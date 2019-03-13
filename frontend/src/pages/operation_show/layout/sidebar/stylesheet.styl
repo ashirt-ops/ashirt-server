@@ -1,0 +1,48 @@
+@import '~src/vars'
+
+.root
+  position: relative
+  height: 100%
+  padding: 10px 0
+  box-sizing: border-box
+
+  header
+    position: relative
+    padding: 0 30px 0 10px
+
+  h1
+    font-weight: 800
+    font-size: 18px
+    height: 25px
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
+    text-shadow: 0 -1px 0 blend(rgba(#000, 0.2), $darker-background)
+
+  h2
+    text-transform: uppercase
+    font-weight: 800
+    font-size: $tag-text-size
+    color: blend(rgba($foreground, 0.3), $darker-background)
+    padding: 5px 10px
+    margin-top: 10px
+    text-shadow: 0 -1px 0 blend(rgba(#000, 0.2), $darker-background)
+    user-select: none
+
+.edit
+  position: absolute
+  top: 0
+  right: 10px
+  width: 25px
+  height: @width
+  background-image: url('./edit.svg')
+  background-position: center center
+  background-repeat: no-repeat
+  background-size: 12px
+  transition: all 200ms
+  opacity: 0.4
+  border-radius: 3px
+
+  &:hover
+    opacity: 1
+    background-color: $background

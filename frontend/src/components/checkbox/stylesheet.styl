@@ -1,0 +1,46 @@
+@import '~src/vars'
+
+.root
+  display: block
+  position: relative
+  height: 16px
+  padding-left: 26px
+  box-sizing: border-box
+  line-height: @height
+  font-size: $label-text-size
+  cursor: pointer
+
+  input
+    position: absolute
+    top: 0
+    left: 0
+    opacity: 0
+    cursor: inherit
+
+.indicator
+  position: absolute
+  top: 0
+  left: 0
+  width: 16px
+  height: @width
+  background: $lighter-background linear-gradient(180deg, rgba(#fff,.05), rgba(#fff,0))
+  box-shadow: 0 0 0 1px $darker-background
+  border-radius: 3px
+
+  &:before
+    content: ""
+    display: block
+    height: 100%
+
+.root input
+  &:checked + .indicator
+    background-color: $primary
+  
+  &:disabled + .indicator
+    background-color: $background 
+
+  &:checked + .indicator:before
+    background-image: url('./check.svg')
+
+  &:focus + .indicator
+    box-shadow: 0 0 1px 1px $primary

@@ -1,0 +1,23 @@
+# Junk files
+.DS_Store
+.*swp
+
+# IDE support
+.vscode
+.idea
+
+# Private Files
+.env
+ashirt.db
+conf.yaml
+app.config.yaml
+
+# Build stuff / Distributables
+dist/
+
+# Others
+cmd/client/client
+cmd/client/dropdown
+cmd/dropdown/dropdown
+cmd/termrec/termrec
+cmd/web/web

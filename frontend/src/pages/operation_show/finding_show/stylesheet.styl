@@ -1,0 +1,34 @@
+@import '~src/vars'
+
+// By using flexbox we can set finding-info to match the height of its content
+// with a max height of 40% and use the remaining space for the timeline
+.root
+  position: absolute
+  display: flex
+  flex-direction: column
+  top: 50px
+  left: 0
+  bottom: 0
+  right: 0
+  z-index: 0
+
+.finding-info
+  min-height: 175px
+  max-height: 40%
+  background: $darker-background
+  overflow: auto
+  nav-box-shadow()
+
+.timeline
+  position: relative
+  flex-grow: 1
+  overflow: auto
+
+.actions
+  padding: 20px 20px 0 20px
+  .left { float: left }
+  .right { float: right }
+  &:after
+    content: ""
+    display: block
+    clear: both

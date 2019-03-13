@@ -1,0 +1,43 @@
+@import '~src/vars'
+
+.root
+  position: relative
+  width: 200px
+  height: 150px
+  text-decoration: none
+
+.name
+  position: absolute
+  top: 10px
+  right: 50px
+  bottom: 45px
+  left: 15px
+  font-size: $text-size
+  font-weight: 800
+  overflow-wrap: break-word
+  overflow: hidden
+
+.root .name:hover
+  text-decoration: underline
+
+.edit
+  position: absolute
+  top: 10px
+  right: 15px
+  width: 25px
+  height: @width
+  background-color: $background
+  background-image: url('./edit.svg')
+  background-position: center center
+  background-size: 12px
+  background-repeat: no-repeat
+  box-shadow: inset 0 0 0 1px $darker-background
+  border-radius: 3px
+
+  &:hover
+    background-color: $darker-background
+
+.badges
+  position: absolute
+  bottom: 10px
+  right: 10px

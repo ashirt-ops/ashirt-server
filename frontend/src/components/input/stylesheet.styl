@@ -1,0 +1,45 @@
+@import '~src/vars'
+
+.root
+  position: relative
+  min-width: 200px
+
+.input
+  height: 35px
+  width: 100%
+  box-sizing: border-box
+  padding: 0 10px
+  line-height: @height
+  background: $darker-background
+  box-shadow: 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), inset 0 0 0 1px rgba(16,22,26,.3), inset 0 1px 1px rgba(16,22,26,.4)
+  color: $foreground
+  border: none
+  outline: none
+  border-radius: 3px
+  focus-box-shadow()
+
+  &:disabled
+    box-shadow: none
+    opacity: 0.5
+    cursor: not-allowed
+
+  &.has-icon
+    padding-left: 34px
+    background-repeat: no-repeat
+    background-size: 14px 14px
+    background-position: 10px center
+
+  &.loading
+    padding-right: 35px
+
+.textarea
+  resize: vertical
+  height: 150px
+  padding: 5px 10px
+  line-height: 1.2
+
+.spinner
+  position: absolute
+  right: 0
+  height: 35px
+  width: 35px

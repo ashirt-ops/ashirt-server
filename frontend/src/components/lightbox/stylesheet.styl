@@ -1,0 +1,30 @@
+@import '~src/vars'
+
+.root
+  position: fixed
+  top: 0
+  left: 0
+  bottom: 0
+  right: 0
+  padding: 15px
+  background: rgba(#000, 0.5)
+  transition: all 200ms
+
+.content
+  position: absolute
+  top: 50%
+  left: 50%
+  box-sizing: border-box
+  max-height: 95%
+  max-width: 95%
+  transform: translate(-50%, -50%)
+  transition: all 200ms
+  box-shadow: 0 0 40px 0 #000
+  background: $background
+  overflow: auto
+
+.animating
+  opacity: 0
+
+.open
+  opacity: 1

@@ -1,0 +1,24 @@
+@import '~src/vars'
+
+.root
+  width: 200px
+  height: 150px
+  background: transparent
+  border: none
+  font-weight: 800
+  color: $foreground
+  cursor: pointer
+
+  div
+    background: $foreground
+    width: 40px
+    height: @width
+    line-height: @width
+    border-radius: @width
+    font-size: 25px
+    margin: 0 auto 15px auto
+    color: $background
+
+  &:hover
+    background: $lighter-background
+    border-radius: 5px

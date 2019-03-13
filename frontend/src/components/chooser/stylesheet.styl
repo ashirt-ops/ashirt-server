@@ -1,0 +1,25 @@
+@import '~src/vars'
+
+.results
+  height: 500px
+  margin-top: 10px
+  background: $darker-background
+  border: 1px solid rgba(#000, 0.3)
+  border-radius: 3px
+  overflow-y: scroll
+
+.row
+  position: relative
+  padding: 10px
+  padding-left: 40px
+  border-bottom: 1px solid $lighter-background
+
+.selected
+  background: $darker-primary
+  border-bottom-color: $lighter-primary
+
+.checkbox
+  position: absolute
+  top: 50%
+  left: 10px
+  transform: translate(0, -50%)

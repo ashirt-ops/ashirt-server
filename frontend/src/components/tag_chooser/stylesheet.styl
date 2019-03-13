@@ -1,0 +1,31 @@
+@import '~src/vars'
+
+.input
+  position: relative
+  display: flex
+  align-items: center
+  flex-wrap: wrap
+  min-height: 35px
+  width: 100%
+  box-sizing: border-box
+  padding: 5px 10px 0 10px
+  line-height: @height
+  background: $darker-background
+  box-shadow: 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), inset 0 0 0 1px rgba(16,22,26,.3), inset 0 1px 1px rgba(16,22,26,.4)
+  color: $foreground
+  border: none
+  outline: none
+  border-radius: 3px
+  z-index: 1
+  focus-box-shadow()
+
+  & > *
+    margin: 0 5px 5px 0
+
+  input
+    width: 80px
+    background: transparent
+    border: none
+    color: inherit
+    outline: none
+    flex-grow: 1

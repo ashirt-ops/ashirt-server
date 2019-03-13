@@ -1,0 +1,55 @@
+version: "3"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/bin/dev/Dockerfile
+    volumes:
+      - ./backend:/app/backend
+      - ./dev_seed_data:/app/dev_seed_data
+      - ./shared:/app/shared
+      - /tmp/contentstore
+    ports:
+      - 3000:3000
+    restart: on-failure
+    environment:
+      APP_IMGSTORE_BUCKET_NAME: ""
+      APP_IMGSTORE_REGION: ""
+      APP_CSRF_AUTH_KEY: ""
+      APP_SESSION_STORE_KEY: ""
+      APP_PORT: 3000
+      DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
+      AUTH_SERVICES: ashirt
+      AUTH_OKTA_CLIENT_ID: 
+      AUTH_OKTA_CLIENT_SECRET: 
+      AUTH_OKTA_ISSUER: 
+      AUTH_OKTA_BACKEND_URL: "http://localhost:8080/web"
+      AUTH_OKTA_SUCCESS_REDIRECT_URL: "http://localhost:8080"
+      AUTH_OKTA_FAILURE_REDIRECT_URL_PREFIX: "http://localhost:8080"
+      AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD: preferred_username
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    ports:
+      - 8080:8080
+    environment:
+      - NODE_ENV=development
+      - WEB_BACKEND_ORIGIN=http://backend:3000
+
+  db:
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    volumes:
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./dev_seed_data/z01_seed_data.sql:/docker-entrypoint-initdb.d/z01_seed_data.sql
+    environment:
+      - MYSQL_DATABASE=dev-db
+      - MYSQL_ROOT_PASSWORD=dev-root-password
+      - MYSQL_USER=dev-user
+      - MYSQL_PASSWORD=dev-user-password

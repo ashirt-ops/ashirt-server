@@ -1,0 +1,50 @@
+@import '~src/vars'
+
+.root li
+  position: relative
+
+  a
+    display: block
+    padding: 10px 20px 10px 20px
+    font-weight: 600
+    outline: none
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+    &:focus { background: lighten($darker-background, 10) }
+
+  &.selected a
+    background: $primary
+    box-shadow: 0 0 1px 1px rgba(#000, 0.2)
+
+  &:hover
+    background: $background
+
+  &.withSaveButton a
+    padding-right: 60px
+
+  &.withMenu:hover
+    a { padding-right: 30px }
+    .menuButton { display: block }
+
+
+.menuButton, .saveButton
+  position: absolute
+  right: 5px
+  top: 50%
+  transform: translate(0, -50%)
+
+.menuButton
+  display: none
+  height: 22px
+  width: @height
+  padding: 0
+  background: rgba(#fff, 0.1)
+  border: none
+  border-radius: @height
+  font-size: 14px
+  font-weight: 800
+  color: #fff
+  cursor: pointer
+
+  &:focus { display: block }

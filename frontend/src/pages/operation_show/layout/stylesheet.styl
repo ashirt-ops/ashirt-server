@@ -1,0 +1,43 @@
+@import '~src/vars'
+
+$sidebar-width = 250px
+$toolbar-height = 56px
+
+.root
+  position: absolute
+  top: 50px
+  left: 0
+  bottom: 0
+  right: 0
+  z-index: 0
+
+.toolbar
+  position: absolute
+  top: 0
+  left: $sidebar-width
+  background: $background
+  right: 0
+  height: $toolbar-height
+  z-index: 3
+  overflow: hidden
+  nav-box-shadow()
+
+.sidebar
+  position: absolute
+  top: 0
+  left: 0
+  bottom: 0
+  width: $sidebar-width - 1px
+  background: $darker-background
+  border-right: 1px solid darken($darker-background, 2)
+  overflow: auto
+  z-index: 1
+
+.children
+  position: absolute
+  top: $toolbar-height
+  left: $sidebar-width
+  bottom: 0
+  right: 0
+  overflow: auto
+  z-index: 2

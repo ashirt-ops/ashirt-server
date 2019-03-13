@@ -1,0 +1,30 @@
+@import '~src/vars'
+
+.root
+  position: relative
+  padding-left: 250px
+
+.tabmenu
+  position: absolute
+  left: 0
+  top: 0
+  width: 250px
+  border: 1px solid darken($darker-background, 10)
+  background: $darker-background
+  border-radius: 3px
+  overflow: hidden
+
+  header
+    padding: 10px 20px
+    border-bottom: 1px solid darken($darker-background, 10)
+    background: linear-gradient(to bottom, $lighter-background, $background)
+    font-weight: 800
+
+  li
+    border-bottom: 1px solid $lighter-background
+  
+  li:last-child
+    border-bottom: 0px
+
+.content
+  padding: 10px 20px

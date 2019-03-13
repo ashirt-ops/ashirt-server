@@ -1,0 +1,39 @@
+@import '~src/vars'
+
+.wrapper
+  position: relative
+
+  select
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    opacity: 0
+    cursor: pointer
+
+  select:focus + .visual
+    box-shadow: 0 0 1px 1px $primary
+
+.visual
+  padding: 10px 15px
+  border-radius: 3px
+  background-color: $lighter-background
+  background-image: linear-gradient(180deg,hsla(0,0%,100%,.05),hsla(0,0%,100%,0))
+  box-shadow: 0 0 0 1px $darker-background
+
+  &:after
+    content: ''
+    display: block
+    position: absolute
+    right: 10px
+    top: 10px
+    width: 16px
+    height: 16px
+    background: url('./arrows.svg')
+    opacity: 0.9
+    pointer-events: none
+
+.disabled
+  opacity: 0.5
+  cursor: not-allowed

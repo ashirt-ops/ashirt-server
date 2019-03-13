@@ -1,0 +1,23 @@
+@import '~src/vars'
+
+.root
+  width: 100%
+
+  th
+    font-weight: 800
+    color: rgba(#fff, 0.4)
+
+  th, td
+    padding: 10px
+    text-align: left
+
+  td
+    vertical-align: middle
+
+  tr
+    border-bottom: 1px solid $darker-background
+
+  tbody tr
+    background: $background
+    transition: background 100ms
+    &:hover { background: $lighter-background }

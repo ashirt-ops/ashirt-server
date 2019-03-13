@@ -1,0 +1,59 @@
+@import '~src/vars'
+
+.open-button
+  width: 100%
+  strong
+    font-weight: 800
+
+.shortcuts
+  padding-right: 5px
+  border-right: 1px solid $darker-background
+
+  button
+    display: block
+    padding: 10px 0
+    width: 150px
+    background: transparent
+    border: none
+    color: inherit
+    cursor: pointer
+    border-radius: 3px
+    font-weight: 600
+    &:hover { background: $background }
+
+.popup
+  display: flex
+  padding: 5px
+  border-radius: 5px
+  border: 1px solid $darker-background
+  box-shadow: 0 0 15px 0 rgba(#000, 0.5)
+  background: $lighter-background
+
+.day-picker
+  :global(.DayPicker-Day)
+    border-radius: 3px !important
+    &:hover
+      background: $darker-background !important
+      border-radius: 3px !important
+
+  :global(.DayPicker-Day--today)
+    color: inherit !important
+    background: $darker-background !important
+
+  :global(.DayPicker-Day--selected)
+    background: $primary !important
+    border-radius: 0 !important
+    &:hover { background: $darker-primary !important }
+
+  :global(.DayPicker-Day--start)
+    border-top-left-radius: 3px !important
+    border-bottom-left-radius: 3px !important
+    background: $lighter-primary !important
+
+  :global(.DayPicker-Day--end)
+    border-top-right-radius: 3px !important
+    border-bottom-right-radius: 3px !important
+    background: $lighter-primary !important
+
+  :global(.DayPicker-Day--outside)
+    background: transparent !important

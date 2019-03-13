@@ -1,0 +1,30 @@
+@import '~src/vars'
+
+.table
+  width: 100%
+
+  .title-cell
+    position: relative
+    padding-right: 110px
+    text-align: left
+
+  .title
+    display: block
+    font-weight: 800
+
+  tr:hover .title
+    text-decoration: underline
+
+  .actions
+    position: absolute
+    top: 50%
+    right: 5px
+    margin-top: -11px
+    opacity: 0
+    transition: opacity 100ms
+
+  tr:hover .actions
+    opacity: 1
+
+  .tags-cell
+    width: 20%

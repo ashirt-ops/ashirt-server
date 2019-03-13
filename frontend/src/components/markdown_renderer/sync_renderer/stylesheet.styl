@@ -1,0 +1,156 @@
+@import '~src/vars'
+
+.markdown
+  font-size: $text-size
+
+  h1
+    font-size: 30px
+    font-weight: 800
+    margin: 15px 0
+
+  h2
+    font-size: 25px
+    font-weight: 700
+    margin: 10px 0
+
+  h3
+    font-size: 20px
+    font-weight: 700
+    margin: 10px 0
+
+  h4, h5
+    font-weight: 700
+    margin: 10px 0
+
+  p
+    line-height: 1.5
+    margin: 10px 0
+
+  strong
+    font-weight: 800
+
+  em
+    font-style: italic
+
+  p > code
+    background: rgba(#000, 0.3) !important
+    padding: 1px 2px
+    border: 1px solid rgba(#000, 0.5)
+    border-radius: 3px
+
+  ul, ol
+    margin-left: 15px
+
+  ul
+    list-style: disc
+
+  ol
+    list-style: decimal
+
+  blockquote
+    border-left: 5px solid rgba(#fff, 0.5)
+    background: $lighter-background
+    padding: 2px 5px 2px 10px
+    opacity: 0.7
+
+  a
+    font-weight: 800
+    text-decoration: underline
+
+  td
+    border: 1px solid rgba(#fff, 0.5)
+    padding: 5px
+
+  th
+    font-weight: 800
+    padding: 2px 10px
+
+.code-block
+  padding: 0.5em
+  margin: 10px 0
+  background: rgba(#000, 0.3) !important
+  color: $foreground
+  border: 1px solid rgba(#000, 0.5)
+  border-radius: 3px
+  font-family: monospace
+
+  :global(.hljs-comment)
+    color: #999580
+
+  :global(.hljs-quote)
+    color: #999580
+
+  :global(.hljs-variable)
+    color: #d73737
+
+  :global(.hljs-template-variable)
+    color: #d73737
+
+  :global(.hljs-attribute)
+    color: #d73737
+
+  :global(.hljs-tag)
+    color: #d73737
+
+  :global(.hljs-name)
+    color: #d73737
+
+  :global(.hljs-regexp)
+    color: #d73737
+
+  :global(.hljs-link)
+    color: #d73737
+
+  :global(.hljs-selector-id)
+    color: #d73737
+
+  :global(.hljs-selector-class)
+    color: #d73737
+
+  :global(.hljs-number)
+    color: #b65611
+
+  :global(.hljs-meta)
+    color: #b65611
+
+  :global(.hljs-built_in)
+    color: #b65611
+
+  :global(.hljs-builtin-name)
+    color: #b65611
+
+  :global(.hljs-literal)
+    color: #b65611
+
+  :global(.hljs-type)
+    color: #b65611
+
+  :global(.hljs-params)
+    color: #b65611
+
+  :global(.hljs-string)
+    color: #60ac39
+
+  :global(.hljs-symbol)
+    color: #60ac39
+
+  :global(.hljs-bullet)
+    color: #60ac39
+
+  :global(.hljs-title)
+    color: #6684e1
+
+  :global(.hljs-section)
+    color: #6684e1
+
+  :global(.hljs-keyword)
+    color: #b854d4
+
+  :global(.hljs-selector-tag)
+    color: #b854d4
+
+  :global(.hljs-emphasis)
+    font-style: italic
+
+  :global(.hljs-strong)
+    font-weight: bold

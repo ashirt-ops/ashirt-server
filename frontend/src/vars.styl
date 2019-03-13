@@ -1,0 +1,50 @@
+// Colors
+$foreground = #f5f8fa
+$foreground-disabled = rgba($foreground, 0.4)
+
+$background = #293742
+$darker-background = blend(rgba(16,22,26,.4), $background)
+$lighter-background = #30404d
+
+$primary = #106ba3
+$darker-primary = blend(rgba(16,22,26,.4), $primary)
+$lighter-primary = #137cbd
+
+$danger = #C23030
+$darker-danger = blend(rgba(16,22,26,.4), $danger)
+$lighter-danger = #DB3737
+
+$error = #A82A2A
+$success = #0D8050
+$listen = #A66321
+
+$key-top = #222
+$key-bottom = #444
+
+$operation-status-colors = {
+  // Keys here are the backend representations of OperationStatus defined in backend/models
+  '0': #FFC940,
+  '1': #3DCC91,
+  '2': #FF7373,
+}
+
+// Sizes
+$h1-size = 25px
+$text-size = 16px
+$label-text-size = 14px
+$tag-text-size = 14px
+$smallest-text-size = 12px
+
+// Mixins
+
+// Used to highlight focasable elements (like buttons, input, etc) for acessability
+focus-box-shadow()
+  outline: none
+  &:focus, &.focus
+    box-shadow: 0 0 1px 1px $primary
+
+// used for main navigation and toolbars
+nav-box-shadow()
+  box-shadow: inset 0 -1px 0 0 darken(@background, 10), \
+              inset 0 -2px 0 0 lighten(@background, 2), \
+              0 0 3px 0 rgba(#000, 0.3)

@@ -1,0 +1,51 @@
+@import '~src/vars'
+
+$radio-size = 20px
+
+.group-label
+  font-size: $label-text-size
+  line-height: 18px
+  margin-bottom: 5px
+
+.disabled
+  opacity: 0.4
+  * { cursor: not-allowed }
+
+.option
+  position: relative
+  display: inline-block
+  height: $radio-size
+  line-height: $radio-size
+  padding-left: 30px
+  margin-right: 30px
+
+  span
+    position: absolute
+    left: 0
+    top: 50%
+    box-sizing: border-box
+    background-color: $darker-background
+    width: $radio-size
+    height: @width
+    margin-top: (-(@height / 2))
+    border-radius: @width
+    background-image: linear-gradient(180deg, rgba(#fff,.1), rgba(#fff,0))
+    border: 1px solid rgba(#000,.4)
+
+  input:checked + span
+    background-color: $primary
+
+  input:checked + span:before
+    content: ""
+    position: absolute
+    width: 8px
+    height: @width
+    top: 50%
+    left: 50%
+    margin: (-(@width / 2))
+    border-radius: (@width / 2)
+    background: #fff
+
+  input
+    position: absolute
+    opacity: 0

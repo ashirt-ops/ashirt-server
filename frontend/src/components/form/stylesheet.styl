@@ -1,0 +1,40 @@
+@import '~src/vars'
+
+.root
+  &:after
+    content: ""
+    display: block
+    clear: both
+
+.children
+  padding-bottom: 20px
+  & > *
+    margin-bottom: 20px
+    width: 100%
+
+  & > *:last-child
+    margin-bottom: 0
+
+.result
+  margin-bottom: 10px
+  box-sizing: border-box
+  border-radius: 3px
+  font-weight: 800
+  line-height: 25px
+  padding: 5px 10px 5px 30px
+  background-size: 16px 16px
+  background-position: 8px 8px
+  background-repeat: no-repeat
+  box-shadow: 1px 1px 1px 0 rgba(#000, 0.3)
+
+  &.error
+    background-color: $error
+    background-image: url('./error.svg')
+
+  &.success
+    background-color: $success
+    background-image: url('./success.svg')
+
+.button
+  float: right
+  margin-left: 10px

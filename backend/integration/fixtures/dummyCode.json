@@ -1,0 +1,8 @@
+{
+	"contentType": "codeblock",
+	"contentSubtype": "go",
+	"metadata": {
+		"source": "File://from-fixture"
+	},
+	"content": "package main\n\nimport \"fmt\"\n\nfunc main(){\n\tfmt.Println(\"Hello World\")\n}\n"
+}

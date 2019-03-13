@@ -1,0 +1,72 @@
+@import '~src/vars'
+
+$outer-padding = 10px
+$inner-padding = 20px
+$right-width = 360px
+
+.root
+  height: 100%
+  box-sizing: border-box
+  overflow: auto
+
+.timeline-row
+  position: relative
+  height: 100%
+  outline: none
+
+.left
+  position: absolute
+  top: $outer-padding
+  left: $outer-padding
+  bottom: $outer-padding
+  right: $right-width + 6px
+  padding-right: $inner-padding
+  text-align: center
+  overflow: hidden
+
+.right
+  position: absolute
+  top: $outer-padding
+  right: $outer-padding
+  bottom: $outer-padding
+  width: $right-width - $outer-padding - $inner-padding
+  padding-left: $inner-padding
+  overflow: auto
+
+  & > *
+    display: block
+    margin-bottom: 10px
+    font-weight: 600
+
+.description
+  white-space: pre-line
+  font-size: $smallest-text-size
+  font-weight: 400
+
+.help
+  float: right
+  position: absolute
+  right: 20px
+  bottom: 5px
+
+// line & dot
+.timeline-row
+  &:before, &:after
+    content: ''
+    position: absolute
+    right: $right-width
+    background: $foreground
+
+  // line
+  &:before
+    top: 0
+    bottom: 0
+    width: 4px
+
+  // dot
+  &:after
+      top: $outer-padding
+      width: 14px
+      height: @width
+      margin-right: (-(@width / 2) + 2px)
+      border-radius: @width

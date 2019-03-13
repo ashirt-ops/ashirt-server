@@ -1,0 +1,46 @@
+# Note: all configuration values, unless otherwise noted, can be overriden
+# via environment variables and/or command line arguments.
+
+# configVersion (int) specifies how to interpret the config file. Should not be modified by the user.
+configVersion: 1
+
+# outputDir (string; path-to-directory) specifies where to write new files by default.
+# Default Value: "" (Write to OS temp directory)
+# Example: /home/me/recordings
+# ENV Equivalent: ASHIRT_TERM_RECORDER_OUTPUT_DIR
+# --
+# outputDir: ""
+
+# recordingShell (string; path-to-binary) specifies which shell to use.
+# Default Value: "" (env's $SHELL)
+# Example: /usr/bin/zsh
+# ENV Equivalent: ASHIRT_TERM_RECORDER_RECORDING_SHELL
+# --
+# recordingShell: ""
+
+# operationID (int) specifies the operation associated with the uploaded content
+# Note: This is a required field, but may be specified after a recording.
+# Default Value: 0 (No default available)
+# Example: 6
+# ENV Equivalent: ASHIRT_TERM_RECORDER_OPERATION_ID
+# --
+# operationID: 0
+
+# apiURL provides the prefix to the backend service.
+# Note: this is a required field and must be specified _somewhere_
+# Default Value: "" (no service support)
+# Example: http://pentest.example.com
+# ENV Equivalent: ASHIRT_TERM_RECORDER_API_URL
+# --
+# apiURL: http://localhost:3000
+
+# accessKey and secretKey provides the mechanism to allow users to identity with the ashirt service.
+# Note: These are required fields and must be specified either in this file, or in environment variables (or spread over both, if desired)
+# Default Value: ""
+# Example:
+#   accessKey: <24 random characters>
+#   secretKey: <base 64 string>
+# ENV Equivalents: ASHIRT_TERM_RECORDER_ACCESS_KEY, ASHIRT_TERM_RECORDER_SECRET_KEY
+# --
+# accessKey:
+# secretKey:

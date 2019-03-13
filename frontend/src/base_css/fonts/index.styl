@@ -1,0 +1,13 @@
+declare-font-face($family-name, $font-weight, $file-name)
+  @font-face
+    font-family: $family-name
+    src: url(./fonts/$file-name.woff) format('woff'),
+         url(./fonts/$file-name.ttf) format('truetype')
+    font-weight: $font-weight
+    font-style: normal
+
+
+declare-font-face("Proxima Nova", 200, "proximanova-light")
+declare-font-face("Proxima Nova", 400, "proximanova-regular")
+declare-font-face("Proxima Nova", 600, "proximanova-semibold")
+declare-font-face("Proxima Nova", 800, "proximanova-bold")

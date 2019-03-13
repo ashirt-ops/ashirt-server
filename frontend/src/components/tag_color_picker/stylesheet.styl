@@ -1,0 +1,42 @@
+@import '~src/vars'
+
+.colors
+  position: relative
+  max-width: 250px
+  min-height: 45px
+  padding: 10px 5px 5px 65px
+  background: $darker-background
+  box-shadow: 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), inset 0 0 0 1px rgba(16,22,26,.3), inset 0 1px 1px rgba(16,22,26,.4)
+  border-radius: 3px
+
+  &:after
+    content: ''
+    display: block
+    clear: left
+
+.current
+  position: absolute
+  width: 45px
+  height: @width
+  left: 10px
+  top: 10px
+  border-radius: 3px
+  box-shadow: 0 0 1px 1px rgba(#000, 0.3)
+
+.color
+  float: left
+  width: 20px
+  height: @width
+  box-sizing: border-box
+  margin: 0 5px 5px 0
+  border-radius: 3px
+  border: 2px solid rgba(#000, 0.2)
+  cursor: pointer
+  box-shadow: 0 0 1px 1px rgba(#000, 0.3)
+  transition: transform 100ms
+
+  &:hover
+    transform: scale(2)
+
+  &.selected
+    border-color: rgba(#fff, 0.9)

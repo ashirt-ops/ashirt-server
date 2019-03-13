@@ -1,0 +1,52 @@
+@import '~src/vars'
+
+.code-viewer
+  position: relative
+  width: 100%
+  height: 100%
+  min-height: 100px
+  min-width: 100px
+
+  .source
+    position: absolute
+    top: 0
+    left: 0
+    max-width: 100%
+    height: 35px
+    line-height: 30px
+    padding: 0 10px
+    box-sizing: border-box
+    background: #0b1115
+    border-top-right-radius: 3px
+    border-top-left-radius: 3px
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
+
+  .ace
+    position: absolute
+    top: 30px
+    bottom: 0
+    left: 0
+    right: 0
+
+.source-some
+  font-weight: bold
+
+.source-none
+  font-style: italic
+
+.code-editor
+  .controls
+    display: flex
+    margin-bottom: 5px
+
+    .language
+      width: 180px
+
+    .source
+      margin-left: 5px
+      flex-grow: 1
+
+  .ace
+    height: 400px

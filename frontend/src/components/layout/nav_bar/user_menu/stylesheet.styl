@@ -1,0 +1,56 @@
+@import '~src/vars'
+
+.user-menu
+  display: block
+  position: relative
+  width: 50px
+  height: 50px
+  cursor: pointer
+
+  .avatar
+    position: absolute
+    height: 32px
+    width: @height
+    top: ((50px - @height) / 2)
+
+  // arrow
+  $arrow-size = 5px
+  &:before, &:after
+    content: ""
+    position: absolute
+    top: ((50px - $arrow-size) / 2)
+    right: 0
+    border: $arrow-size solid transparent
+    border-top-color: $foreground
+  &:before
+    border-top-color: $darker-background
+    margin: 1px -1px
+
+$account-menu-top-height = 40px
+
+.account-menu-top
+  position: relative
+  height: $menu-inner-height
+  max-width: 200px
+  height: $account-menu-top-height
+  line-height: @height
+  font-weight: 800
+  padding: 2px 7px 2px (@height + 16px)
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+  .avatar
+    position: absolute
+    left: 7px
+    height: $account-menu-top-height
+    width: @height
+
+.avatar
+  border-radius: 3px
+  background-color: rgba($darker-background, 0.3)
+  background-image: url('./user.svg')
+  background-repeat: no-repeat
+  background-position: center center
+  background-size: cover
+  box-shadow: 0 0 0 1px $darker-background

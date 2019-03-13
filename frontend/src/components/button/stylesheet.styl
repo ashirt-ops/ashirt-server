@@ -1,0 +1,95 @@
+@import '~src/vars'
+
+.root
+  position: relative
+  display: inline-block
+  padding: 10px 15px
+  height: 35px
+  box-sizing: border-box
+  border: none
+  background-color: $lighter-background
+  background-image: linear-gradient(180deg,hsla(0,0%,100%,.05),hsla(0,0%,100%,0))
+  box-shadow: 0 0 0 1px $darker-background
+  color: $foreground
+  border-radius: 3px
+  min-width: 30px
+  cursor: pointer
+  font-weight: 600
+  outline: none
+  white-space: nowrap
+  focus-box-shadow()
+
+  img
+    margin: 0 8px
+    height: $text-size
+
+  &:hover
+    background-color: $background
+
+  &:active, &.active
+    background-color: $darker-background
+
+  &:focus
+    z-index: 1
+
+  &.primary
+    background-color: $lighter-primary
+
+  &.primary:hover
+    background-color: $primary
+
+  &.primary:active
+    background-color: $darker-primary
+
+  &.danger
+    background-color: $lighter-danger
+
+  &.danger:hover
+    background-color: $danger
+
+  &.danger:active
+    background-color: $darker-danger
+
+  &.disabled
+    background-color: $background !important
+    border-color: transparent
+    cursor: not-allowed
+    color: $foreground-disabled
+  
+    &.danger
+      background-color: $darker-danger !important
+
+  &.small
+    height: 22px
+    padding: 5px 10px
+    font-size: $smallest-text-size
+
+.children
+  display: flex
+  justify-content: center
+  align-items: center
+
+.spinner
+  position: absolute
+  height: 100%
+  width: 100%
+  top: 0
+  left: 0
+
+.loading .children
+  opacity: 0
+
+.button-group
+  display: flex !important
+
+.button-group
+  .root, >* .root
+    border-radius: 0
+
+  >.root:first-child, >*:first-child .root
+    border-top-left-radius: 3px
+    border-bottom-left-radius: 3px
+
+  >.root:last-child, >*:last-child .root
+    border-top-right-radius: 3px
+    border-bottom-right-radius: 3px

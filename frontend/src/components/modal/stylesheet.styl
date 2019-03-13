@@ -1,0 +1,32 @@
+@import '~src/vars'
+
+.root
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  display: flex
+  align-items: center
+  justify-content: center
+  background: rgba(#000, 0.3)
+
+.modal
+  max-height: 90%
+  width: 40%
+  overflow-y: auto
+  background: $background
+  border-radius: 5px
+  box-shadow: 0 0 15px 0 rgba(#000, 0.4)
+
+  p
+    line-height: 1.4
+
+.title
+  padding: 10px
+  border-bottom: 1px solid $darker-background
+  font-weight: 600
+  background: $lighter-background
+
+.content
+  padding: 20px
