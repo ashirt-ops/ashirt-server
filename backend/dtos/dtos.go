@@ -29,7 +29,6 @@ type Finding struct {
 	UUID          string     `json:"uuid"`
 	Title         string     `json:"title"`
 	Description   string     `json:"description"`
-	Operators     []User     `json:"operators"`
 	ReadyToReport bool       `json:"readyToReport"`
 	TicketLink    *string    `json:"ticketLink"`
 	Tags          []Tag      `json:"tags"`

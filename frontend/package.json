@@ -1,11 +1,12 @@
 {
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server --host=0.0.0.0 --content-base=public",
+    "start": "webpack-dev-server --host=0.0.0.0 --content-base=public --env main",
     "lint": "eslint src --ext js,jsx,ts,tsx",
     "test": "mocha 'src/**/*.test.{ts,tsx}'",
     "test-file": "mocha",
-    "build": "NODE_ENV=production webpack --mode=production"
+    "build": "NODE_ENV=production webpack --mode=production --env main",
+    "build-archive-viewer": "NODE_ENV=production webpack --mode=production --env archive_viewer"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^3.2.1",
@@ -31,6 +32,7 @@
     "react-test-renderer": "^16.13.1",
     "sinon": "^9.0.1",
     "sinon-chai": "^3.5.0",
+    "style-loader": "^1.2.1",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
     "ts-loader": "^6.2.2",
@@ -42,6 +44,7 @@
   },
   "dependencies": {
     "ace-builds": "^1.4.9",
+    "async-mutex": "^0.2.2",
     "classnames": "^2.2.6",
     "date-fns": "^2.11.1",
     "lodash": "^4.17.15",

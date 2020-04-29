@@ -1,12 +1,22 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const path = require('path')
+const _ = require('lodash')
 
 module.exports = (env, argv) => ({
-  entry: './src/index.tsx',
+  entry: _.pick({
+    'main': './src/entrypoints/main.ts',
+    'archive_viewer': './src/entrypoints/archive_viewer.ts',
+  }, env),
 
   output: {
-    publicPath: '/assets/',
-    filename: 'main.js',
+    path: {
+      'main': path.resolve(__dirname, 'dist'),
+      'archive_viewer': path.resolve(__dirname, '../backend/archive_templates/assets'),
+    }[env],
+    publicPath: {
+      'main': '/assets/',
+      'archive_viewer': 'assets/',
+    }[env],
     chunkFilename: '[chunkhash].js',
   },
 
@@ -19,11 +29,11 @@ module.exports = (env, argv) => ({
       options: {compilerOptions: {module: 'esnext'}},
     }, {
       test: /\.css$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      use: [styleLoader(env), 'css-loader'],
     }, {
       test: /\.styl/,
       use: [
-        MiniCssExtractPlugin.loader,
+        styleLoader(env),
         {loader: 'css-loader', options: {
           modules: {
             mode: 'local',
@@ -40,7 +50,7 @@ module.exports = (env, argv) => ({
 
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'main.css',
+      filename: '[name].css',
       chunkFilename: '[chunkhash].css',
     }),
   ],
@@ -52,7 +62,10 @@ module.exports = (env, argv) => ({
     },
   },
 
-  devtool: 'cheap-source-map',
+  devtool: {
+    'main': 'cheap-source-map',
+    'archive_viewer': 'none',
+  }[env],
 
   devServer: {
     historyApiFallback: true,
@@ -90,3 +103,25 @@ module.exports = (env, argv) => ({
     },
   }
 })
+
+// A Webpack style loader takes raw css and packages it up in a way that it can be loaded in the app.
+// It must be the final step in any css rules (webpack loads rules from right to left).
+//
+// MiniCssExtractPlugin does this by writing content addressable .css files to disk and including the hash
+// in the webpack bundle
+//
+// style-loader does this by including the raw css string in the javascript bundle and appending a `style` tag
+// to the head of the document on load
+//
+// We don't use style-loader for main because extracting css will allow the browser to load styles in parallel
+// with javascript, allowing the app to display sooner. Since the archive loads all assets off disk this is an
+// optimization that doesn't need to happen in the archive viewer.
+//
+// MiniCssExtractPlugin doesn't work well for local archives (it doesn't handle relative public paths) so we
+// switch to style-loader for local archives.
+function styleLoader(env) {
+  return {
+    'main': MiniCssExtractPlugin.loader,
+    'archive_viewer': 'style-loader',
+  }[env]
+}

@@ -23,7 +23,6 @@ export type Finding = {
   uuid: string,
   title: string,
   description: string,
-  operators: Array<User>,
   readyToReport: boolean,
   ticketLink: string | undefined,
   tags: Array<Tag>,

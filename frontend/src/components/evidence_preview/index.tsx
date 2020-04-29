@@ -69,8 +69,8 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
-  const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-  return <img src={fullUrl} />
+  const ds = useDataSource()
+  return <img src={ds.readEvidenceImage(props)} />
 }
 
 const EvidenceTerminalRecording = (props: EvidenceProps) => {
