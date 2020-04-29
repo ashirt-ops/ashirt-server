@@ -2,24 +2,27 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
+import { Evidence, Finding } from 'src/global_types'
+import { RouteComponentProps } from 'react-router-dom'
+import { useDataSource, getFinding } from 'src/services'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
+
 import FindingInfo from './finding_info'
 import Timeline from 'src/components/timeline'
-import classnames from 'classnames/bind'
-import {ChangeEvidenceOfFindingModal, RemoveEvidenceFromFindingModal, EditFindingModal, DeleteFindingModal} from '../finding_modals'
-import {EditEvidenceModal} from '../evidence_modals'
-import {Evidence, Finding} from 'src/global_types'
-import {RouteComponentProps} from 'react-router-dom'
-import {default as Button, ButtonGroup} from 'src/components/button'
-import {getFinding} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { ChangeEvidenceOfFindingModal, RemoveEvidenceFromFindingModal, EditFindingModal, DeleteFindingModal } from '../finding_modals'
+import { EditEvidenceModal } from '../evidence_modals'
+import { default as Button, ButtonGroup } from 'src/components/button'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
+  const ds = useDataSource()
   const {slug, uuid} = props.match.params
-  const wiredFinding = useWiredData(React.useCallback(() => getFinding({
+  const wiredFinding = useWiredData(React.useCallback(() => getFinding(ds, {
     operationSlug: slug,
     findingUuid: uuid,
-  }), [slug, uuid]))
+  }), [ds, slug, uuid]))
 
   const addRemoveEvidenceModal = useModal<{finding: Finding, initialEvidence: Array<Evidence>}>(modalProps => (
     <ChangeEvidenceOfFindingModal {...modalProps} onChanged={wiredFinding.reload} operationSlug={slug} />

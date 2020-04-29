@@ -3,23 +3,24 @@
 
 import * as React from 'react'
 import AuthContext from 'src/auth_context'
+import classnames from 'classnames/bind'
+import { BuildReloadBus } from 'src/helpers/reload_bus'
+import { User, UserRole, userRoleToLabel } from 'src/global_types'
+import { useDataSource, getUserPermissions, setUserPermission } from 'src/services'
+import { useModal, renderModals, useWiredData, useForm, useFormField } from 'src/helpers'
+
 import Button from 'src/components/button'
 import ErrorDisplay from 'src/components/error_display'
-import LoadingSpinner from 'src/components/loading_spinner'
 import Form from 'src/components/form'
-import Modal from 'src/components/modal'
 import Input from 'src/components/input'
+import LoadingSpinner from 'src/components/loading_spinner'
+import Modal from 'src/components/modal'
 import RadioGroup from 'src/components/radio_group'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import UserChooser from 'src/components/user_chooser'
-import classnames from 'classnames/bind'
-import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { User, UserRole, userRoleToLabel } from 'src/global_types'
-import { getUserPermissions, setUserPermission } from 'src/services'
-import { useForm, useFormField } from 'src/helpers/use_form'
-import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { StandardPager } from 'src/components/paging'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 const RoleSelect = (props: {
@@ -42,13 +43,14 @@ const NewUserForm = (props: {
   operationSlug: string,
   requestReload: () => void
 }) => {
+  const ds = useDataSource()
   const userField = useFormField<User | null>(null)
   const roleField = useFormField(UserRole.READ)
   const formProps = useForm({
     fields: [userField, roleField],
     handleSubmit: async () => {
       if (userField.value == null) throw Error("A user must be selected")
-      await setUserPermission({
+      await setUserPermission(ds, {
         operationSlug: props.operationSlug,
         userSlug: userField.value.slug,
         role: roleField.value,
@@ -130,6 +132,7 @@ const PermissionTable = (props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
 }) => {
+  const ds = useDataSource()
   const columns = ['Name', 'Role', 'Remove']
   const itemsPerPage = 10
 
@@ -137,7 +140,7 @@ const PermissionTable = (props: {
   const [currentPage, setCurrentPage] = React.useState(1)
 
   const wiredPermissions = useWiredData(
-    React.useCallback(() => getUserPermissions({ slug: props.operationSlug, name: "" }), [props.operationSlug]),
+    React.useCallback(() => getUserPermissions(ds, { slug: props.operationSlug, name: "" }), [ds, props.operationSlug]),
     (err) => <ErrorDisplay err={err} />,
     () => <LoadingSpinner />
   )
@@ -164,7 +167,7 @@ const PermissionTable = (props: {
                 <PermissionTableRow
                   key={user.slug}
                   requestReload={props.requestReload}
-                  updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: user.slug, role: r })}
+                  updatePermissions={role => setUserPermission(ds, { operationSlug: props.operationSlug, userSlug: user.slug, role })}
                   user={user}
                   role={role}
                 />

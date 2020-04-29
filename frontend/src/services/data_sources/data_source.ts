@@ -1,6 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
+import * as React from 'react'
 import * as dtos from './dtos'
 import * as types from 'src/global_types'
 
@@ -81,3 +82,7 @@ export interface DataSource {
   getRecoveryMetrics(): Promise<any>
   adminChangePassword(i: { userSlug: string, newPassword: string }): Promise<void>
 }
+
+// @ts-ignore - React.createContext expects a default value here, but since we always wrap the
+// app in a provider, it isn't necessary to construct the service constructors twice
+export const DataSourceContext: React.Context<DataSource> = React.createContext({})

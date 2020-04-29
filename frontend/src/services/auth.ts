@@ -2,10 +2,10 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { UserOwnView, SupportedAuthenticationScheme, AuthSchemeDetails, RecoveryMetrics } from 'src/global_types'
-import { backendDataSource as ds } from './data_sources/backend'
+import { DataSource } from './data_sources/data_source'
 import { userOwnViewFromDto } from './data_sources/converters'
 
-export async function getCurrentUser(): Promise<UserOwnView | null> {
+export async function getCurrentUser(ds: DataSource): Promise<UserOwnView | null> {
   try {
     return userOwnViewFromDto(await ds.readCurrentUser())
   } catch (err) {
@@ -18,7 +18,7 @@ export async function getCurrentUser(): Promise<UserOwnView | null> {
 }
 
 // TODO this should be encapsulated in an admin settings component under src/authschemes/local
-export async function adminChangePassword(i: {
+export async function adminChangePassword(ds: DataSource, i: {
   userSlug: string,
   newPassword: string,
 }) {
@@ -28,16 +28,16 @@ export async function adminChangePassword(i: {
   await ds.adminChangePassword(i)
 }
 
-export async function logout() {
+export async function logout(ds: DataSource) {
   await ds.logout()
 }
 
-export async function getUser(i?: { userSlug: string }): Promise<UserOwnView> {
+export async function getUser(ds: DataSource, i?: { userSlug: string }): Promise<UserOwnView> {
   const user = await (i ? ds.readUser(i) : ds.readCurrentUser())
   return userOwnViewFromDto(user)
 }
 
-export async function adminSetUserFlags(i: {
+export async function adminSetUserFlags(ds: DataSource, i: {
   userSlug: string,
   disabled: boolean,
   admin: boolean,
@@ -48,11 +48,11 @@ export async function adminSetUserFlags(i: {
   )
 }
 
-export async function getSupportedAuthentications(): Promise<Array<SupportedAuthenticationScheme>> {
+export async function getSupportedAuthentications(ds: DataSource): Promise<Array<SupportedAuthenticationScheme>> {
   return await ds.listSupportedAuths()
 }
 
-export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSchemeDetails>> {
+export async function getSupportedAuthenticationDetails(ds: DataSource): Promise<Array<AuthSchemeDetails>> {
   const schemes = await ds.listAuthDetails()
   return schemes.map(details => ({
     schemeName: details.schemeName,
@@ -64,22 +64,22 @@ export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSch
   }))
 }
 
-export async function adminDeleteUser(i: {
+export async function adminDeleteUser(ds: DataSource, i: {
   userSlug: string,
 }) {
   await ds.adminDeleteUser(i)
 }
 
-export async function deleteGlobalAuthScheme(i: {
+export async function deleteGlobalAuthScheme(ds: DataSource, i: {
   schemeName: string,
 }) {
   await ds.deleteGlobalAuthScheme(i)
 }
 
-export async function deleteExpiredRecoveryCodes() {
+export async function deleteExpiredRecoveryCodes(ds: DataSource) {
   await ds.deleteExpiredRecoveryCodes()
 }
 
-export async function getRecoveryMetrics(): Promise<RecoveryMetrics> {
+export async function getRecoveryMetrics(ds: DataSource): Promise<RecoveryMetrics> {
   return await ds.getRecoveryMetrics()
 }

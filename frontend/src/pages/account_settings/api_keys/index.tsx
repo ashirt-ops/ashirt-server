@@ -3,26 +3,28 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
+import { ApiKey, UserWithAuth } from 'src/global_types'
 import { format } from 'date-fns'
+import { useDataSource, getApiKeys, createApiKey, deleteApiKey } from 'src/services'
+import { useWiredData, useForm } from 'src/helpers'
 
 import Button from 'src/components/button'
 import Form from 'src/components/form'
 import Modal from 'src/components/modal'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import { ApiKey } from 'src/global_types'
 import { InputWithCopyButton } from 'src/components/text_copiers'
-import { UserWithAuth } from 'src/global_types'
-import { getApiKeys, createApiKey, deleteApiKey } from 'src/services'
-import { useWiredData, useForm } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   profile: UserWithAuth
 }) => {
+  const ds = useDataSource()
   const [deleteKey, setDeleteKey] = React.useState<null | ApiKey>(null)
-  const wiredApiKeys = useWiredData<Array<ApiKey>>(React.useCallback(() => getApiKeys({ userSlug: props.profile.slug }), [props.profile.slug]))
+  const wiredApiKeys = useWiredData<Array<ApiKey>>(React.useCallback(() => (
+    getApiKeys(ds, { userSlug: props.profile.slug })
+  ), [ds, props.profile.slug]))
 
   return (
     <SettingsSection title="API Key Management" width="wide">
@@ -56,10 +58,11 @@ const GenerateKeyButton = (props: {
   userSlug: string,
   onKeyCreated: () => void,
 }) => {
+  const ds = useDataSource()
   const [apiKey, setApiKey] = React.useState<null | ApiKey>(null)
   const generateKeyForm = useForm({
     onSuccess: props.onKeyCreated,
-    handleSubmit: () => createApiKey({ userSlug: props.userSlug }).then(setApiKey),
+    handleSubmit: () => createApiKey(ds, { userSlug: props.userSlug }).then(setApiKey),
   })
 
   return <>
@@ -86,9 +89,10 @@ const DeleteApiKeyModal = (props: {
   onRequestClose: () => void,
   onDeleted: () => void,
 }) => {
+  const ds = useDataSource()
   const formComponentProps = useForm({
     onSuccess: () => { props.onRequestClose(); props.onDeleted() },
-    handleSubmit: () => deleteApiKey({ userSlug: props.userSlug, accessKey: props.apiKey.accessKey }),
+    handleSubmit: () => deleteApiKey(ds, { userSlug: props.userSlug, accessKey: props.apiKey.accessKey }),
   })
 
   return (

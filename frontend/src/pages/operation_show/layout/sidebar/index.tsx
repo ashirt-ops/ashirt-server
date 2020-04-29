@@ -2,16 +2,18 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
+import { Link } from 'react-router-dom'
+import { SavedQuery, SavedQueryType } from 'src/global_types'
+import { ViewName } from '../../types'
+import { useDataSource, getSavedQueries, getOperation } from 'src/services'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
+
 import ActionMenu from './action_menu'
 import OperationBadges from 'src/components/operation_badges'
-import classnames from 'classnames/bind'
-import {Link} from 'react-router-dom'
-import {NewQueryModal, EditQueryModal, DeleteQueryModal} from './query_modal'
-import {SavedQuery, SavedQueryType} from 'src/global_types'
-import {ViewName} from '../../types'
-import {default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu} from 'src/components/list_menu'
-import {getSavedQueries, getOperation} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { NewQueryModal, EditQueryModal, DeleteQueryModal } from './query_modal'
+import { default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu } from 'src/components/list_menu'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
@@ -20,10 +22,13 @@ export default (props: {
   onNavigate: (view: ViewName, query: string) => void,
   operationSlug: string,
 }) => {
-  const wiredQueries = useWiredData(React.useCallback(() => Promise.all([
-    getSavedQueries({operationSlug: props.operationSlug}),
-    getOperation(props.operationSlug),
-  ]), [props.operationSlug]))
+  const ds = useDataSource()
+  const wiredQueries = useWiredData(React.useCallback(() => (
+    Promise.all([
+      getSavedQueries(ds, {operationSlug: props.operationSlug}),
+      getOperation(ds, props.operationSlug),
+    ])
+  ), [ds, props.operationSlug]))
 
   return wiredQueries.render(([queries, operation]) => (
     <div className={cx('root')}>

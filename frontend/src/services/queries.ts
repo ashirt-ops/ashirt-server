@@ -2,17 +2,17 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { SavedQuery } from 'src/global_types'
-import { backendDataSource as ds } from './data_sources/backend'
+import { DataSource } from './data_sources/data_source'
 import { queryFromDto } from './data_sources/converters'
 
-export async function getSavedQueries(i: {
+export async function getSavedQueries(ds: DataSource, i: {
   operationSlug: string,
 }): Promise<Array<SavedQuery>> {
   const queries = await ds.listQueries(i)
   return queries.map(queryFromDto)
 }
 
-export async function saveQuery(i: {
+export async function saveQuery(ds: DataSource, i: {
   operationSlug: string,
   name: string,
   query: string,
@@ -25,7 +25,7 @@ export async function saveQuery(i: {
   })
 }
 
-export async function updateSavedQuery(i: {
+export async function updateSavedQuery(ds: DataSource, i: {
   operationSlug: string,
   queryId: number,
   name: string,
@@ -37,7 +37,7 @@ export async function updateSavedQuery(i: {
   })
 }
 
-export async function deleteSavedQuery(i: {
+export async function deleteSavedQuery(ds: DataSource, i: {
   operationSlug: string,
   queryId: number,
 }): Promise<void> {

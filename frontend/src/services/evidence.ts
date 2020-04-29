@@ -1,9 +1,12 @@
+// Copyright 2020, Verizon Media
+// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
 import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock } from 'src/global_types'
-import { backendDataSource as ds } from './data_sources/backend'
+import { DataSource } from './data_sources/data_source'
 import { computeDelta } from 'src/helpers'
 import { evidenceFromDto } from './data_sources/converters'
 
-export async function getEvidenceList(i: {
+export async function getEvidenceList(ds: DataSource, i: {
   operationSlug: string,
   query: string,
 }): Promise<Array<Evidence>> {
@@ -11,7 +14,7 @@ export async function getEvidenceList(i: {
   return evidence.map(evidenceFromDto)
 }
 
-export async function getEvidenceAsCodeblock(i: {
+export async function getEvidenceAsCodeblock(ds: DataSource, i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<CodeBlock> {
@@ -24,14 +27,14 @@ export async function getEvidenceAsCodeblock(i: {
   }
 }
 
-export async function getEvidenceAsString(i: {
+export async function getEvidenceAsString(ds: DataSource, i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<string> {
   return await ds.readEvidenceContent(i)
 }
 
-export async function createEvidence(i: {
+export async function createEvidence(ds: DataSource, i: {
   operationSlug: string,
   description: string,
   tagIds?: Array<number>,
@@ -52,7 +55,7 @@ export async function createEvidence(i: {
   await ds.createEvidence({ operationSlug: i.operationSlug }, formData)
 }
 
-export async function updateEvidence(i: {
+export async function updateEvidence(ds: DataSource, i: {
   operationSlug: string,
   evidenceUuid: string,
   description?: string,
@@ -80,7 +83,7 @@ export async function updateEvidence(i: {
   )
 }
 
-export async function changeFindingsOfEvidence(i: {
+export async function changeFindingsOfEvidence(ds: DataSource, i: {
   operationSlug: string,
   evidenceUuid: string,
   oldFindings: Array<Finding>,
@@ -98,7 +101,7 @@ export async function changeFindingsOfEvidence(i: {
   )))
 }
 
-export async function deleteEvidence(i: {
+export async function deleteEvidence(ds: DataSource, i: {
   operationSlug: string,
   evidenceUuid: string,
   deleteAssociatedFindings: boolean,

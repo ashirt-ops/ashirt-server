@@ -2,14 +2,14 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { OperationStatus, operationStatusToLabel } from 'src/global_types'
+import { useDataSource, getOperation, saveOperation } from 'src/services'
+import { useWiredData, useForm, useFormField } from 'src/helpers'
+
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import RadioGroup from 'src/components/radio_group'
 import SettingsSection from 'src/components/settings_section'
-import {OperationStatus, operationStatusToLabel} from 'src/global_types'
-import {getOperation, saveOperation} from 'src/services'
-import {useForm, useFormField} from 'src/helpers/use_form'
-import {useWiredData} from 'src/helpers'
 
 const EditForm = (props: {
   name: string,
@@ -39,7 +39,10 @@ const EditForm = (props: {
 export default (props: {
   operationSlug: string,
 }) => {
-  const wiredOperation = useWiredData(React.useCallback(() => getOperation(props.operationSlug), [props.operationSlug]))
+  const ds = useDataSource()
+  const wiredOperation = useWiredData(React.useCallback(() => (
+    getOperation(ds, props.operationSlug)
+  ), [ds, props.operationSlug]))
 
   return (
     <SettingsSection title="Operation Settings">
@@ -47,7 +50,7 @@ export default (props: {
         <EditForm
           name={operation.name}
           status={operation.status}
-          onSave={({name, status}) => saveOperation(props.operationSlug, {name, status})}
+          onSave={({name, status}) => saveOperation(ds, props.operationSlug, {name, status})}
         />
       ))}
     </SettingsSection>

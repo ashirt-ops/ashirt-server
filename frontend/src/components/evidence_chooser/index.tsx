@@ -2,13 +2,13 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
+import { Evidence } from 'src/global_types'
+import { useDataSource, getEvidenceList } from 'src/services'
+
 import Chooser from 'src/components/chooser'
 import EvidencePreview from 'src/components/evidence_preview'
 import Lightbox from 'src/components/lightbox'
-import classnames from 'classnames/bind'
-import { Evidence } from 'src/global_types'
-
-import { getEvidenceList } from 'src/services'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -18,7 +18,8 @@ export default (props: {
   operationSlug: string,
   value: Array<Evidence>,
 }) => {
-  const fetchEvidence = React.useCallback((query: string) => getEvidenceList({ operationSlug: props.operationSlug, query }), [props.operationSlug])
+  const ds = useDataSource()
+  const fetchEvidence = React.useCallback((query: string) => getEvidenceList(ds, { operationSlug: props.operationSlug, query }), [ds, props.operationSlug])
   return (
     <Chooser
       {...props}

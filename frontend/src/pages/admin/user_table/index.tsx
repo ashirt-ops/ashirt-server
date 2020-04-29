@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import { usePaginatedWiredData } from 'src/helpers'
 
 import { UserAdminView } from 'src/global_types'
-import { listUsersAdminView, createRecoveryCode } from 'src/services'
+import { useDataSource, listUsersAdminView, createRecoveryCode } from 'src/services'
 import AuthContext from 'src/auth_context'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
@@ -31,6 +31,7 @@ export default (props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
 }) => {
+  const ds = useDataSource()
   const [resettingPassword, setResettingPassword] = React.useState<null | UserAdminView>(null)
   const [editingUserFlags, setEditingUserFlags] = React.useState<null | UserAdminView>(null)
   const [deletingUser, setDeletingUser] = React.useState<null | UserAdminView>(null)
@@ -42,14 +43,14 @@ export default (props: {
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
   const editUserFn = (u: UserAdminView) => history.push(`/account/edit/${u.slug}`)
-  const recoverFn = (u: UserAdminView) => createRecoveryCode({ userSlug: u.slug }).then(setRecoveryCode)
+  const recoverFn = (u: UserAdminView) => createRecoveryCode(ds, { userSlug: u.slug }).then(setRecoveryCode)
   const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", editUserFn, setResettingPassword, setEditingUserFlags, setDeletingUser, recoverFn)
   const columns = Object.keys(rowBuilder(null, <span />))
 
   const asFullRow = (el: React.ReactElement): React.ReactElement => <tr><td colSpan={columns.length}>{el}</td></tr>
 
   const wiredUsers = usePaginatedWiredData<UserAdminView>(
-    React.useCallback(page => listUsersAdminView({ page, pageSize: 10, deleted: withDeleted, name: usernameFilterValue }), [usernameFilterValue, withDeleted]),
+    React.useCallback(page => listUsersAdminView(ds, { page, pageSize: 10, deleted: withDeleted, name: usernameFilterValue }), [ds, usernameFilterValue, withDeleted]),
     (err) => asFullRow(<ErrorDisplay err={err} />),
     () => asFullRow(<LoadingSpinner />)
   )

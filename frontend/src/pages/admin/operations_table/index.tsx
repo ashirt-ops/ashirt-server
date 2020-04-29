@@ -2,13 +2,14 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { Operation } from 'src/global_types'
+import { useDataSource, getOperationsForAdmin } from 'src/services'
+import { useWiredData } from 'src/helpers'
+
 import Button from 'src/components/button'
 import OperationBadge from 'src/components/operation_badges'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import { Operation } from 'src/global_types'
-import { getOperationsForAdmin } from 'src/services'
-import { useWiredData } from 'src/helpers'
 
 // @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
@@ -37,7 +38,10 @@ const TableRow = (props: {
 
 export default (props: {
 }) => {
-  const wiredOps = useWiredData<Array<Operation>>(getOperationsForAdmin)
+  const ds = useDataSource()
+  const wiredOps = useWiredData<Array<Operation>>(React.useCallback(() => (
+    getOperationsForAdmin(ds)
+  ), [ds]))
 
   return (
     <SettingsSection title="Operation List">

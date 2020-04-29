@@ -2,23 +2,25 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { Finding } from 'src/global_types'
+import { RouteComponentProps } from 'react-router-dom'
+import { ViewName } from '../types'
+import { useDataSource, getFindings } from 'src/services'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
+
 import FindingsTable from './findings_table'
 import Layout from '../layout'
-import {Finding} from 'src/global_types'
-import {DeleteFindingModal, EditFindingModal} from '../finding_modals'
-import {RouteComponentProps} from 'react-router-dom'
-import {ViewName} from '../types'
-import {getFindings} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { DeleteFindingModal, EditFindingModal } from '../finding_modals'
 
 export default (props: RouteComponentProps<{slug: string}>) => {
+  const ds = useDataSource()
   const {slug} = props.match.params
   const query: string = new URLSearchParams(props.location.search).get('q') || ''
 
-  const wiredFindings = useWiredData(React.useCallback(() => getFindings({
+  const wiredFindings = useWiredData(React.useCallback(() => getFindings(ds, {
     operationSlug: slug,
     query: query,
-  }), [slug, query]))
+  }), [ds, slug, query]))
   React.useEffect(wiredFindings.reload, [slug, query])
 
   const navigate = (view: ViewName, query: string) => {

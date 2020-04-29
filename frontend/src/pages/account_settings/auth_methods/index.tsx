@@ -5,7 +5,7 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import { UserOwnView, SupportedAuthenticationScheme, AuthenticationInfo } from 'src/global_types'
 import { useWiredData } from 'src/helpers'
-import { getSupportedAuthentications } from 'src/services'
+import { useDataSource, getSupportedAuthentications } from 'src/services'
 import { format } from 'date-fns'
 
 import { DeleteAuthModal } from '../modals'
@@ -22,8 +22,11 @@ export default (props: {
   allowLinking: boolean,
   requestReload?: () => void,
 }) => {
+  const ds = useDataSource()
   const [removeAuth, setRemovingAuth] = React.useState<null | string>(null)
-  const wiredSchemes = useWiredData<Array<SupportedAuthenticationScheme>>(getSupportedAuthentications)
+  const wiredSchemes = useWiredData<Array<SupportedAuthenticationScheme>>(React.useCallback(() => (
+    getSupportedAuthentications(ds)
+  ), [ds]))
 
   const columns = [
     "Method Name",

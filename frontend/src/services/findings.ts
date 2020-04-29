@@ -2,11 +2,11 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { Evidence, Finding } from 'src/global_types'
-import { backendDataSource as ds } from './data_sources/backend'
+import { DataSource } from './data_sources/data_source'
 import { computeDelta } from 'src/helpers'
 import { findingFromDto, evidenceFromDto } from './data_sources/converters'
 
-export async function getFindings(i: {
+export async function getFindings(ds: DataSource, i: {
   operationSlug: string,
   query: string,
 }): Promise<Array<Finding>> {
@@ -14,17 +14,17 @@ export async function getFindings(i: {
   return findings.map(findingFromDto)
 }
 
-export async function getFindingsOfEvidence(i: {
+export async function getFindingsOfEvidence(ds: DataSource, i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<Array<Finding>> {
-  return getFindings({
+  return getFindings(ds, {
     operationSlug: i.operationSlug,
     query: `with-evidence:${JSON.stringify(i.evidenceUuid)}`,
   })
 }
 
-export async function getFinding(i: {
+export async function getFinding(ds: DataSource, i: {
   operationSlug: string,
   findingUuid: string,
 }): Promise<{ finding: Finding, evidence: Array<Evidence> }> {
@@ -49,7 +49,7 @@ export async function getFindingCategories(): Promise<Array<string>> {
   ]
 }
 
-export async function createFinding(i: {
+export async function createFinding(ds: DataSource, i: {
   operationSlug: string,
   category: string,
   title: string,
@@ -63,7 +63,7 @@ export async function createFinding(i: {
   return findingFromDto(finding)
 }
 
-export async function changeEvidenceOfFinding(i: {
+export async function changeEvidenceOfFinding(ds: DataSource, i: {
   operationSlug: string,
   findingUuid: string,
   oldEvidence: Array<Evidence>,
@@ -76,7 +76,7 @@ export async function changeEvidenceOfFinding(i: {
   )
 }
 
-export async function removeEvidenceFromFinding(i: {
+export async function removeEvidenceFromFinding(ds: DataSource, i: {
   operationSlug: string,
   findingUuid: string,
   evidenceUuid: string,
@@ -87,7 +87,7 @@ export async function removeEvidenceFromFinding(i: {
   )
 }
 
-export async function updateFinding(i: {
+export async function updateFinding(ds: DataSource, i: {
   findingUuid: string,
   operationSlug: string,
   category: string,
@@ -105,7 +105,7 @@ export async function updateFinding(i: {
   })
 }
 
-export async function deleteFinding(i: {
+export async function deleteFinding(ds: DataSource, i: {
   findingUuid: string,
   operationSlug: string,
 }): Promise<void> {

@@ -2,29 +2,30 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence } from 'src/global_types'
+import { codeblockToBlob } from 'src/helpers/codeblock_to_blob'
+import { useDataSource, createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence, getFindingsOfEvidence, getEvidenceAsCodeblock } from 'src/services'
+import { useForm, useFormField } from 'src/helpers/use_form'
+import { useWiredData } from 'src/helpers'
+
 import Checkbox from 'src/components/checkbox'
 import FindingChooser from 'src/components/finding_chooser'
 import Form from 'src/components/form'
 import ImageUpload from 'src/components/image_upload'
-import ModalForm from 'src/components/modal_form'
 import Modal from 'src/components/modal'
+import ModalForm from 'src/components/modal_form'
 import TagChooser from 'src/components/tag_chooser'
 import TerminalRecordingUpload from 'src/components/termrec_upload'
 import { CodeBlockEditor } from 'src/components/code_block'
-import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence } from 'src/global_types'
 import { TextArea } from 'src/components/input'
 import { default as TabMenu, Tab } from 'src/components/tabs'
-import { useForm, useFormField } from 'src/helpers/use_form'
-import { codeblockToBlob } from 'src/helpers/codeblock_to_blob'
-import { useWiredData } from 'src/helpers'
-
-import { createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence, getFindingsOfEvidence, getEvidenceAsCodeblock } from 'src/services'
 
 export const CreateEvidenceModal = (props: {
   onCreated: () => void,
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const descriptionField = useFormField<string>("")
   const tagsField = useFormField<Array<Tag>>([])
   const binaryBlobField = useFormField<File | null>(null)
@@ -52,7 +53,7 @@ export const CreateEvidenceModal = (props: {
         data = { type: 'terminal-recording', file: binaryBlobField.value }
       }
 
-      return createEvidence({
+      return createEvidence(ds, {
         operationSlug: props.operationSlug,
         description: descriptionField.value,
         evidence: data,
@@ -109,6 +110,7 @@ export const EditEvidenceModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const descriptionField = useFormField<string>(props.evidence.description)
   const tagsField = useFormField<Array<Tag>>(props.evidence.tags)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
@@ -116,16 +118,16 @@ export const EditEvidenceModal = (props: {
     if (props.evidence.contentType !== 'codeblock') {
       return
     }
-    getEvidenceAsCodeblock({
+    getEvidenceAsCodeblock(ds, {
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidence.uuid,
     }).then(codeblockField.onChange)
-  }, [props.evidence.contentType, codeblockField.onChange, props.operationSlug, props.evidence.uuid])
+  }, [ds, props.evidence.contentType, codeblockField.onChange, props.operationSlug, props.evidence.uuid])
 
   const formComponentProps = useForm({
     fields: [descriptionField, tagsField, codeblockField],
     onSuccess: () => { props.onEdited(); props.onRequestClose() },
-    handleSubmit: () => updateEvidence({
+    handleSubmit: () => updateEvidence(ds, {
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidence.uuid,
       description: descriptionField.value,
@@ -151,10 +153,11 @@ export const ChangeFindingsOfEvidenceModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
-  const wiredFindings = useWiredData<Array<Finding>>(React.useCallback(() => getFindingsOfEvidence({
+  const ds = useDataSource()
+  const wiredFindings = useWiredData<Array<Finding>>(React.useCallback(() => getFindingsOfEvidence(ds, {
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidence.uuid,
-  }), [props.operationSlug, props.evidence.uuid]))
+  }), [ds, props.operationSlug, props.evidence.uuid]))
 
   return (
     <Modal title="Select Findings For Evidence" onRequestClose={props.onRequestClose}>
@@ -172,12 +175,13 @@ const InternalChangeFindingsOfEvidenceModal = (props: {
   operationSlug: string,
   initialFindings: Array<Finding>,
 }) => {
+  const ds = useDataSource()
   const oldFindingsField = useFormField<Array<Finding>>(props.initialFindings)
   const newFindingsField = useFormField<Array<Finding>>(props.initialFindings)
   const formComponentProps = useForm({
     fields: [newFindingsField],
     onSuccess: () => { props.onChanged(); props.onRequestClose() },
-    handleSubmit: () => changeFindingsOfEvidence({
+    handleSubmit: () => changeFindingsOfEvidence(ds, {
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidence.uuid,
       oldFindings: oldFindingsField.value,
@@ -198,11 +202,12 @@ export const DeleteEvidenceModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const deleteAssociatedFindingsField = useFormField(false)
   const formComponentProps = useForm({
     fields: [deleteAssociatedFindingsField],
     onSuccess: () => { props.onDeleted(); props.onRequestClose() },
-    handleSubmit: () => deleteEvidence({
+    handleSubmit: () => deleteEvidence(ds, {
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidence.uuid,
       deleteAssociatedFindings: deleteAssociatedFindingsField.value,

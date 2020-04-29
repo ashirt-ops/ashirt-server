@@ -2,14 +2,15 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { AuthSchemeDetails } from 'src/global_types'
+import { formatDistanceToNow } from 'date-fns'
+import { useDataSource, getSupportedAuthenticationDetails } from 'src/services'
+import { useWiredData } from 'src/helpers'
+
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import { AuthSchemeDetails } from 'src/global_types'
 import { DeleteGlobalAuthSchemeModal } from 'src/pages/admin_modals'
 import { default as Button, ButtonGroup } from 'src/components/button'
-import { formatDistanceToNow } from 'date-fns'
-import { getSupportedAuthenticationDetails } from 'src/services'
-import { useWiredData } from 'src/helpers'
 
 type PurgableScheme = {
   schemeCode: string,
@@ -17,9 +18,12 @@ type PurgableScheme = {
 }
 
 export default (props: {}) => {
+  const ds = useDataSource()
   const [purgeScheme, setPurgingScheme] = React.useState<PurgableScheme | null>(null)
 
-  const wiredSchemes = useWiredData<Array<AuthSchemeDetails>>(getSupportedAuthenticationDetails)
+  const wiredSchemes = useWiredData<Array<AuthSchemeDetails>>(React.useCallback(() => (
+    getSupportedAuthenticationDetails(ds)
+  ), [ds]))
   const columns = [
     'Scheme Name',
     { label: '# Users', title: "Number of users who can use this method" },

@@ -2,14 +2,15 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { Evidence, Finding } from 'src/global_types'
+import { useDataSource, createFinding, removeEvidenceFromFinding, updateFinding, deleteFinding, changeEvidenceOfFinding, getFindingCategories } from 'src/services'
+import { useForm, useFormField, useWiredData } from 'src/helpers'
+
+import Checkbox from 'src/components/checkbox'
 import EvidenceChooser from 'src/components/evidence_chooser'
 import ModalForm from 'src/components/modal_form'
 import Select from 'src/components/select'
-import { Evidence, Finding } from 'src/global_types'
-import { createFinding, removeEvidenceFromFinding, updateFinding, deleteFinding, changeEvidenceOfFinding, getFindingCategories } from 'src/services'
 import { default as Input, TextArea } from 'src/components/input'
-import { useForm, useFormField, useWiredData } from 'src/helpers'
-import Checkbox from 'src/components/checkbox'
 
 const CategorySelect = (props: {
   disabled: boolean,
@@ -33,6 +34,7 @@ export const CreateFindingModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const categoryField = useFormField<string>('')
   const titleField = useFormField<string>('')
   const descriptionField = useFormField<string>('')
@@ -40,7 +42,7 @@ export const CreateFindingModal = (props: {
     fields: [categoryField, titleField, descriptionField],
     onSuccess: () => props.onRequestClose(),
     handleSubmit: async () => {
-      const finding = await createFinding({
+      const finding = await createFinding(ds, {
         operationSlug: props.operationSlug,
         category: categoryField.value,
         title: titleField.value,
@@ -65,6 +67,7 @@ export const EditFindingModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const categoryField = useFormField<string>(props.finding.category)
   const titleField = useFormField<string>(props.finding.title)
   const ticketField = useFormField<string>(props.finding.ticketLink || "")
@@ -73,7 +76,7 @@ export const EditFindingModal = (props: {
   const formComponentProps = useForm({
     fields: [categoryField, titleField, descriptionField],
     onSuccess: () => { props.onEdited(); props.onRequestClose() },
-    handleSubmit: () => updateFinding({
+    handleSubmit: () => updateFinding(ds, {
       operationSlug: props.operationSlug,
       findingUuid: props.finding.uuid,
       category: categoryField.value,
@@ -100,9 +103,10 @@ export const DeleteFindingModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const formComponentProps = useForm({
     onSuccess: () => { props.onDeleted(); props.onRequestClose() },
-    handleSubmit: () => deleteFinding({
+    handleSubmit: () => deleteFinding(ds, {
       findingUuid: props.finding.uuid,
       operationSlug: props.operationSlug,
     }),
@@ -121,11 +125,12 @@ export const ChangeEvidenceOfFindingModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const evidenceField = useFormField<Array<Evidence>>(props.initialEvidence)
   const formComponentProps = useForm({
     fields: [evidenceField],
     onSuccess: () => { props.onChanged(); props.onRequestClose() },
-    handleSubmit: () => changeEvidenceOfFinding({
+    handleSubmit: () => changeEvidenceOfFinding(ds, {
       operationSlug: props.operationSlug,
       findingUuid: props.finding.uuid,
       oldEvidence: props.initialEvidence,
@@ -147,9 +152,10 @@ export const RemoveEvidenceFromFindingModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const formComponentProps = useForm({
     onSuccess: () => { props.onRemoved(); props.onRequestClose() },
-    handleSubmit: () => removeEvidenceFromFinding({
+    handleSubmit: () => removeEvidenceFromFinding(ds, {
       evidenceUuid: props.evidence.uuid,
       findingUuid: props.finding.uuid,
       operationSlug: props.operationSlug,

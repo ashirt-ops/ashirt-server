@@ -2,14 +2,16 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
+import { Tag as TagType } from 'src/global_types'
+import { dropRight } from 'lodash'
+import { randomTagColorName } from 'src/helpers'
+import { useDataSource, getTags, createTag } from 'src/services'
+
+import PopoverMenu from 'src/components/popover_menu'
 import Tag from 'src/components/tag'
 import WithLabel from 'src/components/with_label'
-import classnames from 'classnames/bind'
-import {Tag as TagType} from 'src/global_types'
-import {dropRight} from 'lodash'
-import {getTags, createTag} from 'src/services'
-import {randomTagColorName} from 'src/helpers/tag_colors'
-import PopoverMenu from 'src/components/popover_menu'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 const isBackspace = (e: React.KeyboardEvent) => e.which === 8
@@ -36,6 +38,7 @@ export default (props: {
   onChange: (tags: Array<TagType>) => void,
   value: Array<TagType>,
 }) => {
+  const ds = useDataSource()
   const [allTags, setAllTags] = React.useState<Array<TagType>>([])
   const [inputValue, setInputValue] = React.useState("")
   const [dropdownVisible, setDropdownVisible] = React.useState(false)
@@ -43,13 +46,13 @@ export default (props: {
   let filteredTags = filterTags(allTags, inputValue)
   const activeTagIdSet = getTagIdSet(props.value)
 
-  const reloadTags = () => { getTags({operationSlug: props.operationSlug}).then(setAllTags) }
+  const reloadTags = () => { getTags(ds, {operationSlug: props.operationSlug}).then(setAllTags) }
   React.useEffect(reloadTags, [""])
 
   const toggleTag = async (maybeTag: TagType|null) => {
     let tag: TagType
     if (maybeTag == null) {
-      tag = await createTag({operationSlug: props.operationSlug, name: inputValue, colorName: randomTagColorName()})
+      tag = await createTag(ds, {operationSlug: props.operationSlug, name: inputValue, colorName: randomTagColorName()})
       reloadTags()
     } else {
       tag = maybeTag

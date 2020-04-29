@@ -3,18 +3,18 @@
 
 import { ApiKey } from 'src/global_types'
 import { apiKeyFromDto } from './data_sources/converters'
-import { backendDataSource as ds } from './data_sources/backend'
+import { DataSource } from './data_sources/data_source'
 
-export async function createApiKey(i: { userSlug: string }): Promise<ApiKey> {
+export async function createApiKey(ds: DataSource, i: { userSlug: string }): Promise<ApiKey> {
   return apiKeyFromDto(await ds.createApiKey(i))
 }
 
-export async function getApiKeys(i?: { userSlug: string }): Promise<Array<ApiKey>> {
+export async function getApiKeys(ds: DataSource, i?: { userSlug: string }): Promise<Array<ApiKey>> {
   const keys = await ds.listApiKeys()
   return keys.map(apiKeyFromDto)
 }
 
-export async function deleteApiKey(i: {
+export async function deleteApiKey(ds: DataSource, i: {
   userSlug: string,
   accessKey: string,
 }): Promise<void> {

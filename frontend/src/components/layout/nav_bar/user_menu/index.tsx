@@ -4,10 +4,12 @@
 import * as React from 'react'
 import AuthContext from 'src/auth_context'
 import classnames from 'classnames/bind'
-import {ClickPopover} from 'src/components/popover'
-import {default as Menu, MenuItem, MenuSeparator} from 'src/components/menu'
-import {logout} from 'src/services'
-import {useUserIsSuperAdmin} from 'src/helpers'
+import { useDataSource, logout } from 'src/services'
+import { useUserIsSuperAdmin } from 'src/helpers'
+
+import { ClickPopover } from 'src/components/popover'
+import { default as Menu, MenuItem, MenuSeparator } from 'src/components/menu'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 // @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
@@ -19,18 +21,19 @@ const Avatar = (props: {
   <div className={cx('avatar')} style={props.url ? {backgroundImage: `url(${props.url})`} : {}} />
 )
 
-const logoutAndRedirect = () => (
-  logout().then(() => {
-    window.location.pathname = '/'
-  })
-)
-
 const UserMenuDropdown = (props: {
   name: string,
   avatar: string,
 }) => {
+  const ds = useDataSource()
   const history = useHistory()
   const isSuperAdmin = useUserIsSuperAdmin()
+
+  const logoutAndRedirect = () => (
+    logout(ds).then(() => {
+      window.location.pathname = '/'
+    })
+  )
 
   return (
     <Menu>

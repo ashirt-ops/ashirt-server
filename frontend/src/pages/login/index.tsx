@@ -3,11 +3,12 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import {parse as parseQuery, ParsedUrlQuery} from 'querystring'
-import {RouteComponentProps} from 'react-router-dom'
-import {getSupportedAuthentications} from 'src/services/auth'
-import {useAuthFrontendComponent} from 'src/authschemes'
-import {useWiredData} from 'src/helpers'
+import { RouteComponentProps } from 'react-router-dom'
+import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
+import { useAuthFrontendComponent } from 'src/authschemes'
+import { useDataSource, getSupportedAuthentications } from 'src/services'
+import { useWiredData } from 'src/helpers'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 // This component renders a list of all enabled authscheme login components
@@ -15,9 +16,12 @@ const cx = classnames.bind(require('./stylesheet'))
 // src/auth and ensure it is enabled on the backend
 // An optional schemeCode can be provided to only render that auth method
 export default (props: RouteComponentProps<{ schemeCode?: string }>) => {
+  const ds = useDataSource()
   const query = parseQuery(props.location.search.substr(1))
   const renderOnlyScheme = props.match.params.schemeCode
-  const wiredAuthSchemes = useWiredData(getSupportedAuthentications)
+  const wiredAuthSchemes = useWiredData(React.useCallback(() => (
+    getSupportedAuthentications(ds)
+  ), [ds]))
 
   return wiredAuthSchemes.render(supportedAuthSchemes => (
     <div className={cx('login')}>

@@ -3,12 +3,12 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { CodeBlockViewer } from '../code_block'
 import { SupportedEvidenceType, CodeBlock } from 'src/global_types'
-import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
+import { useDataSource, getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services'
 import { useWiredData } from 'src/helpers'
 
 import TerminalPlayer from 'src/components/terminal_player'
+import { CodeBlockViewer } from '../code_block'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -58,10 +58,11 @@ type EvidenceProps = {
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
-  const wiredEvidence = useWiredData<CodeBlock>(React.useCallback(() => getEvidenceAsCodeblock({
+  const ds = useDataSource()
+  const wiredEvidence = useWiredData<CodeBlock>(React.useCallback(() => getEvidenceAsCodeblock(ds, {
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidenceUuid,
-  }), [props.operationSlug, props.evidenceUuid]))
+  }), [ds, props.operationSlug, props.evidenceUuid]))
   React.useEffect(wiredEvidence.reload, [props.evidenceUuid])
 
   return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
@@ -73,13 +74,14 @@ const EvidenceImage = (props: EvidenceProps) => {
 }
 
 const EvidenceTerminalRecording = (props: EvidenceProps) => {
-  const wiredEvidence = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+  const ds = useDataSource()
+  const wiredEvidence = useWiredData<string>(React.useCallback(() => getEvidenceAsString(ds, {
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidenceUuid,
-  }), [props.operationSlug, props.evidenceUuid]))
+  }), [ds, props.operationSlug, props.evidenceUuid]))
   React.useEffect(wiredEvidence.reload, [props.evidenceUuid])
 
-  const updateContent = (content: Blob): Promise<void> => updateEvidence({
+  const updateContent = (content: Blob): Promise<void> => updateEvidence(ds, {
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidenceUuid,
     updatedContent: content,

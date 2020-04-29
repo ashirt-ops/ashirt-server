@@ -2,10 +2,11 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { User } from 'src/global_types'
+import { useDataSource, listUsers } from 'src/services'
+
 import Input from 'src/components/input'
 import PopoverMenu from 'src/components/popover_menu'
-import {User} from 'src/global_types'
-import {listUsers} from 'src/services'
 
 const userToName = (u: User) => `${u.firstName} ${u.lastName}`
 
@@ -17,6 +18,7 @@ export default (props: {
   value: User|null,
   onChange: (user: User|null) => void,
 }) => {
+  const ds = useDataSource()
   const [inputValue, setInputValue] = React.useState('')
   const [dropdownVisible, setDropdownVisible] = React.useState(false)
   const [searchResults, setSearchResults] = React.useState<Array<User>>([])
@@ -29,7 +31,7 @@ export default (props: {
   React.useEffect(() => {
     if (inputValue === '') return
     const reload = () => {
-      listUsers({query: inputValue})
+      listUsers(ds, { query: inputValue })
         .then(setSearchResults)
         .then(() => setLoading(false))
     }
@@ -37,7 +39,7 @@ export default (props: {
     // Manually debounce for now since this component is going away
     const timeout = setTimeout(reload, 250)
     return () => { clearTimeout(timeout) }
-  }, [inputValue])
+  }, [ds, inputValue])
 
   const onRequestClose = () => {
     setDropdownVisible(false)

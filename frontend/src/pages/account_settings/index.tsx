@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import { RouteComponentProps } from 'react-router-dom'
 import { UserOwnView } from 'src/global_types'
-import { getUser } from 'src/services'
+import { useDataSource, getUser } from 'src/services'
 import { useWiredData } from 'src/helpers'
 
 import ApiKeys from './api_keys'
@@ -18,8 +18,11 @@ import Security from './security'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: RouteComponentProps<{ slug: string }>) => {
+  const ds = useDataSource()
   const forUser = props.match.params.slug
-  const wiredProfile = useWiredData<UserOwnView>(React.useCallback(() => getUser({ userSlug: forUser }), [forUser]))
+  const wiredProfile = useWiredData<UserOwnView>(React.useCallback(() => (
+    getUser(ds, { userSlug: forUser })
+  ), [ds, forUser]))
 
   const bus = BuildReloadBus()
 

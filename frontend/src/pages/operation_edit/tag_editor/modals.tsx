@@ -2,18 +2,16 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { Tag as TagType } from 'src/global_types'
+import { useDataSource, deleteTag, updateTag, getEvidenceList } from 'src/services'
+import { useForm, useFormField, useWiredData } from 'src/helpers'
+
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import Tag from 'src/components/tag'
 import TagColorPicker from 'src/components/tag_color_picker'
-import {Link} from 'react-router-dom'
-import {Tag as TagType} from 'src/global_types'
-import { deleteTag, updateTag, getEvidenceList
-
-
-} from 'src/services'
-import {useForm, useFormField, useWiredData} from 'src/helpers'
+import { Link } from 'react-router-dom'
 
 export const EditTagModal = (props: {
   onEdited: () => void,
@@ -21,13 +19,14 @@ export const EditTagModal = (props: {
   operationSlug: string,
   tag: TagType,
 }) => {
+  const ds = useDataSource()
   const nameField = useFormField<string>(props.tag.name)
   const colorField = useFormField<string>(props.tag.colorName)
 
   const formComponentProps = useForm({
     fields: [nameField, colorField],
     onSuccess: () => {props.onEdited(); props.onRequestClose()},
-    handleSubmit: () => updateTag({
+    handleSubmit: () => updateTag(ds, {
       id: props.tag.id,
       operationSlug: props.operationSlug,
       name: nameField.value,
@@ -51,18 +50,19 @@ export const DeleteTagModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const formComponentProps = useForm({
     onSuccess: () => {props.onDeleted(); props.onRequestClose()},
-    handleSubmit: () => deleteTag({
+    handleSubmit: () => deleteTag(ds, {
       id: props.tag.id,
       operationSlug: props.operationSlug,
     }),
   })
 
-  const wiredEvidence = useWiredData(React.useCallback(() => getEvidenceList({
+  const wiredEvidence = useWiredData(React.useCallback(() => getEvidenceList(ds, {
     operationSlug: props.operationSlug,
     query: `tag:${JSON.stringify(props.tag.name)}`,
-  }), [props.operationSlug, props.tag.name]))
+  }), [ds, props.operationSlug, props.tag.name]))
 
   return (
     <Modal title="Delete Tag" onRequestClose={props.onRequestClose}>

@@ -2,15 +2,16 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { Tag as TagType, Evidence } from 'src/global_types'
+import { countBy } from 'lodash'
+import { useDataSource, getTags, getEvidenceList } from 'src/services'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
+
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import Tag from 'src/components/tag'
-import {DeleteTagModal, EditTagModal} from './modals'
-import {Tag as TagType, Evidence} from 'src/global_types'
-import {countBy} from 'lodash'
-import {default as Button, ButtonGroup} from 'src/components/button'
-import {getTags, getEvidenceList} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { DeleteTagModal, EditTagModal } from './modals'
+import { default as Button, ButtonGroup } from 'src/components/button'
 
 const TagTable = (props: {
   operationSlug: string,
@@ -52,10 +53,11 @@ const TagTable = (props: {
 export default (props: {
   operationSlug: string,
 }) => {
+  const ds = useDataSource()
   const wiredTags = useWiredData(React.useCallback(() => Promise.all([
-    getTags({operationSlug: props.operationSlug}),
-    getEvidenceList({operationSlug: props.operationSlug, query: ''}),
-  ]), [props.operationSlug]))
+    getTags(ds, { operationSlug: props.operationSlug }),
+    getEvidenceList(ds, { operationSlug: props.operationSlug, query: '' }),
+  ]), [ds, props.operationSlug]))
 
   return (
     <SettingsSection title="Operation Tags">

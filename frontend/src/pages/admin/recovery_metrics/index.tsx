@@ -3,17 +3,19 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-
 import { RecoveryMetrics } from 'src/global_types'
+import { useDataSource, deleteExpiredRecoveryCodes, getRecoveryMetrics } from 'src/services'
 import { useWiredData } from 'src/helpers'
-import { deleteExpiredRecoveryCodes, getRecoveryMetrics } from 'src/services'
 
 import Button from 'src/components/button'
 
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {}) => {
-  const wiredRecoveryMetrics = useWiredData<RecoveryMetrics>(getRecoveryMetrics)
+  const ds = useDataSource()
+  const wiredRecoveryMetrics = useWiredData<RecoveryMetrics>(React.useCallback(() => (
+    getRecoveryMetrics(ds)
+  ), [ds]))
   const numFormatter = new Intl.NumberFormat()
   return (
     <>
@@ -26,8 +28,8 @@ export default (props: {}) => {
       </dl>
       )}
       <Button primary onClick={() => {
-        deleteExpiredRecoveryCodes()
-        wiredRecoveryMetrics.reload()
+        deleteExpiredRecoveryCodes(ds)
+          .then(wiredRecoveryMetrics.reload)
       }}>Remove Expired Codes</Button>
     </>
   )

@@ -2,17 +2,19 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { UserWithAuth } from 'src/global_types'
+import { useDataSource, updateUserProfile } from 'src/services'
+import { useForm, useFormField } from 'src/helpers'
+
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import SettingsSection from 'src/components/settings_section'
-import { UserWithAuth } from 'src/global_types'
-import { updateUserProfile } from 'src/services'
-import { useForm, useFormField } from 'src/helpers'
 
 export default (props: {
   profile: UserWithAuth
   requestReload?: () => void
 }) => {
+  const ds = useDataSource()
 
   const firstNameField = useFormField(props.profile.firstName)
   const lastNameField = useFormField(props.profile.lastName)
@@ -20,7 +22,7 @@ export default (props: {
 
   const profileForm = useForm({
     fields: [firstNameField, lastNameField, emailField],
-    handleSubmit: () => updateUserProfile({
+    handleSubmit: () => updateUserProfile(ds, {
       userSlug: props.profile.slug,
       firstName: firstNameField.value,
       lastName: lastNameField.value,
