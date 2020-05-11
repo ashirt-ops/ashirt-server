@@ -77,17 +77,17 @@ tidy-go:
 build-termrec-all: build-termrec-linux build-termrec-osx
 
 .PHONY: build-termrec-linux
-build-termrec-linux: update-go termrec-copy-static
+build-termrec-linux: update-go
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/termrec/linux/termrec cmd/termrec/*.go
 
 .PHONY: build-termrec-osx
-build-termrec-osx: update-go termrec-copy-static
+build-termrec-osx: update-go
 	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o dist/termrec/osx/termrec cmd/termrec/*.go
 
 ##### Run Targets
 
 .PHONY: run-termrec
-run-termrec: termrec-copy-static
+run-termrec:
 	$(eval export $(shell sed -ne 's/ *#.*$$//; /./ s/=.*$$// p' .env))
 	go run cmd/termrec/*.go
 
@@ -101,10 +101,6 @@ rerun-backend:
 	docker-compose up --build
 
 ##### Helpers
-
-.PHONY: termrec-copy-static
-termrec-copy-static:
-	statik -src=termrec/static -dest=cmd/termrec/config -p=static -f
 
 # view-backend enters the docker container running the backend
 .PHONY: view-backend
