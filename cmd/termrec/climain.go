@@ -37,10 +37,11 @@ func main() {
 	appdialogs.SetBasicUploadData(cfg.OperationID, dialogReader)
 
 	recOpts := RecordingInput{
-		FileDir:   cfg.OutputDir,
-		FileName:  cfg.OutputFileName,
-		Shell:     cfg.RecordingShell,
-		TermInput: ptyReader,
+		FileDir:       cfg.OutputDir,
+		FileName:      cfg.OutputFileName,
+		Shell:         cfg.RecordingShell,
+		StartupScript: cfg.StartupScript,
+		TermInput:     ptyReader,
 		OnRecordingStart: func(output RecordingOutput) {
 			fmt.Println("Recording to " + fancy.WithPizzazz(output.FilePath, fancy.Bold) + "\n\r")
 			fmt.Println(fancy.WithPizzazz("Recording now live!\r", fancy.Bold|fancy.Reverse|fancy.LightGreen))

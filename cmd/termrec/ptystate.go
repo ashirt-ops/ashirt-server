@@ -18,6 +18,7 @@ type PtyTracker struct {
 	termOut            io.Writer
 	readOut            io.Writer
 	termInput          io.Reader
+	startupScript      string
 	OnReady            func()
 }
 
@@ -27,15 +28,17 @@ type PtyTracker struct {
 // readOut io.Writer // A writer that will forward along stdin events. This is the result of calling io.TeeReader.
 //                   // Note: if you are not interested in receiving stdin events, send along a io.Discard / no-op writer
 // onReady func()    // A hook into the run state that provides a pre-recording area to display messages
+// startupScript string // The path to the (optional) startup script. Ignored if startupScript is an empty string
 //
 // Note: This method assumes all inputs come from stdin. This will adjust the stdin on the calling terminal
 // We will attempt to restore to the original state on exit.
-func NewPtyTracker(termOut, readOut io.Writer, termInput io.Reader, onReadyFunc func()) PtyTracker {
+func NewPtyTracker(termOut, readOut io.Writer, termInput io.Reader, onReadyFunc func(), startupScript string) PtyTracker {
 	return PtyTracker{
-		OnReady:   onReadyFunc,
-		termOut:   termOut,
-		readOut:   readOut,
-		termInput: termInput,
+		OnReady:       onReadyFunc,
+		termOut:       termOut,
+		readOut:       readOut,
+		termInput:     termInput,
+		startupScript: startupScript,
 	}
 }
 
@@ -48,6 +51,10 @@ func (t *PtyTracker) Run(shell string) error {
 	t.Pty, err = pty.Start(c)
 	if err != nil {
 		return err
+	}
+
+	if t.startupScript != "" {
+		t.Pty.WriteString(t.startupScript + "\n")
 	}
 
 	t.WindowListenerChan = startResizeListener(t.Pty)

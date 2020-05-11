@@ -27,6 +27,7 @@ type TermRecorderConfig struct {
 	AccessKey       string `yaml:"accessKey"      split_words:"true"`
 	SecretKeyBase64 string `yaml:"secretKey"      split_words:"true" envconfig:"secret_key"`
 	SecretKey       []byte `yaml:"-"`
+	StartupScript   string `yaml:"startupScript"  split_words:"true"`
 	// OperationSlug   int     `yaml:"operationSlug" split_words:"true"`
 
 	issues []string
@@ -118,6 +119,7 @@ func (t *TermRecorderConfig) parseCli() {
 	attachStringFlag("shell", "s", "Name of the output file", t.RecordingShell, &t.RecordingShell)
 	attachStringFlag("svc", "", "Name of the output file", t.APIURL, &t.APIURL)
 
+	attachStringFlag("startup-script", "ss", "Script to run after beginning a recording", t.StartupScript, &t.StartupScript)
 	flag.Parse()
 }
 

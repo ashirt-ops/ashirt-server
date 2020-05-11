@@ -28,6 +28,7 @@ type RecordingInput struct {
 	FileName         string
 	FileDir          string
 	Shell            string
+	StartupScript    string
 	TermInput        io.Reader
 	EventMiddleware  []eventers.EventMiddleware
 	OnRecordingStart func(RecordingOutput)
@@ -51,7 +52,7 @@ func record(ri RecordingInput) (RecordingOutput, error) {
 	eventWriter := eventers.NewEventWriter(&recorder, common.Output, ri.EventMiddleware...)
 	wrappedStdOut := io.MultiWriter(os.Stdout, eventWriter)
 
-	tracker := NewPtyTracker(wrappedStdOut, ioutil.Discard, ri.TermInput, func() { ri.OnRecordingStart(result) })
+	tracker := NewPtyTracker(wrappedStdOut, ioutil.Discard, ri.TermInput, func() { ri.OnRecordingStart(result) }, ri.StartupScript)
 
 	err = tracker.Run(ri.Shell)
 	if err != nil {
