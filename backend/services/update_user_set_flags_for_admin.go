@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
-	sq "github.com/Masterminds/squirrel"
 )
 
 type SetUserFlagsInput struct {

@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/theparanoids/ashirt/termrec/network"
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt/termrec/network"
 )
 
 func TestUpload(t *testing.T) {
+	t.Skip("skipping network tests")
 	var written []byte
 	makeServer(Route{"POST", "/api/operations/777/evidence", newRequestRecorder(201, "", &written)})
 	network.SetBaseURL("http://localhost" + testPort)
@@ -26,6 +27,7 @@ func TestUpload(t *testing.T) {
 }
 
 func TestUploadFailedWithJSONError(t *testing.T) {
+	t.Skip("skipping network tests")
 	var written []byte
 	makeServer(Route{"POST", "/api/operations/778/evidence", newRequestRecorder(402, `{"error": "oops"}`, &written)})
 	network.SetBaseURL("http://localhost" + testPort)
@@ -42,6 +44,7 @@ func TestUploadFailedWithJSONError(t *testing.T) {
 }
 
 func TestUploadFailedWithUnknownJSON(t *testing.T) {
+	t.Skip("skipping network tests")
 	var written []byte
 	makeServer(Route{"POST", "/api/operations/776/evidence", newRequestRecorder(402, `{"something": "value"}`, &written)})
 	network.SetBaseURL("http://localhost" + testPort)

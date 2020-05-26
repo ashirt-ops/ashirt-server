@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math/rand"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
-	sq "github.com/Masterminds/squirrel"
 )
 
 type CreateUserInput struct {

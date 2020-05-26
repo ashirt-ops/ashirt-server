@@ -4,10 +4,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/jonboulle/clockwork"
 	"github.com/theparanoids/ashirt/termrec/common"
 	"github.com/theparanoids/ashirt/termrec/formatters"
 	"github.com/theparanoids/ashirt/termrec/write"
-	"github.com/jonboulle/clockwork"
 )
 
 // StreamingRecorder controls writes to a TerminalWriter. Events are added to the recorder as they

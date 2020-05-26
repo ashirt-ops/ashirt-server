@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/authschemes"
 	"github.com/theparanoids/ashirt/backend/authschemes/localauth"
 	"github.com/theparanoids/ashirt/backend/contentstore"
@@ -28,7 +29,6 @@ import (
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/server"
 	"github.com/theparanoids/ashirt/shared"
-	"github.com/stretchr/testify/require"
 )
 
 type Tester struct {

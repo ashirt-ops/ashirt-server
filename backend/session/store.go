@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/sessions"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/session/wrappedsessionstore"
-	"github.com/gorilla/sessions"
 )
 
 const sessionDataKey = "session_data"

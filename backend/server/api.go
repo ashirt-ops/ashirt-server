@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"

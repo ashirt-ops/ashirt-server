@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/jonboulle/clockwork"
 	"github.com/theparanoids/ashirt/termrec/common"
 	"github.com/theparanoids/ashirt/termrec/systemstate"
-	"github.com/jonboulle/clockwork"
 )
 
 type asciiCast struct {

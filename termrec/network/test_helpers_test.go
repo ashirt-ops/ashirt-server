@@ -3,6 +3,7 @@ package network_test
 import (
 	"bytes"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"testing"
 
@@ -44,11 +45,12 @@ func makeServer(routes ...Route) {
 	}
 
 	go func() {
-		http.ListenAndServe(testPort, nil)
+		log.Fatal(http.ListenAndServe(testPort, nil))
 	}()
 }
 
 func TestNetworkTestHelper_Gets(t *testing.T) {
+	t.Skip("skipping network tests")
 	makeServer(Route{"GET", "/hi", newCannedResponse(200, "hello!")})
 	client := &http.Client{}
 
@@ -63,6 +65,7 @@ func TestNetworkTestHelper_Gets(t *testing.T) {
 }
 
 func TestNetworkTestHelper_Posts(t *testing.T) {
+	t.Skip("skipping network tests")
 	msg := []byte("ABC123")
 	var written []byte
 	makeServer(Route{"GET", "/bye", newRequestRecorder(201, "late, yo", &written)})

@@ -6,10 +6,10 @@ package services_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/services"
-	"github.com/stretchr/testify/require"
 )
 
 func TestListEvidenceForFinding(t *testing.T) {

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/pkg/errors"
 	"github.com/theparanoids/ashirt/termrec/dialog"
 	"github.com/theparanoids/ashirt/termrec/fancy"
 	"github.com/theparanoids/ashirt/termrec/network"
-	"github.com/pkg/errors"
 )
 
 var operationOptions = []dialog.Option{}

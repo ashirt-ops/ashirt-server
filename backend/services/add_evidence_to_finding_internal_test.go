@@ -6,8 +6,8 @@ package services
 import (
 	"testing"
 
-	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt/backend/database"
 
 	sq "github.com/Masterminds/squirrel"
 )

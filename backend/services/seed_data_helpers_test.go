@@ -11,14 +11,14 @@ import (
 	"testing"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jonboulle/clockwork"
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
-	sq "github.com/Masterminds/squirrel"
-	"github.com/jonboulle/clockwork"
-	"github.com/stretchr/testify/require"
 )
 
 var internalClock = clockwork.NewFakeClock()

@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theparanoids/ashirt/termrec/common"
-	"github.com/theparanoids/ashirt/termrec/systemstate"
 	"github.com/jonboulle/clockwork"
 	"github.com/stretchr/testify/assert"
+	"github.com/theparanoids/ashirt/termrec/common"
+	"github.com/theparanoids/ashirt/termrec/systemstate"
 )
 
 func TestAsciiCastFormatterWriteFooter(t *testing.T) {

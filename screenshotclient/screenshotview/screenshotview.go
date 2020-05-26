@@ -5,10 +5,10 @@ package screenshotview
 
 import (
 	"fmt"
-	"github.com/theparanoids/ashirt/evidence"
-	"github.com/theparanoids/ashirt/screenshotclient/database"
 	"github.com/andlabs/ui"
 	"github.com/sqweek/dialog"
+	"github.com/theparanoids/ashirt/evidence"
+	"github.com/theparanoids/ashirt/screenshotclient/database"
 	"log"
 	"time"
 )

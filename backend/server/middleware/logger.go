@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/gorilla/mux"
+	"github.com/theparanoids/ashirt/backend/logging"
 )
 
 type responseWriterWrapper struct {

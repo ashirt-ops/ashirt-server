@@ -8,13 +8,13 @@ import (
 	"io"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
-	"github.com/google/uuid"
 )
 
 type CreateEvidenceInput struct {

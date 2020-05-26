@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/theparanoids/ashirt/campaign"
-	"github.com/theparanoids/ashirt/httpclient"
-	"github.com/theparanoids/ashirt/screenshotclient/config"
-	"github.com/theparanoids/ashirt/screenshotclient/screenshotview"
 	"github.com/andlabs/ui"
 	_ "github.com/andlabs/ui/winmanifest"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sqweek/dialog"
+	"github.com/theparanoids/ashirt/campaign"
+	"github.com/theparanoids/ashirt/httpclient"
+	"github.com/theparanoids/ashirt/screenshotclient/config"
+	"github.com/theparanoids/ashirt/screenshotclient/screenshotview"
 )
 
 var (

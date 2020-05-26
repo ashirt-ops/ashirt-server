@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/theparanoids/ashirt/termrec/common"
 	"github.com/theparanoids/ashirt/termrec/formatters"
-	"github.com/stretchr/testify/assert"
 )
 
 func makeTestStreamingFileWriter() (StreamingFileWriter, *bytes.Buffer) {

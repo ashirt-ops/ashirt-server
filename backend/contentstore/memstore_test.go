@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt/backend/contentstore"
 )
 
 func TestMemstore(t *testing.T) {

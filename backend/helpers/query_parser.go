@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend"
 	"github.com/pkg/errors"
+	"github.com/theparanoids/ashirt/backend"
 )
 
 // DateRange is a simple struct representing a slice of time From a point To a point
