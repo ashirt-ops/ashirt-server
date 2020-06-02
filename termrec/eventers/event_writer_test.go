@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theparanoids/ashirt/termrec/common"
-	"github.com/theparanoids/ashirt/termrec/recorders"
 	"github.com/jonboulle/clockwork"
 	"github.com/stretchr/testify/assert"
+	"github.com/theparanoids/ashirt/termrec/common"
+	"github.com/theparanoids/ashirt/termrec/recorders"
 )
 
 func newTestEventWriter(middleware ...EventMiddleware) (EventWriter, *recorders.BufferedRecorder) {

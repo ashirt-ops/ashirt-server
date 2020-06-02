@@ -6,8 +6,8 @@ package remux
 import (
 	"net/http"
 
-	"github.com/theparanoids/ashirt/backend/server/dissectors"
 	"github.com/gorilla/mux"
+	"github.com/theparanoids/ashirt/backend/server/dissectors"
 )
 
 // DissectJSONRequest is a gorilla.mux focused rewrap of dissectors.DissectJSONRequest

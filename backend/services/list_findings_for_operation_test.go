@@ -6,12 +6,12 @@ package services_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/helpers"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/services"
-	"github.com/stretchr/testify/require"
 )
 
 type findingValidator func(*testing.T, models.Finding, *dtos.Finding)

@@ -7,11 +7,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
-	"github.com/stretchr/testify/require"
 
 	sq "github.com/Masterminds/squirrel"
 )

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/helpers"
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt/backend/helpers"
 )
 
 func testTimelineQueryCase(t *testing.T, input string, expectedOutput helpers.TimelineFilters) {

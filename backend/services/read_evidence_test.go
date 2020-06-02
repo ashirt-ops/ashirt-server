@@ -8,11 +8,11 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/services"
-	"github.com/stretchr/testify/require"
 
 	sq "github.com/Masterminds/squirrel"
 )

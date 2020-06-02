@@ -6,13 +6,13 @@ package services
 import (
 	"context"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
-	sq "github.com/Masterminds/squirrel"
 )
 
 // ReadUser retrieves a detailed view of a user. This is separate from the data retriving by listing

@@ -8,10 +8,10 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/services"
-	"github.com/stretchr/testify/require"
 )
 
 func TestUpdateEvidence(t *testing.T) {

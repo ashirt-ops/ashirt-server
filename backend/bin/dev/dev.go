@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/theparanoids/ashirt/backend/authschemes"
 	"github.com/theparanoids/ashirt/backend/authschemes/localauth"
 	"github.com/theparanoids/ashirt/backend/authschemes/oktaauth"
@@ -17,7 +18,6 @@ import (
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/server"
-	"github.com/pkg/errors"
 )
 
 func main() {

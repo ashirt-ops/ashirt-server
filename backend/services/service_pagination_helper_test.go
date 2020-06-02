@@ -8,12 +8,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/helpers"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/server/remux"
 	"github.com/theparanoids/ashirt/backend/services"
-	"github.com/stretchr/testify/require"
 
 	sq "github.com/Masterminds/squirrel"
 )

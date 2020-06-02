@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"
@@ -18,7 +19,6 @@ import (
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/server/remux"
 	"github.com/theparanoids/ashirt/backend/session"
-	"github.com/gorilla/mux"
 
 	sq "github.com/Masterminds/squirrel"
 )

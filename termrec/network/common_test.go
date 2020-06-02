@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSetBaseUrl(t *testing.T) {
+func TestSetBaseURL(t *testing.T) {
 	require.False(t, BaseURLSet())
 	SetBaseURL("Something")
 	require.Equal(t, "Something/api", apiURL)

@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine
+FROM golang:1.14.4-alpine
 
 RUN apk add --no-cache git inotify-tools g++ && \
     rm -rf /var/cache/apk/* && \

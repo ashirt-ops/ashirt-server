@@ -11,9 +11,9 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt/backend/server/dissectors"
 	"github.com/theparanoids/ashirt/backend/server/remux"
-	"github.com/gorilla/mux"
 )
 
 func route(r *mux.Router, method string, path string, handler http.Handler) {

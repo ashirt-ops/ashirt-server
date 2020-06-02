@@ -3,9 +3,9 @@ package eventers
 import (
 	"time"
 
+	"github.com/jonboulle/clockwork"
 	"github.com/theparanoids/ashirt/termrec/common"
 	"github.com/theparanoids/ashirt/termrec/recorders"
-	"github.com/jonboulle/clockwork"
 )
 
 // EventWriter is structure that satisfies the io.Writer interface. Its objective is to interpret

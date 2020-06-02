@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/theparanoids/ashirt/termrec/systemstate"
 	"github.com/creack/pty"
+	"github.com/theparanoids/ashirt/termrec/systemstate"
 )
 
 // PtyTracker is here to help collect all of the pty related items that need to be passed around

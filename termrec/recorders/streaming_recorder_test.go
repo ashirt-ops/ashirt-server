@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jonboulle/clockwork"
+	"github.com/stretchr/testify/assert"
 	"github.com/theparanoids/ashirt/termrec/common"
 	"github.com/theparanoids/ashirt/termrec/formatters"
 	"github.com/theparanoids/ashirt/termrec/write"
-	"github.com/jonboulle/clockwork"
-	"github.com/stretchr/testify/assert"
 )
 
 func makeStreamingRecorder() (StreamingRecorder, write.SaveTermWriter, clockwork.FakeClock) {

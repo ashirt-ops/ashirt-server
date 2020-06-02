@@ -5,13 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/jonboulle/clockwork"
+	"github.com/pkg/errors"
 	"github.com/theparanoids/ashirt/termrec/common"
 	"github.com/theparanoids/ashirt/termrec/eventers"
 	"github.com/theparanoids/ashirt/termrec/formatters"
 	"github.com/theparanoids/ashirt/termrec/recorders"
 	"github.com/theparanoids/ashirt/termrec/write"
-	"github.com/jonboulle/clockwork"
-	"github.com/pkg/errors"
 )
 
 // RecordingInput is a small structure for holding all configuration details for starting up

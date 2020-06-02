@@ -6,10 +6,10 @@ package services_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	localConsts "github.com/theparanoids/ashirt/backend/authschemes/localauth/constants"
 	recoveryConsts "github.com/theparanoids/ashirt/backend/authschemes/recoveryauth/constants"
 	"github.com/theparanoids/ashirt/backend/services"
-	"github.com/stretchr/testify/require"
 )
 
 func TestDeleteAuthSchemeUsers(t *testing.T) {

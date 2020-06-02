@@ -7,12 +7,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	localConsts "github.com/theparanoids/ashirt/backend/authschemes/localauth/constants"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
-	"github.com/stretchr/testify/require"
 )
 
 // TestSeedData is designed to allow a database-to-structure mapping. This is useful either for

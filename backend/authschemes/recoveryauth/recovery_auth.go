@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt/backend/authschemes"
 	"github.com/theparanoids/ashirt/backend/authschemes/recoveryauth/constants"
 	"github.com/theparanoids/ashirt/backend/server/remux"
-	"github.com/gorilla/mux"
 )
 
 type RecoveryAuthScheme struct {

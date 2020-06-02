@@ -10,16 +10,16 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/gorilla/csrf"
+	"github.com/gorilla/mux"
+	verifier "github.com/okta/okta-jwt-verifier-golang"
+	"github.com/okta/okta-jwt-verifier-golang/utils"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/authschemes"
 	"github.com/theparanoids/ashirt/backend/config"
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
 	"github.com/theparanoids/ashirt/backend/server/remux"
-	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
-	verifier "github.com/okta/okta-jwt-verifier-golang"
-	"github.com/okta/okta-jwt-verifier-golang/utils"
 )
 
 // OktaAuth provides okta-based authentication via the OAuth2.0 Authorization flow.
