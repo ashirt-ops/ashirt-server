@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
 	"testing"
 
 	"github.com/jonboulle/clockwork"
@@ -66,6 +67,20 @@ func TestCopyStreamToZip(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, filename, creator.StreamName)
 	require.Equal(t, content, creator.Stream.String())
+}
+
+func TestCopyFileToZip(t *testing.T) {
+	creator := newSimpleCreator()
+	src := "export_processor.go"
+	dst := "result_file.go"
+
+	data, err := ioutil.ReadFile(src)
+	require.NoError(t, err)
+
+	err = copyFileToZip(&creator, src, dst)
+	require.NoError(t, err)
+	require.Equal(t, dst, creator.StreamName)
+	require.Equal(t, data, []byte(creator.Stream.String()))
 }
 
 func TestCopyContentStoreFile(t *testing.T) {
