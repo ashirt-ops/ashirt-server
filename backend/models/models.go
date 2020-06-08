@@ -22,16 +22,16 @@ type APIKey struct {
 
 // Finding reflects the structure of the database table 'findings'
 type Finding struct {
-	ID            int64      `db:"id" json:"id"`
-	UUID          string     `db:"uuid" json:"uuid"`
-	OperationID   int64      `db:"operation_id" json:"operationId"`
+	ID            int64      `db:"id"              json:"id"`
+	UUID          string     `db:"uuid"            json:"uuid"`
+	OperationID   int64      `db:"operation_id"    json:"operationId"`
 	ReadyToReport bool       `db:"ready_to_report" json:"readyToReport"`
-	TicketLink    *string    `db:"ticket_link" json:"ticketLink"`
-	Category      string     `db:"category" json:"category"`
-	Title         string     `db:"title" json:"title"`
-	Description   string     `db:"description" json:"description"`
-	CreatedAt     time.Time  `db:"created_at" json:"createdAt"`
-	UpdatedAt     *time.Time `db:"updated_at" json:"updatedAt"`
+	TicketLink    *string    `db:"ticket_link"     json:"ticketLink"`
+	Category      string     `db:"category"        json:"category"`
+	Title         string     `db:"title"           json:"title"`
+	Description   string     `db:"description"     json:"description"`
+	CreatedAt     time.Time  `db:"created_at"      json:"createdAt"`
+	UpdatedAt     *time.Time `db:"updated_at"      json:"updatedAt"`
 }
 
 // Evidence reflects the structure of the database table 'evidence'
