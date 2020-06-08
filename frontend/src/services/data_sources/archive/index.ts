@@ -57,6 +57,13 @@ export type OperationArchiveData = {
     disabled: boolean,
     headless: boolean,
   }>,
+  queries: Array<{
+    id: number,
+    operationId: number,
+    name: string,
+    query: string,
+    type: string,
+  }>,
 }
 
 const archiveUser = {
@@ -121,7 +128,7 @@ export function makeArchiveDataSource(data: OperationArchiveData): DataSource {
     adminListUsers: unimplementedInArchive,
     adminCreateHeadlessUser: unimplementedInArchive,
 
-    listQueries: async () => [], // TODO - queries is null?
+    listQueries: async () => data.queries,
     createQuery: unimplementedInArchive,
     updateQuery: unimplementedInArchive,
     deleteQuery: unimplementedInArchive,
