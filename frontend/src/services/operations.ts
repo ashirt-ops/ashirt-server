@@ -1,7 +1,8 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { Operation, OperationStatus, UserRole, UserOperationRole, UserFilter } from 'src/global_types'
+import { Operation, OperationStatus, UserRole, UserOperationRole, UserFilter, OperationWithExportData } from 'src/global_types'
+import { nullableDateStrToNullableDate } from 'src/helpers'
 import { DataSource } from './data_sources/data_source'
 import { userOperationRoleFromDto } from './data_sources/converters'
 
@@ -28,8 +29,17 @@ export async function getOperations(ds: DataSource): Promise<Array<Operation>> {
   return await ds.listOperations()
 }
 
-export async function getOperationsForAdmin(ds: DataSource): Promise<Array<Operation>> {
-  return await ds.adminListOperations()
+export async function getOperationsForAdmin(ds: DataSource): Promise<Array<OperationWithExportData>> {
+  const operations = await ds.adminListOperations()
+
+  return operations.map((op: any) => ({
+    ...op,
+    lastCompletedExport: nullableDateStrToNullableDate(op.lastCompletedExport),
+  }))
+}
+
+export async function queueOperationExport(ds: DataSource, slug: string) {
+  return await ds.exportOperation({operationSlug: slug})
 }
 
 export async function getOperation(ds: DataSource, slug: string): Promise<Operation> {

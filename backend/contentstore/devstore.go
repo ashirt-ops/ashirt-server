@@ -40,9 +40,30 @@ func (d *DevStore) Upload(data io.Reader) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return path.Base(file.Name()), nil
+	name := path.Base(file.Name())
+	return name, file.Close()
 }
 
+// Read retrieves a file stored under the provided name from the contentstore.
 func (d *DevStore) Read(key string) (io.Reader, error) {
 	return os.Open(path.Join(d.dir, path.Clean(key)))
+}
+
+// UploadWithName attempts to create a file with the given path and data.
+// This will allow the caller to re-write/replace files if not used carefully.
+//
+// Note: this will still write to underlying path that _all_ DevStore files
+// get written to.
+func (d *DevStore) UploadWithName(key string, data io.Reader) error {
+	f, err := os.Create(path.Join(d.dir, path.Clean(key)))
+
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err = bufio.NewReader(data).WriteTo(f); err != nil {
+		return err
+	}
+	return f.Close()
 }

@@ -36,7 +36,12 @@ func main() {
 
 	contentStore, err := contentstore.NewS3Store(config.ImageStoreBucketName(), config.ImageStoreRegion())
 	if err != nil {
-		logging.Fatal(logger, "msg", "store setup error", "error", err)
+		logging.Fatal(logger, "msg", "image store setup error", "error", err)
+	}
+
+	archiveStore, err := contentstore.NewS3Store(config.ArchiveStoreBucketName(), config.ArchiveStoreRegion())
+	if err != nil {
+		logging.Fatal(logger, "msg", "archive store setup error", "error", err)
 	}
 
 	schemes := []authschemes.AuthScheme{
@@ -56,7 +61,7 @@ func main() {
 	}
 
 	http.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
+		db, contentStore, archiveStore, &server.WebConfig{
 			CSRFAuthKey:      []byte(config.CSRFAuthKey()),
 			SessionStoreKey:  []byte(config.SessionStoreKey()),
 			UseSecureCookies: true,

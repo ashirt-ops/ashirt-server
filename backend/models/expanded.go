@@ -16,3 +16,14 @@ type LimitedAuthSchemeData struct {
 	AuthScheme string
 	LastLogin  *time.Time
 }
+
+type OperationExport struct {
+	Operation
+	Queries           []Query              `json:"queries"`
+	Tags              []Tag                `json:"tags"`
+	Evidence          []Evidence           `json:"evidence"`
+	Findings          []Finding            `json:"findings"`
+	EvidenceToFinding []EvidenceFindingMap `json:"evidence_finding_map"`
+	TagsToEvidence    []TagEvidenceMap     `json:"tag_evidence_map"`
+	Users             []User               `json:"users"`
+}

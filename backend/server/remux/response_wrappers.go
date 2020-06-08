@@ -32,16 +32,23 @@ func MediaHandler(handler func(*http.Request) (io.Reader, error)) http.Handler {
 // this project cannot decode/Marshal a JSON message, in which case a plain 500 error with no content
 // is returned.
 func JSONHandler(handler func(*http.Request) (interface{}, error)) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data, err := handler(r)
-		if err != nil {
-			HandleError(w, r, err)
-			return
-		}
-
+	rewrap := func(r *http.Request) (int, interface{}, error) {
+		reply, err := handler(r)
 		status := 200
 		if r.Method == "POST" {
 			status = 201
+		}
+		return status, reply, err
+	}
+	return JSONHandlerWithStatus(rewrap)
+}
+
+func JSONHandlerWithStatus(handler func(*http.Request) (int, interface{}, error)) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		status, data, err := handler(r)
+		if err != nil {
+			HandleError(w, r, err)
+			return
 		}
 		writeJSONResponse(w, status, data)
 	})

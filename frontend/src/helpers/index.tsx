@@ -15,6 +15,7 @@ export * from './use_user_is_super_admin'
 export * from './use_wired_data'
 export * from './localStroage'
 export * from './trim_url'
+export * from './date_tools'
 
 export function useFocusFirstFocusableChild(ref: React.MutableRefObject<HTMLDivElement|null>) {
   React.useLayoutEffect(() => {

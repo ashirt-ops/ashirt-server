@@ -26,7 +26,7 @@ func (c *Connection) Select(modelSlice interface{}, sb squirrel.SelectBuilder) e
 }
 
 // Get executes the provided SelectBuilder query, and marshals the response into the provided structure.
-// Note: this is for retriving a single value -- i.e. not a row, but a cell
+// Note: this is for retriving a single row
 func (c *Connection) Get(model interface{}, sb squirrel.SelectBuilder) error {
 	query, values, err := prepSquirrel(sb, nil)
 	if err != nil {

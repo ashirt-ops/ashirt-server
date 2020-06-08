@@ -31,6 +31,23 @@ export const userRoleToLabel = {
   [UserRole.ADMIN]: "Admin",
 }
 
+export enum ExportStatus {
+  PENDING = 0,
+  IN_PROGRESS = 1,
+  COMPLETE = 2,
+  ERROR = 3,
+  CANCELLED = 4,
+}
+
+export const exportStatusToLabel = {
+  [ExportStatus.PENDING]: "Pending",
+  [ExportStatus.IN_PROGRESS]: "In Progress",
+  [ExportStatus.COMPLETE]: "Complete",
+  [ExportStatus.ERROR]: "Error",
+  [ExportStatus.CANCELLED]: "Cancelled",
+}
+
+
 export type ApiKey = {
   accessKey: string,
   secretKey: string | null,
@@ -76,6 +93,11 @@ export type Operation = {
   name: string,
   status: OperationStatus,
   numUsers: number,
+}
+
+export type OperationWithExportData = Operation & {
+  lastCompletedExport: Date | null,
+  exportStatus: ExportStatus | null,
 }
 
 export type Evidence = {

@@ -53,6 +53,7 @@ export interface DataSource {
   updateFindingEvidence(ids: OpSlug & FindingUuid, payload: { evidenceToAdd: Array<string>, evidenceToRemove: Array<string> }): Promise<void>
 
   listOperations(): Promise<Array<dtos.Operation>>
+  exportOperation(ids: OpSlug): Promise<void>
   adminListOperations(): Promise<Array<dtos.Operation>>
   createOperation(payload: { slug: string, name: string }): Promise<dtos.Operation>
   readOperation(ids: OpSlug): Promise<dtos.Operation>

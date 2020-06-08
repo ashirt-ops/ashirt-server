@@ -15,6 +15,7 @@ import (
 // Read retrieves the raw bytes from the storage service, given a key obtained by Upload
 type Store interface {
 	Upload(data io.Reader) (string, error)
+	UploadWithName(path string, data io.Reader) error
 	Read(key string) (io.Reader, error)
 }
 

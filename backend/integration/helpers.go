@@ -40,13 +40,16 @@ type Tester struct {
 func NewTester(t *testing.T) *Tester {
 	db := database.NewTestConnection(t, "integration-test-db")
 
-	contentStore, err := contentstore.NewDevStore()
+	contentStore, err := contentstore.NewMemStore()
 	require.NoError(t, err)
+	archiveStore, err := contentstore.NewMemStore()
+	require.NoError(t, err)
+
 	commonLogger := logging.SetupStdoutLogging()
 
 	s := http.NewServeMux()
 	s.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
+		db, contentStore, archiveStore, &server.WebConfig{
 			CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
 			SessionStoreKey: []byte("session-store-key-for-integration-tests"),
 			AuthSchemes:     []authschemes.AuthScheme{localauth.LocalAuthScheme{}},

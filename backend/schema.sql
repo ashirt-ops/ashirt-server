@@ -109,6 +109,30 @@ CREATE TABLE `evidence_finding_map` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `exports_queue`
+--
+
+DROP TABLE IF EXISTS `exports_queue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `exports_queue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `operation_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `export_name` varchar(255) DEFAULT NULL,
+  `status` int(11) NOT NULL,
+  `notes` text,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `exports_queue_operation_id__operations_id` (`operation_id`),
+  KEY `exports_queue_user_id__users_id` (`user_id`),
+  CONSTRAINT `exports_queue_ibfk_1` FOREIGN KEY (`operation_id`) REFERENCES `operations` (`id`),
+  CONSTRAINT `exports_queue_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `findings`
 --
 
@@ -302,7 +326,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-03 15:14:28
+-- Dump completed on 2020-04-29 17:40:48
 -- MySQL dump 10.13  Distrib 8.0.17, for Linux (x86_64)
 --
 -- Host: localhost    Database: migrate_db
@@ -326,7 +350,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `gorp_migrations` WRITE;
 /*!40000 ALTER TABLE `gorp_migrations` DISABLE KEYS */;
-INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2020-04-03 15:14:21'),('20190708185420-create-operations-table.sql','2020-04-03 15:14:21'),('20190708185427-create-events-table.sql','2020-04-03 15:14:22'),('20190708185432-create-evidence-table.sql','2020-04-03 15:14:22'),('20190708185441-create-evidence-event-map-table.sql','2020-04-03 15:14:22'),('20190716190100-create-user-operation-map-table.sql','2020-04-03 15:14:22'),('20190722193434-create-tags-table.sql','2020-04-03 15:14:22'),('20190722193937-create-tag-event-map.sql','2020-04-03 15:14:22'),('20190909183500-add-short-name-to-users-table.sql','2020-04-03 15:14:22'),('20190909190416-add-short-name-index.sql','2020-04-03 15:14:22'),('20190926205116-evidence-name.sql','2020-04-03 15:14:23'),('20190930173342-add-saved-searches.sql','2020-04-03 15:14:23'),('20191001182541-evidence-tags.sql','2020-04-03 15:14:23'),('20191008005212-add-uuid-to-events-evidence.sql','2020-04-03 15:14:23'),('20191015235306-add-slug-to-operations.sql','2020-04-03 15:14:23'),('20191018172105-modular-auth.sql','2020-04-03 15:14:24'),('20191023170906-codeblock.sql','2020-04-03 15:14:24'),('20191101185207-replace-events-with-findings.sql','2020-04-03 15:14:25'),('20191114211948-add-operation-to-tags.sql','2020-04-03 15:14:25'),('20191205182830-create-api-keys-table.sql','2020-04-03 15:14:25'),('20191213222629-users-with-email.sql','2020-04-03 15:14:25'),('20200103194053-rename-short-name-to-slug.sql','2020-04-03 15:14:25'),('20200104013804-rework-ashirt-auth.sql','2020-04-03 15:14:26'),('20200116070736-add-admin-flag.sql','2020-04-03 15:14:26'),('20200130175541-fix-color-truncation.sql','2020-04-03 15:14:26'),('20200205200208-disable-user-support.sql','2020-04-03 15:14:26'),('20200215015330-optional-user-id.sql','2020-04-03 15:14:26'),('20200221195107-deletable-user.sql','2020-04-03 15:14:27'),('20200303215004-move-last-login.sql','2020-04-03 15:14:27'),('20200306221628-add-explicit-headless.sql','2020-04-03 15:14:27'),('20200331155258-finding-status.sql','2020-04-03 15:14:28');
+INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2020-04-29 17:40:42'),('20190708185420-create-operations-table.sql','2020-04-29 17:40:42'),('20190708185427-create-events-table.sql','2020-04-29 17:40:42'),('20190708185432-create-evidence-table.sql','2020-04-29 17:40:42'),('20190708185441-create-evidence-event-map-table.sql','2020-04-29 17:40:42'),('20190716190100-create-user-operation-map-table.sql','2020-04-29 17:40:42'),('20190722193434-create-tags-table.sql','2020-04-29 17:40:42'),('20190722193937-create-tag-event-map.sql','2020-04-29 17:40:42'),('20190909183500-add-short-name-to-users-table.sql','2020-04-29 17:40:42'),('20190909190416-add-short-name-index.sql','2020-04-29 17:40:42'),('20190926205116-evidence-name.sql','2020-04-29 17:40:43'),('20190930173342-add-saved-searches.sql','2020-04-29 17:40:43'),('20191001182541-evidence-tags.sql','2020-04-29 17:40:43'),('20191008005212-add-uuid-to-events-evidence.sql','2020-04-29 17:40:43'),('20191015235306-add-slug-to-operations.sql','2020-04-29 17:40:44'),('20191018172105-modular-auth.sql','2020-04-29 17:40:44'),('20191023170906-codeblock.sql','2020-04-29 17:40:44'),('20191101185207-replace-events-with-findings.sql','2020-04-29 17:40:45'),('20191114211948-add-operation-to-tags.sql','2020-04-29 17:40:45'),('20191205182830-create-api-keys-table.sql','2020-04-29 17:40:45'),('20191213222629-users-with-email.sql','2020-04-29 17:40:45'),('20200103194053-rename-short-name-to-slug.sql','2020-04-29 17:40:45'),('20200104013804-rework-ashirt-auth.sql','2020-04-29 17:40:46'),('20200116070736-add-admin-flag.sql','2020-04-29 17:40:46'),('20200130175541-fix-color-truncation.sql','2020-04-29 17:40:46'),('20200205200208-disable-user-support.sql','2020-04-29 17:40:46'),('20200215015330-optional-user-id.sql','2020-04-29 17:40:46'),('20200221195107-deletable-user.sql','2020-04-29 17:40:47'),('20200303215004-move-last-login.sql','2020-04-29 17:40:47'),('20200306221628-add-explicit-headless.sql','2020-04-29 17:40:47'),('20200331155258-finding-status.sql','2020-04-29 17:40:47'),('20200428001410-add-exports-queue.sql','2020-04-29 17:40:48');
 /*!40000 ALTER TABLE `gorp_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -339,4 +363,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-03 15:14:29
+-- Dump completed on 2020-04-29 17:40:49

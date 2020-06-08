@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/services"
@@ -32,7 +33,7 @@ func TestListOperationsForAdmin(t *testing.T) {
 			}
 		}
 		require.NotNil(t, expected, "Result should have matching value")
-		validateOp(t, *expected, op)
+		validateOpForAdmin(t, *expected, op)
 	}
 
 	// verify non admins don't have access
@@ -41,4 +42,10 @@ func TestListOperationsForAdmin(t *testing.T) {
 	ops, err = services.ListOperationsForAdmin(ctx, db)
 	require.Error(t, err)
 	require.Equal(t, "Requesting user is not an admin", err.Error())
+}
+
+func validateOpForAdmin(t *testing.T, expected models.Operation, actual *dtos.OperationWithExportData) {
+	require.Equal(t, expected.Slug, actual.Slug, "Slugs should match")
+	require.Equal(t, expected.Name, actual.Name, "Names should match")
+	require.Equal(t, expected.Status, actual.Status, "Status should match")
 }

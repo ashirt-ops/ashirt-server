@@ -34,7 +34,13 @@ func NewS3Store(bucketName string, region string) (*S3Store, error) {
 // Upload stores a file in the Amazon S3 bucket configured when the S3 store was created
 func (s *S3Store) Upload(data io.Reader) (string, error) {
 	key := uuid.New().String()
+	return key, s.UploadWithName(key, data)
+}
 
+// UploadWithName stores a file with the given key in the Amazon S3 bucket configured when
+// the S3 store was created
+// This will allow the caller to re-write/replace files if not used carefully.
+func (s *S3Store) UploadWithName(key string, data io.Reader) error {
 	_, err := s.s3Client.PutObject(&s3.PutObjectInput{
 		ACL:    aws.String("bucket-owner-full-control"),
 		Body:   aws.ReadSeekCloser(data),
@@ -42,7 +48,7 @@ func (s *S3Store) Upload(data io.Reader) (string, error) {
 		Key:    aws.String(key),
 	})
 
-	return key, err
+	return err
 }
 
 // Read retrieves the indicated file from Amazon S3

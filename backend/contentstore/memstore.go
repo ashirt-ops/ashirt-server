@@ -32,15 +32,8 @@ func NewMemStore() (*MemStore, error) {
 
 // Upload stores content in memory
 func (d *MemStore) Upload(data io.Reader) (key string, err error) {
-	b, err := ioutil.ReadAll(data)
-	if err != nil {
-		return
-	}
-
 	key = uuid.New().String()
-	d.mutex.Lock()
-	d.content[key] = b
-	d.mutex.Unlock()
+	err = d.UploadWithName(key, data)
 	return
 }
 
@@ -50,4 +43,33 @@ func (d *MemStore) Read(key string) (io.Reader, error) {
 		return nil, fmt.Errorf("No such key")
 	}
 	return bytes.NewReader(data), nil
+}
+
+// UploadWithName writes the given data to the given memory key -- this
+// can allow for re-writing/replacing data if names are not unique
+//
+// Note: to avoid overwriting random keys, DO NOT use uuids as they key
+func (d *MemStore) UploadWithName(key string, data io.Reader) error {
+	b, err := ioutil.ReadAll(data)
+	if err != nil {
+		return err
+	}
+
+	d.mutex.Lock()
+	d.content[key] = b
+	d.mutex.Unlock()
+	return nil
+}
+
+// Keys is a small helper to return back a list of Keys that the memstore contains
+// note: this is unique to memstore, and not part of the contentstore.Store interface
+func (d *MemStore) Keys() []string {
+	keys := make([]string, len(d.content))
+
+	i := 0
+	for k := range d.content {
+		keys[i] = k
+		i++
+	}
+	return keys
 }

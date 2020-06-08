@@ -81,3 +81,10 @@ func SystemLog(keyvals ...interface{}) error {
 	}
 	return nil
 }
+
+// With allows for the creation of a longer-lived Logger that includes a specifc key/value
+// pair in all future requests. Similar in spirit to AddRequestLogger, but allows defining both
+// the key and the value
+func With(baseLogger Logger, key string, value interface{}) Logger {
+	return kitlog.With(baseLogger, key, value)
+}

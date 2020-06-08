@@ -22,57 +22,57 @@ type APIKey struct {
 
 // Finding reflects the structure of the database table 'findings'
 type Finding struct {
-	ID            int64      `db:"id"`
-	UUID          string     `db:"uuid"`
-	OperationID   int64      `db:"operation_id"`
-	ReadyToReport bool       `db:"ready_to_report"`
-	TicketLink    *string    `db:"ticket_link"`
-	Category      string     `db:"category"`
-	Title         string     `db:"title"`
-	Description   string     `db:"description"`
-	CreatedAt     time.Time  `db:"created_at"`
-	UpdatedAt     *time.Time `db:"updated_at"`
+	ID            int64      `db:"id" json:"id"`
+	UUID          string     `db:"uuid" json:"uuid"`
+	OperationID   int64      `db:"operation_id" json:"operationId"`
+	ReadyToReport bool       `db:"ready_to_report" json:"readyToReport"`
+	TicketLink    *string    `db:"ticket_link" json:"ticketLink"`
+	Category      string     `db:"category" json:"category"`
+	Title         string     `db:"title" json:"title"`
+	Description   string     `db:"description" json:"description"`
+	CreatedAt     time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt     *time.Time `db:"updated_at" json:"updatedAt"`
 }
 
 // Evidence reflects the structure of the database table 'evidence'
 type Evidence struct {
-	ID            int64      `db:"id"`
-	UUID          string     `db:"uuid"`
-	OperationID   int64      `db:"operation_id"`
-	OperatorID    int64      `db:"operator_id"`
-	Description   string     `db:"description"`
-	ContentType   string     `db:"content_type"`
-	FullImageKey  string     `db:"full_image_key"`
-	ThumbImageKey string     `db:"thumb_image_key"`
-	OccurredAt    time.Time  `db:"occurred_at"`
-	CreatedAt     time.Time  `db:"created_at"`
-	UpdatedAt     *time.Time `db:"updated_at"`
+	ID            int64      `db:"id"              json:"id"`
+	UUID          string     `db:"uuid"            json:"uuid"`
+	OperationID   int64      `db:"operation_id"    json:"operationId"`
+	OperatorID    int64      `db:"operator_id"     json:"operatorId"`
+	Description   string     `db:"description"     json:"description"`
+	ContentType   string     `db:"content_type"    json:"contentType"`
+	FullImageKey  string     `db:"full_image_key"  json:"fullImageKey"`
+	ThumbImageKey string     `db:"thumb_image_key" json:"thumbImageKey"`
+	OccurredAt    time.Time  `db:"occurred_at"     json:"occurredAt"`
+	CreatedAt     time.Time  `db:"created_at"      json:"createdAt"`
+	UpdatedAt     *time.Time `db:"updated_at"      json:"updatedAt"`
 }
 
 // EvidenceFindingMap reflects the structure of the database table 'evidence_finding_map'
 type EvidenceFindingMap struct {
-	EvidenceID int64      `db:"evidence_id"`
-	FindingID  int64      `db:"finding_id"`
-	CreatedAt  time.Time  `db:"created_at"`
-	UpdatedAt  *time.Time `db:"updated_at"`
+	EvidenceID int64      `db:"evidence_id" json:"evidenceId"`
+	FindingID  int64      `db:"finding_id"  json:"findingId"`
+	CreatedAt  time.Time  `db:"created_at"  json:"createdAt"`
+	UpdatedAt  *time.Time `db:"updated_at"  json:"updatedAt"`
 }
 
 // TagEvidenceMap reflects the structure of the database table 'tag_evidence_map'
 type TagEvidenceMap struct {
-	TagID      int64      `db:"tag_id"`
-	EvidenceID int64      `db:"evidence_id"`
-	CreatedAt  time.Time  `db:"created_at"`
-	UpdatedAt  *time.Time `db:"updated_at"`
+	TagID      int64      `db:"tag_id"      json:"tagId"`
+	EvidenceID int64      `db:"evidence_id" json:"evidenceId"`
+	CreatedAt  time.Time  `db:"created_at"  json:"createdAt"`
+	UpdatedAt  *time.Time `db:"updated_at"  json:"updatedAt"`
 }
 
 // Operation reflects the structure of the database table 'operations'
 type Operation struct {
-	ID        int64           `db:"id"`
-	Slug      string          `db:"slug"`
-	Name      string          `db:"name"`
-	Status    OperationStatus `db:"status"`
-	CreatedAt time.Time       `db:"created_at"`
-	UpdatedAt *time.Time      `db:"updated_at"`
+	ID        int64           `db:"id"         json:"id"`
+	Slug      string          `db:"slug"       json:"slug"`
+	Name      string          `db:"name"       json:"name"`
+	Status    OperationStatus `db:"status"     json:"status"`
+	CreatedAt time.Time       `db:"created_at" json:"createdAt"`
+	UpdatedAt *time.Time      `db:"updated_at" json:"updatedAt"`
 }
 
 type OperationStatus = int
@@ -85,27 +85,27 @@ const (
 
 // Tag reflects the structure of the database table 'tags'
 type Tag struct {
-	ID          int64      `db:"id"`
-	OperationID int64      `db:"operation_id"`
-	Name        string     `db:"name"`
-	ColorName   string     `db:"color_name"`
-	CreatedAt   time.Time  `db:"created_at"`
-	UpdatedAt   *time.Time `db:"updated_at"`
+	ID          int64      `db:"id"           json:"id"`
+	OperationID int64      `db:"operation_id" json:"operationId"`
+	Name        string     `db:"name"         json:"name"`
+	ColorName   string     `db:"color_name"   json:"colorName"`
+	CreatedAt   time.Time  `db:"created_at"   json:"createdAt"`
+	UpdatedAt   *time.Time `db:"updated_at"   json:"updatedAt"`
 }
 
 // User reflects the structure of the database table 'user'
 type User struct {
-	ID        int64      `db:"id"`
-	Slug      string     `db:"slug"`
-	FirstName string     `db:"first_name"`
-	LastName  string     `db:"last_name"`
-	Email     string     `db:"email"`
-	Admin     bool       `db:"admin"`
-	Disabled  bool       `db:"disabled"`
-	Headless  bool       `db:"headless"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt *time.Time `db:"updated_at"`
-	DeletedAt *time.Time `db:"deleted_at"`
+	ID        int64      `db:"id"         json:"id"`
+	Slug      string     `db:"slug"       json:"slug"`
+	FirstName string     `db:"first_name" json:"firstName"`
+	LastName  string     `db:"last_name"  json:"lastName"`
+	Email     string     `db:"email"      json:"email"`
+	Admin     bool       `db:"admin"      json:"admin"`
+	Disabled  bool       `db:"disabled"   json:"disabled"`
+	Headless  bool       `db:"headless"   json:"headless"`
+	CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
+	DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
 }
 
 // UserOperationPermission reflects the structure of the database table 'user_operation_permissions'
@@ -119,13 +119,13 @@ type UserOperationPermission struct {
 
 // Query reflects the structure of the database table 'queries'
 type Query struct {
-	ID          int64      `db:"id"`
-	OperationID int64      `db:"operation_id"`
-	Name        string     `db:"name"`
-	Query       string     `db:"query"`
-	Type        string     `db:"type"`
-	CreatedAt   time.Time  `db:"created_at"`
-	UpdatedAt   *time.Time `db:"updated_at"`
+	ID          int64      `db:"id"           json:"id"`
+	OperationID int64      `db:"operation_id" json:"operationId"`
+	Name        string     `db:"name"         json:"name"`
+	Query       string     `db:"query"        json:"query"`
+	Type        string     `db:"type"         json:"type"`
+	CreatedAt   time.Time  `db:"created_at"   json:"createdAt"`
+	UpdatedAt   *time.Time `db:"updated_at"   json:"updatedAt"`
 }
 
 // AuthSchemeData reflects the structure of the database table 'auth_scheme_data'
@@ -150,3 +150,31 @@ type Session struct {
 	ModifiedAt  *time.Time `db:"modified_at"`
 	ExpiresAt   time.Time  `db:"expires_at"`
 }
+
+// ExportQueueItem reflects the structure of the database table 'exports_queue'
+type ExportQueueItem struct {
+	ID          int64        `db:"id"`
+	OperationID int64        `db:"operation_id"`
+	UserID      int64        `db:"user_id"` //Requesting user
+	ExportName  string       `db:"export_name"`
+	Status      ExportStatus `db:"status"`
+	ErrorNotes  string       `db:"notes"`
+	CreatedAt   time.Time    `db:"created_at"`
+	UpdatedAt   *time.Time   `db:"updated_at"`
+}
+
+// ExportStatus reflects the "Status" field for ExportQueueItem
+type ExportStatus = int
+
+const (
+	// ExportStatusPending is the default status that represents an export that has been queued, but not executed
+	ExportStatusPending ExportStatus = 0
+	// ExportStatusInProgress represents an export that has been started, but not completed
+	ExportStatusInProgress ExportStatus = 1
+	// ExportStatusComplete represents an export that has completed
+	ExportStatusComplete ExportStatus = 2
+	// ExportStatusError represents an export that could not complete due to an error (check the ErrorNotes)
+	ExportStatusError ExportStatus = 3
+	// ExportStatusCancelled represents an export that was cancelled by the user.
+	ExportStatusCancelled ExportStatus = 4
+)

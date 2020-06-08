@@ -15,12 +15,14 @@ import (
 
 // WebConfig is a namespaced app-specific configuration.
 type WebConfig struct {
-	ImgstoreBucketName string        `split_words:"true"`
-	ImgstoreRegion     string        `split_words:"true"`
-	CsrfAuthKey        string        `split_words:"true"`
-	SessionStoreKey    string        `split_words:"true"`
-	RecoveryExpiry     time.Duration `split_words:"true" default:"24h"`
-	Port               int
+	ArchiveStoreBucketName string        `split_words:"true"`
+	ArchiveStoreRegion     string        `split_words:"true"`
+	ImgstoreBucketName     string        `split_words:"true"`
+	ImgstoreRegion         string        `split_words:"true"`
+	CsrfAuthKey            string        `split_words:"true"`
+	SessionStoreKey        string        `split_words:"true"`
+	RecoveryExpiry         time.Duration `split_words:"true" default:"24h"`
+	Port                   int
 }
 
 // DBConfig provides configuration details on connecting to the backend database
@@ -28,7 +30,7 @@ type DBConfig struct {
 	URI string `required:"true"`
 }
 
-// AuthConfig provides configuration details, namespaced to
+// AuthConfig provides configuration details, namespaced to an instance
 type AuthConfig struct {
 	Services    []string
 	AuthConfigs map[string]AuthInstanceConfig
@@ -155,6 +157,16 @@ func ImageStoreBucketName() string {
 // ImageStoreRegion retrieves the APP_IMGSTORE_REGION value from the environment
 func ImageStoreRegion() string {
 	return app.ImgstoreRegion
+}
+
+// ArchiveStoreBucketName retrieves the APP_ARCHIVESTORE_BUCKET_NAME value from the environment
+func ArchiveStoreBucketName() string {
+	return app.ArchiveStoreBucketName
+}
+
+// ArchiveStoreRegion retrieves the APP_ARCHIVESTORE_REGION value from the environment
+func ArchiveStoreRegion() string {
+	return app.ArchiveStoreRegion
 }
 
 // CSRFAuthKey retrieves the APP_CSRF_AUTH_KEY value from the environment

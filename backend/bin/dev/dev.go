@@ -17,6 +17,7 @@ import (
 	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"
+	"github.com/theparanoids/ashirt/backend/processors"
 	"github.com/theparanoids/ashirt/backend/server"
 )
 
@@ -49,6 +50,11 @@ func tryRunServer(logger logging.Logger) error {
 	if err != nil {
 		return err
 	}
+	archiveStore, err := contentstore.NewDevStore()
+	if err != nil {
+		return err
+	}
+
 	schemes := []authschemes.AuthScheme{
 		recoveryauth.New(config.RecoveryExpiry()),
 	}
@@ -65,8 +71,13 @@ func tryRunServer(logger logging.Logger) error {
 		}
 	}
 
+	// start processor
+	isStoppedChan := make(chan bool)
+	proc := processors.NewExportProcessor(db, contentStore, archiveStore, isStoppedChan, logger)
+	proc.Start()
+
 	http.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
+		db, contentStore, archiveStore, &server.WebConfig{
 			CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
 			SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
 			UseSecureCookies: false,

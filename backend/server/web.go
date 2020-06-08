@@ -30,6 +30,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// WebConfig is a simple structure for communicating necessary configuration details for the server.Web
+// function
 type WebConfig struct {
 	DBConnection     *database.Connection
 	AuthSchemes      []authschemes.AuthScheme
@@ -56,7 +58,9 @@ func (c *WebConfig) validate() error {
 	return nil
 }
 
-func Web(db *database.Connection, contentStore contentstore.Store, config *WebConfig) http.Handler {
+// Web handles request handling/routing for the Web/frontend portion of the backend
+// (see API for the hanlding of api services)
+func Web(db *database.Connection, contentStore, archiveStore contentstore.Store, config *WebConfig) http.Handler {
 	if err := config.validate(); err != nil {
 		panic(err)
 	}
@@ -621,5 +625,23 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		return nil, services.DeleteAuthScheme(r.Context(), db, i)
+	}))
+
+	route(r, "POST", "/operations/{operationSlug}/export", jsonHandlerWithStatus(func(r *http.Request) (int, interface{}, error) {
+		dr := dissectJSONRequest(r)
+		slug := dr.FromURL("operationSlug").AsString()
+
+		if dr.Error != nil {
+			return 0, nil, dr.Error
+		}
+		out := services.CreateOperationExport(r.Context(), db, slug)
+		switch {
+		case out.Err != nil:
+			return 0, nil, out.Err
+		case out.Queued:
+			return http.StatusAccepted, nil, nil
+		default:
+			return http.StatusNoContent, nil, nil
+		}
 	}))
 }

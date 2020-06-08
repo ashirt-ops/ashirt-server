@@ -288,6 +288,17 @@ func date(year int, month time.Month, day int) time.Time {
 	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 }
 
+func evidenceForOperation(t *testing.T, datasource TestSeedData, opID int64) []models.Evidence {
+	rtn := make([]models.Evidence, 0, len(datasource.Evidences))
+
+	for _, e := range datasource.Evidences {
+		if e.OperationID == opID {
+			rtn = append(rtn, e)
+		}
+	}
+	return rtn
+}
+
 // iotaLike produces an integer iterator.
 func iotaLike(start int64) func() int64 {
 	counter := start
@@ -299,12 +310,28 @@ func iotaLike(start int64) func() int64 {
 }
 
 // sorted orders an int slice in asc order, then returns back a copy of the sorted list
-// note: underlying list is
+// note: underlying list is unaffected
 func sorted(slice []int64) []int64 {
 	clone := make([]int64, len(slice))
 	copy(clone, slice)
 	sort.Slice(clone, func(i, j int) bool { return clone[i] < clone[j] })
 	return clone
+}
+
+// sorted orders a string slice in asc order, then returns back a copy of the sorted list
+// note: underlying list is unaffected
+func sortedStrings(slice []string) []string {
+	clone := make([]string, len(slice))
+	copy(clone, slice)
+	sort.Slice(clone, func(i, j int) bool { return clone[i] < clone[j] })
+	return clone
+}
+
+func muster(t *testing.T) func(something interface{}, err error) interface{} {
+	return func(something interface{}, err error) interface{} {
+		require.NoError(t, err)
+		return something
+	}
 }
 
 // db queries

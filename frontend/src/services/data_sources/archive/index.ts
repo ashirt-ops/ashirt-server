@@ -114,6 +114,7 @@ export function makeArchiveDataSource(data: OperationArchiveData): DataSource {
     updateFindingEvidence: unimplementedInArchive,
 
     listOperations: async () => [operation],
+    exportOperation: unimplementedInArchive,
     adminListOperations: unimplementedInArchive,
     createOperation: unimplementedInArchive,
     readOperation: async () => operation,

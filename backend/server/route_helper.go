@@ -1,11 +1,12 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
+package server
+
 /*
 	This file provides a rewrap of the relevant remux package. This is done to make migration easier,
 	and to minimize the impact of this refactor
 */
-package server
 
 import (
 	"io"
@@ -38,4 +39,8 @@ func mediaHandler(handler func(*http.Request) (io.Reader, error)) http.Handler {
 
 func jsonHandler(handler func(*http.Request) (interface{}, error)) http.Handler {
 	return remux.JSONHandler(handler)
+}
+
+func jsonHandlerWithStatus(handler func(*http.Request) (int, interface{}, error)) http.Handler {
+	return remux.JSONHandlerWithStatus(handler)
 }
