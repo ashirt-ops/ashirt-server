@@ -81,7 +81,7 @@ func (ep *ExportProcessor) process() {
 func (ep *ExportProcessor) checkQueue() bool {
 	var exportItem models.ExportQueueItem
 	var updateExportBase sq.UpdateBuilder
-	err := ep.db.WithTx(context.Background(), func(tx *database.Transactable) { //using a transaction to lock the row while finding an operation (need to verify if this will work properly)
+	err := ep.db.WithTx(context.Background(), func(tx *database.Transactable) { //using a transaction to lock the row while finding an operation
 		tx.Get(&exportItem, sq.Select("id", "operation_id").From("exports_queue").Where(
 			sq.Eq{"status": models.ExportStatusPending},
 			sq.Gt{"created_at": time.Minute},
@@ -292,13 +292,6 @@ func copyStreamToZipWithFixes(zipWriter Creator, src io.Reader, dst string, pref
 // from the database
 func extractOperationData(db *database.Connection, operationID int64) (*models.OperationExport, error) {
 	var export models.OperationExport
-	// err := db.Get(&export, sq.Select("id", "slug", "name", "status", "created_at", "updated_at").
-	// 	From("operations").Where(sq.Eq{"id": operationID})) //TODO: can this query now be done in parallel with the others?
-
-	// if err != nil {
-	// 	return nil, backend.DatabaseErr(err)
-	// }
-
 	var g errgroup.Group
 	selectStarByOperationID := sq.Select("*").Where(sq.Eq{"operation_id": operationID})
 
