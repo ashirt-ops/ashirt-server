@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 
-	sq "github.com/Masterminds/squirrel"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/models"
@@ -34,24 +33,10 @@ func CreateOperationExport(ctx context.Context, db *database.Connection, operati
 	}
 
 	queued := false
-	err = db.WithTx(ctx, func(tx *database.Transactable) {
-		// TODO: there is some potential here for multiple, duplicate rows to be inserted (during concurrent requests)
-		// this probably cannot be resolved via mysql's replace or "on duplicate key update". However, stored procedures might work
-		// however, this should be unlikely given the expected low-usage of this feature (i.e. exports should be few and far between)
-		var count int64
-		tx.Get(&count, sq.Select("count(id)").From("exports_queue").
-			Where(sq.Eq{"exports_queue.operation_id": op.ID}).
-			Where(sq.Eq{"exports_queue.status": models.ExportStatusPending}),
-		)
-		if count == 0 {
-			tx.Insert("exports_queue", map[string]interface{}{
-				"operation_id": op.ID,
-				"user_id":      middleware.UserID(ctx),
-				"status":       models.ExportStatusPending,
-			})
-			queued = true
-		}
-	})
+	err = db.Exec("INSERT INTO exports_queue(operation_id, status, user_id)" +
+	" SELECT ?, ?, ? FROM DUAL WHERE NOT EXISTS(" +
+	" SELECT id FROM exports_queue WHERE operation_id=? AND status=? LIMIT 1);",
+	op.ID, models.ExportStatusPending, middleware.UserID(ctx), op.ID, models.ExportStatusPending)
 
 	if err != nil {
 		return errRtn(backend.DatabaseErr(err))
