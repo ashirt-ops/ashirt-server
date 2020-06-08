@@ -54,7 +54,7 @@ export interface DataSource {
 
   listOperations(): Promise<Array<dtos.Operation>>
   exportOperation(ids: OpSlug): Promise<void>
-  adminListOperations(): Promise<Array<dtos.Operation>>
+  adminListOperations(): Promise<Array<dtos.OperationWithExportData>>
   createOperation(payload: { slug: string, name: string }): Promise<dtos.Operation>
   readOperation(ids: OpSlug): Promise<dtos.Operation>
   updateOperation(ids: OpSlug, payload: { name: string, status: types.OperationStatus }): Promise<void>

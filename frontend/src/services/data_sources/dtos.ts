@@ -40,6 +40,16 @@ export type Operation = {
   id: number,
 }
 
+export type OperationWithExportData = {
+  slug: string,
+  name: string,
+  numUsers: number,
+  status: number,
+  exportStatus: number | undefined,
+  lastCompletedExport: string | undefined,
+  id: number,
+}
+
 export type Query = {
   id: number,
   name: string,
