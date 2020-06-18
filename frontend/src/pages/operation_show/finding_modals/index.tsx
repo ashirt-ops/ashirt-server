@@ -41,6 +41,7 @@ export const CreateFindingModal = (props: {
     onSuccess: () => props.onRequestClose(),
     handleSubmit: async () => {
       const finding = await createFinding({
+        occurredAt: new Date,
         operationSlug: props.operationSlug,
         category: categoryField.value,
         title: titleField.value,

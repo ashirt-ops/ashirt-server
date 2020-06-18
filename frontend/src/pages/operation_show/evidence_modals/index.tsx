@@ -77,6 +77,7 @@ const wiredCodeblock = useWiredData<CodeBlock|null>(React.useCallback(async () =
     const jsonEvidence = await getJSONEvidence({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidence.uuid,
+      previewOrMedia: 'media',
     })
     return {
       type: 'codeblock',

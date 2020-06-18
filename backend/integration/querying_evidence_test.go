@@ -45,7 +45,7 @@ func TestSavedQueries(t *testing.T) {
 	a.Post("/web/operations/op/queries").
 		WithJSONBody(firstEntry).
 		Do().
-		ExpectJSON(`{"id": 1, "name": "First", "query": "one", "type": "evidence"}`)
+		ExpectJSON(`{"id": 1}`)
 
 	// Test "contains one entry"
 	a.Get("/web/operations/op/queries").Do().ExpectSuccess().
@@ -56,7 +56,7 @@ func TestSavedQueries(t *testing.T) {
 	a.Post("/web/operations/op/queries").
 		WithJSONBody(complexEntry).
 		Do().
-		ExpectJSON(`{"id": 2, "name": "Second", "query": "one tag:Plain tag:\"Is Complex\"", "type": "evidence"}`)
+		ExpectJSON(`{"id": 2}`)
 
 	// Test "supports tags"
 	a.Get("/web/operations/op/queries").Do().ExpectSuccess().

@@ -1,21 +1,27 @@
-import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock } from 'src/global_types'
-import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
-import { evidenceFromDto } from './data_sources/converters'
+import { default as req, reqMultipart, xhrText as reqText } from './request_helper'
+import {Evidence, Finding, Tag, SubmittableEvidence, CodeBlock} from 'src/global_types'
 
 export async function getEvidenceList(i: {
   operationSlug: string,
   query: string,
 }): Promise<Array<Evidence>> {
-  const evidence = await ds.listEvidence({ operationSlug: i.operationSlug }, i.query)
-  return evidence.map(evidenceFromDto)
+  const evidence: Array<any> = await req('GET', `/operations/${i.operationSlug}/evidence`, null, {query: i.query})
+  return evidence.map(evi => ({
+    uuid: evi.uuid,
+    description: evi.description,
+    operator: evi.operator,
+    occurredAt: new Date(evi.occurredAt),
+    tags: evi.tags,
+    contentType: evi.contentType
+  }))
 }
 
 export async function getEvidenceAsCodeblock(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<CodeBlock> {
-  const evi = JSON.parse(await ds.readEvidenceContent(i))
+  const evi = await req('GET', `/operations/${i.operationSlug}/evidence/${i.evidenceUuid}/media`)
   return {
     type: 'codeblock',
     language: evi.contentSubtype,
@@ -28,7 +34,7 @@ export async function getEvidenceAsString(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<string> {
-  return await ds.readEvidenceContent(i)
+  return await reqText('GET', `/operations/${i.operationSlug}/evidence/${i.evidenceUuid}/media`)
 }
 
 export async function createEvidence(i: {
@@ -49,7 +55,7 @@ export async function createEvidence(i: {
     formData.append('content', i.evidence.file)
   }
 
-  await ds.createEvidence({ operationSlug: i.operationSlug }, formData)
+  await reqMultipart('POST', `/operations/${i.operationSlug}/evidence`, formData)
 }
 
 export async function updateEvidence(i: {
@@ -74,10 +80,7 @@ export async function updateEvidence(i: {
     formData.append('content', i.updatedContent)
   }
 
-  await ds.updateEvidence(
-    { operationSlug: i.operationSlug, evidenceUuid: i.evidenceUuid },
-    formData,
-  )
+  await reqMultipart('PUT', `/operations/${i.operationSlug}/evidence/${i.evidenceUuid}`, formData)
 }
 
 export async function changeFindingsOfEvidence(i: {
@@ -87,15 +90,11 @@ export async function changeFindingsOfEvidence(i: {
   newFindings: Array<Finding>,
 }): Promise<void> {
   const [adds, subs] = computeDelta(i.oldFindings.map(f => f.uuid), i.newFindings.map(f => f.uuid))
-
-  await Promise.all(adds.map(findingUuid => ds.updateFindingEvidence(
-    { operationSlug: i.operationSlug, findingUuid },
-    { evidenceToAdd: [i.evidenceUuid], evidenceToRemove: [] },
-  )))
-  await Promise.all(subs.map(findingUuid => ds.updateFindingEvidence(
-    { operationSlug: i.operationSlug, findingUuid },
-    { evidenceToAdd: [], evidenceToRemove: [i.evidenceUuid] },
-  )))
+  const updateFindings = (evidenceToAdd: Array<string>, evidenceToRemove: Array<string>) => (findingUuid: string) => (
+    req('PUT', `/operations/${i.operationSlug}/findings/${findingUuid}/evidence`, {evidenceToAdd, evidenceToRemove})
+  )
+  await Promise.all(adds.map(updateFindings([i.evidenceUuid], [])))
+  await Promise.all(subs.map(updateFindings([], [i.evidenceUuid])))
 }
 
 export async function deleteEvidence(i: {
@@ -103,8 +102,7 @@ export async function deleteEvidence(i: {
   evidenceUuid: string,
   deleteAssociatedFindings: boolean,
 }): Promise<void> {
-  await ds.deleteEvidence(
-    { operationSlug: i.operationSlug, evidenceUuid: i.evidenceUuid },
-    { deleteAssociatedFindings: i.deleteAssociatedFindings },
-  )
+  await req('DELETE', `/operations/${i.operationSlug}/evidence/${i.evidenceUuid}`, {
+    deleteAssociatedFindings: i.deleteAssociatedFindings,
+  })
 }

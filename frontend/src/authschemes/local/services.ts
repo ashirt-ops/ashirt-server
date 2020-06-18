@@ -1,4 +1,4 @@
-import req from 'src/services/data_sources/backend/request_helper'
+import req from 'src/services/request_helper'
 
 export async function login(email: string, password: string) {
   await req('POST', '/auth/local/login', { email, password })

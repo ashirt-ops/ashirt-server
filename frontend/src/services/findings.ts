@@ -1,17 +1,21 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
+import req from './request_helper'
 import { Evidence, Finding } from 'src/global_types'
-import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
-import { findingFromDto, evidenceFromDto } from './data_sources/converters'
 
 export async function getFindings(i: {
   operationSlug: string,
   query: string,
 }): Promise<Array<Finding>> {
-  const findings = await ds.listFindings({ operationSlug: i.operationSlug }, i.query)
-  return findings.map(findingFromDto)
+  const findings = await req('GET', `/operations/${i.operationSlug}/findings`, null, { query: i.query })
+
+  return findings.map((finding: any) => ({
+    ...finding,
+    occurredFrom: finding.occurredFrom ? new Date(finding.occurredFrom) : null,
+    occurredTo: finding.occurredTo ? new Date(finding.occurredTo) : null,
+  }))
 }
 
 export async function getFindingsOfEvidence(i: {
@@ -29,12 +33,20 @@ export async function getFinding(i: {
   findingUuid: string,
 }): Promise<{ finding: Finding, evidence: Array<Evidence> }> {
   const [finding, evidence] = await Promise.all([
-    ds.readFinding(i),
-    ds.readFindingEvidence(i),
+    req('GET', `/operations/${i.operationSlug}/findings/${i.findingUuid}`),
+    req('GET', `/operations/${i.operationSlug}/findings/${i.findingUuid}/evidence`),
   ])
+
   return {
-    finding: findingFromDto(finding),
-    evidence: evidence.map(evidenceFromDto),
+    finding: {
+      ...finding,
+      occurredFrom: finding.occurredFrom ? new Date(finding.occurredFrom) : null,
+      occurredTo: finding.occurredTo ? new Date(finding.occurredTo) : null,
+    },
+    evidence: evidence.map((evi: any) => ({
+      ...evi,
+      occurredAt: new Date(evi.occurredAt),
+    })),
   }
 }
 
@@ -54,13 +66,13 @@ export async function createFinding(i: {
   category: string,
   title: string,
   description: string,
+  occurredAt: Date,
 }): Promise<Finding> {
-  const finding = await ds.createFinding({ operationSlug: i.operationSlug }, {
+  return await req('POST', `/operations/${i.operationSlug}/findings`, {
     category: i.category,
     title: i.title,
     description: i.description,
   })
-  return findingFromDto(finding)
 }
 
 export async function changeEvidenceOfFinding(i: {
@@ -70,10 +82,10 @@ export async function changeEvidenceOfFinding(i: {
   newEvidence: Array<Evidence>,
 }): Promise<void> {
   const [adds, subs] = computeDelta(i.oldEvidence.map(evi => evi.uuid), i.newEvidence.map(evi => evi.uuid))
-  await ds.updateFindingEvidence(
-    { operationSlug: i.operationSlug, findingUuid: i.findingUuid },
-    { evidenceToAdd: adds, evidenceToRemove: subs },
-  )
+  await req('PUT', `/operations/${i.operationSlug}/findings/${i.findingUuid}/evidence`, {
+    evidenceToAdd: adds,
+    evidenceToRemove: subs,
+  })
 }
 
 export async function removeEvidenceFromFinding(i: {
@@ -81,10 +93,10 @@ export async function removeEvidenceFromFinding(i: {
   findingUuid: string,
   evidenceUuid: string,
 }): Promise<void> {
-  await ds.updateFindingEvidence(
-    { operationSlug: i.operationSlug, findingUuid: i.findingUuid },
-    { evidenceToAdd: [], evidenceToRemove: [i.evidenceUuid] },
-  )
+  await req('PUT', `/operations/${i.operationSlug}/findings/${i.findingUuid}/evidence`, {
+    evidenceToAdd: [],
+    evidenceToRemove: [i.evidenceUuid],
+  })
 }
 
 export async function updateFinding(i: {
@@ -96,7 +108,7 @@ export async function updateFinding(i: {
   readyToReport: boolean,
   ticketLink: string | null,
 }): Promise<void> {
-  await ds.updateFinding({ operationSlug: i.operationSlug, findingUuid: i.findingUuid }, {
+  await req('PUT', `/operations/${i.operationSlug}/findings/${i.findingUuid}`, {
     category: i.category,
     title: i.title,
     description: i.description,
@@ -109,5 +121,5 @@ export async function deleteFinding(i: {
   findingUuid: string,
   operationSlug: string,
 }): Promise<void> {
-  await ds.deleteFinding(i)
+  await req('DELETE', `/operations/${i.operationSlug}/findings/${i.findingUuid}`, {})
 }

@@ -1,20 +1,16 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { UserOwnView, SupportedAuthenticationScheme, AuthSchemeDetails, RecoveryMetrics } from 'src/global_types'
-import { backendDataSource as ds } from './data_sources/backend'
-import { userOwnViewFromDto } from './data_sources/converters'
+import req from './request_helper'
+import { UserOwnView, SupportedAuthenticationScheme, AuthenticationInfo, AuthSchemeDetails, RecoveryMetrics } from 'src/global_types'
 
 export async function getCurrentUser(): Promise<UserOwnView | null> {
-  try {
-    return userOwnViewFromDto(await ds.readCurrentUser())
-  } catch (err) {
-    // Not found indicates a non logged in user
-    if (err.status === 404) return null
-
-    // Bubble any other error types up
-    throw err
-  }
+  const res = await fetch('/web/user')
+  if ([200, 404].indexOf(res.status) === -1) throw Error(`/web/user returned status ${res.status}`)
+  const csrfToken = res.headers.get('X-CSRF-TOKEN')
+  if (csrfToken == null) throw Error(`/web/user returned status ${res.status}, but no csrf token`)
+  if (res.status !== 200) return null
+  return await res.json()
 }
 
 // TODO this should be encapsulated in an admin settings component under src/authschemes/local
@@ -25,16 +21,30 @@ export async function adminChangePassword(i: {
   if (i.newPassword.length < 3) {
     throw Error("User password must be at least 3 characters long")
   }
-  await ds.adminChangePassword(i)
+  await req('PUT', '/auth/local/admin/password', i)
 }
 
 export async function logout() {
-  await ds.logout()
+  return req('POST', '/logout', {})
 }
 
 export async function getUser(i?: { userSlug: string }): Promise<UserOwnView> {
-  const user = await (i ? ds.readUser(i) : ds.readCurrentUser())
-  return userOwnViewFromDto(user)
+  const user = await req('GET', `/user`, null, i)
+
+  return {
+    email: user.email,
+    authSchemes: user.authSchemes.map((scheme: AuthenticationInfo) => ({
+      userKey: scheme.userKey,
+      schemeCode: scheme.schemeCode,
+      lastLogin: scheme.lastLogin == null ? null : new Date(scheme.lastLogin), // last login is actually a string here
+
+    })),
+    admin: user.admin,
+    headless: user.headless,
+    slug: user.slug,
+    firstName: user.firstName,
+    lastName: user.lastName,
+  }
 }
 
 export async function adminSetUserFlags(i: {
@@ -42,44 +52,41 @@ export async function adminSetUserFlags(i: {
   disabled: boolean,
   admin: boolean,
 }) {
-  await ds.adminSetUserFlags(
-    { userSlug: i.userSlug },
-    { disabled: i.disabled, admin: i.admin },
-  )
+  await req('POST', `/admin/${i.userSlug}/flags`, i)
 }
 
 export async function getSupportedAuthentications(): Promise<Array<SupportedAuthenticationScheme>> {
-  return await ds.listSupportedAuths()
+  return await req('GET', '/auths')
 }
 
 export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSchemeDetails>> {
-  const schemes = await ds.listAuthDetails()
-  return schemes.map(details => ({
-    schemeName: details.schemeName,
-    schemeCode: details.schemeCode,
-    userCount: details.userCount,
-    uniqueUserCount: details.uniqueUserCount,
-    labels: details.labels,
-    lastUsed: details.lastUsed == null ? null : new Date(details.lastUsed), // incoming value is actually a string that we are focing into a date
+  const schemes = await req('GET', '/auths/breakdown')
+  return schemes.map((i: AuthSchemeDetails) => ({
+    schemeName: i.schemeName,
+    schemeCode: i.schemeCode,
+    userCount: i.userCount,
+    uniqueUserCount: i.uniqueUserCount,
+    labels: i.labels,
+    lastUsed: i.lastUsed == null ? null : new Date(i.lastUsed), // incoming value is actually a string that we are focing into a date
   }))
 }
 
 export async function adminDeleteUser(i: {
   userSlug: string,
 }) {
-  await ds.adminDeleteUser(i)
+  await req('DELETE', `/admin/user/${i.userSlug}`, i)
 }
 
 export async function deleteGlobalAuthScheme(i: {
   schemeName: string,
 }) {
-  await ds.deleteGlobalAuthScheme(i)
+  await req('DELETE', `/auths/${i.schemeName}`)
 }
 
 export async function deleteExpiredRecoveryCodes() {
-  await ds.deleteExpiredRecoveryCodes()
+  await req('DELETE', '/auth/recovery/expired')
 }
 
 export async function getRecoveryMetrics(): Promise<RecoveryMetrics> {
-  return await ds.getRecoveryMetrics()
+  return await req('GET', '/auth/recovery/metrics')
 }

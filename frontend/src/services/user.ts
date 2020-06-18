@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { backendDataSource as ds } from './data_sources/backend'
+import req from './request_helper'
 
 export async function updateUserProfile(i: {
   userSlug: string,
@@ -9,18 +9,14 @@ export async function updateUserProfile(i: {
   lastName: string,
   email: string,
 }): Promise<void> {
-  await ds.updateUser({ userSlug: i.userSlug }, {
-    firstName: i.firstName,
-    lastName: i.lastName,
-    email: i.email,
-  })
+  await req('POST', `/user/profile/${i.userSlug}`, i)
 }
 
 export async function deleteUserAuthenticationScheme(i: {
   userSlug: string,
   authSchemeName: string,
 }): Promise<void> {
-  await ds.deleteUserAuthScheme(i)
+  await req('DELETE', `/user/${i.userSlug}/scheme/${i.authSchemeName}`)
 }
 
 export async function addHeadlessUser(i: {
@@ -28,12 +24,12 @@ export async function addHeadlessUser(i: {
   lastName: string,
   email: string,
 }): Promise<void> {
-  await ds.adminCreateHeadlessUser(i)
+  await req('POST', "/admin/user/headless", i)
 }
 
 export async function createRecoveryCode(i: {
   userSlug: string
 }): Promise<string> {
-  const resp = await ds.createRecoveryCode(i)
+  const resp = await req('POST', '/auth/recovery/generate', i)
   return resp.code
 }

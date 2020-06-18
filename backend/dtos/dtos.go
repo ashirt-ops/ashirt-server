@@ -51,10 +51,7 @@ type Operation struct {
 }
 
 type Query struct {
-	ID    int64  `json:"id"`
-	Name  string `json:"name"`
-	Query string `json:"query"`
-	Type  string `json:"type"`
+	ID int64 `json:"id"`
 }
 
 type Tag struct {

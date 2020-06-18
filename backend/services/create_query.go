@@ -52,10 +52,7 @@ func CreateQuery(ctx context.Context, db *database.Connection, i CreateQueryInpu
 	}
 
 	return &dtos.Query{
-		ID:    queryID,
-		Name:  i.Name,
-		Query: i.Query,
-		Type:  i.Type,
+		ID: queryID,
 	}, nil
 }
 

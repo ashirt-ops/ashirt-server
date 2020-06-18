@@ -8,16 +8,23 @@ import (
 
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/dtos"
-	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
 
+// QueriesForOperationOutput contains the given name of a query ("All evidence tagged with 'big deal'")
+// as well as the actual, full length query ('tag: "big deal"')
+type QueriesForOperationOutput struct {
+	ID    int64  `db:"id" json:"id"`
+	Name  string `db:"name" json:"name"`
+	Query string `db:"query" json:"query"`
+	Type  string `db:"type" json:"type"`
+}
+
 // ListQueriesForOperation retrieves all saved queries for a given operation id
-func ListQueriesForOperation(ctx context.Context, db *database.Connection, operationSlug string) ([]*dtos.Query, error) {
+func ListQueriesForOperation(ctx context.Context, db *database.Connection, operationSlug string) ([]QueriesForOperationOutput, error) {
 	operation, err := lookupOperation(db, operationSlug)
 	if err != nil {
 		return nil, backend.UnauthorizedReadErr(err)
@@ -27,7 +34,8 @@ func ListQueriesForOperation(ctx context.Context, db *database.Connection, opera
 		return nil, backend.UnauthorizedReadErr(err)
 	}
 
-	var queries = make([]models.Query, 0)
+	var queries = make([]QueriesForOperationOutput, 0)
+
 	err = db.Select(&queries, sq.Select("id", "name", "query", "type").
 		From("queries").
 		Where(sq.Eq{"operation_id": operation.ID}).
@@ -37,15 +45,5 @@ func ListQueriesForOperation(ctx context.Context, db *database.Connection, opera
 		return nil, backend.DatabaseErr(err)
 	}
 
-	var queriesDTO = make([]*dtos.Query, len(queries))
-	for i, query := range queries {
-		queriesDTO[i] = &dtos.Query{
-			ID:    query.ID,
-			Name:  query.Name,
-			Query: query.Query,
-			Type:  query.Type,
-		}
-	}
-
-	return queriesDTO, nil
+	return queries, nil
 }

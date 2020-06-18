@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/services"
@@ -28,16 +27,16 @@ func TestListQueriesForOperation(t *testing.T) {
 	validateQuerySets(t, foundQueries, allQueries, validateQuery)
 }
 
-type queryValidator func(*testing.T, models.Query, *dtos.Query)
+type queryValidator func(*testing.T, models.Query, services.QueriesForOperationOutput)
 
-func validateQuery(t *testing.T, expected models.Query, actual *dtos.Query) {
+func validateQuery(t *testing.T, expected models.Query, actual services.QueriesForOperationOutput) {
 	require.Equal(t, expected.ID, actual.ID)
 	require.Equal(t, expected.Name, actual.Name)
 	require.Equal(t, expected.Query, actual.Query)
 	require.Equal(t, expected.Type, actual.Type)
 }
 
-func validateQuerySets(t *testing.T, dtoSet []*dtos.Query, dbSet []models.Query, validator queryValidator) {
+func validateQuerySets(t *testing.T, dtoSet []services.QueriesForOperationOutput, dbSet []models.Query, validator queryValidator) {
 	var expected *models.Query = nil
 
 	for _, dtoItem := range dtoSet {
