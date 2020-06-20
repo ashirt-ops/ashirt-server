@@ -120,3 +120,13 @@ type SupportedAuthScheme struct {
 	SchemeName string `json:"schemeName"`
 	SchemeCode string `json:"schemeCode"`
 }
+
+type TagDifference struct {
+	Included []TagPair `json:"included"`
+	Excluded []Tag     `json:"excluded"`
+}
+
+type TagPair struct {
+	SourceTag      Tag `json:"sourceTag"`
+	DestinationTag Tag `json:"destinationTag"`
+}
