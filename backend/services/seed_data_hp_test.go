@@ -16,6 +16,10 @@ var HarryPotterSeedData = TestSeedData{
 	Tags: []models.Tag{
 		TagFamily, TagFriendship, TagHome, TagLoyalty, TagCourage, TagGoodVsEvil, TagSupernatural,
 		TagMercury, TagVenus, TagEarth, TagMars, TagJupiter, TagSaturn, TagNeptune,
+
+		// common tags among all operations
+		CommonTagWhoSS, CommonTagWhatSS, CommonTagWhereSS, CommonTagWhenSS, CommonTagWhySS,
+		CommonTagWhoCoS, CommonTagWhatCoS, CommonTagWhereCoS, CommonTagWhenCoS, CommonTagWhyCoS,
 	},
 	APIKeys: []models.APIKey{
 		APIKeyHarry1, APIKeyHarry2,
@@ -34,12 +38,13 @@ var HarryPotterSeedData = TestSeedData{
 	},
 	Evidences: []models.Evidence{
 		EviDursleys, EviMirrorOfErised,
-		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary,
+		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione,
 	},
 	TagEviMap: unionTagEviMap(
 		associateTagsToEvidence(EviDursleys, TagFamily, TagHome),
 		associateTagsToEvidence(EviFlyingCar, TagEarth, TagSaturn),
 		associateTagsToEvidence(EviDobby, TagMars, TagJupiter, TagMercury),
+		associateTagsToEvidence(EviPetrifiedHermione, TagMars, CommonTagWhatCoS, CommonTagWhoCoS),
 	),
 	EviFindingsMap: unionEviFindingMap(
 		associateEvidenceToFinding(FindingBook2Magic, EviDobby, EviFlyingCar, EviWhompingWillow),
@@ -97,6 +102,18 @@ var TagJupiter = newHPTag(OpChamberOfSecrets.ID, "Jupiter", "green")
 var TagSaturn = newHPTag(OpChamberOfSecrets.ID, "Saturn", "blue")
 var TagNeptune = newHPTag(OpChamberOfSecrets.ID, "Neptune", "indigo")
 
+var CommonTagWhoSS = newHPTag(OpSorcerersStone.ID, "Who", "lightRed")
+var CommonTagWhatSS = newHPTag(OpSorcerersStone.ID, "What", "lightBlue")
+var CommonTagWhereSS = newHPTag(OpSorcerersStone.ID, "Where", "lightGreen")
+var CommonTagWhenSS = newHPTag(OpSorcerersStone.ID, "When", "lightIndigo")
+var CommonTagWhySS = newHPTag(OpSorcerersStone.ID, "Why", "lightYellow")
+
+var CommonTagWhoCoS = newHPTag(OpChamberOfSecrets.ID, "Who", "lightRed")
+var CommonTagWhatCoS = newHPTag(OpChamberOfSecrets.ID, "What", "lightBlue")
+var CommonTagWhereCoS = newHPTag(OpChamberOfSecrets.ID, "Where", "lightGreen")
+var CommonTagWhenCoS = newHPTag(OpChamberOfSecrets.ID, "When", "lightIndigo")
+var CommonTagWhyCoS = newHPTag(OpChamberOfSecrets.ID, "Why", "lightYellow")
+
 var newHPEvidence = newEvidenceGen(1)
 var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-dursleys", "Dursleys take care of young harry", "image")
 var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-mirror", "Harry see parents in the mirror", "image")
@@ -107,6 +124,8 @@ var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "evi-u
 var EviMoaningMyrtle = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-myrtle", "She's very sad", "image")
 var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-willow", "Don't get too close", "image")
 var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-diary", "What's a Horcrux?", "codeblock")
+
+var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-rockher", "Strangely real-looking statue", "image")
 
 var newHPQuery = newQueryGen(1)
 var QuerySalazarsHier = newHPQuery(OpChamberOfSecrets.ID, "Find Heir", "Magic Query String", "findings")
