@@ -14,7 +14,7 @@ type MoveEvidenceInput struct {
 	TargetOperationSlug string
 }
 
-func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceInput) error {ations)
+func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceInput) error {
 	_, evidence, err := lookupOperationEvidence(db, i.SourceOperationSlug, i.EvidenceUUID)
 	if err != nil {
 		return backend.UnauthorizedReadErr(err)
@@ -26,9 +26,13 @@ func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceIn
 	}
 
 	//Check which tags can be migrated
-	tagDifferences, err := ListTagDifference(ctx, db, ListTagsDifferenceInput{
-		SourceOperationSlug:      i.SourceOperationSlug,
-		DestinationOperationSlug: i.TargetOperationSlug})
+	tagDifferences, err := ListTagDifferenceForEvidence(ctx, db, ListTagDifferenceForEvidenceInput{
+		ListTagsDifferenceInput: ListTagsDifferenceInput{
+			SourceOperationSlug:      i.SourceOperationSlug,
+			DestinationOperationSlug: i.TargetOperationSlug,
+		},
+		SourceEvidenceUUID: i.EvidenceUUID,
+	})
 
 	if err != nil {
 		return err
