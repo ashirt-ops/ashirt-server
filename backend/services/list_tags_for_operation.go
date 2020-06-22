@@ -29,10 +29,17 @@ func ListTagsForOperation(ctx context.Context, db *database.Connection, i ListTa
 		return nil, backend.UnauthorizedReadErr(err)
 	}
 
+	return listTagsForOperation(db, operation.ID)
+}
+
+// listTagsForOperation generates a list tags associted with a given operation. This does not
+// check permission, and so is not exported, and is intended to only be used as a helper method
+// for other services
+func listTagsForOperation(db *database.Connection, operationID int64) ([]*dtos.Tag, error) {
 	var tags []models.Tag
-	err = db.Select(&tags, sq.Select("id", "name", "color_name").
+	err := db.Select(&tags, sq.Select("id", "name", "color_name").
 		From("tags").
-		Where(sq.Eq{"operation_id": operation.ID}).
+		Where(sq.Eq{"operation_id": operationID}).
 		OrderBy("id ASC"))
 	if err != nil {
 		return nil, backend.DatabaseErr(err)
