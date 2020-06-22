@@ -31,6 +31,13 @@ var TinyImg []byte = []byte{
 	0x42, 0x60, 0x82,
 } // tiniest png https://github.com/mathiasbynens/small
 
+// contextForUser genereates a user's context as if they had just logged in. All settings are set,
+// except for NeedsReset, which is always false
+func contextForUser(my models.User, db *database.Connection) context.Context {
+	ctx := context.Background()
+	return middleware.BuildContextForUser(ctx, db, my.ID, my.Admin)
+}
+
 func simpleFullContext(my models.User) context.Context {
 	ctx := context.Background()
 	p := policy.NewAuthenticatedPolicy(my.ID, my.Admin)
