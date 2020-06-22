@@ -7,8 +7,10 @@ import (
 	"context"
 	"strings"
 
+	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/dtos"
+	"github.com/theparanoids/ashirt/backend/policy"
 )
 
 type ListTagsDifferenceInput struct {
@@ -16,16 +18,37 @@ type ListTagsDifferenceInput struct {
 	DestinationOperationSlug string
 }
 
+type ListTagDifferenceForEvidenceInput struct {
+	ListTagsDifferenceInput
+	SourceEvidenceUUID string
+}
+
 // ListTagDifference determines which tag values are common between two operations. This is done via
 // relative comparison. That is, all of the tags in the "source" are compared against the "destination"
 // returning only tags that are common, and tags that are in the source, but not in the destination.
 // The opposite list (tags that exist in the destination, but not the source) is not generated.
-func ListTagDifference(ctx context.Context, db *database.Connection, slugs ListTagsDifferenceInput) (*dtos.TagDifference, error) {
-	sourceTags, err := ListTagsForOperation(ctx, db, ListTagsForOperationInput{slugs.SourceOperationSlug})
+func ListTagDifference(ctx context.Context, db *database.Connection, i ListTagsDifferenceInput) (*dtos.TagDifference, error) {
+	sourceOperation, err := lookupOperation(db, i.SourceOperationSlug)
 	if err != nil {
 		return nil, err
 	}
-	destinationTags, err := ListTagsForOperation(ctx, db, ListTagsForOperationInput{slugs.DestinationOperationSlug})
+	destinationOperation, err := lookupOperation(db, i.DestinationOperationSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := policyRequireWithAdminBypass(ctx,
+		policy.CanReadOperation{OperationID: sourceOperation.ID},
+		policy.CanReadOperation{OperationID: destinationOperation.ID},
+	); err != nil {
+		return nil, backend.UnauthorizedReadErr(err)
+	}
+
+	sourceTags, err := listTagsForOperation(db, sourceOperation.ID)
+	if err != nil {
+		return nil, err
+	}
+	destinationTags, err := listTagsForOperation(db, destinationOperation.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +67,40 @@ func ListTagDifference(ctx context.Context, db *database.Connection, slugs ListT
 	}
 
 	return &diff, nil
+}
+
+func ListTagDifferenceForEvidence(ctx context.Context, db *database.Connection, input ListTagDifferenceForEvidenceInput) (*dtos.TagDifference, error) {
+	diff, err := ListTagDifference(ctx, db, input.ListTagsDifferenceInput)
+	if err != nil {
+		return nil, err
+	}
+
+	_, evidence, err := lookupOperationEvidence(db, input.SourceOperationSlug, input.SourceEvidenceUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	tagMap, _, err := tagsForEvidenceByID(db, []int64{evidence.ID})
+	if err != nil {
+		return nil, err
+	}
+
+	updatedDiff := dtos.TagDifference{}
+	for _, mappedTag := range tagMap[evidence.ID] {
+		tagID := mappedTag.ID
+		for _, tagpair := range diff.Included {
+			if tagpair.SourceTag.ID == tagID {
+				updatedDiff.Included = append(updatedDiff.Included, tagpair)
+			}
+		}
+		for _, tag := range diff.Excluded {
+			if tag.ID == tagID {
+				updatedDiff.Excluded = append(updatedDiff.Excluded, tag)
+			}
+		}
+	}
+
+	return &updatedDiff, nil
 }
 
 func standardizeTagName(tags []*dtos.Tag) map[string]*dtos.Tag {
