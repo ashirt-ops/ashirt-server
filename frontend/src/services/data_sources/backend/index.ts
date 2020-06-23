@@ -23,7 +23,7 @@ export const backendDataSource: DataSource = {
   updateEvidence: (ids, formData) => reqMultipart('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, formData),
   deleteEvidence: (ids, payload) => req('DELETE', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, payload),
   getEvidenceMigrationDifference: (ids, fromOperationSlug) => req('GET', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),
-  moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),
+  moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, { sourceOperationSlug: fromOperationSlug }),
 
   listFindings: (ids, query) => req('GET', `/operations/${ids.operationSlug}/findings`, null, { query }),
   createFinding: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/findings`, payload),
