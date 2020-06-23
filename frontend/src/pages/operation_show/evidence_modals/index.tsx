@@ -199,34 +199,28 @@ export const MoveEvidenceModal = (props: {
   onEvidenceMoved: () => void,
 }) => {
 
-  const defaultOpName = "Current Operation"
-  const [selectedOperation, setSelectedOperation] = React.useState<Operation>({
-    slug: props.operationSlug,
-    name: defaultOpName, // Not sure how to get the current operation name -- this should suffice
-    status: 0, // does not matter
-    numUsers: 0, // does not matter
-  })
+  const [selectedOperationSlug, setSelectedOperation] = React.useState(props.operationSlug)
 
   const wiredOps = useWiredData<Array<Operation>>(React.useCallback(getOperations, [props.operationSlug, props.evidence.uuid]))
   const wiredDiff = useWiredData<TagDifference>(React.useCallback(() =>
     getEvidenceMigrationDifference({
       fromOperationSlug: props.operationSlug,
-      toOperationSlug: selectedOperation.slug,
+      toOperationSlug: selectedOperationSlug,
       evidenceUuid: props.evidence.uuid,
-    }), [selectedOperation, props.evidence.uuid, props.operationSlug]))
+    }), [selectedOperationSlug, props.evidence.uuid, props.operationSlug]))
 
   const formComponentProps = useForm({
     fields: [],
     onSuccess: () => { props.onEvidenceMoved(); props.onRequestClose() },
     handleSubmit: () => {
-      if (selectedOperation.slug == props.operationSlug) {
+      if (selectedOperationSlug == props.operationSlug) {
         return Promise.resolve() // no need to do anything if the to and from destinations are the same
       }
       return moveEvidence({
         fromOperationSlug: props.operationSlug,
-        toOperationSlug: selectedOperation.slug,
+        toOperationSlug: selectedOperationSlug,
         evidenceUuid: props.evidence.uuid
-      }).then(() => {window.location.href= `/operations/${props.operationSlug}/evidence`} )
+      }).then(() => { window.location.href = `/operations/${props.operationSlug}/evidence` })
     },
   })
 
@@ -237,30 +231,19 @@ export const MoveEvidenceModal = (props: {
         lost in the transition.
       </div>
       {wiredOps.render(operations => {
-        operations.sort((a, b) => {
-          if (a.name == props.operationSlug) {
-            return -1
-          }
-          return a.name.localeCompare(b.name)
-        })
+        operations.sort((a, b) =>  a.name.localeCompare(b.name))
+
         const mappedOperations = operations.map(op => ({ name: op.name, value: op }))
-        if (selectedOperation.name == defaultOpName) {
-          setSelectedOperation(operations.filter(op => op.slug == props.operationSlug)[0])
-        }
         return (
           <ComboBox
             label="Select a destination operation"
             options={mappedOperations}
-            value={selectedOperation}
-            onChange={setSelectedOperation} />
+            value={operations.filter(op => op.slug === selectedOperationSlug)[0]}
+            onChange={op => setSelectedOperation(op.slug)} />
         )
       })}
-      {selectedOperation.name != defaultOpName && wiredDiff.render(data => (
-        <TagListRenderer
-          sourceSlug={props.operationSlug}
-          destSlug={selectedOperation.slug}
-          tags={data.excluded}
-        />
+      {wiredDiff.render(data => (
+        <TagListRenderer sourceSlug={props.operationSlug} destSlug={selectedOperationSlug} tags={data.excluded} />
       ))}
     </ModalForm>
   )
