@@ -13,18 +13,18 @@ export async function getEvidenceList(i: {
 
 export async function getEvidenceMigrationDifference(i: {
   fromOperationSlug: string,
-  operationSlug: string,
+  toOperationSlug: string,
   evidenceUuid: string,
 }): Promise<TagDifference> {
-  return await ds.getEvidenceMigrationDifference({operationSlug: i.operationSlug, evidenceUuid: i.evidenceUuid}, i.fromOperationSlug)
+  return await ds.getEvidenceMigrationDifference({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid}, i.fromOperationSlug)
 }
 
 export async function moveEvidence(i: {
   fromOperationSlug: string,
-  operationSlug: string,
+  toOperationSlug: string,
   evidenceUuid: string,
 }): Promise<void> {
-  return await ds.moveEvidence({ operationSlug: i.operationSlug, evidenceUuid: i.evidenceUuid }, i.fromOperationSlug)
+  return await ds.moveEvidence({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid }, i.fromOperationSlug)
 }
 
 export async function getEvidenceAsCodeblock(i: {
