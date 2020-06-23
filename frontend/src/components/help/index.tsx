@@ -33,10 +33,11 @@ export default (props: {
   shortcuts?: Array<KeyboardShortcut>,
   className?: string,
 }) => {
-
   const helpModal = useModal<void>(modalProps => <HelpModal preamble={props.preamble} shortcuts={props.shortcuts} {...modalProps} />)
 
   const onKeyDown = (e: KeyboardEvent) => {
+    if (e.target == null || e.target !== document.body) return
+
     if (e.key === '?') helpModal.show()
   }
 
@@ -44,7 +45,6 @@ export default (props: {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
-
 
   return (
     <>
