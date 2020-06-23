@@ -8,17 +8,21 @@ import MarkdownRenderer from 'src/components/markdown_renderer'
 import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
 import Help from 'src/components/help'
+import { ClickPopover } from 'src/components/popover'
 import { Tag, Evidence } from 'src/global_types'
 import { addTagToQuery, addOperatorToQuery } from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CopyTextButton } from 'src/components/text_copiers'
 import { format } from 'date-fns'
+import { default as Menu, MenuItem } from 'src/components/menu'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 type Actions = { [name: string]: (e: Evidence) => void }
 
 export default (props: {
   actions: Actions,
+  extraActions?: Actions,
   evidence: Array<Evidence>,
   onQueryUpdate: (q: string) => void,
   operationSlug: string,
@@ -108,6 +112,7 @@ export default (props: {
 const TimelineRow = (props: {
   active: boolean,
   actions: Actions,
+  extraActions?: Actions,
   evidence: Evidence,
   onQueryUpdate: (q: string) => void,
   operationSlug: string,
@@ -143,14 +148,33 @@ const TimelineRow = (props: {
         </a>
         <TagList tags={props.evidence.tags} onTagClick={onTagClick} />
         <ButtonGroup>
-          {Object.keys(props.actions).map(actionName => (
-            <Button small key={actionName} onClick={() => props.actions[actionName](props.evidence)}>{actionName}</Button>
-          ))}
+          {
+            Object.keys(props.actions).map(actionName => (
+              <Button small key={actionName} onClick={() => props.actions[actionName](props.evidence)}>{actionName}</Button>
+            ))
+          }
           <CopyTextButton small textToCopy={permalink}>Copy Permalink</CopyTextButton>
+          {renderExtraActions(props.evidence, props.extraActions)}
         </ButtonGroup>
         <MarkdownRenderer className={cx('description')}>{props.evidence.description}</MarkdownRenderer>
       </div>
     </div>
+  )
+}
+
+const renderExtraActions = (evidence: Evidence, extraActions?: Actions) => {
+  if (!extraActions) {
+    return null
+  }
+
+  const menuItems = Object.keys(extraActions).map(actionName => (
+    <MenuItem key={actionName} onClick={() => extraActions[actionName](evidence)}>{actionName}</MenuItem>
+  ))
+
+  return (
+    <ClickPopover className={cx('popover')} closeOnContentClick content={<Menu>{menuItems}</Menu>}>
+      <Button small className={cx('arrow')} />
+    </ClickPopover>
   )
 }
 
