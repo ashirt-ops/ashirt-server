@@ -23,7 +23,7 @@ import {
   getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference
 } from 'src/services'
 import ComboBox from 'src/components/combobox'
-import { default as TagComponent } from 'src/components/tag'
+import TagList from 'src/components/tag_list'
 
 export const CreateEvidenceModal = (props: {
   onCreated: () => void,
@@ -231,33 +231,54 @@ export const MoveEvidenceModal = (props: {
 
   return (
     <ModalForm title="Move Evidence To Another Operation" submitText="Move" onRequestClose={props.onRequestClose} {...formComponentProps}>
-      <em>
-        Warning: Moving evidence will disconnect this evidence from any findings, and some tags may be
+      <div>
+        Moving evidence will disconnect this evidence from any findings and some tags may be
         lost in the transition.
-      </em>
+      </div>
       {wiredOps.render(operations => {
+        operations.sort((a, b) => {
+          if (a.name == props.operationSlug) {
+            return -1
+          }
+          return a.name.localeCompare(b.name)
+        })
         const mappedOperations = operations.map(op => ({ name: op.name, value: op }))
         if (selectedOperation.name == defaultOpName) {
           setSelectedOperation(operations.filter(op => op.slug == props.operationSlug)[0])
         }
         return (
           <ComboBox
-            label="Move To Operation..."
+            label="Select a destination operation"
             options={mappedOperations}
             value={selectedOperation}
-            onChange={onOperationChange}
-          />
+            onChange={onOperationChange} />
         )
-      }
-      )}
+      })}
       {selectedOperation.name != defaultOpName && wiredDiff.render(data => (
-        data && data.excluded && <>
-          <em> The following tags will be removed:</em>
-          {data.excluded.map(tag =>
-            <TagComponent color={tag.colorName} name={tag.name} />
-          )}
-        </>
+        <TagListRenderer
+          sourceSlug={props.operationSlug}
+          destSlug={selectedOperation.slug}
+          tags={data.excluded}
+        />
       ))}
     </ModalForm>
   )
+}
+
+const TagListRenderer = (props: {
+  sourceSlug: string,
+  destSlug: string
+  tags: Array<Tag> | null
+}) => {
+  if (props.sourceSlug == props.destSlug) {
+    return <div>This is the current operation, and so no changes will be made</div>
+  }
+  else if (props.tags == null || props.tags.length == 0) {
+    return <div>All tags will carry over</div>
+  }
+
+  return (<>
+    <div>The following tags will be removed:</div>
+    <TagList tags={props.tags} />
+  </>)
 }
