@@ -20,7 +20,8 @@ import { useWiredData } from 'src/helpers'
 
 import {
   createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence,
-  getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference
+  getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference,
+  moveEvidence
 } from 'src/services'
 import ComboBox from 'src/components/combobox'
 import TagList from 'src/components/tag_list'
@@ -210,7 +211,7 @@ export const MoveEvidenceModal = (props: {
   const wiredDiff = useWiredData<TagDifference>(React.useCallback(() =>
     getEvidenceMigrationDifference({
       fromOperationSlug: props.operationSlug,
-      operationSlug: selectedOperation.slug,
+      toOperationSlug: selectedOperation.slug,
       evidenceUuid: props.evidence.uuid,
     }), [selectedOperation, props.evidence.uuid, props.operationSlug]))
 
@@ -221,7 +222,11 @@ export const MoveEvidenceModal = (props: {
       if (selectedOperation.slug == props.operationSlug) {
         return Promise.resolve() // no need to do anything if the to and from destinations are the same
       }
-      throw Error("Not yet implemented")
+      return moveEvidence({
+        fromOperationSlug: props.operationSlug,
+        toOperationSlug: selectedOperation.slug,
+        evidenceUuid: props.evidence.uuid
+      }).then(() => {window.location.href= `/operations/${props.operationSlug}/evidence`} )
     },
   })
 
