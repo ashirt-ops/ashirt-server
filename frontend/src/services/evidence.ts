@@ -19,6 +19,14 @@ export async function getEvidenceMigrationDifference(i: {
   return await ds.getEvidenceMigrationDifference({operationSlug: i.operationSlug, evidenceUuid: i.evidenceUuid}, i.fromOperationSlug)
 }
 
+export async function moveEvidence(i: {
+  fromOperationSlug: string,
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<void> {
+  return await ds.moveEvidence({ operationSlug: i.operationSlug, evidenceUuid: i.evidenceUuid }, i.fromOperationSlug)
+}
+
 export async function getEvidenceAsCodeblock(i: {
   operationSlug: string,
   evidenceUuid: string,
