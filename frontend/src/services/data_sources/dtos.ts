@@ -101,3 +101,13 @@ export type SupportedAuthScheme = {
   schemeName: string,
   schemeCode: string,
 }
+
+export type TagPair = {
+  sourceTag: Tag,
+  destinationTag: Tag,
+}
+
+export type TagDifference = {
+  included: Array<TagPair>,
+  excluded: Array<Tag>,
+}

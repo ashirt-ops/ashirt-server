@@ -184,3 +184,13 @@ export type RecoveryMetrics = {
   activeCount: number,
   expiredCount: number,
 }
+
+export type TagPair = {
+  sourceTag: Tag,
+  destinationTag: Tag,
+}
+
+export type TagDifference = {
+  included: Array<TagPair>,
+  excluded: Array<Tag>
+}

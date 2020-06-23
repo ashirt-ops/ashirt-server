@@ -30,6 +30,8 @@ func main() {
 	gen(dtos.UserOperationRole{})
 	gen(dtos.DetailedAuthenticationInfo{})
 	gen(dtos.SupportedAuthScheme{})
+	gen(dtos.TagPair{})
+	gen(dtos.TagDifference{})
 }
 
 func gen(dtoStruct interface{}) {
