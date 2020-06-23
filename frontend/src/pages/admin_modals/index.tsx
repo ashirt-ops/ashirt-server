@@ -101,8 +101,8 @@ export const UpdateUserFlagsModal = (props: {
 
   return <ModalForm title="Set User Flags" submitText="Update" onRequestClose={props.onRequestClose} {...formComponentProps}>
     <em className={cx('warning')}>Updating these values will log out the user</em>
-    <Checkbox value={isAdmin.value} label="Admin" {...mergedAdminProps} />
-    <Checkbox value={isDisabled.value} label="Disabled" {...mergedDisabledProps} />
+    <Checkbox label="Admin" {...mergedAdminProps} />
+    <Checkbox label="Disabled" {...mergedDisabledProps} />
   </ModalForm>
 }
 
