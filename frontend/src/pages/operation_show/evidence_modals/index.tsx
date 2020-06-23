@@ -230,10 +230,6 @@ export const MoveEvidenceModal = (props: {
     },
   })
 
-  const onOperationChange = (op: Operation) => {
-    setSelectedOperation(op)
-  }
-
   return (
     <ModalForm title="Move Evidence To Another Operation" submitText="Move" onRequestClose={props.onRequestClose} {...formComponentProps}>
       <div>
@@ -256,7 +252,7 @@ export const MoveEvidenceModal = (props: {
             label="Select a destination operation"
             options={mappedOperations}
             value={selectedOperation}
-            onChange={onOperationChange} />
+            onChange={setSelectedOperation} />
         )
       })}
       {selectedOperation.name != defaultOpName && wiredDiff.render(data => (
