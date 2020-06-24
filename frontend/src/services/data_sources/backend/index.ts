@@ -33,7 +33,7 @@ export const backendDataSource: DataSource = {
   updateFindingEvidence: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/findings/${ids.findingUuid}/evidence`, payload),
 
   listOperations: () => req('GET', '/operations'),
-  adminListOperations: () => req('GET', '/operations'),
+  adminListOperations: () => req('GET', '/admin/operations'),
   createOperation: payload => req('POST', '/operations', payload),
   readOperation: ids => req('GET', `/operations/${ids.operationSlug}`),
   updateOperation: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}`, payload),
