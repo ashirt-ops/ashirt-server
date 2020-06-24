@@ -51,3 +51,12 @@ func (d *MemStore) Read(key string) (io.Reader, error) {
 	}
 	return bytes.NewReader(data), nil
 }
+
+// Delete removes files in in your OS's temp directory
+func (d *MemStore) Delete(key string) error {
+	if _, ok := d.content[key]; !ok { // artificial behavior to match other stores
+		return fmt.Errorf("No such key")
+	}
+	delete(d.content, key)
+	return nil
+}

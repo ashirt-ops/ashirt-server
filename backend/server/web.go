@@ -468,7 +468,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, services.DeleteEvidence(r.Context(), db, i)
+		return nil, services.DeleteEvidence(r.Context(), db, contentStore, i)
 	}))
 
 	route(r, "GET", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {

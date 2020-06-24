@@ -56,3 +56,12 @@ func (s *S3Store) Read(key string) (io.Reader, error) {
 	}
 	return res.Body, nil
 }
+
+// Delete removes files in in your OS's temp directory
+func (s *S3Store) Delete(key string) error {
+	_, err := s.s3Client.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucketName),
+		Key:    aws.String(key),
+	})
+	return err
+}
