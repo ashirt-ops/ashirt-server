@@ -34,7 +34,7 @@ func NewMemStore() (*MemStore, error) {
 func (d *MemStore) Upload(data io.Reader) (key string, err error) {
 	key = uuid.New().String()
 	err = d.UploadWithName(key, data)
-	return 
+	return
 }
 
 // UploadWithName writes the given data to the given memory key -- this

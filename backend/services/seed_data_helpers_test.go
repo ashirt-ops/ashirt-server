@@ -378,7 +378,7 @@ func getFindingByUUID(t *testing.T, db *database.Connection, uuid string) models
 	return fullFinding
 }
 
-func getEvidenceForOperation(t *testing.T, db *database.Connection, operationID int64) []models.Evidence{
+func getEvidenceForOperation(t *testing.T, db *database.Connection, operationID int64) []models.Evidence {
 	var evidence []models.Evidence
 	err := db.Select(&evidence, sq.Select("*").From("evidence").Where(sq.Eq{"operation_id": operationID}))
 	require.NoError(t, err)
