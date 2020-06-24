@@ -42,7 +42,7 @@ func DeleteEvidence(ctx context.Context, db *database.Connection, contentStore c
 	if err != nil {
 		return backend.DatabaseErr(err)
 	}
-	
+
 	if err = deleteEvidenceContent(contentStore, *evidence); err != nil {
 		return backend.DeleteErr(err)
 	}
@@ -51,15 +51,19 @@ func DeleteEvidence(ctx context.Context, db *database.Connection, contentStore c
 }
 
 func deleteEvidenceContent(contentStore contentstore.Store, evidence models.Evidence) error {
-	err := contentStore.Delete(evidence.FullImageKey)
-	if err != nil {
-		return err
+	keys := make([]string, 0, 2)
+	if evidence.FullImageKey != "" {
+		keys = append(keys, evidence.FullImageKey)
 	}
-	if evidence.FullImageKey != evidence.ThumbImageKey {
-		err = contentStore.Delete(evidence.ThumbImageKey)
+	if evidence.ThumbImageKey != "" && evidence.ThumbImageKey != evidence.FullImageKey {
+		keys = append(keys, evidence.ThumbImageKey)
+	}
+	for _, key := range keys {
+		err := contentStore.Delete(key)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
