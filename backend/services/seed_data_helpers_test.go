@@ -4,6 +4,7 @@
 package services_test
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"sort"
@@ -14,6 +15,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jonboulle/clockwork"
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/models"
@@ -30,6 +32,21 @@ var TinyImg []byte = []byte{
 	0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
 	0x42, 0x60, 0x82,
 } // tiniest png https://github.com/mathiasbynens/small
+
+var TinyCodeblock []byte = []byte(`{"contentType": "codeblock", "contentSubtype": "python", "content": "print(\"Hello World!\")"}`)
+
+var TinyTermRec []byte = []byte(
+	`{"version":2,"width":75,"height":18,"timestamp":1593020879,"title":"1593020879","env":{"SHELL":"/bin/bash","TERM":"xterm-256color"}}` +
+		"\n" + `[0.188801409,"o","\u001b]0;user@localhost:~\u0007"]` +
+		"\n" + `[0.189032775,"o","[user@localhost ~]$ "]` +
+		"\n" + `[0.716089612,"o","ll\r\n"]` +
+		"\n" + `[1.061539838,"o","total 10652\r\n"]` +
+		"\n" + `[1.061654704,"o","-rwxrwxr-x. 1 user user 10905365 Jun 24 10:41 \u001b[0m\u001b[38;5;40mtermrec\u001b[0m\r\n"]` +
+		"\n" + `[1.062881589,"o","\u001b]0;user@localhost:~\u0007"]` +
+		"\n" + `[1.063084503,"o","[user@localhost ~]$ "]` +
+		"\n" + `[1.517546751,"o","exit\r\n"]` +
+		"\n" + `[2.129344227,"o","exit\r\n"]`,
+)
 
 func simpleFullContext(my models.User) context.Context {
 	ctx := context.Background()
@@ -88,6 +105,22 @@ func newAPIKeyGen(first int64) func(int64, string, []byte) models.APIKey {
 			CreatedAt: internalClock.Now(),
 		}
 	}
+}
+
+func createPopulatedMemStore(seed TestSeedData) *contentstore.MemStore {
+	store, _ := contentstore.NewMemStore()
+	upload := func(uuid string, data []byte) error { return store.UploadWithName(uuid, bytes.NewReader(data)) }
+	for _, evi := range seed.Evidences {
+		switch evi.ContentType {
+		case "codeblock":
+			upload(evi.UUID, TinyCodeblock)
+		case "image":
+			upload(evi.UUID, TinyImg)
+		case "terminal-recording":
+			upload(evi.UUID, TinyTermRec)
+		}
+	}
+	return store
 }
 
 type newUserInput struct {

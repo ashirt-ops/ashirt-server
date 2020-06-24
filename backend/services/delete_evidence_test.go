@@ -18,6 +18,7 @@ func TestDeleteEvidenceNoPropogate(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	memStore := createPopulatedMemStore(HarryPotterSeedData)
 
 	masterEvidence := EviFlyingCar
 	i := services.DeleteEvidenceInput{
@@ -25,22 +26,28 @@ func TestDeleteEvidenceNoPropogate(t *testing.T) {
 		EvidenceUUID:             masterEvidence.UUID,
 		DeleteAssociatedFindings: false,
 	}
+	// populate content store
+	contentStoreKey := masterEvidence.UUID // seed data shares full and thumb key ids
+
 	getAssociatedTagCount := makeDBRowCounter(t, db, "tag_evidence_map", "evidence_id=?", masterEvidence.ID)
 	require.True(t, getAssociatedTagCount() > 0, "Database should have associated tags to delete")
 
 	getEvidenceCount := makeDBRowCounter(t, db, "evidence", "uuid=?", i.EvidenceUUID)
 	require.Equal(t, int64(1), getEvidenceCount(), "Database should have evidence to delete")
 
-	err := services.DeleteEvidence(ctx, db, i)
+	err := services.DeleteEvidence(ctx, db, memStore, i)
 	require.NoError(t, err)
 	require.Equal(t, int64(0), getEvidenceCount(), "Database should have deleted the evidence")
 	require.Equal(t, int64(0), getAssociatedTagCount(), "Database should have deleted associated tags")
+	_, err = memStore.Read(contentStoreKey)
+	require.Error(t, err)
 }
 
 func TestDeleteEvidenceWithPropogation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	memStore := createPopulatedMemStore(HarryPotterSeedData)
 
 	masterEvidence := EviDobby
 	i := services.DeleteEvidenceInput{
@@ -60,7 +67,7 @@ func TestDeleteEvidenceWithPropogation(t *testing.T) {
 	associatedFindingIDs := getAssociatedFindings(t, db, masterEvidence.ID)
 	require.True(t, len(associatedFindingIDs) > 0, "Database should have some associated finding to delete")
 
-	err := services.DeleteEvidence(ctx, db, i)
+	err := services.DeleteEvidence(ctx, db, memStore, i)
 	require.NoError(t, err)
 	require.Equal(t, int64(0), getEvidenceCount(), "Database should have deleted the evidence")
 	require.Equal(t, int64(0), getAssociatedTagCount(), "Database should have deleted evidence-to-tags mappings")
