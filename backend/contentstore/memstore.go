@@ -32,16 +32,26 @@ func NewMemStore() (*MemStore, error) {
 
 // Upload stores content in memory
 func (d *MemStore) Upload(data io.Reader) (key string, err error) {
+	key = uuid.New().String()
+	err = d.UploadWithName(key, data)
+	return 
+}
+
+// UploadWithName writes the given data to the given memory key -- this
+// can allow for re-writing/replacing data if names are not unique
+//
+// Note: to avoid overwriting random keys, DO NOT use uuids as they key
+// Note 2: This is NOT part of the standard ContentStore interface
+func (d *MemStore) UploadWithName(key string, data io.Reader) error {
 	b, err := ioutil.ReadAll(data)
 	if err != nil {
-		return
+		return err
 	}
 
-	key = uuid.New().String()
 	d.mutex.Lock()
 	d.content[key] = b
 	d.mutex.Unlock()
-	return
+	return nil
 }
 
 func (d *MemStore) Read(key string) (io.Reader, error) {
