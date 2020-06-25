@@ -8,7 +8,6 @@ require (
 	github.com/andlabs/ui v0.0.0-20180902183112-867a9e5a498d
 	github.com/aws/aws-sdk-go v1.27.0
 	github.com/bhendo/go-powershell v0.0.0-20190719160123-219e7fb4e41e // indirect
-	github.com/creack/pty v1.1.9
 	github.com/getlantern/context v0.0.0-20190109183933-c447772a6520 // indirect
 	github.com/getlantern/errors v0.0.0-20180829142810-e24b7f4ff7c7
 	github.com/getlantern/golog v0.0.0-20170508214112-cca714f7feb5 // indirect
@@ -31,11 +30,8 @@ require (
 	github.com/juju/testing v0.0.0-20191001232224-ce9dec17d28b // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lestrrat-go/jwx v0.9.0 // indirect
-	github.com/manifoldco/promptui v0.7.0
 	github.com/marcsauter/single v0.0.0-20181104081128-f8bf46f26ec0
 	github.com/martinlindhe/inputbox v0.0.0-20200313123801-5532e940e508
-	github.com/mattn/go-colorable v0.1.4 // indirect
-	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-sqlite3 v1.12.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/okta/okta-jwt-verifier-golang v0.1.0

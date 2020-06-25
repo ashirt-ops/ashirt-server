@@ -19,11 +19,7 @@ update-frontend:
 ##### Clean Targets
 
 .PHONY: clean-all
-clean-all: clean-termrec clean-backend
-
-.PHONY: clean-termrec
-clean-termrec:
-	rm -rf dist/termrec/*
+clean-all: clean-backend
 
 .PHONY: clean-backend
 clean-backend:
@@ -32,12 +28,7 @@ clean-backend:
 ##### Test Targets
 
 .PHONY: test-all
-test-all: test-termrec test-backend test-frontend
-
-.PHONY: test-termrec
-test-termrec:
-	cd cmd/termrec && go test ./...
-	cd termrec && go test ./...
+test-all: test-backend test-frontend
 
 .PHONY: test-backend
 test-backend:
@@ -51,12 +42,7 @@ test-frontend:
 ##### Linting/Tidy/Format Targets
 
 .PHONY: tidy-all
-tidy-all: format-termrec format-backend lint-frontend
-
-.PHONY: format-termrec
-format-termrec:
-	gofmt -w cmd/termrec
-	gofmt -w termrec
+tidy-all:  format-backend lint-frontend
 
 .PHONY: format-backend
 format-backend:
@@ -71,25 +57,7 @@ lint-frontend:
 tidy-go:
 	go mod tidy
 
-##### Build Targets
-
-.PHONY: build-termrec-all
-build-termrec-all: build-termrec-linux build-termrec-osx
-
-.PHONY: build-termrec-linux
-build-termrec-linux: update-go termrec-copy-static
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/termrec/linux/termrec cmd/termrec/*.go
-
-.PHONY: build-termrec-osx
-build-termrec-osx: update-go termrec-copy-static
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o dist/termrec/osx/termrec cmd/termrec/*.go
-
 ##### Run Targets
-
-.PHONY: run-termrec
-run-termrec: termrec-copy-static
-	$(eval export $(shell sed -ne 's/ *#.*$$//; /./ s/=.*$$// p' .env))
-	go run cmd/termrec/*.go
 
 # run-backend starts up a fresh instance of the backend -- typically what you want when working on new features
 .PHONY: run-backend
@@ -101,10 +69,6 @@ rerun-backend:
 	docker-compose up --build
 
 ##### Helpers
-
-.PHONY: termrec-copy-static
-termrec-copy-static:
-	statik -src=termrec/static -dest=cmd/termrec/config -p=static -f
 
 # view-backend enters the docker container running the backend
 .PHONY: view-backend
