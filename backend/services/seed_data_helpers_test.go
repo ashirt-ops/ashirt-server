@@ -33,7 +33,7 @@ var TinyImg []byte = []byte{
 	0x42, 0x60, 0x82,
 } // tiniest png https://github.com/mathiasbynens/small
 
-var TinyCodeblock []byte = []byte(`{"contentType": "codeblock", "contentSubtype": "python", "content": "print(\"Hello World!\")"}`)
+var TinyCodeblock []byte = []byte(`{"contentSubtype": "python", "content": "print(\"Hello World!\")"}`)
 
 var TinyTermRec []byte = []byte(
 	`{"version":2,"width":75,"height":18,"timestamp":1593020879,"title":"1593020879","env":{"SHELL":"/bin/bash","TERM":"xterm-256color"}}` +
