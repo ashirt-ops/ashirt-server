@@ -1,7 +1,3 @@
-include .env
-
-.env:
-	cp .env_template .env
 
 ##### Update Targets
 
