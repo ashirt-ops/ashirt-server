@@ -30,6 +30,12 @@ func main() {
 	gen(dtos.UserOperationRole{})
 	gen(dtos.DetailedAuthenticationInfo{})
 	gen(dtos.SupportedAuthScheme{})
+
+	// Since this file only contains typescript types, webpack doesn't pick up the
+	// changes unless there is some actual executable javascript reverenced from
+	// the app itself. By exporting an empty function and calling it in the app
+	// https://github.com/TypeStrong/ts-loader/issues/808
+	fmt.Println("export function cacheBust() {}")
 }
 
 func gen(dtoStruct interface{}) {

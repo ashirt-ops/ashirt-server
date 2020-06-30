@@ -1,8 +1,9 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { DataSource } from '../data_source'
+import { DataSource, cacheBust } from '../data_source'
 import { default as req, xhrText as reqText, reqMultipart } from './request_helper'
+cacheBust()
 
 export const backendDataSource: DataSource = {
   listApiKeys: ids => req('GET', '/user/apikeys', null, ids),

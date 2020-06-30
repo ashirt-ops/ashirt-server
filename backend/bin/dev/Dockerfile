@@ -4,6 +4,7 @@ RUN apk add --no-cache git inotify-tools g++ && \
     rm -rf /var/cache/apk/* && \
     go get -v github.com/rubenv/sql-migrate/...
 
+RUN mkdir /typescript-dtos
 RUN mkdir /app
 WORKDIR /app
 
