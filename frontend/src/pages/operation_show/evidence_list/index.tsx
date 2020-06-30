@@ -32,7 +32,7 @@ export default (props: RouteComponentProps<{slug: string}>) => {
 
   const navigate = (view: ViewName, query: string) => {
     let path = `/operations/${slug}/${view}`
-    if (query != '') path += `?q=${query}`
+    if (query != '') path += `?q=${encodeURIComponent(query)}`
     props.history.push(path)
   }
 
