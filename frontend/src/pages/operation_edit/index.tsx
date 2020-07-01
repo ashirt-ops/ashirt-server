@@ -10,6 +10,7 @@ import NavVerticalTab from 'src/components/tab_vertical_menu'
 import OperationEditor from './operation_editor'
 import TagEditor from './tag_editor'
 import UserPermissionEditor from './user_permission_editor'
+import DeleteOperationButton from './delete_operation_button'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -22,7 +23,12 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
       <NavVerticalTab {...props}
         title="Edit Operation"
         tabs={[
-          { id: "settings", label: "Settings", content: <OperationEditor operationSlug={slug} /> },
+          {
+            id: "settings", label: "Settings", content: <>
+              <OperationEditor operationSlug={slug} />
+              <DeleteOperationButton operationSlug={slug} />
+            </>
+          },
           { id: "users", label: "Users", content: <UserPermissionEditor operationSlug={slug} /> },
           { id: "tags", label: "Tags", content: <TagEditor operationSlug={slug} /> },
         ]} />

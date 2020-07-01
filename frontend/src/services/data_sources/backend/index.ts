@@ -1,8 +1,9 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { DataSource } from '../data_source'
+import { DataSource, cacheBust } from '../data_source'
 import { default as req, xhrText as reqText, reqMultipart } from './request_helper'
+cacheBust()
 
 export const backendDataSource: DataSource = {
   listApiKeys: ids => req('GET', '/user/apikeys', null, ids),
@@ -34,12 +35,13 @@ export const backendDataSource: DataSource = {
   updateFindingEvidence: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/findings/${ids.findingUuid}/evidence`, payload),
 
   listOperations: () => req('GET', '/operations'),
-  adminListOperations: () => req('GET', '/operations'),
+  adminListOperations: () => req('GET', '/admin/operations'),
   createOperation: payload => req('POST', '/operations', payload),
   readOperation: ids => req('GET', `/operations/${ids.operationSlug}`),
   updateOperation: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}`, payload),
   listUserPermissions: (ids, query) => req('GET', `/operations/${ids.operationSlug}/users`, null, query),
   updateUserPermissions: (ids, payload) => req('PATCH', `/operations/${ids.operationSlug}/users`, payload),
+  deleteOperation: (ids) => req('DELETE', `/operations/${ids.operationSlug}`),
 
   listUsers: (query, includeDeleted) => req('GET', '/users', null, { query, includeDeleted }),
   readUser: ids => req('GET', `/user`, null, ids),

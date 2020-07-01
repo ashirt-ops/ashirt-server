@@ -3,6 +3,8 @@
 set -e
 cd "$(dirname $0)"
 
+touch /typescript-dtos/dtos.ts
+
 # Wait for DB
 while ! nc -z db 3306 2>/dev/null; do
   sleep 1
@@ -21,7 +23,18 @@ else
   echo "Content has been populated. Assuming that includes seed content..."
 fi
 
-while true; do
+# Generate frontend typescript types from dtos.go anytime dtos.go changes
+(while true; do
+  echo "Generating typescript types from DTOs"
+  if ! go run ./dtos/gentypes > /typescript-dtos/dtos.ts; then
+    echo "Failed to generate frontend DTOs. Waiting for file change before continuing"
+  fi
+  inotifywait -r -e modify -e create -e delete ./dtos 2> /dev/null
+done) &
+DTO_LOOP_PID=$!
+
+# Recompile & run the server on change
+(while true; do
   echo "Building dev.go"
   if ! go build -o /tmp/dev bin/dev/dev.go; then
     echo "Failed to build. Waiting for file change before continuing"
@@ -31,7 +44,11 @@ while true; do
 
   echo "Starting dev.go"
   /tmp/dev &
-  PID=$!
+  SERVER_PID=$!
   inotifywait -r -e modify -e create -e delete .
-  kill $PID
-done
+  kill $SERVER_PID
+done) &
+SERVER_LOOP_PID=$!
+
+trap "kill $DTO_LOOP_PID $SERVER_LOOP_PID; exit 1" INT
+wait

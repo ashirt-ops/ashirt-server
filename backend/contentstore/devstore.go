@@ -29,7 +29,7 @@ func NewDevStore() (*DevStore, error) {
 	return &DevStore{dir: tmpDir}, nil
 }
 
-// Upload stores image files in /tmp (or whatever your OS considers to be a temporary file)
+// Upload stores files in your OS's temp directory
 func (d *DevStore) Upload(data io.Reader) (string, error) {
 	file, err := ioutil.TempFile(d.dir, "")
 	if err != nil {
@@ -45,4 +45,9 @@ func (d *DevStore) Upload(data io.Reader) (string, error) {
 
 func (d *DevStore) Read(key string) (io.Reader, error) {
 	return os.Open(path.Join(d.dir, path.Clean(key)))
+}
+
+// Delete removes files in in your OS's temp directory
+func (d *DevStore) Delete(key string) error {
+	return os.Remove(path.Join(d.dir, path.Clean(key)))
 }

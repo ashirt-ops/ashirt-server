@@ -46,6 +46,11 @@ func UploadErr(err error) error {
 	return HTTPErr(http.StatusInternalServerError, "The upload action could not be completed. Please try again.", err)
 }
 
+// DeleteErr provides an error for issues encountered while writing to the store
+func DeleteErr(err error) error {
+	return HTTPErr(http.StatusInternalServerError, "The delete action could not be completed. Please try again.", err)
+}
+
 // NotFoundErr provides an error for situations when a user requests data that does not exist.
 func NotFoundErr(err error) error { return HTTPErr(http.StatusNotFound, "Not Found", err) }
 

@@ -7,7 +7,9 @@ import (
 	"context"
 
 	"github.com/theparanoids/ashirt/backend"
+	"github.com/theparanoids/ashirt/backend/contentstore"
 	"github.com/theparanoids/ashirt/backend/database"
+	"github.com/theparanoids/ashirt/backend/models"
 	"github.com/theparanoids/ashirt/backend/policy"
 	"github.com/theparanoids/ashirt/backend/server/middleware"
 
@@ -20,7 +22,7 @@ type DeleteEvidenceInput struct {
 	DeleteAssociatedFindings bool
 }
 
-func DeleteEvidence(ctx context.Context, db *database.Connection, i DeleteEvidenceInput) error {
+func DeleteEvidence(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i DeleteEvidenceInput) error {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {
 		return backend.UnauthorizedWriteErr(err)
@@ -39,6 +41,28 @@ func DeleteEvidence(ctx context.Context, db *database.Connection, i DeleteEviden
 	})
 	if err != nil {
 		return backend.DatabaseErr(err)
+	}
+
+	if err = deleteEvidenceContent(contentStore, *evidence); err != nil {
+		return backend.DeleteErr(err)
+	}
+
+	return nil
+}
+
+func deleteEvidenceContent(contentStore contentstore.Store, evidence models.Evidence) error {
+	keys := make([]string, 0, 2)
+	if evidence.FullImageKey != "" {
+		keys = append(keys, evidence.FullImageKey)
+	}
+	if evidence.ThumbImageKey != "" && evidence.ThumbImageKey != evidence.FullImageKey {
+		keys = append(keys, evidence.ThumbImageKey)
+	}
+	for _, key := range keys {
+		err := contentStore.Delete(key)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

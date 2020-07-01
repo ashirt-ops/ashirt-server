@@ -33,10 +33,11 @@ export default (props: {
   shortcuts?: Array<KeyboardShortcut>,
   className?: string,
 }) => {
-
   const helpModal = useModal<void>(modalProps => <HelpModal preamble={props.preamble} shortcuts={props.shortcuts} {...modalProps} />)
 
   const onKeyDown = (e: KeyboardEvent) => {
+    if (e.target == null || e.target !== document.body) return
+
     if (e.key === '?') helpModal.show()
   }
 
@@ -44,7 +45,6 @@ export default (props: {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
-
 
   return (
     <>
@@ -60,6 +60,11 @@ export type KeyboardShortcut = {
   keys: Array<string>
   description: string
 }
+
+const commonKeyboardShortcuts = [
+  { keys: ["?"], description: "Open this help menu" },
+  { keys: ["Escape"], description: "Close this window" },
+]
 
 export const HelpModal = (props: {
   preamble?: string,
@@ -81,7 +86,10 @@ export const HelpModal = (props: {
       {!props.shortcuts ? null :
         <div className={cx('shortcuts')}>
           <h1>Keyboard Shortcuts</h1>
-          {props.shortcuts.map(shortcut => <KeyboardShortcutKey key={shortcut.keys[0]} shortcut={shortcut} />)}
+          {props.shortcuts
+            .concat(commonKeyboardShortcuts)
+            .map(shortcut => <KeyboardShortcutKey key={shortcut.keys[0]} shortcut={shortcut} />)
+          }
         </div>
       }
       <Button primary onClick={props.onRequestClose}>Close</Button>

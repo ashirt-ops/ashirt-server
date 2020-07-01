@@ -31,6 +31,7 @@ type CanModifyOperation struct{ OperationID int64 }
 type CanModifyQueriesOfOperation struct{ OperationID int64 }
 type CanModifyTagsOfOperation struct{ OperationID int64 }
 type CanReadOperation struct{ OperationID int64 }
+type CanDeleteOperation struct{ OperationID int64 }
 type CanModifyUserOfOperation struct {
 	OperationID int64
 	UserID      int64

@@ -7,7 +7,6 @@
 .idea
 
 # Private Files
-.env
 ashirt.db
 conf.yaml
 app.config.yaml
@@ -19,5 +18,4 @@ dist/
 cmd/client/client
 cmd/client/dropdown
 cmd/dropdown/dropdown
-cmd/termrec/termrec
 cmd/web/web

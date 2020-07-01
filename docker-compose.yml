@@ -9,6 +9,7 @@ services:
       - ./dev_seed_data:/app/dev_seed_data
       - ./shared:/app/shared
       - /tmp/contentstore
+      - typescript-dtos:/typescript-dtos
     ports:
       - 3000:3000
     restart: on-failure
@@ -35,6 +36,7 @@ services:
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
+      - typescript-dtos:/app/src/services/data_sources/dtos
     ports:
       - 8080:8080
     environment:
@@ -53,3 +55,6 @@ services:
       - MYSQL_ROOT_PASSWORD=dev-root-password
       - MYSQL_USER=dev-user
       - MYSQL_PASSWORD=dev-user-password
+
+volumes:
+  typescript-dtos:

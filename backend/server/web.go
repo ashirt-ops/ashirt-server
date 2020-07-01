@@ -220,6 +220,16 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.CreateOperation(r.Context(), db, i)
 	}))
 
+	route(r, "DELETE", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		operationSlug := dr.FromURL("operation_slug").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+
+		return nil, services.DeleteOperation(r.Context(), db, contentStore, operationSlug)
+	}))
+
 	route(r, "GET", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		operationSlug := dr.FromURL("operation_slug").Required().AsString()
@@ -494,7 +504,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, services.DeleteEvidence(r.Context(), db, i)
+		return nil, services.DeleteEvidence(r.Context(), db, contentStore, i)
 	}))
 
 	route(r, "GET", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
