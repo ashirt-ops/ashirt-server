@@ -89,6 +89,7 @@ var UserSnape = newHPUser(newUserInput{FirstName: "Serverus", LastName: "Snape",
 var UserHagrid = newHPUser(newUserInput{FirstName: "Rubeus", LastName: "Hagrid", Birthday: date(1980, 1, 1), SetLastUpdated: true, Disabled: true})
 var UserTomRiddle = newHPUser(newUserInput{FirstName: "Tom", LastName: "Riddle", Birthday: date(1980, 1, 1), SetLastUpdated: true, Deleted: true})
 var UserHeadlessNick = newHPUser(newUserInput{FirstName: "Nicholas", LastName: "de Mimsy-Porpington", Birthday: date(1980, 1, 1), SetLastUpdated: true, Headless: true})
+
 // Reserved users: Luna Lovegood (Create user test)
 
 var newAPIKey = newAPIKeyGen(1)
