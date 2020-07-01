@@ -11,7 +11,7 @@ import (
 )
 
 var HarryPotterSeedData = TestSeedData{
-	Users:      []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick},
+	Users:      []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick},
 	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows},
 	Tags: []models.Tag{
 		TagFamily, TagFriendship, TagHome, TagLoyalty, TagCourage, TagGoodVsEvil, TagSupernatural,
@@ -26,9 +26,28 @@ var HarryPotterSeedData = TestSeedData{
 		APIKeyRon1, APIKeyRon2,
 	},
 	UserOpMap: []models.UserOperationPermission{
+		// OpSorcerersStone and OpChamberOfSecrets are used to check read/write permissions
+		// The following should always remain true:
+		// | User     | SS Perm | CoS Perm |
+		// | -------- | ------- | -------- |
+		// | Harry    | Admin   | Write    |
+		// | Ron      | Write   | Admin    |
+		// | Hermione | Read    | Write    |
+		// | Seamus   | Write   | Read     |
+		// | Ginny    | <none>  | Write    |
+		// | Neville  | Write   | <none>   |
+
 		newUserOpPermission(UserHarry, OpSorcerersStone, policy.OperationRoleAdmin),
-		newUserOpPermission(UserHarry, OpChamberOfSecrets, policy.OperationRoleWrite),
+		newUserOpPermission(UserRon, OpSorcerersStone, policy.OperationRoleWrite),
+		newUserOpPermission(UserSeamus, OpSorcerersStone, policy.OperationRoleWrite),
+		newUserOpPermission(UserHermione, OpSorcerersStone, policy.OperationRoleRead),
+		newUserOpPermission(UserNeville, OpSorcerersStone, policy.OperationRoleWrite),
+
 		newUserOpPermission(UserRon, OpChamberOfSecrets, policy.OperationRoleAdmin),
+		newUserOpPermission(UserHarry, OpChamberOfSecrets, policy.OperationRoleWrite),
+		newUserOpPermission(UserHermione, OpChamberOfSecrets, policy.OperationRoleWrite),
+		newUserOpPermission(UserSeamus, OpChamberOfSecrets, policy.OperationRoleRead),
+		newUserOpPermission(UserGinny, OpChamberOfSecrets, policy.OperationRoleWrite),
 
 		newUserOpPermission(UserDumbledore, OpSorcerersStone, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
@@ -64,11 +83,13 @@ var UserRon = newHPUser(newUserInput{FirstName: "Ronald", LastName: "Weasley", B
 var UserGinny = newHPUser(newUserInput{FirstName: "Ginny", LastName: "Weasley", Birthday: date(1981, 3, 1), SetLastUpdated: true})
 var UserHermione = newHPUser(newUserInput{FirstName: "Hermione", LastName: "Granger", Birthday: date(1979, 9, 19), SetLastUpdated: true})
 var UserNeville = newHPUser(newUserInput{FirstName: "Neville", LastName: "Longbottom", Birthday: date(1979, 9, 19), SetLastUpdated: true})
+var UserSeamus = newHPUser(newUserInput{FirstName: "Seamus", LastName: "Finnigan", Birthday: date(1980, 9, 1), SetLastUpdated: true})
 var UserDraco = newHPUser(newUserInput{FirstName: "Draco", LastName: "Malfoy", Birthday: date(1980, 6, 5), SetLastUpdated: true})
 var UserSnape = newHPUser(newUserInput{FirstName: "Serverus", LastName: "Snape", Birthday: date(1980, 1, 1), SetLastUpdated: true})
 var UserHagrid = newHPUser(newUserInput{FirstName: "Rubeus", LastName: "Hagrid", Birthday: date(1980, 1, 1), SetLastUpdated: true, Disabled: true})
 var UserTomRiddle = newHPUser(newUserInput{FirstName: "Tom", LastName: "Riddle", Birthday: date(1980, 1, 1), SetLastUpdated: true, Deleted: true})
 var UserHeadlessNick = newHPUser(newUserInput{FirstName: "Nicholas", LastName: "de Mimsy-Porpington", Birthday: date(1980, 1, 1), SetLastUpdated: true, Headless: true})
+// Reserved users: Luna Lovegood (Create user test)
 
 var newAPIKey = newAPIKeyGen(1)
 var APIKeyHarry1 = newAPIKey(UserHarry.ID, "harry-abc", []byte{0x01, 0x02, 0x03})

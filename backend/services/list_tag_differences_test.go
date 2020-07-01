@@ -15,7 +15,6 @@ import (
 func TestListTagDifferences(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
 
 	startingOp := OpChamberOfSecrets
 	endingOp := OpSorcerersStone
@@ -25,7 +24,8 @@ func TestListTagDifferences(t *testing.T) {
 		DestinationOperationSlug: endingOp.Slug,
 	}
 
-	// verify that Ron (cannot read endingOp) cannot determine tag differences
+	// verify that Neville (cannot read endingOp) cannot determine tag differences
+	ctx := contextForUser(UserNeville, db)
 	_, err := services.ListTagDifference(ctx, db, input)
 	require.Error(t, err)
 
@@ -41,7 +41,6 @@ func TestListTagDifferences(t *testing.T) {
 func TestListTagDifferencesForEvidence(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
 
 	startingOp := OpChamberOfSecrets
 	endingOp := OpSorcerersStone
@@ -55,7 +54,8 @@ func TestListTagDifferencesForEvidence(t *testing.T) {
 		SourceEvidenceUUID: sourceEvidence.UUID,
 	}
 
-	// verify that Ron (cannot read endingOp) cannot determine tag differences
+	// verify that Neville (cannot read endingOp) cannot determine tag differences
+	ctx := contextForUser(UserNeville, db)
 	_, err := services.ListTagDifferenceForEvidence(ctx, db, input)
 	require.Error(t, err)
 

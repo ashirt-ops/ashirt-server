@@ -13,7 +13,6 @@ import (
 func TestMoveEvidence(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
 
 	startingOp := OpChamberOfSecrets
 	endingOp := OpSorcerersStone
@@ -25,11 +24,27 @@ func TestMoveEvidence(t *testing.T) {
 		EvidenceUUID:        sourceEvidence.UUID,
 	}
 
-	// verify that Ron (cannot read endingOp) cannot determine tag differences
+	// scenario 1: User present in both, cannot write dst [should fail]
+	ctx := contextForUser(UserHermione, db)
 	err := services.MoveEvidence(ctx, db, input)
 	require.Error(t, err)
 
-	// verify that Harry (can write to both) can determine tag differences
+	// scenario 2: User present in both, cannot write src [should fail]
+	ctx = contextForUser(UserSeamus, db)
+	err = services.MoveEvidence(ctx, db, input)
+	require.Error(t, err)
+
+	// scenario 3: User present in src, cannot write dst [should fail]
+	ctx = contextForUser(UserGinny, db)
+	err = services.MoveEvidence(ctx, db, input)
+	require.Error(t, err)
+
+	// scenario 4: User present in dst, cannot write src [should fail]
+	ctx = contextForUser(UserNeville, db)
+	err = services.MoveEvidence(ctx, db, input)
+	require.Error(t, err)
+
+	// // scenario 5: User present in both, cannot write to both [should succeed]
 	ctx = contextForUser(UserHarry, db)
 	err = services.MoveEvidence(ctx, db, input)
 	require.NoError(t, err)
