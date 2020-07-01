@@ -6,6 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/theparanoids/ashirt/backend"
 	"github.com/theparanoids/ashirt/backend/database"
+	"github.com/theparanoids/ashirt/backend/policy"
 )
 
 type MoveEvidenceInput struct {
@@ -15,13 +16,20 @@ type MoveEvidenceInput struct {
 }
 
 func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceInput) error {
-	_, evidence, err := lookupOperationEvidence(db, i.SourceOperationSlug, i.EvidenceUUID)
+	sourceOperation, evidence, err := lookupOperationEvidence(db, i.SourceOperationSlug, i.EvidenceUUID)
 	if err != nil {
 		return backend.UnauthorizedReadErr(err)
 	}
 
-	targetOperation, err := lookupOperation(db, i.TargetOperationSlug)
+	destinationOperation, err := lookupOperation(db, i.TargetOperationSlug)
 	if err != nil {
+		return backend.UnauthorizedReadErr(err)
+	}
+
+	if err := policyRequireWithAdminBypass(ctx,
+		policy.CanModifyOperation{OperationID: sourceOperation.ID},
+		policy.CanModifyOperation{OperationID: destinationOperation.ID},
+	); err != nil {
 		return backend.UnauthorizedWriteErr(err)
 	}
 
@@ -44,7 +52,7 @@ func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceIn
 		// remove tags
 		tx.Delete(sq.Delete("tag_evidence_map").Where(sq.Eq{"evidence_id": evidence.ID}))
 		// reassociate evidence with new operation
-		tx.Update(sq.Update("evidence").Set("operation_id", targetOperation.ID).Where(sq.Eq{"id": evidence.ID}))
+		tx.Update(sq.Update("evidence").Set("operation_id", destinationOperation.ID).Where(sq.Eq{"id": evidence.ID}))
 		// associate with common tags
 		tx.BatchInsert("tag_evidence_map", len(tagDifferences.Included), func(idx int) map[string]interface{} {
 			pair := tagDifferences.Included[idx]
