@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import * as dtos from './dtos'
+import * as dtos from './dtos/dtos'
 import * as types from 'src/global_types'
 
 type EvidenceUuid = { evidenceUuid: string }
@@ -81,3 +81,10 @@ export interface DataSource {
   getRecoveryMetrics(): Promise<any>
   adminChangePassword(i: { userSlug: string, newPassword: string }): Promise<void>
 }
+
+// Since both dtos & this file only contains typescript types, webpack doesn't pick up the
+// changes unless there is some actual executable javascript reverenced from
+// the app itself. By exporting an empty function and calling it in the app
+// https://github.com/TypeStrong/ts-loader/issues/808
+dtos.cacheBust()
+export function cacheBust() {}
