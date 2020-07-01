@@ -8,8 +8,7 @@ RUN mkdir /typescript-dtos
 RUN mkdir /app
 WORKDIR /app
 
-COPY go.mod go.mod
-COPY go.sum go.sum
+COPY go.mod go.sum ./
 RUN go mod download
 
 CMD ["backend/run-dev.sh"]
