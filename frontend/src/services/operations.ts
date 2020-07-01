@@ -24,6 +24,10 @@ export async function createOperation(name: string): Promise<Operation> {
   }
 }
 
+export async function deleteOperation(slug:string): Promise<void> {
+  return await ds.deleteOperation({operationSlug: slug})
+}
+
 export async function getOperations(): Promise<Array<Operation>> {
   return await ds.listOperations()
 }

@@ -15,7 +15,7 @@ export default <T extends unknown>(props: {
   challengeText: string,
   modalTitle: string,
   submitText: string,
-  onRequestClose: () => void,
+  onRequestClose: (success?:boolean) => void,
   handleSubmit: () => Promise<T>
 }) => {
 
@@ -23,7 +23,7 @@ export default <T extends unknown>(props: {
 
   const formComponentProps = useForm({
     fields: [challenge],
-    onSuccess: () => props.onRequestClose(),
+    onSuccess: () => props.onRequestClose(true),
     handleSubmit: () => {
       if (challenge.value !== props.challengeText) {
         return Promise.reject(Error("Challenge text does not match"))
