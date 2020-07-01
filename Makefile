@@ -84,8 +84,3 @@ new-migration:
 # prep is shorthand for formatting and testing. Useful when prepping for a new Pull Request.
 .PHONY: prep
 prep: tidy-all test-all
-
-# generate-dto-types
-.PHONY: generate-dto-types
-generate-dto-types: 
-	go run backend/dtos/gentypes/generate_typescript_types.go > frontend/src/services/data_sources/dtos.ts
