@@ -1,0 +1,28 @@
+FROM golang:1.14.4-alpine AS build
+
+RUN apk add --no-cache git && \
+    rm -rf /var/cache/apk/*
+
+RUN mkdir /build
+WORKDIR /build
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY backend backend
+COPY shared shared
+RUN go build ./backend/bin/api/
+
+
+FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates && \
+    adduser -h /home/ashirt -S -D ashirt
+
+USER ashirt
+WORKDIR /home/ashirt
+
+COPY --from=build /build/api /home/ashirt/private-api
+COPY backend/migrations /migrations
+
+CMD /home/ashirt/private-api

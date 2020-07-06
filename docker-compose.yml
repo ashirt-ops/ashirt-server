@@ -3,7 +3,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/bin/dev/Dockerfile
+      dockerfile: Dockerfile.dev.backend
     volumes:
       - ./backend:/app/backend
       - ./dev_seed_data:/app/dev_seed_data
@@ -31,8 +31,8 @@ services:
 
   frontend:
     build:
-      context: frontend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: Dockerfile.dev.frontend
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
