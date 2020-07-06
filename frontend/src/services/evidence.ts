@@ -1,4 +1,4 @@
-import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock } from 'src/global_types'
+import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { evidenceFromDto } from './data_sources/converters'
@@ -9,6 +9,22 @@ export async function getEvidenceList(i: {
 }): Promise<Array<Evidence>> {
   const evidence = await ds.listEvidence({ operationSlug: i.operationSlug }, i.query)
   return evidence.map(evidenceFromDto)
+}
+
+export async function getEvidenceMigrationDifference(i: {
+  fromOperationSlug: string,
+  toOperationSlug: string,
+  evidenceUuid: string,
+}): Promise<TagDifference> {
+  return await ds.getEvidenceMigrationDifference({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid}, i.fromOperationSlug)
+}
+
+export async function moveEvidence(i: {
+  fromOperationSlug: string,
+  toOperationSlug: string,
+  evidenceUuid: string,
+}): Promise<void> {
+  return await ds.moveEvidence({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid }, i.fromOperationSlug)
 }
 
 export async function getEvidenceAsCodeblock(i: {

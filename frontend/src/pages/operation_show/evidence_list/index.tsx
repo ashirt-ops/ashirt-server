@@ -4,12 +4,12 @@
 import * as React from 'react'
 import Layout from '../layout'
 import Timeline from 'src/components/timeline'
-import {EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal} from '../evidence_modals'
-import {Evidence} from 'src/global_types'
-import {RouteComponentProps} from 'react-router-dom'
-import {ViewName} from '../types'
-import {getEvidenceList} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal, MoveEvidenceModal} from '../evidence_modals'
+import { Evidence } from 'src/global_types'
+import { RouteComponentProps } from 'react-router-dom'
+import { ViewName } from '../types'
+import { getEvidenceList } from 'src/services'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
 
 export default (props: RouteComponentProps<{slug: string}>) => {
   const {slug} = props.match.params
@@ -28,6 +28,10 @@ export default (props: RouteComponentProps<{slug: string}>) => {
   ))
   const assignToFindingsModal = useModal<{evidence: Evidence}>(modalProps => (
     <ChangeFindingsOfEvidenceModal {...modalProps} operationSlug={slug} onChanged={() => {/* no need to reload here */}} />
+  ))
+
+  const moveModal = useModal<{ evidence: Evidence }>(modalProps => (
+    <MoveEvidenceModal {...modalProps} operationSlug={slug} onEvidenceMoved={()=>{}}/>
   ))
 
   const navigate = (view: ViewName, query: string) => {
@@ -49,8 +53,11 @@ export default (props: RouteComponentProps<{slug: string}>) => {
           evidence={evidence}
           actions={{
             'Edit': evidence => editModal.show({evidence}),
-            'Delete': evidence => deleteModal.show({evidence}),
             'Assign Findings': evidence => assignToFindingsModal.show({evidence}),
+          }}
+          extraActions={{
+            'Move': evidence => moveModal.show({ evidence }),
+            'Delete': evidence => deleteModal.show({ evidence }),
           }}
           onQueryUpdate={query => navigate('evidence', query)}
           operationSlug={slug}
@@ -58,7 +65,7 @@ export default (props: RouteComponentProps<{slug: string}>) => {
         />
       ))}
 
-      {renderModals(editModal, deleteModal, assignToFindingsModal)}
+      {renderModals(editModal, deleteModal, assignToFindingsModal, moveModal)}
     </Layout>
   )
 }

@@ -119,6 +119,10 @@ func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session
 	}
 }
 
+func BuildContextForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin bool) context.Context {
+	return buildContextForUser(ctx, db, userID, isSuperAdmin)
+}
+
 func buildContextForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin bool) context.Context {
 	return InjectIntoContext(ctx, InjectIntoContextInput{
 		IsSuperAdmin: isSuperAdmin,

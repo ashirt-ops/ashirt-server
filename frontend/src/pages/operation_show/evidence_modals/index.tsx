@@ -11,14 +11,20 @@ import Modal from 'src/components/modal'
 import TagChooser from 'src/components/tag_chooser'
 import TerminalRecordingUpload from 'src/components/termrec_upload'
 import { CodeBlockEditor } from 'src/components/code_block'
-import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence } from 'src/global_types'
+import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence, Operation, TagDifference } from 'src/global_types'
 import { TextArea } from 'src/components/input'
 import { default as TabMenu, Tab } from 'src/components/tabs'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { codeblockToBlob } from 'src/helpers/codeblock_to_blob'
 import { useWiredData } from 'src/helpers'
 
-import { createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence, getFindingsOfEvidence, getEvidenceAsCodeblock } from 'src/services'
+import {
+  createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence,
+  getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference,
+  moveEvidence
+} from 'src/services'
+import ComboBox from 'src/components/combobox'
+import TagList from 'src/components/tag_list'
 
 export const CreateEvidenceModal = (props: {
   onCreated: () => void,
@@ -71,37 +77,6 @@ export const CreateEvidenceModal = (props: {
     </ModalForm>
   )
 }
-/*
-const wiredCodeblock = useWiredData<CodeBlock|null>(React.useCallback(async () => {
-    if (props.evidence.contentType !== 'codeblock') return null
-    const jsonEvidence = await getJSONEvidence({
-      operationSlug: props.operationSlug,
-      evidenceUuid: props.evidence.uuid,
-    })
-    return {
-      type: 'codeblock',
-      language: jsonEvidence.contentSubtype,
-      code: jsonEvidence.content,
-      source: jsonEvidence.metadata ? jsonEvidence.metadata.source : null,
-    }
-  }, [props.operationSlug, props.evidence.uuid, props.evidence.contentType]))
-  return (
-    <Modal title="Edit Evidence" onRequestClose={props.onRequestClose}>
-      {wiredCodeblock.render(codeBlock => (
-        <InternalEditEvidenceModal {...props} codeBlock={codeBlock} />
-      ))}
-    </Modal>
-  )
-}
-
-const InternalEditEvidenceModal = (props: {
-  evidence: Evidence,
-  onEdited: () => void,
-  onRequestClose: () => void,
-  operationSlug: string,
-  codeBlock: CodeBlock|null,
-}) => {
-*/
 
 export const EditEvidenceModal = (props: {
   evidence: Evidence,
@@ -215,4 +190,79 @@ export const DeleteEvidenceModal = (props: {
       <Checkbox label="Also delete any findings associated with this evidence" {...deleteAssociatedFindingsField} />
     </ModalForm>
   )
+}
+
+export const MoveEvidenceModal = (props: {
+  evidence: Evidence,
+  operationSlug: string,
+  onRequestClose: () => void,
+  onEvidenceMoved: () => void,
+}) => {
+
+  const [selectedOperationSlug, setSelectedOperation] = React.useState(props.operationSlug)
+
+  const wiredOps = useWiredData<Array<Operation>>(React.useCallback(getOperations, [props.operationSlug, props.evidence.uuid]))
+  const wiredDiff = useWiredData<TagDifference>(React.useCallback(() =>
+    getEvidenceMigrationDifference({
+      fromOperationSlug: props.operationSlug,
+      toOperationSlug: selectedOperationSlug,
+      evidenceUuid: props.evidence.uuid,
+    }), [selectedOperationSlug, props.evidence.uuid, props.operationSlug]))
+
+  const formComponentProps = useForm({
+    fields: [],
+    onSuccess: () => { props.onEvidenceMoved(); props.onRequestClose() },
+    handleSubmit: () => {
+      if (selectedOperationSlug == props.operationSlug) {
+        return Promise.resolve() // no need to do anything if the to and from destinations are the same
+      }
+      return moveEvidence({
+        fromOperationSlug: props.operationSlug,
+        toOperationSlug: selectedOperationSlug,
+        evidenceUuid: props.evidence.uuid
+      }).then(() => { window.location.href = `/operations/${props.operationSlug}/evidence` })
+    },
+  })
+
+  return (
+    <ModalForm title="Move Evidence To Another Operation" submitText="Move" onRequestClose={props.onRequestClose} {...formComponentProps}>
+      <div>
+        Moving evidence will disconnect this evidence from any findings and some tags may be
+        lost in the transition.
+      </div>
+      {wiredOps.render(operations => {
+        operations.sort((a, b) =>  a.name.localeCompare(b.name))
+
+        const mappedOperations = operations.map(op => ({ name: op.name, value: op }))
+        return (
+          <ComboBox
+            label="Select a destination operation"
+            options={mappedOperations}
+            value={operations.filter(op => op.slug === selectedOperationSlug)[0]}
+            onChange={op => setSelectedOperation(op.slug)} />
+        )
+      })}
+      {wiredDiff.render(data => (
+        <TagListRenderer sourceSlug={props.operationSlug} destSlug={selectedOperationSlug} tags={data.excluded} />
+      ))}
+    </ModalForm>
+  )
+}
+
+const TagListRenderer = (props: {
+  sourceSlug: string,
+  destSlug: string
+  tags: Array<Tag> | null
+}) => {
+  if (props.sourceSlug == props.destSlug) {
+    return <div>This is the current operation, and so no changes will be made</div>
+  }
+  else if (props.tags == null || props.tags.length == 0) {
+    return <div>All tags will carry over</div>
+  }
+
+  return (<>
+    <div>The following tags will be removed:</div>
+    <TagList tags={props.tags} />
+  </>)
 }

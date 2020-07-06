@@ -40,7 +40,9 @@ export interface DataSource {
   createEvidence(ids: OpSlug, formData: FormData): Promise<void>
   readEvidenceContent(ids: OpSlug & EvidenceUuid): Promise<string>
   updateEvidence(ids: OpSlug & EvidenceUuid, formData: FormData): Promise<void>
-  deleteEvidence(ids: OpSlug & EvidenceUuid, payload:{ deleteAssociatedFindings: boolean }): Promise<void>
+  deleteEvidence(ids: OpSlug & EvidenceUuid, payload: { deleteAssociatedFindings: boolean }): Promise<void>
+  getEvidenceMigrationDifference(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<dtos.TagDifference>
+  moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
 
   listFindings(ids: OpSlug, query: string): Promise<Array<dtos.Finding>>
   createFinding(ids: OpSlug, payload: FindingPayload): Promise<dtos.Finding>
@@ -67,7 +69,7 @@ export interface DataSource {
   adminCreateHeadlessUser(payload: UserPayload): Promise<void>
 
   listQueries(ids: OpSlug): Promise<Array<dtos.Query>>
-  createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence'|'findings' }): Promise<void>
+  createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings' }): Promise<void>
   updateQuery(ids: OpSlug & QueryId, payload: { name: string, query: string }): Promise<void>
   deleteQuery(ids: OpSlug & QueryId): Promise<void>
 

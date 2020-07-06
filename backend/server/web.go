@@ -468,6 +468,32 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return nil, services.UpdateEvidence(r.Context(), db, contentStore, i)
 	}))
 
+	route(r, "PUT", "/move/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.MoveEvidenceInput{
+			EvidenceUUID:        dr.FromURL("evidence_uuid").Required().AsString(),
+			TargetOperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			SourceOperationSlug: dr.FromBody("sourceOperationSlug").Required().AsString(),
+		}
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.MoveEvidence(r.Context(), db, i)
+	}))
+
+	route(r, "GET", "/move/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ListTagDifferenceForEvidenceInput{
+			ListTagsDifferenceInput: services.ListTagsDifferenceInput{
+				SourceOperationSlug:      dr.FromQuery("sourceOperationSlug").Required().AsString(),
+				DestinationOperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			},
+			SourceEvidenceUUID: dr.FromURL("evidence_uuid").Required().AsString(),
+		}
+		return services.ListTagDifferenceForEvidence(r.Context(), db, i)
+	}))
+
 	route(r, "DELETE", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteEvidenceInput{

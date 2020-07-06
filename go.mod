@@ -33,6 +33,7 @@ require (
 	github.com/marcsauter/single v0.0.0-20181104081128-f8bf46f26ec0
 	github.com/martinlindhe/inputbox v0.0.0-20200313123801-5532e940e508
 	github.com/mattn/go-sqlite3 v1.12.0
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/okta/okta-jwt-verifier-golang v0.1.0
 	github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc // indirect
