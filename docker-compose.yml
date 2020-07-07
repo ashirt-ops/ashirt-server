@@ -7,7 +7,7 @@ services:
     volumes:
       - ./backend:/app/backend
       - ./dev_seed_data:/app/dev_seed_data
-      - ./shared:/app/shared
+      - ./signer:/app/signer
       - /tmp/contentstore
       - typescript-dtos:/typescript-dtos
     ports:

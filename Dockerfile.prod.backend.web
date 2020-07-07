@@ -10,7 +10,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY backend backend
-COPY shared shared
+COPY signer signer
 RUN go build ./backend/bin/web/
 
 

@@ -17,7 +17,7 @@ import (
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/shared"
+	"github.com/theparanoids/ashirt/signer"
 
 	"github.com/stretchr/testify/require"
 )
@@ -106,7 +106,7 @@ func TestAuthenticateAPI(t *testing.T) {
 func addGoodHeaders(t *testing.T, r *http.Request, accessKey string, secretKey []byte) {
 	r.Header.Add("Date", nowInGMT())
 
-	authorization, err := shared.BuildClientRequestAuthorization(r, accessKey, secretKey)
+	authorization, err := signer.BuildClientRequestAuthorization(r, accessKey, secretKey)
 	require.NoError(t, err)
 
 	r.Header.Add("Authorization", authorization)
