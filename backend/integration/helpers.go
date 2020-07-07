@@ -28,7 +28,7 @@ import (
 	"github.com/theparanoids/ashirt/backend/dtos"
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/server"
-	"github.com/theparanoids/ashirt/shared"
+	"github.com/theparanoids/ashirt/signer"
 )
 
 type Tester struct {
@@ -218,7 +218,7 @@ func (b *RequestBuilder) Do() *ResponseTester {
 	}
 
 	if b.apiKey != nil {
-		authorization, err := shared.BuildClientRequestAuthorization(b.req, b.apiKey.AccessKey, b.apiKey.SecretKey)
+		authorization, err := signer.BuildClientRequestAuthorization(b.req, b.apiKey.AccessKey, b.apiKey.SecretKey)
 		require.NoError(b.t, err)
 		b.req.Header.Set("Authorization", authorization)
 	}

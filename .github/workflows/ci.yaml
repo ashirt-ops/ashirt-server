@@ -7,14 +7,10 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
+  gotest:
     name: Test Backend
     runs-on: ubuntu-latest
     steps:
-    - name: Install deps
-      run: |
-          sudo apt update
-          sudo apt install -y libgtk-3-dev libappindicator3-dev
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
@@ -49,7 +45,7 @@ jobs:
 
   build_frontend:
     name: Build Frontend
-    needs: [test]
+    needs: [gotest]
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -66,7 +62,7 @@ jobs:
 
   build_web:
     name: Build Web
-    needs: [test]
+    needs: [gotest]
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -83,7 +79,7 @@ jobs:
 
   build_api:
     name: Build API
-    needs: [test]
+    needs: [gotest]
     runs-on: ubuntu-latest
     steps:
       - name: Check out code

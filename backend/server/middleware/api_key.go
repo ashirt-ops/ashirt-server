@@ -17,7 +17,7 @@ import (
 	"github.com/theparanoids/ashirt/backend/database"
 	"github.com/theparanoids/ashirt/backend/logging"
 	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/shared"
+	"github.com/theparanoids/ashirt/signer"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -47,7 +47,7 @@ func authenticateAPI(db *database.Connection, r *http.Request, requestBody io.Re
 		From("api_keys").
 		LeftJoin("users ON users.id = user_id").
 		Where(sq.Eq{"access_key": accessKey}))
-	expectedHMAC := shared.BuildRequestHMAC(r, requestBody, apiKey.SecretKey)
+	expectedHMAC := signer.BuildRequestHMAC(r, requestBody, apiKey.SecretKey)
 	if !hmac.Equal(headerHMAC, expectedHMAC) {
 		return -1, errors.New("Bad HMAC")
 	}
