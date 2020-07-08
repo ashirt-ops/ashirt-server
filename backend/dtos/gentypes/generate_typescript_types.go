@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/theparanoids/ashirt/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 )
 
 func main() {
@@ -87,7 +87,7 @@ func toTypescriptType(t reflect.Type) string {
 		if t.PkgPath() == "time" && t.Name() == "Time" {
 			return "string"
 		}
-		if strings.HasSuffix(t.PkgPath(), "ashirt/backend/dtos") {
+		if strings.HasSuffix(t.PkgPath(), "ashirt-server/backend/dtos") {
 			return t.Name()
 		}
 		panic(fmt.Errorf("Type from unknown package: %s, (%s)", t.PkgPath(), t.Name()))

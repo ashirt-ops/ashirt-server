@@ -6,8 +6,8 @@ package dtos
 import (
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/policy"
 )
 
 type APIKey struct {

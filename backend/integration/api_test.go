@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/theparanoids/ashirt/backend/integration"
+	"github.com/theparanoids/ashirt-server/backend/integration"
 )
 
 func TestAPI(t *testing.T) {

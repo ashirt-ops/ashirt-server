@@ -6,7 +6,7 @@ package integration_test
 import (
 	"testing"
 
-	"github.com/theparanoids/ashirt/backend/integration"
+	"github.com/theparanoids/ashirt-server/backend/integration"
 )
 
 func TestUserAuthorization(t *testing.T) {

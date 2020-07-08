@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt/backend/services"
+	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestMoveEvidence(t *testing.T) {

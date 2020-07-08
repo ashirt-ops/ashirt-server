@@ -6,11 +6,11 @@ package main
 import (
 	"net/http"
 
-	"github.com/theparanoids/ashirt/backend/config"
-	"github.com/theparanoids/ashirt/backend/contentstore"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/logging"
-	"github.com/theparanoids/ashirt/backend/server"
+	"github.com/theparanoids/ashirt-server/backend/config"
+	"github.com/theparanoids/ashirt-server/backend/contentstore"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/server"
 )
 
 func main() {

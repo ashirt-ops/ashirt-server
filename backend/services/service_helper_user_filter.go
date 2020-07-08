@@ -6,7 +6,7 @@ package services
 import (
 	"strings"
 
-	"github.com/theparanoids/ashirt/backend/server/dissectors"
+	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 
 	sq "github.com/Masterminds/squirrel"
 )

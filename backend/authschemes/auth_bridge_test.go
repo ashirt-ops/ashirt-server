@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/authschemes"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/backend/session"
+	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/session"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/require"

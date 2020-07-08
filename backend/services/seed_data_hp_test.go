@@ -6,8 +6,8 @@ package services_test
 import (
 	"strings"
 
-	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/policy"
 )
 
 var HarryPotterSeedData = TestSeedData{

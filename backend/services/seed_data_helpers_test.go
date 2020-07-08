@@ -15,12 +15,12 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jonboulle/clockwork"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt/backend/contentstore"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/logging"
-	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/backend/policy"
-	"github.com/theparanoids/ashirt/backend/server/middleware"
+	"github.com/theparanoids/ashirt-server/backend/contentstore"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 )
 
 var internalClock = clockwork.NewFakeClock()

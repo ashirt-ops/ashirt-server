@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/authschemes"
-	"github.com/theparanoids/ashirt/backend/config"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/integration"
-	"github.com/theparanoids/ashirt/backend/session"
+	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/theparanoids/ashirt-server/backend/config"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/integration"
+	"github.com/theparanoids/ashirt-server/backend/session"
 
 	sq "github.com/Masterminds/squirrel"
 	verifier "github.com/okta/okta-jwt-verifier-golang"

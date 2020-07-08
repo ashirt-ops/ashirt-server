@@ -17,7 +17,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	extract "github.com/theparanoids/ashirt/backend/server/dissectors"
+	extract "github.com/theparanoids/ashirt-server/backend/server/dissectors"
 )
 
 type dummyRequest struct {

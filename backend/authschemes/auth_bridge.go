@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/logging"
-	"github.com/theparanoids/ashirt/backend/services"
-	"github.com/theparanoids/ashirt/backend/session"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/services"
+	"github.com/theparanoids/ashirt-server/backend/session"
 
 	sq "github.com/Masterminds/squirrel"
 )

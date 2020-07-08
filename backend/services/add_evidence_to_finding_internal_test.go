@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/database"
 
 	sq "github.com/Masterminds/squirrel"
 )

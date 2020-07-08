@@ -12,10 +12,10 @@ import (
 // "testing"
 // "time"
 
-// recoveryConsts "github.com/theparanoids/ashirt/backend/authschemes/recoveryauth/constants"
-// "github.com/theparanoids/ashirt/backend/database"
-// "github.com/theparanoids/ashirt/backend/models"
-// "github.com/theparanoids/ashirt/backend/services"
+// recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+// "github.com/theparanoids/ashirt-server/backend/database"
+// "github.com/theparanoids/ashirt-server/backend/models"
+// "github.com/theparanoids/ashirt-server/backend/services"
 // sq "github.com/Masterminds/squirrel"
 // "github.com/stretchr/testify/require"
 )

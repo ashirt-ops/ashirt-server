@@ -14,12 +14,12 @@ import (
 	"github.com/gorilla/mux"
 	verifier "github.com/okta/okta-jwt-verifier-golang"
 	"github.com/okta/okta-jwt-verifier-golang/utils"
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/authschemes"
-	"github.com/theparanoids/ashirt/backend/config"
-	"github.com/theparanoids/ashirt/backend/logging"
-	"github.com/theparanoids/ashirt/backend/server/middleware"
-	"github.com/theparanoids/ashirt/backend/server/remux"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/theparanoids/ashirt-server/backend/config"
+	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
 
 // OktaAuth provides okta-based authentication via the OAuth2.0 Authorization flow.

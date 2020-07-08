@@ -9,15 +9,15 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/theparanoids/ashirt/backend/authschemes"
-	"github.com/theparanoids/ashirt/backend/authschemes/localauth"
-	"github.com/theparanoids/ashirt/backend/authschemes/oktaauth"
-	"github.com/theparanoids/ashirt/backend/authschemes/recoveryauth"
-	"github.com/theparanoids/ashirt/backend/config"
-	"github.com/theparanoids/ashirt/backend/contentstore"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/logging"
-	"github.com/theparanoids/ashirt/backend/server"
+	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
+	"github.com/theparanoids/ashirt-server/backend/authschemes/oktaauth"
+	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
+	"github.com/theparanoids/ashirt-server/backend/config"
+	"github.com/theparanoids/ashirt-server/backend/contentstore"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/server"
 )
 
 func main() {

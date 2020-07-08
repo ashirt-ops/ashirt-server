@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt/backend/server/dissectors"
+	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 )
 
 // DissectJSONRequest is a gorilla.mux focused rewrap of dissectors.DissectJSONRequest
