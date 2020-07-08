@@ -6,9 +6,9 @@ package services
 import (
 	"context"
 
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 )
 
 // ListOperationsForAdmin is a specialized version of ListOperations where no operations are filtered

@@ -6,10 +6,10 @@ package services
 import (
 	"context"
 
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/dtos"
-	"github.com/theparanoids/ashirt/backend/helpers"
-	"github.com/theparanoids/ashirt/backend/server/dissectors"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 
 	sq "github.com/Masterminds/squirrel"
 )

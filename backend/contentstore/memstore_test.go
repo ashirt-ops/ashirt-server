@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt/backend/contentstore"
+	"github.com/theparanoids/ashirt-server/backend/contentstore"
 )
 
 func TestMemstore(t *testing.T) {

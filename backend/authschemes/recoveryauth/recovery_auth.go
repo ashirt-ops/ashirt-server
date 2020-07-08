@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt/backend/authschemes"
-	"github.com/theparanoids/ashirt/backend/authschemes/recoveryauth/constants"
-	"github.com/theparanoids/ashirt/backend/server/remux"
+	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
 
 type RecoveryAuthScheme struct {

@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt/backend/dtos"
-	"github.com/theparanoids/ashirt/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/models"
 )
 
 // TestBuildTags is a unit-test suite for the buildTags function.

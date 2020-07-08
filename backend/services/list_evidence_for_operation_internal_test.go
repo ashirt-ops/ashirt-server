@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/require"

@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/backend/policy"
-	"github.com/theparanoids/ashirt/backend/server/middleware"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"golang.org/x/sync/errgroup"
 
 	sq "github.com/Masterminds/squirrel"

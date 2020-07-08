@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/theparanoids/ashirt/backend"
+	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // Coercable is a simple builder pattern to help transform the underlying value (if present)

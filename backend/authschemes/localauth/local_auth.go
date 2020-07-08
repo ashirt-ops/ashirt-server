@@ -10,11 +10,11 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/authschemes"
-	"github.com/theparanoids/ashirt/backend/authschemes/localauth/constants"
-	"github.com/theparanoids/ashirt/backend/server/middleware"
-	"github.com/theparanoids/ashirt/backend/server/remux"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/theparanoids/ashirt-server/backend/server/remux"
 	"golang.org/x/crypto/bcrypt"
 )
 

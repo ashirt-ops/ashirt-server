@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 )
 
 // MediaHandler provides a generic handler for any content that _prefers_ a return value as raw data.

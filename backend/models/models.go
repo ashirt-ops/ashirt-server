@@ -6,7 +6,7 @@ package models
 import (
 	"time"
 
-	"github.com/theparanoids/ashirt/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/policy"
 )
 
 // APIKey reflects the structure of the database table 'api_keys'

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/session/wrappedsessionstore"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/session/wrappedsessionstore"
 )
 
 const sessionDataKey = "session_data"

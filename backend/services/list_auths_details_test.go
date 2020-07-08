@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	localConsts "github.com/theparanoids/ashirt/backend/authschemes/localauth/constants"
-	"github.com/theparanoids/ashirt/backend/dtos"
-	"github.com/theparanoids/ashirt/backend/services"
+	localConsts "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 var patronusAuthScheme = dtos.SupportedAuthScheme{SchemeName: "Patronus Charm", SchemeCode: "patronus"}

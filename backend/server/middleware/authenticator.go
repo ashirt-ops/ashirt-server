@@ -12,13 +12,13 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/logging"
-	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/backend/policy"
-	"github.com/theparanoids/ashirt/backend/server/remux"
-	"github.com/theparanoids/ashirt/backend/session"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/remux"
+	"github.com/theparanoids/ashirt-server/backend/session"
 
 	sq "github.com/Masterminds/squirrel"
 )

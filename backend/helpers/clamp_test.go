@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 func TestClamp(t *testing.T) {

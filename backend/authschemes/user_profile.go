@@ -4,7 +4,7 @@
 package authschemes
 
 import (
-	"github.com/theparanoids/ashirt/backend/services"
+	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 // UserProfile containes the necessary information to create a new user

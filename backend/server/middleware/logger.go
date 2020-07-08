@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 )
 
 type responseWriterWrapper struct {

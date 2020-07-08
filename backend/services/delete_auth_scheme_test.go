@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	localConsts "github.com/theparanoids/ashirt/backend/authschemes/localauth/constants"
-	recoveryConsts "github.com/theparanoids/ashirt/backend/authschemes/recoveryauth/constants"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/services"
+	localConsts "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
+	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestDeleteAuthScheme(t *testing.T) {

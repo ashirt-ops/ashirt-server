@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/theparanoids/ashirt/backend"
+	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // DissectedRequest stores a parsed JSON body, the map of URL substituted values, and query string

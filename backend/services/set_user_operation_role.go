@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/theparanoids/ashirt/backend"
-	"github.com/theparanoids/ashirt/backend/database"
-	"github.com/theparanoids/ashirt/backend/models"
-	"github.com/theparanoids/ashirt/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/policy"
 
 	sq "github.com/Masterminds/squirrel"
 )
