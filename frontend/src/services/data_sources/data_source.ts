@@ -73,7 +73,7 @@ export interface DataSource {
   updateQuery(ids: OpSlug & QueryId, payload: { name: string, query: string }): Promise<void>
   deleteQuery(ids: OpSlug & QueryId): Promise<void>
 
-  listTags(ids: OpSlug): Promise<Array<dtos.Tag>>
+  listTags(ids: OpSlug): Promise<Array<dtos.TagWithUsage>>
   createTag(ids: OpSlug, payload: { name: string, colorName: string }): Promise<dtos.Tag>
   updateTag(ids: OpSlug & TagId, payload: { name: string, colorName: string }): Promise<void>
   deleteTag(ids: OpSlug & TagId): Promise<void>
@@ -90,4 +90,4 @@ export interface DataSource {
 // the app itself. By exporting an empty function and calling it in the app
 // https://github.com/TypeStrong/ts-loader/issues/808
 dtos.cacheBust()
-export function cacheBust() {}
+export function cacheBust() { }

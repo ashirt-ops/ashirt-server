@@ -115,6 +115,13 @@ export type Tag = {
   colorName: string,
 }
 
+export type TagWithUsage = {
+  id: number,
+  name: string,
+  colorName: string,
+  evidenceCount: number,
+}
+
 export type User = {
   slug: string,
   firstName: string,
