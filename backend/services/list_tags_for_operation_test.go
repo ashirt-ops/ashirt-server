@@ -25,7 +25,14 @@ func TestListTagsForOperation(t *testing.T) {
 	tags, err := services.ListTagsForOperation(ctx, db, services.ListTagsForOperationInput{masterOp.Slug})
 	require.NoError(t, err)
 	require.Equal(t, len(tags), len(allTags))
-	validateTagSets(t, tags, allTags, validateTag)
+
+	dtoTags := make([]*dtos.Tag, len(tags))
+	for i, tag := range tags {
+		dtoTags[i] = &tag.Tag
+		require.Equal(t, tag.EvidenceCount, getTagUsage(t, db, tag.ID))
+	}
+
+	validateTagSets(t, dtoTags, allTags, validateTag)
 }
 
 func validateTag(t *testing.T, expected models.Tag, actual *dtos.Tag) {
