@@ -4,34 +4,43 @@
 import * as React from 'react'
 import Layout from '../layout'
 import Timeline from 'src/components/timeline'
-import { EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal, MoveEvidenceModal} from '../evidence_modals'
+import { EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal, MoveEvidenceModal } from '../evidence_modals'
 import { Evidence } from 'src/global_types'
 import { RouteComponentProps } from 'react-router-dom'
 import { ViewName } from '../types'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 
-export default (props: RouteComponentProps<{slug: string}>) => {
-  const {slug} = props.match.params
+export default (props: RouteComponentProps<{ slug: string }>) => {
+  const { slug } = props.match.params
   const query: string = new URLSearchParams(props.location.search).get('q') || ''
+  const [lastEditedUuid, setLastEditedUuid] = React.useState("")
 
   const wiredEvidence = useWiredData(React.useCallback(() => getEvidenceList({
     operationSlug: slug,
     query: query,
   }), [slug, query]))
 
-  const editModal = useModal<{evidence: Evidence}>(modalProps => (
-    <EditEvidenceModal {...modalProps} operationSlug={slug} onEdited={wiredEvidence.reload} />
+  const reloadToTop = () => {
+    setLastEditedUuid("")
+    wiredEvidence.reload()
+  }
+
+  const editModal = useModal<{ evidence: Evidence }>(modalProps => (
+    <EditEvidenceModal {...modalProps} operationSlug={slug} onEdited={() => {
+      setLastEditedUuid(modalProps.evidence.uuid)
+      wiredEvidence.reload()
+    }} />
   ))
-  const deleteModal = useModal<{evidence: Evidence}>(modalProps => (
-    <DeleteEvidenceModal {...modalProps} operationSlug={slug} onDeleted={wiredEvidence.reload} />
+  const deleteModal = useModal<{ evidence: Evidence }>(modalProps => (
+    <DeleteEvidenceModal {...modalProps} operationSlug={slug} onDeleted={reloadToTop} />
   ))
-  const assignToFindingsModal = useModal<{evidence: Evidence}>(modalProps => (
-    <ChangeFindingsOfEvidenceModal {...modalProps} operationSlug={slug} onChanged={() => {/* no need to reload here */}} />
+  const assignToFindingsModal = useModal<{ evidence: Evidence }>(modalProps => (
+    <ChangeFindingsOfEvidenceModal {...modalProps} operationSlug={slug} onChanged={() => {/* no need to reload here */ }} />
   ))
 
   const moveModal = useModal<{ evidence: Evidence }>(modalProps => (
-    <MoveEvidenceModal {...modalProps} operationSlug={slug} onEvidenceMoved={()=>{}}/>
+    <MoveEvidenceModal {...modalProps} operationSlug={slug} onEvidenceMoved={() => { }} />
   ))
 
   const navigate = (view: ViewName, query: string) => {
@@ -42,7 +51,7 @@ export default (props: RouteComponentProps<{slug: string}>) => {
 
   return (
     <Layout
-      onEvidenceCreated={wiredEvidence.reload}
+      onEvidenceCreated={reloadToTop}
       onNavigate={navigate}
       operationSlug={slug}
       query={query}
@@ -50,10 +59,11 @@ export default (props: RouteComponentProps<{slug: string}>) => {
     >
       {wiredEvidence.render(evidence => (
         <Timeline
+          scrollToUuid={lastEditedUuid}
           evidence={evidence}
           actions={{
-            'Edit': evidence => editModal.show({evidence}),
-            'Assign Findings': evidence => assignToFindingsModal.show({evidence}),
+            'Edit': evidence => editModal.show({ evidence }),
+            'Assign Findings': evidence => assignToFindingsModal.show({ evidence }),
           }}
           extraActions={{
             'Move': evidence => moveModal.show({ evidence }),

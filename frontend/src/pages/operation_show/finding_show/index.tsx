@@ -20,21 +20,30 @@ export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
     operationSlug: slug,
     findingUuid: uuid,
   }), [slug, uuid]))
+  const [lastEditedUuid, setLastEditedUuid] = React.useState("")
+
+  const reloadToTop = () => {
+    setLastEditedUuid("")
+    wiredFinding.reload()
+  }
 
   const addRemoveEvidenceModal = useModal<{finding: Finding, initialEvidence: Array<Evidence>}>(modalProps => (
-    <ChangeEvidenceOfFindingModal {...modalProps} onChanged={wiredFinding.reload} operationSlug={slug} />
+    <ChangeEvidenceOfFindingModal {...modalProps} onChanged={reloadToTop} operationSlug={slug} />
   ))
   const editFindingModal = useModal<{finding: Finding}>(modalProps => (
-    <EditFindingModal {...modalProps} onEdited={wiredFinding.reload} operationSlug={slug} />
+    <EditFindingModal {...modalProps} onEdited={reloadToTop} operationSlug={slug} />
   ))
   const deleteFindingModal = useModal<{finding: Finding}>(modalProps => (
     <DeleteFindingModal {...modalProps} onDeleted={() => props.history.push(`/operations/${slug}/findings`)} operationSlug={slug} />
   ))
   const editEvidenceModal = useModal<{evidence: Evidence}>(modalProps => (
-    <EditEvidenceModal {...modalProps} onEdited={wiredFinding.reload} operationSlug={slug} />
+    <EditEvidenceModal {...modalProps} onEdited={ ()=>{
+      setLastEditedUuid(modalProps.evidence.uuid)
+      wiredFinding.reload()
+    }} operationSlug={slug} />
   ))
   const removeEvidenceFromFindingModal = useModal<{evidence: Evidence, finding: Finding}>(modalProps => (
-    <RemoveEvidenceFromFindingModal {...modalProps} onRemoved={wiredFinding.reload} operationSlug={slug} />
+    <RemoveEvidenceFromFindingModal {...modalProps} onRemoved={reloadToTop} operationSlug={slug} />
   ))
 
   return <>
@@ -53,6 +62,7 @@ export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
         </div>
         <div className={cx('timeline')}>
           <Timeline
+            scrollToUuid={lastEditedUuid}
             evidence={evidence}
             actions={{
               'Remove From Finding': evidence => removeEvidenceFromFindingModal.show({evidence, finding}),
