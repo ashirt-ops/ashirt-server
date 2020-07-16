@@ -27,6 +27,7 @@ export default (props: {
   onQueryUpdate: (q: string) => void,
   operationSlug: string,
   query: string,
+  scrollToUuid?: string,
 }) => {
   const rootRef = React.useRef<HTMLDivElement | null>(null)
   const lightboxRef = React.useRef<HTMLDivElement | null>(null)
@@ -85,6 +86,7 @@ export default (props: {
       {props.evidence.map((evi, idx) => (
         <TimelineRow
           {...props}
+          focusUuid={props.scrollToUuid}
           active={activeChildIndex === idx}
           evidence={evi}
           key={evi.uuid}
@@ -117,9 +119,18 @@ const TimelineRow = (props: {
   onQueryUpdate: (q: string) => void,
   operationSlug: string,
   query: string,
+  focusUuid?: string,
   onPreviewClick: () => void,
   onClick: () => void,
 }) => {
+  const self = React.useRef<null | HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (self.current != null && props.evidence.uuid == props.focusUuid) {
+      self.current.scrollIntoView()
+    }
+  }, [self, props.focusUuid])
+
   const onTagClick = (t: Tag) => {
     props.onQueryUpdate(addTagToQuery(props.query, t.name))
   }
@@ -131,7 +142,7 @@ const TimelineRow = (props: {
   const permalink = `${window.location.origin}/operations/${props.operationSlug}/evidence/${props.evidence.uuid}`
 
   return (
-    <div className={cx('timeline-row', { active: props.active })} onClick={props.onClick}>
+    <div ref={self} className={cx('timeline-row', { active: props.active })} onClick={props.onClick}>
       <div className={cx('left')}>
         <EvidencePreview
           fitToContainer
