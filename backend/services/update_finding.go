@@ -5,6 +5,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
@@ -27,11 +28,11 @@ type UpdateFindingInput struct {
 func UpdateFinding(ctx context.Context, db *database.Connection, i UpdateFindingInput) error {
 	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.UnauthorizedWriteErr(fmt.Errorf("Unable to lookup operation : %w", err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.UnauthorizedWriteErr(fmt.Errorf("Failed permission check : %w", err))
 	}
 
 	err = db.Update(sq.Update("findings").
@@ -44,7 +45,7 @@ func UpdateFinding(ctx context.Context, db *database.Connection, i UpdateFinding
 		}).
 		Where(sq.Eq{"id": finding.ID}))
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.UnauthorizedWriteErr(fmt.Errorf("Unable to update database : %w", err))
 	}
 	return nil
 }

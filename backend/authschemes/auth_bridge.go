@@ -59,7 +59,7 @@ func (ah AShirtAuthBridge) ReadAuthSchemeSession(r *http.Request) interface{} {
 func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, userID int64, authSchemeSessionData interface{}) error {
 	if !(ah.isAccountEnabled(r, userID)) {
 		ah.DeleteSession(w, r)
-		return backend.AccountDisabled()
+		return backend.WrapError("Unable to login user", backend.AccountDisabled())
 	}
 
 	ah.updateLastLogin(r, userID)
@@ -131,12 +131,12 @@ func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 			"auth_scheme": ah.authSchemeName,
 		}))
 	if err != nil {
-		return UserAuthData{}, backend.DatabaseErr(err)
+		return UserAuthData{}, backend.WrapError("Cannot find user authentication", backend.DatabaseErr(err))
 	}
 	return authData, nil
 }
 
-// FindUserAuthByUserSlug retrieves the row (codified by UserAuthData) corresponding to the provided user slug and the
+// FindUserAuthsByUserSlug retrieves the row (codified by UserAuthData) corresponding to the provided user slug and the
 // auth scheme name provided from the caller.
 //
 // Returns a fully populated UserAuthData object, or nil if no such row exists
@@ -151,7 +151,7 @@ func (ah AShirtAuthBridge) FindUserAuthsByUserSlug(slug string) ([]UserAuthData,
 			"auth_scheme": ah.authSchemeName,
 		}))
 	if err != nil {
-		return []UserAuthData{}, backend.DatabaseErr(err)
+		return []UserAuthData{}, backend.WrapError("Unable to fetch user authentications", backend.DatabaseErr(err))
 	}
 	return authData, nil
 }
@@ -171,7 +171,7 @@ func (ah AShirtAuthBridge) CreateNewAuthForUser(data UserAuthData) error {
 		if database.IsAlreadyExistsError(err) {
 			return backend.BadInputErr(err, "An account for this user already exists")
 		}
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to generate auth scheme for user", backend.DatabaseErr(err))
 	}
 	return nil
 }
@@ -187,7 +187,7 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(userKey string, encryptedPassword [
 		Where(sq.Eq{"user_key": userKey, "auth_scheme": ah.authSchemeName})
 	err := ah.db.Update(ub)
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to update user authentication", backend.DatabaseErr(err))
 	}
 	return nil
 }
@@ -210,7 +210,7 @@ func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, userKey stri
 
 		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"user_key": userKey}))
 	})
-	return userID, err
+	return userID, backend.WrapError("Unable to validate one-time verification", err)
 }
 
 // GetDatabase provides raw access to the database. In general, this should not be used by authschemes,

@@ -55,21 +55,21 @@ func JSONHandler(handler func(*http.Request) (interface{}, error)) http.Handler 
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	var status int
 	var publicReason string
-	var loggedReason string
+	var loggedReason error
 
 	switch err := err.(type) {
 	case *backend.HTTPError:
 		status = err.HTTPStatus
 		publicReason = err.PublicReason
-		loggedReason = err.WrappedError.Error()
+		loggedReason = err.WrappedError
 
 	case error:
 		status = http.StatusInternalServerError
 		publicReason = "An unknown error occurred"
-		loggedReason = err.Error()
+		loggedReason = err
 	}
 
-	logging.Log(r.Context(), "error", loggedReason, "url", r.URL)
+	logging.Log(r.Context(), "msg", "Error handling request", "error", loggedReason.Error(), "url", r.URL)
 
 	writeJSONResponse(w, status, map[string]string{"error": publicReason})
 }
