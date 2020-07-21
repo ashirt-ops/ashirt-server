@@ -23,14 +23,14 @@ import (
 // Duration is determined by looking at the environment configuration
 func deleteExpiredRecoveryCodes(ctx context.Context, db *database.Connection, expiryInMinutes int64) error {
 	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Insufficient access to remove recovery code", backend.UnauthorizedWriteErr(err))
 	}
 
 	err := db.Delete(sq.Delete("auth_scheme_data").
 		Where(sq.Eq{"auth_scheme": recoveryConsts.Code}).
 		Where("TIMESTAMPDIFF(minute, created_at, ?) >= ?", time.Now(), expiryInMinutes)) // ensure timestamps are sufficently old
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to remove recovery code", backend.DatabaseErr(err))
 	}
 
 	return nil
@@ -40,17 +40,17 @@ func deleteExpiredRecoveryCodes(ctx context.Context, db *database.Connection, ex
 // recovery key. This key is then attached to a user as a authorization method.
 func generateRecoveryCodeForUser(ctx context.Context, bridge authschemes.AShirtAuthBridge, userSlug string) (interface{}, error) {
 	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Non-admin tried to generate recovery code", backend.UnauthorizedWriteErr(err))
 	}
 
 	userID, err := bridge.GetUserIDFromSlug(userSlug)
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to get UserID from slug", err)
 	}
 
 	authKey := make([]byte, recoveryKeyLength)
 	if _, err := rand.Read(authKey); err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to generate random recovery key", err)
 	}
 	authKeyStr := base64.URLEncoding.EncodeToString(authKey)
 
@@ -60,16 +60,18 @@ func generateRecoveryCodeForUser(ctx context.Context, bridge authschemes.AShirtA
 	})
 	response := struct {
 		Code string `json:"code"`
-	}{
-		Code: authKeyStr,
+	}{Code: authKeyStr}
+
+	if err != nil {
+		return response, backend.WrapError("Unable to create recovery auth for user", err)
 	}
-	return response, err
+	return response, nil
 }
 
 // getRecoveryMetrics retrieves a count of active vs expired recovery codes.
 func getRecoveryMetrics(ctx context.Context, db *database.Connection, expiryInMinutes int64) (interface{}, error) {
 	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Non-admin tried to get recovery metrics", backend.UnauthorizedReadErr(err))
 	}
 
 	query := sq.Select().
@@ -85,6 +87,9 @@ func getRecoveryMetrics(ctx context.Context, db *database.Connection, expiryInMi
 		ActiveCount  int64 `db:"active" json:"activeCount"`
 	}
 	err := db.Get(&metrics, query)
+	if err != nil {
+		return metrics, backend.WrapError("Failed to query recovery metrics", err)
+	}
 
-	return metrics, err
+	return metrics, nil
 }

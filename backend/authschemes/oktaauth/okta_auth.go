@@ -171,13 +171,13 @@ func (okta OktaAuth) handleOktaCallback(w http.ResponseWriter, r *http.Request, 
 
 	sess, ok := bridge.ReadAuthSchemeSession(r).(*preLoginAuthSession)
 	if !ok {
-		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Callback called without preloginauth session")), "/autherror/noaccess")
+		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Okta callback called without preloginauth session")), "/autherror/noaccess")
 	}
 
 	linkingAccount := sess.OktaMode == modeLink
 
 	if r.URL.Query().Get("state") != sess.StateChallengeCSRF || oktaCode == "" {
-		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Authentication challenge failed")), "/autherror/noverify")
+		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Okta authentication challenge failed")), "/autherror/noverify")
 	}
 
 	exchange := exchangeCode(oktaCode, r)
@@ -185,23 +185,23 @@ func (okta OktaAuth) handleOktaCallback(w http.ResponseWriter, r *http.Request, 
 		return okta.authFailure(w, r, exchange.WrappedError, "/autherror/noverify")
 	}
 	if exchange.Error != "" || exchange.ErrorDescription != "" {
-		return okta.authFailure(w, r, fmt.Errorf("%v : %v", exchange.Error, exchange.ErrorDescription), "/autherror/noverify")
+		return okta.authFailure(w, r, fmt.Errorf("%v: %v", exchange.Error, exchange.ErrorDescription), "/autherror/noverify")
 	}
 
 	_, verificationError := verifyToken(exchange.IDToken, sess.Nonce)
 
 	if verificationError != nil {
-		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Authentication token verification failed")), "/autherror/noverify")
+		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Okta authentication token verification failed")), "/autherror/noverify")
 	}
 
 	profile := getUserProfile(r, exchange.AccessToken)
 	if !okta.canAccessService(profile) {
-		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("User is not permitted access")), "/autherror/noaccess")
+		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Okta user is not permitted access")), "/autherror/noaccess")
 	}
 
 	shortName, ok := profile[okta.profileToShortnameField]
 	if !ok || shortName == "" {
-		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("Shortname is empty, check that profileToShortNameField is correct")), "/autherror/noaccess")
+		return okta.authFailure(w, r, backend.BadAuthErr(errors.New("(Okta) Shortname is empty, check that profileToShortNameField is correct")), "/autherror/noaccess")
 	}
 
 	authData, err := bridge.FindUserAuth(shortName)
@@ -212,7 +212,7 @@ func (okta OktaAuth) handleOktaCallback(w http.ResponseWriter, r *http.Request, 
 		} else {
 			userResult, err := bridge.CreateNewUser(okta.makeUserProfile(profile))
 			if err != nil {
-				return okta.authFailure(w, r, err, "/autherror/incomplete")
+				return okta.authFailure(w, r, backend.WrapError("Create new Okta user failed ["+shortName+"]", err), "/autherror/incomplete")
 			}
 			userID = userResult.UserID
 		}
@@ -223,7 +223,7 @@ func (okta OktaAuth) handleOktaCallback(w http.ResponseWriter, r *http.Request, 
 		}
 		err = bridge.CreateNewAuthForUser(authData)
 		if err != nil {
-			return okta.authFailure(w, r, err, "/autherror/incomplete")
+			return okta.authFailure(w, r, backend.WrapError("Unable to create auth scheme for new Okta user ["+authData.UserKey+"]", err), "/autherror/incomplete")
 		}
 	}
 	if linkingAccount {
@@ -236,9 +236,9 @@ func (okta OktaAuth) handleOktaCallback(w http.ResponseWriter, r *http.Request, 
 	})
 	if err != nil {
 		if backend.IsErrorAccountDisabled(err) {
-			return okta.authFailure(w, r, err, "/autherror/disabled")
+			return okta.authFailure(w, r, backend.WrapError("Unable to log in Okta user ["+authData.UserKey+"]", err), "/autherror/disabled")
 		}
-		return okta.authFailure(w, r, err, "/autherror/incomplete")
+		return okta.authFailure(w, r, backend.WrapError("Unable to log in Okta user ["+authData.UserKey+"]", err), "/autherror/incomplete")
 	}
 	return okta.authSuccess(w, r, linkingAccount)
 }
@@ -299,7 +299,12 @@ func (okta OktaAuth) verifyToken(t, nonce string) (*verifier.Jwt, error) {
 		},
 	}
 
-	return jv.New().VerifyIdToken(t)
+	verifier, err := jv.New().VerifyIdToken(t)
+	if err != nil {
+		return verifier, backend.WrapError("Unable to verify Okta jwt token", err)
+	}
+
+	return verifier, nil
 }
 
 // getProfileData retrives an okta v1 profile, given an access token. If an empty access token
