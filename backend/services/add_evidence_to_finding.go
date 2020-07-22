@@ -27,18 +27,18 @@ type AddEvidenceToFindingInput struct {
 func AddEvidenceToFinding(ctx context.Context, db *database.Connection, i AddEvidenceToFindingInput) error {
 	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to add evidence to finding", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to add evidence to finding", backend.UnauthorizedWriteErr(err))
 	}
 
 	var g errgroup.Group
 	g.Go(func() (err error) { return batchAddEvidenceToFinding(db, i.EvidenceToAdd, operation.ID, finding.ID) })
 	g.Go(func() (err error) { return batchRemoveEvidenceFromFinding(db, i.EvidenceToRemove, finding.ID) })
 	if err = g.Wait(); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to add evidence to finding", backend.UnauthorizedWriteErr(err))
 	}
 
 	return nil
@@ -56,7 +56,7 @@ func batchAddEvidenceToFinding(db *database.Connection, evidenceUUIDs []string, 
 	}
 	var evidence []models.Evidence
 	if err := db.Select(&evidence, buildQueryForEvidenceFromUUIDs(evidenceUUIDs)); err != nil {
-		return err
+		return backend.WrapError("Unable to get evidence from uuids", err)
 	}
 	evidenceIDs := []int64{}
 	for _, evi := range evidence {
@@ -82,7 +82,7 @@ func batchRemoveEvidenceFromFinding(db *database.Connection, evidenceUUIDs []str
 	}
 	var evidence []models.Evidence
 	if err := db.Select(&evidence, buildQueryForEvidenceFromUUIDs(evidenceUUIDs)); err != nil {
-		return err
+		return backend.WrapError("Unable to get evidence from uuids", err)
 	}
 	evidenceIDs := []int64{}
 	for _, evi := range evidence {
