@@ -63,6 +63,11 @@ type Tag struct {
 	Name      string `json:"name"`
 }
 
+type TagWithUsage struct {
+	Tag
+	EvidenceCount int64 `json:"evidenceCount"`
+}
+
 type User struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`

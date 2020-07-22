@@ -12,6 +12,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -29,7 +30,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 		return nil, backend.UnauthorizedReadErr(err)
 	}
 
-	if err := policyRequireWithAdminBypass(ctx, policy.CanReadOperation{OperationID: operation.ID}); err != nil {
+	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.UnauthorizedReadErr(err)
 	}
 

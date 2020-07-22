@@ -535,6 +535,15 @@ func getRealUsers(t *testing.T, db *database.Connection) []models.User {
 	return users
 }
 
+func getTagUsage(t *testing.T, db *database.Connection, tagID int64) int64 {
+	var usageCount int64
+	db.Get(&usageCount, sq.Select("count(*)").
+		From("tag_evidence_map").
+		Where(sq.Eq{"tag_id": tagID}))
+	// ignoring the error here -- just return 0, which is appropriate anyway
+	return usageCount
+}
+
 type FullEvidence struct {
 	models.Evidence
 	// copied from models.User

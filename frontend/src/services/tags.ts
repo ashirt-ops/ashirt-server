@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { Tag } from 'src/global_types'
+import { Tag, TagWithUsage } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function createTag(i: {
@@ -17,7 +17,7 @@ export async function createTag(i: {
 
 export async function getTags(i: {
   operationSlug: string,
-}): Promise<Array<Tag>> {
+}): Promise<Array<TagWithUsage>> {
   return await ds.listTags(i)
 }
 
