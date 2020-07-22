@@ -34,7 +34,7 @@ func main() {
 	gen(dtos.TagDifference{})
 
 	// Since this file only contains typescript types, webpack doesn't pick up the
-	// changes unless there is some actual executable javascript reverenced from
+	// changes unless there is some actual executable javascript referenced from
 	// the app itself. By exporting an empty function and calling it in the app
 	// https://github.com/TypeStrong/ts-loader/issues/808
 	fmt.Println("export function cacheBust() {}")
