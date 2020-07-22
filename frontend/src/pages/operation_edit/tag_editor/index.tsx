@@ -6,26 +6,20 @@ import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import Tag from 'src/components/tag'
 import {DeleteTagModal, EditTagModal} from './modals'
-import {Tag as TagType, Evidence} from 'src/global_types'
-import {countBy} from 'lodash'
+import { TagWithUsage } from 'src/global_types'
 import {default as Button, ButtonGroup} from 'src/components/button'
-import {getTags, getEvidenceList} from 'src/services'
+import {getTags} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
 
 const TagTable = (props: {
   operationSlug: string,
-  tags: Array<TagType>,
-  evidence: Array<Evidence>,
+  tags: Array<TagWithUsage>,
   onUpdate: () => void,
 }) => {
-  const numEvidenceByTagId: {[id: number]: number} = React.useMemo(() => (
-    countBy(props.evidence.flatMap(evi => evi.tags.map(tag => tag.id)))
-  ), [props.evidence])
-
-  const editTagModal = useModal<{tag: TagType}>(modalProps => (
+  const editTagModal = useModal<{ tag: TagWithUsage }>(modalProps => (
     <EditTagModal {...modalProps} operationSlug={props.operationSlug} onEdited={props.onUpdate} />
   ))
-  const deleteTagModal = useModal<{tag: TagType}>(modalProps => (
+  const deleteTagModal = useModal<{ tag: TagWithUsage }>(modalProps => (
     <DeleteTagModal {...modalProps} operationSlug={props.operationSlug} onDeleted={props.onUpdate} />
   ))
 
@@ -34,7 +28,7 @@ const TagTable = (props: {
       {props.tags.map(tag => (
         <tr key={tag.name}>
           <td><Tag name={tag.name} color={tag.colorName} /></td>
-          <td>{numEvidenceByTagId[tag.id] || 0}</td>
+          <td>{tag.evidenceCount}</td>
           <td>
             <ButtonGroup>
               <Button small onClick={() => editTagModal.show({tag})}>Edit</Button>
@@ -52,18 +46,14 @@ const TagTable = (props: {
 export default (props: {
   operationSlug: string,
 }) => {
-  const wiredTags = useWiredData(React.useCallback(() => Promise.all([
-    getTags({operationSlug: props.operationSlug}),
-    getEvidenceList({operationSlug: props.operationSlug, query: ''}),
-  ]), [props.operationSlug]))
+  const wiredTags = useWiredData(React.useCallback(() => getTags({operationSlug: props.operationSlug}), [props.operationSlug]))
 
   return (
     <SettingsSection title="Operation Tags">
-      {wiredTags.render(([tags, evidence]) => (
+      {wiredTags.render(tags => (
         <TagTable
           operationSlug={props.operationSlug}
           tags={tags}
-          evidence={evidence}
           onUpdate={wiredTags.reload}
         />
       ))}

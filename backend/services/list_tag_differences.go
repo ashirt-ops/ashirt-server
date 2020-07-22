@@ -103,11 +103,11 @@ func ListTagDifferenceForEvidence(ctx context.Context, db *database.Connection, 
 	return &updatedDiff, nil
 }
 
-func standardizeTagName(tags []*dtos.Tag) map[string]*dtos.Tag {
+func standardizeTagName(tags []*dtos.TagWithUsage) map[string]*dtos.Tag {
 	names := make(map[string]*dtos.Tag)
 	for _, tag := range tags {
 		standardName := strings.ToLower(strings.TrimSpace(tag.Name))
-		names[standardName] = tag
+		names[standardName] = &tag.Tag
 	}
 	return names
 }
