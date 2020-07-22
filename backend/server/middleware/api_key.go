@@ -27,13 +27,13 @@ const maxDateDelta = time.Hour
 
 func authenticateAPI(db *database.Connection, r *http.Request, requestBody io.Reader) (int64, error) {
 	if err := checkDateHeader(r.Header.Get("Date")); err != nil {
-		return -1, err
+		return -1, backend.WrapError("Unable to parse date header (for api auth)", err)
 	}
 
 	// Check HMAC
 	accessKey, headerHMAC, err := parseAuthorizationHeader(r.Header.Get("Authorization"))
 	if err != nil {
-		return -1, err
+		return -1, backend.WrapError("Unable to parse (api) authorization header", err)
 	}
 
 	var apiKey struct {
@@ -52,7 +52,7 @@ func authenticateAPI(db *database.Connection, r *http.Request, requestBody io.Re
 		return -1, errors.New("Bad HMAC")
 	}
 	if err != nil {
-		return -1, err
+		return -1, backend.WrapError("Unable to retrieve API key data", err)
 	}
 	if apiKey.DisabledFlag {
 		return -1, backend.DisabledUserError()
@@ -79,7 +79,10 @@ func parseAuthorizationHeader(authorizationStr string) (string, []byte, error) {
 	accessKey, base64HMAC := split[0], split[1]
 
 	headerHMAC, err := base64.StdEncoding.DecodeString(base64HMAC)
-	return accessKey, headerHMAC, err
+	if err != nil {
+		return accessKey, headerHMAC, backend.WrapError("Unable to decode base64 HMAC", err)
+	}
+	return accessKey, headerHMAC, nil
 }
 
 // checkDateHeader verifies that the passed Date header is valid and within the maxDateDelta of the current time

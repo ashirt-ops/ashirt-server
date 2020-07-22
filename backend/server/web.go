@@ -103,7 +103,11 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contentstore.Store, sessionStore *session.Store, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
 	route(r, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jsonHandler(func(r *http.Request) (interface{}, error) {
-			return nil, sessionStore.Delete(w, r)
+			err := sessionStore.Delete(w, r)
+			if err != nil {
+				return nil, backend.WrapError("Unable to delete session", err)
+			}
+			return nil, nil
 		}).ServeHTTP(w, r)
 	}))
 
@@ -283,7 +287,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		dr := dissectJSONRequest(r)
 		timelineFilters, err := helpers.ParseTimelineQuery(dr.FromQuery("query").AsString())
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to parse findings query", err)
 		}
 
 		i := services.ListFindingsForOperationInput{
@@ -417,14 +421,13 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 
 		evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to read evidence", err)
 		}
 
 		if i.LoadPreview {
 			return evidence.Preview, nil
-		} else {
-			return evidence.Media, nil
 		}
+		return evidence.Media, nil
 	}))
 
 	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
@@ -460,10 +463,10 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		if err := json.Unmarshal([]byte(tagsToAddJSON), &i.TagsToAdd); err != nil {
-			return nil, backend.BadInputErr(err, "tagIds must be a json array of ints")
+			return nil, backend.BadInputErr(err, "tagsToAdd must be a json array of ints")
 		}
 		if err := json.Unmarshal([]byte(tagsToRemoveJSON), &i.TagsToRemove); err != nil {
-			return nil, backend.BadInputErr(err, "tagIds must be a json array of ints")
+			return nil, backend.BadInputErr(err, "tagsToRemove must be a json array of ints")
 		}
 		return nil, services.UpdateEvidence(r.Context(), db, contentStore, i)
 	}))

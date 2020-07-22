@@ -4,12 +4,12 @@
 package helpers
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/theparanoids/ashirt-server/backend"
 )
 
@@ -177,7 +177,7 @@ func parseTime(str string, useEndOfDayIfTimeIsMissing bool) (time.Time, error) {
 	}
 
 	return time.Now(), backend.BadInputErr(
-		errors.Wrap(fmt.Errorf("RFC3339: %v ;; ISO8601: %v", rfc3339Err, iso8601Err), "Failed to parse time"),
+		fmt.Errorf("Failed to parse time. (RFC3339: %v) (ISO8601: %v)", rfc3339Err.Error(), iso8601Err.Error()),
 		fmt.Sprintf("Query ranges must be in ISO8601 or RFC3339 format. (Got '%s')", str),
 	)
 }

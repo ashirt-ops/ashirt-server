@@ -89,7 +89,7 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			body, cleanup, err := cloneBody(r)
 			if err != nil {
-				respondWithError(w, r, err)
+				respondWithError(w, r, backend.WrapError("Unable to clone http body", err))
 				return
 			}
 			defer cleanup()
@@ -127,16 +127,17 @@ func buildContextForUser(ctx context.Context, db *database.Connection, userID in
 	return InjectIntoContext(ctx, InjectIntoContextInput{
 		IsSuperAdmin: isSuperAdmin,
 		UserID:       userID,
-		UserPolicy:   buildPolicyForUser(db, userID, isSuperAdmin),
+		UserPolicy:   buildPolicyForUser(ctx, db, userID, isSuperAdmin),
 	})
 }
 
-func buildPolicyForUser(db *database.Connection, userID int64, isSuperAdmin bool) policy.Policy {
+func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin bool) policy.Policy {
 	var roles []models.UserOperationPermission
 	err := db.Select(&roles, sq.Select("operation_id", "role").
 		From("user_operation_permissions").
 		Where(sq.Eq{"user_id": userID}))
 	if err != nil {
+		logging.Log(ctx, "msg", "Unable to build user policy", "error", err.Error())
 		return &policy.Deny{}
 	}
 	roleMap := make(map[int64]policy.OperationRole)
