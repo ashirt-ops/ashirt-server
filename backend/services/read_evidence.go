@@ -45,14 +45,14 @@ func ReadEvidence(ctx context.Context, db *database.Connection, contentStore con
 	if i.LoadPreview {
 		preview, err = contentStore.Read(evidence.ThumbImageKey)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to read evidence preview", err)
 		}
 	}
 
 	if i.LoadMedia {
 		media, err = contentStore.Read(evidence.FullImageKey)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to read evidence media", err)
 		}
 	}
 
