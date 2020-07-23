@@ -29,15 +29,15 @@ type UpdateEvidenceInput struct {
 func UpdateEvidence(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i UpdateEvidenceInput) error {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to update evidence", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to update evidence", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := ensureTagIDsBelongToOperation(db, i.TagsToAdd, operation); err != nil {
-		return backend.BadInputErr(err, err.Error())
+		return backend.WrapError("Unable to update evidence", backend.BadInputErr(err, err.Error()))
 	}
 
 	var keys *contentstore.ContentKeys
@@ -49,7 +49,7 @@ func UpdateEvidence(ctx context.Context, db *database.Connection, contentStore c
 			content := contentstore.NewBlob(i.Content)
 			processedKeys, err := content.ProcessPreviewAndUpload(contentStore)
 			if err != nil {
-				return backend.BadInputErr(err, "Failed to process content")
+				return backend.WrapError("Cannot update evidence content", backend.BadInputErr(err, "Failed to process content"))
 			}
 			keys = &processedKeys
 
@@ -89,7 +89,7 @@ func UpdateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		}
 	})
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Cannot updat eevidence", backend.DatabaseErr(err))
 	}
 
 	return nil

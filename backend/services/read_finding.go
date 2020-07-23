@@ -23,11 +23,11 @@ type ReadFindingInput struct {
 func ReadFinding(ctx context.Context, db *database.Connection, i ReadFindingInput) (*dtos.Finding, error) {
 	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to read finding", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to read finding", backend.UnauthorizedReadErr(err))
 	}
 
 	var evidenceIDs []int64
@@ -36,12 +36,12 @@ func ReadFinding(ctx context.Context, db *database.Connection, i ReadFindingInpu
 		From("evidence_finding_map").
 		Where(sq.Eq{"finding_id": finding.ID}))
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Cannot load evidence for finding", backend.DatabaseErr(err))
 	}
 
 	_, allTags, err := tagsForEvidenceByID(db, evidenceIDs)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Cannot load tags for evidence", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Finding{

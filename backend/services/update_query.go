@@ -25,11 +25,11 @@ type UpdateQueryInput struct {
 func UpdateQuery(ctx context.Context, db *database.Connection, i UpdateQueryInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to update query", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyQueriesOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to update query", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.Name == "" {
@@ -49,9 +49,9 @@ func UpdateQuery(ctx context.Context, db *database.Connection, i UpdateQueryInpu
 	err = db.Update(ub)
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {
-			return backend.BadInputErr(err, "A saved query with this name or query already exists")
+			return backend.WrapError("Cannot update query", backend.BadInputErr(err, "A saved query with this name or query already exists"))
 		}
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Cannot update query", backend.UnauthorizedWriteErr(err))
 	}
 	return nil
 }

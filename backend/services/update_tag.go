@@ -24,11 +24,11 @@ type UpdateTagInput struct {
 func UpdateTag(ctx context.Context, db *database.Connection, i UpdateTagInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to update tag", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyTagsOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to update tag", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.Update(sq.Update("tags").
@@ -39,7 +39,7 @@ func UpdateTag(ctx context.Context, db *database.Connection, i UpdateTagInput) e
 		Where(sq.Eq{"id": i.ID}))
 
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot update tag", backend.DatabaseErr(err))
 	}
 	return nil
 }

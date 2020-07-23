@@ -20,11 +20,11 @@ import (
 func ReadUser(ctx context.Context, db *database.Connection, userSlug string) (*dtos.UserOwnView, error) {
 	userID, err := selfOrSlugToUserID(ctx, db, userSlug)
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Unable to read user", backend.DatabaseErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadDetailedUser{UserID: userID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to read user", backend.UnauthorizedReadErr(err))
 	}
 
 	var user models.User
@@ -39,7 +39,7 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string) (*d
 			Where(sq.Eq{"user_id": userID}))
 	})
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot read user", backend.DatabaseErr(err))
 	}
 
 	auths := make([]dtos.AuthenticationInfo, len(authSchemes))

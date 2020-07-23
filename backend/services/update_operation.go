@@ -23,11 +23,11 @@ type UpdateOperationInput struct {
 func UpdateOperation(ctx context.Context, db *database.Connection, i UpdateOperationInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to update operation", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to update operation", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.Update(sq.Update("operations").
@@ -37,7 +37,7 @@ func UpdateOperation(ctx context.Context, db *database.Connection, i UpdateOpera
 		}).
 		Where(sq.Eq{"id": operation.ID}))
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Cannot update operation", backend.DatabaseErr(err))
 	}
 	return nil
 }

@@ -30,7 +30,7 @@ func DeleteSessionsForUserSlug(ctx context.Context, db *database.Connection, use
 
 	userID, err := userSlugToUserID(db, userSlug)
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to delete user session", backend.DatabaseErr(err))
 	}
 
 	return deleteSessionsForUserID(db, userID)
@@ -42,12 +42,12 @@ func DeleteSessionsForUserSlug(ctx context.Context, db *database.Connection, use
 // NOTE: The flag is to _disable_ the user, which prevents access. To enable a user, set Disabled=false
 func SetUserFlags(ctx context.Context, db *database.Connection, i SetUserFlagsInput) error {
 	if !middleware.IsAdmin(ctx) {
-		return backend.UnauthorizedReadErr(fmt.Errorf("Requesting user is not an admin"))
+		return backend.WrapError("Unwilling to set user flag", backend.UnauthorizedReadErr(fmt.Errorf("Requesting user is not an admin")))
 	}
 
 	targetUser, err := db.RetrieveUserWithAuthDataBySlug(i.Slug)
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot set user flags", backend.DatabaseErr(err))
 	}
 	err = validateAdminCanModifyFlag(ctx, targetUser, i)
 	if err != nil {
@@ -77,7 +77,7 @@ func SetUserFlags(ctx context.Context, db *database.Connection, i SetUserFlagsIn
 func deleteSessionsForUserID(db *database.Connection, userID int64) error {
 
 	if err := db.Exec("DELETE FROM sessions WHERE user_id = ?", userID); err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete user session", backend.DatabaseErr(err))
 	}
 	return nil
 }

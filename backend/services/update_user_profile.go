@@ -26,11 +26,11 @@ func UpdateUserProfile(ctx context.Context, db *database.Connection, i UpdateUse
 	var err error
 
 	if userID, err = selfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to update user profile", backend.DatabaseErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyUser{UserID: userID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to update user profile", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.Update(sq.Update("users").
@@ -42,7 +42,7 @@ func UpdateUserProfile(ctx context.Context, db *database.Connection, i UpdateUse
 		Where(sq.Eq{"id": userID}))
 
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot update user profile", backend.DatabaseErr(err))
 	}
 	return nil
 }

@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
@@ -89,7 +90,7 @@ func (p *Pagination) Select(ctx context.Context, db *database.Connection, result
 		tx.Get(&count, sq.Select("count(*)").FromSelect(sb, "T"))
 	})
 	if err != nil {
-		return err
+		return backend.WrapError("Unable to get pagination count", err)
 	}
 
 	p.TotalCount = count
