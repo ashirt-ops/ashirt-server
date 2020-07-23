@@ -17,7 +17,7 @@ type StackTraceEntry struct {
 
 // watcher provides a mechanism to recover from panics. Start this prior to launching
 // questionable code. If a panic occurs, this will catch that panic, log the response,
-// and execute the provided cleanup code. a boolean provided to the cleanup code 
+// and execute the provided cleanup code. a boolean provided to the cleanup code
 // indicates if a panic occurred.
 func watcher(log logging.Logger, cleanup func(bool)) {
 	paniced := false
