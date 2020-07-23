@@ -31,7 +31,6 @@ func TestListUsersForAdmin(t *testing.T) {
 	ctx := fullContext(UserDraco.ID, &policy.FullAccess{}) // Note: not an admin
 	_, err := services.ListUsersForAdmin(ctx, db, input)
 	require.Error(t, err)
-	require.Equal(t, "Requesting user is not an admin", err.Error())
 
 	// Verify admins can list users (no deleted users)
 	ctx = fullContextAsAdmin(UserDumbledore.ID, &policy.FullAccess{})

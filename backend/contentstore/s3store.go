@@ -42,7 +42,7 @@ func (s *S3Store) Upload(data io.Reader) (string, error) {
 		Bucket: aws.String(s.bucketName),
 		Key:    aws.String(key),
 	})
-	
+
 	if err != nil {
 		return key, backend.WrapError("Upload to s3 failed", err)
 	}
@@ -68,7 +68,7 @@ func (s *S3Store) Delete(key string) error {
 		Bucket: aws.String(s.bucketName),
 		Key:    aws.String(key),
 	})
-		
+
 	if err != nil {
 		return backend.WrapError("Delete from s3 failed", err)
 	}

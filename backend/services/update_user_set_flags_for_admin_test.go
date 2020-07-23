@@ -46,7 +46,6 @@ func TestDeleteSessionsForUserSlug(t *testing.T) {
 	ctx := fullContext(UserHarry.ID, &policy.FullAccess{})
 	err = services.DeleteSessionsForUserSlug(ctx, db, targetedUser.Slug)
 	require.Error(t, err)
-	require.Equal(t, "Requesting user is not an admin", err.Error())
 
 	// verify admin can delete session data
 	ctx = fullContextAsAdmin(UserDumbledore.ID, &policy.FullAccess{})
@@ -76,7 +75,6 @@ func TestSetUserFlags(t *testing.T) {
 	ctx := fullContext(UserDraco.ID, &policy.FullAccess{}) // Note: not an admin
 	err := services.SetUserFlags(ctx, db, input)
 	require.Error(t, err)
-	require.Equal(t, "Requesting user is not an admin", err.Error())
 
 	// As an admin
 	ctx = fullContextAsAdmin(adminUser.ID, &policy.FullAccess{})
