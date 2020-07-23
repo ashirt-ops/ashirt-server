@@ -73,6 +73,8 @@ func (d *MemStore) Delete(key string) error {
 	if _, ok := d.content[key]; !ok { // artificial behavior to match other stores
 		return backend.WrapError("Unable to delete from MemStore", fmt.Errorf("No such key"))
 	}
+	d.mutex.Lock()
 	delete(d.content, key)
+	d.mutex.Unlock()
 	return nil
 }
