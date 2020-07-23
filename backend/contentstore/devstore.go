@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // DevStore is the backing structure needed to interact with a local, temporary image store
@@ -23,7 +25,7 @@ func NewDevStore() (*DevStore, error) {
 	if err != nil || !tmpDirInfo.IsDir() {
 		tmpDir, err = ioutil.TempDir("", "ashirt")
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to establish a DevStore", err)
 		}
 	}
 	return &DevStore{dir: tmpDir}, nil
@@ -33,21 +35,29 @@ func NewDevStore() (*DevStore, error) {
 func (d *DevStore) Upload(data io.Reader) (string, error) {
 	file, err := ioutil.TempFile(d.dir, "")
 	if err != nil {
-		return "", err
+		return "", backend.WrapError("Unable to upload to DevStore", err)
 	}
 	defer file.Close()
 	_, err = bufio.NewReader(data).WriteTo(file)
 	if err != nil {
-		return "", err
+		return "", backend.WrapError("Unable upload to DevStore", err)
 	}
 	return path.Base(file.Name()), nil
 }
 
 func (d *DevStore) Read(key string) (io.Reader, error) {
-	return os.Open(path.Join(d.dir, path.Clean(key)))
+	reader, err := os.Open(path.Join(d.dir, path.Clean(key)))
+	if err != nil {
+		return reader, backend.WrapError("Unable to read file from DevStore", err)
+	}
+	return reader, err
 }
 
 // Delete removes files in in your OS's temp directory
 func (d *DevStore) Delete(key string) error {
-	return os.Remove(path.Join(d.dir, path.Clean(key)))
+	err := os.Remove(path.Join(d.dir, path.Clean(key)))
+	if err != nil {
+		return backend.WrapError("Unable to delete file from DevStore", err)
+	}
+	return err
 }

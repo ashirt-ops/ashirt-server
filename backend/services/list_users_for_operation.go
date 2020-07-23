@@ -35,7 +35,7 @@ func ListUsersForOperation(ctx context.Context, db *database.Connection, i ListU
 	var users []userAndRole
 	err = db.Select(&users, *query)
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list users for operation", backend.DatabaseErr(err))
 	}
 	usersDTO := wrapListUsersForOperationResponse(users)
 	return usersDTO, nil
@@ -44,11 +44,11 @@ func ListUsersForOperation(ctx context.Context, db *database.Connection, i ListU
 func prepListUsersForOperation(ctx context.Context, db *database.Connection, i ListUsersForOperationInput) (*sq.SelectBuilder, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to list users for operation", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUsersOfOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list users for operation", backend.UnauthorizedReadErr(err))
 	}
 
 	query := sq.Select("slug", "first_name", "last_name", "role").

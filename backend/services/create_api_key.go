@@ -47,7 +47,7 @@ func CreateAPIKey(ctx context.Context, db *database.Connection, userSlug string)
 		"secret_key": secretKey,
 	})
 	if err != nil {
-		return nil, backend.WrapError("Unable to record api and secret keys",backend.DatabaseErr(err))
+		return nil, backend.WrapError("Unable to record api and secret keys", backend.DatabaseErr(err))
 	}
 
 	return &dtos.APIKey{

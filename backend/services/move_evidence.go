@@ -18,19 +18,19 @@ type MoveEvidenceInput struct {
 func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceInput) error {
 	sourceOperation, evidence, err := lookupOperationEvidence(db, i.SourceOperationSlug, i.EvidenceUUID)
 	if err != nil {
-		return backend.UnauthorizedReadErr(err)
+		return backend.WrapError("Unable to move evidence (src)", backend.UnauthorizedReadErr(err))
 	}
 
 	destinationOperation, err := lookupOperation(db, i.TargetOperationSlug)
 	if err != nil {
-		return backend.UnauthorizedReadErr(err)
+		return backend.WrapError("Unable to move evidence (dst op)", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx,
 		policy.CanModifyOperation{OperationID: sourceOperation.ID},
 		policy.CanModifyOperation{OperationID: destinationOperation.ID},
 	); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to move evidence", backend.UnauthorizedWriteErr(err))
 	}
 
 	//Check which tags can be migrated
@@ -43,7 +43,7 @@ func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceIn
 	})
 
 	if err != nil {
-		return err
+		return backend.WrapError("Unable to list tag differences for moving", err)
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
@@ -62,6 +62,9 @@ func MoveEvidence(ctx context.Context, db *database.Connection, i MoveEvidenceIn
 			}
 		})
 	})
+	if err != nil {
+		return backend.WrapError("Cannot move evidence", err)
+	}
 
-	return err
+	return nil
 }

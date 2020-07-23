@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // MemStore is the backing structure needed to interact with local memory -- for unit/integration
@@ -34,6 +35,11 @@ func NewMemStore() (*MemStore, error) {
 func (d *MemStore) Upload(data io.Reader) (key string, err error) {
 	key = uuid.New().String()
 	err = d.UploadWithName(key, data)
+
+	if err != nil {
+		err = backend.WrapError("Unable to add to MemStore", err)
+	}
+
 	return
 }
 
@@ -45,7 +51,7 @@ func (d *MemStore) Upload(data io.Reader) (key string, err error) {
 func (d *MemStore) UploadWithName(key string, data io.Reader) error {
 	b, err := ioutil.ReadAll(data)
 	if err != nil {
-		return err
+		return backend.WrapError("Unable upload with a given name to MemStore", err)
 	}
 
 	d.mutex.Lock()
@@ -57,7 +63,7 @@ func (d *MemStore) UploadWithName(key string, data io.Reader) error {
 func (d *MemStore) Read(key string) (io.Reader, error) {
 	data, ok := d.content[key]
 	if !ok {
-		return nil, fmt.Errorf("No such key")
+		return nil, backend.WrapError("Unable to read from MemStore", fmt.Errorf("No such key"))
 	}
 	return bytes.NewReader(data), nil
 }
@@ -65,7 +71,7 @@ func (d *MemStore) Read(key string) (io.Reader, error) {
 // Delete removes files in in your OS's temp directory
 func (d *MemStore) Delete(key string) error {
 	if _, ok := d.content[key]; !ok { // artificial behavior to match other stores
-		return fmt.Errorf("No such key")
+		return backend.WrapError("Unable to delete from MemStore", fmt.Errorf("No such key"))
 	}
 	delete(d.content, key)
 	return nil
