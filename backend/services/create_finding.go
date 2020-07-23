@@ -24,11 +24,11 @@ type CreateFindingInput struct {
 func CreateFinding(ctx context.Context, db *database.Connection, i CreateFindingInput) (*dtos.Finding, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create finding", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create finding", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.Title == "" {
@@ -48,7 +48,7 @@ func CreateFinding(ctx context.Context, db *database.Connection, i CreateFinding
 		"description":  i.Description,
 	})
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Unable to insert finding", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Finding{

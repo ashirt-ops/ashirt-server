@@ -30,27 +30,27 @@ type ListTagDifferenceForEvidenceInput struct {
 func ListTagDifference(ctx context.Context, db *database.Connection, i ListTagsDifferenceInput) (*dtos.TagDifference, error) {
 	sourceOperation, err := lookupOperation(db, i.SourceOperationSlug)
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to list tag differences", err)
 	}
 	destinationOperation, err := lookupOperation(db, i.DestinationOperationSlug)
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to list tag differences", err)
 	}
 
 	if err := policyRequireWithAdminBypass(ctx,
 		policy.CanReadOperation{OperationID: sourceOperation.ID},
 		policy.CanReadOperation{OperationID: destinationOperation.ID},
 	); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list tag differences", backend.UnauthorizedReadErr(err))
 	}
 
 	sourceTags, err := listTagsForOperation(db, sourceOperation.ID)
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Cannot list tag differences", err)
 	}
 	destinationTags, err := listTagsForOperation(db, destinationOperation.ID)
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Cannot list tag differences", err)
 	}
 
 	srcTagNames := standardizeTagName(sourceTags)
@@ -72,17 +72,17 @@ func ListTagDifference(ctx context.Context, db *database.Connection, i ListTagsD
 func ListTagDifferenceForEvidence(ctx context.Context, db *database.Connection, input ListTagDifferenceForEvidenceInput) (*dtos.TagDifference, error) {
 	diff, err := ListTagDifference(ctx, db, input.ListTagsDifferenceInput)
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to list tag difference", err)
 	}
 
 	_, evidence, err := lookupOperationEvidence(db, input.SourceOperationSlug, input.SourceEvidenceUUID)
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to get evidence for tagdiff", err)
 	}
 
 	tagMap, _, err := tagsForEvidenceByID(db, []int64{evidence.ID})
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Cannot get evidence tags", err)
 	}
 
 	updatedDiff := dtos.TagDifference{}

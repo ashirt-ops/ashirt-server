@@ -28,16 +28,16 @@ func DeleteAuthScheme(ctx context.Context, db *database.Connection, i DeleteAuth
 	var err error
 
 	if userID, err = selfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to delete auth scheme", backend.DatabaseErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanDeleteAuthScheme{UserID: userID, SchemeCode: i.SchemeName}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to delete auth scheme", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"user_id": userID, "auth_scheme": i.SchemeName}))
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete auth scheme", backend.DatabaseErr(err))
 	}
 
 	return nil

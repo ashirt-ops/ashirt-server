@@ -39,7 +39,7 @@ func ListUsers(ctx context.Context, db *database.Connection, i ListUsersInput) (
 	}
 	err := db.Select(&users, query)
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list users", backend.DatabaseErr(err))
 	}
 
 	usersDTO := []*dtos.User{}

@@ -23,16 +23,16 @@ type DeleteQueryInput struct {
 func DeleteQuery(ctx context.Context, db *database.Connection, i DeleteQueryInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to delete query", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyQueriesOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to delete query", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.Delete(sq.Delete("queries").Where(sq.Eq{"id": i.ID, "operation_id": operation.ID}))
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete query", backend.DatabaseErr(err))
 	}
 
 	return nil

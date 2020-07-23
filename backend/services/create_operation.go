@@ -25,7 +25,7 @@ type CreateOperationInput struct {
 
 func CreateOperation(ctx context.Context, db *database.Connection, i CreateOperationInput) (*dtos.Operation, error) {
 	if err := policy.Require(middleware.Policy(ctx), policy.CanCreateOperations{}); err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create operation", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.Name == "" {
@@ -38,7 +38,7 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 
 	cleanSlug := SanitizeOperationSlug(i.Slug)
 	if cleanSlug == "" {
-		return nil, backend.BadInputErr(errors.New("Invalid operation slug"), "Slug must contain english letters or numbers")
+		return nil, backend.BadInputErr(errors.New("Unable t o create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
 	}
 
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
@@ -55,9 +55,9 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 	})
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {
-			return nil, backend.BadInputErr(err, "An operation with this slug already exists")
+			return nil, backend.WrapError("Unable to create operation. Operation slug already exists.", backend.BadInputErr(err, "An operation with this slug already exists"))
 		}
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Unable to add new operation or permissions", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Operation{

@@ -22,11 +22,11 @@ type DeleteFindingInput struct {
 func DeleteFinding(ctx context.Context, db *database.Connection, i DeleteFindingInput) error {
 	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to delete finding", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to delete finding", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
@@ -34,7 +34,7 @@ func DeleteFinding(ctx context.Context, db *database.Connection, i DeleteFinding
 		tx.Delete(sq.Delete("findings").Where(sq.Eq{"id": finding.ID}))
 	})
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete finding", backend.DatabaseErr(err))
 	}
 
 	return nil

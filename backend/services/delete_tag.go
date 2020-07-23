@@ -23,11 +23,11 @@ type DeleteTagInput struct {
 func DeleteTag(ctx context.Context, db *database.Connection, i DeleteTagInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to delete tag", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyTagsOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to delete tag", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
@@ -35,7 +35,7 @@ func DeleteTag(ctx context.Context, db *database.Connection, i DeleteTagInput) e
 		tx.Delete(sq.Delete("tags").Where(sq.Eq{"id": i.ID}))
 	})
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete tag", backend.DatabaseErr(err))
 	}
 
 	return nil

@@ -31,7 +31,7 @@ func listAllOperations(db *database.Connection) ([]*dtos.Operation, error) {
 		GroupBy("operations.id").
 		OrderBy("operations.created_at DESC"))
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list all operations", backend.DatabaseErr(err))
 	}
 
 	operationsDTO := []*dtos.Operation{}

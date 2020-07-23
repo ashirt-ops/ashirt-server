@@ -27,11 +27,11 @@ type ListEvidenceForOperationInput struct {
 func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i ListEvidenceForOperationInput) ([]*dtos.Evidence, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to list evidence for an operation", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list evidence for an operation", backend.UnauthorizedReadErr(err))
 	}
 
 	var evidence []struct {
@@ -50,7 +50,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 
 	err = db.Select(&evidence, sb)
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list evidence for an operation", backend.DatabaseErr(err))
 	}
 
 	if len(evidence) == 0 {
@@ -64,7 +64,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 
 	tagsByEvidenceID, _, err := tagsForEvidenceByID(db, evidenceIDs)
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot get tags for evidence", backend.DatabaseErr(err))
 	}
 
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))

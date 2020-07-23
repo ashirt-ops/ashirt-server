@@ -22,11 +22,11 @@ type ListTagsForOperationInput struct {
 func ListTagsForOperation(ctx context.Context, db *database.Connection, i ListTagsForOperationInput) ([]*dtos.TagWithUsage, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to list tags for operation", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list tags for operation", backend.UnauthorizedReadErr(err))
 	}
 
 	return listTagsForOperation(db, operation.ID)
@@ -48,7 +48,7 @@ func listTagsForOperation(db *database.Connection, operationID int64) ([]*dtos.T
 		GroupBy("tags.id").
 		OrderBy("tags.id ASC"))
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot get tags for operation", backend.DatabaseErr(err))
 	}
 
 	tagsDTO := make([]*dtos.TagWithUsage, len(tags))
