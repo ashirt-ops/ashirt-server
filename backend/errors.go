@@ -151,3 +151,8 @@ func IsErrorAccountDisabled(err error) bool {
 func DisabledUserError() error {
 	return errors.New("This account has been disabled. Please contact an adminstrator if you think this is an error.")
 }
+
+// PanicedError represents any error the occurs
+func PanicedError() error {
+	return HTTPErr(http.StatusInternalServerError, "An unknown error occurred", errors.New("Pancied during processing"))
+}
