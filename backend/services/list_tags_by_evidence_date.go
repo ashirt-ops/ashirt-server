@@ -42,7 +42,7 @@ func ListTagsByEvidenceDate(ctx context.Context, db *database.Connection, i List
 
 	err = db.Select(&dbData,
 		sq.Select("tags.id", "tags.name", "tags.color_name").
-			Column("group_concat(evidence.created_at) AS usage_dates").
+			Column("group_concat(DISTINCT evidence.occurred_at ORDER BY evidence.occurred_at ASC SEPARATOR ',') AS usage_dates").
 			From("operations").
 			LeftJoin("evidence ON operations.id = evidence.operation_id").
 			LeftJoin("tag_evidence_map ON evidence.id = tag_evidence_map.evidence_id").
@@ -77,7 +77,7 @@ func sliceStrDatesToSliceDates(dates []string) ([]time.Time, error) {
 	times := make([]time.Time, len(dates))
 
 	for i, strTime := range dates {
-		t, err := time.Parse("2006-01-02 15:04:05", strTime)
+		t, err := time.Parse("2006-01-02 15:04:05", strTime) // parse dates as YYYY-MM-DD HH:mm:ss (with 0-prefixed times)
 		if err != nil {
 			return []time.Time{}, err
 		}

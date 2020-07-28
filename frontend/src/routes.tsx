@@ -14,6 +14,7 @@ const cx = classnames.bind(require('./stylesheet'))
 const AsyncLogin = makeAsyncPage(() => import('src/pages/login'))
 const AsyncOperationList = makeAsyncPage(() => import('src/pages/operation_list'))
 const AsyncOperationEdit = makeAsyncPage(() => import('src/pages/operation_edit'))
+const AsyncOperationOverview = makeAsyncPage(() => import('src/pages/operation_overview'))
 const AsyncFindingShow = makeAsyncPage(() => import('src/pages/operation_show/finding_show'))
 const AsyncEvidenceList = makeAsyncPage(() => import('src/pages/operation_show/evidence_list'))
 const AsyncFindingList = makeAsyncPage(() => import('src/pages/operation_show/finding_list'))
@@ -48,6 +49,9 @@ export default () => {
       {/* Operation edit */}
       <Route exact path="/operations/:slug/edit/:view(settings|users|tags)" component={AsyncOperationEdit} />
       <Redirect from="/operations/:slug/edit" to="/operations/:slug/edit/settings" />
+
+      {/* Operation overview */}
+      <Route exact path="/operations/:slug/overview" component={AsyncOperationOverview} />
 
       {/* Operation show */}
       <Route exact path="/operations/:slug/findings" component={AsyncFindingList} />

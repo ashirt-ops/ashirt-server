@@ -5,8 +5,8 @@ import * as React from 'react'
 import Card from 'src/components/card'
 import OperationBadges from 'src/components/operation_badges'
 import classnames from 'classnames/bind'
-import {Link} from 'react-router-dom'
-import {OperationStatus} from 'src/global_types'
+import { Link } from 'react-router-dom'
+import { OperationStatus } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
@@ -16,9 +16,10 @@ export default (props: {
   numUsers: number,
   status: OperationStatus,
 }) => (
-  <Card className={cx('root', props.className)}>
-    <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
-    <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} />
-    <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
-  </Card>
-)
+    <Card className={cx('root', props.className)}>
+      <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
+      <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} />
+      <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
+      <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
+    </Card>
+  )

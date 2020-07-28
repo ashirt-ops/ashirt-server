@@ -15,7 +15,7 @@ function getFgColorFromColor(color: number) {
   return yiq < 128 ? "#fff" : "#000";
 }
 
-function tagColorStyle(colorName: string): React.CSSProperties {
+export function tagColorStyle(colorName: string): React.CSSProperties {
   const color = tagColorNameToColor(colorName)
   return {
     backgroundColor: '#' + ('000000' + color.toString(16)).substr(-6),
