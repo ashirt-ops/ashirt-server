@@ -9,18 +9,22 @@ import { default as Tag, tagColorStyle } from 'src/components/tag'
 import { RouteComponentProps } from 'react-router-dom'
 import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
-import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns'
+import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format } from 'date-fns'
 
 import { default as Timeline, TimelineHeaders, DateHeader, SidebarHeader } from 'react-calendar-timeline'
 import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
 // make sure you include the timeline stylesheet or the timeline will not be styled
 import './timeline.css'
 
+// @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
+import { useHistory } from 'react-router-dom'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: RouteComponentProps<{ slug: string }>) => {
   const { slug } = props.match.params
   const wiredTags = useWiredData(React.useCallback(() => getTagsByEvidenceUsage({ operationSlug: slug }), [slug]))
+  const history = useHistory()
 
   return (
     <>
@@ -40,7 +44,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           const rtn = ranges.map(([start, end], i) => ({
             id: rangeCount + i,
             group: tag.id,
-            title: "",
+            title: "¯\_(ツ)_/¯",
             start_time: toStartOfDay(start),
             end_time: toEndOfDay(end),
             canChangeGroup: false,
@@ -52,14 +56,16 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
         }).flat(1)
 
         const itemRender = (props: ReactCalendarItemRendererProps<any>) => {
-          const borderColor = props.itemContext.selected ? "#880" : "#000"
+          const borderColor = props.itemContext.selected ? "#FFF" : "#000"
           const borderWidth = props.itemContext.selected ? 3 : 1
+          const borderRadius = "9px"
           return (
             <div  {...props.getItemProps({
               style: {
                 background: props.item.bgColor,
                 borderColor,
-                borderWidth
+                borderWidth,
+                borderRadius
               },
             })}>
               <div>{props.itemContext.title} </div>
@@ -68,7 +74,9 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
         }
 
         const timeChangeHandler = (visibleTimeStart: number, visibleTimeEnd: number, updateScrollCanvas: (s: number, e: number) => void) => {
-          const [minTime, maxTime] = [firstDate, lastDate].map(date => date.getTime())
+          // const [minTime, maxTime] = [firstDate, lastDate].map(date => date.getTime())
+          const minTime = toStartOfDay(firstDate).getTime()
+          const maxTime = toEndOfDay(lastDate).getTime()
           if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {
             updateScrollCanvas(minTime, maxTime)
           }
@@ -85,9 +93,11 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
 
         const groupRenderer = (props: ReactCalendarGroupRendererProps<any>) => {
           const tag = tags.filter(someTag => someTag.id == props.group.id)[0]
-          return <div style={{textAlign: "center"}}>
-            <Tag name={tag.name} color={tag.colorName} />
+          return (
+            <div style={{ textAlign: "center" }}>
+              <Tag name={tag.name} color={tag.colorName} />
             </div>
+          )
         }
 
         return (
@@ -101,7 +111,13 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
             itemRenderer={itemRender}
             onTimeChange={timeChangeHandler}
             groupRenderer={groupRenderer}
-            
+            onItemClick={(itemId, evt, time) => {
+              console.log("onItemClick");
+              const item = items.filter(someItem => someItem.id == itemId)[0]
+              const tag = tags.filter(someTag => someTag.id == item.group)[0]
+              const ymd = (d: Date) => format(d, "yyyy-MM-dd")
+              history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
+            }}
           >
             <TimelineHeaders  >
               <DateHeader unit="primaryHeader" />
