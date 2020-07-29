@@ -4,16 +4,17 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import Button from 'src/components/button'
-import { tagColorStyle } from 'src/components/tag'
+import { default as Tag, tagColorStyle } from 'src/components/tag'
 
 import { RouteComponentProps } from 'react-router-dom'
 import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
-import { differenceInCalendarDays, setHours, setMinutes, setSeconds, addDays } from 'date-fns'
+import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns'
 
-import Timeline from 'react-calendar-timeline'
+import { default as Timeline, TimelineHeaders, DateHeader, SidebarHeader } from 'react-calendar-timeline'
+import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
 // make sure you include the timeline stylesheet or the timeline will not be styled
-import 'react-calendar-timeline/lib/Timeline.css'
+import './timeline.css'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -26,44 +27,97 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
       <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
 
       {wiredTags.render(tags => {
+        const [firstDate, lastDate] = maxRange(tags.map(tag => tag.usages))
         const groups = tags.map(tag => ({
           id: tag.id,
           title: tag.name,
         }))
+
         let rangeCount = 0
         const items = tags.map((tag) => {
           const ranges = datesToRanges(tag.usages)
+          const tagColors = tagColorStyle(tag.colorName)
           const rtn = ranges.map(([start, end], i) => ({
             id: rangeCount + i,
             group: tag.id,
             title: "",
-            // start_time: toStartOfDay(start),
-            // end_time: toEndOfDay(end),
-            start_time: start,
-            end_time: end,
+            start_time: toStartOfDay(start),
+            end_time: toEndOfDay(end),
             canChangeGroup: false,
-            // className: cx("something")
-            style: tagColorStyle(tag.colorName),
+            bgColor: tagColors.backgroundColor,
           }))
           rangeCount += rtn.length
 
           return rtn
         }).flat(1)
 
-        return (<Timeline
-          groups={groups}
-          items={items}
-          defaultTimeStart={addDays(new Date(), -14)}
-          defaultTimeEnd={addDays(new Date(), 14)}
-          canMove={false}
-          canResize={false}
-        // itemRenderer={ }
-        />)
+        const itemRender = (props: ReactCalendarItemRendererProps<any>) => {
+          const borderColor = props.itemContext.selected ? "#880" : "#000"
+          const borderWidth = props.itemContext.selected ? 3 : 1
+          return (
+            <div  {...props.getItemProps({
+              style: {
+                background: props.item.bgColor,
+                borderColor,
+                borderWidth
+              },
+            })}>
+              <div>{props.itemContext.title} </div>
+            </div>
+          )
+        }
+
+        const timeChangeHandler = (visibleTimeStart: number, visibleTimeEnd: number, updateScrollCanvas: (s: number, e: number) => void) => {
+          const [minTime, maxTime] = [firstDate, lastDate].map(date => date.getTime())
+          if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {
+            updateScrollCanvas(minTime, maxTime)
+          }
+          else if (visibleTimeStart < minTime) {
+            updateScrollCanvas(minTime, minTime + (visibleTimeEnd - visibleTimeStart))
+          }
+          else if (visibleTimeEnd > maxTime) {
+            updateScrollCanvas(maxTime - (visibleTimeEnd - visibleTimeStart), maxTime)
+          }
+          else {
+            updateScrollCanvas(visibleTimeStart, visibleTimeEnd)
+          }
+        }
+
+        const groupRenderer = (props: ReactCalendarGroupRendererProps<any>) => {
+          const tag = tags.filter(someTag => someTag.id == props.group.id)[0]
+          return <div style={{textAlign: "center"}}>
+            <Tag name={tag.name} color={tag.colorName} />
+            </div>
+        }
+
+        return (
+          <Timeline
+            groups={groups}
+            items={items}
+            defaultTimeStart={firstDate}
+            defaultTimeEnd={lastDate}
+            canMove={false}
+            canResize={false}
+            itemRenderer={itemRender}
+            onTimeChange={timeChangeHandler}
+            groupRenderer={groupRenderer}
+            
+          >
+            <TimelineHeaders  >
+              <DateHeader unit="primaryHeader" />
+              <DateHeader />
+            </TimelineHeaders>
+          </Timeline>
+        )
       })}
     </>
   )
 }
 
+const maxRange = (dates: Array<Array<Date>>) => {
+  const sortedDates = dates.flat(1).sort()
+  return [sortedDates[0], sortedDates[sortedDates.length - 1]]
+}
 
 const datesToRanges = (dates: Array<Date>) => {
   const ranges = []
@@ -93,5 +147,7 @@ const datesToRanges = (dates: Array<Date>) => {
 }
 
 
-const toStartOfDay = (day: Date) => setHours(setMinutes(setSeconds(day, 0), 0), 0)
-const toEndOfDay = (day: Date) => setHours(setMinutes(setSeconds(day, 59), 59), 23)
+const toStartOfDay = (day: Date) => setTime(day, 0, 0, 1)
+const toEndOfDay = (day: Date) => setTime(day, 23, 59, 59)
+
+const setTime = (day: Date, hour: number, minute: number, second: number) => setHours(setMinutes(setSeconds(day, second), minute), hour)
