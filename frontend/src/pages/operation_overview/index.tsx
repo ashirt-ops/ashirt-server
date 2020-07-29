@@ -131,7 +131,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
 }
 
 const maxRange = (dates: Array<Array<Date>>) => {
-  const sortedDates = dates.flat(1).sort()
+  const sortedDates = dates.flat(1).sort( (a, b) => a.getTime() - b.getTime() )
   return [sortedDates[0], sortedDates[sortedDates.length - 1]]
 }
 
