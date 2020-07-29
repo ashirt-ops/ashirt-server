@@ -41,14 +41,15 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
         const items = tags.map((tag) => {
           const ranges = datesToRanges(tag.usages)
           const tagColors = tagColorStyle(tag.colorName)
-          const rtn = ranges.map(([start, end], i) => ({
+          const rtn = ranges.map(({ start, end, eventCount }, i) => ({
             id: rangeCount + i,
             group: tag.id,
-            title: "¯\_(ツ)_/¯",
+            title: `${eventCount} evidence`,
             start_time: toStartOfDay(start),
             end_time: toEndOfDay(end),
             canChangeGroup: false,
             bgColor: tagColors.backgroundColor,
+            color: tagColors.color,
           }))
           rangeCount += rtn.length
 
@@ -62,10 +63,13 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           return (
             <div  {...props.getItemProps({
               style: {
+                color: props.item.color,
+                fontWeight: "bold",
                 background: props.item.bgColor,
                 borderColor,
                 borderWidth,
-                borderRadius
+                borderRadius,
+                textAlign: "center",
               },
             })}>
               <div>{props.itemContext.title} </div>
@@ -95,7 +99,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           const tag = tags.filter(someTag => someTag.id == props.group.id)[0]
           return (
             <div style={{ textAlign: "center" }}>
-              <Tag name={tag.name} color={tag.colorName} />
+              <Tag name={tag.name} color={tag.colorName} className={cx('tag')} />
             </div>
           )
         }
@@ -131,7 +135,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
 }
 
 const maxRange = (dates: Array<Array<Date>>) => {
-  const sortedDates = dates.flat(1).sort( (a, b) => a.getTime() - b.getTime() )
+  const sortedDates = dates.flat(1).sort((a, b) => a.getTime() - b.getTime())
   return [sortedDates[0], sortedDates[sortedDates.length - 1]]
 }
 
@@ -140,24 +144,36 @@ const datesToRanges = (dates: Array<Date>) => {
 
   let start = null
   let nextEndDate = new Date()
+  let eventCount = 0
   for (const date of dates) {
     if (start == null) {
       start = date
       nextEndDate = start
+      eventCount = 1
       continue
     }
     const diff = differenceInCalendarDays(date, nextEndDate)
     if (diff == 1) {
       nextEndDate = date
+      eventCount++
     }
     else {
-      ranges.push([start, nextEndDate])
+      ranges.push({
+        start,
+        end: nextEndDate,
+        eventCount,
+      })
       start = date
       nextEndDate = start
+      eventCount = 1
     }
   }
   if (start != null) {
-    ranges.push([start, nextEndDate])
+    ranges.push({
+      start,
+      end: nextEndDate,
+      eventCount,
+    })
   }
   return ranges
 }

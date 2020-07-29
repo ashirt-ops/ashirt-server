@@ -27,10 +27,11 @@ export default (props: {
   name: string,
   color: string,
   onClick?: () => void,
+  className?: string
 }) => (
   <span
     children={props.name}
-    className={cx('root', {clickable: props.onClick != null})}
+    className={cx('root', props.className, {clickable: props.onClick != null})}
     style={tagColorStyle(props.color)}
     onClick={props.onClick}
   />
