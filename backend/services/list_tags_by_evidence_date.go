@@ -48,6 +48,7 @@ func ListTagsByEvidenceDate(ctx context.Context, db *database.Connection, i List
 			LeftJoin("tag_evidence_map ON evidence.id = tag_evidence_map.evidence_id").
 			LeftJoin("tags ON tags.id = tag_evidence_map.tag_id").
 			Where(sq.Eq{"slug": i.OperationSlug}).
+			Where(sq.NotEq{"tags.name": nil}).
 			GroupBy("tags.id"))
 
 	if err != nil {
