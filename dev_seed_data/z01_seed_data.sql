@@ -100,7 +100,6 @@ VALUES
     , ('co-op',        'Co-Op',        'A Cooperative Operation', 1, 0)
     , ('no-op',        'No-Op',        'An Orphaned Operation',   1, 0)
     , ('big-op',       'BigOp',        'An operation with lots of users', 1, 0)
-    , ('gantt-test',   'Gantt Test',   'An operation viewing overview', 1, 0)
     ;
 
 SET @alice_op_id = 1;
@@ -108,7 +107,6 @@ SET @bob_op_id = 2;
 SET @co_op_id = 3;
 SET @no_op_id = 4;
 SET @big_op_id = 5;
-SET @gantt_op_id = 6;
 
 INSERT INTO user_operation_permissions
     (`user_id`, `operation_id`, `role`)
@@ -117,7 +115,6 @@ VALUES
     , (@bob_uid,   @bob_op_id,   'admin')
     , (@alice_uid, @co_op_id,    'admin')
     , (@bob_uid,   @co_op_id,    'admin')
-    , (@alice_uid, @gantt_op_id, 'admin')
 
     , (@alice_uid,   @big_op_id, 'admin')
     , (@carl_uid,    @big_op_id, 'read')
@@ -169,11 +166,6 @@ VALUES
     , ('network',      'lightBlue',   @co_op_id)
     , ('data link',    'lightIndigo', @co_op_id)
     , ('physical',     'lightViolet', @co_op_id)
-    
-    , ('blinky',   'red', @co_op_id)
-    , ('inky',     'lightBlue', @co_op_id)
-    , ('pinky',    'lightRed', @co_op_id)
-    , ('clyde',    'orange', @co_op_id)
     ;
 
 -- Alice op tags
@@ -201,12 +193,6 @@ SET @tag_osi_5_id = 17;
 SET @tag_osi_6_id = 18;
 SET @tag_osi_7_id = 19;
 
--- Gantt Tags
-SET @tag_gantt_1_id = 20;
-SET @tag_gantt_2_id = 21;
-SET @tag_gantt_3_id = 22;
-SET @tag_gantt_4_id = 23;
-
 --                      0 1 2 3  4 5  6 7  8 9  A B C D E F
 SET @a_op_evi_uuid_1 = 'a10E0000-0000-4000-a000-000000000000';
 SET @a_op_evi_uuid_2 = 'a20E0000-0000-4000-a000-000000000000';
@@ -220,13 +206,6 @@ SET @c_op_evi_uuid_1 = 'c10E0000-0000-4000-8000-000000000000';
 SET @c_op_evi_uuid_2 = 'c20E0000-0000-4000-8000-000000000000';
 SET @c_op_evi_uuid_3 = 'c30E0000-c0de-4000-8000-000000000000';
 
--- Gantt Evidence
-SET @g_op_evi_uuid_1 = 'f10E0000-0000-4000-8000-000000000000';
-SET @g_op_evi_uuid_2 = 'f20E0000-0000-4000-8000-000000000000';
-SET @g_op_evi_uuid_3 = 'f30E0000-0000-4000-8000-000000000000';
-SET @g_op_evi_uuid_4 = 'f40E0000-0000-4000-8000-000000000000';
-SET @g_op_evi_uuid_5 = 'f50E0000-0000-4000-8000-000000000000';
-SET @g_op_evi_uuid_6 = 'f60E0000-0000-4000-8000-000000000000';
 
 INSERT INTO evidence
     (uuid, operation_id, operator_id, content_type, full_image_key, thumb_image_key, occurred_at, `description`)
@@ -243,12 +222,6 @@ VALUES
     , (@c_op_evi_uuid_2, @co_op_id,    @bob_uid,   'image',     'seed_rocky_full',    'seed_rocky_thumb',    now(), 'A raccoon juggling some leaves')
     , (@c_op_evi_uuid_3, @co_op_id,    @bob_uid,   'codeblock', 'seed_rs_aoc201501',  'seed_rs_aoc201501',   now(), 'Rust AOC 2015 Day 1 (https://adventofcode.com/2015/day/1)')
 
-    , (@g_op_evi_uuid_1, @gantt_op_id,    @alice_uid, 'image',     '',    '',    now() - INTERVAL 5 DAY, 'blinky + inky')
-    , (@g_op_evi_uuid_2, @gantt_op_id,    @alice_uid, 'image',     '',    '',    now() - INTERVAL 4 DAY, 'pinky + inky')
-    , (@g_op_evi_uuid_3, @gantt_op_id,    @alice_uid, 'image',     '',    '',    now() - INTERVAL 3 DAY, 'blinky + pinky + inky')
-    , (@g_op_evi_uuid_4, @gantt_op_id,    @alice_uid, 'image',     '',    '',    now() - INTERVAL 2 DAY, 'just inky')
-    , (@g_op_evi_uuid_5, @gantt_op_id,    @alice_uid, 'image',     '',    '',    now() - INTERVAL 1 DAY, 'blinky + pinky + inky again')
-    , (@g_op_evi_uuid_6, @gantt_op_id,    @alice_uid, 'image',     '',    '',    now(), 'pinky + inky again')
     ;
 
 SET @a_op_evi_1 = 1;
@@ -260,12 +233,6 @@ SET @b_op_evi_3 = 6;
 SET @c_op_evi_1 = 7;
 SET @c_op_evi_2 = 8;
 SET @c_op_evi_3 = 9;
-SET @g_op_evi_1 = 10;
-SET @g_op_evi_2 = 11;
-SET @g_op_evi_3 = 12;
-SET @g_op_evi_4 = 13;
-SET @g_op_evi_5 = 14;
-SET @g_op_evi_6 = 15;
 
 SET @a_op_evt_uuid_1 = 'a10F0000-0000-4000-a000-000000000000';
 SET @a_op_evt_uuid_2 = 'a20F0000-0000-4000-a000-000000000000';
@@ -331,25 +298,6 @@ VALUES
     , (@tag_osi_1_id, @c_op_evi_2)
     , (@tag_osi_3_id, @c_op_evi_3)
     , (@tag_osi_2_id, @c_op_evi_3)
-
-    , (@tag_gantt_1_id, @g_op_evi_1)
-    , (@tag_gantt_3_id, @g_op_evi_1)
-
-    , (@tag_gantt_2_id, @g_op_evi_2)
-    , (@tag_gantt_3_id, @g_op_evi_2)
-
-    , (@tag_gantt_1_id, @g_op_evi_3)
-    , (@tag_gantt_2_id, @g_op_evi_3)
-    , (@tag_gantt_3_id, @g_op_evi_3)
-
-    , (@tag_gantt_3_id, @g_op_evi_4)
-
-    , (@tag_gantt_1_id, @g_op_evi_5)
-    , (@tag_gantt_2_id, @g_op_evi_5)
-    , (@tag_gantt_3_id, @g_op_evi_5)
-
-    , (@tag_gantt_2_id, @g_op_evi_6)
-    , (@tag_gantt_3_id, @g_op_evi_6)
     ;
     
 SET @api_key = 'DAYPFGHnm1Pqes-l0Fm76_y1';
