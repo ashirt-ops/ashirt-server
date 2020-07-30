@@ -79,8 +79,9 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
 
         const timeChangeHandler = (visibleTimeStart: number, visibleTimeEnd: number, updateScrollCanvas: (s: number, e: number) => void) => {
           // const [minTime, maxTime] = [firstDate, lastDate].map(date => date.getTime())
-          const minTime = toStartOfDay(firstDate).getTime()
-          const maxTime = toEndOfDay(lastDate).getTime()
+          const thirtydays = 1000*60*60*24*30
+          const minTime = toStartOfDay(firstDate).getTime() - thirtydays
+          const maxTime = toEndOfDay(lastDate).getTime() + thirtydays
           if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {
             updateScrollCanvas(minTime, maxTime)
           }
