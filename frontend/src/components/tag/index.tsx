@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import {tagColorNameToColor} from 'src/helpers/tag_colors'
+import {tagColorNameToColor, disabledGray} from 'src/helpers/tag_colors'
 const cx = classnames.bind(require('./stylesheet'))
 
 // Returns an appropriate foreground color (white or black) for the given background color
@@ -27,12 +27,13 @@ export default (props: {
   name: string,
   color: string,
   onClick?: () => void,
-  className?: string
+  className?: string,
+  disabled?: boolean,
 }) => (
   <span
     children={props.name}
-    className={cx('root', props.className, {clickable: props.onClick != null})}
-    style={tagColorStyle(props.color)}
+    className={cx('root', { clickable: props.onClick != null }, props.className)}
+    style={tagColorStyle(props.disabled ? disabledGray : props.color)}
     onClick={props.onClick}
   />
 )
