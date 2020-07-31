@@ -11,7 +11,7 @@ import WithLabel from 'src/components/with_label'
 import { RouteComponentProps } from 'react-router-dom'
 import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
-import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format } from 'date-fns'
+import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format, addDays } from 'date-fns'
 
 import { default as Timeline, TimelineHeaders, DateHeader } from 'react-calendar-timeline'
 import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
@@ -35,6 +35,9 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
       <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
 
       {wiredTags.render(tags => {
+        if (tags.length == 0) {
+          return <div className={cx('no-content')}>Tags are not being utilized for this operation</div>
+        }
 
         const { groups, items, firstDate, lastDate, itemRenderer, groupRenderer, timeChangeHandler } = prepTimelineRender(tags)
 
@@ -102,18 +105,16 @@ const prepTimelineRender = (tags: Array<TagByEvidenceDate>) => {
   }).flat(1)
 
   const itemRenderer = (props: ReactCalendarItemRendererProps<any>) => {
-    const borderColor = props.itemContext.selected ? "#FFF" : "#000"
-    const borderWidth = props.itemContext.selected ? 3 : 1
-    const borderRadius = "9px"
+    const borderColor = props.itemContext.selected ? "#FFF" : "transparent"
     return (
       <div  {...props.getItemProps({
         style: {
           color: props.item.color,
           fontWeight: "bold",
           background: props.item.bgColor,
+          border: "solid 3px",
           borderColor,
-          borderWidth,
-          borderRadius,
+          borderRadius: 9,
           textAlign: "center",
           overflow: "hidden",
         },
@@ -159,8 +160,8 @@ const prepTimelineRender = (tags: Array<TagByEvidenceDate>) => {
   }
 
   return {
-    firstDate,
-    lastDate,
+    firstDate: addDays(lastDate, -30),
+    lastDate: addDays(lastDate, 1),
     groups,
     items,
     itemRenderer,
@@ -188,7 +189,7 @@ const datesToRanges = (dates: Array<Date>) => {
       continue
     }
     const diff = differenceInCalendarDays(date, nextEndDate)
-    if (diff == 1) {
+    if (diff <= 1) {
       nextEndDate = date
       eventCount++
     }
