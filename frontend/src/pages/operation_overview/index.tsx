@@ -5,6 +5,8 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import Button from 'src/components/button'
 import { default as Tag, tagColorStyle } from 'src/components/tag'
+import { TagByEvidenceDate, Tag as TagType } from 'src/global_types'
+import WithLabel from 'src/components/with_label'
 
 import { RouteComponentProps } from 'react-router-dom'
 import { getTagsByEvidenceUsage } from 'src/services'
@@ -23,116 +25,148 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: RouteComponentProps<{ slug: string }>) => {
   const { slug } = props.match.params
-  const wiredTags = useWiredData(React.useCallback(() => getTagsByEvidenceUsage({ operationSlug: slug }), [slug]))
   const history = useHistory()
+  const [disabledTags, setDisabledTags] = React.useState<{ [key: string]: boolean }>({})
+
+  const wiredTags = useWiredData(React.useCallback(() => getTagsByEvidenceUsage({ operationSlug: slug }), [slug]))
 
   return (
     <>
       <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
 
       {wiredTags.render(tags => {
-        const [firstDate, lastDate] = maxRange(tags.map(tag => tag.usages))
-        const groups = tags.map(tag => ({
-          id: tag.id,
-          title: tag.name,
-        }))
 
-        let rangeCount = 0
-        const items = tags.map((tag) => {
-          const ranges = datesToRanges(tag.usages)
-          const tagColors = tagColorStyle(tag.colorName)
-          const rtn = ranges.map(({ start, end, eventCount }, i) => ({
-            id: rangeCount + i,
-            group: tag.id,
-            title: `${eventCount} evidence`,
-            start_time: toStartOfDay(start),
-            end_time: toEndOfDay(end),
-            canChangeGroup: false,
-            bgColor: tagColors.backgroundColor,
-            color: tagColors.color,
-          }))
-          rangeCount += rtn.length
+        const { groups, items, firstDate, lastDate, itemRenderer, groupRenderer, timeChangeHandler } = prepTimelineRender(tags)
 
-          return rtn
-        }).flat(1)
-
-        const itemRender = (props: ReactCalendarItemRendererProps<any>) => {
-          const borderColor = props.itemContext.selected ? "#FFF" : "#000"
-          const borderWidth = props.itemContext.selected ? 3 : 1
-          const borderRadius = "9px"
-          return (
-            <div  {...props.getItemProps({
-              style: {
-                color: props.item.color,
-                fontWeight: "bold",
-                background: props.item.bgColor,
-                borderColor,
-                borderWidth,
-                borderRadius,
-                textAlign: "center",
-              },
-            })}>
-              <div>{props.itemContext.title} </div>
-            </div>
-          )
-        }
-
-        const timeChangeHandler = (visibleTimeStart: number, visibleTimeEnd: number, updateScrollCanvas: (s: number, e: number) => void) => {
-          // const [minTime, maxTime] = [firstDate, lastDate].map(date => date.getTime())
-          const thirtydays = 1000*60*60*24*30
-          const minTime = toStartOfDay(firstDate).getTime() - thirtydays
-          const maxTime = toEndOfDay(lastDate).getTime() + thirtydays
-          if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {
-            updateScrollCanvas(minTime, maxTime)
-          }
-          else if (visibleTimeStart < minTime) {
-            updateScrollCanvas(minTime, minTime + (visibleTimeEnd - visibleTimeStart))
-          }
-          else if (visibleTimeEnd > maxTime) {
-            updateScrollCanvas(maxTime - (visibleTimeEnd - visibleTimeStart), maxTime)
-          }
-          else {
-            updateScrollCanvas(visibleTimeStart, visibleTimeEnd)
-          }
-        }
-
-        const groupRenderer = (props: ReactCalendarGroupRendererProps<any>) => {
-          const tag = tags.filter(someTag => someTag.id == props.group.id)[0]
-          return (
-            <div style={{ textAlign: "center" }}>
-              <Tag name={tag.name} color={tag.colorName} className={cx('tag')} />
-            </div>
-          )
-        }
+        const filteredGroups = groups.filter(group => !disabledTags[group.title])
 
         return (
-          <Timeline
-            groups={groups}
-            items={items}
-            defaultTimeStart={firstDate}
-            defaultTimeEnd={lastDate}
-            canMove={false}
-            canResize={false}
-            itemRenderer={itemRender}
-            onTimeChange={timeChangeHandler}
-            groupRenderer={groupRenderer}
-            onItemClick={(itemId, evt, time) => {
-              console.log("onItemClick");
-              const item = items.filter(someItem => someItem.id == itemId)[0]
-              const tag = tags.filter(someTag => someTag.id == item.group)[0]
-              const ymd = (d: Date) => format(d, "yyyy-MM-dd")
-              history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
-            }}
-          >
-            <TimelineHeaders  >
-              <DateHeader unit="primaryHeader" />
-              <DateHeader />
-            </TimelineHeaders>
-          </Timeline>
+          <>
+            <TagList tags={tags} onStateChange={(data) => {
+              setDisabledTags(data)
+            }} />
+            <Timeline
+              groups={filteredGroups}
+              items={items}
+              defaultTimeStart={firstDate}
+              defaultTimeEnd={lastDate}
+              canMove={false}
+              canResize={false}
+              itemRenderer={itemRenderer}
+              onTimeChange={timeChangeHandler}
+              groupRenderer={groupRenderer}
+              minZoom={1000 * 60 * 60 * 24 * 30} // restrict zoom to 1 day max
+              onItemClick={(itemId, evt, time) => {
+                const item = items.filter(someItem => someItem.id == itemId)[0]
+                const tag = tags.filter(someTag => someTag.id == item.group)[0]
+                const ymd = (d: Date) => format(d, "yyyy-MM-dd")
+                history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
+              }}
+            >
+              <TimelineHeaders  >
+                <DateHeader unit="primaryHeader" />
+                <DateHeader />
+              </TimelineHeaders>
+            </Timeline>
+          </>
         )
       })}
     </>
   )
+}
+
+const prepTimelineRender = (tags: Array<TagByEvidenceDate>) => {
+  const [firstDate, lastDate] = maxRange(tags.map(tag => tag.usages))
+  const groups = tags.map(tag => ({
+    id: tag.id,
+    title: tag.name,
+  }))
+
+  let rangeCount = 0
+  const items = tags.map((tag) => {
+    const ranges = datesToRanges(tag.usages)
+    const tagColors = tagColorStyle(tag.colorName)
+    const rtn = ranges.map(({ start, end, eventCount }, i) => ({
+      id: rangeCount + i,
+      group: tag.id,
+      title: `${eventCount} item${eventCount == 1 ? '' : 's'}`,
+      start_time: toStartOfDay(start),
+      end_time: toEndOfDay(end),
+      canChangeGroup: false,
+      bgColor: tagColors.backgroundColor,
+      color: tagColors.color,
+    }))
+    rangeCount += rtn.length
+
+    return rtn
+  }).flat(1)
+
+  const itemRenderer = (props: ReactCalendarItemRendererProps<any>) => {
+    const borderColor = props.itemContext.selected ? "#FFF" : "#000"
+    const borderWidth = props.itemContext.selected ? 3 : 1
+    const borderRadius = "9px"
+    return (
+      <div  {...props.getItemProps({
+        style: {
+          color: props.item.color,
+          fontWeight: "bold",
+          background: props.item.bgColor,
+          borderColor,
+          borderWidth,
+          borderRadius,
+          textAlign: "center",
+          overflow: "hidden",
+        },
+      })}>
+        <div>{props.itemContext.title} </div>
+      </div>
+    )
+  }
+
+  const timeChangeHandler = (visibleTimeStart: number, visibleTimeEnd: number, updateScrollCanvas: (s: number, e: number) => void) => {
+    const oneDay = 1000 * 60 * 60 * 24
+    const thirtyDays = oneDay * 30
+    const minTime = toStartOfDay(firstDate).getTime() - thirtyDays
+    const maxTime = toEndOfDay(lastDate).getTime() + thirtyDays
+    const minSpan = 7 * oneDay
+
+    let timeStart = visibleTimeStart
+    let timeEnd = visibleTimeEnd
+
+    if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {
+      timeStart = minTime
+      timeEnd = maxTime
+    }
+    else if (visibleTimeStart < minTime) {
+      timeStart = minTime
+      timeEnd = minTime + (visibleTimeEnd - visibleTimeStart)
+    }
+    else if (visibleTimeEnd > maxTime) {
+      timeStart = maxTime - (visibleTimeEnd - visibleTimeStart)
+      timeEnd = maxTime
+    }
+    const adjustment = Math.max(0, Math.ceil((minSpan - (timeEnd - timeStart)) / 2))
+    updateScrollCanvas(timeStart - adjustment, timeEnd + adjustment)
+  }
+
+  const groupRenderer = (props: ReactCalendarGroupRendererProps<any>) => {
+    const tag = tags.filter(someTag => someTag.id == props.group.id)[0]
+    return (
+      <div style={{ textAlign: "center" }}>
+        <Tag name={tag.name} color={tag.colorName} className={cx('tagKey')} />
+      </div>
+    )
+  }
+
+  return {
+    firstDate,
+    lastDate,
+    groups,
+    items,
+    itemRenderer,
+    timeChangeHandler,
+    groupRenderer,
+  }
 }
 
 const maxRange = (dates: Array<Array<Date>>) => {
@@ -179,8 +213,35 @@ const datesToRanges = (dates: Array<Date>) => {
   return ranges
 }
 
-
+const setTime = (day: Date, hour: number, minute: number, second: number) => setHours(setMinutes(setSeconds(day, second), minute), hour)
 const toStartOfDay = (day: Date) => setTime(day, 0, 0, 1)
 const toEndOfDay = (day: Date) => setTime(day, 23, 59, 59)
 
-const setTime = (day: Date, hour: number, minute: number, second: number) => setHours(setMinutes(setSeconds(day, second), minute), hour)
+const TagList = (props: {
+  tags: Array<TagType>
+  onStateChange?: (data: { [key: string]: boolean }) => void
+}) => {
+  const [disabledTags, setDisabledTags] = React.useState<{ [key: string]: boolean }>(
+    props.tags.reduce((acc, curTag) => ({ ...acc, [curTag.name]: false }), {})
+  )
+
+  return (
+    <WithLabel label="Enabled Tags" className={cx('tag-switches')}>
+      <div className={cx()}>
+        {props.tags.map((tag, i) => (
+          <Tag
+            key={tag.id}
+            color={tag.colorName}
+            name={tag.name}
+            disabled={disabledTags[tag.name]}
+            onClick={() => {
+              const newList = { ...disabledTags, [tag.name]: !disabledTags[tag.name] }
+              props.onStateChange ? props.onStateChange(newList) : ""
+              setDisabledTags(newList)
+            }}
+          />
+        ))}
+      </div>
+    </WithLabel>
+  )
+}
