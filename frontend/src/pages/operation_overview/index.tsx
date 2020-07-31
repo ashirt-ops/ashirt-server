@@ -152,7 +152,7 @@ const prepTimelineRender = (tags: Array<TagByEvidenceDate>) => {
   const groupRenderer = (props: ReactCalendarGroupRendererProps<any>) => {
     const tag = tags.filter(someTag => someTag.id == props.group.id)[0]
     return (
-      <div style={{ textAlign: "center" }}>
+      <div style={{ textAlign: "center", lineHeight: 1, marginTop: "5px" }}>
         <Tag name={tag.name} color={tag.colorName} className={cx('tagKey')} />
       </div>
     )
