@@ -611,7 +611,6 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ListTagsByEvidenceDate(r.Context(), db, i)
 	}))
 
-
 	route(r, "GET", "/user/apikeys", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		userSlug := dr.FromQuery("userSlug").AsString()

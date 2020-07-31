@@ -129,7 +129,7 @@ const TimelineRow = (props: {
     if (self.current != null && props.evidence.uuid == props.focusUuid) {
       self.current.scrollIntoView()
     }
-  }, [self, props.focusUuid])
+  }, [self, props.focusUuid, props.evidence.uuid])
 
   const onTagClick = (t: Tag) => {
     props.onQueryUpdate(addTagToQuery(props.query, t.name))

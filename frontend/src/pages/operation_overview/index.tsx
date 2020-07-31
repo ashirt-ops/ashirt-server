@@ -13,7 +13,7 @@ import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format } from 'date-fns'
 
-import { default as Timeline, TimelineHeaders, DateHeader, SidebarHeader } from 'react-calendar-timeline'
+import { default as Timeline, TimelineHeaders, DateHeader } from 'react-calendar-timeline'
 import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
 // make sure you include the timeline stylesheet or the timeline will not be styled
 import './timeline.css'
