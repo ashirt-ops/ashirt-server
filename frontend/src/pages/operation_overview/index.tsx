@@ -90,7 +90,7 @@ const prepTimelineRender = (tags: Array<TagByEvidenceDate>) => {
     const ranges = datesToRanges(tag.usages)
     const tagColors = tagColorStyle(tag.colorName)
     const rtn = ranges.map(({ start, end, eventCount }, i) => ({
-      id: rangeCount + i,
+      id: rangeCount + i + 1, // an id of 0 doesn't trigger a click event
       group: tag.id,
       title: `${eventCount} item${eventCount == 1 ? '' : 's'}`,
       start_time: toStartOfDay(start),
