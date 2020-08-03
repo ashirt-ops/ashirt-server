@@ -15,8 +15,6 @@ import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format, add
 
 import { default as Timeline, TimelineHeaders, DateHeader } from 'react-calendar-timeline'
 import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
-// make sure you include the timeline stylesheet or the timeline will not be styled
-import './timeline.css'
 
 // @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
