@@ -3,16 +3,15 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import Button from 'src/components/button'
-import { default as Tag, tagColorStyle } from 'src/components/tag'
 import { TagByEvidenceDate, Tag as TagType } from 'src/global_types'
-import WithLabel from 'src/components/with_label'
-
 import { RouteComponentProps } from 'react-router-dom'
+import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format, addDays } from 'date-fns'
 import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
-import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format, addDays } from 'date-fns'
 
+import Button from 'src/components/button'
+import { default as Tag, tagColorStyle } from 'src/components/tag'
+import WithLabel from 'src/components/with_label'
 import { default as Timeline, TimelineHeaders, DateHeader } from 'react-calendar-timeline'
 import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
 
@@ -78,10 +77,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
 
 const prepTimelineRender = (tags: Array<TagByEvidenceDate>) => {
   const [firstDate, lastDate] = maxRange(tags.map(tag => tag.usages))
-  const groups = tags.map(tag => ({
-    id: tag.id,
-    title: tag.name,
-  }))
+  const groups = tags.map(tag => ({ id: tag.id, title: tag.name }))
 
   let rangeCount = 0
   const items = tags.map((tag) => {
@@ -124,9 +120,9 @@ const prepTimelineRender = (tags: Array<TagByEvidenceDate>) => {
 
   const timeChangeHandler = (visibleTimeStart: number, visibleTimeEnd: number, updateScrollCanvas: (s: number, e: number) => void) => {
     const oneDay = 1000 * 60 * 60 * 24
-    const thirtyDays = oneDay * 30
-    const minTime = toStartOfDay(firstDate).getTime() - thirtyDays
-    const maxTime = toEndOfDay(lastDate).getTime() + thirtyDays
+    const extraBuffer = oneDay * 30
+    const minTime = toStartOfDay(firstDate).getTime() - extraBuffer
+    const maxTime = toEndOfDay(lastDate).getTime() + extraBuffer
     const minSpan = 7 * oneDay
 
     let timeStart = visibleTimeStart
@@ -213,7 +209,7 @@ const datesToRanges = (dates: Array<Date>) => {
 }
 
 const setTime = (day: Date, hour: number, minute: number, second: number) => setHours(setMinutes(setSeconds(day, second), minute), hour)
-const toStartOfDay = (day: Date) => setTime(day, 0, 0, 1)
+const toStartOfDay = (day: Date) => setTime(day, 0, 0, 0)
 const toEndOfDay = (day: Date) => setTime(day, 23, 59, 59)
 
 const TagList = (props: {
