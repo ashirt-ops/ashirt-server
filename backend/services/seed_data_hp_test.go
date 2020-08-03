@@ -71,6 +71,14 @@ var HarryPotterSeedData = TestSeedData{
 		associateTagsToEvidence(EviDobby, TagMars, TagJupiter, TagMercury),
 		associateTagsToEvidence(EviPetrifiedHermione, TagMars, CommonTagWhatCoS, CommonTagWhoCoS),
 
+		// tags are in a pattern for easy test verification of operation overview:
+		//       01234
+		// who   #...#
+		// what  .#.#.
+		// where #####
+		// when  .###.
+		// why   ##.##
+		// Extra is added in to verify multiple evidence on a single day reflected in count
 		associateTagsToEvidence(EviGanttZero, CommonTagWhoGantt, CommonTagWhereGantt, CommonTagWhyGantt),
 		associateTagsToEvidence(EviGanttOne, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt),
 		associateTagsToEvidence(EviGanttTwo, CommonTagWhereGantt, CommonTagWhenGantt),
@@ -168,14 +176,6 @@ var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-
 var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-diary", "What's a Horcrux?", "codeblock", 0)
 
 var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-rockher", "Strangely real-looking statue", "image", 0)
-
-// tags are in a pattern:
-//       01234
-// who   *   *
-// what   * *
-// where *****
-// when   ***
-// why   ** **
 
 var EviGanttZero = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-one", "", "none", -4)
 var EviGanttOne = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-two", "", "none", -3)
