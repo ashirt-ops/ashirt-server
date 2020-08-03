@@ -12,7 +12,7 @@ import (
 
 var HarryPotterSeedData = TestSeedData{
 	Users:      []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick},
-	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows},
+	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows, OpGanttChart},
 	Tags: []models.Tag{
 		TagFamily, TagFriendship, TagHome, TagLoyalty, TagCourage, TagGoodVsEvil, TagSupernatural,
 		TagMercury, TagVenus, TagEarth, TagMars, TagJupiter, TagSaturn, TagNeptune,
@@ -20,6 +20,7 @@ var HarryPotterSeedData = TestSeedData{
 		// common tags among all operations
 		CommonTagWhoSS, CommonTagWhatSS, CommonTagWhereSS, CommonTagWhenSS, CommonTagWhySS,
 		CommonTagWhoCoS, CommonTagWhatCoS, CommonTagWhereCoS, CommonTagWhenCoS, CommonTagWhyCoS,
+		CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt,
 	},
 	APIKeys: []models.APIKey{
 		APIKeyHarry1, APIKeyHarry2,
@@ -51,6 +52,10 @@ var HarryPotterSeedData = TestSeedData{
 
 		newUserOpPermission(UserDumbledore, OpSorcerersStone, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
+
+		newUserOpPermission(UserDumbledore, OpGanttChart, policy.OperationRoleAdmin),
+		newUserOpPermission(UserHarry, OpGanttChart, policy.OperationRoleWrite),
+		newUserOpPermission(UserGinny, OpGanttChart, policy.OperationRoleRead),
 	},
 	Findings: []models.Finding{
 		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear,
@@ -58,12 +63,20 @@ var HarryPotterSeedData = TestSeedData{
 	Evidences: []models.Evidence{
 		EviDursleys, EviMirrorOfErised,
 		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione,
+		EviGanttZero, EviGanttOne, EviGanttTwo, EviGanttExtra, EviGanttThree, EviGanttFour,
 	},
 	TagEviMap: unionTagEviMap(
 		associateTagsToEvidence(EviDursleys, TagFamily, TagHome),
 		associateTagsToEvidence(EviFlyingCar, TagEarth, TagSaturn),
 		associateTagsToEvidence(EviDobby, TagMars, TagJupiter, TagMercury),
 		associateTagsToEvidence(EviPetrifiedHermione, TagMars, CommonTagWhatCoS, CommonTagWhoCoS),
+
+		associateTagsToEvidence(EviGanttZero, CommonTagWhoGantt, CommonTagWhereGantt, CommonTagWhyGantt),
+		associateTagsToEvidence(EviGanttOne, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt),
+		associateTagsToEvidence(EviGanttTwo, CommonTagWhereGantt, CommonTagWhenGantt),
+		associateTagsToEvidence(EviGanttExtra, CommonTagWhenGantt),
+		associateTagsToEvidence(EviGanttThree, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt),
+		associateTagsToEvidence(EviGanttFour, CommonTagWhoGantt, CommonTagWhereGantt, CommonTagWhyGantt),
 	),
 	EviFindingsMap: unionEviFindingMap(
 		associateEvidenceToFinding(FindingBook2Magic, EviDobby, EviFlyingCar, EviWhompingWillow),
@@ -106,6 +119,7 @@ var OpGobletOfFire = newHPOp("HPGoF", "Harry Potter and The Goblet Of Fire")
 var OpOrderOfThePhoenix = newHPOp("HPOotP", "Harry Potter and The Order Of The Phoenix")
 var OpHalfBloodPrince = newHPOp("HPHBP", "Harry Potter and The Half Blood Prince")
 var OpDeathlyHallows = newHPOp("HPDH", "Harry Potter and The Deathly Hallows")
+var OpGanttChart = newHPOp("HPGantt", "Harry Potter and The Curse of Admin Oversight")
 
 var newHPTag = newTagGen(1)
 var TagFamily = newHPTag(OpSorcerersStone.ID, "Family", "red")
@@ -136,18 +150,39 @@ var CommonTagWhereCoS = newHPTag(OpChamberOfSecrets.ID, "Where", "lightGreen")
 var CommonTagWhenCoS = newHPTag(OpChamberOfSecrets.ID, "When", "lightIndigo")
 var CommonTagWhyCoS = newHPTag(OpChamberOfSecrets.ID, "Why", "lightYellow")
 
+var CommonTagWhoGantt = newHPTag(OpGanttChart.ID, "Who", "lightRed")
+var CommonTagWhatGantt = newHPTag(OpGanttChart.ID, "What", "lightBlue")
+var CommonTagWhereGantt = newHPTag(OpGanttChart.ID, "Where", "lightGreen")
+var CommonTagWhenGantt = newHPTag(OpGanttChart.ID, "When", "lightIndigo")
+var CommonTagWhyGantt = newHPTag(OpGanttChart.ID, "Why", "lightYellow")
+
 var newHPEvidence = newEvidenceGen(1)
-var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-dursleys", "Dursleys take care of young harry", "image")
-var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-mirror", "Harry see parents in the mirror", "image")
+var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-dursleys", "Dursleys take care of young harry", "image", 0)
+var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-mirror", "Harry see parents in the mirror", "image", 0)
 
-var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-flyingcar", "A Car that flies", "image")
-var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-dobby", "an elf?", "image")
-var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "evi-uuid-spider", "Just a big spider", "image")
-var EviMoaningMyrtle = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-myrtle", "She's very sad", "image")
-var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-willow", "Don't get too close", "image")
-var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-diary", "What's a Horcrux?", "codeblock")
+var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-flyingcar", "A Car that flies", "image", 0)
+var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-dobby", "an elf?", "image", 0)
+var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "evi-uuid-spider", "Just a big spider", "image", 0)
+var EviMoaningMyrtle = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-myrtle", "She's very sad", "image", 0)
+var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-willow", "Don't get too close", "image", 0)
+var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-diary", "What's a Horcrux?", "codeblock", 0)
 
-var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-rockher", "Strangely real-looking statue", "image")
+var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-rockher", "Strangely real-looking statue", "image", 0)
+
+// tags are in a pattern:
+//       01234
+// who   *   *
+// what   * *
+// where *****
+// when   ***
+// why   ** **
+
+var EviGanttZero = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-one", "", "none", -4)
+var EviGanttOne = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-two", "", "none", -3)
+var EviGanttTwo = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-three", "", "none", -2)
+var EviGanttThree = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-four", "", "none", -1)
+var EviGanttFour = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-five", "", "none", 0)
+var EviGanttExtra = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-extra", "", "none", -2)
 
 var newHPQuery = newQueryGen(1)
 var QuerySalazarsHier = newHPQuery(OpChamberOfSecrets.ID, "Find Heir", "Magic Query String", "findings")
