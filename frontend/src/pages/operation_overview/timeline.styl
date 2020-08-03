@@ -1,3 +1,13 @@
+@import '~src/vars'
+
+$border = #0B1013
+$date-header = #fff
+
+$cursor = #2196f3
+$dark-background = #202A32
+$even-row-color = rgba(0, 0, 0, 0.05)
+$weekend-column-color = rgba(11, 16, 19, 0.5)
+
 :global
   .react-calendar-timeline *
     box-sizing: border-box
@@ -38,11 +48,11 @@
       vertical-align: top
       position: relative
       box-sizing: border-box
-      border-right: 1px solid #0B1013
+      border-right: 1px solid $border
 
       &.rct-sidebar-right
         border-right: 0;
-        border-left: 1px solid #0B1013;
+        border-left: 1px solid $border
       
       .rct-sidebar-row
         padding: 0 4px
@@ -51,25 +61,25 @@
         text-overflow: ellipsis
         box-sizing: border-box
         margin: 0
-        border-bottom: 1px solid #0B1013
+        border-bottom: 1px solid $border
 
         &.rct-sidebar-row-odd
-          background: rgba(0, 0, 0, 0.05)
+          background: $dark-background
 
         &.rct-sidebar-row-even
-          background: #202A32
+          background: $even-row-color
 
     .rct-vertical-lines
       .rct-vl
         position: absolute
-        border-left: 1px solid #0B1013
+        border-left: 1px solid $border
         z-index: 30
 
         &.rct-vl-first
           border-left-width: 2px
 
         &.rct-day-6, &.rct-day-0
-          background: rgba(11, 16, 19, 0.5)
+          background: $weekend-column-color
 
     .rct-horizontal-lines
       -webkit-user-select: none
@@ -78,20 +88,20 @@
       user-select: none
 
       .rct-hl-even, .rct-hl-odd
-        border-bottom: 1px solid #0B1013
+        border-bottom: 1px solid $border
         box-sizing: border-box
         z-index: 40
 
       .rct-hl-odd
-        background: rgba(0, 0, 0, 0.05)
+        background: $dark-background
 
       .rct-hl-even
-        background: #202A32
+        background: $even-row-color
 
     .rct-cursor-line
       position: absolute
       width: 2px
-      background: #2196f3
+      background: $cursor
       z-index: 51
 
     .rct-dateHeader 
@@ -99,22 +109,22 @@
       align-items: center
       justify-content: center
       height: 100%
-      border-bottom: 1px solid #0B1013
+      border-bottom: 1px solid $border
       cursor: pointer
       font-size: 14px
-      background-color: #202A32
+      background-color: $dark-background
       font-weight: 600
-      border-left: 2px solid #0B1013
+      border-left: 2px solid $border
 
     .rct-dateHeader-primary
       background-color: initial
-      border-left: 1px solid #0B1013
-      border-right: 1px solid #0B1013
-      color: #fff
+      border-left: 1px solid $border
+      border-right: 1px solid $border
+      color: $date-header
 
     .rct-header-root
-      background: #202A32
-      border-bottom: 1px solid #0B1013
+      background: $dark-background
+      border-bottom: 1px solid $border
 
     .rct-calendar-header
-      border: 1px solid #0B1013
+      border: 1px solid $border
