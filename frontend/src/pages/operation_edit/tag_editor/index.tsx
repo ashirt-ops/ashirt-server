@@ -11,11 +11,15 @@ import {default as Button, ButtonGroup} from 'src/components/button'
 import {getTags} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
 
+// @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
+import { useHistory } from 'react-router-dom'
+
 const TagTable = (props: {
   operationSlug: string,
   tags: Array<TagWithUsage>,
   onUpdate: () => void,
 }) => {
+  const history = useHistory()
   const editTagModal = useModal<{ tag: TagWithUsage }>(modalProps => (
     <EditTagModal {...modalProps} operationSlug={props.operationSlug} onEdited={props.onUpdate} />
   ))
@@ -27,7 +31,7 @@ const TagTable = (props: {
     <Table columns={['Tag', '# Evidence Attached To', 'Actions']}>
       {props.tags.map(tag => (
         <tr key={tag.name}>
-          <td><Tag name={tag.name} color={tag.colorName} /></td>
+          <td><Tag name={tag.name} color={tag.colorName} onClick={() => history.push(`/operations/${props.operationSlug}/evidence?q=tag:${tag.name}`)}/></td>
           <td>{tag.evidenceCount}</td>
           <td>
             <ButtonGroup>
