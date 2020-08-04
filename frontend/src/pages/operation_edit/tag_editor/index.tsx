@@ -58,7 +58,7 @@ const TagTable = (props: {
     <Table columns={columns} onColumnClicked={updateColumnSorting}>
       {[...props.tags].sort(sortFunc).map(tag => (
         <tr key={tag.name}>
-          <td><Tag name={tag.name} color={tag.colorName} onClick={() => history.push(`/operations/${props.operationSlug}/evidence?q=tag:${tag.name}`)} /></td>
+          <td><Tag name={tag.name} color={tag.colorName} onClick={() => history.push(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)} /></td>
           <td>{tag.evidenceCount}</td>
           <td>
             <ButtonGroup>
