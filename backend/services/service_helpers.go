@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
@@ -62,7 +63,10 @@ func lookupOperation(db *database.Connection, operationSlug string) (*models.Ope
 	err := db.Get(&operation, sq.Select("id", "name", "status").
 		From("operations").
 		Where(sq.Eq{"slug": operationSlug}))
-	return &operation, err
+	if err != nil {
+		return &operation, backend.WrapError("Unable to lookup operation by slug", err)
+	}
+	return &operation, nil
 }
 
 // lookupOperationFinding returns an operation & finding model for the given operation slug / finding uuid
@@ -76,11 +80,11 @@ func lookupOperationFinding(db *database.Connection, operationSlug string, findi
 	var finding models.Finding
 	err = db.Get(&finding, sq.Select("*").From("findings").Where(sq.Eq{"uuid": findingUUID}))
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, backend.WrapError("Unable to lookup finding by uuid", err)
 	}
 
 	if finding.OperationID != operation.ID {
-		return nil, nil, fmt.Errorf("Finding %d belongs to operation %d not %d", finding.ID, finding.OperationID, operation.ID)
+		return nil, nil, fmt.Errorf("Unable to lookup operation/finding. Finding %d belongs to operation %d not %d", finding.ID, finding.OperationID, operation.ID)
 	}
 
 	return operation, &finding, nil
@@ -99,11 +103,11 @@ func lookupOperationEvidence(db *database.Connection, operationSlug string, evid
 		From("evidence").
 		Where(sq.Eq{"uuid": evidenceUUID}))
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, backend.WrapError("Unable to lookup evidence by uuid", err)
 	}
 
 	if evidence.OperationID != operation.ID {
-		return nil, nil, fmt.Errorf("Evidence %d belongs to operation %d not %d", evidence.ID, evidence.OperationID, operation.ID)
+		return nil, nil, fmt.Errorf("Unable to lookup operation/evidence. Evidence %d belongs to operation %d not %d", evidence.ID, evidence.OperationID, operation.ID)
 	}
 
 	return operation, &evidence, nil
@@ -122,10 +126,10 @@ func ensureTagIDsBelongToOperation(db *database.Connection, tagIDs []int64, oper
 		Where(sq.NotEq{"operation_id": operation.ID}))
 
 	if err != nil {
-		return err
+		return backend.WrapError("Unable to lookup tags by operation ID", err)
 	}
 	if len(badTags) > 0 {
-		return fmt.Errorf("Tags [%v] do not belong to operation %s", badTags, operation.Slug)
+		return fmt.Errorf("Unable to verify tags for operation. Tags [%v] do not belong to operation %s", badTags, operation.Slug)
 	}
 	return nil
 }
@@ -153,6 +157,9 @@ func isAdmin(ctx context.Context) error {
 func userSlugToUserID(db *database.Connection, slug string) (int64, error) {
 	var userID int64
 	err := db.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": slug}))
+	if err != nil {
+		return userID, backend.WrapError("Unable to look up user by slug", err)
+	}
 	return userID, err
 }
 
@@ -160,13 +167,5 @@ func selfOrSlugToUserID(ctx context.Context, db *database.Connection, slug strin
 	if slug == "" {
 		return middleware.UserID(ctx), nil
 	}
-	var userID int64
-	err := db.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": slug}))
-	return userID, err
-}
-
-func userIDFromSlugTx(tx *database.Transactable, slug string) int64 {
-	var user models.User = models.User{ID: -1} // providing some default value in case tx.Get fails
-	tx.Get(&user, sq.Select("id").From("users").Where(sq.Eq{"slug": slug}))
-	return user.ID
+	return userSlugToUserID(db, slug)
 }

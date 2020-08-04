@@ -21,11 +21,11 @@ import (
 func DeleteOperation(ctx context.Context, db *database.Connection, contentStore contentstore.Store, slug string) error {
 	operation, err := lookupOperation(db, slug)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to delete operation", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanDeleteOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to delete operation", backend.UnauthorizedWriteErr(err))
 	}
 	log := logging.ReqLogger(ctx)
 
@@ -78,7 +78,7 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 		if err != nil {
 			log.Log("task", "delete operation", "msg", "Failed to fully delete operation data",
 				"error", err.Error())
-			return backend.DatabaseErr(err)
+			return backend.WrapError("Cannot delete operation", backend.DatabaseErr(err))
 		}
 		return nil
 	})

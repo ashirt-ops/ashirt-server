@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
+	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // S3Store is the backing structure needed to interact with an Amazon S3 storage service
@@ -23,7 +24,7 @@ type S3Store struct {
 func NewS3Store(bucketName string, region string) (*S3Store, error) {
 	sess, err := session.NewSession()
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to establish an s3 session", err)
 	}
 	return &S3Store{
 		bucketName: bucketName,
@@ -42,7 +43,11 @@ func (s *S3Store) Upload(data io.Reader) (string, error) {
 		Key:    aws.String(key),
 	})
 
-	return key, err
+	if err != nil {
+		return key, backend.WrapError("Upload to s3 failed", err)
+	}
+
+	return key, nil
 }
 
 // Read retrieves the indicated file from Amazon S3
@@ -52,7 +57,7 @@ func (s *S3Store) Read(key string) (io.Reader, error) {
 		Key:    aws.String(key),
 	})
 	if err != nil {
-		return nil, err
+		return nil, backend.WrapError("Unable to read from s3", err)
 	}
 	return res.Body, nil
 }
@@ -63,5 +68,10 @@ func (s *S3Store) Delete(key string) error {
 		Bucket: aws.String(s.bucketName),
 		Key:    aws.String(key),
 	})
-	return err
+
+	if err != nil {
+		return backend.WrapError("Delete from s3 failed", err)
+	}
+
+	return nil
 }

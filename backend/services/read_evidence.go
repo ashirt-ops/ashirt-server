@@ -34,10 +34,10 @@ type ReadEvidenceOutput struct {
 func ReadEvidence(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i ReadEvidenceInput) (*ReadEvidenceOutput, error) {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to read evidence", backend.UnauthorizedReadErr(err))
 	}
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
 	}
 
 	var media io.Reader
@@ -45,14 +45,14 @@ func ReadEvidence(ctx context.Context, db *database.Connection, contentStore con
 	if i.LoadPreview {
 		preview, err = contentStore.Read(evidence.ThumbImageKey)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Cannot read evidence preview", err)
 		}
 	}
 
 	if i.LoadMedia {
 		media, err = contentStore.Read(evidence.FullImageKey)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Cannot read evidence media", err)
 		}
 	}
 

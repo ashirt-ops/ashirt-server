@@ -25,11 +25,11 @@ type DeleteEvidenceInput struct {
 func DeleteEvidence(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i DeleteEvidenceInput) error {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to delete evidence", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to delete evidence", backend.UnauthorizedWriteErr(err))
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
@@ -40,11 +40,11 @@ func DeleteEvidence(ctx context.Context, db *database.Connection, contentStore c
 		tx.Delete(sq.Delete("evidence").Where(sq.Eq{"id": evidence.ID}))
 	})
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete evidence", backend.DatabaseErr(err))
 	}
 
 	if err = deleteEvidenceContent(contentStore, *evidence); err != nil {
-		return backend.DeleteErr(err)
+		return backend.WrapError("Cannot delete evidence content", backend.DeleteErr(err))
 	}
 
 	return nil

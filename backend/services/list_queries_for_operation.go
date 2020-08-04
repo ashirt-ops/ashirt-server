@@ -20,11 +20,11 @@ import (
 func ListQueriesForOperation(ctx context.Context, db *database.Connection, operationSlug string) ([]*dtos.Query, error) {
 	operation, err := lookupOperation(db, operationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to list queries", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list queries", backend.UnauthorizedReadErr(err))
 	}
 
 	var queries = make([]models.Query, 0)
@@ -34,7 +34,7 @@ func ListQueriesForOperation(ctx context.Context, db *database.Connection, opera
 		OrderBy("name ASC"))
 
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list queries", backend.DatabaseErr(err))
 	}
 
 	var queriesDTO = make([]*dtos.Query, len(queries))

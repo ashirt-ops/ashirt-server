@@ -25,7 +25,7 @@ type ListUsersForAdminInput struct {
 // meant for admin review. For use in admin views only.
 func ListUsersForAdmin(ctx context.Context, db *database.Connection, i ListUsersForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list users", backend.UnauthorizedReadErr(err))
 	}
 
 	var users []struct {
@@ -46,7 +46,7 @@ func ListUsersForAdmin(ctx context.Context, db *database.Connection, i ListUsers
 
 	err := i.Pagination.Select(ctx, db, &users, sb)
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list users for admin", backend.DatabaseErr(err))
 	}
 
 	usersDTO := []*dtos.UserAdminView{}

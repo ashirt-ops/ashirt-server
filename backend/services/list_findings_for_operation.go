@@ -28,11 +28,11 @@ type ListFindingsForOperationInput struct {
 func ListFindingsForOperation(ctx context.Context, db *database.Connection, i ListFindingsForOperationInput) ([]*dtos.Finding, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to list findings for operation", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list findings for operation", backend.UnauthorizedReadErr(err))
 	}
 
 	whereClause, whereValues := buildListFindingsWhereClause(operation.ID, i.Filters)
@@ -58,7 +58,7 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 		GroupBy("findings.id").
 		OrderBy("occurred_to DESC", "occurred_from DESC"))
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list findings for operation", backend.DatabaseErr(err))
 	}
 
 	if len(findings) == 0 {
@@ -67,7 +67,7 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 
 	tagsByID, err := allTagsByID(db)
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot find all tags", backend.DatabaseErr(err))
 	}
 
 	findingsDTO := make([]*dtos.Finding, len(findings))

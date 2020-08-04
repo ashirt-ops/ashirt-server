@@ -26,16 +26,16 @@ type CreateQueryInput struct {
 func CreateQuery(ctx context.Context, db *database.Connection, i CreateQueryInput) (*dtos.Query, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create query", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyQueriesOfOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create query", backend.UnauthorizedWriteErr(err))
 	}
 
 	validationError := validateCreateQueryInput(i)
 	if validationError != nil {
-		return nil, validationError
+		return nil, backend.WrapError("CreateQuery validation  error", validationError)
 	}
 
 	queryID, err := db.Insert("queries", map[string]interface{}{
@@ -46,9 +46,9 @@ func CreateQuery(ctx context.Context, db *database.Connection, i CreateQueryInpu
 	})
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {
-			return nil, backend.BadInputErr(err, "A query with this name already exists")
+			return nil, backend.BadInputErr(backend.WrapError("Query already exists", err), "A query with this name already exists")
 		}
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Unable to add new query", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Query{

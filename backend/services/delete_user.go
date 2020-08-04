@@ -15,15 +15,18 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-// DeleteUser needs some godocs
+// DeleteUser provides the ability for a super admin to remove a user from the system. Doing so
+// removes access only. Evidence and other contributions remain. Note that users are not able to
+// delete their own accounts to prevent accidents. Also note that once a user has been deleted,
+// they cannot be restored.
 func DeleteUser(ctx context.Context, db *database.Connection, slug string) error {
 	if !middleware.IsAdmin(ctx) {
-		return backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin"))
+		return backend.WrapError("Unwilling to delete user", backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin")))
 	}
 
 	userID, err := userSlugToUserID(db, slug)
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to delete user", backend.DatabaseErr(err))
 	}
 
 	if userID == middleware.UserID(ctx) {
@@ -37,7 +40,7 @@ func DeleteUser(ctx context.Context, db *database.Connection, slug string) error
 		Disabled: &disabled,
 	})
 	if disableErr != nil {
-		return disableErr
+		return backend.WrapError("Could not set user to disabled prior to deletion", disableErr)
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
@@ -47,7 +50,7 @@ func DeleteUser(ctx context.Context, db *database.Connection, slug string) error
 		tx.Update(sq.Update("users").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
 	})
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete user", backend.DatabaseErr(err))
 	}
 
 	return nil

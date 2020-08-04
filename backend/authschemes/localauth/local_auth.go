@@ -35,7 +35,7 @@ func (LocalAuthScheme) FriendlyName() string {
 // 1. POST ${prefix}/register (flags that a new user should be created)
 //
 // 2. POST ${prefix}/login (verifies the username/password combo)
-
+//
 // 3. POST ${prefix}/login/resetpassword (second authentication step for users to reset their password if forced to)
 //
 // 4. PUT ${prefix}/password (allows users to change their password)
@@ -63,7 +63,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 		encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to generate encrypted password", err)
 		}
 
 		userResult, err := bridge.CreateNewUser(authschemes.UserProfile{
@@ -95,7 +95,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			authData, authDataErr := bridge.FindUserAuth(userKey)
 			checkPwErr := checkUserCredentials(authData, password)
 			if authDataErr != nil || checkPwErr != nil {
-				return nil, backend.InvalidCredentialsErr(coalesceError(authDataErr, checkPwErr))
+				return nil, backend.WrapError("Could not validate user", backend.InvalidCredentialsErr(coalesceError(authDataErr, checkPwErr)))
 			}
 
 			return nil, attemptFinishLogin(w, r, bridge, authData)
@@ -117,12 +117,12 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 			err := updateUserPassword(bridge, sess.UserKey, newPassword)
 			if err != nil {
-				return nil, err
+				return nil, backend.WrapError("Unable to reset user password", err)
 			}
 
 			authData, err := bridge.FindUserAuth(sess.UserKey)
 			if err != nil {
-				return nil, err
+				return nil, backend.WrapError("Unable to reset user password", err)
 			}
 
 			return nil, attemptFinishLogin(w, r, bridge, authData)
@@ -142,7 +142,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			authData, authDataErr := bridge.FindUserAuth(userKey)
 			checkPwErr := checkUserCredentials(authData, oldPassword)
 			if authDataErr != nil || checkPwErr != nil {
-				return nil, backend.InvalidPasswordErr(coalesceError(authDataErr, checkPwErr))
+				return nil, backend.WrapError("Unable to set new password", backend.InvalidPasswordErr(coalesceError(authDataErr, checkPwErr)))
 			}
 			if authData.UserID != middleware.UserID(r.Context()) {
 				return nil, backend.InvalidPasswordErr(errors.New("Cannot reset password for a different user than is currently logged in"))
@@ -184,7 +184,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 		// Skipping password requirement check here -- Admins should have free reign
 		encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to encrypt new password", err)
 		}
 
 		return nil, bridge.UpdateAuthForUser(profile.UserKey, encryptedPassword, true)
@@ -205,7 +205,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 		encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
-			return nil, err
+			return nil, backend.WrapError("Unable to encrypt new password", err)
 		}
 
 		err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
@@ -222,22 +222,27 @@ func attemptFinishLogin(w http.ResponseWriter, r *http.Request, bridge authschem
 	if authData.NeedsPasswordReset {
 		err := bridge.SetAuthSchemeSession(w, r, &needsPasswordResetAuthSession{UserKey: authData.UserKey})
 		if err != nil {
-			return err
+			return backend.WrapError("Unable to set auth scheme in session", err)
 		}
 		return backend.UserRequiresAdditionalAuthenticationErr("PASSWORD_RESET_REQUIRED")
 	}
 
-	return bridge.LoginUser(w, r, authData.UserID, nil)
+	err := bridge.LoginUser(w, r, authData.UserID, nil)
+	if err != nil {
+		return backend.WrapError("Attempt to finish login failed", err)
+	}
+
+	return nil
 }
 
 func updateUserPassword(bridge authschemes.AShirtAuthBridge, userKey string, newPassword string) error {
 	if err := checkPasswordComplexity(newPassword); err != nil {
-		return err
+		return backend.WrapError("Unable to update password", err)
 	}
 
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return backend.WrapError("Unable to encrypte new password", err)
 	}
 
 	return bridge.UpdateAuthForUser(userKey, encryptedPassword, false)
@@ -247,6 +252,7 @@ func checkUserCredentials(authData authschemes.UserAuthData, password string) er
 	return bcrypt.CompareHashAndPassword(authData.EncryptedPassword, []byte(password))
 }
 
+// coalesceError returns the first non-nil error. Will return the following: e1, then e2, then nil
 func coalesceError(e1 error, e2 error) error {
 	if e1 != nil {
 		return e1

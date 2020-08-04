@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 	"math/rand"
 
 	sq "github.com/Masterminds/squirrel"
@@ -46,7 +47,7 @@ func (cui CreateUserInput) validate() error {
 // authentication, and instead rely on user-impersonation and API keys for access.
 func CreateHeadlessUser(ctx context.Context, db *database.Connection, i CreateUserInput) (CreateUserOutput, error) {
 	if err := isAdmin(ctx); err != nil {
-		return CreateUserOutput{}, backend.UnauthorizedWriteErr(err)
+		return CreateUserOutput{}, backend.WrapError("Unable to create new headless user", backend.UnauthorizedWriteErr(err))
 	}
 	i.Headless = true
 	return CreateUser(db, i)
@@ -63,7 +64,7 @@ func CreateHeadlessUser(ctx context.Context, db *database.Connection, i CreateUs
 func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, error) {
 	validationErr := i.validate()
 	if validationErr != nil {
-		return CreateUserOutput{}, validationErr
+		return CreateUserOutput{}, backend.WrapError("Unable to create new user", validationErr)
 	}
 
 	var userID int64
@@ -86,12 +87,15 @@ func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, e
 				slugSuffix = fmt.Sprintf("-%d", rand.Intn(99999))
 				continue
 			}
-			return CreateUserOutput{}, backend.DatabaseErr(err)
+			return CreateUserOutput{}, backend.WrapError("Unable to insert new user", backend.DatabaseErr(err))
 		}
 		break
 	}
 	if userID == 1 {
-		db.Update(sq.Update("users").Set("admin", true).Where(sq.Eq{"id": userID}))
+		err := db.Update(sq.Update("users").Set("admin", true).Where(sq.Eq{"id": userID}))
+		if err != nil {
+			logging.GetSystemLogger().Log("msg", "Unable to make the first user an admin", "error", err.Error())
+		}
 	}
 	return CreateUserOutput{
 		RealSlug: attemptedSlug,

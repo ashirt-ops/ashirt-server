@@ -24,7 +24,7 @@ type SetUserOperationRoleInput struct {
 func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUserOperationRoleInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unable to set user role", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.UserSlug == "" {
@@ -33,18 +33,18 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 
 	userID, err := userSlugToUserID(db, i.UserSlug)
 	if err != nil {
-		return backend.BadInputErr(err, fmt.Sprintf(`No user with slug "%s" was found`, i.UserSlug))
+		return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug "%s" was found`, i.UserSlug)))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserOfOperation{UserID: userID, OperationID: operation.ID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to set user role", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.Role == "" {
 		err := db.Delete(sq.Delete("user_operation_permissions").Where(sq.Eq{"user_id": userID, "operation_id": operation.ID}))
 
 		if err != nil {
-			return backend.DatabaseErr(err)
+			return backend.WrapError("Cannot delete user role", backend.DatabaseErr(err))
 		}
 		return nil
 	}
@@ -63,7 +63,7 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 			"role":         i.Role,
 		})
 		if err != nil {
-			return backend.DatabaseErr(err)
+			return backend.WrapError("Unable to add user role", backend.DatabaseErr(err))
 		}
 		return nil
 	}
@@ -74,7 +74,7 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 			Where(sq.Eq{"user_id": userID, "operation_id": operation.ID}))
 
 		if err != nil {
-			return backend.DatabaseErr(err)
+			return backend.WrapError("Unable to alter user role", backend.DatabaseErr(err))
 		}
 	}
 	return nil

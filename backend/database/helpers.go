@@ -103,7 +103,10 @@ func (c *Connection) BatchInsert(tableName string, count int, mapFn func(int) ma
 func (c *Connection) Update(ub squirrel.UpdateBuilder) error {
 	ub = ub.Set("updated_at", time.Now())
 	_, err := c.execSquirrel(ub)
-	return err
+	if err != nil {
+		return fmt.Errorf("Unable to execute db update : %w", err)
+	}
+	return nil
 }
 
 // Delete removes records indicated by the given DeleteBuilder

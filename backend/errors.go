@@ -23,6 +23,28 @@ func (e *HTTPError) Error() string {
 	return e.WrappedError.Error()
 }
 
+// Rewrap allows re-wrapping the wrapped error to include more information. The new error will
+// consist of the newly provided message, followed by a colon, followed by the original error.
+// e.g. err := HttpError(500, "private err", "public err"); err.Rewrap("outer"); // produces a wrapped error of "outer : private err"
+func (e *HTTPError) Rewrap(msg string) {
+	e.WrappedError = fmt.Errorf("%v : %w", msg, e.WrappedError)
+}
+
+// WrapError provides a mechanism to wrap any error in a consistent manner.
+// If the error is an HTTPError (as defined in this package), then HTTPError.Rewrap will be called
+// If the error is a regular error (i.e. non HTTPError), then a similar wrapping will occur, but the error will remain a non-HTTP error
+// If the error is neither an HTTPError or regular error (i.e. the error is nil), then a new error will be generate with the provided message
+func WrapError(msg string, err error) error {
+	switch err := err.(type) {
+	case *HTTPError:
+		err.Rewrap(msg)
+		return err
+	case error:
+		return fmt.Errorf("%v : %w", msg, err)
+	}
+	return fmt.Errorf(msg)
+}
+
 func HTTPErr(statusCode int, reason string, wrappedError error) error {
 	return &HTTPError{
 		HTTPStatus:   statusCode,
@@ -114,6 +136,8 @@ func AccountDisabled() error {
 	return HTTPErr(http.StatusForbidden, err.Error(), err)
 }
 
+// IsErrorAccountDisabled checks if the provided error is the same as an "Account Disabled" error.
+// See AccountDisabled() in this package.
 func IsErrorAccountDisabled(err error) bool {
 	switch err := err.(type) {
 	case *HTTPError:
@@ -126,4 +150,9 @@ func IsErrorAccountDisabled(err error) bool {
 // DisabledUserError is a version of AccountDisabled that returns an error, rather than an API Error
 func DisabledUserError() error {
 	return errors.New("This account has been disabled. Please contact an adminstrator if you think this is an error.")
+}
+
+// PanicedError represents any error the occurs
+func PanicedError() error {
+	return HTTPErr(http.StatusInternalServerError, "An unknown error occurred", errors.New("Pancied during processing"))
 }

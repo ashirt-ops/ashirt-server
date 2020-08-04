@@ -24,11 +24,11 @@ func DeleteAPIKey(ctx context.Context, db *database.Connection, i DeleteAPIKeyIn
 	var err error
 
 	if userID, err = selfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Unable to delete API Key", backend.DatabaseErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyAPIKeys{UserID: userID}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to delete API Key", backend.UnauthorizedWriteErr(err))
 	}
 
 	var apiKeyID int64
@@ -41,9 +41,9 @@ func DeleteAPIKey(ctx context.Context, db *database.Connection, i DeleteAPIKeyIn
 	})
 	if err != nil {
 		if database.IsEmptyResultSetError(err) {
-			return backend.UnauthorizedWriteErr(err)
+			return backend.WrapError("API key does not exist", backend.UnauthorizedWriteErr(err))
 		}
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot delete API key", backend.DatabaseErr(err))
 	}
 
 	return nil

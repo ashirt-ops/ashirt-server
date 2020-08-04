@@ -21,11 +21,11 @@ func ListAPIKeys(ctx context.Context, db *database.Connection, userSlug string) 
 	var err error
 
 	if userID, err = selfOrSlugToUserID(ctx, db, userSlug); err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Unable to list api keys", backend.DatabaseErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanListAPIKeys{UserID: userID}); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list api keys", backend.UnauthorizedReadErr(err))
 	}
 
 	var keys []models.APIKey
@@ -34,7 +34,7 @@ func ListAPIKeys(ctx context.Context, db *database.Connection, userSlug string) 
 		Where(sq.Eq{"user_id": userID}))
 
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list api keys", backend.DatabaseErr(err))
 	}
 
 	keysDTO := make([]*dtos.APIKey, len(keys))

@@ -30,11 +30,11 @@ type CreateEvidenceInput struct {
 func CreateEvidence(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i CreateEvidenceInput) (*dtos.Evidence, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create evidence", backend.UnauthorizedWriteErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create evidence", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.OccurredAt.IsZero() {
@@ -66,7 +66,7 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 			if httpErr, ok := err.(*backend.HTTPError); ok {
 				return nil, httpErr
 			}
-			return nil, backend.UploadErr(err)
+			return nil, backend.WrapError("Unable to upload evidence", backend.UploadErr(err))
 		}
 	}
 
@@ -92,7 +92,7 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 	})
 
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Could not create evidence and tags", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Evidence{

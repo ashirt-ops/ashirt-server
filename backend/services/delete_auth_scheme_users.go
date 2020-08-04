@@ -17,12 +17,12 @@ import (
 // DeleteAuthSchemeUsers removes/unlinks all users from a provided scheme
 func DeleteAuthSchemeUsers(ctx context.Context, db *database.Connection, schemeCode string) error {
 	if err := policy.Require(middleware.Policy(ctx), policy.CanDeleteAuthForAllUsers{SchemeCode: schemeCode}); err != nil {
-		return backend.UnauthorizedWriteErr(err)
+		return backend.WrapError("Unwilling to remove auth schemes for all users", backend.UnauthorizedWriteErr(err))
 	}
 
 	err := db.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"auth_scheme": schemeCode}))
 	if err != nil {
-		return backend.DatabaseErr(err)
+		return backend.WrapError("Cannot remove auth schemes for all users", backend.DatabaseErr(err))
 	}
 
 	return nil

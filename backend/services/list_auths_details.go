@@ -23,7 +23,7 @@ type detailedSchemeTable struct {
 
 func ListAuthDetails(ctx context.Context, db *database.Connection, supportedAuthSchemes *[]dtos.SupportedAuthScheme) ([]*dtos.DetailedAuthenticationInfo, error) {
 	if err := isAdmin(ctx); err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unwilling to list auth details", backend.UnauthorizedReadErr(err))
 	}
 
 	var detailedAuthData []detailedSchemeTable
@@ -41,7 +41,7 @@ func ListAuthDetails(ctx context.Context, db *database.Connection, supportedAuth
 			GroupBy("auth_scheme"))
 
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot list auth details", backend.DatabaseErr(err))
 	}
 
 	return mergeSchemes(detailedAuthData, supportedAuthSchemes), nil

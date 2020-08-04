@@ -17,13 +17,20 @@ import (
 // the output will instead be json, which conforms to the remainder of the project
 func MediaHandler(handler func(*http.Request) (io.Reader, error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data, err := handler(r)
-		if err != nil {
-			HandleError(w, r, err)
-			return
-		}
+		var data io.Reader
+		var err error
+		defer watcher(logging.ReqLogger(r.Context()), func(paniced bool) {
+			if paniced {
+				err = backend.PanicedError()
+			}
+			if err != nil {
+				HandleError(w, r, err)
+				return
+			}
 
-		io.Copy(w, data)
+			io.Copy(w, data)
+		})
+		data, err = handler(r)
 	})
 }
 
@@ -33,17 +40,24 @@ func MediaHandler(handler func(*http.Request) (io.Reader, error)) http.Handler {
 // is returned.
 func JSONHandler(handler func(*http.Request) (interface{}, error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data, err := handler(r)
-		if err != nil {
-			HandleError(w, r, err)
-			return
-		}
+		var data interface{}
+		var err error
+		defer watcher(logging.ReqLogger(r.Context()), func(paniced bool) {
+			if paniced {
+				err = backend.PanicedError()
+			}
+			if err != nil {
+				HandleError(w, r, err)
+				return
+			}
 
-		status := 200
-		if r.Method == "POST" {
-			status = 201
-		}
-		writeJSONResponse(w, status, data)
+			status := 200
+			if r.Method == "POST" {
+				status = 201
+			}
+			writeJSONResponse(w, status, data)
+		})
+		data, err = handler(r)
 	})
 }
 
@@ -55,21 +69,22 @@ func JSONHandler(handler func(*http.Request) (interface{}, error)) http.Handler 
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	var status int
 	var publicReason string
-	var loggedReason string
+	var loggedReason error
 
 	switch err := err.(type) {
 	case *backend.HTTPError:
 		status = err.HTTPStatus
 		publicReason = err.PublicReason
-		loggedReason = err.WrappedError.Error()
+		loggedReason = err.WrappedError
 
 	case error:
 		status = http.StatusInternalServerError
 		publicReason = "An unknown error occurred"
-		loggedReason = err.Error()
+		loggedReason = err
+		logging.Log(r.Context(), "msg", "handling non-HTTPError", "stacktrace", formatStackTrace(retrace(20)))
 	}
 
-	logging.Log(r.Context(), "error", loggedReason, "url", r.URL)
+	logging.Log(r.Context(), "msg", "Error handling request", "error", loggedReason.Error(), "status", status, "url", r.URL)
 
 	writeJSONResponse(w, status, map[string]string{"error": publicReason})
 }

@@ -22,11 +22,11 @@ type CreateTagInput struct {
 func CreateTag(ctx context.Context, db *database.Connection, i CreateTagInput) (*dtos.Tag, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return nil, backend.UnauthorizedReadErr(err)
+		return nil, backend.WrapError("Unable to create tag", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyTagsOfOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.UnauthorizedWriteErr(err)
+		return nil, backend.WrapError("Unable to create tag", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.Name == "" {
@@ -39,7 +39,7 @@ func CreateTag(ctx context.Context, db *database.Connection, i CreateTagInput) (
 		"operation_id": operation.ID,
 	})
 	if err != nil {
-		return nil, backend.DatabaseErr(err)
+		return nil, backend.WrapError("Cannot add new tag", backend.DatabaseErr(err))
 	}
 	return &dtos.Tag{
 		ID:        tagID,

@@ -175,6 +175,26 @@ The project contains various source code directories, effectively acting as a co
 └── schema.sql                         # The accumulated deployment schema -- useful when starting from scratch
 ```
 
+### Errors and logging
+
+The error model used within this application adopts the following principles:
+
+* Use structured logging, to help finding/reporting errors
+  * Logs are of the form: `timestamp=<ISO8601> key=value`
+  * Common labels and meanings
+    * `error` the error text for the underlying error. Wrapped errors are separated by ` : `
+    * `msg` a general note on what operation is happening, or what unusual thing just happened
+    * `ctx` the unique identifier that corresponds all (eligible) messages together by a particular request
+    * All other values generally represent application state
+* Use wrapped errors to help pinpoint the path an error took
+* Export a (formatted) stacktrace for unexpected panics
+* All error messages have two messages: a public one, exposing no real information to the user, and a private one, that gets logged
+  * Errors containing the following text:
+    * "Unwilling to" suggests that a request did not pass a permissions check.
+    * "Unable to" suggests that some critical data was missing
+    * "Cannot" suggests that we tried, and failed, to do the requested operation
+    * messages that do not match the above generally have more specific information to identify them
+
 ### Visual Studio Code Notes
 
 If you're using Visual Studio Code, you may want to make these changes:
