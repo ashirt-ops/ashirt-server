@@ -64,8 +64,6 @@ export default (props: {
   }
 
   const onInputKeyDown = (e: React.KeyboardEvent) => {
-    console.log("key pressed: ", e.which)
-
     if(inputValue === "") {
       if( isBackspace(e) || isDelete(e) ) {
         if (selectedTag != -1) {
