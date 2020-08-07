@@ -26,11 +26,12 @@ function tagColorStyle(colorName: string): React.CSSProperties {
 export default (props: {
   name: string,
   color: string,
+  selected?: boolean,
   onClick?: () => void,
 }) => (
   <span
     children={props.name}
-    className={cx('root', {clickable: props.onClick != null})}
+    className={cx('root', {clickable: props.onClick != null, selected: !!props.selected})}
     style={tagColorStyle(props.color)}
     onClick={props.onClick}
   />
