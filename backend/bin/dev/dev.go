@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/oktaauth"
@@ -16,6 +15,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/database/seeding"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server"
 )
@@ -37,12 +37,20 @@ func main() {
 func tryRunServer(logger logging.Logger) error {
 	db, err := database.NewConnection(config.DBUri(), "./migrations")
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("Unable to connect to database (DB_URI=%s)", config.DBUri()))
+		return fmt.Errorf("Unable to connect to database (DB_URI=%s) : %w", config.DBUri(), err)
 	}
 
 	logger.Log("msg", "checking database schema")
 	if err := db.CheckSchema(); err != nil {
 		return err
+	}
+
+	if seeded, err := seeding.IsSeeded(db); !seeded && err == nil {
+		logger.Log("msg", "applying db seeding")
+		err := seeding.HarryPotterSeedData.ApplyTo(db)
+		if err != nil {
+			return err
+		}
 	}
 
 	contentStore, err := contentstore.NewDevStore()

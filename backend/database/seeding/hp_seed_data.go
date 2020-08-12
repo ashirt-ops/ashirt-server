@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-package services_test
+package seeding
 
 import (
 	"strings"
@@ -10,7 +10,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/policy"
 )
 
-var HarryPotterSeedData = TestSeedData{
+var HarryPotterSeedData = Seeder{
 	Users:      []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick},
 	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows, OpGanttChart},
 	Tags: []models.Tag{
@@ -96,7 +96,7 @@ var HarryPotterSeedData = TestSeedData{
 	},
 }
 
-var newHPUser = newUserGen(1, func(f, l string) string { return strings.ToLower(f[:1] + l + "@hogwarts.edu") })
+var newHPUser = newUserGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
 var UserDumbledore = newHPUser(newUserInput{FirstName: "Albus", LastName: "Dumbledore", Birthday: date(1970, 8, 1), SetLastUpdated: true, IsAdmin: true}) // birthday should be in 1881, but timestamp range is 1970-2038
 
 var UserHarry = newHPUser(newUserInput{FirstName: "Harry", LastName: "Potter", Birthday: date(1980, 7, 31), SetLastUpdated: true})
@@ -118,6 +118,7 @@ var APIKeyHarry1 = newAPIKey(UserHarry.ID, "harry-abc", []byte{0x01, 0x02, 0x03}
 var APIKeyHarry2 = newAPIKey(UserHarry.ID, "harry-123", []byte{0x11, 0x12, 0x13})
 var APIKeyRon1 = newAPIKey(UserRon.ID, "ron-abc", []byte{0x01, 0x02, 0x03})
 var APIKeyRon2 = newAPIKey(UserRon.ID, "ron-123", []byte{0x11, 0x12, 0x13})
+var APIKeyHeadlessNick1 = newAPIKey(UserHeadlessNick.ID, "DAYPFGHnm1Pqes-l0Fm76_y1", []byte("HqmuWylLznR+tqSotZAOc+w47buSFaKKTJozpXEYkuNBiuRJgw3NeJOuVP6kbQBQmiYTqYAaiIKbcO1BxcH52Q==")) // realKey
 
 var newHPOp = newOperationGen(1)
 var OpSorcerersStone = newHPOp("HPSS", "Harry Potter and The Sorcerer's Stone")
@@ -165,8 +166,8 @@ var CommonTagWhenGantt = newHPTag(OpGanttChart.ID, "When", "lightIndigo")
 var CommonTagWhyGantt = newHPTag(OpGanttChart.ID, "Why", "lightYellow")
 
 var newHPEvidence = newEvidenceGen(1)
-var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-dursleys", "Dursleys take care of young harry", "image", 0)
-var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-mirror", "Harry see parents in the mirror", "image", 0)
+var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-dursleys", "Family of self-centered muggles + Harry", "image", 0)
+var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-mirror", "Mysterious mirror that shows you your deepest desires", "image", 0)
 
 var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-flyingcar", "A Car that flies", "image", 0)
 var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-dobby", "an elf?", "image", 0)
