@@ -1,8 +1,9 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { Tag, TagWithUsage } from 'src/global_types'
+import { Tag, TagWithUsage, TagByEvidenceDate } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
+import { tagEvidenceDateFromDto } from './data_sources/converters'
 
 export async function createTag(i: {
   operationSlug: string,
@@ -38,4 +39,11 @@ export async function updateTag(i: {
     { operationSlug: i.operationSlug, tagId: i.id },
     { name: i.name, colorName: i.colorName },
   )
+}
+
+export async function getTagsByEvidenceUsage(i: {
+  operationSlug: string,
+}): Promise<Array<TagByEvidenceDate>> {
+  const data = await ds.listTagsByEvidenceDate(i)
+  return data.map(tagEvidenceDateFromDto)
 }

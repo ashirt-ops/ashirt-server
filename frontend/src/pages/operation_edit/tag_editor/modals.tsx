@@ -9,10 +9,7 @@ import Tag from 'src/components/tag'
 import TagColorPicker from 'src/components/tag_color_picker'
 import {Link} from 'react-router-dom'
 import {Tag as TagType} from 'src/global_types'
-import { deleteTag, updateTag, getEvidenceList
-
-
-} from 'src/services'
+import { deleteTag, updateTag, getEvidenceList } from 'src/services'
 import {useForm, useFormField, useWiredData} from 'src/helpers'
 
 export const EditTagModal = (props: {
@@ -30,7 +27,7 @@ export const EditTagModal = (props: {
     handleSubmit: () => updateTag({
       id: props.tag.id,
       operationSlug: props.operationSlug,
-      name: nameField.value,
+      name: nameField.value.trim(),
       colorName: colorField.value,
     }),
   })

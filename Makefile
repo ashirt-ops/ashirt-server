@@ -69,12 +69,12 @@ rerun-backend:
 # view-backend enters the docker container running the backend
 .PHONY: view-backend
 view-backend:
-	docker exec -it ashirt_backend_1 /bin/sh
+	docker exec -it ashirt-server_backend_1 /bin/sh
 
 # view-backend enters the docker container running the database
 .PHONY: view-db
 view-db:
-	docker exec -it ashirt_db_1 /bin/bash
+	docker exec -it ashirt-server_db_1 /bin/bash
 
 # new-migration generates a new "migration" (database alteration) when a schema/data change is necessary.
 .PHONY: new-migration
@@ -84,3 +84,10 @@ new-migration:
 # prep is shorthand for formatting and testing. Useful when prepping for a new Pull Request.
 .PHONY: prep
 prep: tidy-all test-all
+
+# gentypes is a mechanism manually to re-create the dtos.ts file needed by the frontend. Typically this
+# will not need to be called directly. Instead, webpack will generate this for you.
+.PHONY: gentypes
+gentypes:
+	mkdir -p frontend/src/services/data_sources/dtos
+	go run backend/dtos/gentypes/generate_typescript_types.go > frontend/src/services/data_sources/dtos/dtos.ts

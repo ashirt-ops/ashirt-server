@@ -74,6 +74,7 @@ export interface DataSource {
   deleteQuery(ids: OpSlug & QueryId): Promise<void>
 
   listTags(ids: OpSlug): Promise<Array<dtos.TagWithUsage>>
+  listTagsByEvidenceDate(ids: OpSlug): Promise<Array<dtos.TagByEvidenceDate>>
   createTag(ids: OpSlug, payload: { name: string, colorName: string }): Promise<dtos.Tag>
   updateTag(ids: OpSlug & TagId, payload: { name: string, colorName: string }): Promise<void>
   deleteTag(ids: OpSlug & TagId): Promise<void>
