@@ -61,8 +61,8 @@ var HarryPotterSeedData = Seeder{
 		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear,
 	},
 	Evidences: []models.Evidence{
-		EviDursleys, EviMirrorOfErised,
-		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione,
+		EviDursleys, EviMirrorOfErised, EviLevitateSpell, EviRulesForQuidditch,
+		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione, EviHeadlessHuntApplication,
 		EviGanttZero, EviGanttOne, EviGanttTwo, EviGanttExtra, EviGanttThree, EviGanttFour,
 	},
 	TagEviMap: unionTagEviMap(
@@ -166,17 +166,19 @@ var CommonTagWhenGantt = newHPTag(OpGanttChart.ID, "When", "lightIndigo")
 var CommonTagWhyGantt = newHPTag(OpGanttChart.ID, "Why", "lightYellow")
 
 var newHPEvidence = newEvidenceGen(1)
-var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-dursleys", "Family of self-centered muggles + Harry", "image", 0)
-var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "evi-uuid-mirror", "Mysterious mirror that shows you your deepest desires", "image", 0)
+var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_dursleys", "Family of self-centered muggles + Harry", "image", 0)
+var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_mirror", "Mysterious mirror that shows you your deepest desires", "image", 0)
+var EviLevitateSpell = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_md_levitate", "Documented Levitation Spell effects", "codeblock", 0)
+var EviRulesForQuidditch = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_rs_aoc201501", "Complex rules for a simple game", "codeblock", 0)
 
-var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-flyingcar", "A Car that flies", "image", 0)
-var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-dobby", "an elf?", "image", 0)
-var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "evi-uuid-spider", "Just a big spider", "image", 0)
-var EviMoaningMyrtle = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-myrtle", "She's very sad", "image", 0)
-var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-willow", "Don't get too close", "image", 0)
-var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-diary", "What's a Horcrux?", "codeblock", 0)
-
-var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "evi-uuid-rockher", "Strangely real-looking statue", "image", 0)
+var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_car", "A Car that flies", "image", 0)
+var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_dobby", "an elf?", "image", 0)
+var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "seed_aragog", "Just a big spider", "image", 0)
+var EviMoaningMyrtle = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_myrtle", "She's very sad", "image", 0)
+var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_tree", "Don't get too close", "image", 0)
+var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_go_aoc201614", "What's a Horcrux?", "codeblock", 0)
+var EviHeadlessHuntApplication = newHPEvidence(OpChamberOfSecrets.ID, UserRon.ID, "seed_py_aoc201717", "This group is very particular", "codeblock", 0)
+var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_statue", "Strangely real-looking statue", "image", 0)
 
 var EviGanttZero = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-one", "", "none", -4)
 var EviGanttOne = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-two", "", "none", -3)
