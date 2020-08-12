@@ -1,0 +1,5 @@
+{
+    "contentType": "codeblock",
+    "contentSubtype": "markdown",
+    "content": "# Levitation\n\nThis spell can make things float. But, if you don't encant correctly, you may experience other results. Below documents these behaviors.\n\n## Experimental Results\n\n| You Say...                   | You Think...              | You move your wand...    | Result                    |\n| ---------------------------- | ------------------------- | ------------------------ | ------------------------- |\n| Win-gar-di-um le-vi-oh-Sah   | `<Nothing>`               | Swish and Flick          | Nothing                   |\n| Win-gar-di-um le-vi-oh-Sah   | \"Why isn't this working?\" | in a drum beating motion | You put someone's eye out |\n| Win-gar-di-um le-vi-Oooh-sah | `<Nothing>` or `<Panic>`  | Swish and Flick          | Floatation!               |\n| Win-gar-di-um le-vi-Oooh-Sah | \"I can do this too!\"      | Swish and Flick          | Explosion                 |\n"
+}
