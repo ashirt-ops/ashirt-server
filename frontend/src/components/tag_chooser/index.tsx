@@ -13,6 +13,9 @@ import PopoverMenu from 'src/components/popover_menu'
 const cx = classnames.bind(require('./stylesheet'))
 
 const isBackspace = (e: React.KeyboardEvent) => e.which === 8
+const isDelete = (e: React.KeyboardEvent) => e.which === 46
+const isRightArrow = (e: React.KeyboardEvent) => e.which === 39
+const isLeftArrow = (e: React.KeyboardEvent) => e.which === 37
 
 function filterTags(allTags: Array<TagType>, filter: string): Array<TagType> {
   if (filter === "") return allTags
@@ -39,6 +42,7 @@ export default (props: {
   const [allTags, setAllTags] = React.useState<Array<TagType>>([])
   const [inputValue, setInputValue] = React.useState("")
   const [dropdownVisible, setDropdownVisible] = React.useState(false)
+  const [selectedTag, setSelectedTag] = React.useState<number>(-1)
 
   let filteredTags = filterTags(allTags, inputValue)
   const activeTagIdSet = getTagIdSet(props.value)
@@ -60,7 +64,27 @@ export default (props: {
   }
 
   const onInputKeyDown = (e: React.KeyboardEvent) => {
-    if (isBackspace(e) && inputValue === "") props.onChange(dropRight(props.value))
+    if(inputValue === "") {
+      if( isBackspace(e) || isDelete(e) ) {
+        if (selectedTag != -1) {
+          props.onChange([...props.value.slice(0, selectedTag), ...props.value.slice(selectedTag + 1)])
+          setSelectedTag(selectedTag - 1)
+        }
+        else if (!isDelete(e)){
+          props.onChange(dropRight(props.value))
+        }
+      }
+      else if (isLeftArrow(e) && inputValue === "") {
+        let index = selectedTag - 1
+        setSelectedTag(index > -1 ? index : props.value.length - 1)
+      }
+      else if (isRightArrow(e) && inputValue === "") {
+        setSelectedTag((selectedTag + 1) % props.value.length)
+      }
+      else {
+        setSelectedTag(-1)
+      }
+    }
     setDropdownVisible(true)
   }
 
@@ -85,7 +109,7 @@ export default (props: {
         onSelect={toggleTag}
       >
         <div className={cx('input', props.className, {focus: dropdownVisible})}>
-          {props.value.map(tag => <Tag key={tag.id} name={tag.name} color={tag.colorName} />)}
+          {props.value.map((tag, i) => <Tag key={tag.id} selected={i == selectedTag} name={tag.name} color={tag.colorName} />)}
           <input
             onChange={e => setInputValue(e.target.value)}
             value={inputValue}
