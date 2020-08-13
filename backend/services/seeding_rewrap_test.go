@@ -117,6 +117,17 @@ var UserSnape = seeding.UserSnape
 var UserHagrid = seeding.UserHagrid
 var UserTomRiddle = seeding.UserTomRiddle
 var UserHeadlessNick = seeding.UserHeadlessNick
+var UserCedric = seeding.UserCedric
+var UserFleur = seeding.UserFleur
+var UserViktor = seeding.UserViktor
+var UserAlastor = seeding.UserAlastor
+var UserMinerva = seeding.UserMinerva
+var UserLucius = seeding.UserLucius
+var UserSirius = seeding.UserSirius
+var UserPeter = seeding.UserPeter
+var UserParvati = seeding.UserParvati
+var UserPadma = seeding.UserPadma
+var UserCho = seeding.UserCho
 
 var APIKeyHarry1 = seeding.APIKeyHarry1
 var APIKeyHarry2 = seeding.APIKeyHarry2

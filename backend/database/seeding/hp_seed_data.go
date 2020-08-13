@@ -11,7 +11,9 @@ import (
 )
 
 var HarryPotterSeedData = Seeder{
-	Users:      []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick},
+	Users: []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick,
+		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
+	},
 	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows, OpGanttChart},
 	Tags: []models.Tag{
 		TagFamily, TagFriendship, TagHome, TagLoyalty, TagCourage, TagGoodVsEvil, TagSupernatural,
@@ -50,8 +52,31 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserSeamus, OpChamberOfSecrets, policy.OperationRoleRead),
 		newUserOpPermission(UserGinny, OpChamberOfSecrets, policy.OperationRoleWrite),
 
+		newUserOpPermission(UserHarry, OpGobletOfFire, policy.OperationRoleAdmin),
+		newUserOpPermission(UserRon, OpGobletOfFire, policy.OperationRoleWrite),
+		newUserOpPermission(UserGinny, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserHermione, OpGobletOfFire, policy.OperationRoleWrite),
+		newUserOpPermission(UserNeville, OpGobletOfFire, policy.OperationRoleWrite),
+		newUserOpPermission(UserSeamus, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserDraco, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserSnape, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserHagrid, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserHeadlessNick, OpGobletOfFire, policy.OperationRoleWrite),
+		newUserOpPermission(UserCedric, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserFleur, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserViktor, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserAlastor, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserMinerva, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserLucius, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserSirius, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserPeter, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserParvati, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserPadma, OpGobletOfFire, policy.OperationRoleRead),
+		newUserOpPermission(UserCho, OpGobletOfFire, policy.OperationRoleRead),
+
 		newUserOpPermission(UserDumbledore, OpSorcerersStone, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
+		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin),
 
 		newUserOpPermission(UserDumbledore, OpGanttChart, policy.OperationRoleAdmin),
 		newUserOpPermission(UserHarry, OpGanttChart, policy.OperationRoleWrite),
@@ -97,18 +122,37 @@ var HarryPotterSeedData = Seeder{
 }
 
 var newHPUser = newUserGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
+
+// UserDumbledore is reserved to be a super admin.
 var UserDumbledore = newHPUser(newUserInput{FirstName: "Albus", LastName: "Dumbledore", Birthday: date(1970, 8, 1), SetLastUpdated: true, IsAdmin: true}) // birthday should be in 1881, but timestamp range is 1970-2038
 
 var UserHarry = newHPUser(newUserInput{FirstName: "Harry", LastName: "Potter", Birthday: date(1980, 7, 31), SetLastUpdated: true})
-var UserRon = newHPUser(newUserInput{FirstName: "Ronald", LastName: "Weasley", Birthday: date(1980, 3, 1), SetLastUpdated: true})
+var UserRon = newHPUser(newUserInput{FirstName: "Ron", LastName: "Weasley", Birthday: date(1980, 3, 1), SetLastUpdated: true})
 var UserGinny = newHPUser(newUserInput{FirstName: "Ginny", LastName: "Weasley", Birthday: date(1981, 3, 1), SetLastUpdated: true})
 var UserHermione = newHPUser(newUserInput{FirstName: "Hermione", LastName: "Granger", Birthday: date(1979, 9, 19), SetLastUpdated: true})
 var UserNeville = newHPUser(newUserInput{FirstName: "Neville", LastName: "Longbottom", Birthday: date(1979, 9, 19), SetLastUpdated: true})
 var UserSeamus = newHPUser(newUserInput{FirstName: "Seamus", LastName: "Finnigan", Birthday: date(1980, 9, 1), SetLastUpdated: true})
 var UserDraco = newHPUser(newUserInput{FirstName: "Draco", LastName: "Malfoy", Birthday: date(1980, 6, 5), SetLastUpdated: true})
 var UserSnape = newHPUser(newUserInput{FirstName: "Serverus", LastName: "Snape", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserCedric = newHPUser(newUserInput{FirstName: "Cedric", LastName: "Digory", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserFleur = newHPUser(newUserInput{FirstName: "Fleur", LastName: "Delacour", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserViktor = newHPUser(newUserInput{FirstName: "Viktor", LastName: "Krum", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserAlastor = newHPUser(newUserInput{FirstName: "Alastor", LastName: "Moody", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserMinerva = newHPUser(newUserInput{FirstName: "Minerva", LastName: "McGonagall", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserLucius = newHPUser(newUserInput{FirstName: "Lucius", LastName: "Malfoy", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserSirius = newHPUser(newUserInput{FirstName: "Sirius", LastName: "Black", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserPeter = newHPUser(newUserInput{FirstName: "Peter", LastName: "Pettigrew", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserParvati = newHPUser(newUserInput{FirstName: "Parvati", LastName: "Patil", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserPadma = newHPUser(newUserInput{FirstName: "Padma", LastName: "Patil", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+var UserCho = newHPUser(newUserInput{FirstName: "Cho", LastName: "Chang", Birthday: date(1980, 1, 1), SetLastUpdated: true})
+
+// UserHagrid is reserved to test disabled users
 var UserHagrid = newHPUser(newUserInput{FirstName: "Rubeus", LastName: "Hagrid", Birthday: date(1980, 1, 1), SetLastUpdated: true, Disabled: true})
+
+// UserTomRiddle is reserved to test deleted users
 var UserTomRiddle = newHPUser(newUserInput{FirstName: "Tom", LastName: "Riddle", Birthday: date(1980, 1, 1), SetLastUpdated: true, Deleted: true})
+
+// UserHeadlessNick is reserved to test api-only access/"headless" users
 var UserHeadlessNick = newHPUser(newUserInput{FirstName: "Nicholas", LastName: "de Mimsy-Porpington", Birthday: date(1980, 1, 1), SetLastUpdated: true, Headless: true})
 
 // Reserved users: Luna Lovegood (Create user test)
@@ -121,13 +165,29 @@ var APIKeyRon2 = newAPIKey(UserRon.ID, "ron-123", []byte{0x11, 0x12, 0x13})
 var APIKeyHeadlessNick1 = newAPIKey(UserHeadlessNick.ID, "DAYPFGHnm1Pqes-l0Fm76_y1", []byte("HqmuWylLznR+tqSotZAOc+w47buSFaKKTJozpXEYkuNBiuRJgw3NeJOuVP6kbQBQmiYTqYAaiIKbcO1BxcH52Q==")) // realKey
 
 var newHPOp = newOperationGen(1)
+
+// OpSorcerersStone is reserved to test permission issues. Also used with OpChamberOfSecrets
 var OpSorcerersStone = newHPOp("HPSS", "Harry Potter and The Sorcerer's Stone")
+
+// OpChamberOfSecrets is reserved to test permission issues. Also used with OpSorcerersStone
 var OpChamberOfSecrets = newHPOp("HPCoS", "Harry Potter and The Chamber Of Secrets")
+
+// OpPrisonerOfAzkaban is reserved as a no-user (orphaned) operation
 var OpPrisonerOfAzkaban = newHPOp("HPPoA", "Harry Potter and The Prisoner Of Azkaban")
+
+// OpGobletOfFire is reserved for a common-operation for all users
 var OpGobletOfFire = newHPOp("HPGoF", "Harry Potter and The Goblet Of Fire")
+
+// OpOrderOfThePhoenix is available for use
 var OpOrderOfThePhoenix = newHPOp("HPOotP", "Harry Potter and The Order Of The Phoenix")
+
+// OpHalfBloodPrince is available for use
 var OpHalfBloodPrince = newHPOp("HPHBP", "Harry Potter and The Half Blood Prince")
+
+// OpDeathlyHallows is a vailable for use
 var OpDeathlyHallows = newHPOp("HPDH", "Harry Potter and The Deathly Hallows")
+
+// OpGanttChart is reserved to verify the Overview feature
 var OpGanttChart = newHPOp("HPGantt", "Harry Potter and The Curse of Admin Oversight")
 
 var newHPTag = newTagGen(1)
