@@ -61,7 +61,9 @@ func (d *MemStore) UploadWithName(key string, data io.Reader) error {
 }
 
 func (d *MemStore) Read(key string) (io.Reader, error) {
+	d.mutex.Lock()
 	data, ok := d.content[key]
+	d.mutex.Unlock()
 	if !ok {
 		return nil, backend.WrapError("Unable to read from MemStore", fmt.Errorf("No such key"))
 	}
