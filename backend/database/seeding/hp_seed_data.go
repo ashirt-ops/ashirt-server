@@ -22,7 +22,8 @@ var HarryPotterSeedData = Seeder{
 		// common tags among all operations
 		CommonTagWhoSS, CommonTagWhatSS, CommonTagWhereSS, CommonTagWhenSS, CommonTagWhySS,
 		CommonTagWhoCoS, CommonTagWhatCoS, CommonTagWhereCoS, CommonTagWhenCoS, CommonTagWhyCoS,
-		CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt,
+		CommonTagWhoGoF, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF, CommonTagWhyGoF,
+		CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk,
 	},
 	APIKeys: []models.APIKey{
 		APIKeyHarry1, APIKeyHarry2,
@@ -52,6 +53,7 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserSeamus, OpChamberOfSecrets, policy.OperationRoleRead),
 		newUserOpPermission(UserGinny, OpChamberOfSecrets, policy.OperationRoleWrite),
 
+		// Every user should be part of OpGobletOfFire (exception: deleted users)
 		newUserOpPermission(UserHarry, OpGobletOfFire, policy.OperationRoleAdmin),
 		newUserOpPermission(UserRon, OpGobletOfFire, policy.OperationRoleWrite),
 		newUserOpPermission(UserGinny, OpGobletOfFire, policy.OperationRoleRead),
@@ -88,7 +90,9 @@ var HarryPotterSeedData = Seeder{
 	Evidences: []models.Evidence{
 		EviDursleys, EviMirrorOfErised, EviLevitateSpell, EviRulesForQuidditch,
 		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione, EviHeadlessHuntApplication,
-		EviGanttZero, EviGanttOne, EviGanttTwo, EviGanttExtra, EviGanttThree, EviGanttFour,
+		EviTristateTrophy, EviEntryForm, EviWizardDance, EviPolyjuice, EviWarewolf,
+		EviGantt01, EviGantt02, EviGantt03, EviGantt04, EviGantt05, EviGantt06, EviGantt07, EviGantt08, EviGantt09, EviGantt10,
+		EviGantt11, EviGantt12, EviGantt13, EviGantt14, EviGantt15, EviGantt16, EviGantt17, EviGantt18, EviGantt19, EviGantt20, EviGanttExtra,
 	},
 	TagEviMap: unionTagEviMap(
 		associateTagsToEvidence(EviDursleys, TagFamily, TagHome),
@@ -96,20 +100,47 @@ var HarryPotterSeedData = Seeder{
 		associateTagsToEvidence(EviDobby, TagMars, TagJupiter, TagMercury),
 		associateTagsToEvidence(EviPetrifiedHermione, TagMars, CommonTagWhatCoS, CommonTagWhoCoS),
 
-		// tags are in a pattern for easy test verification of operation overview:
-		//       01234
-		// who   #...#
-		// what  .#.#.
-		// where #####
-		// when  .###.
-		// why   ##.##
-		// Extra is added in to verify multiple evidence on a single day reflected in count
-		associateTagsToEvidence(EviGanttZero, CommonTagWhoGantt, CommonTagWhereGantt, CommonTagWhyGantt),
-		associateTagsToEvidence(EviGanttOne, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt),
-		associateTagsToEvidence(EviGanttTwo, CommonTagWhereGantt, CommonTagWhenGantt),
-		associateTagsToEvidence(EviGanttExtra, CommonTagWhenGantt),
-		associateTagsToEvidence(EviGanttThree, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt),
-		associateTagsToEvidence(EviGanttFour, CommonTagWhoGantt, CommonTagWhereGantt, CommonTagWhyGantt),
+		associateTagsToEvidence(EviTristateTrophy, CommonTagWhoGoF, CommonTagWhereGoF, CommonTagWhyGoF),
+		associateTagsToEvidence(EviEntryForm, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF),
+		associateTagsToEvidence(EviWizardDance, CommonTagWhereGoF, CommonTagWhenGoF),
+		associateTagsToEvidence(EviPolyjuice, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF, CommonTagWhyGoF),
+		associateTagsToEvidence(EviWarewolf, CommonTagWhoGoF, CommonTagWhereGoF, CommonTagWhyGoF),
+
+		// tags are in a pattern: the first 10 columns are dedicated to a pineapple, the second to an apple
+		// -- pineapple      apple
+		//    1234567890     1234567890
+		//  1 .###.###..     ......##..
+		//  2 #########.     .....##...
+		//  3 #..###..#.     ..##.#.##.
+		//  4 ..#####...     .####.####
+		//  5 .#.#.#.#..     .#.#######
+		//  6 .#######..     .#.#######
+		//  7 .#.#.#.#..     .#.#######
+		//  8 .#######..     .##.######
+		//  9 .#.#.#.#..     ..#######.
+		// 10 ..#####...     ...##.##..
+		//  Note: EviGanttExtra is present to check multiple-tag-usage on same-day
+		associateTagsToEvidence(EviGantt01, CommonTagWhatGantt, CommonTagWhereGantt),
+		associateTagsToEvidence(EviGantt02, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
+		associateTagsToEvidence(EviGantt03, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhenGantt, TagGanttBroom, TagGanttAparate, TagGanttWalk),
+		associateTagsToEvidence(EviGantt04, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
+		associateTagsToEvidence(EviGantt05, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, TagGanttBroom, TagGanttAparate, TagGanttWalk),
+		associateTagsToEvidence(EviGantt06, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
+		associateTagsToEvidence(EviGantt07, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhenGantt, TagGanttBroom, TagGanttAparate, TagGanttWalk),
+		associateTagsToEvidence(EviGantt08, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
+		associateTagsToEvidence(EviGantt09, CommonTagWhatGantt, CommonTagWhereGantt),
+		associateTagsToEvidence(EviGantt10),
+		associateTagsToEvidence(EviGantt11),
+		associateTagsToEvidence(EviGantt12, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate),
+		associateTagsToEvidence(EviGantt13, CommonTagWhereGantt, CommonTagWhenGantt, TagGanttAparate, TagGanttFlooNetwork),
+		associateTagsToEvidence(EviGantt14, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttFlooNetwork, TagGanttWalk),
+		associateTagsToEvidence(EviGantt15, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
+		associateTagsToEvidence(EviGantt16, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
+		associateTagsToEvidence(EviGantt17, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
+		associateTagsToEvidence(EviGantt18, CommonTagWhoGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
+		associateTagsToEvidence(EviGantt19, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
+		associateTagsToEvidence(EviGantt20, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate),
+		associateTagsToEvidence(EviGanttExtra, CommonTagWhoGantt),
 	),
 	EviFindingsMap: unionEviFindingMap(
 		associateEvidenceToFinding(FindingBook2Magic, EviDobby, EviFlyingCar, EviWhompingWillow),
@@ -207,6 +238,7 @@ var TagJupiter = newHPTag(OpChamberOfSecrets.ID, "Jupiter", "green")
 var TagSaturn = newHPTag(OpChamberOfSecrets.ID, "Saturn", "blue")
 var TagNeptune = newHPTag(OpChamberOfSecrets.ID, "Neptune", "indigo")
 
+// Common tags are used to test migrating content from one operation to another
 var CommonTagWhoSS = newHPTag(OpSorcerersStone.ID, "Who", "lightRed")
 var CommonTagWhatSS = newHPTag(OpSorcerersStone.ID, "What", "lightBlue")
 var CommonTagWhereSS = newHPTag(OpSorcerersStone.ID, "Where", "lightGreen")
@@ -219,11 +251,22 @@ var CommonTagWhereCoS = newHPTag(OpChamberOfSecrets.ID, "Where", "lightGreen")
 var CommonTagWhenCoS = newHPTag(OpChamberOfSecrets.ID, "When", "lightIndigo")
 var CommonTagWhyCoS = newHPTag(OpChamberOfSecrets.ID, "Why", "lightYellow")
 
+var CommonTagWhoGoF = newHPTag(OpGobletOfFire.ID, "Who", "lightRed")
+var CommonTagWhatGoF = newHPTag(OpGobletOfFire.ID, "What", "lightBlue")
+var CommonTagWhereGoF = newHPTag(OpGobletOfFire.ID, "Where", "lightGreen")
+var CommonTagWhenGoF = newHPTag(OpGobletOfFire.ID, "When", "lightIndigo")
+var CommonTagWhyGoF = newHPTag(OpGobletOfFire.ID, "Why", "lightYellow")
+
 var CommonTagWhoGantt = newHPTag(OpGanttChart.ID, "Who", "lightRed")
 var CommonTagWhatGantt = newHPTag(OpGanttChart.ID, "What", "lightBlue")
 var CommonTagWhereGantt = newHPTag(OpGanttChart.ID, "Where", "lightGreen")
 var CommonTagWhenGantt = newHPTag(OpGanttChart.ID, "When", "lightIndigo")
 var CommonTagWhyGantt = newHPTag(OpGanttChart.ID, "Why", "lightYellow")
+var TagGanttBroom = newHPTag(OpGanttChart.ID, "Broom", "red")
+var TagGanttHippogriff = newHPTag(OpGanttChart.ID, "Hippogriff", "blue")
+var TagGanttAparate = newHPTag(OpGanttChart.ID, "Aparate", "green")
+var TagGanttFlooNetwork = newHPTag(OpGanttChart.ID, "Floo", "indigo")
+var TagGanttWalk = newHPTag(OpGanttChart.ID, "Walk", "yellow")
 
 var newHPEvidence = newEvidenceGen(1)
 var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_dursleys", "Family of self-centered muggles + Harry", "image", 0)
@@ -240,12 +283,33 @@ var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "see
 var EviHeadlessHuntApplication = newHPEvidence(OpChamberOfSecrets.ID, UserRon.ID, "seed_py_aoc201717", "This group is very particular", "codeblock", 0)
 var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_statue", "Strangely real-looking statue", "image", 0)
 
-var EviGanttZero = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-one", "", "none", -4)
-var EviGanttOne = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-two", "", "none", -3)
-var EviGanttTwo = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-three", "", "none", -2)
-var EviGanttThree = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-four", "", "none", -1)
-var EviGanttFour = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-five", "", "none", 0)
-var EviGanttExtra = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-uuid-extra", "", "none", -2)
+var EviTristateTrophy = newHPEvidence(OpGobletOfFire.ID, UserHarry.ID, "seed_trophy", "First Triwizard Champion Trophy", "image", 0)
+var EviEntryForm = newHPEvidence(OpGobletOfFire.ID, UserCedric.ID, "seed_entry", "Cedric's entry form for Triwizard competition", "codeblock", 0)
+var EviWizardDance = newHPEvidence(OpGobletOfFire.ID, UserCho.ID, "seed_dance", "Advertising for the Triwizard Dance", "image", 0)
+var EviPolyjuice = newHPEvidence(OpGobletOfFire.ID, UserAlastor.ID, "seed_juice", "DIY instructions for Polyjuice Potion", "codeblock", 0)
+var EviWarewolf = newHPEvidence(OpGobletOfFire.ID, UserViktor.ID, "seed_wolf", "Strangely real-looking statue", "terminal-recording", 0)
+
+var EviGantt01 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_01", "", "none", -19)
+var EviGantt02 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_02", "", "none", -18)
+var EviGantt03 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_03", "", "none", -17)
+var EviGantt04 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_04", "", "none", -16)
+var EviGantt05 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_05", "", "none", -15)
+var EviGantt06 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_06", "", "none", -14)
+var EviGantt07 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_07", "", "none", -13)
+var EviGantt08 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_08", "", "none", -12)
+var EviGantt09 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_09", "", "none", -11)
+var EviGantt10 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_10", "", "none", -10)
+var EviGantt11 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_11", "", "none", -9)
+var EviGantt12 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_12", "", "none", -8)
+var EviGantt13 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_13", "", "none", -7)
+var EviGantt14 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_14", "", "none", -6)
+var EviGantt15 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_15", "", "none", -5)
+var EviGantt16 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_16", "", "none", -4)
+var EviGantt17 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_17", "", "none", -3)
+var EviGantt18 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_18", "", "none", -2)
+var EviGantt19 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_19", "", "none", -1)
+var EviGantt20 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_20", "", "none", 0)
+var EviGanttExtra = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_extra", "", "none", -19)
 
 var newHPQuery = newQueryGen(1)
 var QuerySalazarsHier = newHPQuery(OpChamberOfSecrets.ID, "Find Heir", "Magic Query String", "findings")

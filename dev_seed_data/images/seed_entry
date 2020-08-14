@@ -1,0 +1,5 @@
+{
+  "contentType": "codeblock",
+  "contentSubtype": "java",
+  "content": "package edu.hogwarts.hufflepuff;\n\npublic class Entry implementsTristateWizardEntryForm {\n\npublic String contestant(){\n    return \"Cedric Digory\";\n}\n\npublic String grantsConsent(){\n    return true;\n}\n\n}"
+}

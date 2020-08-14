@@ -11,6 +11,8 @@ Sourced from Unsplash:
 * [Dan Gold](https://unsplash.com/photos/N7RiDzfF2iw)
 * [Craig McLachlan](https://unsplash.com/photos/wyBNsKAVlKQ)
 * [Stuart Bloodworth](https://unsplash.com/photos/-79DJDLpxlo)
+* [Ramallah](https://unsplash.com/photos/JhqhGfX_Wd8)
+* [Giorgio Trovato](https://unsplash.com/photos/_XTY6lD8jgM)
 
 ## Source Code
 

@@ -190,11 +190,26 @@ var EviTomRiddlesDiary = seeding.EviTomRiddlesDiary
 
 var EviPetrifiedHermione = seeding.EviPetrifiedHermione
 
-var EviGanttZero = seeding.EviGanttZero
-var EviGanttOne = seeding.EviGanttOne
-var EviGanttTwo = seeding.EviGanttTwo
-var EviGanttThree = seeding.EviGanttThree
-var EviGanttFour = seeding.EviGanttFour
+var EviGantt01 = seeding.EviGantt01
+var EviGantt02 = seeding.EviGantt02
+var EviGantt03 = seeding.EviGantt03
+var EviGantt04 = seeding.EviGantt04
+var EviGantt05 = seeding.EviGantt05
+var EviGantt06 = seeding.EviGantt06
+var EviGantt07 = seeding.EviGantt07
+var EviGantt08 = seeding.EviGantt08
+var EviGantt09 = seeding.EviGantt09
+var EviGantt10 = seeding.EviGantt10
+var EviGantt11 = seeding.EviGantt11
+var EviGantt12 = seeding.EviGantt12
+var EviGantt13 = seeding.EviGantt13
+var EviGantt14 = seeding.EviGantt14
+var EviGantt15 = seeding.EviGantt15
+var EviGantt16 = seeding.EviGantt16
+var EviGantt17 = seeding.EviGantt17
+var EviGantt18 = seeding.EviGantt18
+var EviGantt19 = seeding.EviGantt19
+var EviGantt20 = seeding.EviGantt20
 var EviGanttExtra = seeding.EviGanttExtra
 
 var QuerySalazarsHier = seeding.QuerySalazarsHier
