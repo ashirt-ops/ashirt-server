@@ -56,6 +56,7 @@ export const backendDataSource: DataSource = {
   deleteQuery: ids => req('DELETE', `/operations/${ids.operationSlug}/queries/${ids.queryId}`),
 
   listTags: ids => req('GET', `/operations/${ids.operationSlug}/tags`),
+  listTagsByEvidenceDate: ids => req('GET', `/operations/${ids.operationSlug}/tagsByEvidenceUsage`),
   createTag: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/tags`, payload),
   updateTag: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/tags/${ids.tagId}`, payload),
   deleteTag: ids => req('DELETE', `/operations/${ids.operationSlug}/tags/${ids.tagId}`),

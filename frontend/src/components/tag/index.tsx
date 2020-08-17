@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import {tagColorNameToColor} from 'src/helpers/tag_colors'
+import {tagColorNameToColor, disabledGray} from 'src/helpers/tag_colors'
 const cx = classnames.bind(require('./stylesheet'))
 
 // Returns an appropriate foreground color (white or black) for the given background color
@@ -15,7 +15,7 @@ function getFgColorFromColor(color: number) {
   return yiq < 128 ? "#fff" : "#000";
 }
 
-function tagColorStyle(colorName: string): React.CSSProperties {
+export function tagColorStyle(colorName: string): React.CSSProperties {
   const color = tagColorNameToColor(colorName)
   return {
     backgroundColor: '#' + ('000000' + color.toString(16)).substr(-6),
@@ -28,11 +28,13 @@ export default (props: {
   color: string,
   selected?: boolean,
   onClick?: () => void,
+  className?: string,
+  disabled?: boolean,
 }) => (
   <span
     children={props.name}
-    className={cx('root', {clickable: props.onClick != null, selected: !!props.selected})}
-    style={tagColorStyle(props.color)}
+    className={cx('root', { clickable: props.onClick != null, selected: !!props.selected }, props.className)}
+    style={tagColorStyle(props.disabled ? disabledGray : props.color)}
     onClick={props.onClick}
   />
 )

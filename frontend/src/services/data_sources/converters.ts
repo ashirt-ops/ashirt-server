@@ -49,6 +49,13 @@ export function queryFromDto(query: dtos.Query): types.SavedQuery {
   return { ...query, type: query.type }
 }
 
+export function tagEvidenceDateFromDto(tag: dtos.TagByEvidenceDate): types.TagByEvidenceDate {
+  return {
+    ...tag,
+    usages: tag.usages.map(strDate => new Date(strDate))
+  }
+}
+
 function isValidUserRole(maybeRole: string): maybeRole is types.UserRole {
   // @ts-ignore
   return Object.values(types.UserRole).indexOf(maybeRole) > -1
