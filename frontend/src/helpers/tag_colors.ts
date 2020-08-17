@@ -25,7 +25,11 @@ const TAG_COLORS: {[key: string]: number} = {
   lightTeal      : 0x2EE6D6,
   lightVermilion : 0xFF6E4A,
   lightViolet    : 0xC274C2,
+
+  disabledGray   : 0x606060,
 }
+
+export const disabledGray = "disabledGray"
 
 export const tagColorNames = Object.keys(TAG_COLORS)
 

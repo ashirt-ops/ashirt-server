@@ -6,6 +6,7 @@ package services_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	localConsts "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
@@ -243,4 +244,30 @@ func (seed TestSeedData) UserRoleForOp(user models.User, op models.Operation) po
 		}
 	}
 	return ""
+}
+
+func (seed TestSeedData) EvidenceForOperation(opID int64) []models.Evidence {
+	evidence := make([]models.Evidence, 0)
+	for _, row := range seed.Evidences {
+		if row.OperationID == opID {
+			evidence = append(evidence, row)
+		}
+	}
+	return evidence
+}
+
+func (seed TestSeedData) TagIDsUsageByDate(opID int64) map[int64][]time.Time {
+	evidence := seed.EvidenceForOperation(opID)
+	tagIDUsageMap := make(map[int64][]time.Time)
+
+	for _, evi := range evidence {
+		tags := seed.TagsForEvidence(evi)
+		for _, t := range tags {
+			tmp := tagIDUsageMap[t.ID]
+			tmp = append(tmp, evi.OccurredAt)
+			tagIDUsageMap[t.ID] = tmp
+		}
+	}
+
+	return tagIDUsageMap
 }

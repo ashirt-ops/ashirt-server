@@ -201,3 +201,7 @@ export type TagDifference = {
   included: Array<TagPair>,
   excluded: Array<Tag>
 }
+
+export type TagByEvidenceDate = Tag & {
+  usages: Array<Date>,
+}

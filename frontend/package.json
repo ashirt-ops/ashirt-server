@@ -41,12 +41,15 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "@types/react-calendar-timeline": "^0.26.2",
     "ace-builds": "^1.4.9",
     "classnames": "^2.2.6",
     "date-fns": "^2.11.1",
+    "interactjs": "^1.9.20",
     "lodash": "^4.17.19",
     "react": "^16.13.1",
     "react-ace": "^8.1.0",
+    "react-calendar-timeline": "^0.27.0",
     "react-day-picker": "^7.4.0",
     "react-dom": "^16.13.1",
     "react-dropzone": "^10.2.2",

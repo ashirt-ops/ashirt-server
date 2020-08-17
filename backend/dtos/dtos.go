@@ -135,3 +135,8 @@ type TagPair struct {
 	SourceTag      Tag `json:"sourceTag"`
 	DestinationTag Tag `json:"destinationTag"`
 }
+
+type TagByEvidenceDate struct {
+	Tag
+	UsageDates []time.Time `json:"usages"`
+}

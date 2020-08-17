@@ -30,6 +30,7 @@ export default (props: {
       <header>
         <h1 title={operation.name}>{operation.name}</h1>
         <Link className={cx('edit')} to={`/operations/${props.operationSlug}/edit`} title="Edit this operation" />
+        <Link className={cx('overview')} to={`/operations/${props.operationSlug}/overview`} title="View evidence overview" />
         <OperationBadges {...operation} />
       </header>
       <QueryList
