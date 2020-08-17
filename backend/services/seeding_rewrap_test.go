@@ -32,6 +32,7 @@ type FullEvidence = seeding.FullEvidence
 var initTest = seeding.InitTest
 var getUsersWithRoleForOperationByOperationID = seeding.GetUsersWithRoleForOperationByOperationID
 var contextForUser = seeding.ContextForUser
+var simpleFullContext = seeding.SimpleFullContext
 
 var getFullEvidenceByFindingID = seeding.GetFullEvidenceByFindingID
 var getFullEvidenceByOperationID = seeding.GetFullEvidenceByOperationID
@@ -71,17 +72,6 @@ func createPopulatedMemStore(seed TestSeedData) *contentstore.MemStore {
 }
 
 // to be replaced
-func simpleFullContext(my models.User) context.Context {
-	ctx := context.Background()
-	p := policy.NewAuthenticatedPolicy(my.ID, my.Admin)
-
-	return middleware.InjectIntoContext(ctx, middleware.InjectIntoContextInput{
-		UserID:       p.UserID,
-		IsSuperAdmin: p.IsSuperAdmin,
-		UserPolicy:   p,
-	})
-}
-
 func fullContext(userid int64, p policy.Policy) context.Context {
 	ctx := context.Background()
 	return middleware.InjectIntoContext(ctx, middleware.InjectIntoContextInput{

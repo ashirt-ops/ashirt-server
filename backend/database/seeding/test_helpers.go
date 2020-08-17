@@ -2,6 +2,7 @@ package seeding
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
@@ -12,6 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 )
 
 // TinyImg is the smallest png. Used for testing. Reference: https://github.com/mathiasbynens/small
@@ -62,6 +64,18 @@ func InitTestWithOptions(t *testing.T, options TestOptions) *database.Connection
 	}
 
 	return database.NewTestConnectionFromNonStandardMigrationPath(t, *options.DatabaseName, *options.DatabasePath)
+}
+
+// SimpleFullContext returns back a context with a proper authenticated policy 
+func SimpleFullContext(my models.User) context.Context {
+	ctx := context.Background()
+	p := policy.NewAuthenticatedPolicy(my.ID, my.Admin)
+
+	return middleware.InjectIntoContext(ctx, middleware.InjectIntoContextInput{
+		UserID:       p.UserID,
+		IsSuperAdmin: p.IsSuperAdmin,
+		UserPolicy:   p,
+	})
 }
 
 // CreatePopulatedMemStore generates an in-memory content store with all evidence of the given seed
