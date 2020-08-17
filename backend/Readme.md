@@ -65,7 +65,7 @@ Configuration is handled entirely via environment variables. To that end, here a
 
 Authentication is a somewhat modular system that allows for new authentication/identification to occur with external systems. The exact process is left pretty open to allow for maximum extensibility, while trying to keep a fairly simple interface. For details on how to add your own authentication scheme, see the [Custom Authentication](#custom-authentication).
 
-Authorization is handled via the policy package. Policies are broken into two flavors: what operations can an authentication user perform, and what operations can a user perform for a given operation. Each specific action is listed inside the policies, and each check happens prior to performing the requested action; generally, but not necessarily, these checks happen in the services package.
+Authorization is handled via the policy package. Policies are broken into two flavors: what operations can an authenticated user perform, and what operations can an authenticated user perform for a given operation. Each specific action is listed inside the policies, and each check happens prior to performing the requested action; generally, but not necessarily, these checks happen in the services package.
 
 #### Administrator Priviledges
 
@@ -104,7 +104,7 @@ As mentioned above, other services can iteract with the system, under the guise 
 
 ## Development Overview
 
-This project utilizes Golang 1.12 (with modules), interfaces with a MySQL database and leverages Gorilla Mux to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
+This project utilizes Golang 1.13 (with modules), interfaces with a MySQL database and leverages Gorilla Mux to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
 
 ### Development Environment
 
@@ -112,7 +112,7 @@ This project has been verified to build and run on Linux and MacOS X. Windows ma
 
 ### Dependencies
 
-* Go 1.12
+* Go 1.13
   * To get supporing libraries, use `go mod download`
   * To clean up libraries, use `go mod tidy`
 * MySQL 8
@@ -140,6 +140,82 @@ Once the servers have been started, you can access the UI from `localhost:8080`.
 * The first run takes awhile to start, due to a number of required startup tasks. Subsequent runs should be quick.
 * Changes to the database schema or switching branches _may_ require stopping the server and restarting it.
 * The dockerfile is set up to hot reload changes, but given the way docker-compose restarts work, long periods spent debugging or making code changes may make the rebuild process take extra long. In these cases, it may be faster to stop and restart the docker-compose process manually.
+
+### Using Seeded Data
+
+Both unit tests and developer tests / manual tests use the same seed data to quickly spin up a decent selection of use cases within the database. This data is ever expanding, but in general tries to hit each of the features or expected bug scenarios. The most up-to-date document is going to be the seed data itself, which can be found at: `backend/database/seeding/hp_seed_data.go` (for a Harry Potter themed seed). However, a more pratical guide is as follows:
+
+#### Using seed data for developer testing
+
+* Several users are predefiend (see below). In general, the most "complete" users are:
+  * Albus (Dumbledore) -- the super admin, indirect access to all operations
+  * Ron (Weasley) -- admin for Chamber of Secrets
+  * Harry (Potter) -- admin for Sorcerer's Stone
+  * Draco (Malfoy) -- (mostly) no access, read-only access for Goblet of Fire
+  * Nicholas (de Mimsy-Porpington) ; AKA: Nearly-Headless Nick -- A headless user. Note that Nick only has access to the Goblet of Fire operation
+  * Tom (Riddle) -- deleted user
+  * Rubeus (Hagrid) -- disabled user
+* Users log in via their first name for their username and password. The password is always lowercase-only. e.g. Ron Weasley's login is `ron`/`ron`
+* All users (except Tom Riddle) should see the Goblet of Fire operation
+* The "Harry Potter and the Curse of Admin Oversight" operation provides no real evidence, but enough evidence to render a pattern on the operation overview page
+* There is nuanced permission data for Sorcerer's Stone and Chamber of Secrets
+
+#### Using seed data for unit testing
+
+##### Setting up seeded data
+
+Each test that wishes to use the seeded data needs to do the following:
+
+```go
+  db := seeding.InitTest(t) // this initializes the database connection to a fresh instance. This expects a certain path to the migrations directory, as well as a specific database name. See below for details on how to modify these
+  err := seeding.HarryPotterSeedData.ApplyTo(db) // seeds the database with the harry potter seed data
+  require.NoError(t, err) // ensure that no error was encountered while starting up
+  userContext := seeding.SimpleFullContext(seeding.UserHarry) // Provide a proper authenticated policy for a given seed user. (note: any user can be used here -- Harry is just an example)
+
+  // additional test-specific logic
+```
+
+This will spin up a fresh database instance the seeded data, and a user to perform the action (See users list below for pertinent details on seed users)
+
+As a small caution, note that every time the database is refreshed, some time is spent establishing a new connection to the database and feeding the database both the schemea and a set of data. This process is relatively quick -- less than a second, but can quickly balloon once more tests are added.
+
+##### Unit testing conventions
+
+Unit tests should follow these guidelines:
+
+* Ideal tests should verify access requirements for Read/Write, and Admin/Super Admin when necessary.
+* Tests should use `testify.require` or `testify.assert` to validate condtions
+
+#### Seeded Users
+
+Note that this list may become out of date. Users with flags should be considered constant with respect to the below
+fields, and Harry, Ronald, Hermione, Seamus, Ginny and Neville should be considered constant for the below fields as well.
+
+| User                         | User key | Password   | Flags       | SS Permissions | CoS Permissions |
+| ---------------------------- | -------- | ---------- | ----------- | -------------- | --------------- |
+| Albus Dumbledore             | Albus    | `albus`    | Super Admin | Admin          | Admin           |
+| Harry Potter                 | Harry    | `harry`    |             | Admin          | Write           |
+| Ronald Weasley               | Ron      | `ron`      |             | Write          | Admin           |
+| Hermione Granger             | Hermione | `hermione` |             | Read           | Write           |
+| Seamus Finnegan              | Seamus   | `seamus`   |             | Write          | Read            |
+| Ginny Weasley                | Ginny    | `ginny`    |             | NoAccess       | Write           |
+| Neville Longbottom           | Neville  | `neville`  |             | Write          | NoAccess        |
+| Draco Malfoy                 | Draco    | `draco`    |             | NoAccess       | NoAccess        |
+| Serverus Snape               | Serverus | `serverus` |             | NoAccess       | NoAccess        |
+| Cedric Digory                | Cedric   | `cedric`   |             | NoAccess       | NoAccess        |
+| Fleur Delacour               | Fleur    | `fleur`    |             | NoAccess       | NoAccess        |
+| Viktor Krum                  | Viktor   | `viktor`   |             | NoAccess       | NoAccess        |
+| Alastor Moody                | Alastor  | `alastor`  |             | NoAccess       | NoAccess        |
+| Minerva McGonagall           | Minerva  | `minerva`  |             | NoAccess       | NoAccess        |
+| Lucius Malfoy                | Lucius   | `lucius`   |             | NoAccess       | NoAccess        |
+| Sirius Black                 | Sirius   | `sirius`   |             | NoAccess       | NoAccess        |
+| Peter Pettigrew              | Peter    | `peter`    |             | NoAccess       | NoAccess        |
+| Parvati Patil                | Parvati  | `parvati`  |             | NoAccess       | NoAccess        |
+| Padma Patil                  | Padma    | `padma`    |             | NoAccess       | NoAccess        |
+| Cho Chang                    | Cho      | `cho`      |             | NoAccess       | NoAccess        |
+| Rubeus Hagrid                | Rubeus   | `rubeus`   | Disabled    | NoAccess       | NoAccess        |
+| Tom Riddle                   | Tom      | `tom`      | Deleted     | NoAccess       | NoAccess        |
+| Nicholas de Mimsy-Porpington | Nicholas | `nicholas` | Headless    | NoAccess       | NoAccess        |
 
 ### Project Structure
 
