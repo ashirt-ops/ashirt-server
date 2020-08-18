@@ -66,7 +66,7 @@ func InitTestWithOptions(t *testing.T, options TestOptions) *database.Connection
 	return database.NewTestConnectionFromNonStandardMigrationPath(t, *options.DatabaseName, *options.DatabasePath)
 }
 
-// SimpleFullContext returns back a context with a proper authenticated policy 
+// SimpleFullContext returns back a context with a proper authenticated policy
 func SimpleFullContext(my models.User) context.Context {
 	ctx := context.Background()
 	p := policy.NewAuthenticatedPolicy(my.ID, my.Admin)
