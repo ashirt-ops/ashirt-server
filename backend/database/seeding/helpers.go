@@ -192,6 +192,21 @@ func newQueryGen(first int64) func(opID int64, name, query, qType string) models
 	}
 }
 
+// associateEvidenceToTag mirrors associateTagsToEvidence. Rather than associating multiple tags
+// with a single piece of evidence this will instead associate a single tag to multiple evidence.
+func associateEvidenceToTag(tag models.Tag, evis ...models.Evidence) []models.TagEvidenceMap {
+	mappings := make([]models.TagEvidenceMap, 0, len(evis))
+	for _, evi := range evis {
+		if evi.OperationID == tag.OperationID {
+			mappings = append(mappings, models.TagEvidenceMap{TagID: tag.ID, EvidenceID: evi.ID, CreatedAt: internalClock.Now()})
+		} else {
+			// will likely be ignored, but helpful in constructing new sets
+			os.Stderr.WriteString("[Testing - WARNING] Trying to associate tag(" + tag.Name + ") with evidence(" + evi.UUID + ") in differeing operations\n")
+		}
+	}
+	return mappings
+}
+
 func associateTagsToEvidence(evi models.Evidence, tags ...models.Tag) []models.TagEvidenceMap {
 	mappings := make([]models.TagEvidenceMap, 0, len(tags))
 
