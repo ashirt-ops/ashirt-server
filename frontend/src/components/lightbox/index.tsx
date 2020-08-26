@@ -3,17 +3,18 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import {createPortal} from 'react-dom'
+import { createPortal } from 'react-dom'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   children: React.ReactNode,
   isOpen: boolean,
+  showToggle?: boolean
   onRequestClose: () => void,
 }) => {
   const [exists, setExists] = React.useState<boolean>(false)
   const [animating, setAnimating] = React.useState<boolean>(true)
-
+  const [full, setFull] = React.useState<boolean>(true)
 
   React.useEffect(() => {
     if (props.isOpen) {
@@ -28,6 +29,7 @@ export default (props: {
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') props.onRequestClose()
+    if (e.key === 'z' || e.key === 'Z') setFull(!full)
   }
 
   React.useEffect(() => {
@@ -39,7 +41,7 @@ export default (props: {
   return (
     createPortal((
       <div className={cx('root', animating ? 'animating' : 'open')} onClick={props.onRequestClose}>
-        <div className={cx('content')} onClick={e => e.stopPropagation()}>
+        <div className={cx('content', full ? "full" : "fit")} onClick={e => e.stopPropagation()}>
           {props.children}
         </div>
       </div>
