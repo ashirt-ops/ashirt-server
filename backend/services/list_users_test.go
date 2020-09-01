@@ -19,7 +19,7 @@ func TestListUsers(t *testing.T) {
 
 	testListUsersCase(t, db, "harry potter", true, []models.User{UserHarry})
 	testListUsersCase(t, db, "granger", true, []models.User{UserHermione})
-	testListUsersCase(t, db, "al", true, []models.User{UserDumbledore, UserDraco, UserRon})
+	testListUsersCase(t, db, "al", true, []models.User{UserAlastor, UserDumbledore, UserDraco, UserLucius, UserMinerva})
 	testListUsersCase(t, db, "dra mal", true, []models.User{UserDraco})
 	testListUsersCase(t, db, "", true, []models.User{})
 	testListUsersCase(t, db, "  ", true, []models.User{})

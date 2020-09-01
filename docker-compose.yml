@@ -49,8 +49,6 @@ services:
       - 3306:3306
     volumes:
       - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-      - ./dev_seed_data/z01_seed_data.sql:/docker-entrypoint-initdb.d/z01_seed_data.sql
-      - ./dev_seed_data/z02_gantt_operation.sql:/docker-entrypoint-initdb.d/z02_gantt_operation.sql
     environment:
       - MYSQL_DATABASE=dev-db
       - MYSQL_ROOT_PASSWORD=dev-root-password

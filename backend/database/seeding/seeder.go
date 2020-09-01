@@ -1,25 +1,25 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-package services_test
+package seeding
 
 import (
 	"context"
-	"testing"
+	"strings"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	localConsts "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// TestSeedData is designed to allow a database-to-structure mapping. This is useful either for
+// Seeder is designed to allow a database-to-structure mapping. This is useful either for
 // populating/seeding the database (see ApplyTo method), or alternatively, as acting as a source of
 // truth for post-db operations.
-type TestSeedData struct {
+type Seeder struct {
 	APIKeys        []models.APIKey
 	Findings       []models.Finding
 	Evidences      []models.Evidence
@@ -33,12 +33,12 @@ type TestSeedData struct {
 }
 
 // AllInitialTagIds is a (convenience) method version of the function TagIDsFromTags
-func (seed TestSeedData) AllInitialTagIds() []int64 {
+func (seed Seeder) AllInitialTagIds() []int64 {
 	return TagIDsFromTags(seed.Tags...)
 }
 
-// ApplyTo takes the configured TestSeedData and writes these values to the database.
-func (seed TestSeedData) ApplyTo(t *testing.T, db *database.Connection) {
+// ApplyTo takes the configured Seeder and writes these values to the database.
+func (seed Seeder) ApplyTo(db *database.Connection) error {
 	systemLogger := logging.GetSystemLogger()
 	systemLogger.Log("msg", "Applying seed data", "firstUser", seed.Users[0].FirstName)
 	logging.SetSystemLogger(logging.NewNopLogger())
@@ -73,15 +73,15 @@ func (seed TestSeedData) ApplyTo(t *testing.T, db *database.Connection) {
 			if seed.Users[i].DeletedAt != nil || seed.Users[i].Headless {
 				return map[string]interface{}{}
 			}
+			encryptedPassword, _ := bcrypt.GenerateFromPassword([]byte(strings.ToLower(seed.Users[i].FirstName)), bcrypt.DefaultCost)
 			return map[string]interface{}{
 				"id":                 seed.Users[i].ID,
 				"auth_scheme":        localConsts.Code,
-				"user_key":           seed.Users[i].Slug,
+				"user_key":           seed.Users[i].FirstName,
 				"user_id":            seed.Users[i].ID,
-				"encrypted_password": "$2a$10$MLooRpCcdyyxoXwe3ZiCFuQZfsGeVC7TPCSyYhTs8Bl/sFPd4K67W", //aka "password"
-				// "last_login":         nil,
-				"created_at": seed.Users[i].CreatedAt,
-				"updated_at": seed.Users[i].UpdatedAt,
+				"encrypted_password": encryptedPassword, //the user's first name, lowercased
+				"created_at":         seed.Users[i].CreatedAt,
+				"updated_at":         seed.Users[i].UpdatedAt,
 			}
 		})
 		tx.BatchInsert("operations", len(seed.Operations), func(i int) map[string]interface{} {
@@ -171,10 +171,10 @@ func (seed TestSeedData) ApplyTo(t *testing.T, db *database.Connection) {
 		})
 	})
 
-	require.Nil(t, err)
+	return err
 }
 
-func (seed TestSeedData) EvidenceIDsForFinding(finding models.Finding) []int64 {
+func (seed Seeder) EvidenceIDsForFinding(finding models.Finding) []int64 {
 	rtn := make([]int64, 0)
 	for _, row := range seed.EviFindingsMap {
 		if row.FindingID == finding.ID {
@@ -184,7 +184,7 @@ func (seed TestSeedData) EvidenceIDsForFinding(finding models.Finding) []int64 {
 	return rtn
 }
 
-func (seed TestSeedData) TagsForFinding(finding models.Finding) []models.Tag {
+func (seed Seeder) TagsForFinding(finding models.Finding) []models.Tag {
 	evidenceIDs := seed.EvidenceIDsForFinding(finding)
 	rtn := make([]models.Tag, 0)
 	for _, eviID := range evidenceIDs {
@@ -194,11 +194,11 @@ func (seed TestSeedData) TagsForFinding(finding models.Finding) []models.Tag {
 	return rtn
 }
 
-func (seed TestSeedData) TagsForEvidence(evidence models.Evidence) []models.Tag {
+func (seed Seeder) TagsForEvidence(evidence models.Evidence) []models.Tag {
 	return seed.tagsForEvidenceID(evidence.ID)
 }
 
-func (seed TestSeedData) tagsForEvidenceID(eviID int64) []models.Tag {
+func (seed Seeder) tagsForEvidenceID(eviID int64) []models.Tag {
 	rtn := make([]models.Tag, 0)
 	for _, row := range seed.TagEviMap {
 		if eviID == row.EvidenceID {
@@ -208,7 +208,7 @@ func (seed TestSeedData) tagsForEvidenceID(eviID int64) []models.Tag {
 	return rtn
 }
 
-func (seed TestSeedData) GetTagFromID(id int64) models.Tag {
+func (seed Seeder) GetTagFromID(id int64) models.Tag {
 	for _, item := range seed.Tags {
 		if item.ID == id {
 			return item
@@ -217,7 +217,7 @@ func (seed TestSeedData) GetTagFromID(id int64) models.Tag {
 	return models.Tag{}
 }
 
-func (seed TestSeedData) GetUserFromID(id int64) models.User {
+func (seed Seeder) GetUserFromID(id int64) models.User {
 	for _, item := range seed.Users {
 		if item.ID == id {
 			return item
@@ -226,7 +226,7 @@ func (seed TestSeedData) GetUserFromID(id int64) models.User {
 	return models.User{}
 }
 
-func (seed TestSeedData) UsersForOp(op models.Operation) []models.User {
+func (seed Seeder) UsersForOp(op models.Operation) []models.User {
 	rtn := make([]models.User, 0)
 
 	for _, row := range seed.UserOpMap {
@@ -237,7 +237,7 @@ func (seed TestSeedData) UsersForOp(op models.Operation) []models.User {
 	return rtn
 }
 
-func (seed TestSeedData) UserRoleForOp(user models.User, op models.Operation) policy.OperationRole {
+func (seed Seeder) UserRoleForOp(user models.User, op models.Operation) policy.OperationRole {
 	for _, row := range seed.UserOpMap {
 		if row.OperationID == op.ID && row.UserID == user.ID {
 			return row.Role
@@ -246,7 +246,7 @@ func (seed TestSeedData) UserRoleForOp(user models.User, op models.Operation) po
 	return ""
 }
 
-func (seed TestSeedData) EvidenceForOperation(opID int64) []models.Evidence {
+func (seed Seeder) EvidenceForOperation(opID int64) []models.Evidence {
 	evidence := make([]models.Evidence, 0)
 	for _, row := range seed.Evidences {
 		if row.OperationID == opID {
@@ -256,7 +256,7 @@ func (seed TestSeedData) EvidenceForOperation(opID int64) []models.Evidence {
 	return evidence
 }
 
-func (seed TestSeedData) TagIDsUsageByDate(opID int64) map[int64][]time.Time {
+func (seed Seeder) TagIDsUsageByDate(opID int64) map[int64][]time.Time {
 	evidence := seed.EvidenceForOperation(opID)
 	tagIDUsageMap := make(map[int64][]time.Time)
 
