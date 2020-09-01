@@ -68,7 +68,7 @@ export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
               'Remove From Finding': evidence => removeEvidenceFromFindingModal.show({evidence, finding}),
               'Edit': evidence => editEvidenceModal.show({evidence}),
             }}
-            onQueryUpdate={query => props.history.push(`/operations/${slug}/evidence?q=${encodeURIComponent(query)}`)}
+            onQueryUpdate={query => props.history.push(`/operations/${slug}/evidence?q=${encodeURIComponent(query.trim())}`)}
             operationSlug={slug}
             query=""
           />
