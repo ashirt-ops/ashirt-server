@@ -19,12 +19,27 @@
   max-width: 95%
   transform: translate(-50%, -50%)
   transition: all 200ms
-  box-shadow: 0 0 40px 0 #000
   background: $background
   overflow: auto
+
+  &.fit
+    transition: all 0ms
+    background: transparent
+    box-shadow: initial
 
 .animating
   opacity: 0
 
 .open
   opacity: 1
+
+.fit
+  img
+    display: block
+    width: 95vw
+    height: 95vh
+    object-fit: contain
+
+.full
+  img
+    display: block

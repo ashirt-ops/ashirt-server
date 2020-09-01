@@ -99,7 +99,8 @@ export default (props: {
         shortcuts={KeyboardShortcuts}
       />
     </div>
-    <Lightbox isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
+    <Lightbox showToggle={activeEvidence.contentType == "image"}
+      isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
       <div ref={lightboxRef}>
         <EvidencePreview
           operationSlug={props.operationSlug}
@@ -221,4 +222,5 @@ export const KeyboardShortcuts = [
   { keys: ["Enter"], description: "Open evidence large view" },
   { keys: ["Escape"], description: "Close evidence large view" },
   { keys: [" "], description: "Toggle evidence large view" },
+  { keys: ["z", "Z"], description: "Toggle Best Fit vs standard view" },
 ]

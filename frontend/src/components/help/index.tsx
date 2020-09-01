@@ -59,11 +59,12 @@ export default (props: {
 export type KeyboardShortcut = {
   keys: Array<string>
   description: string
+  uniqueKey?: string
 }
 
 const commonKeyboardShortcuts = [
-  { keys: ["?"], description: "Open this help menu" },
-  { keys: ["Escape"], description: "Close this window" },
+  { keys: ["?"], description: "Open this help menu", uniqueKey: "stdhelp-?" },
+  { keys: ["Escape"], description: "Close this window", uniqueKey: "stdhelp-Escape"},
 ]
 
 export const HelpModal = (props: {
@@ -88,7 +89,7 @@ export const HelpModal = (props: {
           <h1>Keyboard Shortcuts</h1>
           {props.shortcuts
             .concat(commonKeyboardShortcuts)
-            .map(shortcut => <KeyboardShortcutKey key={shortcut.keys[0]} shortcut={shortcut} />)
+            .map(shortcut => <KeyboardShortcutKey key={shortcut.uniqueKey ? shortcut.uniqueKey : shortcut.keys[0]} shortcut={shortcut} />)
           }
         </div>
       }
