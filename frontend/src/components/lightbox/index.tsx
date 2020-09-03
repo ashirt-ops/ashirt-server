@@ -14,7 +14,7 @@ export default (props: {
 }) => {
   const [exists, setExists] = React.useState<boolean>(false)
   const [animating, setAnimating] = React.useState<boolean>(true)
-  const [full, setFull] = React.useState<boolean>(true)
+  const [full, setFull] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     if (props.isOpen) {
