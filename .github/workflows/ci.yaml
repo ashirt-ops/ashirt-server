@@ -57,7 +57,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ashirt/frontend
           tag_with_ref: true
-          tag_with_sha: true
+          tag_with_sha: ${{ github.ref == 'refs/heads/master' }}
           dockerfile: Dockerfile.prod.frontend
 
   build_web:
@@ -74,7 +74,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ashirt/web
           tag_with_ref: true
-          tag_with_sha: true
+          tag_with_sha: ${{ github.ref == 'refs/heads/master' }}
           dockerfile: Dockerfile.prod.backend.web
 
   build_api:
@@ -91,5 +91,5 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ashirt/api
           tag_with_ref: true
-          tag_with_sha: true
+          tag_with_sha: ${{ github.ref == 'refs/heads/master' }}
           dockerfile: Dockerfile.prod.backend.api
