@@ -64,6 +64,11 @@ run-backend: clean-backend rerun-backend
 rerun-backend:
 	docker-compose up --build
 
+.PHONY: run-prod
+run-prod:
+	docker-compose -f docker-compose-prod.yml down
+	docker-compose -f docker-compose-prod.yml up --build
+
 ##### Helpers
 
 # view-backend enters the docker container running the backend
