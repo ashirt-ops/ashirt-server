@@ -1,4 +1,6 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 const path = require('path')
 
 module.exports = (env, argv) => ({
@@ -6,7 +8,7 @@ module.exports = (env, argv) => ({
 
   output: {
     publicPath: '/assets/',
-    filename: 'main.js',
+    filename: 'main-[hash].js',
     chunkFilename: '[chunkhash].js',
   },
 
@@ -39,8 +41,15 @@ module.exports = (env, argv) => ({
   },
 
   plugins: [
+    new HtmlWebpackPlugin({
+      title: "ASHIRT",
+      alwaysWriteToDisk: true,
+    }),
+    new HtmlWebpackHarddiskPlugin({
+      outputPath: path.resolve(__dirname, 'public')
+    }),
     new MiniCssExtractPlugin({
-      filename: 'main.css',
+      filename: 'main-[hash].css',
       chunkFilename: '[chunkhash].css',
     }),
   ],
