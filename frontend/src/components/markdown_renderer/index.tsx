@@ -2,19 +2,14 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import {useAsyncComponent} from 'src/helpers'
-const importRendererAsync = () => import('./sync_renderer').then(module => module.default)
 
-// Renders a markdown string passed to `children` after asynchronously downloading the markdown renderer javascript bundle
+import SyncMarkdownRenderer from './sync_renderer'
+
 export default (props: {
   className?: string,
   children: string,
-}) => {
-  const AsyncMarkdownRenderer = useAsyncComponent(importRendererAsync)
-
-  return (
-    <div className={props.className}>
-      <AsyncMarkdownRenderer children={props.children} />
-    </div>
-  )
-}
+}) => (
+  <div className={props.className}>
+    <SyncMarkdownRenderer children={props.children} />
+  </div>
+)
