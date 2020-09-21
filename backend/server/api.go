@@ -51,6 +51,13 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ListOperations(r.Context(), db)
 	}))
 
+	route(r, "GET", "/api/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
+		reply := struct {
+			Connected bool `json:"ashirtConnected"`
+		}{true}
+		return reply, nil
+	}))
+
 	route(r, "GET", "/api/operations/{operation_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		operationID := dr.FromURL("operation_id").Required().AsInt64()
