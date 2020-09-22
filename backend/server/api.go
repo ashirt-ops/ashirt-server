@@ -13,6 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -52,10 +53,7 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 	}))
 
 	route(r, "GET", "/api/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
-		reply := struct {
-			Connected bool `json:"ashirtConnected"`
-		}{true}
-		return reply, nil
+		return dtos.CheckConnection{Ok: true}, nil
 	}))
 
 	route(r, "GET", "/api/operations/{operation_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
