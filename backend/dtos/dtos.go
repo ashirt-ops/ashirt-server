@@ -140,3 +140,7 @@ type TagByEvidenceDate struct {
 	Tag
 	UsageDates []time.Time `json:"usages"`
 }
+
+type CheckConnection struct {
+	Ok bool `json:"ok"`
+}
