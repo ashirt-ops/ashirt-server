@@ -1,6 +1,6 @@
 # ASHIRT
 
-Adversary Simulators High-Fidelity Intelligence and Reporting Toolkit
+Adversary Simulators High-Fidelity Intelligence and Reporting Toolkit. This repo contains only the server side and frontend code for ASHIRT. You can find the ASHIRT client [here](https://www.github.com/theparanoids/ashirt) and aterm [here](https://www.github.com/theparanoids/aterm).
 
 ## Table of Contents
 
