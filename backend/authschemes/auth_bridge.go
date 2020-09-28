@@ -116,7 +116,7 @@ type UserAuthData struct {
 	UserKey            string  `db:"user_key"`
 	EncryptedPassword  []byte  `db:"encrypted_password"`
 	NeedsPasswordReset bool    `db:"must_reset_password"`
-	TOTPSecret         *string `db:totp_secret`
+	TOTPSecret         *string `db:"totp_secret"`
 }
 
 // FindUserAuth retrieves the row (codified by UserAuthData) corresponding to the provided userKey(e.g. username, email, etc) and the

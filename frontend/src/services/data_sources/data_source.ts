@@ -23,6 +23,12 @@ type UserPayload = {
   email: string,
 }
 
+type TotpKey = {
+  qr: string,
+  secret: string,
+  url: string,
+}
+
 export interface DataSource {
   listApiKeys(ids?: UserSlug): Promise<Array<dtos.APIKey>>
   createApiKey(ids: UserSlug): Promise<dtos.APIKey>
@@ -35,6 +41,10 @@ export interface DataSource {
   listAuthDetails(): Promise<Array<dtos.DetailedAuthenticationInfo>>
   adminDeleteUser(ids: UserSlug): Promise<void>
   deleteGlobalAuthScheme(ids: { schemeName: string }): Promise<void>
+  totpIsEnabled(): Promise<boolean>
+  generateTotpSecret(): Promise<TotpKey>
+  setTotp(data: {secret: string, passcode: string}): Promise<void>
+  deleteTotp(): Promise<void>
 
   listEvidence(ids: OpSlug, query: string): Promise<Array<dtos.Evidence>>
   createEvidence(ids: OpSlug, formData: FormData): Promise<void>
