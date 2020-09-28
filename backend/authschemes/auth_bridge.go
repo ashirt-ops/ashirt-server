@@ -11,6 +11,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
 	"github.com/theparanoids/ashirt-server/backend/session"
 
@@ -111,10 +112,11 @@ func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request)
 }
 
 type UserAuthData struct {
-	UserID             int64  `db:"user_id"`
-	UserKey            string `db:"user_key"`
-	EncryptedPassword  []byte `db:"encrypted_password"`
-	NeedsPasswordReset bool   `db:"must_reset_password"`
+	UserID             int64   `db:"user_id"`
+	UserKey            string  `db:"user_key"`
+	EncryptedPassword  []byte  `db:"encrypted_password"`
+	NeedsPasswordReset bool    `db:"must_reset_password"`
+	TOTPSecret         *string `db:totp_secret`
 }
 
 // FindUserAuth retrieves the row (codified by UserAuthData) corresponding to the provided userKey(e.g. username, email, etc) and the
@@ -124,7 +126,7 @@ type UserAuthData struct {
 func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 	var authData UserAuthData
 
-	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password").
+	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
 		From("auth_scheme_data").
 		Where(sq.Eq{
 			"user_key":    userKey,
@@ -136,6 +138,25 @@ func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 	return authData, nil
 }
 
+// FindUserAuthByContext retrieves the row (codified by UserAuthData) corresponding to the userID
+// stored in the request context and the auth scheme name provided from the caller.
+//
+// Returns a fully populated UserAuthData object, or nil if no such row exists
+func (ah AShirtAuthBridge) FindUserAuthByContext(ctx context.Context) (UserAuthData, error) {
+	var authData UserAuthData
+
+	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
+		From("auth_scheme_data").
+		Where(sq.Eq{
+			"user_id":     middleware.UserID(ctx),
+			"auth_scheme": ah.authSchemeName,
+		}))
+	if err != nil {
+		return UserAuthData{}, backend.DatabaseErr(err)
+	}
+	return authData, nil
+}
+
 // FindUserAuthsByUserSlug retrieves the row (codified by UserAuthData) corresponding to the provided user slug and the
 // auth scheme name provided from the caller.
 //
@@ -143,7 +164,7 @@ func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 func (ah AShirtAuthBridge) FindUserAuthsByUserSlug(slug string) ([]UserAuthData, error) {
 	var authData []UserAuthData
 
-	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password").
+	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
 		From("auth_scheme_data").
 		LeftJoin("users ON users.id = auth_scheme_data.user_id").
 		Where(sq.Eq{
@@ -166,6 +187,7 @@ func (ah AShirtAuthBridge) CreateNewAuthForUser(data UserAuthData) error {
 		"user_key":           data.UserKey,
 		"user_id":            data.UserID,
 		"encrypted_password": data.EncryptedPassword,
+		"totp_secret":        data.TOTPSecret,
 	})
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {
@@ -178,13 +200,14 @@ func (ah AShirtAuthBridge) CreateNewAuthForUser(data UserAuthData) error {
 
 // UpdateAuthForUser updates a user's authentication password, and can flag whether the user needs to
 // change their password on the next login.
-func (ah AShirtAuthBridge) UpdateAuthForUser(userKey string, encryptedPassword []byte, forceReset bool) error {
+func (ah AShirtAuthBridge) UpdateAuthForUser(data UserAuthData) error {
 	ub := sq.Update("auth_scheme_data").
 		SetMap(map[string]interface{}{
-			"encrypted_password":  encryptedPassword,
-			"must_reset_password": forceReset,
+			"encrypted_password":  data.EncryptedPassword,
+			"must_reset_password": data.NeedsPasswordReset,
+			"totp_secret":         data.TOTPSecret,
 		}).
-		Where(sq.Eq{"user_key": userKey, "auth_scheme": ah.authSchemeName})
+		Where(sq.Eq{"user_key": data.UserKey, "auth_scheme": ah.authSchemeName})
 	err := ah.db.Update(ub)
 	if err != nil {
 		return backend.WrapError("Unable to update user authentication", backend.DatabaseErr(err))
@@ -196,7 +219,7 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(userKey string, encryptedPassword [
 // user_key matches && created_at less than <expirationInMinutes> minutes
 // If this record exists, then the record is deleted. If there is no error _either_ for the lookup
 // OR the deletion, then (userID for the user, nil) is returned. At this point, the user has been validated
-// and ApproveUser can be called.
+// and LoginUser can be called.
 //
 // If an error occurs, _either_ the record does not exist, or some database issue prevented deletion,
 // and in either event, the user cannot be approved. In this case (0, <error>) will be returned

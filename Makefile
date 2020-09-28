@@ -96,3 +96,7 @@ prep: tidy-all test-all
 gentypes:
 	mkdir -p frontend/src/services/data_sources/dtos
 	go run backend/dtos/gentypes/generate_typescript_types.go > frontend/src/services/data_sources/dtos/dtos.ts
+
+.PHONY: build-test
+build-test:
+	go build -o /dev/null backend/bin/dev/dev.go
