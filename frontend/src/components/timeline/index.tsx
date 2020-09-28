@@ -222,5 +222,5 @@ export const KeyboardShortcuts = [
   { keys: ["Enter"], description: "Open evidence large view" },
   { keys: ["Escape"], description: "Close evidence large view" },
   { keys: [" "], description: "Toggle evidence large view" },
-  { keys: ["z", "Z"], description: "Toggle Best Fit vs standard view" },
+  { keys: ["z", "Z"], description: "Toggle Best Fit vs Standard views" },
 ]
