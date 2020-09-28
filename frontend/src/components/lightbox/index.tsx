@@ -9,7 +9,7 @@ const cx = classnames.bind(require('./stylesheet'))
 export default (props: {
   children: React.ReactNode,
   isOpen: boolean,
-  showToggle?: boolean
+  canUseFitToggle?: boolean
   onRequestClose: () => void,
 }) => {
   const [exists, setExists] = React.useState<boolean>(false)
@@ -38,10 +38,15 @@ export default (props: {
   })
 
   if (!exists) return null
+
+  const toggleClasses = props.canUseFitToggle
+    ? [full ? "full" : "fit", props.canUseFitToggle ? 'can-fit': '']
+    : []
+
   return (
     createPortal((
       <div className={cx('root', animating ? 'animating' : 'open')} onClick={props.onRequestClose}>
-        <div className={cx('content', full ? "full" : "fit")} onClick={e => e.stopPropagation()}>
+        <div className={cx('content', ...toggleClasses)} onClick={e => e.stopPropagation()}>
           {props.children}
         </div>
       </div>

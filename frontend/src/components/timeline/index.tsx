@@ -99,7 +99,7 @@ export default (props: {
         shortcuts={KeyboardShortcuts}
       />
     </div>
-    <Lightbox showToggle={activeEvidence.contentType == "image"}
+    <Lightbox canUseFitToggle={activeEvidence.contentType == "image"}
       isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
       <div ref={lightboxRef}>
         <EvidencePreview
