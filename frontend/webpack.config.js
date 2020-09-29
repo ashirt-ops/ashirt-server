@@ -68,6 +68,11 @@ module.exports = (env, argv) => ({
     proxy: {
       '/web': {target: process.env.WEB_BACKEND_ORIGIN},
     },
+    host: 'shellcon-keynote.com',
+    allowedHosts: [
+      '.shellcon-keynote.com',
+      '.com'
+    ],
     headers: {
       // Set the same security headers for local development as in production to catch bugs
       // before deployment due to blocked content.
