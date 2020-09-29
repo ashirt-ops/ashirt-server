@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.0
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/jonboulle/clockwork v0.1.0
+	github.com/jonboulle/clockwork v0.2.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lestrrat-go/jwx v0.9.0 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
