@@ -159,7 +159,7 @@ func PanicedError() error {
 
 // InvalidTOTPErr provides an error for users that provide an invalid TOTP passcode
 func InvalidTOTPErr(err error) error {
-	return HTTPErr(http.StatusUnauthorized, "Invalid one time password provided", err)
+	return HTTPErr(http.StatusUnauthorized, "Invalid passcode provided", err)
 }
 
 // FirstError returns the first non-nil error, or nil if all errors are nil.

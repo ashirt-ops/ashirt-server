@@ -10,8 +10,10 @@ type needsPasswordResetAuthSession struct {
 
 type needsTotpAuthSession struct {
 	UserKey string
+	Validated bool
 }
 
 func init() {
 	gob.Register(&needsPasswordResetAuthSession{})
+	gob.Register(&needsTotpAuthSession{})
 }
