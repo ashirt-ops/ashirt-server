@@ -41,10 +41,6 @@ export interface DataSource {
   listAuthDetails(): Promise<Array<dtos.DetailedAuthenticationInfo>>
   adminDeleteUser(ids: UserSlug): Promise<void>
   deleteGlobalAuthScheme(ids: { schemeName: string }): Promise<void>
-  totpIsEnabled(): Promise<boolean>
-  generateTotpSecret(): Promise<TotpKey>
-  setTotp(data: {secret: string, passcode: string}): Promise<void>
-  deleteTotp(): Promise<void>
 
   listEvidence(ids: OpSlug, query: string): Promise<Array<dtos.Evidence>>
   createEvidence(ids: OpSlug, formData: FormData): Promise<void>

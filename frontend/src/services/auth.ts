@@ -83,19 +83,3 @@ export async function deleteExpiredRecoveryCodes() {
 export async function getRecoveryMetrics(): Promise<RecoveryMetrics> {
   return await ds.getRecoveryMetrics()
 }
-
-export async function totpIsEnabled(): Promise<boolean> {
-  return await ds.totpIsEnabled()
-}
-
-export async function generateTotpSecret(): Promise<{ qr: string, secret: string, url: string }> {
-  return await ds.generateTotpSecret()
-}
-
-export async function setTotp(i: { secret: string, passcode: string }): Promise<void> {
-  return await ds.setTotp(i) // TODO: avoid return?
-}
-
-export async function deleteTotp(): Promise<void> {
-  await ds.deleteTotp()
-}

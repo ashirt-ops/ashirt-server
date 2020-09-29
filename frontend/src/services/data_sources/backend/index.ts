@@ -17,10 +17,6 @@ export const backendDataSource: DataSource = {
   listAuthDetails: () => req('GET', '/auths/breakdown'),
   adminDeleteUser: ids => req('DELETE', `/admin/user/${ids.userSlug}`),
   deleteGlobalAuthScheme: ids => req('DELETE', `/auths/${ids.schemeName}`),
-  totpIsEnabled: () => req('GET', '/auth/local/totp'),
-  generateTotpSecret: () => req('GET', '/auth/local/totp/generate'),
-  setTotp: (data:{secret: string, passcode: string}) => req('POST', '/auth/local/totp', data),
-  deleteTotp: () => req('DELETE', '/auth/local/totp'),
 
   listEvidence: (ids, query) => req('GET', `/operations/${ids.operationSlug}/evidence`, null, { query }),
   createEvidence: (ids, formData) => reqMultipart('POST', `/operations/${ids.operationSlug}/evidence`, formData),

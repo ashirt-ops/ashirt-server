@@ -46,3 +46,23 @@ export async function linkLocalAccount(i: {
 }) {
   await req('POST', "/auth/local/link", i)
 }
+
+export async function totpIsEnabled() {
+  return await req('GET', '/auth/local/totp')
+}
+
+export async function generateTotpSecret() {
+  return await req('GET', '/auth/local/totp/generate')
+}
+
+export async function setTotp(data: { secret: string, passcode: string }) {
+  return await req('POST', '/auth/local/totp', data)
+}
+
+export async function deleteTotp() {
+  await req('DELETE', '/auth/local/totp')
+}
+
+export async function totpLogin(totpPasscode: string) {
+  await req('POST', '/auth/local/login/totp', { totpPasscode })
+}

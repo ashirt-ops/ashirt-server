@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { totpIsEnabled, generateTotpSecret, setTotp, deleteTotp } from 'src/services'
+import { totpIsEnabled, generateTotpSecret, setTotp, deleteTotp } from '../services'
 import { useWiredData, useForm, useFormField } from 'src/helpers'
 
 import Form from 'src/components/form'
