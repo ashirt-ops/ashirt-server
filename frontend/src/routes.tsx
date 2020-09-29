@@ -44,6 +44,9 @@ export default () => {
       <Redirect exact from="/login" to="/operations" />
       <Redirect exact from="/" to="/operations" />
 
+      {/* AuthError routes that an admin might reach if testing */}
+      <Route exact path="/autherror/recoveryfailed" render={makeErrorDisplay("Access Error", "This url only works for users that are not logged in. ", true)} />
+
       <Route exact path="/operations" component={AsyncOperationList} />
 
       {/* Operation edit */}
