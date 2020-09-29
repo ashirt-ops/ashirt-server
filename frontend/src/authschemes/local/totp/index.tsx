@@ -42,7 +42,7 @@ const TotpEnabled = (props: {
 
   return (
     <Form submitDanger submitText="Remove Two-Factor Auth" {...removeTotpForm}>
-      Your account currently has TOTP enabled
+      Your account currently has Time-based One Time Password (TOTP) two factor authentication enabled
     </Form>
   )
 }
@@ -55,7 +55,7 @@ const TotpDisabled = (props: {
   const [showTotpSetupModal, setShowTotpSetupModal] = React.useState(false)
 
   return <>
-    <p>Two-Factor auth is not currently setup on your account.</p>
+    <p>Two-Factor authentication is not currently setup on your account.</p>
     <p>
       Two-factor authentication adds an additional layer of security to
       your account by requiring more than just a password to log in.

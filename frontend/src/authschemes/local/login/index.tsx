@@ -150,8 +150,9 @@ const EnterTotp = (props: {
   })
 
   return (<>
+    <h2 className={cx('title')}>Two Factor Authentication</h2>
     <div className={cx('messagebox')}>
-      Please enter your passcode code.
+      Please provide your TOTP passcode
     </div>
     <Form {...totpForm}>
       <Input label="Passcode" {...totpField}/>
