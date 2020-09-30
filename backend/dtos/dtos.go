@@ -91,12 +91,13 @@ type AuthenticationInfo struct {
 
 type UserAdminView struct {
 	User
-	Email       string   `json:"email"`
-	Admin       bool     `json:"admin,omitempty"`
-	Headless    bool     `json:"headless"`
-	Disabled    bool     `json:"disabled"`
-	Deleted     bool     `json:"deleted"`
-	AuthSchemes []string `json:"authSchemes"`
+	Email         string   `json:"email"`
+	Admin         bool     `json:"admin,omitempty"`
+	Headless      bool     `json:"headless"`
+	Disabled      bool     `json:"disabled"`
+	Deleted       bool     `json:"deleted"`
+	UsesLocalTOTP bool     `json:"hasLocalTotp"`
+	AuthSchemes   []string `json:"authSchemes"`
 }
 
 type UserOperationRole struct {
