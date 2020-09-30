@@ -138,17 +138,22 @@ func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 	return authData, nil
 }
 
-// FindUserAuthByContext retrieves the row (codified by UserAuthData) corresponding to the userID
-// stored in the request context and the auth scheme name provided from the caller.
+// FindUserAuthByContext acts as a proxy to calling FindUserByUserID with the userID extracted from the provided context
+//  see FindUserAuthByUserID
+func (ah AShirtAuthBridge) FindUserAuthByContext(ctx context.Context) (UserAuthData, error) {
+	return ah.FindUserAuthByUserID(middleware.UserID(ctx))
+}
+
+// FindUserAuthByUserID retrieves the row (codified by UserAuthData) corresponding to the provided userID
 //
 // Returns a fully populated UserAuthData object, or nil if no such row exists
-func (ah AShirtAuthBridge) FindUserAuthByContext(ctx context.Context) (UserAuthData, error) {
+func (ah AShirtAuthBridge) FindUserAuthByUserID(userID int64) (UserAuthData, error) {
 	var authData UserAuthData
 
 	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
 		From("auth_scheme_data").
 		Where(sq.Eq{
-			"user_id":     middleware.UserID(ctx),
+			"user_id":     userID,
 			"auth_scheme": ah.authSchemeName,
 		}))
 	if err != nil {
