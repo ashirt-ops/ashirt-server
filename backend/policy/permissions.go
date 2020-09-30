@@ -18,6 +18,9 @@ type CanReadUser struct{ UserID int64 }
 type CanReadDetailedUser struct{ UserID int64 }
 type CanModifyUser struct{ UserID int64 }
 type CanListAPIKeys struct{ UserID int64 }
+type CanCheckTotp struct{ UserID int64 }
+type CanDeleteTotp struct{ UserID int64 }
+
 type CanDeleteAuthScheme struct {
 	UserID     int64
 	SchemeCode string
