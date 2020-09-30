@@ -7,7 +7,7 @@ import classnames from 'classnames/bind'
 import { User, UserAdminView } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
-  deleteGlobalAuthScheme
+  deleteGlobalAuthScheme, deleteTotpForUser
 } from 'src/services'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
@@ -148,4 +148,23 @@ export const RecoverAccountModal = (props: {
       <Button primary onClick={() => props.onRequestClose()}>Close</Button>
     </div>
   </Modal>
+}
+
+export const RemoveTotpModal = (props: {
+  user: UserAdminView,
+  onRequestClose: () => void,
+}) => {
+  const formComponentProps = useForm({
+    fields: [],
+    onSuccess: () => props.onRequestClose(),
+    handleSubmit: () => deleteTotpForUser({userSlug: props.user.slug}),
+  })
+
+  return <ModalForm title="Disable Two-Factor Authentication" submitText="Continue" onRequestClose={props.onRequestClose} {...formComponentProps}>
+    <em className={cx('warning')}>
+      Two-Factor Authentication provides an extra layer of security for this user. 
+      Removing this factor should only be done if the user has lost the device or the mechansim to authenticate. 
+      Are you sure you want to continue?
+    </em>
+  </ModalForm>
 }

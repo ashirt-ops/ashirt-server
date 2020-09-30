@@ -37,3 +37,15 @@ export async function createRecoveryCode(i: {
   const resp = await ds.createRecoveryCode(i)
   return resp.code
 }
+
+export async function getTotpForUser(i:{
+  userSlug: string
+}): Promise<boolean> {
+  return await ds.getTotpForUser(i)
+}
+
+export async function deleteTotpForUser(i: {
+  userSlug: string
+}): Promise<void> {
+  await ds.deleteTotpForUser(i)
+}
