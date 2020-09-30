@@ -23,7 +23,7 @@ func DeleteAPIKey(ctx context.Context, db *database.Connection, i DeleteAPIKeyIn
 	var userID int64
 	var err error
 
-	if userID, err = selfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
+	if userID, err = SelfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
 		return backend.WrapError("Unable to delete API Key", backend.DatabaseErr(err))
 	}
 
