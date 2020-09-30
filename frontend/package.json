@@ -54,7 +54,7 @@
     "react-calendar-timeline": "^0.27.0",
     "react-day-picker": "^7.4.0",
     "react-dom": "^16.13.1",
-    "react-dropzone": "^10.2.2",
+    "react-dropzone": "^11.2.0",
     "react-markdown": "^4.3.1",
     "react-router-dom": "^5.1.2",
     "xterm": "^4.3.0"
