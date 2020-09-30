@@ -271,12 +271,12 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 	}))
 
 	remux.Route(r, "GET", "/totp", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		userAuth, err := bridge.FindUserAuthByContext(r.Context())
-		if err != nil {
-			return nil, err
+		dr := remux.DissectJSONRequest(r)
+		userSlug := dr.FromBody("userSlug").AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
 		}
-		hasTOTP := userAuth.TOTPSecret != nil
-		return hasTOTP, nil
+		return readUserTotpStatus(r.Context(), bridge, userSlug)
 	}))
 
 	remux.Route(r, "GET", "/totp/generate", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
@@ -307,7 +307,6 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			)
 		}
 
-		fmt.Println(secret, passcode) // TODO: remove
 		err = validateTOTP(passcode, secret)
 		if err != nil {
 			return nil, err
@@ -322,19 +321,13 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 	}))
 
 	remux.Route(r, "DELETE", "/totp", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		userAuth, err := bridge.FindUserAuthByContext(r.Context())
-		if err != nil {
-			return nil, err
-		}
-		if userAuth.TOTPSecret == nil {
-			return nil, backend.BadInputErr(
-				errors.New("User does not have a TOTP key associated"),
-				"Your account does not have a TOTP key",
-			)
+		dr := remux.DissectJSONRequest(r)
+		userSlug := dr.FromBody("userSlug").AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
 		}
 
-		userAuth.TOTPSecret = nil
-		return nil, bridge.UpdateAuthForUser(userAuth)
+		return nil, deleteUserTotp(r.Context(), bridge, userSlug)
 	}))
 }
 
