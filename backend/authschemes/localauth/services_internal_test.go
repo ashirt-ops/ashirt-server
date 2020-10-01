@@ -15,7 +15,7 @@ import (
 func initBridge(t *testing.T) authschemes.AShirtAuthBridge {
 	db := seeding.InitTestWithOptions(t, seeding.TestOptions{
 		DatabasePath: helpers.StringPtr("../../migrations"),
-		DatabaseName: helpers.StringPtr("auth-test-db"),
+		DatabaseName: helpers.StringPtr("local-auth-test-db"),
 	})
 	seeding.ApplySeeding(t, seeding.HarryPotterSeedData, db)
 	sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
