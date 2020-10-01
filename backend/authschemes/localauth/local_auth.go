@@ -118,8 +118,8 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 				return nil, dr.Error
 			}
 
-			sess, ok := bridge.ReadAuthSchemeSession(r).(*needsPasswordResetAuthSession)
-			if !ok {
+			sess := readLocalSession(r, bridge)
+			if !sess.SessionValid {
 				return nil, backend.HTTPErr(http.StatusUnauthorized,
 					"Your account does not require a password reset at this time",
 					errors.New("User session is not a local auth needsPasswordResetAuthSession"))
@@ -146,8 +146,8 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 				return nil, dr.Error
 			}
 
-			sess, ok := bridge.ReadAuthSchemeSession(r).(*needsTotpAuthSession)
-			if !ok {
+			sess := readLocalSession(r, bridge)
+			if !sess.SessionValid {
 				return nil, backend.HTTPErr(http.StatusUnauthorized,
 					"Could not validate passcode",
 					errors.New("User session does not require needsTotpAuthSession"))
@@ -164,9 +164,8 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			if err = validateTOTP(totpPasscode, *authData.TOTPSecret); err != nil {
 				return nil, backend.WrapError("Could not validate passcode", err)
 			}
-			sess.Validated = true
-			err = bridge.SetAuthSchemeSession(w, r, sess)
-			if err != nil {
+			sess.TOTPValidated = true
+			if err = sess.writeLocalSession(w, r, bridge); err != nil {
 				return nil, backend.WrapError("Could not validate passcode", backend.WrapError("Unable to set auth scheme in session", err))
 			}
 
@@ -327,27 +326,27 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 }
 
 func attemptFinishLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, authData authschemes.UserAuthData) error {
-	if authData.NeedsPasswordReset {
-		err := bridge.SetAuthSchemeSession(w, r, &needsPasswordResetAuthSession{UserKey: authData.UserKey})
-		if err != nil {
-			return backend.WrapError("Unable to set auth scheme in session", err)
-		}
-		return backend.UserRequiresAdditionalAuthenticationErr("PASSWORD_RESET_REQUIRED")
-	}
+	sess := readLocalSession(r, bridge)
+	sess.UserKey = authData.UserKey
 
 	if authData.TOTPSecret != nil {
-		sess, ok := bridge.ReadAuthSchemeSession(r).(*needsTotpAuthSession)
-		if !ok || !sess.Validated {
-			err := bridge.SetAuthSchemeSession(w, r, &needsTotpAuthSession{UserKey: authData.UserKey, Validated: false})
-			if err != nil {
+		if !sess.SessionValid || !sess.TOTPValidated {
+			sess.TOTPValidated = false
+			if err := sess.writeLocalSession(w, r, bridge); err != nil {
 				return backend.WrapError("Unable to set auth scheme in session", err)
 			}
 			return backend.UserRequiresAdditionalAuthenticationErr("TOTP_REQUIRED")
 		}
 	}
 
-	err := bridge.LoginUser(w, r, authData.UserID, nil)
-	if err != nil {
+	if authData.NeedsPasswordReset {
+		if err := sess.writeLocalSession(w, r, bridge); err != nil {
+			return backend.WrapError("Unable to set auth scheme in session", err)
+		}
+		return backend.UserRequiresAdditionalAuthenticationErr("PASSWORD_RESET_REQUIRED")
+	}
+
+	if err := bridge.LoginUser(w, r, authData.UserID, nil); err != nil {
 		return backend.WrapError("Attempt to finish login failed", err)
 	}
 

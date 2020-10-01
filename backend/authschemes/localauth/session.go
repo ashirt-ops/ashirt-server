@@ -1,19 +1,39 @@
 package localauth
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+	"net/http"
 
-// needsPasswordResetAuthSession is saved as an authscheme session for a user who has successfully
-// authenticated with a username/password but requires a password reset.
-type needsPasswordResetAuthSession struct {
-	UserKey string
-}
+	"github.com/theparanoids/ashirt-server/backend/authschemes"
+)
 
-type needsTotpAuthSession struct {
-	UserKey   string
-	Validated bool
+// localAuthSession is saved as an authscheme session for users that have "some difficulty" in logging in --
+// i.e. a plain authentication is insufficient, and more action is required. Speciifically, this 
+// comes in the following flavors:
+//  * User must reset their password
+//  * User must supply their TOTP code
+type localAuthSession struct {
+	SessionValid  bool
+	UserKey       string
+	TOTPValidated bool
 }
 
 func init() {
-	gob.Register(&needsPasswordResetAuthSession{})
-	gob.Register(&needsTotpAuthSession{})
+	gob.Register(&localAuthSession{})
+}
+
+func readLocalSession(r *http.Request, bridge authschemes.AShirtAuthBridge) *localAuthSession {
+	sess, ok := bridge.ReadAuthSchemeSession(r).(*localAuthSession)
+	if !ok {
+		return &localAuthSession{SessionValid: false}
+	}
+	return sess
+}
+
+func (sess *localAuthSession) writeLocalSession(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge) error {
+	return bridge.SetAuthSchemeSession(w, r, &localAuthSession{
+		SessionValid: true,
+		UserKey: sess.UserKey,
+		TOTPValidated: sess.TOTPValidated,
+	})
 }
