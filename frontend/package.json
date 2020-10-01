@@ -34,7 +34,7 @@
     "sinon": "^9.0.3",
     "sinon-chai": "^3.5.0",
     "stylus": "^0.54.8",
-    "stylus-loader": "^3.0.2",
+    "stylus-loader": "^4.0.0",
     "ts-loader": "^8.0.4",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3",
