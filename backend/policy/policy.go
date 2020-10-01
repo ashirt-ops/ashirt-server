@@ -84,7 +84,7 @@ func (a *Authenticated) String() string {
 
 // Check reviews the permission type for all authenticated users (true => valid ;; false => invalid)
 func (a *Authenticated) Check(permission Permission) bool {
-	selfOrAdmin := func(userID int64) bool {return userID == a.UserID || a.IsSuperAdmin}
+	selfOrAdmin := func(userID int64) bool { return userID == a.UserID || a.IsSuperAdmin }
 
 	switch target := permission.(type) {
 	case CanCreateOperations:

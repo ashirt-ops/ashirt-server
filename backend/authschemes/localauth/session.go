@@ -9,7 +9,7 @@ type needsPasswordResetAuthSession struct {
 }
 
 type needsTotpAuthSession struct {
-	UserKey string
+	UserKey   string
 	Validated bool
 }
 

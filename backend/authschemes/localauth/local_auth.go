@@ -51,6 +51,7 @@ func (LocalAuthScheme) FriendlyName() string {
 // * POST   ${prefix}/link                 Adds local auth to a non-local user
 //
 // * TOTP-Related
+//   * POST   ${prefix}/login/totp     Completes login with totp passcode
 //   * GET    ${prefix}/totp           Returns boolean true if the user has totp enabled, false otherwise
 //   * GET    ${prefix}/totp/generate  Returns a new generated totp secret/uri/qrcode
 //   * POST   ${prefix}/totp           Enables totp on a user's account by accepting a secret and verifying
