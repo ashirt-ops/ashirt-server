@@ -135,7 +135,12 @@ func TestUserAuthCreationAndLookup(t *testing.T) {
 	})
 
 	t.Run("Test UpdateAuthForUser", func(t *testing.T) {
-		err := bridge.UpdateAuthForUser("dummy-user-key", []byte("encrypted-password"), true)
+		authData := authschemes.UserAuthData{
+			UserKey:            "dummy-user-key",
+			EncryptedPassword:  []byte("encrypted-password"),
+			NeedsPasswordReset: true,
+		}
+		err := bridge.UpdateAuthForUser(authData)
 		require.NoError(t, err)
 
 		auth, err := bridge.FindUserAuth("dummy-user-key")
