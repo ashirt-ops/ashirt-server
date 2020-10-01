@@ -64,7 +64,7 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 	}))
 
 	remux.Route(r, "DELETE", "/expired", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		return nil, deleteExpiredRecoveryCodes(r.Context(), bridge.GetDatabase(), int64(p.Expiry/time.Minute))
+		return nil, DeleteExpiredRecoveryCodes(r.Context(), bridge.GetDatabase(), int64(p.Expiry/time.Minute))
 	}))
 
 	remux.Route(r, "GET", "/metrics", remux.JSONHandler(func(r *http.Request) (interface{}, error) {

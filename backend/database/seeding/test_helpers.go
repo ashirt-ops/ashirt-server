@@ -385,3 +385,8 @@ func (opts *TestOptions) useDefaults() {
 		opts.DatabaseName = helpers.StringPtr("service-test-db")
 	}
 }
+
+func ApplySeeding(t *testing.T, seed Seeder, db *database.Connection) {
+	err := seed.ApplyTo(db)
+	require.NoError(t, err)
+}
