@@ -23,7 +23,7 @@
     "chai": "^4.2.0",
     "css-loader": "^3.6.0",
     "eslint": "^6.8.0",
-    "eslint-plugin-react": "^7.21.2",
+    "eslint-plugin-react": "^7.21.3",
     "eslint-plugin-react-hooks": "^4.1.2",
     "file-loader": "^6.1.0",
     "html-webpack-harddisk-plugin": "^1.0.2",
