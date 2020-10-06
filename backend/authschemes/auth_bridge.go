@@ -210,7 +210,10 @@ func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, userKey stri
 
 		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"user_key": userKey}))
 	})
-	return userID, backend.WrapError("Unable to validate one-time verification", err)
+	if err != nil {
+		return 0, backend.WrapError("Unable to validate one-time verification", err)
+	}
+	return userID, nil
 }
 
 // GetDatabase provides raw access to the database. In general, this should not be used by authschemes,
