@@ -23,6 +23,7 @@ async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
     }
     else if (err.message === 'TOTP_REQUIRED') {
       window.location.href = '/login/local?step=totp'
+      return
     }
     throw err
   }
@@ -150,11 +151,8 @@ const EnterTotp = (props: {
   })
 
   return (<>
-    <h2 className={cx('title')}>Two Factor Authentication</h2>
-    <div className={cx('messagebox')}>
-      Please provide your TOTP passcode
-    </div>
-    <Form {...totpForm}>
+    <h2 className={cx('title')}>Multi-factor Authentication</h2>
+    <Form submitText="Submit" {...totpForm}>
       <Input label="Passcode" {...totpField}/>
     </Form>
   </>)

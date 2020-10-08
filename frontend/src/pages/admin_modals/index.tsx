@@ -160,9 +160,9 @@ export const RemoveTotpModal = (props: {
     handleSubmit: () => deleteTotpForUser({userSlug: props.user.slug}),
   })
 
-  return <ModalForm title="Disable Two-Factor Authentication" submitText="Continue" onRequestClose={props.onRequestClose} {...formComponentProps}>
+  return <ModalForm title="Disable Multi-Factor Authentication" submitText="Continue" onRequestClose={props.onRequestClose} {...formComponentProps}>
     <em className={cx('warning')}>
-      Two-Factor Authentication provides an extra layer of security for this user.
+      Multi-factor Authentication provides an extra layer of security for this user.
       Removing this factor should only be done if the user has lost the device or the mechansim to authenticate.
       Are you sure you want to continue?
     </em>

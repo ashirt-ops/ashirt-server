@@ -170,7 +170,7 @@ const actionsForUserBuilder = (selfSlug: string,
     const canRemoveTotp = () => {
       if (u.deleted) return deletedAttrs
       if (!u.hasLocalTotp) {
-        return {disabled: true, title: "User does not have Two-Factor Authentication enabled"}
+        return { disabled: true, title: "User does not have multi-factor Authentication enabled" }
       }
       return {}
     }
@@ -182,7 +182,7 @@ const actionsForUserBuilder = (selfSlug: string,
             <MenuItem onClick={() => editUserFn(u)}>Edit User</MenuItem>
             <MenuItem onClick={() => resetPwFn(u)} {...canReset()}>Reset Password</MenuItem>
             <MenuItem onClick={() => editFlagsFn(u)} {...canEditFlags}>Edit User Flags</MenuItem>
-            <MenuItem onClick={() => deleteTotpFn(u)} {...canRemoveTotp()}>Remove Two-Factor Authentication</MenuItem>
+            <MenuItem onClick={() => deleteTotpFn(u)} {...canRemoveTotp()}>Remove Multi-Factor Authentication</MenuItem>
             <MenuItem onClick={() => recoveryFn(u)} {...canRecover}>Generate Recovery Code</MenuItem>
           </Menu>
         }>

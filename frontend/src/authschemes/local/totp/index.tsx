@@ -20,7 +20,7 @@ export default (props: {
   const wiredTotpIsEnabled = useWiredData(totpIsEnabled)
 
   return (
-    <SettingsSection title="Two-Factor Authentication" className={cx('root')}>
+    <SettingsSection title="Multi-Factor Authentication" className={cx('root')}>
       {wiredTotpIsEnabled.render(isEnabled => (
         isEnabled
           ? <TotpEnabled onSuccess={wiredTotpIsEnabled.reload} />
@@ -41,8 +41,8 @@ const TotpEnabled = (props: {
   })
 
   return (
-    <Form submitDanger submitText="Remove Two-Factor Auth" {...removeTotpForm}>
-      Your account currently has Time-based One Time Password (TOTP) two factor authentication enabled
+    <Form submitDanger submitText="Remove Multi-Factor Authentication" {...removeTotpForm}>
+      Your account currently has Time-based One Time Password (TOTP) multi-factor authentication enabled
     </Form>
   )
 }
@@ -55,12 +55,12 @@ const TotpDisabled = (props: {
   const [showTotpSetupModal, setShowTotpSetupModal] = React.useState(false)
 
   return <>
-    <p>Two-Factor authentication is not currently setup on your account.</p>
+    <p>Multi-factor authentication is not currently setup on your account.</p>
     <p>
-      Two-factor authentication adds an additional layer of security to
+      Multi-factor authentication adds an additional layer of security to
       your account by requiring more than just a password to log in.
     </p>
-    <Button primary onClick={() => setShowTotpSetupModal(true)}>Setup Two-Factor Authentication</Button>
+    <Button primary onClick={() => setShowTotpSetupModal(true)}>Setup Multi-Factor Authentication</Button>
 
     {showTotpSetupModal && (
       <TotpSetupModal
@@ -82,12 +82,12 @@ const TotpSetupModal = (props: {
   const wiredGeneratedTotp = useWiredData(generateTotpSecret)
 
   return (
-    <Modal title="Enable Two-Factor Authentication" onRequestClose={props.onRequestClose}>
+    <Modal title="Enable Multi-Factor Authentication" onRequestClose={props.onRequestClose}>
       {wiredGeneratedTotp.render(generatedTotp => (
         <div className={cx('setup-modal')}>
           <h2>1. Set up your authenticator app</h2>
           <p>
-            Set up two factor auth with your authenticator app of choice by scanning
+            Set up multi-factor auth with your authenticator app of choice by scanning
             the QR code below.
           </p>
           <img className={cx('qr')} src={generatedTotp.qr} />
@@ -99,7 +99,7 @@ const TotpSetupModal = (props: {
 
           <h2>2. Enter the code from your authenticator app</h2>
           <p>
-            To finalize setup, verify your app is generating correct two-factor codes
+            To finalize setup, verify your app is generating correct multi-factor codes
             by entering a generated code below:
           </p>
           <TotpSetupForm {...props} secret={generatedTotp.secret} onCancel={props.onRequestClose} />
