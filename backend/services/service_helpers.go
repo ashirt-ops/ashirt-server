@@ -163,7 +163,7 @@ func userSlugToUserID(db *database.Connection, slug string) (int64, error) {
 	return userID, err
 }
 
-func selfOrSlugToUserID(ctx context.Context, db *database.Connection, slug string) (int64, error) {
+func SelfOrSlugToUserID(ctx context.Context, db *database.Connection, slug string) (int64, error) {
 	if slug == "" {
 		return middleware.UserID(ctx), nil
 	}

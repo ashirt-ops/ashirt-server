@@ -18,7 +18,7 @@ import (
 // ReadUser retrieves a detailed view of a user. This is separate from the data retriving by listing
 // users, or reading another user's profile (when not an admin)
 func ReadUser(ctx context.Context, db *database.Connection, userSlug string) (*dtos.UserOwnView, error) {
-	userID, err := selfOrSlugToUserID(ctx, db, userSlug)
+	userID, err := SelfOrSlugToUserID(ctx, db, userSlug)
 	if err != nil {
 		return nil, backend.WrapError("Unable to read user", backend.DatabaseErr(err))
 	}

@@ -25,7 +25,7 @@ func UpdateUserProfile(ctx context.Context, db *database.Connection, i UpdateUse
 	var userID int64
 	var err error
 
-	if userID, err = selfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
+	if userID, err = SelfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
 		return backend.WrapError("Unable to update user profile", backend.DatabaseErr(err))
 	}
 

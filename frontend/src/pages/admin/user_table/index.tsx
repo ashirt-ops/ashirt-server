@@ -10,7 +10,10 @@ import { listUsersAdminView, createRecoveryCode } from 'src/services'
 import AuthContext from 'src/auth_context'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
-import { ResetPasswordModal, UpdateUserFlagsModal, DeleteUserModal, RecoverAccountModal } from 'src/pages/admin_modals'
+import {
+  ResetPasswordModal, UpdateUserFlagsModal, DeleteUserModal, RecoverAccountModal,
+  RemoveTotpModal
+} from 'src/pages/admin_modals'
 import Table from 'src/components/table'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import Checkbox from 'src/components/checkbox'
@@ -34,6 +37,7 @@ export default (props: {
   const [resettingPassword, setResettingPassword] = React.useState<null | UserAdminView>(null)
   const [editingUserFlags, setEditingUserFlags] = React.useState<null | UserAdminView>(null)
   const [deletingUser, setDeletingUser] = React.useState<null | UserAdminView>(null)
+  const [deletingTotp, setDeletingTotp] = React.useState<null | UserAdminView>(null)
   const [recoveryCode, setRecoveryCode] = React.useState<null | string>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
   const self = React.useContext(AuthContext).user
@@ -43,7 +47,7 @@ export default (props: {
 
   const editUserFn = (u: UserAdminView) => history.push(`/account/edit/${u.slug}`)
   const recoverFn = (u: UserAdminView) => createRecoveryCode({ userSlug: u.slug }).then(setRecoveryCode)
-  const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", editUserFn, setResettingPassword, setEditingUserFlags, setDeletingUser, recoverFn)
+  const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", editUserFn, setResettingPassword, setEditingUserFlags, setDeletingUser, recoverFn, setDeletingTotp)
   const columns = Object.keys(rowBuilder(null, <span />))
 
   const asFullRow = (el: React.ReactElement): React.ReactElement => <tr><td colSpan={columns.length}>{el}</td></tr>
@@ -85,6 +89,7 @@ export default (props: {
       {resettingPassword && <ResetPasswordModal user={resettingPassword} onRequestClose={() => setResettingPassword(null)} />}
       {editingUserFlags && <UpdateUserFlagsModal user={editingUserFlags} onRequestClose={() => { setEditingUserFlags(null); wiredUsers.reload() }} />}
       {deletingUser && <DeleteUserModal user={deletingUser} onRequestClose={() => { setDeletingUser(null); wiredUsers.reload() }} />}
+      {deletingTotp && <RemoveTotpModal user={deletingTotp} onRequestClose={() => { setDeletingTotp(null); wiredUsers.reload() }} />}
       {recoveryCode && <RecoverAccountModal recoveryCode={recoveryCode} onRequestClose={() => setRecoveryCode(null)} />}
     </SettingsSection>
   )
@@ -138,7 +143,8 @@ const actionsForUserBuilder = (selfSlug: string,
   resetPwFn: (u: UserAdminView) => void,
   editFlagsFn: (u: UserAdminView) => void,
   deleteUserFn: (u: UserAdminView) => void,
-  recoveryFn: (u: UserAdminView) => void
+  recoveryFn: (u: UserAdminView) => void,
+  deleteTotpFn: (u: UserAdminView) => void,
 ) => (
   u: UserAdminView
 ) => {
@@ -161,6 +167,13 @@ const actionsForUserBuilder = (selfSlug: string,
     const canDelete = notDeletedOrSelf("Admins cannot delete themselves")
 
     const canRecover = u.deleted ? deletedAttrs : {}
+    const canRemoveTotp = () => {
+      if (u.deleted) return deletedAttrs
+      if (!u.hasLocalTotp) {
+        return { disabled: true, title: "User does not have multi-factor Authentication enabled" }
+      }
+      return {}
+    }
 
     return (
       <ButtonGroup>
@@ -169,6 +182,7 @@ const actionsForUserBuilder = (selfSlug: string,
             <MenuItem onClick={() => editUserFn(u)}>Edit User</MenuItem>
             <MenuItem onClick={() => resetPwFn(u)} {...canReset()}>Reset Password</MenuItem>
             <MenuItem onClick={() => editFlagsFn(u)} {...canEditFlags}>Edit User Flags</MenuItem>
+            <MenuItem onClick={() => deleteTotpFn(u)} {...canRemoveTotp()}>Remove Multi-Factor Authentication</MenuItem>
             <MenuItem onClick={() => recoveryFn(u)} {...canRecover}>Generate Recovery Code</MenuItem>
           </Menu>
         }>

@@ -135,6 +135,7 @@ type AuthSchemeData struct {
 	UserKey           string     `db:"user_key"`
 	UserID            int64      `db:"user_id"`
 	EncryptedPassword []byte     `db:"encrypted_password"`
+	TOTPSecret        *string    `db:"totp_secret"`
 	MustResetPassword bool       `db:"must_reset_password"`
 	LastLogin         *time.Time `db:"last_login"`
 	CreatedAt         time.Time  `db:"created_at"`

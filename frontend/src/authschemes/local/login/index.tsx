@@ -7,7 +7,7 @@ import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import classnames from 'classnames/bind'
 import { ParsedUrlQuery } from 'querystring'
-import { login, register, userResetPassword } from '../services'
+import { login, register, userResetPassword, totpLogin } from '../services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
@@ -19,6 +19,10 @@ async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
   } catch(err) {
     if (err.message === 'PASSWORD_RESET_REQUIRED') {
       window.location.href = '/login/local?step=reset'
+      return
+    }
+    else if (err.message === 'TOTP_REQUIRED') {
+      window.location.href = '/login/local?step=totp'
       return
     }
     throw err
@@ -37,6 +41,7 @@ export default (props: {
 }) => {
   switch (props.query.step) {
     case 'reset': return <ResetPassword />
+    case 'totp': return <EnterTotp />
     default: return <Login />
   }
 }
@@ -132,4 +137,23 @@ const ResetPassword = (props: {
       <Input label="Confirm New Password" type="password" {...confirmPasswordField} />
     </Form>
   </>
+}
+
+const EnterTotp = (props: {
+}) => {
+  const totpField = useFormField('')
+
+  const totpForm = useForm({
+    fields: [totpField],
+    handleSubmit: () => handleLoginStepPromise(
+        totpLogin(totpField.value)
+    ),
+  })
+
+  return (<>
+    <h2 className={cx('title')}>Multi-factor Authentication</h2>
+    <Form submitText="Submit" {...totpForm}>
+      <Input label="Passcode" {...totpField}/>
+    </Form>
+  </>)
 }

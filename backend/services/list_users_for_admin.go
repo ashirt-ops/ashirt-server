@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/theparanoids/ashirt-server/backend"
+	localauth "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
@@ -30,10 +31,13 @@ func ListUsersForAdmin(ctx context.Context, db *database.Connection, i ListUsers
 
 	var users []struct {
 		models.User
-		AuthSchemes *string `db:"auth_schemes"`
+		AuthSchemes   *string `db:"auth_schemes"`
+		UsesLocalTOTP bool    `db:"has_local_totp"`
 	}
 
-	sb := sq.Select("slug", "first_name", "last_name", "email", "admin", "disabled", "headless", "deleted_at", "GROUP_CONCAT(auth_scheme) AS auth_schemes").
+	sb := sq.Select("slug", "first_name", "last_name", "email", "admin", "disabled", "headless",
+		"deleted_at", "GROUP_CONCAT(auth_scheme) AS auth_schemes").
+		Column("SUM(auth_scheme='" + localauth.Code + "' AND totp_secret IS NOT NULL)>0 AS has_local_totp"). // does the user have *local* totp enabled
 		From("users").
 		LeftJoin("auth_scheme_data ON auth_scheme_data.user_id = users.id").
 		GroupBy("users.id")
@@ -63,12 +67,13 @@ func ListUsersForAdmin(ctx context.Context, db *database.Connection, i ListUsers
 				FirstName: user.FirstName,
 				LastName:  user.LastName,
 			},
-			Email:       user.Email,
-			Admin:       user.Admin,
-			Headless:    user.Headless,
-			AuthSchemes: authSchemes,
-			Disabled:    user.Disabled,
-			Deleted:     user.DeletedAt != nil,
+			Email:         user.Email,
+			Admin:         user.Admin,
+			Headless:      user.Headless,
+			AuthSchemes:   authSchemes,
+			Disabled:      user.Disabled,
+			UsesLocalTOTP: user.UsesLocalTOTP,
+			Deleted:       user.DeletedAt != nil,
 		})
 	}
 

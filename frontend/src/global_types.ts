@@ -148,6 +148,7 @@ export type UserAdminView = UserWithAuth & {
   disabled: boolean,
   headless: boolean,
   deleted: boolean,
+  hasLocalTotp: boolean,
   authSchemes: Array<string>,
 }
 

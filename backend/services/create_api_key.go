@@ -22,7 +22,7 @@ func CreateAPIKey(ctx context.Context, db *database.Connection, userSlug string)
 	var userID int64
 	var err error
 
-	if userID, err = selfOrSlugToUserID(ctx, db, userSlug); err != nil {
+	if userID, err = SelfOrSlugToUserID(ctx, db, userSlug); err != nil {
 		return nil, backend.WrapError("Unable to create api key", backend.DatabaseErr(err))
 	}
 

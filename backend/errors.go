@@ -156,3 +156,20 @@ func DisabledUserError() error {
 func PanicedError() error {
 	return HTTPErr(http.StatusInternalServerError, "An unknown error occurred", errors.New("Pancied during processing"))
 }
+
+// InvalidTOTPErr provides an error for users that provide an invalid TOTP passcode
+func InvalidTOTPErr(err error) error {
+	return HTTPErr(http.StatusUnauthorized, "Invalid passcode provided", err)
+}
+
+// FirstError returns the first non-nil error, or nil if all errors are nil.
+// equivalement to:
+//  if errs[0] != nil {return errs[0]} else if errs[1] != nil {return errs[1]} /*...*/ else { return nil }
+func FirstError(errs ...error) error {
+	for _, e := range errs {
+		if e != nil {
+			return e
+		}
+	}
+	return nil
+}

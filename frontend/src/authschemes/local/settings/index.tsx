@@ -8,6 +8,7 @@ import SettingsSection from 'src/components/settings_section'
 import classnames from 'classnames/bind'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { userChangePassword } from '../services'
+import Totp from '../totp'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
@@ -17,6 +18,7 @@ export default (props: {
   <SettingsSection title="Change Password" width="narrow">
     <ResetPasswordForm userKey={props.userKey} />
   </SettingsSection>
+  <Totp />
 </>
 
 const ResetPasswordForm = (props: {

@@ -19,9 +19,9 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-// deleteExpiredRecoveryCodes removes recovery codes from the database that are older than X minutes old
+// DeleteExpiredRecoveryCodes removes recovery codes from the database that are older than X minutes old
 // Duration is determined by looking at the environment configuration
-func deleteExpiredRecoveryCodes(ctx context.Context, db *database.Connection, expiryInMinutes int64) error {
+func DeleteExpiredRecoveryCodes(ctx context.Context, db *database.Connection, expiryInMinutes int64) error {
 	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
 		return backend.WrapError("Insufficient access to remove recovery code", backend.UnauthorizedWriteErr(err))
 	}

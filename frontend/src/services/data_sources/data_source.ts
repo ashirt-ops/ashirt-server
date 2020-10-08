@@ -23,6 +23,12 @@ type UserPayload = {
   email: string,
 }
 
+type TotpKey = {
+  qr: string,
+  secret: string,
+  url: string,
+}
+
 export interface DataSource {
   listApiKeys(ids?: UserSlug): Promise<Array<dtos.APIKey>>
   createApiKey(ids: UserSlug): Promise<dtos.APIKey>
@@ -84,6 +90,8 @@ export interface DataSource {
   deleteExpiredRecoveryCodes(): Promise<void>
   getRecoveryMetrics(): Promise<any>
   adminChangePassword(i: { userSlug: string, newPassword: string }): Promise<void>
+  getTotpForUser(ids: UserSlug): Promise<boolean>
+  deleteTotpForUser(ids: UserSlug): Promise<void>
 }
 
 // Since both dtos & this file only contains typescript types, webpack doesn't pick up the

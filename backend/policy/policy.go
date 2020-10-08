@@ -84,6 +84,8 @@ func (a *Authenticated) String() string {
 
 // Check reviews the permission type for all authenticated users (true => valid ;; false => invalid)
 func (a *Authenticated) Check(permission Permission) bool {
+	selfOrAdmin := func(userID int64) bool { return userID == a.UserID || a.IsSuperAdmin }
+
 	switch target := permission.(type) {
 	case CanCreateOperations:
 		return true
@@ -92,19 +94,24 @@ func (a *Authenticated) Check(permission Permission) bool {
 		return a.IsSuperAdmin
 
 	case CanModifyAPIKeys:
-		return target.UserID == a.UserID || a.IsSuperAdmin
+		return selfOrAdmin(target.UserID)
 	case CanListAPIKeys:
-		return target.UserID == a.UserID || a.IsSuperAdmin
+		return selfOrAdmin(target.UserID)
 
 	case CanDeleteAuthScheme:
-		return (target.UserID == a.UserID || a.IsSuperAdmin) && target.SchemeCode != recoveryConsts.Code
+		return selfOrAdmin(target.UserID) && target.SchemeCode != recoveryConsts.Code
 	case CanDeleteAuthForAllUsers:
 		return a.IsSuperAdmin && target.SchemeCode != recoveryConsts.Code
 
+	case CanCheckTotp:
+		return selfOrAdmin(target.UserID)
+	case CanDeleteTotp:
+		return selfOrAdmin(target.UserID)
+
 	case CanModifyUser:
-		return target.UserID == a.UserID || a.IsSuperAdmin
+		return selfOrAdmin(target.UserID)
 	case CanReadDetailedUser:
-		return target.UserID == a.UserID || a.IsSuperAdmin
+		return selfOrAdmin(target.UserID)
 	case CanReadUser:
 		return true
 	}
