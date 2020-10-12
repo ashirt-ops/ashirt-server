@@ -14,6 +14,7 @@ module.exports = (env, argv) => ({
   entry: './src/index.tsx',
 
   output: {
+    path: path.resolve(__dirname, 'dist/assets'),
     publicPath: '/assets/',
     filename: 'main-[hash].js',
     chunkFilename: '[chunkhash].js',
