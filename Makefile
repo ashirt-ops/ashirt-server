@@ -76,7 +76,12 @@ run-prod:
 view-backend:
 	docker exec -it ashirt-server_backend_1 /bin/sh
 
-# view-backend enters the docker container running the database
+# view-frontend enters the docker container running the frontend
+.PHONY: view-frontend
+view-frontend:
+	docker exec -it ashirt-server_frontend_1 /bin/sh
+
+# view-db enters the docker container running the database
 .PHONY: view-db
 view-db:
 	docker exec -it ashirt-server_db_1 /bin/bash
