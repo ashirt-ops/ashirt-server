@@ -3,6 +3,13 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const HtmlWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 const path = require('path')
 
+const miniCssExtraPluginConfig = {
+  loader: MiniCssExtractPlugin.loader,
+  options: {
+    esModule: false,
+  },
+};
+
 module.exports = (env, argv) => ({
   entry: './src/index.tsx',
 
@@ -21,19 +28,16 @@ module.exports = (env, argv) => ({
       options: {compilerOptions: {module: 'esnext'}},
     }, {
       test: /\.css$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      use: [miniCssExtraPluginConfig, 'css-loader'],
     }, {
       test: /\.styl/,
-      use: [
-        MiniCssExtractPlugin.loader,
-        {loader: 'css-loader', options: {
-          modules: {
-            mode: 'local',
-            localIdentName: argv.mode == 'production' ? '[hash:base64:5]' : '[path][name]__[local]',
-          },
-        }},
-        'stylus-loader',
-      ],
+      use: [miniCssExtraPluginConfig, {
+        loader: 'css-loader', options: {
+        modules: {
+          mode: 'local',
+          localIdentName: argv.mode == 'production' ? '[hash:base64:5]' : '[path][name]__[local]',
+        },
+      }}, 'stylus-loader'],
     }, {
       test: /\.(svg|png|ttf|woff)/,
       use: [
