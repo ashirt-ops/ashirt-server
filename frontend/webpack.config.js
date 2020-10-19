@@ -14,6 +14,7 @@ module.exports = (env, argv) => ({
   entry: './src/index.tsx',
 
   output: {
+    path: path.resolve(__dirname, 'dist/assets'),
     publicPath: '/assets/',
     filename: 'main-[hash].js',
     chunkFilename: '[chunkhash].js',
@@ -76,6 +77,7 @@ module.exports = (env, argv) => ({
 
   devServer: {
     historyApiFallback: true,
+    publicPath: "/assets/",
     proxy: {
       '/web': {target: process.env.WEB_BACKEND_ORIGIN},
     },
