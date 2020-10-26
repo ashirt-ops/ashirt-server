@@ -39,8 +39,8 @@ const Popover = (props: {
   const contentRef = React.useRef<HTMLDivElement|null>(null)
 
   const windowSize = useWindowSize()
-  const targetRect = useElementRect(props.isOpen ? targetRef.current : null)
-  const contentRect = useElementRect(props.isOpen ? contentRef.current : null)
+  const targetRect = useElementRect(props.isOpen ? targetRef : null)
+  const contentRect = useElementRect(props.isOpen ? contentRef : null)
 
   useEventListenerUnlessRef(contentRef, 'mousedown', () => { if (props.onRequestClose) props.onRequestClose() })
 

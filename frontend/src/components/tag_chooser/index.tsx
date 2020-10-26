@@ -48,7 +48,7 @@ export default (props: {
   const activeTagIdSet = getTagIdSet(props.value)
 
   const reloadTags = () => { getTags({operationSlug: props.operationSlug}).then(setAllTags) }
-  React.useEffect(reloadTags, [""])
+  React.useEffect(reloadTags, [props.operationSlug])
 
   const toggleTag = async (maybeTag: TagType|null) => {
     let tag: TagType
