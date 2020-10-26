@@ -47,7 +47,7 @@ export default (props: {
       transformOrigin: 'top left',
     })
     setWrapperStyle({ height: termRef.current.clientHeight * scale })
-  }, [rootRect])
+  }, [rootRect, termRef])
 
   React.useEffect(() => {
     if (termPlayer.current != null || termRef.current == null) {
