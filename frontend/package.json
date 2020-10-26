@@ -30,7 +30,7 @@
     "html-webpack-plugin": "^4.5.0",
     "mini-css-extract-plugin": "^1.0.0",
     "mocha": "^8.2.0",
-    "react-test-renderer": "^16.13.1",
+    "react-test-renderer": "^16.14.0",
     "sinon": "^9.2.0",
     "sinon-chai": "^3.5.0",
     "stylus": "^0.54.8",
