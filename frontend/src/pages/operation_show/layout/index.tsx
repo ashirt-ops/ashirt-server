@@ -11,8 +11,6 @@ import {ViewName} from '../types'
 import {useModal, renderModals} from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-type Modal = 'none' | 'createEvidence' | 'createFinding'
-
 const noOp = () => {}
 
 export default (props: {
