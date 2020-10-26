@@ -70,7 +70,6 @@ const TableRow = (props: {
   const canDeleteAuth = () => {
     switch (true) {
       case (!userScheme): return { disabled: true, title: "Auth scheme has not been linked" }
-      case (props.authInfo.length == 1): return { disabled: true, title: "Cannot delete only remaining authentication method" }
       default: return {}
     }
   }
