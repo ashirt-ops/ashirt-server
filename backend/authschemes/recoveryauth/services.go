@@ -6,7 +6,7 @@ package recoveryauth
 import (
 	"context"
 	"crypto/rand"
-	"encoding/base64"
+	"encoding/hex"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
@@ -36,7 +36,7 @@ func DeleteExpiredRecoveryCodes(ctx context.Context, db *database.Connection, ex
 	return nil
 }
 
-// generateRecoveryCodeForUser creates a new, cryptographically random, base64-encoded,
+// generateRecoveryCodeForUser creates a new, cryptographically random, hex-encoded,
 // recovery key. This key is then attached to a user as a authorization method.
 func generateRecoveryCodeForUser(ctx context.Context, bridge authschemes.AShirtAuthBridge, userSlug string) (interface{}, error) {
 	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
@@ -52,7 +52,7 @@ func generateRecoveryCodeForUser(ctx context.Context, bridge authschemes.AShirtA
 	if _, err := rand.Read(authKey); err != nil {
 		return nil, backend.WrapError("Unable to generate random recovery key", err)
 	}
-	authKeyStr := base64.URLEncoding.EncodeToString(authKey)
+	authKeyStr := hex.EncodeToString(authKey)
 
 	err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 		UserID:  userID,
