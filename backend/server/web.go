@@ -118,7 +118,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return services.ReadUser(r.Context(), db, slug)
+		return services.ReadUser(r.Context(), db, slug, supportedAuthSchemes)
 	}))
 
 	route(r, "GET", "/users", jsonHandler(func(r *http.Request) (interface{}, error) {

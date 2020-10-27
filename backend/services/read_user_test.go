@@ -20,30 +20,54 @@ func TestReadUser(t *testing.T) {
 	adminUser := UserDumbledore
 	ctx := simpleFullContext(normalUser)
 
+	supportedAuthSchemes := []dtos.SupportedAuthScheme{
+		dtos.SupportedAuthScheme{SchemeName: "Local", SchemeCode: "local"},
+	}
+
 	// verify read-self
-	retrievedUser, err := services.ReadUser(ctx, db, "")
-	require.Nil(t, err)
-	verifyRetrievedUser(t, normalUser, retrievedUser)
+	retrievedUser, err := services.ReadUser(ctx, db, "", &supportedAuthSchemes)
+	require.NoError(t, err)
+	verifyRetrievedUser(t, normalUser, retrievedUser, supportedAuthSchemes)
 
 	// verify read-self alternative (userslug provided)
-	retrievedUser, err = services.ReadUser(ctx, db, normalUser.Slug)
-	require.Nil(t, err)
-	verifyRetrievedUser(t, normalUser, retrievedUser)
+	retrievedUser, err = services.ReadUser(ctx, db, normalUser.Slug, &supportedAuthSchemes)
+	require.NoError(t, err)
+	verifyRetrievedUser(t, normalUser, retrievedUser, supportedAuthSchemes)
 
 	// verify read-other (non-admin : should fail)
-	_, err = services.ReadUser(ctx, db, targetUser.Slug)
-	require.NotNil(t, err)
+	_, err = services.ReadUser(ctx, db, targetUser.Slug, &supportedAuthSchemes)
+	require.Error(t, err)
 
 	// verify read-other (as admin)
 	ctx = simpleFullContext(adminUser)
-	retrievedUser, err = services.ReadUser(ctx, db, targetUser.Slug)
-	require.Nil(t, err)
-	verifyRetrievedUser(t, targetUser, retrievedUser)
+	retrievedUser, err = services.ReadUser(ctx, db, targetUser.Slug, &supportedAuthSchemes)
+	require.NoError(t, err)
+	verifyRetrievedUser(t, targetUser, retrievedUser, supportedAuthSchemes)
+
+	// verify old/removed auth schemes are filtered out
+	ctx = simpleFullContext(normalUser)
+	supportedAuthSchemes = []dtos.SupportedAuthScheme{
+		dtos.SupportedAuthScheme{SchemeName: "Petronus", SchemeCode: "petroni"},
+	}
+	retrievedUser, err = services.ReadUser(ctx, db, "", &supportedAuthSchemes)
+	require.NoError(t, err)
+	verifyRetrievedUser(t, normalUser, retrievedUser, []dtos.SupportedAuthScheme{})
 }
 
-func verifyRetrievedUser(t *testing.T, expectedUser models.User, retrievedUser *dtos.UserOwnView) {
+func verifyRetrievedUser(t *testing.T, expectedUser models.User, retrievedUser *dtos.UserOwnView, expectedAuths []dtos.SupportedAuthScheme) {
 	require.Equal(t, expectedUser.Slug, retrievedUser.Slug)
 	require.Equal(t, expectedUser.FirstName, retrievedUser.FirstName)
 	require.Equal(t, expectedUser.LastName, retrievedUser.LastName)
 	require.Equal(t, expectedUser.Email, retrievedUser.Email)
+	for _, expectedAuth := range expectedAuths {
+		found := false
+
+		for _, returnedAuth := range retrievedUser.Authentication {
+			if expectedAuth.SchemeCode == returnedAuth.AuthSchemeCode {
+				found = true
+				break
+			}
+		}
+		require.True(t, found)
+	}
 }
