@@ -7,6 +7,7 @@ import { ClickPopover } from 'src/components/popover'
 import { default as Menu, MenuItem } from 'src/components/menu'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CreateBookmarkModal } from './modals'
+import { useElementRect } from 'src/helpers/use_element_rect'
 import {
   default as TerminalPlayer,
   EventTypeFrameAdvance, EventTypeRateChange, EventTypeDesiredRateChange,
@@ -27,27 +28,27 @@ export default (props: {
   const [termStyle, setTermStyle] = React.useState<React.CSSProperties>({})
   const [wrapperStyle, setWrapperStyle] = React.useState<React.CSSProperties>({})
 
-  const adjustTerminalScaling = () => {
-    if (rootRef.current != null && termRef.current != null) {
-      const rootRect = rootRef.current.getBoundingClientRect()
-      const wFactor = rootRect.width / termRef.current.clientWidth
-      // 70 here refers to the control padding area, defined in css.
-      const hFactor = (rootRect.height - 70) / termRef.current.clientHeight
-      let scale = Math.min(wFactor, hFactor)
-
-      if (isNaN(scale) || scale == Infinity) {
-        scale = 1
-      }
-
-      setTermStyle({
-        transform: `translate(${(rootRect.width - (scale * termRef.current.clientWidth)) / 2}px) scale(${scale})`,
-        transformOrigin: 'top left',
-      })
-      setWrapperStyle({ height: termRef.current.clientHeight * scale })
+  const rootRect = useElementRect(rootRef)
+  React.useEffect(() => {
+    if (rootRect == null || termRef.current == null) {
+      return
     }
-  }
+    const wFactor = rootRect.width / termRef.current.clientWidth
+    // 70 here refers to the control padding area, defined in css.
+    const hFactor = (rootRect.height - 70) / termRef.current.clientHeight
+    let scale = Math.min(wFactor, hFactor)
 
-  React.useLayoutEffect(adjustTerminalScaling, [rootRef.current, termRef.current])
+    if (isNaN(scale) || scale == Infinity) {
+      scale = 1
+    }
+
+    setTermStyle({
+      transform: `translate(${(rootRect.width - (scale * termRef.current.clientWidth)) / 2}px) scale(${scale})`,
+      transformOrigin: 'top left',
+    })
+    setWrapperStyle({ height: termRef.current.clientHeight * scale })
+  }, [rootRect, termRef])
+
   React.useEffect(() => {
     if (termPlayer.current != null || termRef.current == null) {
       return
@@ -57,9 +58,7 @@ export default (props: {
     termPlayer.current = player
     player.init(termRef.current)
 
-    window.addEventListener('resize', adjustTerminalScaling)
     return () => {
-      window.removeEventListener('resize', adjustTerminalScaling)
       player.cleanup()
       termPlayer.current = null
     }
@@ -90,11 +89,12 @@ const PlaybackControlLogic = (props: {
 
   const termPlayer = props.player
 
-  const handlerPairs: Array<[string, (a: PositionChangeEventBody | RateChangeEventBody) => void]> = [
-    [EventTypeFrameAdvance, (evt: PositionChangeEventBody) => { setPlaybackTime(evt.elapsedTime); setCompleted(evt.playbackPosition) }],
-    [EventTypeRateChange, (evt: RateChangeEventBody) => setPlaying(evt.newRate != 0)],
-    [EventTypeDesiredRateChange, (evt: RateChangeEventBody) => setDesiredRate(evt.newRate)]
-  ]
+  const handlerPairs: Array<[string, (a: PositionChangeEventBody | RateChangeEventBody) => void]> =
+  React.useMemo(() => [
+      [EventTypeFrameAdvance, (evt: PositionChangeEventBody) => { setPlaybackTime(evt.elapsedTime); setCompleted(evt.playbackPosition) }],
+      [EventTypeRateChange, (evt: RateChangeEventBody) => setPlaying(evt.newRate != 0)],
+      [EventTypeDesiredRateChange, (evt: RateChangeEventBody) => setDesiredRate(evt.newRate)]
+    ], [])
 
   React.useEffect(() => {
     handlerPairs.forEach(p => termPlayer.on(...p))

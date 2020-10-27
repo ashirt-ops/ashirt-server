@@ -23,12 +23,6 @@ type UserPayload = {
   email: string,
 }
 
-type TotpKey = {
-  qr: string,
-  secret: string,
-  url: string,
-}
-
 export interface DataSource {
   listApiKeys(ids?: UserSlug): Promise<Array<dtos.APIKey>>
   createApiKey(ids: UserSlug): Promise<dtos.APIKey>

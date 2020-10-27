@@ -62,7 +62,6 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
-  React.useEffect(wiredEvidence.reload, [props.evidenceUuid])
 
   return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
 }
@@ -77,7 +76,6 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
-  React.useEffect(wiredEvidence.reload, [props.evidenceUuid])
 
   const updateContent = (content: Blob): Promise<void> => updateEvidence({
     operationSlug: props.operationSlug,

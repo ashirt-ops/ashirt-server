@@ -5,6 +5,7 @@ import * as React from 'react'
 import * as ace from 'ace-builds'
 import AceEditor from 'react-ace'
 import classnames from 'classnames/bind'
+import { useElementRect } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 // This is a wrapper component around react-ace to fix some bugs
@@ -65,21 +66,16 @@ function useLoadAceModeWithWebpack(requestedMode: string): string {
 function useSizeOfParentContainer(parentRef: React.MutableRefObject<HTMLDivElement|null>): {width: string, height: string} {
   const [size, setSize] = React.useState({ width: '100%', height: '100%' })
 
-  const resize = () => {
-    if (!parentRef.current) return
-    setSize({
-      width: (`${parentRef.current.clientWidth}px`),
-      height: (`${parentRef.current.clientHeight}px`),
-    })
-  }
-
-  // resize on initial mount and on resize
-  React.useLayoutEffect(resize, [""])
+  const parentRect = useElementRect(parentRef)
   React.useEffect(() => {
-    window.addEventListener('resize', resize)
-    return () => window.removeEventListener('resize', resize)
-  })
-
+    if(parentRect == null) {
+      return
+    }
+    setSize({
+      width: (`${parentRect.width}px`),
+      height: (`${parentRect.height}px`),
+    })
+  }, [parentRect])
   return size
 }
 

@@ -19,7 +19,6 @@ export default (props: RouteComponentProps<{slug: string}>) => {
     operationSlug: slug,
     query: query,
   }), [slug, query]))
-  React.useEffect(wiredFindings.reload, [slug, query])
 
   const navigate = (view: ViewName, query: string) => {
     let path = `/operations/${slug}/${view}`

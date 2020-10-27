@@ -29,7 +29,7 @@ const Tooltip = (props: {
   const targetRef = React.useRef<HTMLDivElement|null>(null)
   const [exists, setExists] = React.useState(false)
   const [animating, setAnimating] = React.useState(false)
-  const rect = useElementRect(exists ? targetRef.current : null)
+  const rect = useElementRect(exists ? targetRef : null)
 
   React.useEffect(() => {
     let timeout: number
