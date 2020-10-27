@@ -28,7 +28,7 @@
     "file-loader": "^6.1.1",
     "html-webpack-harddisk-plugin": "^1.0.2",
     "html-webpack-plugin": "^4.5.0",
-    "mini-css-extract-plugin": "^1.0.0",
+    "mini-css-extract-plugin": "^1.2.0",
     "mocha": "^8.2.0",
     "react-test-renderer": "^16.14.0",
     "sinon": "^9.2.0",
