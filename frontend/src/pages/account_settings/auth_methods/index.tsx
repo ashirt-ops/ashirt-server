@@ -43,6 +43,7 @@ export default (props: {
               supportedScheme={scheme}
               authInfo={props.profile.authSchemes}
               removeAuth={() => setRemovingAuth(scheme.schemeCode)}
+              requestReload={props.requestReload}
             />
           ))}
         </Table>
@@ -62,6 +63,7 @@ const TableRow = (props: {
   authInfo: Array<AuthenticationInfo>,
   removeAuth: () => void,
   allowLinking: boolean,
+  requestReload?: () => void,
 }) => {
   const [linking, setLinking] = React.useState<boolean>(false)
   const Linker = useAuthFrontendComponent(props.supportedScheme.schemeCode, 'Linker')
@@ -95,7 +97,10 @@ const TableRow = (props: {
       </td>
       {linking && (
         <Modal onRequestClose={() => setLinking(false)} title={"Link Account"}>
-          <Linker onSuccess={() => setLinking(false)} />
+          <Linker onSuccess={() => {
+            setLinking(false)
+            props.requestReload && props.requestReload()
+          }} />
         </Modal>
       )}
     </tr>
