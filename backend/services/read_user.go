@@ -28,7 +28,7 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string, sup
 	}
 
 	supportedAuthCodes := make([]string, len(*supportedAuthSchemes))
-	for i, scheme := range (*supportedAuthSchemes) {
+	for i, scheme := range *supportedAuthSchemes {
 		supportedAuthCodes[i] = scheme.SchemeCode
 	}
 
@@ -42,7 +42,7 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string, sup
 		db.Select(&authSchemes, sq.Select("user_key", "auth_scheme", "last_login").
 			From("auth_scheme_data").
 			Where(sq.Eq{
-				"user_id": userID, 
+				"user_id":     userID,
 				"auth_scheme": supportedAuthCodes,
 			}))
 	})
