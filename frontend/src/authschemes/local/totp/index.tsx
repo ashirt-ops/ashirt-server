@@ -17,7 +17,12 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
 }) => {
-  const wiredTotpIsEnabled = useWiredData(totpIsEnabled)
+  const wiredTotpIsEnabled = useWiredData(totpIsEnabled, (err: Error)=>(
+    <div className={cx('plain-error')}>
+      Multifactor Authentication is not available for this account. Please ensure you have linked
+      ASHIRT local authentication.
+    </div>
+  ))
 
   return (
     <SettingsSection title="Multi-Factor Authentication" className={cx('root')}>
