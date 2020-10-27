@@ -17,7 +17,7 @@ import (
 
 // ReadUser retrieves a detailed view of a user. This is separate from the data retriving by listing
 // users, or reading another user's profile (when not an admin)
-func ReadUser(ctx context.Context, db *database.Connection, userSlug string) (*dtos.UserOwnView, error) {
+func ReadUser(ctx context.Context, db *database.Connection, userSlug string, supportedAuthSchemes *[]dtos.SupportedAuthScheme) (*dtos.UserOwnView, error) {
 	userID, err := SelfOrSlugToUserID(ctx, db, userSlug)
 	if err != nil {
 		return nil, backend.WrapError("Unable to read user", backend.DatabaseErr(err))
@@ -25,6 +25,11 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string) (*d
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadDetailedUser{UserID: userID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read user", backend.UnauthorizedReadErr(err))
+	}
+
+	supportedAuthCodes := make([]string, len(*supportedAuthSchemes))
+	for i, scheme := range *supportedAuthSchemes {
+		supportedAuthCodes[i] = scheme.SchemeCode
 	}
 
 	var user models.User
@@ -36,7 +41,10 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string) (*d
 
 		db.Select(&authSchemes, sq.Select("user_key", "auth_scheme", "last_login").
 			From("auth_scheme_data").
-			Where(sq.Eq{"user_id": userID}))
+			Where(sq.Eq{
+				"user_id":     userID,
+				"auth_scheme": supportedAuthCodes,
+			}))
 	})
 	if err != nil {
 		return nil, backend.WrapError("Cannot read user", backend.DatabaseErr(err))
