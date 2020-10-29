@@ -56,6 +56,19 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return dtos.CheckConnection{Ok: true}, nil
 	}))
 
+	route(r, "POST", "/api/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.CreateOperationInput{
+			Slug:    dr.FromBody("slug").Required().AsString(),
+			Name:    dr.FromBody("name").Required().AsString(),
+			OwnerID: middleware.UserID(r.Context()),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.CreateOperation(r.Context(), db, i)
+	}))
+
 	route(r, "GET", "/api/operations/{operation_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		operationID := dr.FromURL("operation_id").Required().AsInt64()
