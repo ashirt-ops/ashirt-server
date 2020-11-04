@@ -38,7 +38,7 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 
 	cleanSlug := SanitizeOperationSlug(i.Slug)
 	if cleanSlug == "" {
-		return nil, backend.BadInputErr(errors.New("Unable t o create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
+		return nil, backend.BadInputErr(errors.New("Unable to create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
 	}
 
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
