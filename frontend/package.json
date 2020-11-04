@@ -13,7 +13,7 @@
     "@types/classnames": "^2.2.10",
     "@types/lodash": "^4.14.164",
     "@types/mocha": "^8.0.3",
-    "@types/react": "^16.9.53",
+    "@types/react": "^16.9.55",
     "@types/react-dom": "^16.9.9",
     "@types/react-router-dom": "^5.1.6",
     "@types/sinon": "^9.0.8",
