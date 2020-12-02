@@ -29,7 +29,7 @@
     "html-webpack-harddisk-plugin": "^1.0.2",
     "html-webpack-plugin": "^4.5.0",
     "mini-css-extract-plugin": "^1.2.1",
-    "mocha": "^8.2.0",
+    "mocha": "^8.2.1",
     "react-test-renderer": "^16.14.0",
     "sinon": "^9.2.1",
     "sinon-chai": "^3.5.0",
