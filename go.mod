@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/Masterminds/squirrel v1.4.0
-	github.com/aws/aws-sdk-go v1.35.19
+	github.com/aws/aws-sdk-go v1.35.36
 	github.com/go-kit/kit v0.10.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/google/uuid v1.1.2
@@ -21,6 +21,6 @@ require (
 	github.com/pquerna/otp v1.2.0
 	github.com/rubenv/sql-migrate v0.0.0-20200119084958-8794cecc920c
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 )
