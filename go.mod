@@ -3,7 +3,7 @@ module github.com/theparanoids/ashirt-server
 go 1.13
 
 require (
-	github.com/Masterminds/squirrel v1.4.0
+	github.com/Masterminds/squirrel v1.5.0
 	github.com/aws/aws-sdk-go v1.35.36
 	github.com/go-kit/kit v0.10.0
 	github.com/go-sql-driver/mysql v1.5.0
