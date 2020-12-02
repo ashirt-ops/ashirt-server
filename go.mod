@@ -18,7 +18,7 @@ require (
 	github.com/lestrrat-go/jwx v0.9.0 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/okta/okta-jwt-verifier-golang v0.1.0
-	github.com/pquerna/otp v1.2.0
+	github.com/pquerna/otp v1.3.0
 	github.com/rubenv/sql-migrate v0.0.0-20200119084958-8794cecc920c
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
