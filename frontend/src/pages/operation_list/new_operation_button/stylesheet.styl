@@ -9,7 +9,8 @@
   color: $foreground
   cursor: pointer
 
-  div
+  .circle
+    position: relative
     background: $foreground
     width: 40px
     height: @width
@@ -22,3 +23,22 @@
   &:hover
     background: $lighter-background
     border-radius: 5px
+
+  // plus-inverse-size shrinks as the pixel size grows. max size is effective 9
+  $plus-inverse-size=13px
+  $plus-weight=2px
+  .plus
+    &:before, &:after
+      content: ""
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+      background: $background
+    &:before
+      margin: $plus-inverse-size auto
+      width: $plus-weight
+    &:after
+      margin: auto $plus-inverse-size
+      height: $plus-weight
