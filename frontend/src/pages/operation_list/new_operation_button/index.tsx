@@ -12,7 +12,7 @@ export default (props: {
     className={cx('root')}
     onClick={props.onClick}
   >
-    <div>+</div>
+    <div className={cx('circle', 'plus')} />
     New Operation
   </button>
 )
