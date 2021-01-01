@@ -50,7 +50,7 @@
     "interactjs": "^1.10.0",
     "lodash": "^4.17.19",
     "react": "^16.14.0",
-    "react-ace": "^9.2.0",
+    "react-ace": "^9.2.1",
     "react-calendar-timeline": "^0.27.0",
     "react-day-picker": "^7.4.0",
     "react-dom": "^16.14.0",
