@@ -47,7 +47,7 @@
     "ace-builds": "^1.4.9",
     "classnames": "^2.2.6",
     "date-fns": "^2.11.1",
-    "interactjs": "^1.10.0",
+    "interactjs": "^1.10.2",
     "lodash": "^4.17.19",
     "react": "^16.14.0",
     "react-ace": "^9.2.1",
