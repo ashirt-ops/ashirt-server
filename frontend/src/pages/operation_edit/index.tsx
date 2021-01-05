@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import { RouteComponentProps } from 'react-router-dom'
 
 import Button from 'src/components/button'
-import NavVerticalTab from 'src/components/tab_vertical_menu'
+import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
 import OperationEditor from './operation_editor'
 import TagEditor from './tag_editor'
 import UserPermissionEditor from './user_permission_editor'
@@ -20,7 +20,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
   return (
     <>
       <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
-      <NavVerticalTab {...props}
+      <NavVerticalTabMenu {...props}
         title="Edit Operation"
         tabs={[
           {

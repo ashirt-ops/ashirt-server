@@ -7,7 +7,7 @@ import { RouteComponentProps } from 'react-router-dom'
 
 import AuthTable from './auth_table'
 import HeadlessButton from './add_headless'
-import NavVerticalTab from 'src/components/tab_vertical_menu'
+import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
 import OperationsTable from './operations_table'
 import RecoveryMetrics from './recovery_metrics'
 import UserTable from './user_table'
@@ -21,7 +21,7 @@ export default (props: RouteComponentProps) => {
 
   return (
     <div className={cx('root')}>
-      <NavVerticalTab {...props}
+      <NavVerticalTabMenu {...props}
         title="Admin Tools"
         tabs={[
           {

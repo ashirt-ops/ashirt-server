@@ -17,7 +17,7 @@ export type Tab = {
   content?: React.ReactNode
 }
 
-export default (props: RouteComponentProps & {
+export const NavVerticalTabMenu = (props: RouteComponentProps & {
   title: string,
   tabs: Array<Tab>
 }) => {
@@ -42,3 +42,4 @@ export default (props: RouteComponentProps & {
     </div>
   )
 }
+
