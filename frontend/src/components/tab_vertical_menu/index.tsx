@@ -46,23 +46,23 @@ export const NavVerticalTabMenu = (props: RouteComponentProps & {
 export const VerticalTabMenu = (props: {
   title: string,
   tabs: Array<Tab>
-  selectedTab: Tab
+  selectedTabIndex: number
   onTabChanged?: (tab: Tab, tabIndex: number) => void,
 }) => (
-    <div className={cx('root')}>
-      <div className={cx("tabmenu")}>
-        <header>{props.title}</header>
-        <ListMenu>
-          {props.tabs.map((tab, index) => <ListItem
-            key={tab.id}
-            name={tab.label}
-            selected={ tab.id == props.selectedTab.id }
-            onSelect={() => props.onTabChanged?.(tab, index)}
-            />)}
-        </ListMenu>
-      </div>
-      <div className={cx("content")}>
-        {props.selectedTab.content}
-      </div>
+  <div className={cx('root')}>
+    <div className={cx("tabmenu")}>
+      <header>{props.title}</header>
+      <ListMenu>
+        {props.tabs.map((tab, index) => <ListItem
+          key={tab.id}
+          name={tab.label}
+          selected={index == props.selectedTabIndex}
+          onSelect={() => props.onTabChanged?.(tab, index)}
+        />)}
+      </ListMenu>
     </div>
-  )
+    <div className={cx("content")}>
+      {props.tabs[props.selectedTabIndex].content}
+    </div>
+  </div>
+)
