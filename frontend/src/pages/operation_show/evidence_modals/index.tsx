@@ -9,7 +9,7 @@ import ImageUpload from 'src/components/image_upload'
 import ModalForm from 'src/components/modal_form'
 import Modal from 'src/components/modal'
 import TagChooser from 'src/components/tag_chooser'
-import TerminalRecordingUpload from 'src/components/termrec_upload'
+import BinaryUpload from 'src/components/binary_upload'
 import { CodeBlockEditor } from 'src/components/code_block'
 import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence, Operation, TagDifference } from 'src/global_types'
 import { TextArea } from 'src/components/input'
@@ -36,11 +36,16 @@ export const CreateEvidenceModal = (props: {
   const binaryBlobField = useFormField<File | null>(null)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
 
+  const isATerminalRecording = (file: File) => file.type == '' 
+  const isAnHttpRequestCycle = (file: File) => file.name.endsWith("har")
+
   const evidenceTypes: Array<Tab> = [
     { id: 'screenshot', label: 'Screenshot', content: <ImageUpload label='Screenshot' {...binaryBlobField} /> },
     { id: 'codeblock', label: 'Code Block', content: <CodeBlockEditor {...codeblockField} /> },
-    { id: 'terminal-recording', label: 'Terminal Recording', content: <TerminalRecordingUpload label='Terminal Recording' {...binaryBlobField} /> },
-    { id: 'http-request-cycle', label: 'HTTP Request/Response Chain', content:<ImageUpload label='Http Request/Response chain' {...binaryBlobField} />} //TODO
+    { id: 'terminal-recording', label: 'Terminal Recording', 
+      content: <BinaryUpload label='Terminal Recording' isSupportedFile={isATerminalRecording} {...binaryBlobField} /> },
+    { id: 'http-request-cycle', label: 'HTTP Request/Response Chain', 
+      content: <BinaryUpload label='HAR File' isSupportedFile={isAnHttpRequestCycle} {...binaryBlobField} />} 
   ]
 
   const [selectedTab, setSelectedTab] = React.useState<Tab>(evidenceTypes[0])
