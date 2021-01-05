@@ -20,6 +20,8 @@ function getComponent(evidenceType: SupportedEvidenceType) {
       return EvidenceImage
     case 'terminal-recording':
       return EvidenceTerminalRecording
+    case 'http-request-cycle':
+      // TODO
     case 'none':
     default:
       return null

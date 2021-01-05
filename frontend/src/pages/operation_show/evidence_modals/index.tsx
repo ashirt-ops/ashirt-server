@@ -40,6 +40,7 @@ export const CreateEvidenceModal = (props: {
     { id: 'screenshot', label: 'Screenshot', content: <ImageUpload label='Screenshot' {...binaryBlobField} /> },
     { id: 'codeblock', label: 'Code Block', content: <CodeBlockEditor {...codeblockField} /> },
     { id: 'terminal-recording', label: 'Terminal Recording', content: <TerminalRecordingUpload label='Terminal Recording' {...binaryBlobField} /> },
+    { id: 'http-request-cycle', label: 'HTTP Request/Response Chain', content:<ImageUpload label='Http Request/Response chain' {...binaryBlobField} />} //TODO
   ]
 
   const [selectedTab, setSelectedTab] = React.useState<Tab>(evidenceTypes[0])
@@ -56,6 +57,8 @@ export const CreateEvidenceModal = (props: {
         data = { type: 'codeblock', file: codeblockToBlob(codeblockField.value) }
       } else if (selectedTab.id === 'terminal-recording' && binaryBlobField.value !== null) {
         data = { type: 'terminal-recording', file: binaryBlobField.value }
+      } else if (selectedTab.id === 'http-request-cycle' && binaryBlobField.value !== null) {
+        data = { type: 'http-request-cycle', file: binaryBlobField.value }
       }
 
       return createEvidence({
