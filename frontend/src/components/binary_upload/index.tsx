@@ -13,14 +13,16 @@ const BinaryUpload = (props: {
 }) =>  {
   const [err, setErr] = React.useState<Error | null>(null)
 
+  const {value, isSupportedFile, label} = {...props}
+
   React.useEffect(() => {
-    const file = props.value
-    if (file == null || props.isSupportedFile(file)) {
+    const file = value
+    if (file == null || isSupportedFile(file)) {
       setErr(null)
     } else {
-      setErr(Error(`Expected a ${props.label.toLowerCase()}, but got ${file.type}.`))
+      setErr(Error(`Expected a ${label.toLowerCase()}, but got ${file.type}.`))
     }
-  }, [props.value])
+  }, [value, isSupportedFile, label])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     multiple: false,
@@ -55,7 +57,7 @@ const BinaryUploadChildren = (props: {
       </div>
     : <div className={cx('no-content')}>
       Drag {props.friendlyFileType} here or <span>Browse for one</span> to upload
-        {props.err && 
+        {props.err &&
           <div className={cx('error')}>{props.err.message}</div>
         }
       </div>
