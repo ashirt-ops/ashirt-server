@@ -5,6 +5,9 @@ import * as React from 'react'
 import Input from 'src/components/input'
 import PopoverMenu from 'src/components/popover_menu'
 
+import classnames from 'classnames/bind'
+const cx = classnames.bind(require('./stylesheet'))
+
 export type ComboBoxItem<T> = {
   name: string,
   value: T,
@@ -67,6 +70,7 @@ export default function ComboBox<T>(props: {
     >
       <Input
         label={props.label}
+        className={cx('arrow', props.className)}
         onChange={setInputValue}
         onFocus={onInputFocus}
         onKeyDown={() => setDropdownVisible(true)}
