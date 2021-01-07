@@ -4,6 +4,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
+import HttpCycleViewer from '../http_cycle_viewer'
 import { SupportedEvidenceType, CodeBlock } from 'src/global_types'
 import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
@@ -21,7 +22,7 @@ function getComponent(evidenceType: SupportedEvidenceType) {
     case 'terminal-recording':
       return EvidenceTerminalRecording
     case 'http-request-cycle':
-      // TODO
+      return EvidenceHttpCycle
     case 'none':
     default:
       return null
@@ -86,4 +87,13 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
   })
 
   return wiredEvidence.render(evi => <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />)
+}
+
+const EvidenceHttpCycle = (props: EvidenceProps) => {
+  const wiredEvidence = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+    operationSlug: props.operationSlug,
+    evidenceUuid: props.evidenceUuid,
+  }), [props.operationSlug, props.evidenceUuid]))
+
+  return wiredEvidence.render(evi => <HttpCycleViewer log={evi}/>)
 }
