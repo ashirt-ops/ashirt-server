@@ -4,7 +4,7 @@
 // this works best with Github-like urls.
 // Example:
 // https://github.com/microsoft/vscode/blob/master/README.md => github.com/microsoft/vscode/.../README.md
-export const trimURL = (original: string, maxNonUrlLength: number = 50): {
+export const trimURL = (original: string, maxNonUrlLength: number = 50, keepBeginingParts: number = 2): {
   isAUrl: boolean
   trimmedValue: string
 } => {
@@ -25,9 +25,11 @@ export const trimURL = (original: string, maxNonUrlLength: number = 50): {
   lastOne = lastOne.substr(0, hashIndex > -1 ? hashIndex : lastOne.length)
   pathParts[pathParts.length - 1] = lastOne
 
-  const label = domain + (pathParts.length <= 3
+  const totalKeepParts = keepBeginingParts + 1
+
+  const label = domain + (pathParts.length <= totalKeepParts
     ? `/${pathParts.join('/')}`
-    : `/${pathParts.slice(0, 2).join('/')}/.../${lastOne}`)
+    : `/${pathParts.slice(0, keepBeginingParts).join('/')}/.../${lastOne}`)
 
   return {
     isAUrl: true,
