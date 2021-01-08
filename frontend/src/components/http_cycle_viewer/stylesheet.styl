@@ -12,6 +12,7 @@
   margin: 10px
   height: 45%
   overflow: auto
+  border: 1px solid $darker-background
 
   .selected-row
     background: $darker-primary
@@ -22,4 +23,43 @@
 .body
   margin: 10px
   height: 45%
+
+  .tab-group
+    margin-left: 2px
+    margin-bottom: 2px
+
+  .ace-container
+    position: relative
+    width: 100%
+    height: 100%
+    min-width: 100px
+    min-height: 100px
+    margin-bottom: 10px
+
+    .ace
+      position: relative
+      height: 50%
+      top: 0px
+      bottom: 0
+      left: 0
+      right: 0
+
+.pretty-headers-container
   overflow: auto
+  background: $darker-background
+  height: 10%
+  margin-bottom: 10px
+  border: 1px solid $darker-primary
+  padding: 5px
+
+.pretty-headers-key
+  font-weight: bold
+  margin-left: 5px
+
+.pretty-headers-value
+  font-family: monospace
+
+.pretty-headers-no-content
+  font-weight: bold
+  margin-left: 5px
+
