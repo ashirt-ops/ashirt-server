@@ -21,22 +21,24 @@ export default (props: {
 
   return (
     <>
-      <div className={cx('header')}>From: <em>{parsedLog.log.creator.name} @ {parsedLog.log.creator.version}</em></div>
-      <div className={cx('table-container')}>
-        <Table columns={['#', 'Status', 'Method', 'Path', 'Data Size']} className={cx('table')}>
-          {parsedLog.log.entries.map((entry, index) => (
-            <tr key={index} className={cx(index == selectedRow ? ['selected-row', 'render'] : '')} onClick={() => setSelectedRow(index)} >
-              <td>{index + 1}</td>
-              <td>{entry.response.status}</td>
-              <td>{entry.request.method}</td>
-              <td>{trimURL(entry.request.url).trimmedValue}</td>
-              <td>{entry.request.postData == null ? "No Data" : entry.request.postData.text?.length}</td>
-            </tr>
-          ))}
-        </Table>
-      </div>
-      <div className={cx('body')}>
-        {selectedRow == -1 ? null : <HttpEntry entry={parsedLog.log.entries[selectedRow]} />}
+      <div className={cx('root')} onClick={e => e.stopPropagation()}>
+        <div className={cx('header')}>From: <em>{parsedLog.log.creator.name} @ {parsedLog.log.creator.version}</em></div>
+        <div className={cx('table-container')}>
+          <Table columns={['#', 'Status', 'Method', 'Path', 'Data Size']} className={cx('table')}>
+            {parsedLog.log.entries.map((entry, index) => (
+              <tr key={index} className={cx(index == selectedRow ? ['selected-row', 'render'] : '')} onClick={() => setSelectedRow(index)} >
+                <td>{index + 1}</td>
+                <td>{entry.response.status}</td>
+                <td>{entry.request.method}</td>
+                <td>{trimURL(entry.request.url).trimmedValue}</td>
+                <td>{entry.request.postData == null ? "No Data" : entry.request.postData.text?.length}</td>
+              </tr>
+            ))}
+          </Table>
+        </div>
+        <div className={cx('body')}>
+          {selectedRow == -1 ? null : <HttpEntry entry={parsedLog.log.entries[selectedRow]} />}
+        </div>
       </div>
     </>
   )
@@ -72,7 +74,7 @@ const ResponseSegment = (props: {
       tabs={[
         { id: "request-pretty", label: "Pretty Headers", content: <PrettyHeaders headers={props.entry.response.headers} /> },
         { id: "response-raw", label: "Raw Headers", content: <RawContent content={responseToRaw(props.entry.response)} /> },
-        { id: "response-content", label: "Content", content: <ResponseContent response={props.entry.response}/> },
+        { id: "response-content", label: "Content", content: <ResponseContent response={props.entry.response} /> },
       ]}
     />
   </>
@@ -87,7 +89,7 @@ const PrettyHeaders = (props: {
   else {
     content = props.headers
       .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-      .map( (h, i) => <div key={i} className={cx('pretty-headers-entry')}><em className={cx('pretty-headers-key')}>{h.name}: </em> <span className={cx('pretty-headers-value')}>{h.value}</span></div>)
+      .map((h, i) => <div key={i} className={cx('pretty-headers-entry')}><em className={cx('pretty-headers-key')}>{h.name}: </em> <span className={cx('pretty-headers-value')}>{h.value}</span></div>)
   }
 
   return <div className={cx('pretty-headers-outer-container')}><div className={cx('pretty-headers-container')}>{...content}</div></div>
@@ -117,8 +119,8 @@ const ResponseContent = (props: {
 }) => {
 
   const content = props.response.content.text
-  const mimetype = props.response.content.mimeType || "" 
-  
+  const mimetype = props.response.content.mimeType || ""
+
   let lang = ''
 
   if (mimetype.includes("text/javascript") || mimetype.includes('application/json')) {
