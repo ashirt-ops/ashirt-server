@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import { trimURL, useAsyncComponent } from 'src/helpers'
 
 import Table from 'src/components/table'
-import { Har, Entry, Request, Response, Header } from 'har-format'
+import { Har, Entry, Request, Response, Header, PostData } from 'har-format'
 import { default as TabMenu } from '../tabs'
 import SettingsSection from 'src/components/settings_section'
 
@@ -62,6 +62,7 @@ const RequestSegment = (props: {
         tabs={[
           { id: "request-pretty", label: "Pretty", content: <PrettyHeaders headers={props.entry.request.headers} /> },
           { id: "request-raw", label: "Raw", content: <RawContent content={requestToRaw(props.entry.request)} /> },
+          { id: "request-content", label: "Content", content: <RequestContent data={props.entry.request.postData} /> },
         ]}
       />
     </SettingsSection>
@@ -129,34 +130,68 @@ const ResponseContent = (props: {
   response: Response
 }) => {
 
-  const content = props.response.content.text
-  const mimetype = props.response.content.mimeType || ""
+  const length = props.response.content.size
+  const rawText = props.response.content.text || ''
+  const mimetype = props.response.content.mimeType || ''
 
-  let lang = ''
+  const content = (rawText == '' && length > 0)
+    ? `Content is ${length} bytes long, but no data/text was captured`
+    : rawText
 
+  return <RawContent content={content} language={mimetypeToAceLang(mimetype)} />
+}
+
+const RequestContent = (props: {
+  data?: PostData
+}) => {
+
+  if (props.data == null) {
+    return <RawContent content="No Post Data captured" />
+  }
+
+  const mimetype = props.data.mimeType
+
+  // Per the draft HAR v1.2 standard, text and params are mutually exclusive.
+  // However, in practice they are not (see chrome form data har export). Opting to prefer text
+  // over params
+  let body = ''
+
+  if (props.data.text != null) {
+    body = props.data.text
+  }
+  else {
+    body = 'Parameters:\n'
+    for (let p of props.data.params) {
+      body += `  ${p.name}${(p.value ? ': ' + p.value : '')}\n`
+    }
+  }
+
+  return <RawContent content={body} language={mimetypeToAceLang(mimetype)} />
+}
+
+const mimetypeToAceLang = (mimetype:string) => {
   if (mimetype.includes("text/javascript") || mimetype.includes('application/json')) {
-    lang = 'javascript'
+    return 'javascript'
   }
   else if (mimetype.includes('text/html')) {
-    lang = 'html'
+    return 'html'
   }
   else if (mimetype.includes('text/css')) {
-    lang = 'css'
+    return 'css'
   }
   else if (mimetype.includes('text/xml')) {
-    lang = 'xml'
+    return 'xml'
   }
-
-  return <RawContent content={content ? content : ''} language={lang} />
+  return ''
 }
 
 const requestToRaw = (req: Request) => {
   const parsedUrl = new URL(req.url)
   const reqSummary = req.method + " " + parsedUrl.pathname + parsedUrl.search + " " + req.httpVersion + "\n"
 
-  return reqSummary + req.headers.map(h => `${h.name}: ${h.value}`).join("\n")
+  return reqSummary + req.headers.map(h => `${ h.name }: ${ h.value } `).join("\n")
 }
 
 const responseToRaw = (resp: Response) => {
-  return resp.headers.map(h => `${h.name}: ${h.value}`).join("\n")
+  return resp.headers.map(h => `${ h.name }: ${ h.value } `).join("\n")
 }
