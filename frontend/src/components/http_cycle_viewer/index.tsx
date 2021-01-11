@@ -3,30 +3,31 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { trimURL, useAsyncComponent } from 'src/helpers'
+import { trimURL } from 'src/helpers'
+import { Har, Entry, Response, PostData, Log } from 'har-format'
+import { mimetypeToAceLang, requestToRaw, responseToRaw } from './helpers'
 
-import Table from 'src/components/table'
-import { Har, Entry, Request, Response, Header, PostData } from 'har-format'
-import { default as TabMenu } from '../tabs'
+import { PrettyHeaders, RawContent } from './components'
 import SettingsSection from 'src/components/settings_section'
+import Table from 'src/components/table'
+import { default as TabMenu } from '../tabs'
 
 const cx = classnames.bind(require('./stylesheet'))
-const importAceEditorAsync = () => import('../code_block/ace_editor').then(module => module.default)
 
 export default (props: {
   log: Har
 }) => {
-  const parsedLog: Har = props.log
+  const log: Log = props.log.log
 
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
 
   return (
     <>
       <div className={cx('root')} onClick={e => e.stopPropagation()}>
-        <div className={cx('header')}>From: <em>{parsedLog.log.creator.name} @ {parsedLog.log.creator.version}</em></div>
+        <div className={cx('header')}>From: <em>{log.creator.name} @ {log.creator.version}</em></div>
         <div className={cx('table-container')}>
           <Table columns={['#', 'Status', 'Method', 'Path', 'Data Size']} className={cx('table')}>
-            {parsedLog.log.entries.map((entry, index) => (
+            {log.entries.map((entry, index) => (
               <tr key={index} className={cx(index == selectedRow ? ['selected-row', 'render'] : '')} onClick={() => setSelectedRow(index)} >
                 <td>{index + 1}</td>
                 <td>{entry.response.status}</td>
@@ -38,7 +39,7 @@ export default (props: {
           </Table>
         </div>
         <div className={cx('body')}>
-          {selectedRow == -1 ? null : <HttpEntry entry={parsedLog.log.entries[selectedRow]} />}
+          {selectedRow == -1 ? null : <HttpEntry entry={log.entries[selectedRow]} />}
         </div>
       </div>
     </>
@@ -82,63 +83,18 @@ const ResponseSegment = (props: {
     </SettingsSection>
   </>
 
-const PrettyHeaders = (props: {
-  headers: Array<Header>
-}) => {
-  let content
-  if (props.headers.length == 0) {
-    content = [<em className={cx('pretty-headers-no-content')}>No Captured Headers</em>]
-  }
-  else {
-    content = props.headers
-      .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-      .map((h, i) => (
-        <div key={i} className={cx('pretty-headers-entry')}>
-          <em className={cx('pretty-headers-key')}>{h.name}:</em>
-          <span className={cx('pretty-headers-value')}>{h.value}</span>
-        </div>
-      ))
-  }
-
-  return (
-    <div className={cx('pretty-headers-outer-container')}>
-      <div className={cx('pretty-headers-container')}>{...content}</div>
-    </div>
-  )
-}
-
-const RawContent = (props: {
-  content: string
-  language?: string
-}) => {
-  const AceEditor = useAsyncComponent(importAceEditorAsync)
-
-  return (
-    <div className={cx('ace-container')}>
-      <div className={cx('ace')}>
-        <AceEditor
-          readOnly
-          mode={props.language ? props.language : ''}
-          value={props.content}
-        />
-      </div>
-    </div>
-  )
-}
-
 const ResponseContent = (props: {
   response: Response
 }) => {
 
   const length = props.response.content.size
   const rawText = props.response.content.text || ''
-  const mimetype = props.response.content.mimeType || ''
 
   const content = (rawText == '' && length > 0)
     ? `Content is ${length} bytes long, but no data/text was captured`
     : rawText
 
-  return <RawContent content={content} language={mimetypeToAceLang(mimetype)} />
+  return <RawContent content={content} language={mimetypeToAceLang(props.response.content.mimeType)} />
 }
 
 const RequestContent = (props: {
@@ -149,7 +105,7 @@ const RequestContent = (props: {
     return <RawContent content="No Post Data captured" />
   }
 
-  const mimetype = props.data.mimeType
+  const mimetype = (props.data?.mimeType) || ''
 
   // Per the draft HAR v1.2 standard, text and params are mutually exclusive.
   // However, in practice they are not (see chrome form data har export). Opting to prefer text
@@ -169,29 +125,3 @@ const RequestContent = (props: {
   return <RawContent content={body} language={mimetypeToAceLang(mimetype)} />
 }
 
-const mimetypeToAceLang = (mimetype:string) => {
-  if (mimetype.includes("text/javascript") || mimetype.includes('application/json')) {
-    return 'javascript'
-  }
-  else if (mimetype.includes('text/html')) {
-    return 'html'
-  }
-  else if (mimetype.includes('text/css')) {
-    return 'css'
-  }
-  else if (mimetype.includes('text/xml')) {
-    return 'xml'
-  }
-  return ''
-}
-
-const requestToRaw = (req: Request) => {
-  const parsedUrl = new URL(req.url)
-  const reqSummary = req.method + " " + parsedUrl.pathname + parsedUrl.search + " " + req.httpVersion + "\n"
-
-  return reqSummary + req.headers.map(h => `${ h.name }: ${ h.value } `).join("\n")
-}
-
-const responseToRaw = (resp: Response) => {
-  return resp.headers.map(h => `${ h.name }: ${ h.value } `).join("\n")
-}
