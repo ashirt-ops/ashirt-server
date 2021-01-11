@@ -8,6 +8,7 @@ import { trimURL, useAsyncComponent } from 'src/helpers'
 import Table from 'src/components/table'
 import { Har, Entry, Request, Response, Header } from 'har-format'
 import { default as TabMenu } from '../tabs'
+import SettingsSection from 'src/components/settings_section'
 
 const cx = classnames.bind(require('./stylesheet'))
 const importAceEditorAsync = () => import('../code_block/ace_editor').then(module => module.default)
@@ -31,7 +32,7 @@ export default (props: {
                 <td>{entry.response.status}</td>
                 <td>{entry.request.method}</td>
                 <td>{trimURL(entry.request.url).trimmedValue}</td>
-                <td>{entry.request.postData == null ? "No Data" : entry.request.postData.text?.length}</td>
+                <td>{entry.request.postData == null ? "None" : entry.request.postData.text?.length}</td>
               </tr>
             ))}
           </Table>
@@ -56,27 +57,28 @@ const HttpEntry = (props: {
 const RequestSegment = (props: {
   entry: Entry
 }) => <>
-    <em>Request</em>
-    <TabMenu className={cx('tab-group')}
-      tabs={[
-        { id: "request-pretty", label: "Pretty", content: <PrettyHeaders headers={props.entry.request.headers} /> },
-        { id: "request-raw", label: "Raw", content: <RawContent content={requestToRaw(props.entry.request)} /> },
-      ]}
-    />
+    <SettingsSection className={cx('section-header')} title="Request" width="full-width">
+      <TabMenu className={cx('tab-group')}
+        tabs={[
+          { id: "request-pretty", label: "Pretty", content: <PrettyHeaders headers={props.entry.request.headers} /> },
+          { id: "request-raw", label: "Raw", content: <RawContent content={requestToRaw(props.entry.request)} /> },
+        ]}
+      />
+    </SettingsSection>
   </>
 
-// these should be segments
 const ResponseSegment = (props: {
   entry: Entry
 }) => <>
-    <em>Response</em>
-    <TabMenu className={cx('tab-group')}
-      tabs={[
-        { id: "request-pretty", label: "Pretty Headers", content: <PrettyHeaders headers={props.entry.response.headers} /> },
-        { id: "response-raw", label: "Raw Headers", content: <RawContent content={responseToRaw(props.entry.response)} /> },
-        { id: "response-content", label: "Content", content: <ResponseContent response={props.entry.response} /> },
-      ]}
-    />
+    <SettingsSection className={cx('section-header')} title="Response" width="full-width">
+      <TabMenu className={cx('tab-group')}
+        tabs={[
+          { id: "request-pretty", label: "Pretty Headers", content: <PrettyHeaders headers={props.entry.response.headers} /> },
+          { id: "response-raw", label: "Raw Headers", content: <RawContent content={responseToRaw(props.entry.response)} /> },
+          { id: "response-content", label: "Content", content: <ResponseContent response={props.entry.response} /> },
+        ]}
+      />
+    </SettingsSection>
   </>
 
 const PrettyHeaders = (props: {
@@ -89,10 +91,19 @@ const PrettyHeaders = (props: {
   else {
     content = props.headers
       .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-      .map((h, i) => <div key={i} className={cx('pretty-headers-entry')}><em className={cx('pretty-headers-key')}>{h.name}: </em> <span className={cx('pretty-headers-value')}>{h.value}</span></div>)
+      .map((h, i) => (
+        <div key={i} className={cx('pretty-headers-entry')}>
+          <em className={cx('pretty-headers-key')}>{h.name}:</em>
+          <span className={cx('pretty-headers-value')}>{h.value}</span>
+        </div>
+      ))
   }
 
-  return <div className={cx('pretty-headers-outer-container')}><div className={cx('pretty-headers-container')}>{...content}</div></div>
+  return (
+    <div className={cx('pretty-headers-outer-container')}>
+      <div className={cx('pretty-headers-container')}>{...content}</div>
+    </div>
+  )
 }
 
 const RawContent = (props: {
