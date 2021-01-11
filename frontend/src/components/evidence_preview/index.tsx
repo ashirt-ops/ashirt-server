@@ -95,5 +95,8 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
 
-  return wiredEvidence.render(evi => <HttpCycleViewer log={evi}/>)
+  return wiredEvidence.render(evi => {
+    const log = JSON.parse(evi)
+    return <HttpCycleViewer log={log} />
+  })
 }

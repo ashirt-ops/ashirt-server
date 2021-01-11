@@ -13,9 +13,9 @@ const cx = classnames.bind(require('./stylesheet'))
 const importAceEditorAsync = () => import('../code_block/ace_editor').then(module => module.default)
 
 export default (props: {
-  log: string
+  log: Har
 }) => {
-  const parsedLog: Har = JSON.parse(props.log)  // TODO: moveoutside of this component
+  const parsedLog: Har = props.log
 
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
 
