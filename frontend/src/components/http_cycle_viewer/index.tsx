@@ -11,6 +11,7 @@ import { PrettyHeaders, RawContent } from './components'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import { default as TabMenu } from '../tabs'
+import { clamp } from 'lodash'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -21,28 +22,46 @@ export default (props: {
 
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
 
+  const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
+      e.stopPropagation()
+      e.preventDefault()
+
+      const newIndex = clamp(selectedRow + (e.key == 'ArrowDown' ? 1 : -1), 0, log.entries.length - 1)
+      if (tbodyRef.current != null) {
+        // @ts-ignore - typescript is unable to determine that children is an array of HTMLDivElements
+        const rows: Array<HTMLTableRowElement> = Array.from(tbodyRef.current.children).filter(el => el instanceof HTMLTableRowElement)
+        rows[newIndex].scrollIntoView() // this needs adjustment to be less weird/active
+      }
+      setSelectedRow(newIndex)
+    }
+  }
+
   return (
-    <>
-      <div className={cx('root')} onClick={e => e.stopPropagation()}>
-        <div className={cx('header')}>From: <em>{log.creator.name} @ {log.creator.version}</em></div>
-        <div className={cx('table-container')}>
-          <Table columns={['#', 'Status', 'Method', 'Path', 'Data Size']} className={cx('table')}>
-            {log.entries.map((entry, index) => (
-              <tr key={index} className={cx(index == selectedRow ? ['selected-row', 'render'] : '')} onClick={() => setSelectedRow(index)} >
-                <td>{index + 1}</td>
-                <td>{entry.response.status}</td>
-                <td>{entry.request.method}</td>
-                <td>{trimURL(entry.request.url).trimmedValue}</td>
-                <td>{entry.request.postData == null ? "None" : entry.request.postData.text?.length}</td>
-              </tr>
-            ))}
-          </Table>
-        </div>
-        <div className={cx('body')}>
-          {selectedRow == -1 ? null : <HttpEntry entry={log.entries[selectedRow]} />}
-        </div>
+    <div className={cx('root')} onClick={e => e.stopPropagation()} >
+      <div className={cx('header')}>From: <em>{log.creator.name} @ {log.creator.version}</em></div>
+      <div className={cx('table-container')}>
+        <Table className={cx('table')} tbodyRef={tbodyRef}
+          columns={['#', 'Status', 'Method', 'Path', 'Data Size']}
+          onKeyDown={onKeyDown}
+        >
+          {log.entries.map((entry, index) => (
+            <tr key={index} className={cx(index == selectedRow ? ['selected-row', 'render'] : '')}
+              onClick={() => setSelectedRow(index)} >
+              <td>{index + 1}</td>
+              <td>{entry.response.status}</td>
+              <td>{entry.request.method}</td>
+              <td>{trimURL(entry.request.url).trimmedValue}</td>
+              <td>{entry.request.postData == null ? "None" : entry.request.postData.text?.length}</td>
+            </tr>
+          ))}
+        </Table>
       </div>
-    </>
+      <div className={cx('body')}>
+        {selectedRow == -1 ? null : <HttpEntry entry={log.entries[selectedRow]} />}
+      </div>
+    </div>
   )
 }
 
