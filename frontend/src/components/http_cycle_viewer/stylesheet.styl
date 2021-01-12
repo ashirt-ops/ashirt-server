@@ -8,11 +8,13 @@
   text-align: left
 
   em
+    padding: 0 5px 0 5px
     font-style: italic
     font-weight: bold
 
 .section-header
   text-align: left
+  padding-bottom: 5px
 
 .table
   white-space: nowrap
@@ -29,7 +31,7 @@
     &:hover
       background: $lighter-primary
 
-.body
+.http-details
   margin: 10px
   height: 45%
 
@@ -47,7 +49,6 @@
 
     .ace
       position: relative
-      height: 50%
       top: 0px
       bottom: 0
       left: 0
@@ -62,9 +63,13 @@
   padding: 5px
   text-align: left 
 
+.pretty-headers-entry
+  line-height: 1.25
+  margin-left: 5px
+
 .pretty-headers-key
   font-weight: bold
-  margin-left: 5px
+  white-space: nowrap
 
 .pretty-headers-value
   font-family: monospace
@@ -73,5 +78,4 @@
 
 .pretty-headers-no-content
   font-weight: bold
-  margin-left: 5px
 
