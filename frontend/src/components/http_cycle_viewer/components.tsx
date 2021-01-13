@@ -27,9 +27,7 @@ export const PrettyHeaders = (props: {
   }
 
   return (
-    <div className={cx('pretty-headers-outer-container')}>
       <div className={cx('pretty-headers-container')}>{...content}</div>
-    </div>
   )
 }
 
@@ -50,4 +48,10 @@ export const RawContent = (props: {
       </div>
     </div>
   )
+}
+
+export const Section = (props: {
+
+}) => {
+  
 }
