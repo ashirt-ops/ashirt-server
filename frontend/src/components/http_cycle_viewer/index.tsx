@@ -90,8 +90,8 @@ const HttpDetails = (props: {
   entry: Entry
 }) => (
   <div className={cx('http-details')}>
-    <RequestSegment {...props} />
     <ResponseSegment {...props} />
+    <RequestSegment {...props} />
   </div>
 )
 

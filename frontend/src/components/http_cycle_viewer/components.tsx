@@ -13,21 +13,23 @@ export const PrettyHeaders = (props: {
 }) => {
   let content
   if (props.headers.length == 0) {
-    content = [<em className={cx('pretty-headers-no-content')}>No Captured Headers</em>]
+    content = [<em className={cx('pretty-headers-key')}>No Captured Headers</em>]
   }
   else {
     content = props.headers
       .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-      .map((h, i) => (
-        <div key={i} className={cx('pretty-headers-entry')}>
-          <em className={cx('pretty-headers-key')}>{h.name}:</em>
-          <span className={cx('pretty-headers-value')}>{h.value}</span>
-        </div>
+      .map((header) => (
+        <>
+          <em className={cx('pretty-headers-key')}>{header.name}:</em>
+          <span className={cx('pretty-headers-value')}>{header.value}</span>
+        </>
       ))
   }
 
   return (
-      <div className={cx('pretty-headers-container')}>{...content}</div>
+    <div className={cx('pretty-headers-container')}>
+      {content.map((el, i) => <div key={i} className={cx('pretty-headers-entry')}>{el}</div>)}
+    </div>
   )
 }
 
@@ -38,7 +40,7 @@ export const RawContent = (props: {
   const AceEditor = useAsyncComponent(importAceEditorAsync)
 
   return (
-    <div className={cx('ace-container')}>
+    <div className={cx('code-viewer')}>
       <div className={cx('ace')}>
         <AceEditor
           readOnly
@@ -48,10 +50,4 @@ export const RawContent = (props: {
       </div>
     </div>
   )
-}
-
-export const Section = (props: {
-
-}) => {
-  
 }
