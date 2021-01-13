@@ -61,7 +61,7 @@ const RequestTable = (props: {
       if (tbodyRef.current != null) {
         // @ts-ignore - typescript is unable to determine that children is an array of HTMLDivElements
         const rows: Array<HTMLTableRowElement> = Array.from(tbodyRef.current.children).filter(el => el instanceof HTMLTableRowElement)
-        rows[newIndex].scrollIntoView() // this needs adjustment to be less weird/active
+        rows[newIndex].scrollIntoView({block: 'nearest'})
       }
       props.setSelectedRow(newIndex)
     }
