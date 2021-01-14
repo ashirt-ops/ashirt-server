@@ -22,11 +22,10 @@ export default (props: {
   className?: string,
   columns: Array<string | ColumnData>,
   onColumnClicked?: (colIndex: number) => void,
-  // todo: either both or neither
   onKeyDown?: (e: KeyboardEvent) => void,
   tableRef?: React.MutableRefObject<HTMLTableElement | null>
 }) => {
-  const noop = () => {}
+  const noop = () => { }
   React.useEffect(() => {
     const curRootRef = props.tableRef?.current
     if (!curRootRef) {
@@ -37,7 +36,9 @@ export default (props: {
   })
 
   return (
-    <table className={cx('root', props.className)} {...(props.onKeyDown ? { ref: props.tableRef, tabIndex:0} : {})}>
+    <table className={cx('root', props.className)} {...(props.onKeyDown ? { tabIndex: 0 } : {})}
+      {...(props.tableRef ? { ref: props.tableRef } : {})}
+    >
       <thead>
         <tr>
           {props.columns.map((column, idx) => {
@@ -62,6 +63,6 @@ export default (props: {
       <tbody>
         {props.children}
       </tbody>
-    </table>
+    </table >
   )
 }
