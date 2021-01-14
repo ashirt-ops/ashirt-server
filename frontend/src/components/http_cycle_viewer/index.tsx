@@ -168,4 +168,3 @@ const RequestContent = (props: {
 
   return <RawContent content={body} language={mimetypeToAceLang(mimetype)} />
 }
-

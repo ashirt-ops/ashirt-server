@@ -63,6 +63,6 @@ export default (props: {
       <tbody>
         {props.children}
       </tbody>
-    </table >
+    </table>
   )
 }
