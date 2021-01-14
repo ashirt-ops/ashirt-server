@@ -23,14 +23,14 @@ export default (props: {
 
   return (
     <div className={cx('root')} onClick={e => e.stopPropagation()}>
-      <EvidenceHeader creator={log.creator.name} version={log.creator.version}/>
-      <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow}/>
+      <EvidenceHeader creator={log.creator.name} version={log.creator.version} />
+      <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />
       {selectedRow > -1 && <HttpDetails entry={log.entries[selectedRow]} />}
     </div>
   )
 }
 
-const EvidenceHeader = (props:{
+const EvidenceHeader = (props: {
   creator: string,
   version: string
 }) => (
@@ -51,17 +51,23 @@ const RequestTable = (props: {
   selectedRow: number
   setSelectedRow: (rowNumber: number) => void
 }) => {
-  const tbodyRef = React.useRef<HTMLTableSectionElement | null>(null)
+  const tableRef = React.useRef<HTMLTableElement | null>(null)
+
   const onKeyDown = (e: KeyboardEvent) => {
+    console.log("Got keypress event")
     if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
       e.stopPropagation()
       e.preventDefault()
 
       const newIndex = clamp(props.selectedRow + (e.key == 'ArrowDown' ? 1 : -1), 0, props.log.entries.length - 1)
-      if (tbodyRef.current != null) {
-        // @ts-ignore - typescript is unable to determine that children is an array of HTMLDivElements
-        const rows: Array<HTMLTableRowElement> = Array.from(tbodyRef.current.children).filter(el => el instanceof HTMLTableRowElement)
-        rows[newIndex].scrollIntoView({block: 'nearest'})
+      if (tableRef.current != null) {
+
+        if (props.selectedRow == 0 && newIndex == 0) {
+          tableRef.current.tHead?.scrollIntoView({block:'nearest'})
+        }
+        else {
+          tableRef.current.tBodies.item(0)?.rows.item(newIndex)?.scrollIntoView({block: 'nearest'})
+        }
       }
       props.setSelectedRow(newIndex)
     }
@@ -69,7 +75,7 @@ const RequestTable = (props: {
 
   return (
     <div className={cx('table-container')}>
-      <Table className={cx('table')} tbodyRef={tbodyRef} onKeyDown={onKeyDown}
+      <Table className={cx('table')} onKeyDown={onKeyDown} tableRef={tableRef}
         columns={['#', 'Status', 'Method', 'Path', 'Data Size']} >
         {props.log.entries.map((entry, index) => (
           <tr key={index} className={cx(index == props.selectedRow ? ['selected-row', 'render'] : '')}
@@ -103,7 +109,7 @@ const RequestSegment = (props: {
       tabs={[
         { id: "request-pretty", label: "Pretty Headers", content: <PrettyHeaders headers={props.entry.request.headers} /> },
         { id: "request-raw", label: "Raw Headers", content: <RawContent content={requestToRaw(props.entry.request)} /> },
-        { id: "request-content", label: "Post Content", content: <RequestContent data={props.entry.request.postData} /> },
+        { id: "request-content", label: "Post Data", content: <RequestContent data={props.entry.request.postData} /> },
       ]}
     />
   </SettingsSection>
