@@ -28,6 +28,7 @@ type TimelineFilters struct {
 	DateRange        *DateRange
 	WithEvidenceUUID string
 	Linked           *bool
+	SortAsc          bool
 }
 
 // ParseTimelineQuery parses a query a user may type into the search box on the timeline page
@@ -79,6 +80,16 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
 			}
 			timelineFilters.Linked = &val
+		case "sort-direction":
+			if len(v) != 1 {
+				errReason := "Only one sorting flag can be specified"
+				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
+			}
+			direction := strings.ToLower(v[0])
+			if direction == "asc" || direction == "chronological" || direction == "ascending" {
+				timelineFilters.SortAsc = true
+			}
+
 		default:
 			errReason := fmt.Sprintf("Unknown filter key '%s'", k)
 			return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
