@@ -95,7 +95,7 @@ func TestParseTimelineQuery(t *testing.T) {
 	testTimelineQueryCase(t, ``, helpers.TimelineFilters{
 		SortAsc: false,
 	})
-	
+
 	testTimelineQueryExpectErr(t, `invalid keys cause error invalid:value`)
 	testTimelineQueryExpectErr(t, `multiple operators       cause error operator:alice operator:bob`)
 	testTimelineQueryExpectErr(t, `multiple uuids           cause error uuid:ABC123 uuid:XYZ789`) // actual uuid doesn't currently matter
