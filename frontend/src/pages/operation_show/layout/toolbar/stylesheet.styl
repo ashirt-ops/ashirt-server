@@ -1,3 +1,5 @@
+@import '~src/vars'
+
 .root
   display: flex
   justify-content: space-around
@@ -6,9 +8,16 @@
   & > *
     margin: 0 10px;
 
-.search
+.search-container
+  position: relative
   width: 500px
-  flex-grow: 1;
+  flex-grow: 1
+
+.search
+  width: 100%
+
+.search-input
+  padding-right: 30px
 
 p
   margin-bottom: 10px
@@ -43,17 +52,21 @@ em
   p
     line-height: 1.1
 
-// .search-help-icon
-//   width: 25px
-//   height: @width
-//   background-position: center center
-//   background-repeat: no-repeat
-//   background-size: 12px
-//   transition: all 200ms
-//   opacity: 0.4
-//   border-radius: 3px
-//   cursor: pointer
+.search-help-icon
+  position: absolute
+  background-image: url('./qmark2.svg')
+  right: 4px
+  top: 4px
+  width: 25px
+  height: @width
+  background-position: center center
+  background-repeat: no-repeat
+  background-size: 12px
+  transition: all 200ms
+  opacity: 0.4
+  border-radius: 3px
+  cursor: pointer
 
-//   &:hover
-//     opacity: 1
-//     background-color: $background
+  &:hover
+    opacity: 1
+    background-color: $background

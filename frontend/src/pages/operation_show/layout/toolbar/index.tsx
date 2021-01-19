@@ -29,21 +29,24 @@ export default (props: {
   return (
     <>
       <div className={cx('root')}>
-        <Input
-          ref={inputRef}
-          className={cx('search')}
-          value={queryInput}
-          onChange={setQueryInput}
-          placeholder="Filter Timeline"
-          icon={require('./search.svg')}
-          onKeyDown={e => {
-            if (e.which == 13) {
-              inputRef.current?.blur()
-              props.onSearch(queryInput)
-            }
-          }}
-        />
-        <Button onClick={e => helpModal.show()} title="Search Help">?</Button>
+        <div className={cx('search-container')}>
+          <Input
+            ref={inputRef}
+            className={cx('search')}
+            inputClassName={cx('search-input')}
+            value={queryInput}
+            onChange={setQueryInput}
+            placeholder="Filter Timeline"
+            icon={require('./search.svg')}
+            onKeyDown={e => {
+              if (e.which == 13) {
+                inputRef.current?.blur()
+                props.onSearch(queryInput)
+              }
+            }}
+          />
+          <a className={cx('search-help-icon')} onClick={_ => helpModal.show()} title="Search Help"></a>
+        </div>
         <DateRangePicker
           range={getDateRangeFromQuery(queryInput)}
           onSelectRange={r => {
