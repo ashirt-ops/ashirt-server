@@ -80,7 +80,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
 			}
 			timelineFilters.Linked = &val
-		case "sort-direction":
+		case "sort":
 			if len(v) != 1 {
 				errReason := "Only one sorting flag can be specified"
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)

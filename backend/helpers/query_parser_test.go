@@ -79,17 +79,17 @@ func TestParseTimelineQuery(t *testing.T) {
 	testTimelineQueryCase(t, `linked:all`, helpers.TimelineFilters{
 		Linked: nil,
 	})
-	testTimelineQueryCase(t, `sort-direction:asc`, helpers.TimelineFilters{
+	testTimelineQueryCase(t, `sort:asc`, helpers.TimelineFilters{
 		SortAsc: true,
 	})
-	testTimelineQueryCase(t, `sort-direction:chronological`, helpers.TimelineFilters{
+	testTimelineQueryCase(t, `sort:chronological`, helpers.TimelineFilters{
 		SortAsc: true,
 	})
-	testTimelineQueryCase(t, `sort-direction:ascending`, helpers.TimelineFilters{
+	testTimelineQueryCase(t, `sort:ascending`, helpers.TimelineFilters{
 		SortAsc: true,
 	})
 
-	testTimelineQueryCase(t, `sort-direction:desc`, helpers.TimelineFilters{
+	testTimelineQueryCase(t, `sort:desc`, helpers.TimelineFilters{
 		SortAsc: false,
 	})
 	testTimelineQueryCase(t, ``, helpers.TimelineFilters{
@@ -101,7 +101,7 @@ func TestParseTimelineQuery(t *testing.T) {
 	testTimelineQueryExpectErr(t, `multiple uuids           cause error uuid:ABC123 uuid:XYZ789`) // actual uuid doesn't currently matter
 	testTimelineQueryExpectErr(t, `multiple with_evidence   cause error with-evidence:ABC123 with-evidence:XYZ789`)
 	testTimelineQueryExpectErr(t, `multiple linked          cause error linked:all linked:true`)
-	testTimelineQueryExpectErr(t, `multiple sort_directions cause error sort-direction:desc sort-direction:asc`)
+	testTimelineQueryExpectErr(t, `multiple sort_directions cause error sort:desc sort:asc`)
 	testTimelineQueryExpectErr(t, `unparsable bool/not all cause error linked:maybe`)
 	testTimelineQueryExpectErr(t, `unparsable date cause error range:2021-01-01,2021-02-31`)
 	testTimelineQueryExpectErr(t, `unparsable date cause error (alt) range:2021-01-01`)
