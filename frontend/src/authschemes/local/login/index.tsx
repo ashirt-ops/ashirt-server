@@ -16,7 +16,7 @@ async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
   try {
     await promise
     window.location.href = '/'
-  } catch(err) {
+  } catch (err) {
     if (err.message === 'PASSWORD_RESET_REQUIRED') {
       window.location.href = '/login/local?step=reset'
       return
@@ -30,7 +30,7 @@ async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
 }
 
 // Used to pull a value out of a password field and clear the field value for security
-function getValueAndClear(field: {value: string, onChange: (s: string) => void}): string {
+function getValueAndClear(field: { value: string, onChange: (s: string) => void }): string {
   const { value } = field
   field.onChange('')
   return value
@@ -42,6 +42,8 @@ export default (props: {
   switch (props.query.step) {
     case 'reset': return <ResetPassword />
     case 'totp': return <EnterTotp />
+    case 'recovery': return <RecoverUserAccount />
+    case 'recovery-sent': return <AccountRecoveryStarted />
     default: return <Login />
   }
 }
@@ -61,11 +63,14 @@ const Login = (props: {
   const registerModal = useModal<void>(modalProps => <RegisterModal {...modalProps} />)
 
   return (
-    <div style={{minWidth: 300}}>
+    <div style={{ minWidth: 300 }}>
       <Form submitText="Login" cancelText="Register" onCancel={() => registerModal.show()} {...loginForm}>
         <Input label="Email" {...emailField} />
         <Input label="Password" type="password" {...passwordField} />
       </Form>
+      <div className={cx('recover-container')}>
+        <a className={cx('recover-link')} href="/login/local?step=recovery" title="Account Recovery">Forgot your password?</a>
+      </div>
       {renderModals(registerModal)}
     </div>
   )
@@ -139,21 +144,53 @@ const ResetPassword = (props: {
   </>
 }
 
-const EnterTotp = (props: {
-}) => {
+const EnterTotp = (props: {}) => {
   const totpField = useFormField('')
 
   const totpForm = useForm({
     fields: [totpField],
     handleSubmit: () => handleLoginStepPromise(
-        totpLogin(totpField.value)
+      totpLogin(totpField.value)
     ),
   })
 
   return (<>
     <h2 className={cx('title')}>Multi-factor Authentication</h2>
     <Form submitText="Submit" {...totpForm}>
-      <Input label="Passcode" {...totpField}/>
+      <Input label="Passcode" {...totpField} />
     </Form>
   </>)
 }
+
+const RecoverUserAccount = (props: {}) => {
+  const emailField = useFormField('')
+
+  const emailForm = useForm({
+    fields: [emailField],
+    handleSubmit: () => {
+      if (emailField.value == "recover") {
+        // redirect user to login page with message? or blank page with message and button to return to login?
+        window.location.href = '/login/local?step=recovery-sent'
+        // console.log("Recovering!")
+        return Promise.resolve()
+      }
+
+      return Promise.reject(new Error("Oops!"))
+    },
+  })
+
+  return (<>
+    <h2 className={cx('title')}>Find Your Account</h2>
+    <Form submitText="Submit" {...emailForm}>
+      <Input label="Email" {...emailField} />
+    </Form>
+  </>)
+}
+
+const AccountRecoveryStarted = (props: {
+
+}) => (
+  <div>
+    <span>You should receive an email shortly with a recovery link.</span>
+  </div>
+)
