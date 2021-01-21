@@ -5,9 +5,10 @@ import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
+import { NavLinkButton } from 'src/components/button'
 import classnames from 'classnames/bind'
 import { ParsedUrlQuery } from 'querystring'
-import { login, register, userResetPassword, totpLogin } from '../services'
+import { login, register, requestRecovery, userResetPassword, totpLogin } from '../services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
@@ -167,16 +168,7 @@ const RecoverUserAccount = (props: {}) => {
 
   const emailForm = useForm({
     fields: [emailField],
-    handleSubmit: () => {
-      if (emailField.value == "recover") {
-        // redirect user to login page with message? or blank page with message and button to return to login?
-        window.location.href = '/login/local?step=recovery-sent'
-        // console.log("Recovering!")
-        return Promise.resolve()
-      }
-
-      return Promise.reject(new Error("Oops!"))
-    },
+    handleSubmit: () => requestRecovery(emailField.value).then(() => window.location.href = '/login/local?step=recovery-sent')
   })
 
   return (<>
@@ -191,6 +183,11 @@ const AccountRecoveryStarted = (props: {
 
 }) => (
   <div>
-    <span>You should receive an email shortly with a recovery link.</span>
+    <div className={cx('messagebox')}>
+      You should receive an email shortly with a recovery link.
+    </div>
+    <NavLinkButton primary className={cx('centered-button')} to={'/login'}>
+      Return to Login
+    </NavLinkButton>
   </div>
 )
