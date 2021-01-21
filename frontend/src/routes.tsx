@@ -99,7 +99,7 @@ const makeErrorDisplay = (title: string, message: string, withLoginLink: boolean
       withLoginLink && (
         <>
           <br />
-          <NavLinkButton className={cx('return-button')} to={"/login"}>Return to login</NavLinkButton>
+          <NavLinkButton primary className={cx('return-button')} to={"/login"}>Return to login</NavLinkButton>
         </>
       )
     }
