@@ -52,7 +52,7 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 			return nil, dr.Error
 		}
 
-		return generateRecoveryEmail(r.Context(), bridge, userEmail)
+		return nil, generateRecoveryEmail(r.Context(), bridge, userEmail)
 	}))
 
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

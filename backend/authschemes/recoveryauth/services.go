@@ -95,27 +95,20 @@ func getRecoveryMetrics(ctx context.Context, db *database.Connection, expiryInMi
 	return metrics, nil
 }
 
-func generateRecoveryEmail(ctx context.Context, bridge authschemes.AShirtAuthBridge, userEmail string) (interface{}, error) {
+func generateRecoveryEmail(ctx context.Context, bridge authschemes.AShirtAuthBridge, userEmail string) error {
 	userAccounts, err := bridge.FindUserAuthsByUserEmail(userEmail)
 	if err != nil || len(userAccounts) == 0 {
 		if len(userAccounts) == 0 {
 			err = backend.DatabaseErr(errors.New("No matching user accounts"))
 		}
-		return nil, backend.WrapError("Unable to get user accounts from email", err)
+		return backend.WrapError("Unable to get user accounts from email", err)
 	}
 
 	targetAccount := userAccounts[0]
 	err = bridge.AddScheduledEmail(userEmail, &targetAccount, "self-service-recovery-email")
 	if err != nil {
-		return nil, backend.WrapError("Unable to generate recovery email", err)
+		return backend.WrapError("Unable to generate recovery email", err)
 	}
 
-	// TODO
-	response := struct {
-		Email string `json:"email"`
-	}{
-		Email: userEmail,
-	}
-
-	return response, nil
+	return nil
 }
