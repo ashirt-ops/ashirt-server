@@ -65,10 +65,10 @@ func TestParseAuthorizationHeader(t *testing.T) {
 func TestAuthenticateAPI(t *testing.T) {
 	//set up
 	db := initTestDB(t)
-	userID := createDummyUser(t, db, models.User{Slug: "slug", FirstName: "fn", LastName: "ln", Email: "slug@example.com", Disabled: false})
+	userID := createDummyUser(t, db, models.User{Slug: "slug", FirstName: "fn", LastName: "ln", Email: "normalUser@example.com", Disabled: false})
 	keyData := createAPIKey(t, db, userID)
 
-	disabledUser := createDummyUser(t, db, models.User{Slug: "snail", FirstName: "fn", LastName: "ln", Email: "slug@example.com", Disabled: true})
+	disabledUser := createDummyUser(t, db, models.User{Slug: "snail", FirstName: "fn", LastName: "ln", Email: "disabledUser@example.com", Disabled: true})
 	disabledUserKeys := createAPIKey(t, db, disabledUser)
 
 	browser := testBrowser{}

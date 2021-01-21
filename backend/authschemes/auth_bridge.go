@@ -276,9 +276,9 @@ func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, data *UserAuth
 		userID = data.UserID
 	}
 	_, err := ah.db.Insert("email_queue", map[string]interface{}{
-		"to_email":           emailAddress,
-		"user_id":            userID,
-		"template":           emailTemplate,
+		"to_email": emailAddress,
+		"user_id":  userID,
+		"template": emailTemplate,
 	})
 	if err != nil {
 		return backend.WrapError("Unable to schedule email", backend.DatabaseErr(err))

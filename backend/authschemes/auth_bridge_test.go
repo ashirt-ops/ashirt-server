@@ -62,7 +62,7 @@ func TestLoginUser(t *testing.T) {
 
 	gob.Register(&testSession{})
 
-	userID := createDummyUser(t, bridge)
+	userID := createDummyUser(t, bridge, "")
 
 	browser := &testBrowser{}
 	w, r := browser.newRequest()
@@ -94,7 +94,7 @@ func TestDeleteSession(t *testing.T) {
 
 	gob.Register(&testSession{})
 
-	userID := createDummyUser(t, bridge)
+	userID := createDummyUser(t, bridge, "")
 
 	browser := &testBrowser{}
 	w, r := browser.newRequest()
@@ -112,7 +112,7 @@ func TestDeleteSession(t *testing.T) {
 func TestUserAuthCreationAndLookup(t *testing.T) {
 	_, _, bridge := initBridgeTest(t)
 
-	userID := createDummyUser(t, bridge)
+	userID := createDummyUser(t, bridge, "")
 	err := bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 		UserID:  userID,
 		UserKey: "dummy-user-key",
@@ -157,11 +157,11 @@ func initBridgeTest(t *testing.T) (*database.Connection, *session.Store, authsch
 	return db, sessionStore, authschemes.MakeAuthBridge(db, sessionStore, "test")
 }
 
-func createDummyUser(t *testing.T, bridge authschemes.AShirtAuthBridge) int64 {
+func createDummyUser(t *testing.T, bridge authschemes.AShirtAuthBridge, extra string) int64 {
 	newUser, err := bridge.CreateNewUser(authschemes.UserProfile{
 		FirstName: "Dummy",
 		LastName:  "User",
-		Email:     "email@example.com",
+		Email:     "email+" + extra + "@example.com",
 		Slug:      "dummy-user-slug",
 	})
 	require.NoError(t, err)
