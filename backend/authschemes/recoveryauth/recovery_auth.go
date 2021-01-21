@@ -45,6 +45,16 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 		return generateRecoveryCodeForUser(r.Context(), bridge, userSlug)
 	}))
 
+	remux.Route(r, "POST", "/generateemail", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+		dr := remux.DissectJSONRequest(r)
+		userEmail := dr.FromBody("userEmail").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+
+		return generateRecoveryEmail(r.Context(), bridge, userEmail)
+	}))
+
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		dr := remux.DissectJSONRequest(r)
 		recoveryKey := dr.FromQuery("code").Required().AsString()

@@ -162,6 +162,25 @@ func (ah AShirtAuthBridge) FindUserAuthByUserID(userID int64) (UserAuthData, err
 	return authData, nil
 }
 
+// FindUserAuthsByUserEmail retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail
+// Note that a user may have multiple authentications based on a single email, so each of these records are returned
+//
+// Returns a fully populated UserAuthData object, or nil if no such row exists
+func (ah AShirtAuthBridge) FindUserAuthsByUserEmail(email string) ([]UserAuthData, error) {
+	var authData []UserAuthData
+
+	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
+		From("auth_scheme_data").
+		LeftJoin("users ON users.id = auth_scheme_data.user_id").
+		Where(sq.Eq{
+			"users.email": email,
+		}))
+	if err != nil {
+		return []UserAuthData{}, backend.DatabaseErr(err)
+	}
+	return authData, nil
+}
+
 // FindUserAuthsByUserSlug retrieves the row (codified by UserAuthData) corresponding to the provided user slug and the
 // auth scheme name provided from the caller.
 //
@@ -248,4 +267,21 @@ func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, userKey stri
 // but is provided in situations where unique-access to the database is required.
 func (ah AShirtAuthBridge) GetDatabase() *database.Connection {
 	return ah.db
+}
+
+// AddScheduledEmail creates a database entry for an outgoing email, for the given email address, related user
+func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, data *UserAuthData, emailTemplate string) error {
+	userID := int64(0)
+	if data != nil {
+		userID = data.UserID
+	}
+	_, err := ah.db.Insert("email_queue", map[string]interface{}{
+		"to_email":           emailAddress,
+		"user_id":            userID,
+		"template":           emailTemplate,
+	})
+	if err != nil {
+		return backend.WrapError("Unable to schedule email", backend.DatabaseErr(err))
+	}
+	return nil
 }
