@@ -49,16 +49,11 @@ func generateRecoveryCodeForUser(ctx context.Context, bridge authschemes.AShirtA
 		return nil, backend.WrapError("Unable to get UserID from slug", err)
 	}
 
-	authKey := make([]byte, recoveryKeyLength)
-	if _, err := rand.Read(authKey); err != nil {
-		return nil, backend.WrapError("Unable to generate random recovery key", err)
+	authKeyStr, err := GenerateRecoveryCodeForUser(bridge.GetDatabase(), userID)
+	if err != nil {
+		return nil, backend.WrapError("Could not generate recovery code for user", err)
 	}
-	authKeyStr := hex.EncodeToString(authKey)
 
-	err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
-		UserID:  userID,
-		UserKey: authKeyStr,
-	})
 	response := struct {
 		Code string `json:"code"`
 	}{Code: authKeyStr}
@@ -111,4 +106,29 @@ func generateRecoveryEmail(ctx context.Context, bridge authschemes.AShirtAuthBri
 	}
 
 	return nil
+}
+
+// GenerateRecoveryCodeForUser provides a mechanism for non-recovery services to generate and register
+// a recovery authentication for the provided UserID.
+//
+// returns the generatedCode if successful, and an error, if one was encountered
+func GenerateRecoveryCodeForUser(db *database.Connection, userID int64) (string, error) {
+	authKey := make([]byte, recoveryKeyLength)
+	if _, err := rand.Read(authKey); err != nil {
+		return "", backend.WrapError("Unable to generate random recovery key", err)
+	}
+	authKeyStr := hex.EncodeToString(authKey)
+
+	err := GenerateNewRecoveryRecord(db, authschemes.UserAuthData{
+		UserID:  userID,
+		UserKey: authKeyStr,
+	})
+
+	return authKeyStr, err
+}
+
+// GenerateNewRecoveryRecord is a shorthand for CreateNewAuthForUserGeneric with the recovery code
+// constant provide
+func GenerateNewRecoveryRecord(db *database.Connection, userAuthData authschemes.UserAuthData) error {
+	return authschemes.CreateNewAuthForUserGeneric(db, recoveryConsts.Code, userAuthData)
 }

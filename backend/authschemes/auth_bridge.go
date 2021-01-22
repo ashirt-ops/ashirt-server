@@ -206,20 +206,7 @@ func (ah AShirtAuthBridge) FindUserAuthsByUserSlug(slug string) ([]UserAuthData,
 // Returns nil if no error was occurred, BadInputErr if the user account already exists, or DatabaseErr
 // if any other issue occurs
 func (ah AShirtAuthBridge) CreateNewAuthForUser(data UserAuthData) error {
-	_, err := ah.db.Insert("auth_scheme_data", map[string]interface{}{
-		"auth_scheme":        ah.authSchemeName,
-		"user_key":           data.UserKey,
-		"user_id":            data.UserID,
-		"encrypted_password": data.EncryptedPassword,
-		"totp_secret":        data.TOTPSecret,
-	})
-	if err != nil {
-		if database.IsAlreadyExistsError(err) {
-			return backend.BadInputErr(err, "An account for this user already exists")
-		}
-		return backend.WrapError("Unable to generate auth scheme for user", backend.DatabaseErr(err))
-	}
-	return nil
+	return CreateNewAuthForUserGeneric(ah.db, ah.authSchemeName, data)
 }
 
 // UpdateAuthForUser updates a user's authentication password, and can flag whether the user needs to
@@ -282,6 +269,28 @@ func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, data *UserAuth
 	})
 	if err != nil {
 		return backend.WrapError("Unable to schedule email", backend.DatabaseErr(err))
+	}
+	return nil
+}
+
+// CreateNewAuthForUserGeneric provides a mechanism for non-auth providers to generate new authentications
+// on behalf of auth providers. This is only intended for recovery. 
+//
+// Proper usage:  authschemes.CreateNewAuthForUser(db, recoveryauth.constants.Code, authschemes.UserAuthData{})
+// note: you will need to provide your own database instance
+func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName string, data UserAuthData) error {
+	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
+		"auth_scheme":        authSchemeName,
+		"user_key":           data.UserKey,
+		"user_id":            data.UserID,
+		"encrypted_password": data.EncryptedPassword,
+		"totp_secret":        data.TOTPSecret,
+	})
+	if err != nil {
+		if database.IsAlreadyExistsError(err) {
+			return backend.BadInputErr(err, "An account for this user already exists")
+		}
+		return backend.WrapError("Unable to generate auth scheme for user", backend.DatabaseErr(err))
 	}
 	return nil
 }
