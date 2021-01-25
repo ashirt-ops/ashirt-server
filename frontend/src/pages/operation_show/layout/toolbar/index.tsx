@@ -89,116 +89,18 @@ const FilterDescriptionRow = (props: {
 const SearchHelpModal = (props: {
   onRequestClose: () => void,
 }) => {
-  const parameters: Array<FilterDetail> = [
-    {
-      field: 'tag',
-      description:
-        <>
-          <p>
-            Filters the result by requiring that the evidence or finding contain each of the
-            specified tag fields.
-          </p>
-          <p>Multiple <CodeSnippet>tag</CodeSnippet> fields can be specified.</p>
-          <p>To easily create this filter, click on the desired tags next to any evidence.</p>
-        </>
-    },
-    {
-      field: 'operator',
-      description:
-        <>
-          <p>
-            Filters the result by requiring that the evidence or finding was created by a particular
-            user.
-          </p>
-          <p>Only one <CodeSnippet>operator</CodeSnippet> field can be specified.</p>
-          <p>To easily create this filter, click on the desired username next to any evidence.</p>
-        </>
-    },
-    {
-      field: 'range',
-      description:
-        <>
-          <p>
-            Filters the result by requiring that the evidence to have occurred within a particular
-            date range. In the findings timeline, this will require that all evidence for a finding
-            be contained with the indicated date range. Only one range can be specified.
-            Date Format: <CodeSnippet>yyyy-mm-dd,yyyy-mm-dd</CodeSnippet> where
-            y, m, and d are year, month and day digits respectively.
-            For example: <CodeSnippet>2020-01-01,2020-01-31</CodeSnippet> covers the entire
-            month of January, 2020.
-          </p>
-          <p>Only one <CodeSnippet>range</CodeSnippet> field can be specified.</p>
-          <p>Click on the calendar next to the Timeline Filter to help specify the date.</p>
-        </>
-    },
-    {
-      field: 'uuid',
-      description:
-        <>
-          <p>
-            Filters the result by requiring that the evidence or finding have a particular ID.
-            This is typically used to share evidence with other users. While it can be specified
-            manually, the preferred method is to click the "Copy Permalink" button
-            next to the desired evidence, and share the link as needed.
-          </p>
-          <p>Only one <CodeSnippet>uuid</CodeSnippet> field can be specified.</p>
-        </>
-    },
-    {
-      field: 'with-evidence',
-      description:
-        <>
-          <p>
-            Filters the result by requiring a fidning to contain a particular piece of evidence.
-            <em>This will only have an effect in the Findings Timeline.</em>
-          </p>
-          <p>Only one <CodeSnippet>with-evidence</CodeSnippet> field can be specified.</p>
-        </>
-    },
-    {
-      field: 'linked',
-      description:
-        <>
-          <p>
-            Filters the result by finding evidence that either has, or has not been attached to a finding.
-          </p>
-          <p>
-            Possible values: <CodeSnippet>true</CodeSnippet>, <CodeSnippet>false</CodeSnippet>
-          </p>
-          <p>
-            Provide <CodeSnippet>true</CodeSnippet> to require the evidence has been linked
-            with a finding, or <CodeSnippet>false</CodeSnippet> to require evidence that has
-            not been linked with a finding.
-            {" "}<em>This will only have an effect in the Evidence Timeline.</em>
-          </p>
-          <p>Only one <CodeSnippet>linked</CodeSnippet> field can be specified.</p>
-        </>
-    },
-    {
-      field: 'sort',
-      description:
-        <>
-          <p>
-            Orders the filter in a particular direction. By default, wiith no filter provided,
-            results are ordered by "last evidence first", or an effective reverse-chronological
-            order.
-          </p>
-          <p>
-            Possible values:
-            {" "}<CodeSnippet>asc</CodeSnippet>,
-            {" "}<CodeSnippet>ascending</CodeSnippet> or
-            {" "}<CodeSnippet>chronological</CodeSnippet>
-          </p>
-          <p>
-            Each of the above values will order the results in a "first-evidence-first", or
-            chronological order.
-          </p>
-          <p>Only one <CodeSnippet>sort</CodeSnippet> field can be specified.</p>
-        </>
-    },
-  ]
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      props.onRequestClose()
+    }
+  }
 
-  return <Modal title="Search Help" onRequestClose={props.onRequestClose}>
+  React.useEffect(() => {
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  })
+
+  return <Modal title="Search Help" onRequestClose={props.onRequestClose} >
     <div>
       <p>
         Timeline results can be influenced by using the Filter Timeline text box. Filters are applied
@@ -232,10 +134,119 @@ const SearchHelpModal = (props: {
       <p>The below table lists all of the currently available filters, and value limitations, if any:</p>
       <table>
         <tbody>
-          {parameters.map(f => <FilterDescriptionRow filter={f} key={f.field} />)}
+          {HelpText.map(f => <FilterDescriptionRow filter={f} key={f.field} />)}
         </tbody>
       </table>
     </div>
 
-  </Modal>
+  </Modal >
 }
+
+const HelpText: Array<FilterDetail> = [
+  {
+    field: 'tag',
+    description:
+      <>
+        <p>
+          Filters the result by requiring that the evidence or finding contain each of the
+          specified tag fields.
+          </p>
+        <p>Multiple <CodeSnippet>tag</CodeSnippet> fields can be specified.</p>
+        <p>To easily create this filter, click on the desired tags next to any evidence.</p>
+      </>
+  },
+  {
+    field: 'operator',
+    description:
+      <>
+        <p>
+          Filters the result by requiring that the evidence or finding was created by a particular
+          user.
+          </p>
+        <p>Only one <CodeSnippet>operator</CodeSnippet> field can be specified.</p>
+        <p>To easily create this filter, click on the desired username next to any evidence.</p>
+      </>
+  },
+  {
+    field: 'range',
+    description:
+      <>
+        <p>
+          Filters the result by requiring that the evidence to have occurred within a particular
+          date range. In the findings timeline, this will require that all evidence for a finding
+          be contained with the indicated date range. Only one range can be specified.
+            Date Format: <CodeSnippet>yyyy-mm-dd,yyyy-mm-dd</CodeSnippet> where
+            y, m, and d are year, month and day digits respectively.
+            For example: <CodeSnippet>2020-01-01,2020-01-31</CodeSnippet> covers the entire
+            month of January, 2020.
+          </p>
+        <p>Only one <CodeSnippet>range</CodeSnippet> field can be specified.</p>
+        <p>Click on the calendar next to the Timeline Filter to help specify the date.</p>
+      </>
+  },
+  {
+    field: 'uuid',
+    description:
+      <>
+        <p>
+          Filters the result by requiring that the evidence or finding have a particular ID.
+          This is typically used to share evidence with other users. While it can be specified
+          manually, the preferred method is to click the "Copy Permalink" button
+          next to the desired evidence, and share the link as needed.
+          </p>
+        <p>Only one <CodeSnippet>uuid</CodeSnippet> field can be specified.</p>
+      </>
+  },
+  {
+    field: 'with-evidence',
+    description:
+      <>
+        <p>
+          Filters the result by requiring a fidning to contain a particular piece of evidence.
+            <em>This will only have an effect in the Findings Timeline.</em>
+        </p>
+        <p>Only one <CodeSnippet>with-evidence</CodeSnippet> field can be specified.</p>
+      </>
+  },
+  {
+    field: 'linked',
+    description:
+      <>
+        <p>
+          Filters the result by finding evidence that either has, or has not been attached to a finding.
+          </p>
+        <p>
+          Possible values: <CodeSnippet>true</CodeSnippet>, <CodeSnippet>false</CodeSnippet>
+        </p>
+        <p>
+          Provide <CodeSnippet>true</CodeSnippet> to require the evidence has been linked
+            with a finding, or <CodeSnippet>false</CodeSnippet> to require evidence that has
+            not been linked with a finding.
+            {" "}<em>This will only have an effect in the Evidence Timeline.</em>
+        </p>
+        <p>Only one <CodeSnippet>linked</CodeSnippet> field can be specified.</p>
+      </>
+  },
+  {
+    field: 'sort',
+    description:
+      <>
+        <p>
+          Orders the filter in a particular direction. By default, wiith no filter provided,
+          results are ordered by "last evidence first", or an effective reverse-chronological
+          order.
+          </p>
+        <p>
+          Possible values:
+            {" "}<CodeSnippet>asc</CodeSnippet>,
+            {" "}<CodeSnippet>ascending</CodeSnippet> or
+            {" "}<CodeSnippet>chronological</CodeSnippet>
+        </p>
+        <p>
+          Each of the above values will order the results in a "first-evidence-first", or
+          chronological order.
+          </p>
+        <p>Only one <CodeSnippet>sort</CodeSnippet> field can be specified.</p>
+      </>
+  },
+]
