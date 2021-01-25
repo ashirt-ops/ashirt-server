@@ -174,28 +174,28 @@ const SearchHelpModal = (props: {
           <p>Only one <CodeSnippet>linked</CodeSnippet> field can be specified.</p>
         </>
     },
-    // {
-    //   field: 'sort-direction',
-    //   description:
-    //     <>
-    //       <p>
-    //         Orders the filter in a particular direction. By default, wiith no filter provided,
-    //         results are ordered by "last evidence first", or an effective reverse-chronological
-    //         order.
-    //       </p>
-    //       <p>
-    //         Possible values:
-    //         {" "}<CodeSnippet>asc</CodeSnippet>,
-    //         {" "}<CodeSnippet>ascending</CodeSnippet> or
-    //         {" "}<CodeSnippet>chronological</CodeSnippet>
-    //       </p>
-    //       <p>
-    //         Each of the above values will order the results in a "first-evidence-first", or
-    //         chronological order.
-    //       </p>
-    //       <p>Only one <CodeSnippet>sort-direction</CodeSnippet> field can be specified.</p>
-    //     </>
-    // },
+    {
+      field: 'sort',
+      description:
+        <>
+          <p>
+            Orders the filter in a particular direction. By default, wiith no filter provided,
+            results are ordered by "last evidence first", or an effective reverse-chronological
+            order.
+          </p>
+          <p>
+            Possible values:
+            {" "}<CodeSnippet>asc</CodeSnippet>,
+            {" "}<CodeSnippet>ascending</CodeSnippet> or
+            {" "}<CodeSnippet>chronological</CodeSnippet>
+          </p>
+          <p>
+            Each of the above values will order the results in a "first-evidence-first", or
+            chronological order.
+          </p>
+          <p>Only one <CodeSnippet>sort</CodeSnippet> field can be specified.</p>
+        </>
+    },
   ]
 
   return <Modal title="Search Help" onRequestClose={props.onRequestClose}>
