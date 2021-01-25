@@ -185,27 +185,25 @@ const HelpText: Array<FilterDetail> = [
       </>
   },
   {
-    field: 'uuid',
+    field: 'sort',
     description:
       <>
         <p>
-          Filters the result by requiring that the evidence or finding have a particular ID.
-          This is typically used to share evidence with other users. While it can be specified
-          manually, the preferred method is to click the "Copy Permalink" button
-          next to the desired evidence, and share the link as needed.
+          Orders the filter in a particular direction. By default, wiith no filter provided,
+          results are ordered by "last evidence first", or an effective reverse-chronological
+          order.
           </p>
-        <p>Only one <CodeSnippet>uuid</CodeSnippet> field can be specified.</p>
-      </>
-  },
-  {
-    field: 'with-evidence',
-    description:
-      <>
         <p>
-          Filters the result by requiring a fidning to contain a particular piece of evidence.
-            <em>This will only have an effect in the Findings Timeline.</em>
+          Possible values:
+            {" "}<CodeSnippet>asc</CodeSnippet>,
+            {" "}<CodeSnippet>ascending</CodeSnippet> or
+            {" "}<CodeSnippet>chronological</CodeSnippet>
         </p>
-        <p>Only one <CodeSnippet>with-evidence</CodeSnippet> field can be specified.</p>
+        <p>
+          Each of the above values will order the results in a "first-evidence-first", or
+          chronological order.
+          </p>
+        <p>Only one <CodeSnippet>sort</CodeSnippet> field can be specified.</p>
       </>
   },
   {
@@ -228,25 +226,28 @@ const HelpText: Array<FilterDetail> = [
       </>
   },
   {
-    field: 'sort',
+    field: 'with-evidence',
     description:
       <>
         <p>
-          Orders the filter in a particular direction. By default, wiith no filter provided,
-          results are ordered by "last evidence first", or an effective reverse-chronological
-          order.
-          </p>
-        <p>
-          Possible values:
-            {" "}<CodeSnippet>asc</CodeSnippet>,
-            {" "}<CodeSnippet>ascending</CodeSnippet> or
-            {" "}<CodeSnippet>chronological</CodeSnippet>
+          Filters the result by requiring a fidning to contain a particular piece of evidence.
+            <em>This will only have an effect in the Findings Timeline.</em>
         </p>
-        <p>
-          Each of the above values will order the results in a "first-evidence-first", or
-          chronological order.
-          </p>
-        <p>Only one <CodeSnippet>sort</CodeSnippet> field can be specified.</p>
+        <p>Only one <CodeSnippet>with-evidence</CodeSnippet> field can be specified.</p>
       </>
   },
+  {
+    field: 'uuid',
+    description:
+      <>
+        <p>
+          Filters the result by requiring that the evidence or finding have a particular ID.
+          This is typically used to share evidence with other users. While it can be specified
+          manually, the preferred method is to click the "Copy Permalink" button
+          next to the desired evidence, and share the link as needed.
+          </p>
+        <p>Only one <CodeSnippet>uuid</CodeSnippet> field can be specified.</p>
+      </>
+  },
+
 ]
