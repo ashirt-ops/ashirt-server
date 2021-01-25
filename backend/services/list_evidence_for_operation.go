@@ -43,8 +43,13 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 
 	sb := sq.Select("evidence.id", "evidence.uuid", "description", "evidence.content_type", "occurred_at", "users.first_name", "users.last_name", "users.slug").
 		From("evidence").
-		LeftJoin("users ON evidence.operator_id = users.id").
-		OrderBy("occurred_at DESC")
+		LeftJoin("users ON evidence.operator_id = users.id")
+
+	if i.Filters.SortAsc {
+		sb = sb.OrderBy("occurred_at ASC")
+	} else {
+		sb = sb.OrderBy("occurred_at DESC")
+	}
 
 	sb = buildListEvidenceWhereClause(sb, operation.ID, i.Filters)
 
