@@ -19,7 +19,7 @@ function stringifyQuery(tokens: {[key: string]: Array<string>}): string {
   return query.join(' ')
 }
 
-function parseQuery(query: string): {[key: string]: Array<string>} {
+export function parseQuery(query: string): {[key: string]: Array<string>} {
   const tokenized: {[key: string]: Array<string>} = {}
   let currentToken = ''
   let inQuote = false
