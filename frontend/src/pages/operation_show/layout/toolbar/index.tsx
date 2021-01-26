@@ -5,8 +5,13 @@ import * as React from 'react'
 import DateRangePicker from 'src/components/date_range_picker'
 import Input from 'src/components/input'
 import classnames from 'classnames/bind'
-import {default as Button, ButtonGroup} from 'src/components/button'
-import {getDateRangeFromQuery, addOrUpdateDateRangeInQuery} from 'src/helpers'
+import { default as Button, ButtonGroup } from 'src/components/button'
+
+import { stringToSearch, SearchType, SearchOptions, stringifySearch } from 'src/components/search_query_builder/helpers'
+import Modal from 'src/components/modal'
+import { default as SearchQueryBuilder } from 'src/components/search_query_builder'
+
+import { getDateRangeFromQuery, addOrUpdateDateRangeInQuery, useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
@@ -21,6 +26,14 @@ export default (props: {
   }, [props.query])
 
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const builderModal = useModal<{searchText: string}>(modalProps => (
+    <SearchBuilderModal
+      {...modalProps}
+      onChanged={(result: string) => setQueryInput(result)}
+      operationSlug={"HPCoS"} // TODO
+      searchType={SearchType.EVIDENCE_SEARCH} // TODO
+    />
+  ))
 
   return (
     <div className={cx('root')}>
@@ -38,7 +51,7 @@ export default (props: {
           }
         }}
       />
-
+      <Button onClick={() => builderModal.show({searchText: queryInput})} >Help Me!</Button>
       <DateRangePicker
         range={getDateRangeFromQuery(queryInput)}
         onSelectRange={r => {
@@ -52,6 +65,28 @@ export default (props: {
         <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
         <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
       </ButtonGroup>
+      {renderModals(builderModal)}
     </div>
   )
+}
+
+const SearchBuilderModal = (props: {
+  searchText: string,
+  operationSlug: string,
+  searchType: SearchType,
+  onRequestClose: () => void,
+  onChanged: (resultString: string) => void,
+}) => {
+
+  return <Modal title="Query Builder" onRequestClose={props.onRequestClose}>
+    <SearchQueryBuilder
+      searchOptions={stringToSearch(props.searchText)}
+      onChanged={(result:SearchOptions) => {
+        props.onChanged(stringifySearch(result))
+        props.onRequestClose()
+      }}
+      operationSlug={props.operationSlug}
+      searchType={props.searchType}
+    />
+  </Modal>
 }

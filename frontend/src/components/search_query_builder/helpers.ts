@@ -3,7 +3,7 @@ import * as dateFns from 'date-fns'
 import { parseQuery, getDateRangeFromQuery } from 'src/helpers'
 
 export type SearchOptions = {
-  text: string
+  text: string,
   sortAsc: boolean,
   uuid?: string,
   tags?: Array<string>,
@@ -11,6 +11,11 @@ export type SearchOptions = {
   dateRange?: [Date, Date],
   hasLink?: boolean,
   withEvidenceUuid?: string,
+}
+
+export enum SearchType {
+  EVIDENCE_SEARCH = 0,
+  FINDING_SEARCH = 1,
 }
 
 const quoteText = (tagName: string) => tagName.includes(' ') ? `"${tagName}"` : tagName
