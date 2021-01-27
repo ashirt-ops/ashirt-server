@@ -26,6 +26,7 @@ export default React.forwardRef((props: SharedProps & {
   icon?: string,
   loading?: boolean,
   type?: string,
+  inputClassName?: string,
 }, ref: React.RefObject<HTMLInputElement>) => (
   <WithLabel className={cx('root', props.className)} label={props.label}>
     {props.loading && (
@@ -33,7 +34,7 @@ export default React.forwardRef((props: SharedProps & {
     )}
     <input
       ref={ref}
-      className={cx('input', {'has-icon': props.icon != null, loading: props.loading != null})}
+      className={cx('input', {'has-icon': props.icon != null, loading: props.loading != null}, props.inputClassName)}
       disabled={props.disabled}
       name={props.name}
       onBlur={props.onBlur}
