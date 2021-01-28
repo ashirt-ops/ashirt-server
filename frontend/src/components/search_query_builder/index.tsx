@@ -2,9 +2,13 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import { useForm, useFormField } from 'src/helpers'
 import { SearchOptions, SearchType } from './helpers'
-import { Tag, Evidence } from 'src/global_types'
+import { Tag, Evidence, User } from 'src/global_types'
 import { addOrUpdateDateRangeInQuery, getDateRangeFromQuery, useModal, renderModals } from 'src/helpers'
 import { MaybeDateRange } from 'src/components/date_range_picker/range_picker_helpers'
+import { useWiredData } from 'src/helpers'
+import { listEvidenceCreators } from 'src/services'
+
+import * as dateFns from 'date-fns'
 
 import DateRangePicker from 'src/components/date_range_picker'
 import Input from 'src/components/input'
@@ -12,6 +16,7 @@ import TagChooser from 'src/components/tag_chooser'
 import { default as ComboBox, ComboBoxItem } from 'src/components/combobox'
 import EvidenceChooser from 'src/components/evidence_chooser'
 import ModalForm from 'src/components/modal_form'
+import WithLabel from 'src/components/with_label'
 
 import Button from '../button'
 
@@ -24,71 +29,76 @@ export default (props: {
   searchType: SearchType
   onChanged: (result: SearchOptions) => void
 }) => {
-  const initialEvidence: [Evidence] | [] = props.searchOptions.withEvidenceUuid == null
-    ? []
-    : [uuidToBasicEvidence(props.searchOptions.withEvidenceUuid)]
-
   const descriptionField = useFormField<string>(props.searchOptions.text)
   const tagsField = useFormField<Array<Tag>>([])
-  const [dateRangeStr, setDateRangeStr] = React.useState<string>(
-    dateRangeToStr(toMaybeDateRange(props.searchOptions.dateRange))
+  const [dateRange, setDateRange] = React.useState<MaybeDateRange>(
+    props.searchOptions.dateRange || null
   )
   const sortingField = useFormField<boolean>(props.searchOptions.sortAsc)
   const linkedField = useFormField<boolean | undefined>(props.searchOptions.hasLink)
+  const creatorField = useFormField<string | undefined>(props.searchOptions.operator)
+  const [evidenceUuid, setEvidenceUuid] = React.useState<string | null>(props.searchOptions.withEvidenceUuid || null)
+
+  const wiredCreators = useWiredData<Array<User>>(
+    React.useCallback(() => listEvidenceCreators({ operationSlug: props.operationSlug }), [props.operationSlug])
+  )
 
   const chooseEvidenceModal = useModal<void>(modalProps => (
     <ChooseEvidenceModal
-      initialEvidence={initialEvidence}
+      initialEvidence={evidenceUuid == null ? [] : [uuidToBasicEvidence(evidenceUuid)]}
       operationSlug={props.operationSlug}
-      onChanged={() => { }}
+      onChanged={setEvidenceUuid}
       {...modalProps}
     />
   ))
 
   const onFormSubmit = () => {
-    const rtn: SearchOptions = {
+    props.onChanged({
+      uuid: props.searchOptions.uuid, // forward along the value
       text: descriptionField.value,
+      tags: tagsField.value.map(tag => tag.name),
+      operator: creatorField.value,
+      dateRange: dateRange || undefined,
+      hasLink: linkedField.value,
       sortAsc: sortingField.value,
-    }
-    if (props.searchOptions.uuid) { // just forward it along for now
-      rtn.uuid = props.searchOptions.uuid
-    }
-    if (tagsField.value.length > 0) {
-      rtn.tags = tagsField.value.map(tag => tag.name)
-    }
-    if (dateRangeStr.length > 0) {
-      //  rtn.dateRange = dateRangeStr
-    }
-    if (linkedField) {
-      rtn.hasLink = linkedField.value
-    }
-    // operator ?: string, // TODO
-
-    // withEvidenceUuid ?: string,
-    props.onChanged(rtn)
+      withEvidenceUuid: evidenceUuid || undefined,
+    })
   }
 
   return (
     <div className={cx('root')}>
-      <Input label="Description" {...descriptionField} />
-      <TagChooser label="Include Tags" operationSlug={props.operationSlug} {...tagsField} />
-      <DateRangePicker
-        range={getDateRangeFromQuery(dateRangeStr)}
-        onSelectRange={r => setDateRangeStr(dateRangeToStr(r))}
-      />
-      <ComboBox
-        label="Exists in Finding"
-        options={supportedLinking}
-        {...linkedField}
-      />
-      <ComboBox
-        label="Sort Direction"
-        options={supportedSortDirections}
-        {...sortingField}
-      />
-      <Input label="Includes Evidence (uuid)" />
-      <Button onClick={() => chooseEvidenceModal.show()}>Search for evidence</Button>
-      <Button primary onClick={onFormSubmit}>Submit</Button>
+      {wiredCreators.render(users => {
+        const creators = users.map(user => ({ name: `${user.firstName} ${user.lastName}`, value: user.slug }))
+        return (<>
+          <Input label="Description" {...descriptionField} />
+          <TagChooser label="Include Tags" operationSlug={props.operationSlug} {...tagsField} />
+
+          <WithLabel label="Date Range">
+            <div className={cx('multi-item-row')}>
+              <Input className={cx('flex-input', 'date-range-input')} readOnly
+                value={dateRange ? `${toUSDate(dateRange[0])} to ${toUSDate(dateRange[1])}` : ''} />
+              <DateRangePicker
+                range={dateRange}
+                onSelectRange={r => setDateRange(r)}
+              />
+            </div>
+          </WithLabel>
+
+          <ComboBox label="Sort Direction" options={supportedSortDirections} {...sortingField} />
+          <ComboBox label="Exists in Finding" options={supportedLinking} {...linkedField} />
+          <ComboBox label="Creator" options={[{ name: 'Any', value: undefined }, ...creators]} {...creatorField} />
+
+          <WithLabel label="Includes Evidence (uuid)">
+            <div className={cx('multi-item-row')}>
+              <Input className={cx('flex-input', 'linked-evidence-input')} readOnly
+                value={evidenceUuid || ''} />
+              <Button onClick={() => chooseEvidenceModal.show()}>Browse</Button>
+            </div>
+          </WithLabel>
+
+          <Button primary className={cx('submit-button')} onClick={onFormSubmit}>Submit</Button>
+        </>)
+      })}
       {renderModals(chooseEvidenceModal)}
     </div>
   )
@@ -129,8 +139,7 @@ const supportedLinking: Array<ComboBoxItem<boolean | undefined>> = [
 ]
 
 
-const dateRangeToStr = (r: MaybeDateRange) => addOrUpdateDateRangeInQuery('', r)
-const toMaybeDateRange = (range: [Date, Date] | undefined) => range ? range : null
+const toUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")
 
 const uuidToBasicEvidence = (uuid: string): Evidence => ({
   uuid: uuid,

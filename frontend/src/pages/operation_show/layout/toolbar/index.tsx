@@ -26,11 +26,14 @@ export default (props: {
   }, [props.query])
 
   const inputRef = React.useRef<HTMLInputElement>(null)
-  const builderModal = useModal<{searchText: string}>(modalProps => (
+  const builderModal = useModal<{ searchText: string }>(modalProps => (
     <SearchBuilderModal
       {...modalProps}
-      onChanged={(result: string) => setQueryInput(result)}
-      operationSlug={"HPCoS"} // TODO
+      onChanged={(result: string) => {
+        setQueryInput(result)
+        props.onSearch(result)
+      }}
+      operationSlug={"HPGoF"} // TODO
       searchType={SearchType.EVIDENCE_SEARCH} // TODO
     />
   ))
@@ -51,7 +54,7 @@ export default (props: {
           }
         }}
       />
-      <Button onClick={() => builderModal.show({searchText: queryInput})} >Help Me!</Button>
+      <Button onClick={() => builderModal.show({ searchText: queryInput })} >Help Me!</Button>
       <DateRangePicker
         range={getDateRangeFromQuery(queryInput)}
         onSelectRange={r => {
@@ -81,7 +84,7 @@ const SearchBuilderModal = (props: {
   return <Modal title="Query Builder" onRequestClose={props.onRequestClose}>
     <SearchQueryBuilder
       searchOptions={stringToSearch(props.searchText)}
-      onChanged={(result:SearchOptions) => {
+      onChanged={(result: SearchOptions) => {
         props.onChanged(stringifySearch(result))
         props.onRequestClose()
       }}
