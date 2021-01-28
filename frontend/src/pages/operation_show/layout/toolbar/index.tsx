@@ -2,7 +2,6 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import DateRangePicker from 'src/components/date_range_picker'
 import Input from 'src/components/input'
 import classnames from 'classnames/bind'
 import { default as Button, ButtonGroup } from 'src/components/button'
@@ -63,16 +62,9 @@ export default (props: {
             }}
           />
           <a className={cx('search-help-icon')} onClick={_ => helpModal.show()} title="Search Help"></a>
+          <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Filters"></a>
         </div>
-        <Button onClick={() => builderModal.show({ searchText: queryInput })} >Help Me!</Button>
-        {/* <DateRangePicker
-          range={getDateRangeFromQuery(queryInput)}
-          onSelectRange={r => {
-            const newQuery = addOrUpdateDateRangeInQuery(queryInput, r)
-            setQueryInput(newQuery)
-            props.onSearch(newQuery)
-          }}
-        /> */}
+        <Button onClick={() => builderModal.show({ searchText: queryInput })} >Edit Filters</Button>
 
         <ButtonGroup>
           <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>

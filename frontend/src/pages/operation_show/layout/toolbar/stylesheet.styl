@@ -17,7 +17,7 @@
   width: 100%
 
 .search-input
-  padding-right: 30px
+  padding-right: 60px
 
 p
   margin-bottom: 10px
@@ -56,6 +56,25 @@ em
   position: absolute
   background-image: url('./qmark.svg')
   right: 4px
+  top: 4px
+  width: 25px
+  height: @width
+  background-position: center center
+  background-repeat: no-repeat
+  background-size: 12px
+  transition: all 200ms
+  opacity: 0.4
+  border-radius: 3px
+  cursor: pointer
+
+  &:hover
+    opacity: 1
+    background-color: $background
+
+.edit-filter-icon
+  position: absolute
+  background-image: url('./edit.svg')
+  right: 30px
   top: 4px
   width: 25px
   height: @width
