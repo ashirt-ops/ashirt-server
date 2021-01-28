@@ -26,7 +26,7 @@ export default (props: {
   onChanged: (result: SearchOptions) => void
 }) => {
   const descriptionField = useFormField<string>(props.searchOptions.text)
-  const tagsField = useFormField<Array<Tag>>([])
+  const tagsField = useFormField<Array<Tag>>(props.searchOptions.tags || [])
   const [dateRange, setDateRange] = React.useState<MaybeDateRange>(
     props.searchOptions.dateRange || null
   )
@@ -52,7 +52,7 @@ export default (props: {
     props.onChanged({
       uuid: props.searchOptions.uuid, // forward along the value
       text: descriptionField.value,
-      tags: tagsField.value.map(tag => tag.name),
+      tags: tagsField.value,
       operator: creatorField.value,
       dateRange: dateRange || undefined,
       hasLink: linkedField.value,

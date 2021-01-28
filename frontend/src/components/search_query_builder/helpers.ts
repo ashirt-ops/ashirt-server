@@ -1,12 +1,13 @@
 import * as dateFns from 'date-fns'
 
 import { parseQuery, parseDateRangeString } from 'src/helpers'
+import { Tag } from 'src/global_types'
 
 export type SearchOptions = {
   text: string,
   sortAsc: boolean,
   uuid?: string,
-  tags?: Array<string>,
+  tags?: Array<Tag>,
   operator?: string,
   dateRange?: [Date, Date],
   hasLink?: boolean,
@@ -24,7 +25,7 @@ const dateToRange = (dates: [Date, Date]) => {
 export const stringifySearch = (searchOpts: SearchOptions) => {
   return ([
     searchOpts.text,
-    searchOpts.tags ? searchOpts.tags.map(tag => `tag:${quoteText(tag)}`).join(' ') : '',
+    searchOpts.tags ? searchOpts.tags.map(tag => `tag:${quoteText(tag.name)}`).join(' ') : '',
     searchOpts.operator ? `operator:${searchOpts.operator}` : '',
     searchOpts.dateRange ? `range:${dateToRange(searchOpts.dateRange)}` : '',
     (searchOpts.hasLink != undefined) ? `linked:${searchOpts.hasLink}` : '',
@@ -36,7 +37,7 @@ export const stringifySearch = (searchOpts: SearchOptions) => {
     .join(' ')
 }
 
-export const stringToSearch = (searchText: string) => {
+export const stringToSearch = (searchText: string, allTags: Array<Tag> = []) => {
   const tokens: { [key: string]: Array<string> } = parseQuery(searchText)
 
   const opts: SearchOptions = {
@@ -49,7 +50,9 @@ export const stringToSearch = (searchText: string) => {
       opts.text = values.map(item => quoteText(item)).join(' ')
     }
     else if (key == 'tag') {
-      opts.tags = values
+      opts.tags = values.
+        map(tagName => allTags.find(tag => tag.name == tagName)).
+        filter(isNotUndefined)
     }
     else if (key == 'operator') {
       opts.operator = values[0]
@@ -78,4 +81,8 @@ export const stringToSearch = (searchText: string) => {
   })
 
   return opts
+}
+
+function isNotUndefined<T>(t: T | undefined): t is T {
+  return t != undefined
 }

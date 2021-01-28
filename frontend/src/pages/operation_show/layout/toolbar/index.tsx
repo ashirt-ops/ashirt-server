@@ -10,8 +10,9 @@ import { stringToSearch, SearchOptions, stringifySearch } from 'src/components/s
 import Modal from 'src/components/modal'
 import { default as SearchQueryBuilder } from 'src/components/search_query_builder'
 
-import { useModal, renderModals } from 'src/helpers'
-import { ViewName } from 'src/global_types'
+import { useModal, renderModals, useWiredData } from 'src/helpers'
+import { Tag, ViewName } from 'src/global_types'
+import { getTags } from 'src/services'
 const cx = classnames.bind(require('./stylesheet'))
 
 
@@ -61,7 +62,7 @@ export default (props: {
               }
             }}
           />
-          <a className={cx('search-help-icon')} onClick={_ => helpModal.show()} title="Search Help"></a>
+          <a className={cx('search-help-icon')} onClick={() => helpModal.show()} title="Search Help"></a>
           <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Filters"></a>
         </div>
         <Button onClick={() => builderModal.show({ searchText: queryInput })} >Edit Filters</Button>
@@ -83,18 +84,25 @@ const SearchBuilderModal = (props: {
   onRequestClose: () => void,
   onChanged: (resultString: string) => void,
 }) => {
+  const wiredTags = useWiredData<Array<Tag>>(
+    React.useCallback(() => getTags({ operationSlug: props.operationSlug }), [props.operationSlug])
+  )
 
-  return <Modal title="Query Builder" onRequestClose={props.onRequestClose}>
-    <SearchQueryBuilder
-      searchOptions={stringToSearch(props.searchText)}
-      onChanged={(result: SearchOptions) => {
-        props.onChanged(stringifySearch(result))
-        props.onRequestClose()
-      }}
-      operationSlug={props.operationSlug}
-      viewName={props.viewName}
-    />
-  </Modal>
+  return (<>
+    {wiredTags.render(tags => (
+      <Modal title="Query Builder" onRequestClose={props.onRequestClose}>
+        <SearchQueryBuilder
+          searchOptions={stringToSearch(props.searchText, tags)}
+          onChanged={(result: SearchOptions) => {
+            props.onChanged(stringifySearch(result))
+            props.onRequestClose()
+          }}
+          operationSlug={props.operationSlug}
+          viewName={props.viewName}
+        />
+      </Modal>
+    ))}
+  </>)
 }
 
 const CodeSnippet = (props: {
