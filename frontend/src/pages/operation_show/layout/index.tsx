@@ -7,7 +7,7 @@ import Toolbar from './toolbar'
 import classnames from 'classnames/bind'
 import {CreateEvidenceModal} from '../evidence_modals'
 import {CreateFindingModal} from '../finding_modals'
-import {ViewName} from '../types'
+import {ViewName} from 'src/global_types'
 import {useModal, renderModals} from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 

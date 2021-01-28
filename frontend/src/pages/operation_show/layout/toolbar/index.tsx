@@ -12,7 +12,7 @@ import Modal from 'src/components/modal'
 import { default as SearchQueryBuilder } from 'src/components/search_query_builder'
 
 import { useModal, renderModals } from 'src/helpers'
-import { ViewName } from '../../types'
+import { ViewName } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
 
@@ -22,7 +22,7 @@ export default (props: {
   onSearch: (query: string) => void,
   query: string,
   operationSlug: string,
-  viewName: ViewName
+  viewName: ViewName,
 }) => {
   const [queryInput, setQueryInput] = React.useState<string>("")
   const helpModal = useModal<void>(modalProps => <SearchHelpModal {...modalProps} />)

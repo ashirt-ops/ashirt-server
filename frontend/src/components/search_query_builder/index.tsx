@@ -4,7 +4,7 @@ import * as dateFns from 'date-fns'
 import { useForm, useFormField, useModal, renderModals, useWiredData } from 'src/helpers'
 import { listEvidenceCreators } from 'src/services'
 import { SearchOptions } from './helpers'
-import { Tag, Evidence, User } from 'src/global_types'
+import { Evidence, Tag, User, ViewName } from 'src/global_types'
 import { MaybeDateRange } from 'src/components/date_range_picker/range_picker_helpers'
 
 import Button from 'src/components/button'
@@ -15,7 +15,6 @@ import Input from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
 import TagChooser from 'src/components/tag_chooser'
 import WithLabel from 'src/components/with_label'
-import { ViewName } from 'src/pages/operation_show/types'
 
 const cx = classnames.bind(require('./stylesheet'))
 
