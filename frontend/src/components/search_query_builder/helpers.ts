@@ -1,6 +1,6 @@
 import * as dateFns from 'date-fns'
 
-import { parseQuery, getDateRangeFromQuery } from 'src/helpers'
+import { parseQuery, parseDateRangeString } from 'src/helpers'
 
 export type SearchOptions = {
   text: string,
@@ -60,7 +60,7 @@ export const stringToSearch = (searchText: string) => {
       opts.operator = values[0]
     }
     else if (key == 'range') {
-      const range = getDateRangeFromQuery(values[0])
+      const range = parseDateRangeString(values[0])
       if (range) {
         opts.dateRange = range
       }
