@@ -1,24 +1,21 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useForm, useFormField } from 'src/helpers'
-import { SearchOptions, SearchType } from './helpers'
-import { Tag, Evidence, User } from 'src/global_types'
-import { addOrUpdateDateRangeInQuery, getDateRangeFromQuery, useModal, renderModals } from 'src/helpers'
-import { MaybeDateRange } from 'src/components/date_range_picker/range_picker_helpers'
-import { useWiredData } from 'src/helpers'
-import { listEvidenceCreators } from 'src/services'
-
 import * as dateFns from 'date-fns'
+import { useForm, useFormField, useModal, renderModals, useWiredData } from 'src/helpers'
+import { listEvidenceCreators } from 'src/services'
+import { SearchOptions } from './helpers'
+import { Tag, Evidence, User } from 'src/global_types'
+import { MaybeDateRange } from 'src/components/date_range_picker/range_picker_helpers'
 
-import DateRangePicker from 'src/components/date_range_picker'
-import Input from 'src/components/input'
-import TagChooser from 'src/components/tag_chooser'
+import Button from 'src/components/button'
 import { default as ComboBox, ComboBoxItem } from 'src/components/combobox'
+import DateRangePicker from 'src/components/date_range_picker'
 import EvidenceChooser from 'src/components/evidence_chooser'
+import Input from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
+import TagChooser from 'src/components/tag_chooser'
 import WithLabel from 'src/components/with_label'
-
-import Button from '../button'
+import { ViewName } from 'src/pages/operation_show/types'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -26,7 +23,7 @@ const cx = classnames.bind(require('./stylesheet'))
 export default (props: {
   operationSlug: string
   searchOptions: SearchOptions
-  searchType: SearchType
+  viewName: ViewName
   onChanged: (result: SearchOptions) => void
 }) => {
   const descriptionField = useFormField<string>(props.searchOptions.text)
@@ -85,16 +82,18 @@ export default (props: {
           </WithLabel>
 
           <ComboBox label="Sort Direction" options={supportedSortDirections} {...sortingField} />
-          <ComboBox label="Exists in Finding" options={supportedLinking} {...linkedField} />
           <ComboBox label="Creator" options={[{ name: 'Any', value: undefined }, ...creators]} {...creatorField} />
 
-          <WithLabel label="Includes Evidence (uuid)">
-            <div className={cx('multi-item-row')}>
-              <Input className={cx('flex-input', 'linked-evidence-input')} readOnly
-                value={evidenceUuid || ''} />
-              <Button onClick={() => chooseEvidenceModal.show()}>Browse</Button>
-            </div>
-          </WithLabel>
+          { props.viewName == 'evidence'
+            ? <ComboBox label="Exists in Finding" options={supportedLinking} {...linkedField} />
+            : <WithLabel label="Includes Evidence (uuid)">
+              <div className={cx('multi-item-row')}>
+                <Input className={cx('flex-input', 'linked-evidence-input')} readOnly
+                  value={evidenceUuid || ''} />
+                <Button onClick={() => chooseEvidenceModal.show()}>Browse</Button>
+              </div>
+            </WithLabel>
+          }
 
           <Button primary className={cx('submit-button')} onClick={onFormSubmit}>Submit</Button>
         </>)

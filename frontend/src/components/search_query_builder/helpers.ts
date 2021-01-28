@@ -13,11 +13,6 @@ export type SearchOptions = {
   withEvidenceUuid?: string,
 }
 
-export enum SearchType {
-  EVIDENCE_SEARCH = 0,
-  FINDING_SEARCH = 1,
-}
-
 const quoteText = (tagName: string) => tagName.includes(' ') ? `"${tagName}"` : tagName
 
 const dateToRange = (dates: [Date, Date]) => {

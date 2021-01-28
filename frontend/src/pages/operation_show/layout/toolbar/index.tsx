@@ -7,12 +7,12 @@ import Input from 'src/components/input'
 import classnames from 'classnames/bind'
 import { default as Button, ButtonGroup } from 'src/components/button'
 
-import { stringToSearch, SearchType, SearchOptions, stringifySearch } from 'src/components/search_query_builder/helpers'
+import { stringToSearch, SearchOptions, stringifySearch } from 'src/components/search_query_builder/helpers'
 import Modal from 'src/components/modal'
 import { default as SearchQueryBuilder } from 'src/components/search_query_builder'
 
 import { useModal, renderModals } from 'src/helpers'
-import { getDateRangeFromQuery, addOrUpdateDateRangeInQuery, useModal, renderModals } from 'src/helpers'
+import { ViewName } from '../../types'
 const cx = classnames.bind(require('./stylesheet'))
 
 
@@ -39,7 +39,7 @@ export default (props: {
         props.onSearch(result)
       }}
       operationSlug={props.operationSlug}
-      searchType={props.view == 'evidence' ? SearchOptions.EVIDENCE_SEARCH : SearchOptions.FINDING}
+      viewName={props.viewName}
     />
   ))
 
@@ -65,14 +65,14 @@ export default (props: {
           <a className={cx('search-help-icon')} onClick={_ => helpModal.show()} title="Search Help"></a>
         </div>
         <Button onClick={() => builderModal.show({ searchText: queryInput })} >Help Me!</Button>
-        <DateRangePicker
+        {/* <DateRangePicker
           range={getDateRangeFromQuery(queryInput)}
           onSelectRange={r => {
             const newQuery = addOrUpdateDateRangeInQuery(queryInput, r)
             setQueryInput(newQuery)
             props.onSearch(newQuery)
           }}
-        />
+        /> */}
 
         <ButtonGroup>
           <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
@@ -87,7 +87,7 @@ export default (props: {
 const SearchBuilderModal = (props: {
   searchText: string,
   operationSlug: string,
-  searchType: SearchType,
+  viewName: ViewName,
   onRequestClose: () => void,
   onChanged: (resultString: string) => void,
 }) => {
@@ -100,7 +100,7 @@ const SearchBuilderModal = (props: {
         props.onRequestClose()
       }}
       operationSlug={props.operationSlug}
-      searchType={props.searchType}
+      viewName={props.viewName}
     />
   </Modal>
 }
