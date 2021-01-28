@@ -11,6 +11,7 @@ import { stringToSearch, SearchType, SearchOptions, stringifySearch } from 'src/
 import Modal from 'src/components/modal'
 import { default as SearchQueryBuilder } from 'src/components/search_query_builder'
 
+import { useModal, renderModals } from 'src/helpers'
 import { getDateRangeFromQuery, addOrUpdateDateRangeInQuery, useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -20,6 +21,8 @@ export default (props: {
   onRequestCreateEvidence: () => void,
   onSearch: (query: string) => void,
   query: string,
+  operationSlug: string,
+  viewName: ViewName
 }) => {
   const [queryInput, setQueryInput] = React.useState<string>("")
   const helpModal = useModal<void>(modalProps => <SearchHelpModal {...modalProps} />)
@@ -35,8 +38,8 @@ export default (props: {
         setQueryInput(result)
         props.onSearch(result)
       }}
-      operationSlug={"HPGoF"} // TODO
-      searchType={SearchType.EVIDENCE_SEARCH} // TODO
+      operationSlug={props.operationSlug}
+      searchType={props.view == 'evidence' ? SearchOptions.EVIDENCE_SEARCH : SearchOptions.FINDING}
     />
   ))
 

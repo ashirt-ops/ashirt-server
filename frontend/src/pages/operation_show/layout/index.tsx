@@ -37,6 +37,8 @@ export default (props: {
           onRequestCreateEvidence={() => createEvidenceModal.show()}
           onSearch={query => props.onNavigate(props.view, query)}
           query={props.query}
+          operationSlug={props.operationSlug}
+          viewName={props.view}
         />
       </div>
       <div className={cx('sidebar')}>
