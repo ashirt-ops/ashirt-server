@@ -76,7 +76,7 @@ export default (props: {
           <WithLabel label="Date Range">
             <div className={cx('multi-item-row')}>
               <Input className={cx('flex-input', 'date-range-input')} readOnly
-                value={dateRange ? `${toUSDate(dateRange[0])} to ${toUSDate(dateRange[1])}` : ''} />
+                value={dateRange ? `${toEnUSDate(dateRange[0])} to ${toEnUSDate(dateRange[1])}` : ''} />
               <DateRangePicker
                 range={dateRange}
                 onSelectRange={r => setDateRange(r)}
@@ -126,7 +126,6 @@ const ChooseEvidenceModal = (props: {
   )
 }
 
-
 const supportedSortDirections: Array<ComboBoxItem<boolean>> = [
   { name: "Descending (default)", value: false },
   { name: "Ascending", value: true },
@@ -138,8 +137,7 @@ const supportedLinking: Array<ComboBoxItem<boolean | undefined>> = [
   { name: "Only Non-included", value: false },
 ]
 
-
-const toUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")
+const toEnUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")
 
 const uuidToBasicEvidence = (uuid: string): Evidence => ({
   uuid: uuid,
