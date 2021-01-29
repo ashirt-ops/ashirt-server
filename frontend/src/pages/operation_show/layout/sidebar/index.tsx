@@ -91,7 +91,7 @@ const QueryList = (props: {
     <NewQueryModal {...modalProps} operationSlug={props.operationSlug} query={props.currentQuery} type={props.type} onCreated={onCreated} />
   ))
   const editQueryModal = useModal<{savedQuery: SavedQuery}>(modalProps => (
-    <EditQueryModal {...modalProps} operationSlug={props.operationSlug} onEdited={onEdited} />
+    <EditQueryModal {...modalProps} operationSlug={props.operationSlug} onEdited={onEdited} view={props.type}/>
   ))
   const deleteQueryModal = useModal<{savedQuery: SavedQuery}>(modalProps => (
     <DeleteQueryModal {...modalProps} operationSlug={props.operationSlug} onDeleted={onDeleted} />

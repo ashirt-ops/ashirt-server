@@ -41,6 +41,7 @@ export const EditQueryModal = (props: {
   onRequestClose: () => void,
   operationSlug: string,
   savedQuery: SavedQuery,
+  view: ViewName,
 }) => {
   const nameField = useFormField(props.savedQuery.name)
   const queryField = useFormField(props.savedQuery.query)
