@@ -8,7 +8,7 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 
 import { stringToSearch, SearchOptions, stringifySearch } from 'src/components/search_query_builder/helpers'
 import Modal from 'src/components/modal'
-import { default as SearchQueryBuilder } from 'src/components/search_query_builder'
+import SearchQueryBuilder from 'src/components/search_query_builder'
 
 import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { Tag, ViewName } from 'src/global_types'
@@ -63,7 +63,7 @@ export default (props: {
             }}
           />
           <a className={cx('search-help-icon')} onClick={() => helpModal.show()} title="Search Help"></a>
-          <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Filters"></a>
+          <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Query Filters"></a>
         </div>
 
         <ButtonGroup>
