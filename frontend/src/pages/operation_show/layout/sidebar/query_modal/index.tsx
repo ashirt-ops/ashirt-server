@@ -2,11 +2,13 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import Input from  'src/components/input'
+import Input from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
-import {SavedQuery} from 'src/global_types'
-import {saveQuery, updateSavedQuery, deleteSavedQuery} from 'src/services'
-import {useForm, useFormField} from 'src/helpers'
+import { FilterFields } from 'src/components/search_query_builder'
+import { SavedQuery, Tag, User, ViewName } from 'src/global_types'
+import { saveQuery, updateSavedQuery, deleteSavedQuery, listEvidenceCreators, getTags } from 'src/services'
+import { useForm, useFormField, useWiredData } from 'src/helpers'
+import { stringToSearch, SearchOptions, stringifySearch } from 'src/components/search_query_builder/helpers'
 
 export const NewQueryModal = (props: {
   onRequestClose: () => void,
@@ -44,25 +46,45 @@ export const EditQueryModal = (props: {
   view: ViewName,
 }) => {
   const nameField = useFormField(props.savedQuery.name)
-  const queryField = useFormField(props.savedQuery.query)
+  const [searchOptions, setSearchOptions] = React.useState<SearchOptions | null>()
+
+  const editedQueryOrOriginal = () => searchOptions ? stringifySearch(searchOptions) : props.savedQuery.query
+
   const editQueryForm = useForm({
-    fields: [nameField, queryField],
+    fields: [nameField],
     onSuccess: () => {
       props.onRequestClose()
-      props.onEdited(props.savedQuery, {...props.savedQuery, name: nameField.value, query: queryField.value})
+      props.onEdited(props.savedQuery,
+        { ...props.savedQuery, name: nameField.value, query: editedQueryOrOriginal() })
     },
     handleSubmit: () => updateSavedQuery({
       operationSlug: props.operationSlug,
       queryId: props.savedQuery.id,
       name: nameField.value,
-      query: queryField.value,
+      query: editedQueryOrOriginal()
     }),
   })
+
+  const wiredData = useWiredData<[Array<Tag>, Array<User>]>(
+    React.useCallback(() =>
+      Promise.all([
+        getTags({ operationSlug: props.operationSlug }),
+        listEvidenceCreators({ operationSlug: props.operationSlug }),
+      ]), [props.operationSlug]
+    ))
 
   return (
     <ModalForm title="Update Saved Query" submitText="Save" onRequestClose={props.onRequestClose} {...editQueryForm}>
       <Input label="Name" {...nameField} />
-      <Input label="Query" {...queryField} />
+      {wiredData.render(([tags, users]) => (
+        <FilterFields
+          operationSlug={props.operationSlug}
+          viewName={props.view}
+          allCreators={users}
+          searchOptions={stringToSearch(props.savedQuery.query, tags)}
+          onChanged={setSearchOptions}
+        />
+      ))}
     </ModalForm>
   )
 }
