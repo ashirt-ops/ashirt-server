@@ -23,84 +23,129 @@ export default (props: {
   operationSlug: string
   searchOptions: SearchOptions
   viewName: ViewName
-  onChanged: (result: SearchOptions) => void
+  onChanged: (result: SearchOptions) => void,
+  buttonName?: string
 }) => {
-  const descriptionField = useFormField<string>(props.searchOptions.text)
-  const tagsField = useFormField<Array<Tag>>(props.searchOptions.tags || [])
-  const [dateRange, setDateRange] = React.useState<MaybeDateRange>(
-    props.searchOptions.dateRange || null
-  )
-  const sortingField = useFormField<boolean>(props.searchOptions.sortAsc)
-  const linkedField = useFormField<boolean | undefined>(props.searchOptions.hasLink)
-  const creatorField = useFormField<string | undefined>(props.searchOptions.operator)
-  const [evidenceUuid, setEvidenceUuid] = React.useState<string | null>(props.searchOptions.withEvidenceUuid || null)
+  const [searchOptions, setSearchOptions] = React.useState<SearchOptions>(props.searchOptions)
 
   const wiredCreators = useWiredData<Array<User>>(
     React.useCallback(() => listEvidenceCreators({ operationSlug: props.operationSlug }), [props.operationSlug])
   )
 
-  const chooseEvidenceModal = useModal<void>(modalProps => (
-    <ChooseEvidenceModal
-      initialEvidence={evidenceUuid == null ? [] : [uuidToBasicEvidence(evidenceUuid)]}
-      operationSlug={props.operationSlug}
-      onChanged={setEvidenceUuid}
-      {...modalProps}
-    />
-  ))
-
   const onFormSubmit = () => {
-    props.onChanged({
-      uuid: props.searchOptions.uuid, // forward along the value
-      text: descriptionField.value,
-      tags: tagsField.value,
-      operator: creatorField.value,
-      dateRange: dateRange || undefined,
-      hasLink: linkedField.value,
-      sortAsc: sortingField.value,
-      withEvidenceUuid: evidenceUuid || undefined,
-    })
+    props.onChanged(searchOptions)
   }
 
   return (
     <div className={cx('root')}>
-      {wiredCreators.render(users => {
-        const creators = users.map(user => ({ name: `${user.firstName} ${user.lastName}`, value: user.slug }))
-        return (<>
-          <Input label="Description" {...descriptionField} />
-          <TagChooser label="Include Tags" operationSlug={props.operationSlug} {...tagsField} />
+      {wiredCreators.render(users => (<>
+        <FilterFields
+          operationSlug={props.operationSlug}
+          viewName={props.viewName}
+          searchOptions={searchOptions}
+          allCreators={users}
+          onChanged={options => setSearchOptions({ ...options })}
+        />
+        <Button primary className={cx('submit-button')} onClick={onFormSubmit}>{props.buttonName || "Submit"}</Button>
+      </>)
+      )}
+    </div>
+  )
+}
 
-          <WithLabel label="Date Range">
-            <div className={cx('multi-item-row')}>
-              <Input className={cx('flex-input', 'date-range-input')} readOnly
-                value={dateRange ? `${toEnUSDate(dateRange[0])} to ${toEnUSDate(dateRange[1])}` : ''} />
-              <DateRangePicker
-                range={dateRange}
-                onSelectRange={r => setDateRange(r)}
-              />
-            </div>
-          </WithLabel>
+export const FilterFields = (props: {
+  operationSlug: string
+  viewName: ViewName
+  searchOptions: SearchOptions
+  onChanged: (result: SearchOptions) => void
+  allCreators: Array<User>
+}) => {
 
-          <ComboBox label="Sort Direction" options={supportedSortDirections} {...sortingField} />
-          <ComboBox label="Creator" options={[{ name: 'Any', value: undefined }, ...creators]} {...creatorField} />
+  const dateRange = props.searchOptions.dateRange
 
-          { props.viewName == 'evidence'
-            ? <ComboBox label="Exists in Finding" options={supportedLinking} {...linkedField} />
-            : <WithLabel label="Includes Evidence (uuid)">
-              <div className={cx('multi-item-row')}>
-                <Input className={cx('flex-input', 'linked-evidence-input')} readOnly
-                  value={evidenceUuid || ''} />
-                <Button onClick={() => chooseEvidenceModal.show()}>Browse</Button>
-              </div>
-            </WithLabel>
-          }
+  const allCreators = props.allCreators.map(user => ({ name: `${user.firstName} ${user.lastName}`, value: user.slug }))
 
-          <Button primary className={cx('submit-button')} onClick={onFormSubmit}>Submit</Button>
-        </>)
-      })}
+  const descriptionProps = {
+    value: props.searchOptions.text,
+    onChange: (text: string) => props.onChanged({ ...props.searchOptions, text })
+  }
+  const tagProps = {
+    operationSlug: props.operationSlug,
+    value: props.searchOptions.tags || [],
+    onChange: (tags: Array<Tag>) => props.onChanged({ ...props.searchOptions, tags }),
+  }
+  const dateProps = {
+    value: dateRange ? `${toEnUSDate(dateRange[0])} to ${toEnUSDate(dateRange[1])}` : '',
+    range: dateRange || null,
+    onSelectRange: (r: MaybeDateRange) => props.onChanged({ ...props.searchOptions, dateRange: r || undefined })
+  }
+  const sortProps = {
+    options: supportedSortDirections,
+    value: props.searchOptions.sortAsc,
+    onChange: (sortAsc: boolean) => props.onChanged({ ...props.searchOptions, sortAsc }),
+  }
+  const creatorProps = {
+    options: [{ name: 'Any', value: undefined }, ...allCreators],
+    value: props.searchOptions.operator,
+    onChange: (creator?: string) => props.onChanged({ ...props.searchOptions, operator: creator }),
+  }
+  const linkedProps = {
+    options: supportedLinking,
+    value: props.searchOptions.hasLink,
+    onChange: (hasLink?: boolean) => props.onChanged({ ...props.searchOptions, hasLink }),
+  }
+
+  const chooseEvidenceModal = useModal<void>(modalProps => (
+    <ChooseEvidenceModal
+      initialEvidence={props.searchOptions.withEvidenceUuid == null
+        ? []
+        : [uuidToBasicEvidence(props.searchOptions.withEvidenceUuid)]
+      }
+      operationSlug={props.operationSlug}
+      onChanged={uuid => props.onChanged({ ...props.searchOptions, withEvidenceUuid: uuid })}
+      {...modalProps}
+    />
+  ))
+
+  return (
+    <div className={cx('root')}>
+      <Input label="Description" {...descriptionProps} />
+      <TagChooser label="Include Tags" {...tagProps} />
+
+      <InputWithStuff label="Date Range" inputValue={dateProps.value} className={'date-range-input'}>
+        <DateRangePicker {...dateProps} />
+      </InputWithStuff>
+
+      <ComboBox label="Sort Direction" {...sortProps} />
+      <ComboBox label="Creator" {...creatorProps} />
+
+      { props.viewName == 'evidence'
+        ? <ComboBox label="Exists in Finding" {...linkedProps} />
+        : (
+          <InputWithStuff label="Includes Evidence (uuid)" className={'linked-evidence-input'}
+            inputValue={props.searchOptions.withEvidenceUuid || ''}>
+            <Button onClick={() => chooseEvidenceModal.show()}>Browse</Button>
+          </InputWithStuff>
+        )
+      }
       {renderModals(chooseEvidenceModal)}
     </div>
   )
 }
+
+const InputWithStuff = (props: {
+  label: string,
+  inputValue: string,
+  className?: string,
+  children: React.ReactNode,
+}) => (
+  <WithLabel label={props.label}>
+    <div className={cx('multi-item-row')}>
+      <Input readOnly className={cx('flex-input', props.className)} value={props.inputValue} />
+      {props.children}
+    </div>
+  </WithLabel>
+)
 
 const ChooseEvidenceModal = (props: {
   initialEvidence: [Evidence] | [],
