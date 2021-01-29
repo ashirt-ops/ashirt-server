@@ -65,7 +65,6 @@ export default (props: {
           <a className={cx('search-help-icon')} onClick={() => helpModal.show()} title="Search Help"></a>
           <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Filters"></a>
         </div>
-        <Button onClick={() => builderModal.show({ searchText: queryInput })} >Edit Filters</Button>
 
         <ButtonGroup>
           <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
