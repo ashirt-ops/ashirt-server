@@ -46,7 +46,7 @@ export const EditQueryModal = (props: {
   view: ViewName,
 }) => {
   const nameField = useFormField(props.savedQuery.name)
-  const [searchOptions, setSearchOptions] = React.useState<SearchOptions | null>()
+  const [searchOptions, setSearchOptions] = React.useState<SearchOptions | null>(null)
 
   const editedQueryOrOriginal = () => searchOptions ? stringifySearch(searchOptions) : props.savedQuery.query
 
@@ -81,7 +81,7 @@ export const EditQueryModal = (props: {
           operationSlug={props.operationSlug}
           viewName={props.view}
           allCreators={users}
-          searchOptions={stringToSearch(props.savedQuery.query, tags)}
+          searchOptions={searchOptions || stringToSearch(props.savedQuery.query, tags)}
           onChanged={setSearchOptions}
         />
       ))}
