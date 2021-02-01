@@ -45,6 +45,6 @@ export default (props: {
   onSelectRange: (r: MaybeDateRange) => void,
 }) => (
   <ClickPopover content={<DropDown {...props} />}>
-    <Button className={cx('open-button')} icon={require('./icon.svg')} title={stringifyRange(props.range)} />
+    <Button doNotSubmit className={cx('open-button')} icon={require('./icon.svg')} title={stringifyRange(props.range)} />
   </ClickPopover>
 )
