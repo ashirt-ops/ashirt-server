@@ -12,7 +12,7 @@ import { default as ComboBox, ComboBoxItem } from 'src/components/combobox'
 import DateRangePicker from 'src/components/date_range_picker'
 import EvidenceChooser from 'src/components/evidence_chooser'
 import Input from 'src/components/input'
-import ModalForm from 'src/components/modal_form'
+import Modal from 'src/components/modal'
 import TagChooser from 'src/components/tag_chooser'
 import WithLabel from 'src/components/with_label'
 
@@ -124,7 +124,7 @@ export const FilterFields = (props: {
         : (
           <InputWithStuff label="Includes Evidence (uuid)" className={'linked-evidence-input'}
             inputValue={props.searchOptions.withEvidenceUuid || ''}>
-            <Button onClick={() => chooseEvidenceModal.show()}>Browse</Button>
+            <Button doNotSubmit onClick={() => chooseEvidenceModal.show()}>Browse</Button>
           </InputWithStuff>
         )
       }
@@ -154,18 +154,15 @@ const ChooseEvidenceModal = (props: {
   operationSlug: string,
 }) => {
   const evidenceField = useFormField<Array<Evidence>>(props.initialEvidence)
-  const formComponentProps = useForm({
-    fields: [evidenceField],
-    onSuccess: () => { props.onChanged(evidenceField.value.length > 0 ? evidenceField.value[0].uuid : ''); props.onRequestClose() },
-    handleSubmit: () => {
-      return Promise.resolve()
-    },
-  })
 
   return (
-    <ModalForm title="Search for evidence" submitText="Select" onRequestClose={props.onRequestClose} {...formComponentProps}>
+    <Modal title="Search for evidence" onRequestClose={props.onRequestClose}>
       <EvidenceChooser operationSlug={props.operationSlug} {...evidenceField} />
-    </ModalForm>
+      <Button primary className={cx('submit-button')} onClick={() => {
+        props.onChanged(evidenceField.value.length > 0 ? evidenceField.value[0].uuid : '')
+        props.onRequestClose()
+      }}>Select</Button>
+    </Modal>
   )
 }
 
