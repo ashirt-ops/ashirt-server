@@ -6,7 +6,7 @@ import * as React from 'react'
 import Button from 'src/components/button'
 import DayPicker from 'react-day-picker'
 import classnames from 'classnames/bind'
-import {ClickPopover} from 'src/components/popover'
+import Popover from 'src/components/popover'
 import {subDays, startOfMonth, endOfMonth} from 'date-fns'
 import {DateRange, MaybeDateRange, stringifyRange, addDateToRange, lengthenRangeToDayBoundaries} from './range_picker_helpers'
 const cx = classnames.bind(require('./stylesheet'))
@@ -21,6 +21,7 @@ const presetRanges: {[name: string]: DateRange} = {
 const DropDown = (props: {
   range: MaybeDateRange,
   onSelectRange: (newRange: MaybeDateRange) => void,
+  onButtonClick: () => void
 }) => (
   <div className={cx('popup')}>
     <div className={cx('shortcuts')}>
@@ -30,21 +31,29 @@ const DropDown = (props: {
         <button key={rangeName} onClick={() => props.onSelectRange(presetRanges[rangeName])}>{rangeName}</button>
       ))}
     </div>
-    <DayPicker
-      className={cx('day-picker')}
-      numberOfMonths={2}
-      selectedDays={props.range != null ? {from: props.range[0], to: props.range[1]} : undefined}
-      onDayClick={d => props.onSelectRange(addDateToRange(d, props.range))}
-      modifiers={props.range != null ? {start: props.range[0], end: props.range[1]} : undefined}
-    />
+    <div className={cx('day-picker-area')}>
+      <DayPicker
+        className={cx('day-picker')}
+        numberOfMonths={2}
+        selectedDays={props.range != null ? {from: props.range[0], to: props.range[1]} : undefined}
+        onDayClick={d => props.onSelectRange(addDateToRange(d, props.range))}
+        modifiers={props.range != null ? {start: props.range[0], end: props.range[1]} : undefined}
+      />
+      <Button primary className={cx('close-button')} onClick={props.onButtonClick} >Close</Button>
+    </div>
   </div>
 )
 
 export default (props: {
   range: MaybeDateRange,
   onSelectRange: (r: MaybeDateRange) => void,
-}) => (
-  <ClickPopover content={<DropDown {...props} />}>
-    <Button doNotSubmit className={cx('open-button')} icon={require('./icon.svg')} title={stringifyRange(props.range)} />
-  </ClickPopover>
-)
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  return (
+    <Popover isOpen={isOpen} onClick={() => setIsOpen(true)} onRequestClose={() => setIsOpen(false)}
+      content={<DropDown onButtonClick={() => setIsOpen(false)} {...props} />}>
+      <Button doNotSubmit className={cx('open-button')} icon={require('./icon.svg')} title={stringifyRange(props.range)} />
+    </Popover>
+  )
+}
