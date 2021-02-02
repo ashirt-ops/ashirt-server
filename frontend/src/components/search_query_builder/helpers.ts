@@ -76,7 +76,7 @@ export const stringToSearch = (searchText: string, allTags: Array<Tag> = []) => 
       opts.uuid = values[0]
     }
     else if (key == 'with-evidence') {
-      opts.uuid = values[0]
+      opts.withEvidenceUuid = values[0]
     }
     else if (key == 'sort') {
       opts.sortAsc = ['asc', 'ascending', 'chronological'].includes(values[0])
