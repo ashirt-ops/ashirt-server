@@ -115,9 +115,9 @@ export const FilterFields = (props: {
       <Input label="Description" {...descriptionProps} />
       <TagChooser label="Include Tags" {...tagProps} />
 
-      <InputWithStuff label="Date Range" inputValue={dateProps.value} className={'date-range-input'}>
+      <SplitInputRow label="Date Range" inputValue={dateProps.value} className={'date-range-input'}>
         <DateRangePicker {...dateProps} />
-      </InputWithStuff>
+      </SplitInputRow>
 
       <ComboBox label="Sort Direction" {...sortProps} />
       <ComboBox label="Creator" {...creatorProps} />
@@ -125,10 +125,10 @@ export const FilterFields = (props: {
       { props.viewName == 'evidence'
         ? <ComboBox label="Exists in Finding" {...linkedProps} />
         : (
-          <InputWithStuff label="Includes Evidence (uuid)" className={'linked-evidence-input'}
+          <SplitInputRow label="Includes Evidence (uuid)" className={'linked-evidence-input'}
             inputValue={props.searchOptions.withEvidenceUuid || ''}>
             <Button doNotSubmit onClick={() => chooseEvidenceModal.show()}>Browse</Button>
-          </InputWithStuff>
+          </SplitInputRow>
         )
       }
       {renderModals(chooseEvidenceModal)}
@@ -136,7 +136,7 @@ export const FilterFields = (props: {
   )
 }
 
-const InputWithStuff = (props: {
+const SplitInputRow = (props: {
   label: string,
   inputValue: string,
   className?: string,
