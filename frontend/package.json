@@ -57,6 +57,6 @@
     "react-dropzone": "^11.2.4",
     "react-markdown": "^5.0.3",
     "react-router-dom": "^5.1.2",
-    "xterm": "^4.3.0"
+    "xterm": "^4.10.0"
   }
 }
