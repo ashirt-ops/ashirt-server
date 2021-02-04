@@ -45,6 +45,7 @@ export const backendDataSource: DataSource = {
 
   listUsers: (query, includeDeleted) => req('GET', '/users', null, { query, includeDeleted }),
   readUser: ids => req('GET', `/user`, null, ids),
+  listEvidenceCreators: (ids) => req('GET', `/operations/${ids.operationSlug}/evidence/creators`),
   updateUser: (ids, payload) => req('POST', `/user/profile/${ids.userSlug}`, payload),
   deleteUserAuthScheme: ids => req('DELETE', `/user/${ids.userSlug}/scheme/${ids.authSchemeName}`),
   adminListUsers: query => req('GET', '/admin/users', null, query),

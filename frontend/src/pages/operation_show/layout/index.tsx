@@ -7,7 +7,7 @@ import Toolbar from './toolbar'
 import classnames from 'classnames/bind'
 import {CreateEvidenceModal} from '../evidence_modals'
 import {CreateFindingModal} from '../finding_modals'
-import {ViewName} from '../types'
+import {ViewName} from 'src/global_types'
 import {useModal, renderModals} from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -37,6 +37,8 @@ export default (props: {
           onRequestCreateEvidence={() => createEvidenceModal.show()}
           onSearch={query => props.onNavigate(props.view, query)}
           query={props.query}
+          operationSlug={props.operationSlug}
+          viewName={props.view}
         />
       </div>
       <div className={cx('sidebar')}>

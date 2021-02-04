@@ -100,7 +100,8 @@ export type Finding = {
   ticketLink?: string,
 }
 
-export type SavedQueryType = 'evidence' | 'findings'
+export type ViewName = 'evidence' | 'findings'
+export type SavedQueryType = ViewName
 
 export type SavedQuery = {
   id: number,
