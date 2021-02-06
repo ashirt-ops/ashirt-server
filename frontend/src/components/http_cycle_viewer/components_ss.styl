@@ -1,0 +1,23 @@
+
+.header
+  margin: 10px 10px
+  text-align: left
+
+  em
+    padding: 0 5px 0 5px
+    font-style: italic
+    font-weight: bold
+
+
+.code-viewer
+  position: relative
+  // height: 250px
+  height: 400px // this is bad -- it should  conform to the maximum height of it's parent
+
+  .ace
+    position: absolute
+    top: 0px
+    bottom: 0
+    left: 0
+    right: 0
+    height: 100%

@@ -4,7 +4,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
-import HttpCycleViewer from '../http_cycle_viewer'
+import { HarViewer } from '../http_cycle_viewer'
 import { SupportedEvidenceType, CodeBlock } from 'src/global_types'
 import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
@@ -97,6 +97,6 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
 
   return wiredEvidence.render(evi => {
     const log = JSON.parse(evi)
-    return <HttpCycleViewer log={log} />
+    return <HarViewer log={log} />
   })
 }

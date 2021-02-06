@@ -1,49 +1,111 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { trimURL } from 'src/helpers'
-import { Har, Entry, Response, PostData, Log } from 'har-format'
-import { mimetypeToAceLang, requestToRaw, responseToRaw } from './helpers'
+import { Har, Entry, Log, Header, PostData, Response } from 'har-format'
+import { mimetypeToAceLang } from './helpers'
 
-import { PrettyHeaders, RawContent } from './components'
-import SettingsSection from 'src/components/settings_section'
+import { ExpandableSection } from './expandable_area'
+
+import { EvidenceHeader, RawContent } from './components'
 import Table from 'src/components/table'
 import { default as TabMenu } from '../tabs'
 import { clamp } from 'lodash'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export const HarViewer = (props: {
   log: Har
 }) => {
   const log: Log = props.log.log
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
 
   return (
-    <div className={cx('root')} onClick={e => e.stopPropagation()}>
+    <div className={cx('alt-root')} onClick={e => e.stopPropagation()}>
       <EvidenceHeader creator={log.creator.name} version={log.creator.version} />
-      <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />
-      {selectedRow > -1 && <HttpDetails entry={log.entries[selectedRow]} />}
+      <div className={cx('flex-area')}>
+        <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />
+        {selectedRow > -1 && <EntryData entry={log.entries[selectedRow]} />}
+      </div>
     </div>
   )
 }
+export default HarViewer
 
-const EvidenceHeader = (props: {
-  creator: string,
-  version: string
-}) => (
-  <div className={cx('header')}>
-    From:
-    <em className={cx('header-creator')}>
-      {props.creator}
-    </em>
-    @
-    <em className={cx('header-version')}>
-      {props.version}
-    </em>
+const EntryData = (props: {
+  entry: Entry
+}) => {
+  return <div className={cx('alt-content')}>
+    <TabMenu className={cx('alt-tab-group')}
+      tabs={[
+        { id: 'entry-headers', label: 'Headers', content: <EntryHeadersData entry={props.entry} /> },
+        {
+          id: 'entry-request', label: 'Request',
+          content: <RequestContent data={props.entry.request.postData}/>
+        },
+        {
+          id: 'entry-response', label: 'Response',
+          content: <ResponseContent response={props.entry.response}/>
+        },
+      ]}
+    />
   </div>
+}
+
+const EntryHeadersData = (props: {
+  entry: Entry
+}) => (
+  <div className={cx('headers-grouping')}>
+    <ExpandableSection content={<RequestInfo entry={props.entry} />}>
+      Request Info
+    </ExpandableSection>
+    <ExpandableSection content={
+      <SectionDefintions definitions={formatHeaders(props.entry.request.headers)} />
+    }>
+      Request Headers
+    </ExpandableSection>
+    <ExpandableSection content={
+      <SectionDefintions definitions={formatHeaders(props.entry.response.headers)} />
+    }>
+      Response Headers
+    </ExpandableSection>
+  </div>
+)
+
+const formatHeaders = (headers: Array<Header>): Array<[string, string]> => headers
+  .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+  .map(header => [header.name, header.value])
+
+const RequestInfo = (props: {
+  entry: Entry
+}) => {
+  // TODO: re-add raw headers
+  // request headers: <RawContent content={requestToRaw(props.entry.request)} />)
+  // response headers: <RawContent content = { responseToRaw(props.entry.response) }/>
+  const requestUrl = new URL(props.entry.request.url)
+  return (
+    <SectionDefintions
+      definitions={[
+        [props.entry.request.method, ''],
+        ['Host', requestUrl.hostname + (requestUrl.port == '80' ? '' : `:${requestUrl.port}`)],
+        ['Path', requestUrl.pathname],
+        ['Server IP', props.entry.serverIPAddress || ''],
+        ['Duration', props.entry.time.toFixed(2) + ' ms'],
+      ]}
+    />
+  )
+}
+
+const SectionDefintions = (props: {
+  definitions: Array<[key: string, value: string]>
+}) => (
+  <section className={cx('section-container')}>
+    {props.definitions.map(([key, value]) => (
+      <div className={cx('section-entry')}>
+        <em className={cx('section-key')}>{key}{value && ':'}</em>
+        <div className={cx('section-value')}>{value}</div>
+      </div>
+    ))}
+  </section>
 )
 
 const RequestTable = (props: {
@@ -51,95 +113,49 @@ const RequestTable = (props: {
   selectedRow: number
   setSelectedRow: (rowNumber: number) => void
 }) => {
+
   const tableRef = React.useRef<HTMLTableElement | null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
-    console.log("Got keypress event")
     if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
       e.stopPropagation()
       e.preventDefault()
 
-      const newIndex = clamp(props.selectedRow + (e.key == 'ArrowDown' ? 1 : -1), 0, props.log.entries.length - 1)
+      const direction = (e.key == 'ArrowDown' ? 1 : -1)
+      const newIndex = clamp(props.selectedRow + direction, 0, props.log.entries.length - 1)
       if (tableRef.current != null) {
 
         if (props.selectedRow == 0 && newIndex == 0) {
-          tableRef.current.tHead?.scrollIntoView({block:'nearest'})
+          tableRef.current.tHead?.scrollIntoView({ block: 'nearest' })
         }
         else {
-          tableRef.current.tBodies.item(0)?.rows.item(newIndex)?.scrollIntoView({block: 'nearest'})
+          tableRef.current.tBodies.item(0)?.rows.item(newIndex)?.scrollIntoView({ block: 'nearest' })
         }
       }
       props.setSelectedRow(newIndex)
     }
   }
 
+  const onRowSelected = (index: number) => (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+    props.setSelectedRow((e.ctrlKey && props.selectedRow == index) ? -1 : index)
+  }
+
   return (
-    <div className={cx('table-container')}>
-      <Table className={cx('table')} onKeyDown={onKeyDown} tableRef={tableRef}
-        columns={['#', 'Status', 'Method', 'Path', 'Data Size']} >
+    <div className={cx('alt-table-container')}>
+      <Table className={cx('table')} columns={['#', 'S', 'M', 'Path']}
+        onKeyDown={onKeyDown} tableRef={tableRef}>
         {props.log.entries.map((entry, index) => (
           <tr key={index} className={cx(index == props.selectedRow ? ['selected-row', 'render'] : '')}
-            onClick={() => props.setSelectedRow(index)} >
+            onClick={(e) => onRowSelected(index)(e)} >
             <td>{index + 1}</td>
             <td>{entry.response.status}</td>
             <td>{entry.request.method}</td>
             <td>{trimURL(entry.request.url).trimmedValue}</td>
-            <td>{entry.request.postData == null ? "None" : entry.request.postData.text?.length}</td>
           </tr>
         ))}
       </Table>
     </div>
   )
-}
-
-const HttpDetails = (props: {
-  entry: Entry
-}) => (
-  <div className={cx('http-details')}>
-    <RequestSegment {...props} />
-    <ResponseSegment {...props} />
-  </div>
-)
-
-const RequestSegment = (props: {
-  entry: Entry
-}) => (
-  <SettingsSection className={cx('section-header')} title="Request" width="full-width">
-    <TabMenu className={cx('tab-group')}
-      tabs={[
-        { id: "request-pretty", label: "Pretty Headers", content: <PrettyHeaders headers={props.entry.request.headers} /> },
-        { id: "request-raw", label: "Raw Headers", content: <RawContent content={requestToRaw(props.entry.request)} /> },
-        { id: "request-content", label: "Post Data", content: <RequestContent data={props.entry.request.postData} /> },
-      ]}
-    />
-  </SettingsSection>
-)
-
-const ResponseSegment = (props: {
-  entry: Entry
-}) => (
-  <SettingsSection className={cx('section-header')} title="Response" width="full-width">
-    <TabMenu className={cx('tab-group')}
-      tabs={[
-        { id: "request-pretty", label: "Pretty Headers", content: <PrettyHeaders headers={props.entry.response.headers} /> },
-        { id: "response-raw", label: "Raw Headers", content: <RawContent content={responseToRaw(props.entry.response)} /> },
-        { id: "response-content", label: "Content", content: <ResponseContent response={props.entry.response} /> },
-      ]}
-    />
-  </SettingsSection>
-)
-
-const ResponseContent = (props: {
-  response: Response
-}) => {
-  const length = props.response.content.size
-  const rawText = props.response.content.text || ''
-
-  const content = (rawText == '' && length > 0)
-    ? `Content is ${length} bytes long, but no data/text was captured`
-    : rawText
-
-  return <RawContent content={content} language={mimetypeToAceLang(props.response.content.mimeType)} />
 }
 
 const RequestContent = (props: {
@@ -167,4 +183,17 @@ const RequestContent = (props: {
   }
 
   return <RawContent content={body} language={mimetypeToAceLang(mimetype)} />
+}
+
+const ResponseContent = (props: {
+  response: Response
+}) => {
+  const length = props.response.content.size
+  const rawText = props.response.content.text || ''
+
+  const content = (rawText == '' && length > 0)
+    ? `Content is ${length} bytes long, but no data/text was captured`
+    : rawText
+
+  return <RawContent content={content} language={mimetypeToAceLang(props.response.content.mimeType)} />
 }

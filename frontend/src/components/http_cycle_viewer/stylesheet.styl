@@ -1,78 +1,71 @@
 @import '~src/vars'
 
 
-.root
-  position: relative
-  height: 100%
 
-
-.header
-  margin: 10px 10px
-  text-align: left
-
-  em
-    padding: 0 5px 0 5px
-    font-style: italic
-    font-weight: bold
-
-
-.table-container
+.alt-root
+  // height: 95%
   margin: 10px
-  height: 200px
-  overflow: auto
+  display: block
+
+.flex-area
+  height: 100%
+  display: flex
+  flex-flow: row wrap
+  justify-content: flex-start
+  align-items: flex-start
+
+.alt-summary
+  margin-bottom: 10px
+
+.alt-table-container
+  flex-grow: 1
+  flex-shrink: 1
   border: 1px solid $darker-background
+  border-bottom: 0px
+  box-sizing: border-box
+  overflow: auto
+  height: 100%
 
   .selected-row
     background: $darker-primary
 
     &:hover
       background: $lighter-primary
-
+  
   .table
     white-space: nowrap
 
 
-.http-details
-  margin: 10px
-  position: relative
+.alt-content
+  flex-grow: 1
+  min-width: 100px
 
-  .tab-group
-    margin-left: 2px
-    margin-bottom: 2px
 
-  .section-header
-    text-align: left
-    padding-bottom: 5px
 
-  .pretty-headers-container
-    overflow: auto
-    max-height: 250px
-    background: $darker-background
-    border: 1px solid $darker-background
-    text-align: left
-    padding: 5px
 
-  .pretty-headers-entry
-    line-height: 1.25
-    margin-left: 5px
+.alt-tab-group
+  margin-bottom: 2px
 
-  .pretty-headers-key
-    font-weight: bold
-    white-space: nowrap
+.section-container
+  padding: 5px 0px 5px 10px
+  
+  
 
-  .pretty-headers-value
-    font-family: monospace
-    font-size: small
-    padding-left: 5px
+.section-entry
+  line-height: 1.25
+  display: block
+  text-align: left
 
-  .code-viewer
-    position: relative
-    height: 250px
+.section-key
+  display: inline
+  font-weight: bold
+  font-style: normal
+  color: $lighter-primary
+  white-space: nowrap
 
-    .ace
-      position: absolute
-      top: 0px
-      bottom: 0
-      left: 0
-      right: 0
-      height: 100%
+.section-value
+  display: inline
+  padding-left: 5px
+  font-family: monospace
+  font-size: small
+  
