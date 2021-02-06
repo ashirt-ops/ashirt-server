@@ -20,22 +20,23 @@ export const HarViewer = (props: {
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
 
   return (
-    <div className={cx('alt-root')} onClick={e => e.stopPropagation()}>
+    <div className={cx('root')} onClick={e => e.stopPropagation()}>
       <EvidenceHeader creator={log.creator.name} version={log.creator.version} />
       <div className={cx('flex-area')}>
         <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />
-        {selectedRow > -1 && <EntryData entry={log.entries[selectedRow]} />}
+        {selectedRow > -1 && 
+        <EntryData entry={log.entries[selectedRow]} 
+        />}
       </div>
     </div>
   )
 }
-export default HarViewer
 
 const EntryData = (props: {
   entry: Entry
 }) => {
-  return <div className={cx('alt-content')}>
-    <TabMenu className={cx('alt-tab-group')}
+  return <div className={cx('entry-root')}>
+    <TabMenu className={cx('tab-menu-group')}
       tabs={[
         { id: 'entry-headers', label: 'Headers', content: <EntryHeadersData entry={props.entry} /> },
         {
@@ -141,7 +142,7 @@ const RequestTable = (props: {
   }
 
   return (
-    <div className={cx('alt-table-container')}>
+    <div className={cx('table-container')}>
       <Table className={cx('table')} columns={['#', 'S', 'M', 'Path']}
         onKeyDown={onKeyDown} tableRef={tableRef}>
         {props.log.entries.map((entry, index) => (

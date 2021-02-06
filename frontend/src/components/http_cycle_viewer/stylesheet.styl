@@ -1,23 +1,18 @@
 @import '~src/vars'
 
-
-
-.alt-root
+.root
   // height: 95%
   margin: 10px
   display: block
 
 .flex-area
   height: 100%
-  display: flex
+  display: flex // or maybe inline-flex
   flex-flow: row wrap
   justify-content: flex-start
   align-items: flex-start
 
-.alt-summary
-  margin-bottom: 10px
-
-.alt-table-container
+.table-container
   flex-grow: 1
   flex-shrink: 1
   border: 1px solid $darker-background
@@ -36,20 +31,15 @@
     white-space: nowrap
 
 
-.alt-content
+.entry-root
   flex-grow: 1
   min-width: 100px
 
-
-
-
-.alt-tab-group
+.tab-menu-group
   margin-bottom: 2px
 
 .section-container
   padding: 5px 0px 5px 10px
-  
-  
 
 .section-entry
   line-height: 1.25
@@ -68,4 +58,4 @@
   padding-left: 5px
   font-family: monospace
   font-size: small
-  
+  word-break: break-all
