@@ -24,9 +24,9 @@ export const HarViewer = (props: {
       <EvidenceHeader creator={log.creator.name} version={log.creator.version} />
       <div className={cx('flex-area')}>
         <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />
-        {selectedRow > -1 && 
-        <EntryData entry={log.entries[selectedRow]} 
-        />}
+        {selectedRow > -1 &&
+          <EntryData entry={log.entries[selectedRow]} />
+        }
       </div>
     </div>
   )
@@ -41,11 +41,11 @@ const EntryData = (props: {
         { id: 'entry-headers', label: 'Headers', content: <EntryHeadersData entry={props.entry} /> },
         {
           id: 'entry-request', label: 'Request',
-          content: <RequestContent data={props.entry.request.postData}/>
+          content: <RequestContent data={props.entry.request.postData} />
         },
         {
           id: 'entry-response', label: 'Response',
-          content: <ResponseContent response={props.entry.response}/>
+          content: <ResponseContent response={props.entry.response} />
         },
       ]}
     />
