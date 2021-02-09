@@ -4,10 +4,11 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
-import { HarViewer } from '../http_cycle_viewer'
+import { HarViewer, isAHar } from '../http_cycle_viewer'
 import { SupportedEvidenceType, CodeBlock } from 'src/global_types'
 import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
+import ErrorDisplay from 'src/components/error_display'
 
 import TerminalPlayer from 'src/components/terminal_player'
 
@@ -96,7 +97,15 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
   }), [props.operationSlug, props.evidenceUuid]))
 
   return wiredEvidence.render(evi => {
-    const log = JSON.parse(evi)
-    return <HarViewer log={log} />
+    try {
+      const log = JSON.parse(evi)
+      if (isAHar(log)) {
+        return <HarViewer log={log} />
+      }
+      return <ErrorDisplay title="Corrupted HAR file" err={new Error("unsupported format")} />
+    }
+    catch (err) {
+      return <ErrorDisplay title="Corrupted HAR file" err={err}/>
+    }
   })
 }

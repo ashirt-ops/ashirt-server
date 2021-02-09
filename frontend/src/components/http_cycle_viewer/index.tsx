@@ -13,6 +13,8 @@ import { clamp } from 'lodash'
 
 const cx = classnames.bind(require('./stylesheet'))
 
+export * from './is_valid_har'
+
 export const HarViewer = (props: {
   log: Har
 }) => {
