@@ -80,7 +80,7 @@ export const SourcelessCodeblock = (props: {
 
   return (
     <div className={cx('code-viewer', props.className)}>
-      <div className={cx('ace')}>
+      <div className={cx('ace', 'no-source')}>
         <AceEditor
           readOnly
           mode={props.language || ''}
