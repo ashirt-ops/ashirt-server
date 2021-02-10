@@ -145,7 +145,7 @@ const RequestTable = (props: {
 
   return (
     <div className={cx('table-container')}>
-      <Table className={cx('table')} columns={['#', 'S', 'M', 'Path']}
+      <Table className={cx('table')} columns={['#', 'Status', 'Method', 'Path']}
         onKeyDown={onKeyDown} tableRef={tableRef}>
         {props.log.entries.map((entry, index) => (
           <tr key={index} className={cx(index == props.selectedRow ? ['selected-row', 'render'] : '')}
