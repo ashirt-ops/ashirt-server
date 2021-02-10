@@ -1,28 +1,20 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 
-import { useAsyncComponent } from 'src/helpers'
+import { SourcelessCodeblock } from '../code_block'
 
 const cx = classnames.bind(require('./components_ss'))
-const importAceEditorAsync = () => import('../code_block/ace_editor').then(module => module.default)
 
 export const RawContent = (props: {
   content: string
   language?: string
 }) => {
-  const AceEditor = useAsyncComponent(importAceEditorAsync)
 
   return props.content == ''
-      ? <em>No Content</em>
-      : <div className={cx('code-viewer')}>
-        <div className={cx('ace')}>
-          <AceEditor
-            readOnly
-            mode={props.language ? props.language : ''}
-            value={props.content}
-          />
-        </div>
-    </div>
+    ? <em>No Content</em>
+    : <SourcelessCodeblock className={cx('code-viewer')}
+      code={props.content}
+      language={props.language || null} />
 }
 
 export const EvidenceHeader = (props: {
