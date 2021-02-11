@@ -69,7 +69,14 @@ func (store *Store) readRaw(r *http.Request) *sessions.Session {
 func userIDFromSession(sess *sessions.Session) *int64 {
 	sessionData, ok := sess.Values[sessionDataKey].(*Session)
 	if ok {
-		return &sessionData.UserID
+		val := sessionData.UserID
+		// userIDs start at 1. In some cases, the UserID won't be set and will be 0
+		// trying to add a row with userID 0 will result in a foreign key constraint error, so
+		// returning nil ("no user id") instead
+		if val != 0 {
+			return &val
+		}
+		return nil
 	}
 	return nil
 }
