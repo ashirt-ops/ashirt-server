@@ -17,6 +17,8 @@ export const operationStatusToLabel = {
   [OperationStatus.COMPLETE]: "Complete",
 }
 
+export type EvidenceViewHint = 'small' | 'medium' | 'large'
+
 export enum UserRole {
   // Values here are the backend representations of OperationRole defined in backend/policy
   NO_ACCESS = "",

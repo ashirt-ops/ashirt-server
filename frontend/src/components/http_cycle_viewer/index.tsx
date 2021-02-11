@@ -10,6 +10,7 @@ import { EvidenceHeader, RawContent } from './components'
 import Table from 'src/components/table'
 import { default as TabMenu } from '../tabs'
 import { clamp } from 'lodash'
+import { EvidenceViewHint } from 'src/global_types'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -17,6 +18,7 @@ export * from './is_valid_har'
 
 export const HarViewer = (props: {
   log: Har
+  viewHint?: EvidenceViewHint
 }) => {
   const log: Log = props.log.log
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
