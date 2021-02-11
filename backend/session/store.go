@@ -34,6 +34,7 @@ func NewStore(db *database.Connection, opts StoreOptions) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
+	wrappedStore.SetSessionToUserID(userIDFromSession)
 	wrappedStore.Options.Path = "/"
 	wrappedStore.Options.HttpOnly = true
 	wrappedStore.Options.Secure = opts.UseSecureCookies
@@ -63,4 +64,12 @@ func (store *Store) Delete(w http.ResponseWriter, r *http.Request) error {
 func (store *Store) readRaw(r *http.Request) *sessions.Session {
 	sess, _ := store.wrappedStore.Get(r, "auth") // ignoring, because errors only fire if a bad cookie name is provided
 	return sess
+}
+
+func userIDFromSession(sess *sessions.Session) *int64 {
+	sessionData, ok := sess.Values[sessionDataKey].(*Session)
+	if ok {
+		return &sessionData.UserID
+	}
+	return nil
 }
