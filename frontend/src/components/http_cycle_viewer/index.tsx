@@ -14,7 +14,14 @@ import { EvidenceViewHint } from 'src/global_types'
 
 const cx = classnames.bind(require('./stylesheet'))
 
+
 export * from './is_valid_har'
+
+type ExpandedState = { [tabId: string]: boolean }
+type EntryState = {
+  activeTab: number
+  expandedAreas: ExpandedState
+}
 
 export const HarViewer = (props: {
   log: Har
@@ -22,6 +29,10 @@ export const HarViewer = (props: {
 }) => {
   const log: Log = props.log.log
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
+  const [entryState, setEntryState] = React.useState<EntryState>({
+    activeTab: -1,
+    expandedAreas: {}
+  })
 
   return (
     <div className={cx('root')} onClick={e => e.stopPropagation()}>
@@ -29,7 +40,7 @@ export const HarViewer = (props: {
       <div className={cx('flex-area')}>
         <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />
         {selectedRow > -1 &&
-          <EntryData entry={log.entries[selectedRow]} />
+          <EntryData entry={log.entries[selectedRow]} state={entryState} setState={setEntryState} />
         }
       </div>
     </div>
@@ -37,12 +48,24 @@ export const HarViewer = (props: {
 }
 
 const EntryData = (props: {
-  entry: Entry
+  entry: Entry,
+  state: EntryState,
+  setState: (newState: EntryState) => void
 }) => {
+  const onTabChanged = (_: Tab, idx: number) => props.setState({ ...props.state, activeTab: idx })
+
   return <div className={cx('entry-root')}>
-    <TabMenu className={cx('tab-menu-group')}
+    <TabMenu className={cx('tab-menu-group')} initialActiveTab={props.state.activeTab} onTabChanged={onTabChanged}
       tabs={[
-        { id: 'entry-headers', label: 'Headers', content: <EntryHeadersData entry={props.entry} /> },
+        {
+          id: 'entry-headers', label: 'Headers',
+          content: (
+            <EntryHeadersData entry={props.entry}
+              expandedAreas={props.state.expandedAreas}
+              setExpandedAreas={(s) => props.setState({ ...props.state, expandedAreas: s })}
+            />
+          )
+        },
         {
           id: 'entry-request', label: 'Request',
           content: <RequestContent data={props.entry.request.postData} />
@@ -58,23 +81,34 @@ const EntryData = (props: {
 
 const EntryHeadersData = (props: {
   entry: Entry
-}) => (
-  <div className={cx('headers-grouping')}>
-    <ExpandableSection content={<RequestInfo entry={props.entry} />}>
-      Request Info
+  expandedAreas: ExpandedState
+  setExpandedAreas: (newState: ExpandedState) => void
+}) => {
+  const expandedAreaProps = (id: string) => ({
+    onExpanded: (include: boolean) => props.setExpandedAreas({ ...props.expandedAreas, [id]: include }),
+    initiallyExpanded: props.expandedAreas[id] || false
+  })
+
+  return (
+    <div className={cx('headers-grouping')}>
+      <ExpandableSection {...expandedAreaProps('request-info')} content={
+        <RequestInfo entry={props.entry} />
+      }>
+        Request Info
     </ExpandableSection>
-    <ExpandableSection content={
-      <SectionDefintions definitions={formatHeaders(props.entry.request.headers)} />
-    }>
-      Request Headers
+      <ExpandableSection {...expandedAreaProps('request-headers')} content={
+        <SectionDefintions definitions={formatHeaders(props.entry.request.headers)} />
+      }>
+        Request Headers
     </ExpandableSection>
-    <ExpandableSection content={
-      <SectionDefintions definitions={formatHeaders(props.entry.response.headers)} />
-    }>
-      Response Headers
+      <ExpandableSection {...expandedAreaProps('response-headers')} content={
+        <SectionDefintions definitions={formatHeaders(props.entry.response.headers)} />
+      }>
+        Response Headers
     </ExpandableSection>
-  </div>
-)
+    </div>
+  )
+}
 
 const formatHeaders = (headers: Array<Header>): Array<[string, string]> => headers
   .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
