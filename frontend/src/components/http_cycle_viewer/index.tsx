@@ -1,16 +1,14 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { trimURL } from 'src/helpers'
 import { Har, Entry, Log, Header, PostData, Response } from 'har-format'
-import { mimetypeToAceLang } from './helpers'
-
-import { ExpandableSection } from '../expandable_area'
-
-import { EvidenceHeader, RawContent } from './components'
-import Table from 'src/components/table'
-import { default as TabMenu } from '../tabs'
-import { clamp } from 'lodash'
 import { EvidenceViewHint } from 'src/global_types'
+import { trimURL, clamp } from 'src/helpers'
+import { mimetypeToAceLang } from './helpers'
+import { EvidenceHeader, RawContent } from './components'
+import { ExpandableSection } from '../expandable_area'
+import { Tab } from '../tab_vertical_menu'
+import { default as TabMenu } from '../tabs'
+import Table from 'src/components/table'
 
 const cx = classnames.bind(require('./stylesheet'))
 
