@@ -140,7 +140,7 @@ const RequestTable = (props: {
   }
 
   const onRowSelected = (index: number) => (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-    props.setSelectedRow((e.ctrlKey && props.selectedRow == index) ? -1 : index)
+    props.setSelectedRow(props.selectedRow == index ? -1 : index)
   }
 
   return (
