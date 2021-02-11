@@ -4,7 +4,7 @@ import { trimURL } from 'src/helpers'
 import { Har, Entry, Log, Header, PostData, Response } from 'har-format'
 import { mimetypeToAceLang } from './helpers'
 
-import { ExpandableSection } from './expandable_area'
+import { ExpandableSection } from '../expandable_area'
 
 import { EvidenceHeader, RawContent } from './components'
 import Table from 'src/components/table'

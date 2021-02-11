@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-const cx = classnames.bind(require('./expandable_area_ss'))
+const cx = classnames.bind(require('./stylesheet'))
 
 export const ExpandableSection = (props: {
   children: string
