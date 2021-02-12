@@ -3,13 +3,6 @@ import { Har, Log, Creator, Browser, Page, PageTiming, Entry, Request, Response,
 export const isAHar = (o: any): o is Har => hasField("log", o, isHarLog)
 
 const isHarLog = (o: any): o is Log => {
-  console.log("isVersion?", hasString("version", o))
-  console.log("creator?", hasField("creator", o, isHarCreator))
-  console.log("browser?", hasMaybeField("browser", o, isHarBrowser))
-  console.log("pages?", hasMaybeArray("pages", o, isHarPage))
-  console.log("entries?", hasArray("entries", o, isHarEntry))
-  console.log("comment?", hasMaybeString("comment", o))
-
   return (
     hasString("version", o)
     && hasField("creator", o, isHarCreator)
@@ -198,10 +191,6 @@ const hasMaybeField = (field: string, o: any, ofType: (b: any) => boolean): bool
 }
 
 const hasArray = (field: string, o: any, isChildOfType: (b: any) => boolean): boolean => {
-  console.log(field, "has field?", field in o)
-  console.log(field, "isArray?", Array.isArray(o[field]))
-  console.log(field, "valid children?", o[field].map((item: any) => isChildOfType(item)).reduce((acc: boolean, cur: boolean) => acc && cur, true))
-
   return (
     field in o
     && Array.isArray(o[field])
