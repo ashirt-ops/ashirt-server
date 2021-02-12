@@ -44,7 +44,7 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 		TagIDs       *string    `db:"tag_ids"`
 	}
 
-	err = db.Select(&findings, sq.Select(
+	sb := sq.Select(
 		"findings.*",
 		"COUNT(DISTINCT evidence_finding_map.evidence_id) AS num_evidence",
 		"MIN(evidence.occurred_at) AS occurred_from",
@@ -55,8 +55,17 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 		LeftJoin("evidence ON evidence_id = evidence.id").
 		LeftJoin("tag_evidence_map ON tag_evidence_map.evidence_id = evidence_finding_map.evidence_id").
 		Where(whereClause, whereValues...).
-		GroupBy("findings.id").
-		OrderBy("occurred_to DESC", "occurred_from DESC"))
+		GroupBy("findings.id")
+
+	if i.Filters.SortAsc {
+		sb = sb.OrderBy("occurred_to ASC").
+			OrderBy("occurred_from ASC")
+	} else {
+		sb = sb.OrderBy("occurred_to DESC").
+			OrderBy("occurred_from DESC")
+	}
+
+	err = db.Select(&findings, sb)
 	if err != nil {
 		return nil, backend.WrapError("Cannot list findings for operation", backend.DatabaseErr(err))
 	}

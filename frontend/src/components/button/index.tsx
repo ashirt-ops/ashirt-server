@@ -33,9 +33,11 @@ const Button = (props: ButtonStyle & {
   loading?: boolean,
   onClick?: (e: React.MouseEvent) => void,
   title?: string,
+  doNotSubmit?: boolean
 }) => {
   return (
     <button
+      type={props.doNotSubmit ? 'button' : undefined}
       className={cx('root', props.className, styleToClassname(props), {
         disabled: props.disabled || props.loading,
         loading: props.loading,

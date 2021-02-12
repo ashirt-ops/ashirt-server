@@ -19,7 +19,7 @@ function stringifyQuery(tokens: {[key: string]: Array<string>}): string {
   return query.join(' ')
 }
 
-function parseQuery(query: string): {[key: string]: Array<string>} {
+export function parseQuery(query: string): {[key: string]: Array<string>} {
   const tokenized: {[key: string]: Array<string>} = {}
   let currentToken = ''
   let inQuote = false
@@ -70,9 +70,17 @@ export function addOperatorToQuery(query: string, userSlugToAdd: string): string
 
 export function getDateRangeFromQuery(query: string): [Date, Date] | null {
   const tokenized = parseQuery(query)
-  if (!tokenized.range) return null
-  const [from, to] = tokenized.range[0].split(',').map(str => dateFns.parseISO(str))
-  if (!from || !to || !dateFns.isValid(from) || !dateFns.isValid(to)) return null
+  if (!tokenized.range){
+    return null
+  }
+  return parseDateRangeString(tokenized.range[0])
+}
+
+export function parseDateRangeString(dateRangeStr: string): [Date, Date] | null {
+  const [from, to] = dateRangeStr.split(',').map(str => dateFns.parseISO(str))
+  if (!from || !to || !dateFns.isValid(from) || !dateFns.isValid(to)) {
+    return null
+  }
   return [dateFns.startOfDay(from), dateFns.endOfDay(to)]
 }
 

@@ -4,10 +4,9 @@
 import * as React from 'react'
 import FindingsTable from './findings_table'
 import Layout from '../layout'
-import {Finding} from 'src/global_types'
+import { Finding, ViewName } from 'src/global_types'
 import {DeleteFindingModal, EditFindingModal} from '../finding_modals'
 import {RouteComponentProps} from 'react-router-dom'
-import {ViewName} from '../types'
 import {getFindings} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
 

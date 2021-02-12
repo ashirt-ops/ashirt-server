@@ -7,8 +7,7 @@ import OperationBadges from 'src/components/operation_badges'
 import classnames from 'classnames/bind'
 import {Link} from 'react-router-dom'
 import {NewQueryModal, EditQueryModal, DeleteQueryModal} from './query_modal'
-import {SavedQuery, SavedQueryType} from 'src/global_types'
-import {ViewName} from '../../types'
+import { SavedQuery, SavedQueryType, ViewName} from 'src/global_types'
 import {default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu} from 'src/components/list_menu'
 import {getSavedQueries, getOperation} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
@@ -92,7 +91,7 @@ const QueryList = (props: {
     <NewQueryModal {...modalProps} operationSlug={props.operationSlug} query={props.currentQuery} type={props.type} onCreated={onCreated} />
   ))
   const editQueryModal = useModal<{savedQuery: SavedQuery}>(modalProps => (
-    <EditQueryModal {...modalProps} operationSlug={props.operationSlug} onEdited={onEdited} />
+    <EditQueryModal {...modalProps} operationSlug={props.operationSlug} onEdited={onEdited} view={props.type}/>
   ))
   const deleteQueryModal = useModal<{savedQuery: SavedQuery}>(modalProps => (
     <DeleteQueryModal {...modalProps} operationSlug={props.operationSlug} onDeleted={onDeleted} />
