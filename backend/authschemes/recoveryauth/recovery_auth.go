@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
 
@@ -52,7 +53,11 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 			return nil, dr.Error
 		}
 
-		return nil, generateRecoveryEmail(r.Context(), bridge, userEmail)
+		err := generateRecoveryEmail(r.Context(), bridge, userEmail)
+		if err != nil {
+			logging.Log(r.Context(), "msg", "Unable to generate recovery email", "error", err.Error())
+		}
+		return nil, nil
 	}))
 
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
