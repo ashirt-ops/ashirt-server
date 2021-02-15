@@ -20,6 +20,7 @@ type WebConfig struct {
 	CsrfAuthKey        string        `split_words:"true"`
 	SessionStoreKey    string        `split_words:"true"`
 	RecoveryExpiry     time.Duration `split_words:"true" default:"24h"`
+	FrontendIndexURL   string        `split_words:"true"`
 	Port               int
 }
 
@@ -175,4 +176,9 @@ func Port() string {
 // RecoveryExpiry retrieves the APP_RECOVERY_EXPIRY value from the environment
 func RecoveryExpiry() time.Duration {
 	return app.RecoveryExpiry
+}
+
+// FrontendIndexURL retrieves the APP_FRONTEND_INDEX_URL value from the environment
+func FrontendIndexURL() string {
+	return app.FrontendIndexURL
 }

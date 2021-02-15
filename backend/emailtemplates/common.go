@@ -7,9 +7,8 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/config"
 )
-
-const appFrontendRoot = "http://localhost:8080" // TODO: we should get this fron envvars
 
 type EmailTemplateData struct {
 	SendToAddress string
@@ -20,6 +19,7 @@ type EmailTemplateData struct {
 var templateFuncs = template.New("base").Funcs(template.FuncMap{
 	"AddRecoveryAuth": func(data EmailTemplateData, label string) (string, error) {
 		// create recovery URL
+		appFrontendRoot := config.FrontendIndexURL()
 		recoveryCode, err := recoveryauth.GenerateRecoveryCodeForUser(data.DB, data.UserRecord.ID)
 		recoveryURL := appFrontendRoot + "/login/recovery/" + recoveryCode
 
