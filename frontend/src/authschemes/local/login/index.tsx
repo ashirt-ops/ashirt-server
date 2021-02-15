@@ -168,7 +168,12 @@ const RecoverUserAccount = (props: {}) => {
 
   const emailForm = useForm({
     fields: [emailField],
-    handleSubmit: () => requestRecovery(emailField.value).then(() => window.location.href = '/login/local?step=recovery-sent')
+    handleSubmit: () => {
+      if( emailField.value.trim() == '' ) {
+        return Promise.reject(Error("Please supply a valid email address"))
+      }
+      return requestRecovery(emailField.value).then(() => window.location.href = '/login/local?step=recovery-sent')
+    }
   })
 
   return (<>
