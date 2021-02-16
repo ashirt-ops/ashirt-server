@@ -79,15 +79,26 @@ func (ah AShirtAuthBridge) updateLastLogin(r *http.Request, userID int64) {
 	}
 }
 
-func (ah AShirtAuthBridge) isAccountEnabled(r *http.Request, userID int64) bool {
+// IsAccountEnabled checks if the provided userid has an enabled account (specifically, it does not
+// have the disabled flag set)
+// returns (false, err) if the account cannot be found or another database error occurred.
+func (ah AShirtAuthBridge) IsAccountEnabled(userID int64) (bool, error) {
 	var flag bool
 	err := ah.db.Get(&flag, sq.Select("disabled").From("users").Where(sq.Eq{"id": userID}))
+	if err != nil {
+		return false, err
+	}
+
+	return !flag, nil
+}
+
+func (ah AShirtAuthBridge) isAccountEnabled(r *http.Request, userID int64) bool {
+	enabled, err := ah.IsAccountEnabled(userID)
 	if err != nil {
 		logging.Log(r.Context(), "msg", "Unable to check user's disabled flag", "userID", userID, "error", err)
 		return false
 	}
-
-	return !flag
+	return enabled
 }
 
 func (ah AShirtAuthBridge) isAdmin(r *http.Request, userID int64) bool {
@@ -162,23 +173,41 @@ func (ah AShirtAuthBridge) FindUserAuthByUserID(userID int64) (UserAuthData, err
 	return authData, nil
 }
 
-// FindUserAuthsByUserEmail retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail
-// Note that a user may have multiple authentications based on a single email, so each of these records are returned
-//
-// Returns a fully populated UserAuthData object, or nil if no such row exists
-func (ah AShirtAuthBridge) FindUserAuthsByUserEmail(email string) ([]UserAuthData, error) {
+func (ah AShirtAuthBridge) findUserAuthsByUserEmail(email string, includeDeleted bool) ([]UserAuthData, error) {
 	var authData []UserAuthData
+
+	whereClause := sq.Eq{
+		"users.email": email,
+	}
+	if !includeDeleted {
+		whereClause["deleted_at"] = nil
+	}
 
 	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
 		From("auth_scheme_data").
 		LeftJoin("users ON users.id = auth_scheme_data.user_id").
-		Where(sq.Eq{
-			"users.email": email,
-		}))
+		Where(whereClause))
 	if err != nil {
 		return []UserAuthData{}, backend.DatabaseErr(err)
 	}
 	return authData, nil
+}
+
+// FindUserAuthsByUserEmail retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail for NON-DELETED accounts.
+// Note that a user may have multiple authentications based on a single email, so each of these records are returned.
+//
+// See FindUserAuthsByUserEmailIncludeDeleted to retreive all users irrespective of if they have been deleted
+// Returns a fully populated UserAuthData object, or nil if no such row exists
+func (ah AShirtAuthBridge) FindUserAuthsByUserEmail(email string) ([]UserAuthData, error) {
+	return ah.findUserAuthsByUserEmail(email, false)
+}
+
+// FindUserAuthsByUserEmailIncludeDeleted retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail for ALL accounts.
+// Note that a user may have multiple authentications based on a single email, so each of these records are returned.
+//
+// Returns a fully populated UserAuthData object, or nil if no such row exists
+func (ah AShirtAuthBridge) FindUserAuthsByUserEmailIncludeDeleted(email string) ([]UserAuthData, error) {
+	return ah.findUserAuthsByUserEmail(email, true)
 }
 
 // FindUserAuthsByUserSlug retrieves the row (codified by UserAuthData) corresponding to the provided user slug and the
@@ -274,7 +303,7 @@ func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, data *UserAuth
 }
 
 // CreateNewAuthForUserGeneric provides a mechanism for non-auth providers to generate new authentications
-// on behalf of auth providers. This is only intended for recovery. 
+// on behalf of auth providers. This is only intended for recovery.
 //
 // Proper usage:  authschemes.CreateNewAuthForUser(db, recoveryauth.constants.Code, authschemes.UserAuthData{})
 // note: you will need to provide your own database instance
