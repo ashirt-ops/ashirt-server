@@ -23,8 +23,6 @@ func New(maxAge time.Duration) RecoveryAuthScheme {
 	return RecoveryAuthScheme{Expiry: maxAge}
 }
 
-const recoveryKeyLength = 40
-
 // Name returns the name of this authscheme
 func (RecoveryAuthScheme) Name() string {
 	return constants.Code
