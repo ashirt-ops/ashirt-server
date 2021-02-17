@@ -39,7 +39,7 @@ var templateFuncs = template.New("base").Funcs(template.FuncMap{
 		// create recovery URL
 		appFrontendRoot := config.FrontendIndexURL()
 		recoveryCode, err := recoveryHelpers.GenerateRecoveryCodeForUser(data.DB, data.UserRecord.ID)
-		recoveryURL := appFrontendRoot + "/login/recovery/" + recoveryCode
+		recoveryURL := appFrontendRoot + "/web/auth/recovery/login?code=" + recoveryCode
 
 		return `<a href="` + recoveryURL + `">` + label + `</a>`, err
 	},
@@ -53,8 +53,7 @@ var templateFuncs = template.New("base").Funcs(template.FuncMap{
 
 // BuildEmail constructs an email message from the given template and template data
 func BuildEmail(emailTemplate EmailTemplate, templateData EmailTemplateData) OutgoingEmail {
-	buf := make([]byte, 0)
-	w := bytes.NewBuffer(buf)
+	w := bytes.NewBuffer(make([]byte, 0))
 	var err error
 
 	switch emailTemplate {
@@ -68,7 +67,7 @@ func BuildEmail(emailTemplate EmailTemplate, templateData EmailTemplateData) Out
 	if err != nil {
 		rtn.Error = err
 	} else {
-		rtn.Body = string(buf)
+		rtn.Body = string(w.Bytes())
 		rtn.To = templateData.UserRecord.Email
 	}
 
