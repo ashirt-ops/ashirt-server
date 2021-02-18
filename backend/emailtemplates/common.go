@@ -28,11 +28,6 @@ type EmailTemplateData struct {
 	DB            *database.Connection
 }
 
-type OutgoingEmail struct {
-	Body  string
-	To    string
-	Error error
-}
 
 var templateFuncs = template.New("base").Funcs(template.FuncMap{
 	"AddRecoveryAuth": func(data EmailTemplateData, label string) (string, error) {
@@ -51,25 +46,25 @@ var templateFuncs = template.New("base").Funcs(template.FuncMap{
 	},
 })
 
-// BuildEmail constructs an email message from the given template and template data
-func BuildEmail(emailTemplate EmailTemplate, templateData EmailTemplateData) OutgoingEmail {
+// BuildEmailContent constructs an email message from the given template and template data. Returns
+// (the email job, nil) if successful, otherwise returns (nil, error)
+func BuildEmailContent(emailTemplate EmailTemplate, templateData EmailTemplateData) (string, string, error) {
 	w := bytes.NewBuffer(make([]byte, 0))
 	var err error
+	subject := ""
 
 	switch emailTemplate {
 	case EmailRecoveryTemplate:
 		err = recoveryEmail.Execute(w, templateData)
+		subject = "Recover your AShirt account"
 	case EmailRecoveryDeniedTemplate:
 		err = recoveryDeniedDisabledEmail.Execute(w, templateData)
+		subject = "Recover your AShirt account"
 	}
 
-	rtn := OutgoingEmail{}
 	if err != nil {
-		rtn.Error = err
-	} else {
-		rtn.Body = string(w.Bytes())
-		rtn.To = templateData.UserRecord.Email
+		return "", "", err
 	}
-
-	return rtn
+	return string(w.Bytes()), subject, nil
 }
+
