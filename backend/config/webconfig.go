@@ -21,6 +21,7 @@ type WebConfig struct {
 	SessionStoreKey    string        `split_words:"true"`
 	RecoveryExpiry     time.Duration `split_words:"true" default:"24h"`
 	FrontendIndexURL   string        `split_words:"true"`
+	FromEmailAddress   string        `split_words:"true"`
 	Port               int
 }
 
@@ -181,4 +182,8 @@ func RecoveryExpiry() time.Duration {
 // FrontendIndexURL retrieves the APP_FRONTEND_INDEX_URL value from the environment
 func FrontendIndexURL() string {
 	return app.FrontendIndexURL
+}
+
+func FromEmailAddress() string {
+	return app.FromEmailAddress
 }

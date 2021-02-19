@@ -74,11 +74,13 @@ CREATE TABLE `email_queue` (
   `to_email` varchar(255) NOT NULL,
   `user_id` int NOT NULL DEFAULT '0',
   `template` varchar(255) NOT NULL,
-  `email_sent` tinyint(1) NOT NULL DEFAULT '0',
+  `email_status` varchar(32) NOT NULL DEFAULT 'created',
+  `error_count` int NOT NULL DEFAULT '0',
+  `error_text` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `email_queue__email_sent` (`email_sent`),
+  KEY `email_queue__email_status` (`email_status`),
   KEY `email_queue__email_to` (`to_email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -325,7 +327,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-02-15 22:09:50
+-- Dump completed on 2021-02-19  2:50:16
 -- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
 --
 -- Host: localhost    Database: migrate_db
@@ -349,7 +351,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `gorp_migrations` WRITE;
 /*!40000 ALTER TABLE `gorp_migrations` DISABLE KEYS */;
-INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2021-02-15 22:09:47'),('20190708185420-create-operations-table.sql','2021-02-15 22:09:47'),('20190708185427-create-events-table.sql','2021-02-15 22:09:47'),('20190708185432-create-evidence-table.sql','2021-02-15 22:09:47'),('20190708185441-create-evidence-event-map-table.sql','2021-02-15 22:09:47'),('20190716190100-create-user-operation-map-table.sql','2021-02-15 22:09:47'),('20190722193434-create-tags-table.sql','2021-02-15 22:09:47'),('20190722193937-create-tag-event-map.sql','2021-02-15 22:09:47'),('20190909183500-add-short-name-to-users-table.sql','2021-02-15 22:09:47'),('20190909190416-add-short-name-index.sql','2021-02-15 22:09:47'),('20190926205116-evidence-name.sql','2021-02-15 22:09:47'),('20190930173342-add-saved-searches.sql','2021-02-15 22:09:47'),('20191001182541-evidence-tags.sql','2021-02-15 22:09:47'),('20191008005212-add-uuid-to-events-evidence.sql','2021-02-15 22:09:48'),('20191015235306-add-slug-to-operations.sql','2021-02-15 22:09:48'),('20191018172105-modular-auth.sql','2021-02-15 22:09:48'),('20191023170906-codeblock.sql','2021-02-15 22:09:48'),('20191101185207-replace-events-with-findings.sql','2021-02-15 22:09:49'),('20191114211948-add-operation-to-tags.sql','2021-02-15 22:09:49'),('20191205182830-create-api-keys-table.sql','2021-02-15 22:09:49'),('20191213222629-users-with-email.sql','2021-02-15 22:09:49'),('20200103194053-rename-short-name-to-slug.sql','2021-02-15 22:09:49'),('20200104013804-rework-ashirt-auth.sql','2021-02-15 22:09:49'),('20200116070736-add-admin-flag.sql','2021-02-15 22:09:49'),('20200130175541-fix-color-truncation.sql','2021-02-15 22:09:49'),('20200205200208-disable-user-support.sql','2021-02-15 22:09:49'),('20200215015330-optional-user-id.sql','2021-02-15 22:09:50'),('20200221195107-deletable-user.sql','2021-02-15 22:09:50'),('20200303215004-move-last-login.sql','2021-02-15 22:09:50'),('20200306221628-add-explicit-headless.sql','2021-02-15 22:09:50'),('20200331155258-finding-status.sql','2021-02-15 22:09:50'),('20200617193248-case-senitive-apikey.sql','2021-02-15 22:09:50'),('20200928160958-add-totp-secret-to-auth-table.sql','2021-02-15 22:09:50'),('20210120205510-create-email-queue-table.sql','2021-02-15 22:09:50');
+INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2021-02-19 02:50:12'),('20190708185420-create-operations-table.sql','2021-02-19 02:50:12'),('20190708185427-create-events-table.sql','2021-02-19 02:50:12'),('20190708185432-create-evidence-table.sql','2021-02-19 02:50:13'),('20190708185441-create-evidence-event-map-table.sql','2021-02-19 02:50:13'),('20190716190100-create-user-operation-map-table.sql','2021-02-19 02:50:13'),('20190722193434-create-tags-table.sql','2021-02-19 02:50:13'),('20190722193937-create-tag-event-map.sql','2021-02-19 02:50:13'),('20190909183500-add-short-name-to-users-table.sql','2021-02-19 02:50:13'),('20190909190416-add-short-name-index.sql','2021-02-19 02:50:13'),('20190926205116-evidence-name.sql','2021-02-19 02:50:13'),('20190930173342-add-saved-searches.sql','2021-02-19 02:50:13'),('20191001182541-evidence-tags.sql','2021-02-19 02:50:13'),('20191008005212-add-uuid-to-events-evidence.sql','2021-02-19 02:50:14'),('20191015235306-add-slug-to-operations.sql','2021-02-19 02:50:14'),('20191018172105-modular-auth.sql','2021-02-19 02:50:14'),('20191023170906-codeblock.sql','2021-02-19 02:50:14'),('20191101185207-replace-events-with-findings.sql','2021-02-19 02:50:14'),('20191114211948-add-operation-to-tags.sql','2021-02-19 02:50:14'),('20191205182830-create-api-keys-table.sql','2021-02-19 02:50:15'),('20191213222629-users-with-email.sql','2021-02-19 02:50:15'),('20200103194053-rename-short-name-to-slug.sql','2021-02-19 02:50:15'),('20200104013804-rework-ashirt-auth.sql','2021-02-19 02:50:15'),('20200116070736-add-admin-flag.sql','2021-02-19 02:50:15'),('20200130175541-fix-color-truncation.sql','2021-02-19 02:50:15'),('20200205200208-disable-user-support.sql','2021-02-19 02:50:15'),('20200215015330-optional-user-id.sql','2021-02-19 02:50:15'),('20200221195107-deletable-user.sql','2021-02-19 02:50:16'),('20200303215004-move-last-login.sql','2021-02-19 02:50:16'),('20200306221628-add-explicit-headless.sql','2021-02-19 02:50:16'),('20200331155258-finding-status.sql','2021-02-19 02:50:16'),('20200617193248-case-senitive-apikey.sql','2021-02-19 02:50:16'),('20200928160958-add-totp-secret-to-auth-table.sql','2021-02-19 02:50:16'),('20210120205510-create-email-queue-table.sql','2021-02-19 02:50:16');
 /*!40000 ALTER TABLE `gorp_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -362,4 +364,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-02-15 22:09:51
+-- Dump completed on 2021-02-19  2:50:17
