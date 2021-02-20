@@ -138,7 +138,7 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 		Body:    body,
 		Subject: subject,
 		To:      email.To,
-		From:    config.FromEmailAddress(),
+		From:    config.EmailFromAddress(),
 		OnCompleted: func(encounteredErr error) {
 			if encounteredErr != nil {
 				w.logger.Log("msg", "Unable to send email", "err", encounteredErr.Error())

@@ -17,3 +17,11 @@ type EmailJob struct {
 type EmailServicer interface {
 	AddToQueue(EmailJob) error
 }
+
+type EmailServicerType = string
+
+const (
+	StdOutEmailer EmailServicerType = "stdout"
+	MemoryEmailer EmailServicerType = "memory"
+	SMTPEmailer   EmailServicerType = "smtp"
+)

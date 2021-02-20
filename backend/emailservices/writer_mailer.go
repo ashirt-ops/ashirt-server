@@ -36,7 +36,7 @@ func (m *WriterMailer) yellEmail(job EmailJob) error {
 	return emailPrintFormat.Execute(m.writer, job)
 }
 
-var emailPrintFormat = template.Must(template.New("").Parse(
+var emailPrintFormat = template.Must(template.New("yell-email").Parse(
 	"\n" +
 		`======================================================
 To:      | {{ .To }}
