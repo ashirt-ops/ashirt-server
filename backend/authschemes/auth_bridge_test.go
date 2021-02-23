@@ -14,6 +14,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/session"
+	"github.com/theparanoids/ashirt-server/backend/workers"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/require"
@@ -148,6 +149,104 @@ func TestUserAuthCreationAndLookup(t *testing.T) {
 		require.Equal(t, []byte("encrypted-password"), auth.EncryptedPassword)
 		require.Equal(t, true, auth.NeedsPasswordReset)
 	})
+}
+
+func TestAddScheduledEmail(t *testing.T) {
+	db, _, bridge := initBridgeTest(t)
+
+	expectedEmail := "user@example.com"
+	expectedUserID := int64(17)
+	expectedEmailTemplate := "some-email"
+	err := bridge.AddScheduledEmail(expectedEmail, expectedUserID, expectedEmailTemplate)
+	require.NoError(t, err)
+
+	var emailJobs []models.QueuedEmail
+	err = db.Select(&emailJobs, sq.Select("*").From("email_queue"))
+	require.NoError(t, err)
+	require.Equal(t, 1, len(emailJobs))
+	job := emailJobs[0]
+	require.Equal(t, expectedEmail, job.ToEmail)
+	require.Equal(t, expectedUserID, job.UserID)
+	require.Equal(t, expectedEmailTemplate, job.Template)
+	require.Equal(t, int64(0), job.ErrorCount)
+	require.Equal(t, workers.EmailCreated, job.EmailStatus)
+	require.Nil(t, job.ErrorText)
+}
+
+func TestIsAccountEnabled(t *testing.T) {
+	db, _, bridge := initBridgeTest(t)
+
+	userID := createDummyUser(t, bridge, "disabledUser")
+
+	enabled, err := bridge.IsAccountEnabled(userID)
+	require.NoError(t, err)
+	require.True(t, enabled)
+
+	db.Update(sq.Update("users").Set("disabled", true).Where(sq.Eq{"id": userID}))
+
+	enabled, err = bridge.IsAccountEnabled(userID)
+	require.NoError(t, err)
+	require.False(t, enabled)
+}
+
+func TestFindUserByEmail(t *testing.T) {
+	db, _, bridge := initBridgeTest(t)
+	userID := createDummyUser(t, bridge, "normalUser")
+	var user models.User
+	db.Get(&user, sq.Select("*").From("users").Where(sq.Eq{"id": userID}))
+
+	foundUser, err := bridge.FindUserByEmail(user.Email, false)
+	require.NoError(t, err)
+	require.Equal(t, user.ID, foundUser.ID)
+
+	_, err = bridge.FindUserByEmail("nobody@example.com", false)
+	require.Error(t, err)
+
+	db.Update(sq.Update("users").Set("deleted_at", time.Now()).Where(sq.Eq{"id": userID}))
+	_, err = bridge.FindUserByEmail(user.Email, false)
+	require.Error(t, err)
+
+	foundUser = models.User{}
+	foundUser, err = bridge.FindUserByEmail(user.Email, true)
+	require.NoError(t, err)
+	require.Equal(t, user.ID, foundUser.ID)
+}
+
+func TestFindUserAuthsByEmail(t *testing.T) {
+	db, _, bridge := initBridgeTest(t)
+
+	userID := createDummyUser(t, bridge, "normal-user")
+	err := bridge.CreateNewAuthForUser(authschemes.UserAuthData{
+		UserID:  userID,
+		UserKey: "dummy-user-key",
+	})
+	require.NoError(t, err)
+
+	var user models.User
+	db.Get(&user, sq.Select("*").From("users").Where(sq.Eq{"id": userID}))
+
+	expectedAuth, err := bridge.FindUserAuthByUserID(userID)
+	require.NoError(t, err)
+
+	foundAuths, err := bridge.FindUserAuthsByUserEmail(user.Email)
+	require.NoError(t, err)
+	require.Equal(t, expectedAuth, foundAuths[0])
+
+	foundAuths = []authschemes.UserAuthData{}
+	_, err = bridge.FindUserAuthsByUserEmail("nobody@example.com")
+	// require.Error(t, err)
+	require.Equal(t, 0, len(foundAuths))
+
+	db.Update(sq.Update("users").Set("deleted_at", time.Now()).Where(sq.Eq{"id": userID}))
+
+	foundAuths = []authschemes.UserAuthData{}
+	foundAuths, err = bridge.FindUserAuthsByUserEmail(user.Email)
+	require.NoError(t, err)
+	require.Equal(t, 0, len(foundAuths))
+
+	foundAuths, err = bridge.FindUserAuthsByUserEmailIncludeDeleted(user.Email)
+	require.NoError(t, err)
+	require.Equal(t, expectedAuth, foundAuths[0])
 }
 
 func initBridgeTest(t *testing.T) (*database.Connection, *session.Store, authschemes.AShirtAuthBridge) {
