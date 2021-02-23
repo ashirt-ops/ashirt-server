@@ -16,12 +16,12 @@ import (
 type EmailStatus = string
 
 const (
-	// Created reflects emails where the email has been acknowledged, but not yet sent
-	Created EmailStatus = "created"
-	// Sent reflects emails that have been attempted to be delivered (and probably succeeded)
-	Sent EmailStatus = "sent"
-	// Errored reflects emails that could not be sent for any reason
-	Errored EmailStatus = "error"
+	// EmailCreated reflects emails where the email has been acknowledged, but not yet sent
+	EmailCreated EmailStatus = "created"
+	// EmailSent reflects emails that have been attempted to be delivered (and probably succeeded)
+	EmailSent EmailStatus = "sent"
+	// EmailErrored reflects emails that could not be sent for any reason
+	EmailErrored EmailStatus = "error"
 )
 
 // EmailWorker is a struct that creates the functionality of reading emails from the email queue (db table)
@@ -99,7 +99,7 @@ func (w *EmailWorker) run() {
 		// get emails from email queue
 		err := w.db.Select(&emails, sq.Select("id", "to_email", "user_id", "template").
 			From("email_queue").
-			Where(sq.Eq{"email_status": []string{Created, Errored}}).
+			Where(sq.Eq{"email_status": []string{EmailCreated, EmailErrored}}).
 			Where(sq.Expr("error_count < ?", 3)).
 			OrderBy("updated_at ASC"). // grab the oldest emails first, prefer jobs that have not errored out
 			Limit(50))
@@ -154,13 +154,13 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 				w.db.Update(sq.Update("email_queue").
 					Set("error_count", sq.Expr("error_count + 1")).
 					SetMap(map[string]interface{}{
-						"email_status": Errored,
+						"email_status": EmailErrored,
 						"error_text":   encounteredErr.Error(),
 					}).
 					Where(sq.Eq{"id": email.EmailID}))
 			} else {
 				err := w.db.Update(sq.Update("email_queue").
-					Set("email_status", Sent).
+					Set("email_status", EmailSent).
 					Where(sq.Eq{"id": email.EmailID}))
 				if err != nil {
 					w.logger.Log("msg", "Unable to set email completed status", "error", err.Error())
