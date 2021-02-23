@@ -77,27 +77,7 @@ func tryRunServer(logger logging.Logger) error {
 	}
 
 	if config.EmailType() != "" {
-		var emailServicer emailservices.EmailServicer
-		emailLogger := logging.With(logger, "service", "email-sender", "type", config.EmailType)
-		switch config.EmailType() {
-		case string(emailservices.StdOutEmailer):
-			mailer := emailservices.MakeWriterMailer(os.Stdout, emailLogger)
-			emailServicer = &mailer
-		case string(emailservices.MemoryEmailer):
-			mailer := emailservices.MakeMemoryMailer(emailLogger)
-			emailServicer = &mailer
-		case string(emailservices.SMTPEmailer):
-			mailer := emailservices.MakeSMTPMailer(emailLogger)
-			emailServicer = &mailer
-		}
-
-		if emailServicer == nil {
-			logger.Log("msg", "unsupported emailer", "type", config.EmailType)
-		} else {
-			emailLogger.Log("msg", "Staring emailer")
-			emailWorker := workers.MakeEmailWorker(db, emailServicer, logging.With(logger, "service", "email-worker"))
-			emailWorker.Start()
-		}
+		startEmailServices(db, logger)
 	} else {
 		logger.Log("msg", "No Emailer selected")
 	}
@@ -117,4 +97,28 @@ func tryRunServer(logger logging.Logger) error {
 
 	logger.Log("port", config.Port(), "msg", "Now Serving")
 	return http.ListenAndServe(":"+config.Port(), nil)
+}
+
+func startEmailServices(db *database.Connection, logger logging.Logger) {
+	var emailServicer emailservices.EmailServicer
+	emailLogger := logging.With(logger, "service", "email-sender", "type", config.EmailType)
+	switch config.EmailType() {
+	case string(emailservices.StdOutEmailer):
+		mailer := emailservices.MakeWriterMailer(os.Stdout, emailLogger)
+		emailServicer = &mailer
+	case string(emailservices.MemoryEmailer):
+		mailer := emailservices.MakeMemoryMailer(emailLogger)
+		emailServicer = &mailer
+	case string(emailservices.SMTPEmailer):
+		mailer := emailservices.MakeSMTPMailer(emailLogger)
+		emailServicer = &mailer
+	}
+
+	if emailServicer == nil {
+		logger.Log("msg", "unsupported emailer", "type", config.EmailType)
+	} else {
+		emailLogger.Log("msg", "Staring emailer")
+		emailWorker := workers.MakeEmailWorker(db, emailServicer, logging.With(logger, "service", "email-worker"))
+		emailWorker.Start()
+	}
 }
