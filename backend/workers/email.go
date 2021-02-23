@@ -24,6 +24,8 @@ const (
 	Errored EmailStatus = "error"
 )
 
+// EmailWorker is a struct that creates the functionality of reading emails from the email queue (db table)
+// and passing those to the email servicer
 type EmailWorker struct {
 	db         *database.Connection
 	emailQueue chan emailservices.EmailJob
@@ -33,6 +35,7 @@ type EmailWorker struct {
 	logger     logging.Logger
 }
 
+// MakeEmailWorker constructs an EmailWorker
 func MakeEmailWorker(db *database.Connection, servicer emailservices.EmailServicer, logger logging.Logger) EmailWorker {
 	emailCh := make(chan emailservices.EmailJob)
 	stopCh := make(chan bool)
@@ -45,10 +48,14 @@ func MakeEmailWorker(db *database.Connection, servicer emailservices.EmailServic
 	}
 }
 
+// GetEmailQueue returns the channel that the EmailWorker uses to add emails to the outgoing queue.
+// The email servicer should read from this channel to know what emails to send out.
 func (w *EmailWorker) GetEmailQueue() *chan emailservices.EmailJob {
 	return &w.emailQueue
 }
 
+// Start starts the email worker's processing. Note that calling this while the worker is already
+// running will do nothing
 func (w *EmailWorker) Start() {
 	if !w.running {
 		w.running = true
@@ -71,6 +78,8 @@ func (w *EmailWorker) start() {
 	}()
 }
 
+// Stop stops the email worker at it's next opporunity (generally between individual email sends)
+// any email that has been picked up by the servicer will run to completion.
 func (w *EmailWorker) Stop() {
 	w.stopChan <- true
 }
