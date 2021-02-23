@@ -28,7 +28,6 @@ type EmailTemplateData struct {
 	DB            *database.Connection
 }
 
-
 var templateFuncs = template.New("base").Funcs(template.FuncMap{
 	"AddRecoveryAuth": func(data EmailTemplateData, label string) (string, error) {
 		// create recovery URL
@@ -67,4 +66,3 @@ func BuildEmailContent(emailTemplate EmailTemplate, templateData EmailTemplateDa
 	}
 	return string(w.Bytes()), subject, nil
 }
-

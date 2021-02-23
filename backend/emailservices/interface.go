@@ -31,5 +31,5 @@ const (
 	MemoryEmailer EmailServicerType = "memory"
 
 	// SMTPEmailer refers to an email servicer that sends emails via SMTP.
-	SMTPEmailer   EmailServicerType = "smtp"
+	SMTPEmailer EmailServicerType = "smtp"
 )
