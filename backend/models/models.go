@@ -151,3 +151,16 @@ type Session struct {
 	ModifiedAt  *time.Time `db:"modified_at"`
 	ExpiresAt   time.Time  `db:"expires_at"`
 }
+
+// QueuedEmail reflects the structure of the database table 'email_queue'
+type QueuedEmail struct {
+	ID          int64      `db:"id"`
+	ToEmail     string     `db:"to_email"`
+	UserID      int64      `db:"user_id"`
+	Template    string     `db:"template"`
+	EmailStatus string     `db:"email_status"`
+	ErrorCount  int64      `db:"error_count"`
+	ErrorText   *string    `db:"error_text"`
+	CreatedAt   time.Time  `db:"created_at"`
+	UpdatedAt   *time.Time `db:"updated_at"`
+}
