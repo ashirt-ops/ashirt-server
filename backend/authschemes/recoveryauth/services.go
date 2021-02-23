@@ -5,7 +5,6 @@ package recoveryauth
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
@@ -13,6 +12,7 @@ import (
 	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
 	recoveryHelpers "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/helpers"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/emailtemplates"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 
@@ -90,16 +90,19 @@ func getRecoveryMetrics(ctx context.Context, db *database.Connection, expiryInMi
 }
 
 func generateRecoveryEmail(ctx context.Context, bridge authschemes.AShirtAuthBridge, userEmail string) error {
-	userAccounts, err := bridge.FindUserAuthsByUserEmail(userEmail)
-	if err != nil || len(userAccounts) == 0 {
-		if len(userAccounts) == 0 {
-			err = backend.DatabaseErr(errors.New("No matching user accounts"))
-		}
-		return backend.WrapError("Unable to get user accounts from email", err)
+	userAccount, err := bridge.FindUserByEmail(userEmail, false)
+	if err != nil {
+		return backend.WrapError("Unable to get user account from email", err)
 	}
 
-	targetAccount := userAccounts[0]
-	err = bridge.AddScheduledEmail(userEmail, &targetAccount, "self-service-recovery-email")
+	var useTemplate string
+	if userAccount.Disabled {
+		useTemplate = emailtemplates.EmailRecoveryDeniedTemplate
+	} else {
+		useTemplate = emailtemplates.EmailRecoveryTemplate
+	}
+
+	err = bridge.AddScheduledEmail(userEmail, userAccount.ID, useTemplate)
 	if err != nil {
 		return backend.WrapError("Unable to generate recovery email", err)
 	}

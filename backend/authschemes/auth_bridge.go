@@ -11,6 +11,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
 	"github.com/theparanoids/ashirt-server/backend/session"
@@ -180,7 +181,7 @@ func (ah AShirtAuthBridge) findUserAuthsByUserEmail(email string, includeDeleted
 		"users.email": email,
 	}
 	if !includeDeleted {
-		whereClause["deleted_at"] = nil
+		whereClause["users.deleted_at"] = nil
 	}
 
 	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
@@ -191,6 +192,25 @@ func (ah AShirtAuthBridge) findUserAuthsByUserEmail(email string, includeDeleted
 		return []UserAuthData{}, backend.DatabaseErr(err)
 	}
 	return authData, nil
+}
+
+// FindUserByEmail retrieves the user record associated with the specified email address. Returns
+// the found record, or an error if no such record exists
+func (ah AShirtAuthBridge) FindUserByEmail(email string, includeDeleted bool) (models.User, error) {
+	var userRecord models.User
+
+	whereClause := sq.Eq{
+		"email": email,
+	}
+	if !includeDeleted {
+		whereClause["deleted_at"] = nil
+	}
+	err := ah.db.Get(&userRecord,
+		sq.Select("*").From("users").Where(whereClause))
+	if err != nil {
+		return models.User{}, backend.DatabaseErr(err)
+	}
+	return userRecord, nil
 }
 
 // FindUserAuthsByUserEmail retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail for NON-DELETED accounts.
@@ -285,12 +305,9 @@ func (ah AShirtAuthBridge) GetDatabase() *database.Connection {
 	return ah.db
 }
 
-// AddScheduledEmail creates a database entry for an outgoing email, for the given email address, related user
-func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, data *UserAuthData, emailTemplate string) error {
-	userID := int64(0)
-	if data != nil {
-		userID = data.UserID
-	}
+// AddScheduledEmail creates a database entry for an outgoing email, for the given email address and
+// related user_id
+func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, userID int64, emailTemplate string) error {
 	_, err := ah.db.Insert("email_queue", map[string]interface{}{
 		"to_email": emailAddress,
 		"user_id":  userID,
