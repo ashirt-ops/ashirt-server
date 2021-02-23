@@ -9,25 +9,32 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/logging"
 )
 
+// SMTPEmailAuthType indicates how the system should authenticate with the STMP server
+// see: https://www.samlogic.net/articles/smtp-commands-reference-auth.htm
 type SMTPEmailAuthType string
 
 const (
-	LoginType   SMTPEmailAuthType = "login"
-	PlainType   SMTPEmailAuthType = "plain"
-	CRAMMD5Type SMTPEmailAuthType = "cramda5"
+	// LoginType indicates the login SMTP authentication flow
+	LoginType SMTPEmailAuthType = "login"
+	// PlainType indicates the plain SMTP authentication flow
+	PlainType SMTPEmailAuthType = "plain"
+	// CRAMMD5Type  indicates the CRAM-MD5 SMTP authentication flow
+	CRAMMD5Type SMTPEmailAuthType = "crammd5"
 )
 
+// SMTPMailer is the struct that holds an email servicer that sends emails over SMTP
 type SMTPMailer struct {
 	logger logging.Logger
 }
 
+// MakeSMTPMailer constructs an SMTPMailer with the given logger
 func MakeSMTPMailer(logger logging.Logger) SMTPMailer {
 	return SMTPMailer{
 		logger: logger,
 	}
 }
 
-func (m *SMTPMailer) Auth() smtp.Auth {
+func (m *SMTPMailer) auth() smtp.Auth {
 	switch config.EmailSMTPAuthType() {
 	case string(LoginType):
 		return smtpLoginAuth(config.EmailUserName(), config.EmailPassword())
@@ -40,12 +47,13 @@ func (m *SMTPMailer) Auth() smtp.Auth {
 	return nil
 }
 
+// AddToQueue attempts to send the provided email over smtp
 func (m *SMTPMailer) AddToQueue(job EmailJob) error {
 	msg, err := buildSMTPEmail(job)
 	if err != nil {
 		return err
 	}
-	err = smtp.SendMail(config.EmailHost(), m.Auth(), job.From, []string{job.To}, msg)
+	err = smtp.SendMail(config.EmailHost(), m.auth(), job.From, []string{job.To}, msg)
 	return err
 }
 

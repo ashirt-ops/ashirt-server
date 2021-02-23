@@ -18,10 +18,18 @@ type EmailServicer interface {
 	AddToQueue(EmailJob) error
 }
 
+// EmailServicerType acts as an enum for selecting known email servicers types
 type EmailServicerType = string
 
 const (
+	// StdOutEmailer refers to an email servicer that simply outputs the emails to the terminal.
+	// Useful for local testing
 	StdOutEmailer EmailServicerType = "stdout"
+
+	// MemoryEmailer refers to an email servicer that holds all emails sent in memory.
+	// Useful for unit testing
 	MemoryEmailer EmailServicerType = "memory"
+
+	// SMTPEmailer refers to an email servicer that sends emails via SMTP.
 	SMTPEmailer   EmailServicerType = "smtp"
 )
