@@ -23,9 +23,8 @@ const (
 )
 
 type EmailTemplateData struct {
-	SendToAddress string
-	UserRecord    *models.User
-	DB            *database.Connection
+	UserRecord *models.User
+	DB         *database.Connection
 }
 
 var templateFuncs = template.New("base").Funcs(template.FuncMap{

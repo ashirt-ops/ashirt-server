@@ -131,9 +131,8 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 		return err
 	}
 	templateData := emailtemplates.EmailTemplateData{
-		SendToAddress: email.To,
-		UserRecord:    &user,
-		DB:            w.db,
+		UserRecord: &user,
+		DB:         w.db,
 	}
 	body, subject, err := emailtemplates.BuildEmailContent(email.Template, templateData)
 
