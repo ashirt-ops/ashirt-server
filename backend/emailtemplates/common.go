@@ -2,6 +2,7 @@ package emailtemplates
 
 import (
 	"bytes"
+	"errors"
 	"text/template"
 
 	recoveryHelpers "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/helpers"
@@ -58,6 +59,8 @@ func BuildEmailContent(emailTemplate EmailTemplate, templateData EmailTemplateDa
 	case EmailRecoveryDeniedTemplate:
 		err = recoveryDeniedDisabledEmail.Execute(w, templateData)
 		subject = "Recover your AShirt account"
+	default:
+		err = errors.New("Unsupported email template")
 	}
 
 	if err != nil {
