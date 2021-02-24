@@ -44,8 +44,8 @@ var templateFuncs = template.New("base").Funcs(template.FuncMap{
 	},
 })
 
-// BuildEmailContent constructs an email message from the given template and template data. Returns
-// (the email job, nil) if successful, otherwise returns (nil, error)
+// BuildEmailContent constructs an email subject and body from the given template and template data. Returns
+// (body, subject, nil) if there is no error generating the content, otherwise ("", "", error)
 func BuildEmailContent(emailTemplate EmailTemplate, templateData EmailTemplateData) (string, string, error) {
 	w := bytes.NewBuffer(make([]byte, 0))
 	var err error
