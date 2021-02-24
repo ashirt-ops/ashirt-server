@@ -5,12 +5,12 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/require"
+	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	recoveryHelpers "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/helpers"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
-	recoveryHelpers "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/helpers"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
 )
 
 func TestGenerateRecoveryCodeForUser(t *testing.T) {
@@ -23,7 +23,7 @@ func TestGenerateRecoveryCodeForUser(t *testing.T) {
 	var recoveryAuthEntry models.AuthSchemeData
 	db.Get(&recoveryAuthEntry, sq.Select("*").From("auth_scheme_data").Where(sq.Eq{
 		"auth_scheme": recoveryConsts.Code,
-		"user_id": targetUserID,
+		"user_id":     targetUserID,
 	}))
 	require.Equal(t, code, recoveryAuthEntry.UserKey)
 }
