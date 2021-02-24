@@ -35,6 +35,7 @@ type EmailWorker struct {
 	logger                   logging.Logger
 	SleepAfterWorkDuration   time.Duration
 	SleepAfterNoWorkDuration time.Duration
+	OnPassComplete           func()
 }
 
 // MakeEmailWorker constructs an EmailWorker
@@ -130,6 +131,9 @@ func (w *EmailWorker) run() {
 			sleepDuration = w.SleepAfterNoWorkDuration
 		}
 
+		if w.OnPassComplete != nil {
+			w.OnPassComplete()
+		}
 		time.Sleep(sleepDuration * time.Millisecond)
 	}
 }
