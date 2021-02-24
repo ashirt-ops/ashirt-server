@@ -27,12 +27,14 @@ const (
 // EmailWorker is a struct that creates the functionality of reading emails from the email queue (db table)
 // and passing those to the email servicer
 type EmailWorker struct {
-	db         *database.Connection
-	emailQueue chan emailservices.EmailJob
-	stopChan   chan bool
-	running    bool
-	servicer   emailservices.EmailServicer
-	logger     logging.Logger
+	db                       *database.Connection
+	emailQueue               chan emailservices.EmailJob
+	stopChan                 chan bool
+	running                  bool
+	servicer                 emailservices.EmailServicer
+	logger                   logging.Logger
+	SleepAfterWorkDuration   time.Duration
+	SleepAfterNoWorkDuration time.Duration
 }
 
 // MakeEmailWorker constructs an EmailWorker
@@ -45,6 +47,8 @@ func MakeEmailWorker(db *database.Connection, servicer emailservices.EmailServic
 		stopChan:   stopCh,
 		servicer:   servicer,
 		logger:     logger,
+		SleepAfterWorkDuration: 20*1000,
+		SleepAfterNoWorkDuration: 60 * 1000,
 	}
 }
 
@@ -84,6 +88,12 @@ func (w *EmailWorker) Stop() {
 	w.stopChan <- true
 }
 
+// IsRunning returns the current state of the worker. If running, the worker is processing new emails
+// returns true if the worker is running, false otherwise.
+func (w *EmailWorker) IsRunning() bool {
+	return w.running
+}
+
 type emailRequest struct {
 	EmailID  int64  `db:"id"`
 	To       string `db:"to_email"`
@@ -115,12 +125,12 @@ func (w *EmailWorker) run() {
 					continue
 				}
 			}
-			sleepDuration = 60
+			sleepDuration = w.SleepAfterWorkDuration
 		} else {
-			sleepDuration = 20
+			sleepDuration = w.SleepAfterNoWorkDuration
 		}
 
-		time.Sleep(sleepDuration * time.Second)
+		time.Sleep(sleepDuration * time.Millisecond)
 	}
 }
 
