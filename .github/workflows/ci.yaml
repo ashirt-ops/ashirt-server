@@ -44,7 +44,7 @@ jobs:
         go test -v ./...
 
   build:
-    if:  ! contains(github.ref, 'refs/heads/master')
+    if: github.ref != 'refs/heads/main'
     name: Build
     needs: [gotest]
     strategy:
@@ -80,7 +80,7 @@ jobs:
           push: false
 
   build_push:
-    if:  contains(github.ref, 'refs/heads/master')
+    if: github.ref == 'refs/heads/main'
     name: Build
     needs: [gotest]
     strategy:
