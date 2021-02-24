@@ -42,12 +42,12 @@ func MakeEmailWorker(db *database.Connection, servicer emailservices.EmailServic
 	emailCh := make(chan emailservices.EmailJob)
 	stopCh := make(chan bool)
 	return EmailWorker{
-		db:         db,
-		emailQueue: emailCh,
-		stopChan:   stopCh,
-		servicer:   servicer,
-		logger:     logger,
-		SleepAfterWorkDuration: 20*1000,
+		db:                       db,
+		emailQueue:               emailCh,
+		stopChan:                 stopCh,
+		servicer:                 servicer,
+		logger:                   logger,
+		SleepAfterWorkDuration:   20 * 1000,
 		SleepAfterNoWorkDuration: 60 * 1000,
 	}
 }
@@ -147,6 +147,7 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 	body, subject, err := emailtemplates.BuildEmailContent(email.Template, templateData)
 
 	if err != nil {
+		setEmailFailed(w.db, email.EmailID, w.logger, err)
 		return err
 	}
 	if w.servicer == nil {
@@ -159,14 +160,7 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 		From:    config.EmailFromAddress(),
 		OnCompleted: func(encounteredErr error) {
 			if encounteredErr != nil {
-				w.logger.Log("msg", "Unable to send email", "err", encounteredErr.Error())
-				w.db.Update(sq.Update("email_queue").
-					Set("error_count", sq.Expr("error_count + 1")).
-					SetMap(map[string]interface{}{
-						"email_status": EmailErrored,
-						"error_text":   encounteredErr.Error(),
-					}).
-					Where(sq.Eq{"id": email.EmailID}))
+				setEmailFailed(w.db, email.EmailID, w.logger, encounteredErr)
 			} else {
 				err := w.db.Update(sq.Update("email_queue").
 					Set("email_status", EmailSent).
@@ -178,4 +172,15 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 		},
 	})
 	return err
+}
+
+func setEmailFailed(db *database.Connection, emailID int64, logger logging.Logger, err error) {
+	logger.Log("msg", "Unable to send email", "err", err.Error())
+	db.Update(sq.Update("email_queue").
+		Set("error_count", sq.Expr("error_count + 1")).
+		SetMap(map[string]interface{}{
+			"email_status": EmailErrored,
+			"error_text":   err.Error(),
+		}).
+		Where(sq.Eq{"id": emailID}))
 }
