@@ -46,10 +46,14 @@ func TestEmailWorkerStartAndStop(t *testing.T) {
 
 func TestEmailWorkerProcessEmail(t *testing.T) {
 	db := setupDb(t)
+	doneCh := make(chan bool)
 	mailer := emailservices.MakeMemoryMailer(logging.NewNopLogger())
 	emailWorker := workers.MakeEmailWorker(db, &mailer, logging.NewNopLogger())
 	emailWorker.SleepAfterNoWorkDuration = 10 * time.Millisecond
 	emailWorker.SleepAfterWorkDuration = 10 * time.Millisecond
+	emailWorker.OnPassComplete = func() {
+		doneCh <- true
+	}
 
 	targetUser := seeding.UserHarry
 	givenTemplate := emailtemplates.EmailRecoveryTemplate // we need some valid template to produce data, so here we are
@@ -73,9 +77,9 @@ func TestEmailWorkerProcessEmail(t *testing.T) {
 	})
 
 	emailWorker.Start()
-	time.Sleep(15 * time.Millisecond) // give the worker a chance to process the emails
-	emailWorker.Stop()
 
+	<- doneCh
+	emailWorker.Stop()
 	sentEmails := mailer.Outbox[targetUser.Email]
 
 	// check that the success email went through
