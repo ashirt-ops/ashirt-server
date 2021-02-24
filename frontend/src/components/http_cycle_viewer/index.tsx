@@ -1,3 +1,6 @@
+// Copyright 2021, Verizon Media
+// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { Har, Entry, Log, Header, PostData, Response } from 'har-format'
@@ -115,9 +118,6 @@ const formatHeaders = (headers: Array<Header>): Array<[string, string]> => heade
 const RequestInfo = (props: {
   entry: Entry
 }) => {
-  // TODO: re-add raw headers
-  // request headers: <RawContent content={requestToRaw(props.entry.request)} />)
-  // response headers: <RawContent content = { responseToRaw(props.entry.response) }/>
   const requestUrl = new URL(props.entry.request.url)
   return (
     <SectionDefintions

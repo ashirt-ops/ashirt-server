@@ -1,3 +1,6 @@
+// Copyright 2021, Verizon Media
+// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
 import { Request, Response } from 'har-format'
 
 export const mimetypeToAceLang = (mimetype: string) => {
