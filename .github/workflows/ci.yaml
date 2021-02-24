@@ -45,7 +45,7 @@ jobs:
 
   build:
     if: github.ref != 'refs/heads/main'
-    name: Build
+    name: Build (PR)
     needs: [gotest]
     strategy:
       matrix:
@@ -81,7 +81,7 @@ jobs:
 
   build_push:
     if: github.ref == 'refs/heads/main'
-    name: Build
+    name: Build and Push (Master)
     needs: [gotest]
     strategy:
       matrix:
