@@ -1,19 +1,15 @@
 package emailservices_test
 
 import (
-	"io/ioutil"
 	"testing"
 
-	kitlog "github.com/go-kit/kit/log"
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/emailservices"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 )
 
 func TestAddToQueueMemory(t *testing.T) {
-	w := kitlog.NewSyncWriter(ioutil.Discard)
-	logger := kitlog.NewLogfmtLogger(w)
-
-	servicer := emailservices.MakeMemoryMailer(logger)
+	servicer := emailservices.MakeMemoryMailer(logging.NewNopLogger())
 	onCompletedCalled := false
 	toTarget := "Harry.Potter@hogwarts.edu"
 
