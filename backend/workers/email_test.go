@@ -78,7 +78,7 @@ func TestEmailWorkerProcessEmail(t *testing.T) {
 
 	emailWorker.Start()
 
-	<- doneCh
+	<-doneCh
 	emailWorker.Stop()
 	sentEmails := mailer.Outbox[targetUser.Email]
 
