@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -170,7 +169,7 @@ func cloneBody(r *http.Request) (io.Reader, func(), error) {
 	if r.Method == "GET" {
 		return bytes.NewBuffer([]byte{}), func() {}, nil
 	}
-	bodyTmpFile, err := ioutil.TempFile("", "ashirt-body")
+	bodyTmpFile, err := os.MkdirTemp("", "ashirt-body")
 	if err != nil {
 		return nil, func() {}, err
 	}

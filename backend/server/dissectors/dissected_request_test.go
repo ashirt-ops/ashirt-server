@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -445,7 +444,7 @@ func makeRequest(body *string, query string) *http.Request {
 }
 
 func makeReadCloser(content string) io.ReadCloser {
-	return ioutil.NopCloser(strings.NewReader(content))
+	return io.NopCloser(strings.NewReader(content))
 }
 
 func makeURL(queryString string) *url.URL {

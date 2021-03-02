@@ -6,7 +6,6 @@ package contentstore
 import (
 	"bufio"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -23,7 +22,7 @@ func NewDevStore() (*DevStore, error) {
 	tmpDir := "/tmp/contentstore"
 	tmpDirInfo, err := os.Stat(tmpDir)
 	if err != nil || !tmpDirInfo.IsDir() {
-		tmpDir, err = ioutil.TempDir("", "ashirt")
+		tmpDir, err = os.MkdirTemp("", "ashirt")
 		if err != nil {
 			return nil, backend.WrapError("Unable to establish a DevStore", err)
 		}
@@ -33,7 +32,7 @@ func NewDevStore() (*DevStore, error) {
 
 // Upload stores files in your OS's temp directory
 func (d *DevStore) Upload(data io.Reader) (string, error) {
-	file, err := ioutil.TempFile(d.dir, "")
+	file, err := os.MkdirTemp(d.dir, "")
 	if err != nil {
 		return "", backend.WrapError("Unable to upload to DevStore", err)
 	}

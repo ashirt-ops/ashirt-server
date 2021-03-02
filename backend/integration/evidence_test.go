@@ -6,9 +6,9 @@ package integration_test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
+	"io"
 	"strings"
 	"testing"
 
@@ -88,7 +88,7 @@ func TestEvidence(t *testing.T) {
 		a.Put("/web/operations/op/evidence/"+uuid).WithMultipartBody(map[string]string{"description": "new description"}, nil).Do().ExpectSuccess()
 
 		// Ensure image is unmodified
-		imageData, _ := ioutil.ReadFile("fixtures/screenshot.png")
+		imageData, _ := os.ReadFile("fixtures/screenshot.png")
 		a.Get("/web/operations/op/evidence/"+uuid+"/media").Do().ExpectResponse(200, imageData)
 	})
 
@@ -247,7 +247,7 @@ func testWebUploadCodeblock(a *integration.Tester, op dtos.Operation, state test
 	require.NoError(a.TestingT(), err)
 	defer file.Close()
 
-	fileContent, err := ioutil.ReadAll(file)
+	fileContent, err := io.ReadAll(file)
 	require.NoError(a.TestingT(), err)
 	file.Seek(0, 0)
 
