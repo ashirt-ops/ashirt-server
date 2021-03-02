@@ -5,11 +5,10 @@ package database
 
 import (
 	"database/sql"
-	"io/ioutil"
-	"testing"
-
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
+	"os"
+	"testing"
 )
 
 // NewTestConnection creates a new empty database, and applies for integration/service tests
@@ -42,7 +41,7 @@ func NewTestConnectionFromNonStandardMigrationPath(t *testing.T, dbName, migrati
 	require.NoError(t, err)
 
 	// Reset database back to schema.sql
-	schemaSQL, err := ioutil.ReadFile(migrationsDirPath + "/../schema.sql")
+	schemaSQL, err := os.ReadFile(migrationsDirPath + "/../schema.sql")
 	require.NoError(t, err)
 
 	_, err = setupDB.Exec("USE `" + config.DBName + "`;\n" + string(schemaSQL))
