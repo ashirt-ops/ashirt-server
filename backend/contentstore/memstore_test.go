@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"os"
+	"io"
 	"testing"
 )
 
@@ -22,7 +22,7 @@ func TestMemstore(t *testing.T) {
 	reader, err := store.Read(key)
 	require.NoError(t, err)
 
-	b, _ := os.ReadAll(reader)
+	b, _ := io.ReadAll(reader)
 
 	require.Equal(t, content, b, "retrieved content should match uploaded content")
 }
