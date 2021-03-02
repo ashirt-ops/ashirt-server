@@ -46,7 +46,7 @@
     "@types/react-calendar-timeline": "^0.26.3",
     "ace-builds": "^1.4.9",
     "classnames": "^2.2.6",
-    "date-fns": "^2.11.1",
+    "date-fns": "^2.18.0",
     "interactjs": "^1.10.3",
     "lodash": "^4.17.21",
     "react": "^16.14.0",
