@@ -10,17 +10,13 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
 	"github.com/theparanoids/ashirt-server/backend/emailservices"
 	"github.com/theparanoids/ashirt-server/backend/emailtemplates"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/workers"
 )
 
 func setupDb(t *testing.T) *database.Connection {
-	db := seeding.InitTestWithOptions(t, seeding.TestOptions{
-		DatabasePath: helpers.StringPtr("../migrations"),
-		DatabaseName: helpers.StringPtr("emailtemplates-test-db"),
-	})
+	db := seeding.InitTestWithName(t, "workers-test-db")
 	seeding.ApplySeeding(t, seeding.HarryPotterSeedData, db)
 
 	return db

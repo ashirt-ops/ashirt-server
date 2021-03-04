@@ -7,7 +7,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
 	"github.com/theparanoids/ashirt-server/backend/emailtemplates"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 func TestBuildEmailContent(t *testing.T) {
@@ -30,10 +29,7 @@ func TestBuildEmailContent(t *testing.T) {
 }
 
 func setupDb(t *testing.T) *database.Connection {
-	db := seeding.InitTestWithOptions(t, seeding.TestOptions{
-		DatabasePath: helpers.StringPtr("../migrations"),
-		DatabaseName: helpers.StringPtr("emailtemplates-test-db"),
-	})
+	db := seeding.InitTestWithName(t, "emailtemplates-test-db")
 	seeding.ApplySeeding(t, seeding.HarryPotterSeedData, db)
 
 	return db
