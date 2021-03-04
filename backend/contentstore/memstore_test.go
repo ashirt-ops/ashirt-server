@@ -5,10 +5,11 @@ package contentstore_test
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"io"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt-server/backend/contentstore"
 )
 
 func TestMemstore(t *testing.T) {

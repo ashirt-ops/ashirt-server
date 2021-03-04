@@ -5,10 +5,11 @@ package database
 
 import (
 	"database/sql"
-	"github.com/go-sql-driver/mysql"
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/require"
 )
 
 // NewTestConnection creates a new empty database, and applies for integration/service tests

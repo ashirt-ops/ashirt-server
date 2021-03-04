@@ -8,11 +8,12 @@ import (
 	"image"
 
 	// provides handling for decoding images
-	"github.com/nfnt/resize"
-	"golang.org/x/sync/errgroup"
 	_ "image/jpeg"
 	"image/png"
 	"io"
+
+	"github.com/nfnt/resize"
+	"golang.org/x/sync/errgroup"
 )
 
 type imageStorable struct {

@@ -6,10 +6,11 @@ package contentstore
 import (
 	"bytes"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/theparanoids/ashirt-server/backend"
 	"io"
 	"sync"
+
+	"github.com/google/uuid"
+	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // MemStore is the backing structure needed to interact with local memory -- for unit/integration
