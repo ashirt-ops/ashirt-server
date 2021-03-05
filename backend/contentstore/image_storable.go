@@ -11,7 +11,6 @@ import (
 	_ "image/jpeg"
 	"image/png"
 	"io"
-	"io/ioutil"
 
 	"github.com/nfnt/resize"
 	"golang.org/x/sync/errgroup"
@@ -35,7 +34,7 @@ func (is imageStorable) ProcessPreviewAndUpload(s Store) (ContentKeys, error) {
 	var g errgroup.Group
 	contentKeys := ContentKeys{}
 
-	imageBytes, err := ioutil.ReadAll(is.data)
+	imageBytes, err := io.ReadAll(is.data)
 	if err != nil {
 		return contentKeys, err
 	}

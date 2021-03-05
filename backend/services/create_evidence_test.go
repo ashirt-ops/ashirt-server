@@ -6,7 +6,7 @@ package services_test
 import (
 	"bytes"
 	// "encoding/json"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -72,7 +72,7 @@ func validateInsertedEvidence(t *testing.T, evi *dtos.Evidence, src services.Cre
 		require.NotEqual(t, "", fullEvidence.FullImageKey, "Keys should be populated")
 		require.NotEqual(t, "", fullEvidence.ThumbImageKey, "Keys should be populated")
 		fullReader, _ := store.Read(fullEvidence.FullImageKey)
-		fullContentBytes, _ := ioutil.ReadAll(fullReader)
+		fullContentBytes, _ := io.ReadAll(fullReader)
 		require.Equal(t, rawContent, fullContentBytes)
 	}
 
