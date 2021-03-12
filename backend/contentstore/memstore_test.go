@@ -5,7 +5,7 @@ package contentstore_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,7 +23,7 @@ func TestMemstore(t *testing.T) {
 	reader, err := store.Read(key)
 	require.NoError(t, err)
 
-	b, _ := ioutil.ReadAll(reader)
+	b, _ := io.ReadAll(reader)
 
 	require.Equal(t, content, b, "retrieved content should match uploaded content")
 }
