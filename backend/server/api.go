@@ -56,6 +56,10 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return dtos.CheckConnection{Ok: true}, nil
 	}))
 
+	route(r, "GET", "/api/health", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return nil, nil
+	}))
+
 	route(r, "POST", "/api/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateOperationInput{

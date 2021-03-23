@@ -111,6 +111,10 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		}).ServeHTTP(w, r)
 	}))
 
+	route(r, "GET", "/health", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return nil, nil
+	}))
+
 	route(r, "GET", "/user", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		slug := dr.FromQuery("userSlug").AsString()
