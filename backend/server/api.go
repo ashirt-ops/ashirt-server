@@ -21,12 +21,16 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var operationIDRegex = regexp.MustCompile(`\d+`)
 
 func API(db *database.Connection, contentStore contentstore.Store, logger logging.Logger) http.Handler {
 	r := mux.NewRouter()
+	metricRouter := r.PathPrefix("").Subrouter()
+	metricRouter.Handle("/api/metrics", promhttp.Handler())
+
 	r.Use(middleware.LogRequests(logger))
 	r.Use(middleware.AuthenticateAppAndInjectCtx(db))
 
@@ -54,10 +58,6 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 
 	route(r, "GET", "/api/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return dtos.CheckConnection{Ok: true}, nil
-	}))
-
-	route(r, "GET", "/api/health", jsonHandler(func(r *http.Request) (interface{}, error) {
-		return nil, nil
 	}))
 
 	route(r, "POST", "/api/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
