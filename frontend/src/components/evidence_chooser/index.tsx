@@ -44,6 +44,7 @@ const EvidenceRow = (props: {
         onClick={(e) => { e.stopPropagation(); setLightboxOpen(true)} }
         fitToContainer
         viewHint="small"
+        interactionHint="inactive"
       />
     </div>
     <div className={cx('description')} onClick={e => e.stopPropagation()}>{props.evidence.description}</div>
@@ -54,6 +55,7 @@ const EvidenceRow = (props: {
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
           viewHint="large"
+          interactionHint="active"
         />
       </Lightbox>
     </div>

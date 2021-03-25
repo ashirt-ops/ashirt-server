@@ -5,7 +5,7 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
-import { SupportedEvidenceType, CodeBlock, EvidenceViewHint } from 'src/global_types'
+import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint } from 'src/global_types'
 import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
@@ -35,6 +35,7 @@ export default (props: {
   evidenceUuid: string,
   contentType: SupportedEvidenceType,
   viewHint?: EvidenceViewHint,
+  interactionHint?: InteractionHint,
   className?: string,
   fitToContainer?: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
@@ -61,6 +62,7 @@ type EvidenceProps = {
   operationSlug: string,
   evidenceUuid: string,
   viewHint?: EvidenceViewHint,
+  interactionHint?: InteractionHint,
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
@@ -102,7 +104,8 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
     try {
       const log = JSON.parse(evi)
       if (isAHar(log)) {
-        return <HarViewer log={log} viewHint={props.viewHint} />
+        const isActive = props.interactionHint == 'inactive' ? {disableKeyHandler : true} : {}
+        return <HarViewer log={log} viewHint={props.viewHint} {...isActive} />
       }
       return <ErrorDisplay title="Corrupted HAR file" err={new Error("unsupported format")} />
     }

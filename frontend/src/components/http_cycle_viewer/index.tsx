@@ -27,6 +27,7 @@ type EntryState = {
 export const HarViewer = (props: {
   log: Har
   viewHint?: EvidenceViewHint
+  disableKeyHandler?: boolean
 }) => {
   const log: Log = props.log.log
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
@@ -36,11 +37,15 @@ export const HarViewer = (props: {
   })
 
   return (
-    <div className={cx('root')} onClick={e => e.stopPropagation()}>
+    <div className={cx('root')} onClick={e => {
+      if (!props.disableKeyHandler ) {
+        e.stopPropagation() // prevent lightbox from showing
+      }
+    }}>
       <EvidenceHeader creator={log.creator.name} version={log.creator.version} />
       <div className={cx('flex-area')}>
-        <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />
-        {selectedRow > -1 &&
+        <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={props.disableKeyHandler ? (_)=>{} : setSelectedRow} />
+        {selectedRow > -1  &&
           <EntryData entry={log.entries[selectedRow]} state={entryState} setState={setEntryState} />
         }
       </div>

@@ -18,6 +18,7 @@ export const operationStatusToLabel = {
 }
 
 export type EvidenceViewHint = 'small' | 'medium' | 'large'
+export type InteractionHint = 'active' | 'inactive'
 
 export enum UserRole {
   // Values here are the backend representations of OperationRole defined in backend/policy
