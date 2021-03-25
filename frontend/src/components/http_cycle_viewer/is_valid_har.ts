@@ -219,10 +219,10 @@ const hasMaybeArray = (field: string, o: any, ofType: (b: any) => boolean): bool
 
 const isAString = (o: any): o is string => typeof o === 'string'
 const isANumber = (o: any): o is number => typeof o === 'number'
-const isABoolean = (o: any): o is boolean => typeof o === 'boolean'
+// const isABoolean = (o: any): o is boolean => typeof o === 'boolean'
 
 const hasString = (field: string, o: any) => hasField(field, o, isAString)
 const hasMaybeString = (field: string, o: any) => hasMaybeField(field, o, isAString)
 const hasNumber = (field: string, o: any) => hasField(field, o, isANumber)
-const hasMaybeNumber = (field: string, o: any) => hasMaybeField(field, o, isANumber)
-const hasMaybeBoolean = (field: string, o: any) => hasMaybeField(field, o, isABoolean)
+// const hasMaybeNumber = (field: string, o: any) => hasMaybeField(field, o, isANumber)
+// const hasMaybeBoolean = (field: string, o: any) => hasMaybeField(field, o, isABoolean)
