@@ -43,7 +43,7 @@ export const HarViewer = (props: {
       }
     }}>
       <EvidenceHeader creator={log.creator.name} version={log.creator.version} />
-      <div className={cx('flex-area')}>
+      <div className={cx('columns')}>
         <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={props.disableKeyHandler ? (_)=>{} : setSelectedRow} />
         {selectedRow > -1  &&
           <EntryData entry={log.entries[selectedRow]} state={entryState} setState={setEntryState} />
@@ -60,7 +60,7 @@ const EntryData = (props: {
 }) => {
   const onTabChanged = (_: Tab, idx: number) => props.setState({ ...props.state, activeTab: idx })
 
-  return <div className={cx('entry-root')}>
+  return <div className={cx('entry-root', 'column')}>
     <TabMenu className={cx('tab-menu-group')} initialActiveTab={props.state.activeTab} onTabChanged={onTabChanged}
       tabs={[
         {
@@ -183,7 +183,7 @@ const RequestTable = (props: {
   }
 
   return (
-    <div className={cx('table-container')}>
+    <div className={cx('table-container', 'column', props.selectedRow > -1 ? '' : 'full-width-column')}>
       <Table className={cx('table')} columns={['#', 'Status', 'Method', 'Path']}
         onKeyDown={onKeyDown} tableRef={tableRef}>
         {props.log.entries.map((entry, index) => (

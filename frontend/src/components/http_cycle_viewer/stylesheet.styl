@@ -3,28 +3,26 @@
 .root
   height: 100%
   display: block
-  overflow: auto
-  margin: 0px 10px 10px 10px
+  position: relative
 
-.flex-area
-  display: flex
-  flex-flow: row wrap
-  justify-content: flex-start
-  align-items: flex-start
+.columns
+  width: 100%
+  margin-left: 5px
 
-  & > *
-    margin-right: 5px
-    margin-bottom: 5px
+.column
+  width: 50%
+  position: absolute
+  top: 30px
+  bottom: 0px
+  box-sizing: border-box
+  padding: 10px
 
 .table-container
-  flex-grow: 1
-  flex-shrink: 1
-  flex-basis: 49% //500px
-  border: 1px solid $darker-background
-  border-bottom: 0px
+  left: 0
+  overflow-y: auto
+  overflow-x: hidden
+  
   box-sizing: border-box
-  overflow: auto
-  height: 100%
 
   .selected-row
     background: $darker-primary
@@ -36,10 +34,12 @@
     white-space: nowrap
 
 
+.full-width-column
+  width: 100%
+
 .entry-root
-  flex-grow: 1
-  flex-basis: 49%
-  flex-shrink: 1
+  left: 50%
+  overflow: auto
 
 .tab-menu-group
   margin-bottom: 2px
