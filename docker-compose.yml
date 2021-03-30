@@ -34,7 +34,7 @@ services:
       - "traefik.http.routers.ashirt.entrypoints=websecure"
       - "traefik.http.routers.ashirt.tls.certresolver=myresolver"
       - "traefik.http.routers.ashirt.tls=true"
-      - "traefik.http.services.ashirt.loadbalancer.server.port=8080"
+      - "traefik.http.services.ashirt.loadbalancer.server.port=3000"
   frontend:
     build:
       context: .
@@ -54,7 +54,7 @@ services:
       - "traefik.http.routers.ashirt.entrypoints=websecure"
       - "traefik.http.routers.ashirt.tls.certresolver=myresolver"
       - "traefik.http.routers.ashirt.tls=true"
-      - "traefik.http.services.ashirt.loadbalancer.server.port=3000"
+      - "traefik.http.services.ashirt.loadbalancer.server.port=8080"
   db:
     image: mysql:8.0
     ports:
