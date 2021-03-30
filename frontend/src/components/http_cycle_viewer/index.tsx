@@ -42,7 +42,7 @@ export const HarViewer = (props: {
         e.stopPropagation() // prevent lightbox from showing
       }
     }}>
-      <EvidenceHeader creator={log.creator.name} version={log.creator.version} />
+      {/* <EvidenceHeader creator={log.creator.name} version={log.creator.version} /> */}
       <div className={cx('columns')}>
         <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={props.disableKeyHandler ? (_)=>{} : setSelectedRow} />
         {selectedRow > -1  &&
