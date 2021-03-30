@@ -10,8 +10,8 @@ services:
       - ./signer:/app/signer
       - /tmp/contentstore
       - typescript-dtos:/typescript-dtos
-    ports:
-      - 3000:3000
+#    ports:
+#      - 3000:3000
     restart: on-failure
     environment:
       APP_IMGSTORE_BUCKET_NAME: ""
@@ -28,7 +28,13 @@ services:
       AUTH_OKTA_SUCCESS_REDIRECT_URL: "http://localhost:8080"
       AUTH_OKTA_FAILURE_REDIRECT_URL_PREFIX: "http://localhost:8080"
       AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD: preferred_username
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ashirt.rule=Host(`api.ashirt.${PUB_DOMAIN}`)"
+      - "traefik.http.routers.ashirt.entrypoints=websecure"
+      - "traefik.http.routers.ashirt.tls.certresolver=myresolver"
+      - "traefik.http.routers.ashirt.tls=true"
+      - "traefik.http.services.ashirt.loadbalancer.server.port=8080"
   frontend:
     build:
       context: .
@@ -37,12 +43,18 @@ services:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
       - typescript-dtos:/app/src/services/data_sources/dtos
-    ports:
-      - 8080:8080
+#    ports:
+#      - 8080:8080
     environment:
       - NODE_ENV=development
       - WEB_BACKEND_ORIGIN=http://backend:3000
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ashirt.rule=Host(`ashirt.${PUB_DOMAIN}`)"
+      - "traefik.http.routers.ashirt.entrypoints=websecure"
+      - "traefik.http.routers.ashirt.tls.certresolver=myresolver"
+      - "traefik.http.routers.ashirt.tls=true"
+      - "traefik.http.services.ashirt.loadbalancer.server.port=3000"
   db:
     image: mysql:8.0
     ports:

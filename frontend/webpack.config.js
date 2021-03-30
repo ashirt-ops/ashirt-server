@@ -78,6 +78,8 @@ module.exports = (env, argv) => ({
   devServer: {
     historyApiFallback: true,
     publicPath: "/assets/",
+    disableHostCheck: true,
+    compress: true,
     proxy: {
       '/web': {target: process.env.WEB_BACKEND_ORIGIN},
     },
