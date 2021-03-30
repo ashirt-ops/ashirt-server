@@ -78,5 +78,6 @@ volumes:
   typescript-dtos:
 
 networks:
+  ashirt:
   core_traefik:
     external: true
