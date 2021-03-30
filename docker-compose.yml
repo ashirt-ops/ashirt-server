@@ -30,6 +30,7 @@ services:
       AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD: preferred_username
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=core_traefik"
       - "traefik.http.routers.ashirt-backend.rule=Host(`api.ashirt.${PUB_DOMAIN}`)"
       - "traefik.http.routers.ashirt-backend.entrypoints=websecure"
       - "traefik.http.routers.ashirt-backend.tls.certresolver=myresolver"
@@ -53,6 +54,7 @@ services:
       - WEB_BACKEND_ORIGIN=http://backend:3000
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=core_traefik"
       - "traefik.http.routers.ashirt.rule=Host(`ashirt.${PUB_DOMAIN}`)"
       - "traefik.http.routers.ashirt.entrypoints=websecure"
       - "traefik.http.routers.ashirt.tls.certresolver=myresolver"
