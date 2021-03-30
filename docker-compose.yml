@@ -37,6 +37,7 @@ services:
       - "traefik.http.services.ashirt-backend.loadbalancer.server.port=3000"
     networks:
       - core_traefik
+      - default
   frontend:
     build:
       context: .
@@ -59,6 +60,7 @@ services:
       - "traefik.http.services.ashirt.loadbalancer.server.port=8080"
     networks:
       - core_traefik
+      - default
   db:
     image: mysql:8.0
 #    ports:
@@ -70,6 +72,8 @@ services:
       - MYSQL_ROOT_PASSWORD=dev-root-password
       - MYSQL_USER=dev-user
       - MYSQL_PASSWORD=dev-user-password
+    networks:
+      - default
 volumes:
   typescript-dtos:
 
