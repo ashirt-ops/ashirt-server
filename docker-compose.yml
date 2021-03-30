@@ -76,3 +76,7 @@ services:
       - ashirt
 volumes:
   typescript-dtos:
+
+networks:
+  core_traefik:
+    external: true
