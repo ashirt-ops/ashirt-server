@@ -26,4 +26,5 @@ type AuthScheme interface {
 	BindRoutes(*mux.Router, AShirtAuthBridge)
 	Name() string
 	FriendlyName() string
+	Flags() []string
 }

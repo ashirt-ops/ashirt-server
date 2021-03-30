@@ -34,6 +34,11 @@ func (RecoveryAuthScheme) FriendlyName() string {
 	return constants.FriendlyName
 }
 
+// Flags returns an empty string (no supported auth flags for recovery)
+func (RecoveryAuthScheme) Flags() []string {
+	return []string{}
+}
+
 func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/generate", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		dr := remux.DissectJSONRequest(r)

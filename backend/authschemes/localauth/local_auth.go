@@ -18,7 +18,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type LocalAuthScheme struct{
+type LocalAuthScheme struct {
 	RegistrationEnabled bool
 }
 
@@ -30,6 +30,18 @@ func (LocalAuthScheme) Name() string {
 // FriendlyName returns "ASHIRT Local Authentication"
 func (LocalAuthScheme) FriendlyName() string {
 	return constants.FriendlyName
+}
+
+// Flags returns auth flags associated with local auth
+// in particular, notes if registration is open or closed
+func (s LocalAuthScheme) Flags() []string {
+	flags := make([]string, 0)
+
+	if s.RegistrationEnabled {
+		flags = append(flags, "open-registration")
+	}
+
+	return flags
 }
 
 // BindRoutes creates many routes for local database routes:

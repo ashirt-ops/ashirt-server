@@ -84,6 +84,11 @@ func (OktaAuth) FriendlyName() string {
 	return "Okta OIDC"
 }
 
+// Flags returns an empty string (no supported auth flags for okta)
+func (OktaAuth) Flags() []string {
+	return []string{}
+}
+
 func (okta OktaAuth) authSuccess(w http.ResponseWriter, r *http.Request, linking bool) (interface{}, error) {
 	if linking {
 		return authDone(w, r, "/account/authmethods", nil)
