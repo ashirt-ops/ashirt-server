@@ -37,7 +37,6 @@ services:
       - "traefik.http.services.ashirt-backend.loadbalancer.server.port=3000"
     networks:
       - core_traefik
-      - ashirt
   frontend:
     build:
       context: .
@@ -60,11 +59,10 @@ services:
       - "traefik.http.services.ashirt.loadbalancer.server.port=8080"
     networks:
       - core_traefik
-      - ashirt
   db:
     image: mysql:8.0
-    ports:
-      - 3306:3306
+#    ports:
+#      - 3306:3306
     volumes:
       - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     environment:
@@ -72,12 +70,9 @@ services:
       - MYSQL_ROOT_PASSWORD=dev-root-password
       - MYSQL_USER=dev-user
       - MYSQL_PASSWORD=dev-user-password
-    networks:
-      - ashirt
 volumes:
   typescript-dtos:
 
 networks:
-  ashirt:
   core_traefik:
     external: true
