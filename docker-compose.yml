@@ -36,6 +36,7 @@ services:
       - "traefik.http.routers.ashirt-backend.tls.certresolver=myresolver"
       - "traefik.http.routers.ashirt-backend.tls=true"
       - "traefik.http.services.ashirt-backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.ashirt-backend.middlewares=private@docker"
     networks:
       - core_traefik
       - default
@@ -60,6 +61,7 @@ services:
       - "traefik.http.routers.ashirt.tls.certresolver=myresolver"
       - "traefik.http.routers.ashirt.tls=true"
       - "traefik.http.services.ashirt.loadbalancer.server.port=8080"
+      - "traefik.http.routers.ashirt.middlewares=private@docker"
     networks:
       - core_traefik
       - default
