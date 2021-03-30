@@ -63,7 +63,9 @@ func tryRunServer(logger logging.Logger) error {
 	for _, svc := range config.SupportedAuthServices() {
 		switch svc {
 		case "ashirt":
-			schemes = append(schemes, localauth.LocalAuthScheme{})
+			schemes = append(schemes, localauth.LocalAuthScheme{
+				RegistrationEnabled: config.IsRegistrationEnabled(),
+			})
 		case "okta":
 			schemes = append(schemes, oktaauth.NewFromConfig(
 				config.AuthConfigInstance(svc),

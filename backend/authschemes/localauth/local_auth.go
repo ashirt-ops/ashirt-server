@@ -18,7 +18,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type LocalAuthScheme struct{}
+type LocalAuthScheme struct{
+	RegistrationEnabled bool
+}
 
 // Name returns the name of this authscheme
 func (LocalAuthScheme) Name() string {
@@ -56,6 +58,10 @@ func (LocalAuthScheme) FriendlyName() string {
 // the underlying system/database
 func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/register", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+		if !p.RegistrationEnabled {
+			return nil, fmt.Errorf("registration is closed to users")
+		}
+
 		dr := remux.DissectJSONRequest(r)
 		firstName := dr.FromBody("firstName").Required().AsString()
 		lastName := dr.FromBody("lastName").Required().AsString()
