@@ -57,6 +57,7 @@ export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSch
   return schemes.map(details => ({
     schemeName: details.schemeName,
     schemeCode: details.schemeCode,
+    schemeFlags: details.schemeFlags,
     userCount: details.userCount,
     uniqueUserCount: details.uniqueUserCount,
     labels: details.labels,

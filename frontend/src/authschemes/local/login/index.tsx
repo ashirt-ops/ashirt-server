@@ -38,11 +38,12 @@ function getValueAndClear(field: {value: string, onChange: (s: string) => void})
 
 export default (props: {
   query: ParsedUrlQuery,
+  authFlags?: Array<string>
 }) => {
   switch (props.query.step) {
     case 'reset': return <ResetPassword />
     case 'totp': return <EnterTotp />
-    default: return <Login />
+    default: return <Login authFlags={props.authFlags} />
   }
 }
 
