@@ -30,11 +30,11 @@ services:
       AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD: preferred_username
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ashirt.rule=Host(`api.ashirt.${PUB_DOMAIN}`)"
-      - "traefik.http.routers.ashirt.entrypoints=websecure"
-      - "traefik.http.routers.ashirt.tls.certresolver=myresolver"
-      - "traefik.http.routers.ashirt.tls=true"
-      - "traefik.http.services.ashirt.loadbalancer.server.port=3000"
+      - "traefik.http.routers.ashirt-backend.rule=Host(`api.ashirt.${PUB_DOMAIN}`)"
+      - "traefik.http.routers.ashirt-backend.entrypoints=websecure"
+      - "traefik.http.routers.ashirt-backend.tls.certresolver=myresolver"
+      - "traefik.http.routers.ashirt-backend.tls=true"
+      - "traefik.http.services.ashirt-backend.loadbalancer.server.port=3000"
   frontend:
     build:
       context: .
