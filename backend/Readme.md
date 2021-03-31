@@ -84,6 +84,42 @@ One limitation to this behavior is that, generally speaking, admins cannot alter
 
 When a fresh system is deployed, no users are present, thus no admins are present either. The first administration account, therefore, is granted to the first user that registers within the system.
 
+###### First Admin alternative
+
+In certain situations, there may not be a way for a new user to register with AShirt without an
+admin's help, even for the first user. In these cases, the below SQL can be used to create an initial
+account and a recovery code to link the account to a supported authentication scheme.
+
+Note that this requires direct access to the database. This should only be done for the first user
+when the normal approach will not work.
+
+1. Edit, and execute the below SQL
+
+  ```sql
+  INSERT INTO users (slug, first_name, last_name, email, admin) VALUES
+  ('user@example.com', 'User', 'McUserface', 'user@example.com', true);
+
+  INSERT INTO auth_scheme_data (auth_scheme, user_key, user_id) VALUES
+  ('recovery', 'e3c6ead16e0c25820ba730f278ef54133da5610f9bf1d2e481ff6693c8df85123a29b8dc1f033a2f', 1);
+  ```
+
+  This will add a one-time password to AShirt which will allow the admin to sign in. Note that,
+  per convention, the slug and email should match if using ASHIRT Local Authentication. This is not
+  a hard requirement if you want to deviate from the convention. All other fields can be updated by
+  updating the profile in Account Settings.
+
+2. Start up the AShirt frontend and backend, if not already started
+3. Once started, edit, and navigate to: `http://MY_ASHIRT_DOMAIN/web/auth/recovery/login?code=e3c6ead16e0c25820ba730f278ef54133da5610f9bf1d2e481ff6693c8df85123a29b8dc1f033a2f`
+
+The admin should now be logged in, and can update their security information.
+
+1. Click the person icon and select "Account Settings"
+2. Go to "Authentication Methods"
+3. Find a supported login the admin wishes to use, and click the "Link" button. Follow this process.
+   1. Note: if linking to ASHIRT Local Authentication, when the admin logs in, they will log in via the email address provided during the linking step, not (necessarily) the above sql script.
+
+At this point, a proper admin account exists and you can log in via the linked methods.
+
 #### Custom Authentication
 
 Adding your own authentication is a 3 step process:
