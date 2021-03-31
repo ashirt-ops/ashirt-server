@@ -39,10 +39,17 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Expected type: time duration (e.g. `60m` => 60 minutes `24h` => 24 hours)
     * Defaults to 24 hours
     * Base unit is 1 minute. Fractional minutes will be ignored
+  * `APP_DISABLE_LOCAL_REGISTRATION`
+    * Removes the registration aspect of local auth. Users will still be able to log in if they already have a local auth account.
+    * Valid Options: `"true"` or `"false"`
+    * Admins can provision new local auth accounts to provide access to new users.
+    * Only valid if deploying using `ashirt` authentication. Otherwise has no effect
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
-    * Example value: `ashirt,google,github`
+    * Example value: `ashirt,otka`
+    * Currently valid values: `ashirt`, `okta`
+      * This list will likely become outdated over time. Consult the authschemes directory for a better idea of what is supported.
   * `AUTH_${SERVICE}_` Variables
     * These environment variables are namespaced per Auth Service. Each of these is a specific field that can be used to pass configuration details to the authentication service. Note that `${SERVICE}` must be replaced with a proper string, expected in all caps. For example `AUTH_GITHUB`, `AUTH_ASHIRT`, `AUTH_GOOGLE`
     * `AUTH_${SERVICE}_CLIENT_ID`
@@ -75,7 +82,7 @@ One limitation to this behavior is that, generally speaking, admins cannot alter
 
 ##### First Admin
 
-When a fresh system is deployed, no users are present, thus no admins are present either. The first administration, therefore, is granted to the first user that registers a system.
+When a fresh system is deployed, no users are present, thus no admins are present either. The first administration account, therefore, is granted to the first user that registers within the system.
 
 #### Custom Authentication
 
