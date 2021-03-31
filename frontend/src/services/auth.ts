@@ -28,6 +28,15 @@ export async function adminChangePassword(i: {
   await ds.adminChangePassword(i)
 }
 
+// TODO this should be encapsulated in an admin settings component under src/authschemes/local
+export async function adminCreateLocalUser(i: {
+  firstName: string,
+  lastName?: string,
+  email: string,
+}) {
+  return await ds.adminCreateLocalUser(i)
+}
+
 export async function logout() {
   await ds.logout()
 }

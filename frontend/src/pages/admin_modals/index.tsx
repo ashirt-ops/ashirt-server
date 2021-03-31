@@ -7,7 +7,7 @@ import classnames from 'classnames/bind'
 import { User, UserAdminView } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
-  deleteGlobalAuthScheme, deleteTotpForUser
+  deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser
 } from 'src/services'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
@@ -15,6 +15,7 @@ import ChallengeModalForm from 'src/components/challenge_modal_form'
 import Checkbox from 'src/components/checkbox'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
+import Form from 'src/components/form'
 import ModalForm from 'src/components/modal_form'
 import { InputWithCopyButton } from 'src/components/text_copiers'
 import { useForm, useFormField } from 'src/helpers'
@@ -65,6 +66,65 @@ export const AddHeadlessUserModal = (props: {
       <Input label="Headless name" {...headlessName} />
       <Input type="email" label="Contact Email" {...contactEmail} />
     </ModalForm>
+  )
+}
+
+export const AddUserModal = (props: {
+  onRequestClose: () => void,
+}) => {
+  const firstName = useFormField<string>("")
+  const lastName = useFormField<string>("")
+  const contactEmail = useFormField<string>("")
+
+  const [username, setUsername] = React.useState<string>("")
+  const [password, setPassword] = React.useState<string>("")
+  const [isDisabled, setDisabled] = React.useState<boolean>(false)
+
+  const formComponentProps = useForm({
+    fields: [firstName, lastName, contactEmail],
+    handleSubmit: () => {
+      if (firstName.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Users should have at least a first name")))
+      }
+      if (contactEmail.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Users must have an email address")))
+      }
+      // TODO: this should create the user, then update the form with the new user/password combo
+      // to share.
+      const runSubmit = async () => {
+        const result = await adminCreateLocalUser({
+          firstName: firstName.value,
+          lastName: lastName.value,
+          email: contactEmail.value,
+        })
+        setUsername(contactEmail.value)
+        setPassword(result.temporaryPassword)
+        setDisabled(true) // lock the form -- we don't need to allow submits at this time.
+      }
+
+      return runSubmit()
+    },
+  })
+
+  return (
+    <Modal title="Create New User" onRequestClose={props.onRequestClose}>
+      <Form {...formComponentProps} loading={isDisabled}
+        submitText={isDisabled ? undefined : "Submit"}
+      >
+        <Input label="First Name" {...firstName} disabled={isDisabled} />
+        <Input label="Last Name" {...lastName} disabled={isDisabled} />
+        <Input label="Email" {...contactEmail} disabled={isDisabled} />
+      </Form>
+      {isDisabled && (<>
+        <div className={cx('success-area')}>
+          <p>Below is the new user's initial login credentials:</p>
+          <InputWithCopyButton label="Username" value={username} />
+          <InputWithCopyButton label="Password" value={password} />
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      }
+    </Modal>
   )
 }
 

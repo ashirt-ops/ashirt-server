@@ -7,6 +7,7 @@ import { RouteComponentProps } from 'react-router-dom'
 
 import AuthTable from './auth_table'
 import HeadlessButton from './add_headless'
+import CreateUserButton from "./add_user"
 import NavVerticalTab from 'src/components/tab_vertical_menu'
 import OperationsTable from './operations_table'
 import RecoveryMetrics from './recovery_metrics'
@@ -28,6 +29,7 @@ export default (props: RouteComponentProps) => {
             id: "users", label: "User Management", content: <>
               <UserTable {...bus} />
               <HeadlessButton {...bus} />
+              <CreateUserButton {...bus} />
             </>
           },
           {
