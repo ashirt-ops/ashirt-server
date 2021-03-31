@@ -147,3 +147,7 @@ type TagByEvidenceDate struct {
 type CheckConnection struct {
 	Ok bool `json:"ok"`
 }
+
+type NewUserCreatedByAdmin struct {
+	TemporaryPassword string `json:"temporaryPassword"`
+}
