@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.17, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
 --
 -- Host: localhost    Database: migrate_db
 -- ------------------------------------------------------
--- Server version	8.0.17
+-- Server version	8.0.22
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,8 +23,8 @@ DROP TABLE IF EXISTS `api_keys`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `api_keys` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
   `access_key` varbinary(255) NOT NULL,
   `secret_key` varbinary(255) NOT NULL,
   `last_auth` timestamp NULL DEFAULT NULL,
@@ -45,10 +45,10 @@ DROP TABLE IF EXISTS `auth_scheme_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_scheme_data` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `auth_scheme` varchar(255) NOT NULL,
   `user_key` varchar(255) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
   `encrypted_password` varbinary(255) DEFAULT NULL,
   `must_reset_password` tinyint(1) DEFAULT '0',
   `totp_secret` varchar(255) DEFAULT NULL,
@@ -70,10 +70,10 @@ DROP TABLE IF EXISTS `evidence`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `evidence` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `uuid` varchar(36) NOT NULL,
-  `operation_id` int(11) NOT NULL,
-  `operator_id` int(11) NOT NULL,
+  `operation_id` int NOT NULL,
+  `operator_id` int NOT NULL,
   `description` text,
   `content_type` varchar(31) NOT NULL,
   `full_image_key` varchar(255) DEFAULT NULL,
@@ -98,8 +98,8 @@ DROP TABLE IF EXISTS `evidence_finding_map`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `evidence_finding_map` (
-  `evidence_id` int(11) NOT NULL,
-  `finding_id` int(11) NOT NULL,
+  `evidence_id` int NOT NULL,
+  `finding_id` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`evidence_id`,`finding_id`),
@@ -110,6 +110,21 @@ CREATE TABLE `evidence_finding_map` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `finding_categories`
+--
+
+DROP TABLE IF EXISTS `finding_categories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `finding_categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `category` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `category` (`category`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `findings`
 --
 
@@ -117,9 +132,9 @@ DROP TABLE IF EXISTS `findings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `findings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `uuid` varchar(36) NOT NULL,
-  `operation_id` int(11) NOT NULL,
+  `operation_id` int NOT NULL,
   `ready_to_report` tinyint(1) NOT NULL DEFAULT '0',
   `ticket_link` varchar(255) DEFAULT NULL,
   `category` varchar(255) NOT NULL DEFAULT '',
@@ -156,12 +171,12 @@ DROP TABLE IF EXISTS `operations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `operations` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `slug` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `active` tinyint(1) DEFAULT '1',
-  `status` int(11) NOT NULL,
+  `status` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -177,8 +192,8 @@ DROP TABLE IF EXISTS `queries`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `queries` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `operation_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `operation_id` int NOT NULL,
   `name` varchar(255) NOT NULL,
   `query` varchar(255) NOT NULL,
   `type` varchar(15) NOT NULL,
@@ -199,8 +214,8 @@ DROP TABLE IF EXISTS `sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sessions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
   `session_data` longblob,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -219,8 +234,8 @@ DROP TABLE IF EXISTS `tag_evidence_map`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tag_evidence_map` (
-  `tag_id` int(11) NOT NULL,
-  `evidence_id` int(11) NOT NULL,
+  `tag_id` int NOT NULL,
+  `evidence_id` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`tag_id`,`evidence_id`),
@@ -238,8 +253,8 @@ DROP TABLE IF EXISTS `tags`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tags` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `operation_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `operation_id` int NOT NULL,
   `name` varchar(63) NOT NULL,
   `color_name` varchar(63) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -258,8 +273,8 @@ DROP TABLE IF EXISTS `user_operation_permissions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_operation_permissions` (
-  `user_id` int(11) NOT NULL,
-  `operation_id` int(11) NOT NULL,
+  `user_id` int NOT NULL,
+  `operation_id` int NOT NULL,
   `role` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -278,7 +293,7 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `slug` varchar(255) NOT NULL,
   `first_name` varchar(255) NOT NULL,
   `last_name` varchar(255) NOT NULL,
@@ -303,12 +318,12 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-09-28 21:20:08
--- MySQL dump 10.13  Distrib 8.0.17, for Linux (x86_64)
+-- Dump completed on 2021-04-01 22:16:30
+-- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
 --
 -- Host: localhost    Database: migrate_db
 -- ------------------------------------------------------
--- Server version	8.0.17
+-- Server version	8.0.22
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -327,7 +342,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `gorp_migrations` WRITE;
 /*!40000 ALTER TABLE `gorp_migrations` DISABLE KEYS */;
-INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2020-09-28 21:20:00'),('20190708185420-create-operations-table.sql','2020-09-28 21:20:00'),('20190708185427-create-events-table.sql','2020-09-28 21:20:00'),('20190708185432-create-evidence-table.sql','2020-09-28 21:20:00'),('20190708185441-create-evidence-event-map-table.sql','2020-09-28 21:20:01'),('20190716190100-create-user-operation-map-table.sql','2020-09-28 21:20:01'),('20190722193434-create-tags-table.sql','2020-09-28 21:20:01'),('20190722193937-create-tag-event-map.sql','2020-09-28 21:20:01'),('20190909183500-add-short-name-to-users-table.sql','2020-09-28 21:20:01'),('20190909190416-add-short-name-index.sql','2020-09-28 21:20:01'),('20190926205116-evidence-name.sql','2020-09-28 21:20:01'),('20190930173342-add-saved-searches.sql','2020-09-28 21:20:01'),('20191001182541-evidence-tags.sql','2020-09-28 21:20:01'),('20191008005212-add-uuid-to-events-evidence.sql','2020-09-28 21:20:02'),('20191015235306-add-slug-to-operations.sql','2020-09-28 21:20:02'),('20191018172105-modular-auth.sql','2020-09-28 21:20:03'),('20191023170906-codeblock.sql','2020-09-28 21:20:03'),('20191101185207-replace-events-with-findings.sql','2020-09-28 21:20:03'),('20191114211948-add-operation-to-tags.sql','2020-09-28 21:20:04'),('20191205182830-create-api-keys-table.sql','2020-09-28 21:20:04'),('20191213222629-users-with-email.sql','2020-09-28 21:20:04'),('20200103194053-rename-short-name-to-slug.sql','2020-09-28 21:20:04'),('20200104013804-rework-ashirt-auth.sql','2020-09-28 21:20:04'),('20200116070736-add-admin-flag.sql','2020-09-28 21:20:05'),('20200130175541-fix-color-truncation.sql','2020-09-28 21:20:05'),('20200205200208-disable-user-support.sql','2020-09-28 21:20:05'),('20200215015330-optional-user-id.sql','2020-09-28 21:20:05'),('20200221195107-deletable-user.sql','2020-09-28 21:20:05'),('20200303215004-move-last-login.sql','2020-09-28 21:20:06'),('20200306221628-add-explicit-headless.sql','2020-09-28 21:20:06'),('20200331155258-finding-status.sql','2020-09-28 21:20:06'),('20200617193248-case-senitive-apikey.sql','2020-09-28 21:20:06'),('20200928160958-add-totp-secret-to-auth-table.sql','2020-09-28 21:20:06');
+INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2021-04-01 22:16:27'),('20190708185420-create-operations-table.sql','2021-04-01 22:16:27'),('20190708185427-create-events-table.sql','2021-04-01 22:16:27'),('20190708185432-create-evidence-table.sql','2021-04-01 22:16:27'),('20190708185441-create-evidence-event-map-table.sql','2021-04-01 22:16:27'),('20190716190100-create-user-operation-map-table.sql','2021-04-01 22:16:28'),('20190722193434-create-tags-table.sql','2021-04-01 22:16:28'),('20190722193937-create-tag-event-map.sql','2021-04-01 22:16:28'),('20190909183500-add-short-name-to-users-table.sql','2021-04-01 22:16:28'),('20190909190416-add-short-name-index.sql','2021-04-01 22:16:28'),('20190926205116-evidence-name.sql','2021-04-01 22:16:28'),('20190930173342-add-saved-searches.sql','2021-04-01 22:16:28'),('20191001182541-evidence-tags.sql','2021-04-01 22:16:28'),('20191008005212-add-uuid-to-events-evidence.sql','2021-04-01 22:16:28'),('20191015235306-add-slug-to-operations.sql','2021-04-01 22:16:28'),('20191018172105-modular-auth.sql','2021-04-01 22:16:29'),('20191023170906-codeblock.sql','2021-04-01 22:16:29'),('20191101185207-replace-events-with-findings.sql','2021-04-01 22:16:29'),('20191114211948-add-operation-to-tags.sql','2021-04-01 22:16:29'),('20191205182830-create-api-keys-table.sql','2021-04-01 22:16:29'),('20191213222629-users-with-email.sql','2021-04-01 22:16:29'),('20200103194053-rename-short-name-to-slug.sql','2021-04-01 22:16:29'),('20200104013804-rework-ashirt-auth.sql','2021-04-01 22:16:29'),('20200116070736-add-admin-flag.sql','2021-04-01 22:16:29'),('20200130175541-fix-color-truncation.sql','2021-04-01 22:16:29'),('20200205200208-disable-user-support.sql','2021-04-01 22:16:30'),('20200215015330-optional-user-id.sql','2021-04-01 22:16:30'),('20200221195107-deletable-user.sql','2021-04-01 22:16:30'),('20200303215004-move-last-login.sql','2021-04-01 22:16:30'),('20200306221628-add-explicit-headless.sql','2021-04-01 22:16:30'),('20200331155258-finding-status.sql','2021-04-01 22:16:30'),('20200617193248-case-senitive-apikey.sql','2021-04-01 22:16:30'),('20200928160958-add-totp-secret-to-auth-table.sql','2021-04-01 22:16:30'),('20210401220807-dynamic-categories.sql','2021-04-01 22:16:30');
 /*!40000 ALTER TABLE `gorp_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -340,4 +355,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-09-28 21:20:09
+-- Dump completed on 2021-04-01 22:16:31
