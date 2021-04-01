@@ -145,3 +145,8 @@ type TagByEvidenceDate struct {
 type CheckConnection struct {
 	Ok bool `json:"ok"`
 }
+
+type FindingCategory struct {
+	ID       int64  `json:"id"`
+	Category string `json:"category"`
+}

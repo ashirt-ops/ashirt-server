@@ -151,3 +151,8 @@ type Session struct {
 	ModifiedAt  *time.Time `db:"modified_at"`
 	ExpiresAt   time.Time  `db:"expires_at"`
 }
+
+type FindingCategory struct {
+	ID          int64      `db:"id"`
+	Category    string     `db:"category"`
+}

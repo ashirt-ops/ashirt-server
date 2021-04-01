@@ -681,4 +681,8 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		}
 		return nil, services.DeleteAuthScheme(r.Context(), db, i)
 	}))
+
+	route(r, "GET", "/findings/categories", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return services.ListFindingCategories(r.Context(), db)
+	}))
 }
