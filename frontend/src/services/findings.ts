@@ -39,14 +39,8 @@ export async function getFinding(i: {
 }
 
 export async function getFindingCategories(): Promise<Array<string>> {
-  return [
-    'Product',
-    'Network',
-    'Enterprise',
-    'Vendor',
-    'Behavioral',
-    'Detection Gap',
-  ]
+  const categories = await ds.listFindingCategories()
+  return categories.map(cat => cat.category)
 }
 
 export async function createFinding(i: {

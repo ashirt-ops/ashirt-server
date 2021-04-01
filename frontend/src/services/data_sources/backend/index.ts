@@ -26,6 +26,7 @@ export const backendDataSource: DataSource = {
   getEvidenceMigrationDifference: (ids, fromOperationSlug) => req('GET', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),
   moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, { sourceOperationSlug: fromOperationSlug }),
 
+  listFindingCategories: () => req('GET', `/findings/categories`),
   listFindings: (ids, query) => req('GET', `/operations/${ids.operationSlug}/findings`, null, { query }),
   createFinding: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/findings`, payload),
   readFinding: ids => req('GET', `/operations/${ids.operationSlug}/findings/${ids.findingUuid}`),

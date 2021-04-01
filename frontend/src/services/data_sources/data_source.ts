@@ -44,6 +44,7 @@ export interface DataSource {
   getEvidenceMigrationDifference(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<dtos.TagDifference>
   moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
 
+  listFindingCategories(): Promise<Array<dtos.FindingCategory>>
   listFindings(ids: OpSlug, query: string): Promise<Array<dtos.Finding>>
   createFinding(ids: OpSlug, payload: FindingPayload): Promise<dtos.Finding>
   readFinding(ids: OpSlug & FindingUuid): Promise<dtos.Finding>
