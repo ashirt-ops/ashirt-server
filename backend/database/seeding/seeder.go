@@ -20,16 +20,17 @@ import (
 // populating/seeding the database (see ApplyTo method), or alternatively, as acting as a source of
 // truth for post-db operations.
 type Seeder struct {
-	APIKeys        []models.APIKey
-	Findings       []models.Finding
-	Evidences      []models.Evidence
-	Users          []models.User
-	Operations     []models.Operation
-	Tags           []models.Tag
-	UserOpMap      []models.UserOperationPermission
-	TagEviMap      []models.TagEvidenceMap
-	EviFindingsMap []models.EvidenceFindingMap
-	Queries        []models.Query
+	FindingCategories []models.FindingCategory
+	APIKeys           []models.APIKey
+	Findings          []models.Finding
+	Evidences         []models.Evidence
+	Users             []models.User
+	Operations        []models.Operation
+	Tags              []models.Tag
+	UserOpMap         []models.UserOperationPermission
+	TagEviMap         []models.TagEvidenceMap
+	EviFindingsMap    []models.EvidenceFindingMap
+	Queries           []models.Query
 }
 
 // AllInitialTagIds is a (convenience) method version of the function TagIDsFromTags
@@ -44,6 +45,14 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 	logging.SetSystemLogger(logging.NewNopLogger())
 	defer logging.SetSystemLogger(systemLogger)
 	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+		tx.BatchInsert("finding_categories", len(seed.FindingCategories), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.FindingCategories[i].ID,
+				"category":   seed.FindingCategories[i].Category,
+				"created_at": seed.FindingCategories[i].CreatedAt,
+				"updated_at": seed.FindingCategories[i].UpdatedAt,
+			}
+		})
 		tx.BatchInsert("users", len(seed.Users), func(i int) map[string]interface{} {
 			return map[string]interface{}{
 				"id":         seed.Users[i].ID,

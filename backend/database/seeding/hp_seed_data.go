@@ -11,6 +11,9 @@ import (
 )
 
 var HarryPotterSeedData = Seeder{
+	FindingCategories: []models.FindingCategory{
+		ProductFindingCategory, NetworkFindingCategory, EnterpriseFindingCategory, VendorFindingCategory, BehavioralFindingCategory, DetectionGapFindingCategory,
+	},
 	Users: []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick,
 		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
 	},
@@ -400,3 +403,12 @@ var spiderLink = "https://www.google.com/search?q=spider+predators"
 var FindingBook2Magic = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-b2magic", "some-category", "lots o' magic", "Magic plagues Harry's life", nil)
 var FindingBook2CGI = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-cgi", "alt-category", "this looks fake", "I'm not entirely sure this is all above board", &noLink)
 var FindingBook2SpiderFear = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-spider", "some-category", "how to scare spiders", "Who would have thought?", &spiderLink)
+
+var newHpFindingCategory = newFindingCategoryGen(1)
+
+var ProductFindingCategory = newHpFindingCategory("Product")
+var NetworkFindingCategory = newHpFindingCategory("Network")
+var EnterpriseFindingCategory = newHpFindingCategory("Enterprise")
+var VendorFindingCategory = newHpFindingCategory("Vendor")
+var BehavioralFindingCategory = newHpFindingCategory("Behavioral")
+var DetectionGapFindingCategory = newHpFindingCategory("Detection Gap")

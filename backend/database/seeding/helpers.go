@@ -149,6 +149,18 @@ func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentTy
 	}
 }
 
+func newFindingCategoryGen(first int64) func(category string) models.FindingCategory {
+	id := iotaLike(first)
+	return func(category string) models.FindingCategory {
+		findingCategory := models.FindingCategory{
+			ID:        id(),
+			Category:  category,
+			CreatedAt: internalClock.Now(),
+		}
+		return findingCategory
+	}
+}
+
 func newFindingGen(first int64) func(opID int64, uuid, category, title, desc string, ticketLink *string) models.Finding {
 	id := iotaLike(first)
 	return func(opID int64, uuid, category, title, desc string, ticketLink *string) models.Finding {
