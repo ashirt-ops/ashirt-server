@@ -119,6 +119,8 @@ DROP TABLE IF EXISTS `finding_categories`;
 CREATE TABLE `finding_categories` (
   `id` int NOT NULL AUTO_INCREMENT,
   `category` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `category` (`category`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
