@@ -153,6 +153,8 @@ type Session struct {
 }
 
 type FindingCategory struct {
-	ID          int64      `db:"id"`
-	Category    string     `db:"category"`
+	ID        int64      `db:"id"`
+	Category  string     `db:"category"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
 }
