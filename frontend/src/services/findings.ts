@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { Evidence, Finding } from 'src/global_types'
+import { Evidence, Finding, FindingCategory } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { findingFromDto, evidenceFromDto } from './data_sources/converters'
@@ -38,9 +38,23 @@ export async function getFinding(i: {
   }
 }
 
-export async function getFindingCategories(): Promise<Array<string>> {
-  const categories = await ds.listFindingCategories()
-  return categories.map(cat => cat.category)
+export async function getFindingCategories(): Promise<Array<FindingCategory>> {
+  return await ds.listFindingCategories()
+}
+
+export async function createFindingCategory(category: string): Promise<FindingCategory> {
+  return await ds.createFindingCategory({ category })
+}
+
+export async function updateFindingCategory(i: {
+  findingCategoryId: number,
+  category: string
+}): Promise<void> {
+  await ds.updateFindingCategory({findingCategoryId: i.findingCategoryId}, {category: i.category})
+}
+
+export async function deleteFindingCategory(findingCategoryId: number): Promise<void> {
+  await ds.deleteFindingCategory({ findingCategoryId })
 }
 
 export async function createFinding(i: {

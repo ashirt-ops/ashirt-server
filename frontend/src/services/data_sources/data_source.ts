@@ -10,6 +10,7 @@ type OpSlug = { operationSlug: string }
 type UserSlug = { userSlug: string }
 type QueryId = { queryId: number }
 type TagId = { tagId: number }
+type FindingCategoryId = { findingCategoryId: number }
 
 type FindingPayload = {
   category: string,
@@ -45,6 +46,9 @@ export interface DataSource {
   moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
 
   listFindingCategories(): Promise<Array<dtos.FindingCategory>>
+  createFindingCategory(payload: { category: string }): Promise<dtos.FindingCategory>
+  deleteFindingCategory(ids: FindingCategoryId): Promise<void>
+  updateFindingCategory(ids: FindingCategoryId, payload: { category: string }): Promise<void>
   listFindings(ids: OpSlug, query: string): Promise<Array<dtos.Finding>>
   createFinding(ids: OpSlug, payload: FindingPayload): Promise<dtos.Finding>
   readFinding(ids: OpSlug & FindingUuid): Promise<dtos.Finding>

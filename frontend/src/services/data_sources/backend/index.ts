@@ -27,6 +27,9 @@ export const backendDataSource: DataSource = {
   moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, { sourceOperationSlug: fromOperationSlug }),
 
   listFindingCategories: () => req('GET', `/findings/categories`),
+  createFindingCategory: (payload) => req('POST', `/findings/category`, payload),
+  deleteFindingCategory: (ids) => req('DELETE', `/finding/category/${ids.findingCategoryId}`),
+  updateFindingCategory: (ids, payload) => req('POST', `/findings/category/${ids.findingCategoryId}`, payload),
   listFindings: (ids, query) => req('GET', `/operations/${ids.operationSlug}/findings`, null, { query }),
   createFinding: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/findings`, payload),
   readFinding: ids => req('GET', `/operations/${ids.operationSlug}/findings/${ids.findingUuid}`),
