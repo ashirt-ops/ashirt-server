@@ -685,4 +685,13 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 	route(r, "GET", "/findings/categories", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListFindingCategories(r.Context(), db)
 	}))
+
+	route(r, "POST", "/findings/category", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		category := dr.FromBody("category").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.CreateFindingCategory(r.Context(), db, category)
+	}))
 }
