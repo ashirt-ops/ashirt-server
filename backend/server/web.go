@@ -694,4 +694,14 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		}
 		return services.CreateFindingCategory(r.Context(), db, category)
 	}))
+
+	route(r, "DELETE", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		findingCategoryID := dr.FromURL("id").AsInt64()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteFindingCategory(r.Context(), db, findingCategoryID)
+	}))
+
 }
