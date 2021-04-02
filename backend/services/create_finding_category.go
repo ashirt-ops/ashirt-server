@@ -25,5 +25,5 @@ func CreateFindingCategory(ctx context.Context, db *database.Connection, newCate
 		return nil, err
 	}
 
-	return &dtos.FindingCategory{ ID: id, Category: newCategory }, nil
+	return &dtos.FindingCategory{ID: id, Category: newCategory}, nil
 }
