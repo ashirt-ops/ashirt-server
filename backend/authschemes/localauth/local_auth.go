@@ -108,11 +108,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 		}
 
 		// convert authKey into readable format
-		bufKey := make([]byte, len(authKey))
-		for i, b := range authKey {
-			bufKey[i] = (b % (126 - 33)) + 33
-		}
-		readKey := base64.StdEncoding.EncodeToString(bufKey)
+		readKey := base64.StdEncoding.EncodeToString(authKey)
 
 		dr := remux.DissectJSONRequest(r)
 		info := RegistrationInfo{
