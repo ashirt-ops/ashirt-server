@@ -5,6 +5,7 @@ package localauth
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -101,15 +102,17 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			return nil, backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin"))
 		}
 
-		authKey := make([]byte, 40)
+		authKey := make([]byte, 42)
 		if _, err := rand.Read(authKey); err != nil {
 			return nil, backend.WrapError("Unable to generate random new user password key", err)
 		}
-		// convert authKey into readable range (33-126)
-		readKey := make([]byte, len(authKey))
+		
+		// convert authKey into readable format
+		bufKey := make([]byte, len(authKey))
 		for i, b := range authKey {
-			readKey[i] = (b % (126 - 33)) + 33
+			bufKey[i] = (b % (126 - 33)) + 33
 		}
+		readKey := base64.StdEncoding.EncodeToString(bufKey)
 
 		dr := remux.DissectJSONRequest(r)
 		info := RegistrationInfo{
