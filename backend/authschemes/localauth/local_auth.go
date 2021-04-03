@@ -106,7 +106,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 		if _, err := rand.Read(authKey); err != nil {
 			return nil, backend.WrapError("Unable to generate random new user password key", err)
 		}
-		
+
 		// convert authKey into readable format
 		bufKey := make([]byte, len(authKey))
 		for i, b := range authKey {
