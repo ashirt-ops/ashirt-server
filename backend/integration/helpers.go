@@ -48,8 +48,10 @@ func NewTester(t *testing.T) *Tester {
 		db, contentStore, &server.WebConfig{
 			CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
 			SessionStoreKey: []byte("session-store-key-for-integration-tests"),
-			AuthSchemes:     []authschemes.AuthScheme{localauth.LocalAuthScheme{}},
-			Logger:          commonLogger,
+			AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
+				RegistrationEnabled: true,
+			}},
+			Logger: commonLogger,
 		},
 	)))
 	s.Handle("/api/", server.API(

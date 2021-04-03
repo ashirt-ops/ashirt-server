@@ -97,10 +97,13 @@ const TableRow = (props: {
       </td>
       {linking && (
         <Modal onRequestClose={() => setLinking(false)} title={"Link Account"}>
-          <Linker onSuccess={() => {
-            setLinking(false)
-            props.requestReload && props.requestReload()
-          }} />
+          <Linker
+            onSuccess={() => {
+              setLinking(false)
+              props.requestReload && props.requestReload()
+            }}
+            authFlags={props.supportedScheme.schemeFlags}
+          />
         </Modal>
       )}
     </tr>

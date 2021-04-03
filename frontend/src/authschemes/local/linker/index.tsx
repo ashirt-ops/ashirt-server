@@ -10,6 +10,7 @@ import Input from 'src/components/input'
 
 export default (props: {
   onSuccess: () => void,
+  authFlags?: Array<string>,
 }) => {
   const email = useFormField<string>('')
   const password = useFormField<string>('')

@@ -7,6 +7,7 @@ import Button from 'src/components/button'
 
 export default (props: {
   onSuccess: () => void,
+  authFlags?: Array<string>
 }) => (
   <Button primary onClick={(e) => { e.preventDefault(); window.location.href = "/web/auth/okta/link" }}>Login with Okta</Button >
 )
