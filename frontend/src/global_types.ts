@@ -180,6 +180,7 @@ export type PaginationResult<T> = PaginationQuery & {
 export type SupportedAuthenticationScheme = {
   schemeName: string,
   schemeCode: string,
+  schemeFlags: Array<string>
 }
 
 export type AuthSchemeDetails = SupportedAuthenticationScheme & {

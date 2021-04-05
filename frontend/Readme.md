@@ -16,6 +16,7 @@ In addition to the above, the following features are supported:
 
 * Admin accounts
   * Admins have special access to the system. They can view all users, reset password, and edit any operation settings.
+  * Admins gain access to these functions, and more, by choosing the person icon, and selecting "Admin"
 * Robust searching
   * Sort by tag, date range or description
 * Saving searches for evidence and findings (on a per-operation basis)

@@ -116,6 +116,7 @@ type PaginationWrapper struct {
 type DetailedAuthenticationInfo struct {
 	AuthSchemeName  string     `json:"schemeName"`
 	AuthSchemeCode  string     `json:"schemeCode"`
+	AuthSchemeFlags []string   `json:"schemeFlags"`
 	UserCount       int64      `json:"userCount"`
 	UniqueUserCount int64      `json:"uniqueUserCount"`
 	LastUsed        *time.Time `json:"lastUsed"`
@@ -123,8 +124,9 @@ type DetailedAuthenticationInfo struct {
 }
 
 type SupportedAuthScheme struct {
-	SchemeName string `json:"schemeName"`
-	SchemeCode string `json:"schemeCode"`
+	SchemeName  string   `json:"schemeName"`
+	SchemeCode  string   `json:"schemeCode"`
+	SchemeFlags []string `json:"schemeFlags"`
 }
 
 type TagDifference struct {
@@ -149,4 +151,8 @@ type CheckConnection struct {
 type FindingCategory struct {
 	ID       int64  `json:"id"`
 	Category string `json:"category"`
+}
+
+type NewUserCreatedByAdmin struct {
+	TemporaryPassword string `json:"temporaryPassword"`
 }

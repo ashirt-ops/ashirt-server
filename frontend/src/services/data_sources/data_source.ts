@@ -90,6 +90,7 @@ export interface DataSource {
   deleteExpiredRecoveryCodes(): Promise<void>
   getRecoveryMetrics(): Promise<any>
   adminChangePassword(i: { userSlug: string, newPassword: string }): Promise<void>
+  adminCreateLocalUser(i: { firstName: string, lastName?: string, email: string }): Promise<dtos.NewUserCreatedByAdmin>,
   getTotpForUser(ids: UserSlug): Promise<boolean>
   deleteTotpForUser(ids: UserSlug): Promise<void>
 }

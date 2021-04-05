@@ -71,6 +71,7 @@ export const backendDataSource: DataSource = {
   deleteExpiredRecoveryCodes: () => req('DELETE', '/auth/recovery/expired'),
   getRecoveryMetrics: () => req('GET', '/auth/recovery/metrics'),
   adminChangePassword: i => req('PUT', '/auth/local/admin/password', i),
+  adminCreateLocalUser: i => req('POST', '/auth/local/admin/register', i),
   getTotpForUser: ids =>  req('GET', '/auth/local/totp', ids),
   deleteTotpForUser: ids => req('DELETE', '/auth/local/totp', ids),
 }

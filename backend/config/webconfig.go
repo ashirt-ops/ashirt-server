@@ -15,12 +15,13 @@ import (
 
 // WebConfig is a namespaced app-specific configuration.
 type WebConfig struct {
-	ImgstoreBucketName string        `split_words:"true"`
-	ImgstoreRegion     string        `split_words:"true"`
-	CsrfAuthKey        string        `split_words:"true"`
-	SessionStoreKey    string        `split_words:"true"`
-	RecoveryExpiry     time.Duration `split_words:"true" default:"24h"`
-	Port               int
+	ImgstoreBucketName       string        `split_words:"true"`
+	ImgstoreRegion           string        `split_words:"true"`
+	CsrfAuthKey              string        `split_words:"true"`
+	SessionStoreKey          string        `split_words:"true"`
+	RecoveryExpiry           time.Duration `split_words:"true" default:"24h"`
+	DisableLocalRegistration bool          `split_words:"true"`
+	Port                     int
 }
 
 // DBConfig provides configuration details on connecting to the backend database
@@ -175,4 +176,9 @@ func Port() string {
 // RecoveryExpiry retrieves the APP_RECOVERY_EXPIRY value from the environment
 func RecoveryExpiry() time.Duration {
 	return app.RecoveryExpiry
+}
+
+// IsRegistrationEnabled returns true if local registration is enabled, false otherwise.
+func IsRegistrationEnabled() bool {
+	return !app.DisableLocalRegistration
 }

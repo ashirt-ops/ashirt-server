@@ -8,7 +8,7 @@
     "test-file": "mocha"
   },
   "devDependencies": {
-    "@testing-library/react-hooks": "^5.1.0",
+    "@testing-library/react-hooks": "^5.1.1",
     "@types/chai": "^4.2.15",
     "@types/classnames": "^2.2.11",
     "@types/lodash": "^4.14.168",
@@ -16,7 +16,7 @@
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
     "@types/react-router-dom": "^5.1.7",
-    "@types/sinon": "^9.0.10",
+    "@types/sinon": "^9.0.11",
     "@types/sinon-chai": "^3.2.5",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
@@ -37,7 +37,7 @@
     "stylus-loader": "^4.3.3",
     "ts-loader": "^8.0.17",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.2",
+    "typescript": "^4.2.3",
     "webpack": "^4.46.0",
     "webpack-cli": "^4.5.0",
     "webpack-dev-server": "^3.11.2"
@@ -47,14 +47,14 @@
     "ace-builds": "^1.4.9",
     "classnames": "^2.2.6",
     "date-fns": "^2.18.0",
-    "interactjs": "^1.10.3",
+    "interactjs": "^1.10.11",
     "lodash": "^4.17.21",
     "react": "^16.14.0",
     "react-ace": "^9.3.0",
     "react-calendar-timeline": "^0.27.0",
     "react-day-picker": "^7.4.0",
     "react-dom": "^16.14.0",
-    "react-dropzone": "^11.3.1",
+    "react-dropzone": "^11.3.2",
     "react-markdown": "^5.0.3",
     "react-router-dom": "^5.1.2",
     "xterm": "^4.10.0"

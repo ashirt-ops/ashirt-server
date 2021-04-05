@@ -3,14 +3,24 @@ package localauth
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
+
+type RegistrationInfo struct {
+	Password           string
+	Email              string
+	FirstName          string
+	LastName           string
+	ForceResetPassword bool
+}
 
 func readUserTotpStatus(ctx context.Context, bridge authschemes.AShirtAuthBridge, userSlug string) (bool, error) {
 	userID, err := services.SelfOrSlugToUserID(ctx, bridge.GetDatabase(), userSlug)
@@ -50,4 +60,27 @@ func deleteUserTotp(ctx context.Context, bridge authschemes.AShirtAuthBridge, us
 
 	authData.TOTPSecret = nil
 	return bridge.UpdateAuthForUser(authData)
+}
+
+func registerNewUser(ctx context.Context, bridge authschemes.AShirtAuthBridge, info RegistrationInfo) error {
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(info.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return backend.WrapError("Unable to generate encrypted password", err)
+	}
+
+	userResult, err := bridge.CreateNewUser(authschemes.UserProfile{
+		FirstName: info.FirstName,
+		LastName:  info.LastName,
+		Slug:      strings.ToLower(info.FirstName + "." + info.LastName),
+		Email:     info.Email,
+	})
+	if err != nil {
+		return err
+	}
+	return bridge.CreateNewAuthForUser(authschemes.UserAuthData{
+		UserID:             userResult.UserID,
+		UserKey:            info.Email,
+		EncryptedPassword:  encryptedPassword,
+		NeedsPasswordReset: info.ForceResetPassword,
+	})
 }

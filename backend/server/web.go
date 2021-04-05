@@ -84,7 +84,11 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 	for i, scheme := range config.AuthSchemes {
 		authRouter := r.PathPrefix("/auth/" + scheme.Name()).Subrouter()
 		scheme.BindRoutes(authRouter, authschemes.MakeAuthBridge(db, sessionStore, scheme.Name()))
-		supportedAuthSchemes[i] = dtos.SupportedAuthScheme{SchemeName: scheme.FriendlyName(), SchemeCode: scheme.Name()}
+		supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
+			SchemeName:  scheme.FriendlyName(),
+			SchemeCode:  scheme.Name(),
+			SchemeFlags: scheme.Flags(),
+		}
 	}
 	authsWithOutRecovery := make([]dtos.SupportedAuthScheme, 0, len(supportedAuthSchemes)-1)
 

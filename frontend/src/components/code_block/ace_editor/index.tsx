@@ -30,6 +30,7 @@ export default (props: {
         {...editorSize}
         mode={mode}
         theme="ashirt"
+        showPrintMargin={false}
         editorProps={{ $blockScrolling: true }}
       />
     </div>
