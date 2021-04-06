@@ -2,12 +2,15 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
 import Button, { ButtonGroup } from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import { FindingCategory } from 'src/global_types'
 import { getFindingCategories } from 'src/services'
 import { useModal, useWiredData, renderModals } from 'src/helpers'
+
+const cx = classnames.bind(require('./stylesheet'))
 
 import {
   DeleteFindingCategoryModal,
@@ -54,7 +57,7 @@ export default (props: {
   ))
 
   return (
-    <SettingsSection title="Finding Categories">
+    <SettingsSection title="Finding Categories" className={cx('finding-table-section')}>
       {wiredCategories.render(data => (
         <>
           <Table columns={columns}>
@@ -62,7 +65,7 @@ export default (props: {
               <TableRow key={category.id} category={category} onUpdate={wiredCategories.reload} />
             ))}
           </Table>
-          <Button primary onClick={() => createModal.show()}>Add</Button>
+          <Button className={cx('create-button')} primary onClick={() => createModal.show()}>Add New Category</Button>
         </>
       ))}
       {renderModals(createModal)}
