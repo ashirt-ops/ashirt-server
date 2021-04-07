@@ -7,7 +7,7 @@ import Button, { ButtonGroup } from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import { FindingCategory } from 'src/global_types'
-import { deleteFindingCategory, getFindingCategories, getFindingCategoriesInclDeleted } from 'src/services'
+import { deleteFindingCategory, getFindingCategories } from 'src/services'
 import { useModal, useWiredData, renderModals } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -61,7 +61,9 @@ const TableRow = (props: {
 
 export default (props: {
 }) => {
-  const wiredCategories = useWiredData<Array<FindingCategory>>(getFindingCategoriesInclDeleted)
+  const wiredCategories = useWiredData<Array<FindingCategory>>(
+    React.useCallback(() => getFindingCategories(true), [])
+  )
 
   const createModal = useModal<void>(modalProps => (
     <EditFindingCategoryModal {...modalProps} onEdited={wiredCategories.reload} />

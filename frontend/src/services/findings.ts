@@ -42,10 +42,6 @@ export async function getFindingCategories(includeDeleted = false): Promise<Arra
   return await ds.listFindingCategories(includeDeleted)
 }
 
-export async function getFindingCategoriesInclDeleted(): Promise<Array<FindingCategory>> {
-  return await ds.listFindingCategories(true)
-}
-
 export async function createFindingCategory(category: string): Promise<FindingCategory> {
   return await ds.createFindingCategory({ category })
 }
