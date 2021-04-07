@@ -212,4 +212,5 @@ export type TagByEvidenceDate = Tag & {
 export type FindingCategory = {
   id: number,
   category: string,
+  deleted: boolean,
 }

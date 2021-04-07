@@ -7,7 +7,7 @@ import Button, { ButtonGroup } from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import { FindingCategory } from 'src/global_types'
-import { getFindingCategories } from 'src/services'
+import { deleteFindingCategory, getFindingCategories, getFindingCategoriesInclDeleted } from 'src/services'
 import { useModal, useWiredData, renderModals } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -19,6 +19,7 @@ import {
 
 const columns = [
   'Name',
+  'Status',
   'Actions',
 ]
 
@@ -33,14 +34,24 @@ const TableRow = (props: {
   const deleteModal = useModal<void>(modalProps => (
     <DeleteFindingCategoryModal {...modalProps} onDeleted={props.onUpdate} category={props.category} />
   ))
+  const isDeleted = props.category.deleted
 
   return (
     <tr>
       <td>{props.category.category}</td>
+      <td>{isDeleted ? 'deleted' : 'active'}</td>
       <td>
         <ButtonGroup>
           <Button small onClick={() => editModal.show()}>Edit</Button>
-          <Button small danger onClick={() => deleteModal.show()}>Delete</Button>
+          {
+            isDeleted
+              ? <Button small onClick={() => deleteFindingCategory({
+                id: props.category.id,
+                delete: false
+              }).then(props.onUpdate)}>Restore</Button>
+              : <Button small danger onClick={() => deleteModal.show()}>Delete</Button>
+          }
+
         </ButtonGroup>
         {renderModals(editModal, deleteModal)}
       </td>
@@ -50,7 +61,7 @@ const TableRow = (props: {
 
 export default (props: {
 }) => {
-  const wiredCategories = useWiredData<Array<FindingCategory>>(getFindingCategories)
+  const wiredCategories = useWiredData<Array<FindingCategory>>(getFindingCategoriesInclDeleted)
 
   const createModal = useModal<void>(modalProps => (
     <EditFindingCategoryModal {...modalProps} onEdited={wiredCategories.reload} />

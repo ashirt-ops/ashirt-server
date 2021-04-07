@@ -45,9 +45,9 @@ export interface DataSource {
   getEvidenceMigrationDifference(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<dtos.TagDifference>
   moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
 
-  listFindingCategories(): Promise<Array<dtos.FindingCategory>>
+  listFindingCategories(includeDeleted: boolean): Promise<Array<dtos.FindingCategory>>
   createFindingCategory(payload: { category: string }): Promise<dtos.FindingCategory>
-  deleteFindingCategory(ids: FindingCategoryId): Promise<void>
+  deleteFindingCategory(ids: FindingCategoryId, payload: { delete: boolean }): Promise<void>
   updateFindingCategory(ids: FindingCategoryId, payload: { category: string }): Promise<void>
   listFindings(ids: OpSlug, query: string): Promise<Array<dtos.Finding>>
   createFinding(ids: OpSlug, payload: FindingPayload): Promise<dtos.Finding>

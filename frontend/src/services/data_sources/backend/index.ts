@@ -26,9 +26,9 @@ export const backendDataSource: DataSource = {
   getEvidenceMigrationDifference: (ids, fromOperationSlug) => req('GET', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),
   moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, { sourceOperationSlug: fromOperationSlug }),
 
-  listFindingCategories: () => req('GET', `/findings/categories`),
+  listFindingCategories: (includeDeleted) => req('GET', `/findings/categories`, null, { includeDeleted }),
   createFindingCategory: (payload) => req('POST', `/findings/category`, payload),
-  deleteFindingCategory: (ids) => req('DELETE', `/findings/category/${ids.findingCategoryId}`),
+  deleteFindingCategory: (ids, payload) => req('DELETE', `/findings/category/${ids.findingCategoryId}`, payload),
   updateFindingCategory: (ids, payload) => req('PUT', `/findings/category/${ids.findingCategoryId}`, payload),
   listFindings: (ids, query) => req('GET', `/operations/${ids.operationSlug}/findings`, null, { query }),
   createFinding: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/findings`, payload),
@@ -72,6 +72,6 @@ export const backendDataSource: DataSource = {
   getRecoveryMetrics: () => req('GET', '/auth/recovery/metrics'),
   adminChangePassword: i => req('PUT', '/auth/local/admin/password', i),
   adminCreateLocalUser: i => req('POST', '/auth/local/admin/register', i),
-  getTotpForUser: ids =>  req('GET', '/auth/local/totp', ids),
+  getTotpForUser: ids => req('GET', '/auth/local/totp', ids),
   deleteTotpForUser: ids => req('DELETE', '/auth/local/totp', ids),
 }

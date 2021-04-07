@@ -38,8 +38,12 @@ export async function getFinding(i: {
   }
 }
 
-export async function getFindingCategories(): Promise<Array<FindingCategory>> {
-  return await ds.listFindingCategories()
+export async function getFindingCategories(includeDeleted = false): Promise<Array<FindingCategory>> {
+  return await ds.listFindingCategories(includeDeleted)
+}
+
+export async function getFindingCategoriesInclDeleted(): Promise<Array<FindingCategory>> {
+  return await ds.listFindingCategories(true)
 }
 
 export async function createFindingCategory(category: string): Promise<FindingCategory> {
@@ -50,11 +54,14 @@ export async function updateFindingCategory(i: {
   findingCategoryId: number,
   category: string
 }): Promise<void> {
-  await ds.updateFindingCategory({findingCategoryId: i.findingCategoryId}, {category: i.category})
+  await ds.updateFindingCategory({ findingCategoryId: i.findingCategoryId }, { category: i.category })
 }
 
-export async function deleteFindingCategory(findingCategoryId: number): Promise<void> {
-  await ds.deleteFindingCategory({ findingCategoryId })
+export async function deleteFindingCategory(i: {
+  id: number,
+  delete: boolean
+}): Promise<void> {
+  await ds.deleteFindingCategory({ findingCategoryId: i.id }, {delete: i.delete})
 }
 
 export async function createFinding(i: {

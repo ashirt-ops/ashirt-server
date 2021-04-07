@@ -687,7 +687,13 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 	}))
 
 	route(r, "GET", "/findings/categories", jsonHandler(func(r *http.Request) (interface{}, error) {
-		return services.ListFindingCategories(r.Context(), db)
+		dr := dissectJSONRequest(r)
+		includeDeleted := dr.FromQuery("includeDeleted").OrDefault(false).AsBool()
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ListFindingCategories(r.Context(), db, includeDeleted)
 	}))
 
 	route(r, "POST", "/findings/category", jsonHandler(func(r *http.Request) (interface{}, error) {
@@ -701,11 +707,14 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 
 	route(r, "DELETE", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
-		findingCategoryID := dr.FromURL("id").AsInt64()
+		i := services.DeleteFindingCategoryInput{
+			FindingCategoryId: dr.FromURL("id").AsInt64(),
+			DoDelete:          dr.FromBody("delete").Required().AsBool(),
+		}
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, services.DeleteFindingCategory(r.Context(), db, findingCategoryID)
+		return nil, services.DeleteFindingCategory(r.Context(), db, i)
 	}))
 
 	route(r, "PUT", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {

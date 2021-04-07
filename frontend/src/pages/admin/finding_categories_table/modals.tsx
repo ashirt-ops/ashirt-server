@@ -15,7 +15,10 @@ export const DeleteFindingCategoryModal = (props: {
 }) => {
   const formComponentProps = useForm({
     onSuccess: () => { props.onDeleted(); props.onRequestClose() },
-    handleSubmit: () => deleteFindingCategory(props.category.id),
+    handleSubmit: () => deleteFindingCategory({
+      id: props.category.id,
+      delete: true
+    }),
   })
 
   return (

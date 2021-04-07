@@ -15,16 +15,17 @@ import (
 )
 
 // ListFindingCategories retrieves a list of all of the finding categories present in the database.
-func ListFindingCategories(ctx context.Context, db *database.Connection) (interface{}, error) {
+func ListFindingCategories(ctx context.Context, db *database.Connection, includeDeleted bool) (interface{}, error) {
+	query := sq.Select("id", "category", "deleted_at").
+		From("finding_categories").
+		OrderBy("category")
+
+	if !includeDeleted {
+		query = query.Where(sq.Eq{"deleted_at": nil})
+	}
 
 	var categories []models.FindingCategory
-
-	err := db.Select(&categories, sq.Select("id", "category").
-		From("finding_categories").
-		OrderBy("category"),
-	)
-
-	if err != nil {
+	if err := db.Select(&categories, query); err != nil {
 		return nil, backend.WrapError("Cannot list finding categories", backend.DatabaseErr(err))
 	}
 
@@ -33,6 +34,7 @@ func ListFindingCategories(ctx context.Context, db *database.Connection) (interf
 		rtn[i] = &dtos.FindingCategory{
 			ID:       cat.ID,
 			Category: cat.Category,
+			Deleted:  cat.DeletedAt != nil,
 		}
 	}
 

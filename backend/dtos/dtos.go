@@ -151,6 +151,7 @@ type CheckConnection struct {
 type FindingCategory struct {
 	ID       int64  `json:"id"`
 	Category string `json:"category"`
+	Deleted  bool   `json:"deleted"`
 }
 
 type NewUserCreatedByAdmin struct {
