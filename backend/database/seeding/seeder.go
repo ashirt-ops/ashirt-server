@@ -51,6 +51,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"category":   seed.FindingCategories[i].Category,
 				"created_at": seed.FindingCategories[i].CreatedAt,
 				"updated_at": seed.FindingCategories[i].UpdatedAt,
+				"deleted_at": seed.FindingCategories[i].DeletedAt,
 			}
 		})
 		tx.BatchInsert("users", len(seed.Users), func(i int) map[string]interface{} {

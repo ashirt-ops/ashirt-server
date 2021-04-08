@@ -13,6 +13,7 @@ import (
 var HarryPotterSeedData = Seeder{
 	FindingCategories: []models.FindingCategory{
 		ProductFindingCategory, NetworkFindingCategory, EnterpriseFindingCategory, VendorFindingCategory, BehavioralFindingCategory, DetectionGapFindingCategory,
+		DeletedCategory,
 	},
 	Users: []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick,
 		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
@@ -406,9 +407,10 @@ var FindingBook2SpiderFear = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-spid
 
 var newHpFindingCategory = newFindingCategoryGen(1)
 
-var ProductFindingCategory = newHpFindingCategory("Product")
-var NetworkFindingCategory = newHpFindingCategory("Network")
-var EnterpriseFindingCategory = newHpFindingCategory("Enterprise")
-var VendorFindingCategory = newHpFindingCategory("Vendor")
-var BehavioralFindingCategory = newHpFindingCategory("Behavioral")
-var DetectionGapFindingCategory = newHpFindingCategory("Detection Gap")
+var ProductFindingCategory = newHpFindingCategory("Product", false)
+var NetworkFindingCategory = newHpFindingCategory("Network", false)
+var EnterpriseFindingCategory = newHpFindingCategory("Enterprise", false)
+var VendorFindingCategory = newHpFindingCategory("Vendor", false)
+var BehavioralFindingCategory = newHpFindingCategory("Behavioral", false)
+var DetectionGapFindingCategory = newHpFindingCategory("Detection Gap", false)
+var DeletedCategory = newHpFindingCategory("I was deleted", true)
