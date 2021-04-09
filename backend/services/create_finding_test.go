@@ -19,7 +19,7 @@ func TestCreateFinding(t *testing.T) {
 	op := OpChamberOfSecrets
 	i := services.CreateFindingInput{
 		OperationSlug: op.Slug,
-		Category:      "Garbage",
+		Category:      VendorFindingCategory.Category,
 		Title:         "When Dinosaurs Attack",
 		Description:   "An investigative look into what happens when dinosaurs vandalize neighborhoods like yours",
 	}

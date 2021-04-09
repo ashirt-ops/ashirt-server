@@ -266,3 +266,7 @@ func (seed TestSeedData) EvidenceForOperation(opID int64) []models.Evidence {
 func (seed TestSeedData) TagIDsUsageByDate(opID int64) map[int64][]time.Time {
 	return seed.Seeder.TagIDsUsageByDate(opID)
 }
+
+func (seed TestSeedData) CategoryForFinding(finding models.Finding) string {
+	return seed.Seeder.CategoryForFinding(finding)
+}

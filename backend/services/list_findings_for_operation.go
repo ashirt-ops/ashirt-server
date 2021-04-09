@@ -51,8 +51,7 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 		"MIN(evidence.occurred_at) AS occurred_from",
 		"MAX(evidence.occurred_at) AS occurred_to",
 		"GROUP_CONCAT(DISTINCT tag_id) AS tag_ids",
-		"finding_categories.category AS finding_category",
-		).
+		"finding_categories.category AS finding_category").
 		From("findings").
 		LeftJoin("evidence_finding_map ON findings.id = finding_id").
 		LeftJoin("evidence ON evidence_id = evidence.id").

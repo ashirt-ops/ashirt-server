@@ -184,6 +184,18 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 	return err
 }
 
+func (seed Seeder) CategoryForFinding(finding models.Finding) string {
+	if finding.CategoryID == nil {
+		return ""
+	}
+	for _, row := range seed.FindingCategories {
+		if row.ID == *finding.CategoryID {
+			return row.Category
+		}
+	}
+	return ""
+}
+
 func (seed Seeder) EvidenceIDsForFinding(finding models.Finding) []int64 {
 	rtn := make([]int64, 0)
 	for _, row := range seed.EviFindingsMap {
