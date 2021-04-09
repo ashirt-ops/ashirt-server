@@ -45,6 +45,21 @@ type mockOperation struct {
 // the second operation has a single piece of evidence and finding, to do tests for "such and such does not belong to this operation" branches
 // All wiring still needs to be done by the user
 func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperation, mockOperation) {
+
+	commonFindingCategories := []string{
+		"Product",
+		"Network",
+		"Enterprise",
+		"Vendor",
+		"Behavioral",
+		"Detection Gap",
+	}
+	db.BatchInsert("finding_categories", len(commonFindingCategories), func(i int) map[string]interface{} {
+		return map[string]interface{}{
+			"category": commonFindingCategories[i],
+		}
+	})
+
 	goodOp := mockOperation{
 		User:     dtos.User{FirstName: "fn", LastName: "ln", Slug: "sn"},
 		Findings: make([]models.Finding, 0),
@@ -108,10 +123,13 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 	makeEvidence(&badOp, "item5")
 
 	makeFinding := func(op *mockOperation, title string) {
-		input := CreateFindingInput{OperationSlug: op.Op.Slug, Category: "garbage", Title: title, Description: "desc"}
+		input := CreateFindingInput{OperationSlug: op.Op.Slug, Category: "Product", Title: title, Description: "desc"}
 		findingResult, err := CreateFinding(ctx, db, input)
 		require.NoError(t, err)
 
+		var categoryID int64
+		err = db.Get(&categoryID, sq.Select("id").From("finding_categories").Where(sq.Eq{"category": commonFindingCategories[0]}))
+		require.NoError(t, err)
 		var findingID int64
 		err = db.Get(&findingID, sq.Select("id").From("findings").Where(sq.Eq{"uuid": findingResult.UUID}))
 		require.NoError(t, err)
@@ -120,7 +138,7 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 			UUID:        findingResult.UUID,
 			Title:       findingResult.Title,
 			Description: findingResult.Description,
-			Category:    input.Category,
+			CategoryID:  &categoryID,
 			OperationID: op.Op.ID,
 		})
 	}

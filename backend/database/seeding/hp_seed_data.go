@@ -13,7 +13,7 @@ import (
 var HarryPotterSeedData = Seeder{
 	FindingCategories: []models.FindingCategory{
 		ProductFindingCategory, NetworkFindingCategory, EnterpriseFindingCategory, VendorFindingCategory, BehavioralFindingCategory, DetectionGapFindingCategory,
-		DeletedCategory,
+		DeletedCategory, SomeFindingCategory, SomeOtherFindingCategory,
 	},
 	Users: []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick,
 		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
@@ -89,7 +89,7 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserGinny, OpGanttChart, policy.OperationRoleRead),
 	},
 	Findings: []models.Finding{
-		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear,
+		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear, FindingBook2Robes,
 	},
 	Evidences: []models.Evidence{
 		EviDursleys, EviMirrorOfErised, EviLevitateSpell, EviRulesForQuidditch,
@@ -398,13 +398,6 @@ var newHPQuery = newQueryGen(1)
 var QuerySalazarsHier = newHPQuery(OpChamberOfSecrets.ID, "Find Heir", "Magic Query String", "findings")
 var QueryWhereIsTheChamberOfSecrets = newHPQuery(OpChamberOfSecrets.ID, "Locate Chamber", "Fancy Query", "evidence")
 
-var newHPFinding = newFindingGen(1)
-var noLink = ""
-var spiderLink = "https://www.google.com/search?q=spider+predators"
-var FindingBook2Magic = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-b2magic", "some-category", "lots o' magic", "Magic plagues Harry's life", nil)
-var FindingBook2CGI = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-cgi", "alt-category", "this looks fake", "I'm not entirely sure this is all above board", &noLink)
-var FindingBook2SpiderFear = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-spider", "some-category", "how to scare spiders", "Who would have thought?", &spiderLink)
-
 var newHpFindingCategory = newFindingCategoryGen(1)
 
 var ProductFindingCategory = newHpFindingCategory("Product", false)
@@ -413,4 +406,14 @@ var EnterpriseFindingCategory = newHpFindingCategory("Enterprise", false)
 var VendorFindingCategory = newHpFindingCategory("Vendor", false)
 var BehavioralFindingCategory = newHpFindingCategory("Behavioral", false)
 var DetectionGapFindingCategory = newHpFindingCategory("Detection Gap", false)
+var SomeFindingCategory = newHpFindingCategory("some-category", false)
+var SomeOtherFindingCategory = newHpFindingCategory("alt-category", false)
 var DeletedCategory = newHpFindingCategory("I was deleted", true)
+
+var newHPFinding = newFindingGen(1)
+var noLink = ""
+var spiderLink = "https://www.google.com/search?q=spider+predators"
+var FindingBook2Magic = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-b2magic", &SomeFindingCategory.ID, "lots o' magic", "Magic plagues Harry's life", nil)
+var FindingBook2CGI = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-cgi", &SomeOtherFindingCategory.ID, "this looks fake", "I'm not entirely sure this is all above board", &noLink)
+var FindingBook2SpiderFear = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-spider", &SomeFindingCategory.ID, "how to scare spiders", "Who would have thought?", &spiderLink)
+var FindingBook2Robes = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-robes", nil, "Robes for all seasons", "Turns out there's only one kind of robe.", &spiderLink)

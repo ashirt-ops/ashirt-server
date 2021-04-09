@@ -46,6 +46,6 @@ func TestRequestingNonexistentOperations(t *testing.T) {
 	a.Get("/web/operations/op/evidence/1").Do().ExpectNotFound()
 
 	// Writing operations that don't exist returns unauthorized
-	a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "e1", "category": "CD", "description": ""}`).Do().ExpectUnauthorized()
+	a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "e1", "category": "Vendor", "description": ""}`).Do().ExpectUnauthorized()
 	a.Put("/web/operations/op").WithJSONBody(`{"name": "new name"}`).Do().ExpectUnauthorized()
 }

@@ -20,13 +20,13 @@ func TestUserAuthorization(t *testing.T) {
 	a.Get("/web/operations").AsUser(bob).Do().ExpectJSON(`[]`)
 
 	// Ensure bob cannot create findings/evidence under alice's operation
-	a.Post("/web/operations/alice/findings").WithJSONBody(`{"title": "finding", "category": "OPSEC", "description": ""}`).AsUser(bob).Do().ExpectUnauthorized()
+	a.Post("/web/operations/alice/findings").WithJSONBody(`{"title": "finding", "category": "Detection Gap", "description": ""}`).AsUser(bob).Do().ExpectUnauthorized()
 	a.Post("/web/operations/alice/evidence").WithMultipartBody(map[string]string{"description": "evi"}, nil).AsUser(bob).Do().ExpectUnauthorized()
 
 	// Create findings as bob and ensure alice can't see them
 	a.Post("/web/operations").WithJSONBody(`{"name": "Bob's Operation", "slug": "bob"}`).AsUser(bob).Do().ExpectSubsetJSON(`{"name": "Bob's Operation", "status": 0}`)
-	findingUUID1 := a.Post("/web/operations/bob/findings").WithJSONBody(`{"title": "f1", "category": "OPSEC", "description": ""}`).AsUser(bob).Do().ExpectSuccess().ResponseUUID()
-	a.Post("/web/operations/bob/findings").WithJSONBody(`{"title": "e2", "category": "OPSEC", "description": ""}`).AsUser(bob).Do().ExpectSuccess()
+	findingUUID1 := a.Post("/web/operations/bob/findings").WithJSONBody(`{"title": "f1", "category": "Detection Gap", "description": ""}`).AsUser(bob).Do().ExpectSuccess().ResponseUUID()
+	a.Post("/web/operations/bob/findings").WithJSONBody(`{"title": "e2", "category": "Detection Gap", "description": ""}`).AsUser(bob).Do().ExpectSuccess()
 	a.Get("/web/operations/bob/findings").AsUser(alice).Do().ExpectNotFound()
 	a.Get("/web/operations/bob/findings/" + findingUUID1).AsUser(alice).Do().ExpectNotFound()
 	a.Get("/web/operations/alice/findings/" + findingUUID1).AsUser(alice).Do().ExpectNotFound()
@@ -52,7 +52,7 @@ func TestUserAuthorization(t *testing.T) {
 
 	// Ensure alice cannot add bob's evidence to alice's findings
 	findingUUID3 := a.Post("/web/operations/alice/findings").
-		WithJSONBody(`{"title": "Alice's finding", "category": "OPSEC", "description": ""}`).
+		WithJSONBody(`{"title": "Alice's finding", "category": "Detection Gap", "description": ""}`).
 		AsUser(alice).Do().
 		ExpectSubsetJSON(`{"title": "Alice's finding"}`).
 		ResponseUUID()

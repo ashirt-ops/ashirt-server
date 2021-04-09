@@ -145,7 +145,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"operation_id":    seed.Findings[i].OperationID,
 				"ready_to_report": seed.Findings[i].ReadyToReport,
 				"ticket_link":     seed.Findings[i].TicketLink,
-				"category":        seed.Findings[i].Category,
+				"category_id":     seed.Findings[i].CategoryID,
 				"title":           seed.Findings[i].Title,
 				"description":     seed.Findings[i].Description,
 				"created_at":      seed.Findings[i].CreatedAt,
@@ -182,6 +182,18 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 	})
 
 	return err
+}
+
+func (seed Seeder) CategoryForFinding(finding models.Finding) string {
+	if finding.CategoryID == nil {
+		return ""
+	}
+	for _, row := range seed.FindingCategories {
+		if row.ID == *finding.CategoryID {
+			return row.Category
+		}
+	}
+	return ""
 }
 
 func (seed Seeder) EvidenceIDsForFinding(finding models.Finding) []int64 {

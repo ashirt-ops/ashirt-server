@@ -27,7 +27,7 @@ type Finding struct {
 	OperationID   int64      `db:"operation_id"`
 	ReadyToReport bool       `db:"ready_to_report"`
 	TicketLink    *string    `db:"ticket_link"`
-	Category      string     `db:"category"`
+	CategoryID    *int64     `db:"category_id"`
 	Title         string     `db:"title"`
 	Description   string     `db:"description"`
 	CreatedAt     time.Time  `db:"created_at"`
