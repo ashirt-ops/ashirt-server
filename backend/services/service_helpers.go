@@ -17,6 +17,40 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
+// getFindingCategory returns the category associated with the provided category id
+// if this record is not found, then an empty string will be returned. If an error occurs,
+// then an error will be returned.
+func getFindingCategory(db *database.Connection, findingCategoryID int64) (string, error) {
+	var category string
+	err := db.Get(&category, sq.Select("category").
+		From("finding_categories").
+		Where(sq.Eq{"id": findingCategoryID}),
+	)
+
+	return category, err
+}
+
+// getFindingCategoryID retrieves the ID associated with the provided category.
+// this function accepts a select function, which is intended to be a (*database.Connection).Select,
+// or a (*database.Transactable).Select
+func getFindingCategoryID(findingCategory string, selectFunc func(modalSlice interface{}, sb sq.SelectBuilder) error) (*int64, error) {
+	var foundCategoryID []int64
+
+	// look up the category -- it might be null. We don't want to create it here.
+	err := selectFunc(&foundCategoryID, sq.Select("id").
+		From("finding_categories").
+		Where(sq.Eq{"category": findingCategory}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(foundCategoryID) == 0 {
+		return nil, nil
+	}
+	return &foundCategoryID[0], nil
+
+}
+
 // tagsForEvidenceByID retrieves a list of Tag structures for the specified evidence ids
 func tagsForEvidenceByID(db *database.Connection, evidenceIDs []int64) (tagsByEvidenceID map[int64][]dtos.Tag, allTags []dtos.Tag, err error) {
 	if len(evidenceIDs) == 0 {

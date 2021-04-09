@@ -44,10 +44,18 @@ func ReadFinding(ctx context.Context, db *database.Connection, i ReadFindingInpu
 		return nil, backend.WrapError("Cannot load tags for evidence", backend.DatabaseErr(err))
 	}
 
+	var realCategory = ""
+	if finding.CategoryID != nil {
+		realCategory, err = getFindingCategory(db, *finding.CategoryID)
+		if err != nil {
+			return nil, backend.WrapError("Cannot load finding category for finding", backend.DatabaseErr(err))
+		}
+	}
+
 	return &dtos.Finding{
 		UUID:          i.FindingUUID,
 		Title:         finding.Title,
-		Category:      finding.Category,
+		Category:      realCategory,
 		Description:   finding.Description,
 		NumEvidence:   len(evidenceIDs),
 		Tags:          allTags,
