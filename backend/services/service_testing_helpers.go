@@ -112,6 +112,7 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 		findingResult, err := CreateFinding(ctx, db, input)
 		require.NoError(t, err)
 
+		categoryID := int64(1) // hard coding for now // TODO:  add to a the finding categories table,  if possible.
 		var findingID int64
 		err = db.Get(&findingID, sq.Select("id").From("findings").Where(sq.Eq{"uuid": findingResult.UUID}))
 		require.NoError(t, err)
@@ -120,7 +121,7 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 			UUID:        findingResult.UUID,
 			Title:       findingResult.Title,
 			Description: findingResult.Description,
-			Category:    input.Category,
+			CategoryID:  &categoryID,
 			OperationID: op.Op.ID,
 		})
 	}

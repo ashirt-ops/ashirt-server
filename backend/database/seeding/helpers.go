@@ -170,14 +170,14 @@ func newFindingCategoryGen(first int64) func(category string, deleted bool) mode
 	}
 }
 
-func newFindingGen(first int64) func(opID int64, uuid, category, title, desc string, ticketLink *string) models.Finding {
+func newFindingGen(first int64) func(opID int64, uuid string, category *int64, title, desc string, ticketLink *string) models.Finding {
 	id := iotaLike(first)
-	return func(opID int64, uuid, category, title, desc string, ticketLink *string) models.Finding {
+	return func(opID int64, uuid string, category *int64, title, desc string, ticketLink *string) models.Finding {
 		finding := models.Finding{
 			ID:            id(),
 			OperationID:   opID,
 			UUID:          uuid,
-			Category:      category,
+			CategoryID:    category,
 			Title:         title,
 			Description:   desc,
 			ReadyToReport: (ticketLink != nil),
