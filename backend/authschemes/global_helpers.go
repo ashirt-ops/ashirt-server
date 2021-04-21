@@ -15,11 +15,12 @@ import (
 // note: you will need to provide your own database instance
 func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName string, data UserAuthData) error {
 	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
-		"auth_scheme":        authSchemeName,
-		"user_key":           data.UserKey,
-		"user_id":            data.UserID,
-		"encrypted_password": data.EncryptedPassword,
-		"totp_secret":        data.TOTPSecret,
+		"auth_scheme":         authSchemeName,
+		"user_key":            data.UserKey,
+		"user_id":             data.UserID,
+		"encrypted_password":  data.EncryptedPassword,
+		"totp_secret":         data.TOTPSecret,
+		"must_reset_password": data.NeedsPasswordReset,
 	})
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {
