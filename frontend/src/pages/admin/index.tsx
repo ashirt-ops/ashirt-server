@@ -45,6 +45,12 @@ export default (props: RouteComponentProps) => {
             id: "operations", label: "Operation Management", content: (
               <>
                 <OperationsTable />
+              </>
+            )
+          },
+          {
+            id: "findings", label: "Finding Categories", content: (
+              <>
                 <FindingCategoriesTable />
               </>
             )
