@@ -5,7 +5,7 @@ package services_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -59,7 +59,7 @@ func TestReadEvidence(t *testing.T) {
 	})
 	require.NoError(t, err)
 	validateReadEvidenceOutput(t, masterEvidence, retrievedEvidence)
-	previewBytes, err := ioutil.ReadAll(retrievedEvidence.Preview)
+	previewBytes, err := io.ReadAll(retrievedEvidence.Preview)
 	require.NoError(t, err)
 	require.Equal(t, thumbImg, previewBytes)
 
@@ -70,7 +70,7 @@ func TestReadEvidence(t *testing.T) {
 	})
 	require.NoError(t, err)
 	validateReadEvidenceOutput(t, masterEvidence, retrievedEvidence)
-	mediaBytes, err := ioutil.ReadAll(retrievedEvidence.Media)
+	mediaBytes, err := io.ReadAll(retrievedEvidence.Media)
 	require.NoError(t, err)
 	require.Equal(t, fullImg, mediaBytes)
 }

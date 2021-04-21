@@ -22,6 +22,7 @@ services:
       APP_FRONTEND_INDEX_URL: "http://localhost:8080"
       EMAIL_FROM_ADDRESS: 
       EMAIL_TYPE: stdout
+      APP_DISABLE_LOCAL_REGISTRATION: "false"
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
       AUTH_SERVICES: ashirt
       AUTH_OKTA_CLIENT_ID:

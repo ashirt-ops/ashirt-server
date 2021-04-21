@@ -21,13 +21,14 @@ export default (props: RouteComponentProps<{ schemeCode?: string }>) => {
 
   return wiredAuthSchemes.render(supportedAuthSchemes => (
     <div className={cx('login')}>
-      {supportedAuthSchemes.map(({schemeCode}) => {
+      {supportedAuthSchemes.map(({schemeCode, schemeFlags}) => {
         if (renderOnlyScheme != null && schemeCode != renderOnlyScheme) return null
         return (
           <AuthSchemeLogin
             key={schemeCode}
             authSchemeCode={schemeCode}
             query={query}
+            authSchemeFlags={schemeFlags}
           />
         )
       })}
@@ -38,12 +39,13 @@ export default (props: RouteComponentProps<{ schemeCode?: string }>) => {
 
 const AuthSchemeLogin = (props: {
   authSchemeCode: string,
+  authSchemeFlags: Array<string>
   query: ParsedUrlQuery,
 }) => {
   const Login = useAuthFrontendComponent(props.authSchemeCode, 'Login')
   return (
     <div className={cx('auth-scheme-row')}>
-      <Login query={props.query} />
+      <Login query={props.query} authFlags={props.authSchemeFlags}/>
     </div>
   )
 }

@@ -82,9 +82,10 @@ func mergeSchemes(foundSchemes []detailedSchemeTable, supportedAuthSchemes *[]dt
 	// Add schemes that are supported (whether used or not)
 	for _, scheme := range clonedSchemes {
 		schemes = append(schemes, &dtos.DetailedAuthenticationInfo{
-			AuthSchemeName: scheme.SchemeName,
-			AuthSchemeCode: scheme.SchemeCode,
-			Labels:         []string{},
+			AuthSchemeName:  scheme.SchemeName,
+			AuthSchemeCode:  scheme.SchemeCode,
+			AuthSchemeFlags: scheme.SchemeFlags,
+			Labels:          []string{},
 		})
 	}
 

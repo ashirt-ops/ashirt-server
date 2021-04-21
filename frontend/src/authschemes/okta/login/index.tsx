@@ -9,6 +9,7 @@ const loginWithOkta = () => {
 }
 
 export default (props: {
+  authFlags?: Array<string>
 }) => (
   <div style={{textAlign: 'right'}}>
     <Button primary onClick={loginWithOkta}>Login With Okta</Button>

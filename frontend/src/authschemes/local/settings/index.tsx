@@ -13,6 +13,7 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   userKey: string,
+  authFlags?: Array<string>
 }) => <>
   <h1 className={cx('header')}>Settings for local account <span className={cx('user-key')}>{props.userKey}</span></h1>
   <SettingsSection title="Change Password" width="narrow">

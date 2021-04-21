@@ -39,17 +39,19 @@ function getValueAndClear(field: { value: string, onChange: (s: string) => void 
 
 export default (props: {
   query: ParsedUrlQuery,
+  authFlags?: Array<string>
 }) => {
   switch (props.query.step) {
     case 'reset': return <ResetPassword />
     case 'totp': return <EnterTotp />
     case 'recovery': return <RecoverUserAccount />
     case 'recovery-sent': return <AccountRecoveryStarted />
-    default: return <Login />
+    default: return <Login authFlags={props.authFlags} />
   }
 }
 
 const Login = (props: {
+  authFlags?: Array<string>
 }) => {
   const emailField = useFormField('')
   const passwordField = useFormField('')
@@ -63,9 +65,14 @@ const Login = (props: {
 
   const registerModal = useModal<void>(modalProps => <RegisterModal {...modalProps} />)
 
+  const allowRegister = props.authFlags?.includes("open-registration")
+  const registerProps = allowRegister
+    ? { cancelText: "Register", onCancel: () => registerModal.show() }
+    : {}
+
   return (
     <div style={{ minWidth: 300 }}>
-      <Form submitText="Login" cancelText="Register" onCancel={() => registerModal.show()} {...loginForm}>
+      <Form submitText="Login" {...registerProps} {...loginForm}>
         <Input label="Email" {...emailField} />
         <Input label="Password" type="password" {...passwordField} />
       </Form>
@@ -169,7 +176,7 @@ const RecoverUserAccount = (props: {}) => {
   const emailForm = useForm({
     fields: [emailField],
     handleSubmit: () => {
-      if( emailField.value.trim() == '' ) {
+      if (emailField.value.trim() == '') {
         return Promise.reject(Error("Please supply a valid email address"))
       }
       return requestRecovery(emailField.value).then(() => window.location.href = '/login/local?step=recovery-sent')

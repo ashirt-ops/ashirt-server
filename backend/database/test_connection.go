@@ -5,7 +5,7 @@ package database
 
 import (
 	"database/sql"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/go-sql-driver/mysql"
@@ -42,7 +42,7 @@ func NewTestConnectionFromNonStandardMigrationPath(t *testing.T, dbName, migrati
 	require.NoError(t, err)
 
 	// Reset database back to schema.sql
-	schemaSQL, err := ioutil.ReadFile(migrationsDirPath + "/../schema.sql")
+	schemaSQL, err := os.ReadFile(migrationsDirPath + "/../schema.sql")
 	require.NoError(t, err)
 
 	_, err = setupDB.Exec("USE `" + config.DBName + "`;\n" + string(schemaSQL))

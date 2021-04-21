@@ -39,10 +39,17 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Expected type: time duration (e.g. `60m` => 60 minutes `24h` => 24 hours)
     * Defaults to 24 hours
     * Base unit is 1 minute. Fractional minutes will be ignored
+  * `APP_DISABLE_LOCAL_REGISTRATION`
+    * Removes the registration aspect of local auth. Users will still be able to log in if they already have a local auth account.
+    * Valid Options: `"true"` or `"false"`
+    * Admins can provision new local auth accounts to provide access to new users.
+    * Only valid if deploying using `ashirt` authentication. Otherwise has no effect
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
-    * Example value: `ashirt,google,github`
+    * Example value: `ashirt,otka`
+    * Currently valid values: `ashirt`, `okta`
+      * This list will likely become outdated over time. Consult the authschemes directory for a better idea of what is supported.
   * `AUTH_${SERVICE}_` Variables
     * These environment variables are namespaced per Auth Service. Each of these is a specific field that can be used to pass configuration details to the authentication service. Note that `${SERVICE}` must be replaced with a proper string, expected in all caps. For example `AUTH_GITHUB`, `AUTH_ASHIRT`, `AUTH_GOOGLE`
     * `AUTH_${SERVICE}_CLIENT_ID`
@@ -93,7 +100,43 @@ One limitation to this behavior is that, generally speaking, admins cannot alter
 
 ##### First Admin
 
-When a fresh system is deployed, no users are present, thus no admins are present either. The first administration, therefore, is granted to the first user that registers a system.
+When a fresh system is deployed, no users are present, thus no admins are present either. The first administration account, therefore, is granted to the first user that registers within the system.
+
+###### First Admin alternative
+
+In certain situations, there may not be a way for a new user to register with AShirt without an
+admin's help, even for the first user. In these cases, the below SQL can be used to create an initial
+account and a recovery code to link the account to a supported authentication scheme.
+
+Note that this requires direct access to the database. This should only be done for the first user
+when the normal approach will not work.
+
+1. Edit, and execute the below SQL
+
+  ```sql
+  INSERT INTO users (slug, first_name, last_name, email, admin) VALUES
+  ('user@example.com', 'User', 'McUserface', 'user@example.com', true);
+
+  INSERT INTO auth_scheme_data (auth_scheme, user_key, user_id) VALUES
+  ('recovery', 'e3c6ead16e0c25820ba730f278ef54133da5610f9bf1d2e481ff6693c8df85123a29b8dc1f033a2f', 1);
+  ```
+
+  This will add a one-time password to AShirt which will allow the admin to sign in. Note that,
+  per convention, the slug and email should match if using ASHIRT Local Authentication. This is not
+  a hard requirement if you want to deviate from the convention. All other fields can be updated by
+  updating the profile in Account Settings.
+
+2. Start up the AShirt frontend and backend, if not already started
+3. Once started, edit, and navigate to: `http://MY_ASHIRT_DOMAIN/web/auth/recovery/login?code=e3c6ead16e0c25820ba730f278ef54133da5610f9bf1d2e481ff6693c8df85123a29b8dc1f033a2f`
+
+The admin should now be logged in, and can update their security information.
+
+1. Click the person icon and select "Account Settings"
+2. Go to "Authentication Methods"
+3. Find a supported login the admin wishes to use, and click the "Link" button. Follow this process.
+   1. Note: if linking to ASHIRT Local Authentication, when the admin logs in, they will log in via the email address provided during the linking step, not (necessarily) the above sql script.
+
+At this point, a proper admin account exists and you can log in via the linked methods.
 
 #### Custom Authentication
 

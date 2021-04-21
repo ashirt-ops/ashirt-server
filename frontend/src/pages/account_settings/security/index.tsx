@@ -27,6 +27,7 @@ const AuthSchemeSettings = (props: {
 }) => {
   const Settings = useAuthFrontendComponent(props.authSchemeCode, 'Settings')
   return (
-    <Settings userKey={props.userKey} />
+    // TODO: we should figure out how to get flag info below
+    <Settings userKey={props.userKey} authFlags={[]} />
   )
 }
