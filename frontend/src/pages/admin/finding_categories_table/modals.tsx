@@ -21,13 +21,19 @@ export const DeleteFindingCategoryModal = (props: {
     }),
   })
 
+  const affectedText = props.category.usageCount == 0 
+    ? "" 
+    : props.category.usageCount == 1
+      ? "This will affect one finding."
+      : `This will affect ${props.category.usageCount} findings.`
+
   return (
     <ModalForm title="Delete Finding Category"
       submitDanger submitText="Delete"
       cancelText="Close"
       onRequestClose={props.onRequestClose} {...formComponentProps}>
       <p>
-        Are you sure you want to delete this finding category?
+        Are you sure you want to delete this finding category? {affectedText}
       </p>
     </ModalForm>
   )

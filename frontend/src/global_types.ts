@@ -213,4 +213,5 @@ export type FindingCategory = {
   id: number,
   category: string,
   deleted: boolean,
+  usageCount: number,
 }
