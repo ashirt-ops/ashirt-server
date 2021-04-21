@@ -30,11 +30,6 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-const (
-	// UserIDSessionKey provides a key into the values table for User ID
-	UserIDSessionKey = "userID"
-)
-
 // DeletableSessionStore is an extension of sessions.Store that also supports a Delete method
 type DeletableSessionStore interface {
 	sessions.Store
@@ -50,9 +45,10 @@ type MySQLStore struct {
 	stmtUpdate *sql.Stmt
 	stmtSelect *sql.Stmt
 
-	Codecs  []securecookie.Codec
-	Options *sessions.Options
-	table   string
+	Codecs          []securecookie.Codec
+	Options         *sessions.Options
+	table           string
+	sessionToUserID func(*sessions.Session) *int64
 }
 
 type sessionRow struct {
@@ -144,6 +140,10 @@ func (m *MySQLStore) Close() {
 	m.db.Close()
 }
 
+func (m *MySQLStore) SetSessionToUserID(fn func(*sessions.Session) *int64) {
+	m.sessionToUserID = fn
+}
+
 func (m *MySQLStore) Get(r *http.Request, name string) (*sessions.Session, error) {
 	return sessions.GetRegistry(r).Get(m, name)
 }
@@ -211,8 +211,10 @@ func (m *MySQLStore) insert(session *sessions.Session) error {
 	delete(session.Values, "expires_at")
 	delete(session.Values, "modified_at")
 
-	userID := userIDFromSession(session)
-	delete(session.Values, UserIDSessionKey)
+	var userID *int64
+	if m.sessionToUserID != nil {
+		userID = m.sessionToUserID(session)
+	}
 
 	encoded, encErr := securecookie.EncodeMulti(session.Name(), session.Values, m.Codecs...)
 	if encErr != nil {
@@ -276,8 +278,10 @@ func (m *MySQLStore) save(session *sessions.Session) error {
 	delete(session.Values, "expires_at")
 	delete(session.Values, "modified_at")
 
-	userID := userIDFromSession(session)
-	delete(session.Values, UserIDSessionKey)
+	var userID *int64
+	if m.sessionToUserID != nil {
+		userID = m.sessionToUserID(session)
+	}
 
 	encoded, encErr := securecookie.EncodeMulti(session.Name(), session.Values, m.Codecs...)
 	if encErr != nil {
@@ -310,19 +314,8 @@ func (m *MySQLStore) load(session *sessions.Session) error {
 	if err != nil {
 		return err
 	}
-	if sess.userID != nil {
-		session.Values[UserIDSessionKey] = *sess.userID
-	}
 	session.Values["created_at"] = sess.createdAt
 	session.Values["modified_at"] = sess.modifiedAt
 	session.Values["expires_at"] = sess.expiresAt
 	return nil
-}
-
-func userIDFromSession(session *sessions.Session) *int64 {
-	userID, ok := session.Values[UserIDSessionKey].(int64)
-	if !ok {
-		return nil
-	}
-	return &userID
 }
