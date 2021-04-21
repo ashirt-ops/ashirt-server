@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/csrf"
@@ -82,6 +82,11 @@ func (OktaAuth) Name() string {
 // FriendlyName returns "Okta OIDC"
 func (OktaAuth) FriendlyName() string {
 	return "Okta OIDC"
+}
+
+// Flags returns an empty string (no supported auth flags for okta)
+func (OktaAuth) Flags() []string {
+	return []string{}
 }
 
 func (okta OktaAuth) authSuccess(w http.ResponseWriter, r *http.Request, linking bool) (interface{}, error) {
@@ -270,7 +275,7 @@ func (okta OktaAuth) exchangeCode(code string, r *http.Request) Exchange {
 	if err != nil {
 		return Exchange{WrappedError: err}
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return Exchange{WrappedError: err}
 	}
@@ -326,7 +331,7 @@ func (okta OktaAuth) getProfileData(r *http.Request, accessToken string) map[str
 
 	client := &http.Client{}
 	resp, _ := client.Do(req)
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	json.Unmarshal(body, &profile)
 

@@ -63,6 +63,7 @@ export interface DataSource {
 
   listUsers(query: string, includeDeleted: boolean): Promise<Array<dtos.User>>
   readUser(ids: UserSlug): Promise<dtos.UserOwnView>
+  listEvidenceCreators(ids: OpSlug): Promise<Array<dtos.User>>,
   updateUser(ids: UserSlug, payload: UserPayload): Promise<void>
   deleteUserAuthScheme(ids: UserSlug & { authSchemeName: string }): Promise<void>
   adminListUsers(query: { deleted: boolean, name?: string }): Promise<types.PaginationResult<dtos.UserAdminView>>
@@ -84,6 +85,7 @@ export interface DataSource {
   deleteExpiredRecoveryCodes(): Promise<void>
   getRecoveryMetrics(): Promise<any>
   adminChangePassword(i: { userSlug: string, newPassword: string }): Promise<void>
+  adminCreateLocalUser(i: { firstName: string, lastName?: string, email: string }): Promise<dtos.NewUserCreatedByAdmin>,
   getTotpForUser(ids: UserSlug): Promise<boolean>
   deleteTotpForUser(ids: UserSlug): Promise<void>
 }

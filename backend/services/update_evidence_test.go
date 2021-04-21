@@ -5,7 +5,7 @@ package services_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -71,9 +71,9 @@ func TestUpdateEvidence(t *testing.T) {
 		LoadPreview:   true,
 	})
 	require.NoError(t, err)
-	mediaBytes, err := ioutil.ReadAll(evi.Media)
+	mediaBytes, err := io.ReadAll(evi.Media)
 	require.NoError(t, err)
-	previewBytes, err := ioutil.ReadAll(evi.Preview)
+	previewBytes, err := io.ReadAll(evi.Preview)
 	require.NoError(t, err)
 	require.Equal(t, mediaBytes, previewBytes, "Preview and Media content should be identical for codeblocks")
 	require.Equal(t, []byte(newContent), previewBytes)

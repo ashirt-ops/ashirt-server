@@ -2,13 +2,17 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import DateRangePicker from 'src/components/date_range_picker'
 import Input from 'src/components/input'
-import Modal from 'src/components/modal'
 import classnames from 'classnames/bind'
 import { default as Button, ButtonGroup } from 'src/components/button'
-import { getDateRangeFromQuery, addOrUpdateDateRangeInQuery, useModal, renderModals } from 'src/helpers'
 
+import { stringToSearch, SearchOptions, stringifySearch } from 'src/components/search_query_builder/helpers'
+import Modal from 'src/components/modal'
+import SearchQueryBuilder from 'src/components/search_query_builder'
+
+import { useModal, renderModals, useWiredData } from 'src/helpers'
+import { Tag, ViewName } from 'src/global_types'
+import { getTags } from 'src/services'
 const cx = classnames.bind(require('./stylesheet'))
 
 
@@ -17,6 +21,8 @@ export default (props: {
   onRequestCreateEvidence: () => void,
   onSearch: (query: string) => void,
   query: string,
+  operationSlug: string,
+  viewName: ViewName,
 }) => {
   const [queryInput, setQueryInput] = React.useState<string>("")
   const helpModal = useModal<void>(modalProps => <SearchHelpModal {...modalProps} />)
@@ -25,6 +31,17 @@ export default (props: {
   }, [props.query])
 
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const builderModal = useModal<{ searchText: string }>(modalProps => (
+    <SearchBuilderModal
+      {...modalProps}
+      onChanged={(result: string) => {
+        setQueryInput(result)
+        props.onSearch(result)
+      }}
+      operationSlug={props.operationSlug}
+      viewName={props.viewName}
+    />
+  ))
 
   return (
     <>
@@ -45,25 +62,46 @@ export default (props: {
               }
             }}
           />
-          <a className={cx('search-help-icon')} onClick={_ => helpModal.show()} title="Search Help"></a>
+          <a className={cx('search-help-icon')} onClick={() => helpModal.show()} title="Search Help"></a>
+          <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Query Filters"></a>
         </div>
-        <DateRangePicker
-          range={getDateRangeFromQuery(queryInput)}
-          onSelectRange={r => {
-            const newQuery = addOrUpdateDateRangeInQuery(queryInput, r)
-            setQueryInput(newQuery)
-            props.onSearch(newQuery)
-          }}
-        />
 
         <ButtonGroup>
           <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
           <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
         </ButtonGroup>
       </div>
-      {renderModals(helpModal)}
+      {renderModals(helpModal, builderModal)}
     </>
   )
+}
+
+const SearchBuilderModal = (props: {
+  searchText: string,
+  operationSlug: string,
+  viewName: ViewName,
+  onRequestClose: () => void,
+  onChanged: (resultString: string) => void,
+}) => {
+  const wiredTags = useWiredData<Array<Tag>>(
+    React.useCallback(() => getTags({ operationSlug: props.operationSlug }), [props.operationSlug])
+  )
+
+  return (<>
+    {wiredTags.render(tags => (
+      <Modal title="Query Builder" onRequestClose={props.onRequestClose}>
+        <SearchQueryBuilder
+          searchOptions={stringToSearch(props.searchText, tags)}
+          onChanged={(result: SearchOptions) => {
+            props.onChanged(stringifySearch(result))
+            props.onRequestClose()
+          }}
+          operationSlug={props.operationSlug}
+          viewName={props.viewName}
+        />
+      </Modal>
+    ))}
+  </>)
 }
 
 const CodeSnippet = (props: {

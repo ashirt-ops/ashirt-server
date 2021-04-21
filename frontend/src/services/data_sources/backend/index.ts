@@ -45,6 +45,7 @@ export const backendDataSource: DataSource = {
 
   listUsers: (query, includeDeleted) => req('GET', '/users', null, { query, includeDeleted }),
   readUser: ids => req('GET', `/user`, null, ids),
+  listEvidenceCreators: (ids) => req('GET', `/operations/${ids.operationSlug}/evidence/creators`),
   updateUser: (ids, payload) => req('POST', `/user/profile/${ids.userSlug}`, payload),
   deleteUserAuthScheme: ids => req('DELETE', `/user/${ids.userSlug}/scheme/${ids.authSchemeName}`),
   adminListUsers: query => req('GET', '/admin/users', null, query),
@@ -66,6 +67,7 @@ export const backendDataSource: DataSource = {
   deleteExpiredRecoveryCodes: () => req('DELETE', '/auth/recovery/expired'),
   getRecoveryMetrics: () => req('GET', '/auth/recovery/metrics'),
   adminChangePassword: i => req('PUT', '/auth/local/admin/password', i),
+  adminCreateLocalUser: i => req('POST', '/auth/local/admin/register', i),
   getTotpForUser: ids =>  req('GET', '/auth/local/totp', ids),
   deleteTotpForUser: ids => req('DELETE', '/auth/local/totp', ids),
 }

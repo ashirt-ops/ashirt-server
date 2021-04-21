@@ -3,7 +3,7 @@ services:
   ashirt-private-service:
     build:
       context: .
-      dockerfile: Dockerfile.prod.backend.web
+      dockerfile: Dockerfile.prod.web
     ports:
       - 8000:8000
     restart: on-failure
@@ -27,7 +27,7 @@ services:
   ashirt-public-service:
     build:
       context: .
-      dockerfile: Dockerfile.prod.backend.api
+      dockerfile: Dockerfile.prod.api
     ports:
       - 8001:8000
     restart: on-failure

@@ -14,3 +14,9 @@ export async function listUsers(i: {
 export async function listUsersAdminView(i: ListUsersForAdminQuery & UserFilter): Promise<PaginationResult<UserAdminView>> {
   return await ds.adminListUsers(i)
 }
+
+export async function listEvidenceCreators(i: {
+  operationSlug: string
+}): Promise<Array<User>> {
+  return await ds.listEvidenceCreators({ operationSlug: i.operationSlug })
+}
