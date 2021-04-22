@@ -43,6 +43,8 @@ func UpdateEvidence(ctx context.Context, db *database.Connection, contentStore c
 	var keys *contentstore.ContentKeys
 	if i.Content != nil {
 		switch evidence.ContentType {
+		case "http-request-cycle":
+			fallthrough
 		case "codeblock":
 			fallthrough
 		case "terminal-recording":

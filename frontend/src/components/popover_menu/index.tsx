@@ -6,11 +6,8 @@ import Popover from 'src/components/popover'
 import { default as Menu, MenuItem } from 'src/components/menu'
 
 // input key down helpers:
-const isEnter = (e: React.KeyboardEvent) => e.which === 13
-const isEsc = (e: React.KeyboardEvent) => e.which === 27
-const isDown = (e: React.KeyboardEvent) => e.which === 40 || (e.ctrlKey && e.which === 78) // down arrow or ctrl-n
-const isUp = (e: React.KeyboardEvent) => e.which === 38 || (e.ctrlKey && e.which === 80) // up arrow or ctrl-p
-const isCtrlKey = (e: React.KeyboardEvent) => e.which === 17
+const isDown = (e: React.KeyboardEvent) => e.key === 'ArrowDown' || (e.ctrlKey && e.key === 'n') // down arrow or ctrl-n
+const isUp = (e: React.KeyboardEvent) => e.key === 'ArrowUp' || (e.ctrlKey && e.key === 'p') // up arrow or ctrl-p
 
 export default function PopoverMenu<T>(props: {
   children: React.ReactNode,
@@ -37,11 +34,11 @@ export default function PopoverMenu<T>(props: {
   }
 
   const onKeyDown = (e: React.KeyboardEvent) => {
-    if (isEnter(e)) selectItem()
-    else if (isEsc(e)) props.onRequestClose()
+    if (e.key === 'Enter') selectItem()
+    else if (e.key === 'Escape') props.onRequestClose()
     else if (isDown(e)) changeSelectedIndex(1)
     else if (isUp(e)) changeSelectedIndex(-1)
-    else if (!isCtrlKey(e)) return
+    else if (!e.ctrlKey) return
     e.preventDefault()
   }
 

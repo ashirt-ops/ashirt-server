@@ -29,3 +29,17 @@
     color: inherit
     outline: none
     flex-grow: 1
+
+.arrow
+  $arrow-size = 5px
+  
+  input
+    padding-right: 25px
+    
+  &:after
+    content: ""
+    position: absolute
+    top: 40px - $arrow-size
+    right: 10px
+    border: $arrow-size solid transparent
+    border-top-color: $foreground

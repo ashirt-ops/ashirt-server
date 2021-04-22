@@ -12,11 +12,6 @@ import {randomTagColorName} from 'src/helpers/tag_colors'
 import PopoverMenu from 'src/components/popover_menu'
 const cx = classnames.bind(require('./stylesheet'))
 
-const isBackspace = (e: React.KeyboardEvent) => e.which === 8
-const isDelete = (e: React.KeyboardEvent) => e.which === 46
-const isRightArrow = (e: React.KeyboardEvent) => e.which === 39
-const isLeftArrow = (e: React.KeyboardEvent) => e.which === 37
-
 function filterTags(allTags: Array<TagType>, filter: string): Array<TagType> {
   if (filter === "") return allTags
   filter = filter.toUpperCase()
@@ -65,20 +60,20 @@ export default (props: {
 
   const onInputKeyDown = (e: React.KeyboardEvent) => {
     if(inputValue === "") {
-      if( isBackspace(e) || isDelete(e) ) {
+      if( ['Backspace', 'Delete'].includes(e.key)) {
         if (selectedTag != -1) {
           props.onChange([...props.value.slice(0, selectedTag), ...props.value.slice(selectedTag + 1)])
           setSelectedTag(selectedTag - 1)
         }
-        else if (!isDelete(e)){
+        else if (e.key != 'Delete'){
           props.onChange(dropRight(props.value))
         }
       }
-      else if (isLeftArrow(e) && inputValue === "") {
+      else if (e.key === 'ArrowLeft' && inputValue === "") {
         let index = selectedTag - 1
         setSelectedTag(index > -1 ? index : props.value.length - 1)
       }
-      else if (isRightArrow(e) && inputValue === "") {
+      else if (e.key === 'ArrowRight' && inputValue === "") {
         setSelectedTag((selectedTag + 1) % props.value.length)
       }
       else {
