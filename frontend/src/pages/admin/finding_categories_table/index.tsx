@@ -4,6 +4,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import Button, { ButtonGroup } from 'src/components/button'
+import Checkbox from 'src/components/checkbox'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import { FindingCategory } from 'src/global_types'
@@ -61,6 +62,8 @@ const TableRow = (props: {
 
 export default (props: {
 }) => {
+  const [withDeleted, setWithDeleted] = React.useState(false)
+
   const wiredCategories = useWiredData<Array<FindingCategory>>(
     React.useCallback(() => getFindingCategories(true), [])
   )
@@ -69,12 +72,22 @@ export default (props: {
     <EditFindingCategoryModal {...modalProps} onEdited={wiredCategories.reload} />
   ))
 
+  const includeDeleted = withDeleted
+  const filterMethod = includeDeleted
+    ? (_row: FindingCategory) => true
+    : (row: FindingCategory) => row.deleted == false
+
   return (
     <SettingsSection title="Finding Categories" className={cx('finding-table-section')}>
       {wiredCategories.render(data => (
         <>
+          <Checkbox
+            label="Include Deleted Categories"
+            className={cx('checkbox')}
+            value={withDeleted}
+            onChange={setWithDeleted} />
           <Table columns={columns}>
-            {data.map(category => (
+            {data.filter(filterMethod).map(category => (
               <TableRow key={category.id} category={category} onUpdate={wiredCategories.reload} />
             ))}
           </Table>
