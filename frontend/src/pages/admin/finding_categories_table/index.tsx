@@ -20,6 +20,7 @@ import {
 
 const columns = [
   'Name',
+  '# of Findings',
   'Status',
   'Actions',
 ]
@@ -40,6 +41,7 @@ const TableRow = (props: {
   return (
     <tr>
       <td>{props.category.category}</td>
+      <td>{props.category.usageCount == 0 ? "None" : props.category.usageCount}</td>
       <td>{isDeleted ? 'deleted' : 'active'}</td>
       <td>
         <ButtonGroup>
