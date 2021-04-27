@@ -20,16 +20,17 @@ import (
 // populating/seeding the database (see ApplyTo method), or alternatively, as acting as a source of
 // truth for post-db operations.
 type Seeder struct {
-	APIKeys        []models.APIKey
-	Findings       []models.Finding
-	Evidences      []models.Evidence
-	Users          []models.User
-	Operations     []models.Operation
-	Tags           []models.Tag
-	UserOpMap      []models.UserOperationPermission
-	TagEviMap      []models.TagEvidenceMap
-	EviFindingsMap []models.EvidenceFindingMap
-	Queries        []models.Query
+	FindingCategories []models.FindingCategory
+	APIKeys           []models.APIKey
+	Findings          []models.Finding
+	Evidences         []models.Evidence
+	Users             []models.User
+	Operations        []models.Operation
+	Tags              []models.Tag
+	UserOpMap         []models.UserOperationPermission
+	TagEviMap         []models.TagEvidenceMap
+	EviFindingsMap    []models.EvidenceFindingMap
+	Queries           []models.Query
 }
 
 // AllInitialTagIds is a (convenience) method version of the function TagIDsFromTags
@@ -44,6 +45,15 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 	logging.SetSystemLogger(logging.NewNopLogger())
 	defer logging.SetSystemLogger(systemLogger)
 	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+		tx.BatchInsert("finding_categories", len(seed.FindingCategories), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.FindingCategories[i].ID,
+				"category":   seed.FindingCategories[i].Category,
+				"created_at": seed.FindingCategories[i].CreatedAt,
+				"updated_at": seed.FindingCategories[i].UpdatedAt,
+				"deleted_at": seed.FindingCategories[i].DeletedAt,
+			}
+		})
 		tx.BatchInsert("users", len(seed.Users), func(i int) map[string]interface{} {
 			return map[string]interface{}{
 				"id":         seed.Users[i].ID,
@@ -135,7 +145,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"operation_id":    seed.Findings[i].OperationID,
 				"ready_to_report": seed.Findings[i].ReadyToReport,
 				"ticket_link":     seed.Findings[i].TicketLink,
-				"category":        seed.Findings[i].Category,
+				"category_id":     seed.Findings[i].CategoryID,
 				"title":           seed.Findings[i].Title,
 				"description":     seed.Findings[i].Description,
 				"created_at":      seed.Findings[i].CreatedAt,
@@ -172,6 +182,18 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 	})
 
 	return err
+}
+
+func (seed Seeder) CategoryForFinding(finding models.Finding) string {
+	if finding.CategoryID == nil {
+		return ""
+	}
+	for _, row := range seed.FindingCategories {
+		if row.ID == *finding.CategoryID {
+			return row.Category
+		}
+	}
+	return ""
 }
 
 func (seed Seeder) EvidenceIDsForFinding(finding models.Finding) []int64 {

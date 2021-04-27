@@ -217,3 +217,10 @@ export type TagDifference = {
 export type TagByEvidenceDate = Tag & {
   usages: Array<Date>,
 }
+
+export type FindingCategory = {
+  id: number,
+  category: string,
+  deleted: boolean,
+  usageCount: number,
+}

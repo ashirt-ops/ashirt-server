@@ -111,8 +111,8 @@ func TestEvidence(t *testing.T) {
 		evidenceUUID1 := a.Post("/web/operations/op/evidence").WithMultipartBody(map[string]string{"description": "Evidence 1"}, nil).Do().ExpectSuccess().ResponseUUID()
 		evidenceUUID2 := a.Post("/web/operations/op/evidence").WithMultipartBody(map[string]string{"description": "Evidence 2"}, nil).Do().ExpectSuccess().ResponseUUID()
 
-		findingUUID1 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 1", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
-		findingUUID2 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 2", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+		findingUUID1 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 1", "category": "Network", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+		findingUUID2 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 2", "category": "Network", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
 
 		a.Put("/web/operations/op/findings/" + findingUUID1 + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID1 + `"], "evidenceToRemove": []}`).Do().ExpectSuccess()
 		a.Put("/web/operations/op/findings/" + findingUUID2 + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID2 + `"], "evidenceToRemove": []}`).Do().ExpectSuccess()

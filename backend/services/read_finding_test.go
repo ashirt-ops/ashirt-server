@@ -29,7 +29,7 @@ func TestReadFinding(t *testing.T) {
 
 	require.Equal(t, masterFinding.UUID, retrievedFinding.UUID)
 	require.Equal(t, masterFinding.Title, retrievedFinding.Title)
-	require.Equal(t, masterFinding.Category, retrievedFinding.Category)
+	require.Equal(t, HarryPotterSeedData.CategoryForFinding(masterFinding), retrievedFinding.Category)
 	require.Equal(t, masterFinding.Description, retrievedFinding.Description)
 	require.Equal(t, masterFinding.ReadyToReport, retrievedFinding.ReadyToReport)
 	require.Equal(t, masterFinding.TicketLink, retrievedFinding.TicketLink)

@@ -38,10 +38,11 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 	whereClause, whereValues := buildListFindingsWhereClause(operation.ID, i.Filters)
 	var findings []struct {
 		models.Finding
-		NumEvidence  int        `db:"num_evidence"`
-		OccurredFrom *time.Time `db:"occurred_from"`
-		OccurredTo   *time.Time `db:"occurred_to"`
-		TagIDs       *string    `db:"tag_ids"`
+		NumEvidence     int        `db:"num_evidence"`
+		OccurredFrom    *time.Time `db:"occurred_from"`
+		OccurredTo      *time.Time `db:"occurred_to"`
+		TagIDs          *string    `db:"tag_ids"`
+		FindingCategory *string    `db:"finding_category"`
 	}
 
 	sb := sq.Select(
@@ -49,11 +50,13 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 		"COUNT(DISTINCT evidence_finding_map.evidence_id) AS num_evidence",
 		"MIN(evidence.occurred_at) AS occurred_from",
 		"MAX(evidence.occurred_at) AS occurred_to",
-		"GROUP_CONCAT(DISTINCT tag_id) AS tag_ids").
+		"GROUP_CONCAT(DISTINCT tag_id) AS tag_ids",
+		"finding_categories.category AS finding_category").
 		From("findings").
 		LeftJoin("evidence_finding_map ON findings.id = finding_id").
 		LeftJoin("evidence ON evidence_id = evidence.id").
 		LeftJoin("tag_evidence_map ON tag_evidence_map.evidence_id = evidence_finding_map.evidence_id").
+		LeftJoin("finding_categories ON finding_categories.id = findings.category_id").
 		Where(whereClause, whereValues...).
 		GroupBy("findings.id")
 
@@ -81,9 +84,13 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 
 	findingsDTO := make([]*dtos.Finding, len(findings))
 	for idx, finding := range findings {
+		realCategory := ""
+		if finding.FindingCategory != nil {
+			realCategory = *finding.FindingCategory
+		}
 		findingsDTO[idx] = &dtos.Finding{
 			UUID:          finding.UUID,
-			Category:      finding.Category,
+			Category:      realCategory,
 			Title:         finding.Title,
 			Description:   finding.Description,
 			OccurredFrom:  finding.OccurredFrom,
