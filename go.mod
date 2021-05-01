@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
-	github.com/aws/aws-sdk-go v1.38.10
+	github.com/aws/aws-sdk-go v1.38.30
 	github.com/go-kit/kit v0.10.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.2.0
