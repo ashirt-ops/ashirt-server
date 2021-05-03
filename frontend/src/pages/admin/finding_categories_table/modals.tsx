@@ -21,8 +21,8 @@ export const DeleteFindingCategoryModal = (props: {
     }),
   })
 
-  const affectedText = props.category.usageCount == 0 
-    ? "" 
+  const affectedText = props.category.usageCount == 0
+    ? ""
     : props.category.usageCount == 1
       ? "This will affect one finding."
       : `This will affect ${props.category.usageCount} findings.`
