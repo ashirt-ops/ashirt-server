@@ -5,6 +5,7 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/theparanoids/ashirt-server/backend"
@@ -39,11 +40,20 @@ func CreateFinding(ctx context.Context, db *database.Connection, i CreateFinding
 		return nil, backend.MissingValueErr("Category")
 	}
 
+	useCategoryID, err := getFindingCategoryID(i.Category, db.Select)
+
+	if err != nil {
+		return nil, backend.WrapError("Unable create finding", err)
+	}
+	if useCategoryID == nil {
+		return nil, backend.BadInputErr(errors.New("no such category"), "Unknown Category")
+	}
+
 	findingUUID := uuid.New().String()
 	_, err = db.Insert("findings", map[string]interface{}{
 		"uuid":         findingUUID,
 		"operation_id": operation.ID,
-		"category":     i.Category,
+		"category_id":  useCategoryID,
 		"title":        i.Title,
 		"description":  i.Description,
 	})

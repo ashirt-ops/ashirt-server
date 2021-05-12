@@ -34,15 +34,20 @@ func UpdateFinding(ctx context.Context, db *database.Connection, i UpdateFinding
 		return backend.WrapError("Failed permission check", backend.UnauthorizedWriteErr(err))
 	}
 
-	err = db.Update(sq.Update("findings").
-		SetMap(map[string]interface{}{
-			"category":        i.Category,
-			"title":           i.Title,
-			"description":     i.Description,
-			"ticket_link":     i.TicketLink,
-			"ready_to_report": i.ReadyToReport,
-		}).
-		Where(sq.Eq{"id": finding.ID}))
+	err = db.WithTx(ctx, func(tx *database.Transactable) {
+		useCategoryID, _ := getFindingCategoryID(i.Category, tx.Select)
+
+		tx.Update(sq.Update("findings").
+			SetMap(map[string]interface{}{
+				"category_id":     useCategoryID,
+				"title":           i.Title,
+				"description":     i.Description,
+				"ticket_link":     i.TicketLink,
+				"ready_to_report": i.ReadyToReport,
+			}).
+			Where(sq.Eq{"id": finding.ID}))
+	})
+
 	if err != nil {
 		return backend.WrapError("Unable to update database", backend.UnauthorizedWriteErr(err))
 	}

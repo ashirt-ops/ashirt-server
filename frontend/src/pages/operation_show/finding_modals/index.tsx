@@ -21,7 +21,7 @@ const CategorySelect = (props: {
     <Select label="Category" {...props}>
       <option value="">- Select a category -</option>
       {categories.map(category => (
-        <option key={category}>{category}</option>
+        <option key={category.id}>{category.category}</option>
       ))}
     </Select>
   ))

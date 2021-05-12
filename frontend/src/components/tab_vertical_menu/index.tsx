@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import { Switch, Route, RouteComponentProps } from 'react-router-dom'
 import { subUrl } from 'src/helpers'
 
-import { default as ListMenu, NavListItem } from 'src/components/list_menu'
+import { default as ListMenu, NavListItem, ListItem } from 'src/components/list_menu'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -17,7 +17,7 @@ export type Tab = {
   content?: React.ReactNode
 }
 
-export default (props: RouteComponentProps & {
+export const NavVerticalTabMenu = (props: RouteComponentProps & {
   title: string,
   tabs: Array<Tab>
 }) => {
@@ -42,3 +42,27 @@ export default (props: RouteComponentProps & {
     </div>
   )
 }
+
+export const VerticalTabMenu = (props: {
+  title: string,
+  tabs: Array<Tab>
+  selectedTabIndex: number
+  onTabChanged?: (tab: Tab, tabIndex: number) => void,
+}) => (
+  <div className={cx('root')}>
+    <div className={cx("tabmenu")}>
+      <header>{props.title}</header>
+      <ListMenu>
+        {props.tabs.map((tab, index) => <ListItem
+          key={tab.id}
+          name={tab.label}
+          selected={index == props.selectedTabIndex}
+          onSelect={() => props.onTabChanged?.(tab, index)}
+        />)}
+      </ListMenu>
+    </div>
+    <div className={cx("content")}>
+      {props.tabs[props.selectedTabIndex].content}
+    </div>
+  </div>
+)

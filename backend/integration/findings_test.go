@@ -21,16 +21,16 @@ func TestFindings(t *testing.T) {
 		a.Post("/web/operations/op/tags").WithJSONBody(`{"name": "two", "colorName": "green"}`).Do().ExpectSuccess()
 		a.Post("/web/operations/op/tags").WithJSONBody(`{"name": "three", "colorName": "blue"}`).Do().ExpectSuccess()
 
-		uuid := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 1", "category": "CD", "description": "Here is my finding"}`).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
-		a.Get("/web/operations/op/findings").Do().ExpectSubsetJSONArray([]string{`{"uuid": "` + uuid + `", "title": "Finding 1", "category": "CD", "description": "Here is my finding"}`})
+		uuid := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 1", "category": "Product", "description": "Here is my finding"}`).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
+		a.Get("/web/operations/op/findings").Do().ExpectSubsetJSONArray([]string{`{"uuid": "` + uuid + `", "title": "Finding 1", "category": "Product", "description": "Here is my finding"}`})
 		a.Put("/web/operations/op/findings/" + uuid).WithJSONBody(`{
 			"title": "Updated title", 
-			"category": "PROD", 
+			"category": "Network", 
 			"description": "Updated description",
 			"readyToReport": false,
 			"ticketLink": null
 		}`).Do().ExpectSuccess()
-		a.Get("/web/operations/op/findings").Do().ExpectSubsetJSONArray([]string{`{"uuid": "` + uuid + `", "title": "Updated title", "category": "PROD", "description": "Updated description"}`})
+		a.Get("/web/operations/op/findings").Do().ExpectSubsetJSONArray([]string{`{"uuid": "` + uuid + `", "title": "Updated title", "category": "Network", "description": "Updated description"}`})
 	})
 
 	t.Run("Deleting findings", func(t *testing.T) {
@@ -38,7 +38,7 @@ func TestFindings(t *testing.T) {
 		a.DefaultUser = a.NewUser("adefaultuser", "Alice", "DefaultUser")
 
 		a.Post("/web/operations").WithJSONBody(`{"name": "Op 1", "slug": "op"}`).Do().ExpectSuccess()
-		uuid := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "To be deleted...", "category": "CD", "description": ""}`).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
+		uuid := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "To be deleted...", "category": "Enterprise", "description": ""}`).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
 		a.Get("/web/operations/op/findings").Do().ExpectSubsetJSONArray([]string{`{"uuid": "` + uuid + `", "title": "To be deleted..."}`})
 		a.Delete("/web/operations/op/findings/" + uuid).Do().ExpectSuccess()
 		a.Get("/web/operations/op/findings").Do().ExpectJSON("[]")
@@ -50,10 +50,10 @@ func TestFindings(t *testing.T) {
 		bob := a.NewUser("battacker", "Bob", "Attacker")
 
 		a.Post("/web/operations").WithJSONBody(`{"name": "Alice's Operation", "slug": "alice"}`).AsUser(alice).Do().ExpectSuccess()
-		uuid := a.Post("/web/operations/alice/findings").WithJSONBody(`{"title": "Alice's finding", "category": "CD", "description": ""}`).AsUser(alice).Do().ExpectSuccess().ResponseUUID()
+		uuid := a.Post("/web/operations/alice/findings").WithJSONBody(`{"title": "Alice's finding", "category": "Enterprise", "description": ""}`).AsUser(alice).Do().ExpectSuccess().ResponseUUID()
 		a.Put("/web/operations/alice/findings/" + uuid).WithJSONBody(`{
 			"title": "bob was here", 
-			"category": "BOB", 
+			"category": "Enterprise", 
 			"description": "",
 			"readyToReport": false,
 			"ticketLink": null
@@ -61,7 +61,7 @@ func TestFindings(t *testing.T) {
 
 		// Ensure using an operation that bob controlls does not bypass security check
 		a.Post("/web/operations").WithJSONBody(`{"name": "Bob's Operation", "slug": "bob"}`).AsUser(bob).Do().ExpectSuccess()
-		a.Put("/web/operations/bob/findings/" + uuid).WithJSONBody(`{"title": "bob was here", "category": "BOB", "description": "", "readyToReport": false}`).AsUser(bob).Do().ExpectUnauthorized()
+		a.Put("/web/operations/bob/findings/" + uuid).WithJSONBody(`{"title": "bob was here", "category": "Enterprise", "description": "", "readyToReport": false}`).AsUser(bob).Do().ExpectUnauthorized()
 
 		// Ensure finding is unmodified
 		a.Get("/web/operations/alice/findings").AsUser(alice).Do().ExpectSubsetJSONArray([]string{`{"title": "Alice's finding"}`})
@@ -73,7 +73,7 @@ func TestFindings(t *testing.T) {
 		bob := a.NewUser("battacker", "Bob", "Attacker")
 
 		a.Post("/web/operations").WithJSONBody(`{"name": "Alice's Operation", "slug": "alice"}`).AsUser(alice).Do().ExpectSuccess()
-		uuid := a.Post("/web/operations/alice/findings").WithJSONBody(`{"title": "Alice's finding", "category": "CD", "description": ""}`).AsUser(alice).Do().ExpectSuccess().ResponseUUID()
+		uuid := a.Post("/web/operations/alice/findings").WithJSONBody(`{"title": "Alice's finding", "category": "Product", "description": ""}`).AsUser(alice).Do().ExpectSuccess().ResponseUUID()
 		a.Delete("/web/operations/alice/findings/" + uuid).AsUser(bob).Do().ExpectUnauthorized()
 
 		// Ensure using an operation that bob controlls does not bypass security check
@@ -94,7 +94,7 @@ func TestAssociatingEvidenceWithFindings(t *testing.T) {
 	evidenceUUID1 := a.Post("/web/operations/op1/evidence").WithMultipartBody(map[string]string{"description": "evi1"}, nil).Do().ExpectSuccess().ResponseUUID()
 	evidenceUUID2 := a.Post("/web/operations/op1/evidence").WithMultipartBody(map[string]string{"description": "evi2"}, nil).Do().ExpectSuccess().ResponseUUID()
 	evidenceUUID3 := a.Post("/web/operations/op1/evidence").WithMultipartBody(map[string]string{"description": "evi3"}, nil).Do().ExpectSuccess().ResponseUUID()
-	findingUUID := a.Post("/web/operations/op1/findings").WithJSONBody(`{"title": "finding", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+	findingUUID := a.Post("/web/operations/op1/findings").WithJSONBody(`{"title": "finding", "category": "Product", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
 
 	// Check adding and removing evidence
 	a.Put("/web/operations/op1/findings/" + findingUUID + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID1 + `", "` + evidenceUUID2 + `"], "evidenceToRemove": []}`).Do().ExpectSuccess()
@@ -106,7 +106,7 @@ func TestAssociatingEvidenceWithFindings(t *testing.T) {
 	a.Post("/web/operations").WithJSONBody(`{"name": "op", "slug": "op2"}`).Do().ExpectSubsetJSON(
 		`{"slug": "op2", "name": "op", "status": 0}`,
 	)
-	findingUUID2 := a.Post("/web/operations/op2/findings").WithJSONBody(`{"title": "other finding", "category": "CD", "description": ""}`).Do().ResponseUUID()
+	findingUUID2 := a.Post("/web/operations/op2/findings").WithJSONBody(`{"title": "other finding", "category": "Product", "description": ""}`).Do().ResponseUUID()
 	a.Put("/web/operations/op2/findings/" + findingUUID2 + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID1 + `"], "evidenceToRemove": []}`).Do().ExpectUnauthorized()
 }
 
@@ -121,9 +121,9 @@ func TestTaggingFindings(t *testing.T) {
 	evidenceUUID1 := a.Post("/web/operations/op/evidence").WithMultipartBody(map[string]string{"description": "e1", "tagIds": "[1]", "occurredAt": "2019-05-01T10:00:00Z"}, nil).Do().ExpectSuccess().ResponseUUID()
 	evidenceUUID2 := a.Post("/web/operations/op/evidence").WithMultipartBody(map[string]string{"description": "e2", "tagIds": "[2]", "occurredAt": "2019-06-01T10:00:00Z"}, nil).Do().ExpectSuccess().ResponseUUID()
 	evidenceUUID3 := a.Post("/web/operations/op/evidence").WithMultipartBody(map[string]string{"description": "e3", "occurredAt": "2019-07-01T10:00:00Z"}, nil).Do().ExpectSuccess().ResponseUUID()
-	findingUUID1 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "f1", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
-	findingUUID2 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "f2", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
-	findingUUID3 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "f3", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+	findingUUID1 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "f1", "category": "Network", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+	findingUUID2 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "f2", "category": "Network", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+	findingUUID3 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "f3", "category": "Network", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
 
 	// Add evidence to findings
 	a.Put("/web/operations/op/findings/" + findingUUID1 + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID1 + `", "` + evidenceUUID2 + `"], "evidenceToRemove": []}`).Do().ExpectSuccess()

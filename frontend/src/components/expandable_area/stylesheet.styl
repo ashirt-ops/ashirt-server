@@ -1,0 +1,45 @@
+@import '~src/vars'
+
+$border-radius = 4px
+$arrow-size = 5px
+
+.expandable-root
+  position: relative
+
+.expandable-section-label
+  text-align: left
+  font-size: 15px
+  margin-top: 5px
+  margin-bottom: 5px
+  font-weight: bold
+
+.expandable-arrow
+  border: 1px solid $darker-background
+  background-color: $darker-background
+  background-image: linear-gradient(180deg,hsla(0,0%,100%,.05),hsla(0,0%,100%,0))
+  padding-left: 25px
+
+  &.expanded
+    border-radius: $border-radius $border-radius 0 0
+    &:before
+      content: ""
+      position: absolute
+      top: 12px
+      left: 10px
+      border: $arrow-size solid transparent
+      border-top-color: $foreground
+
+  &.condensed
+    border-radius: $border-radius
+    &:before
+      content: ""
+      position: absolute
+      top: 8px
+      left: 10px
+      border: $arrow-size solid transparent
+      border-left-color: $foreground
+
+.expandable-content
+  background-color: $darker-background
+  border-radius: 0 0 $border-radius $border-radius
+  margin-bottom: 4px

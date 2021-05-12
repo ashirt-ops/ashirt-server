@@ -22,7 +22,7 @@ func TestUpdateFinding(t *testing.T) {
 	input := services.UpdateFindingInput{
 		OperationSlug: masterOp.Slug,
 		FindingUUID:   masterFinding.UUID,
-		Category:      "New Category",
+		Category:      DetectionGapFindingCategory.Category,
 		Title:         "New Title",
 		Description:   "New Description",
 	}

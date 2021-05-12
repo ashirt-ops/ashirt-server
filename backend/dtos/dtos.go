@@ -148,6 +148,13 @@ type CheckConnection struct {
 	Ok bool `json:"ok"`
 }
 
+type FindingCategory struct {
+	ID         int64  `json:"id"`
+	Category   string `json:"category"`
+	Deleted    bool   `json:"deleted"`
+	UsageCount int64  `json:"usageCount"`
+}
+
 type NewUserCreatedByAdmin struct {
 	TemporaryPassword string `json:"temporaryPassword"`
 }

@@ -34,6 +34,7 @@ func main() {
 	gen(dtos.TagPair{})
 	gen(dtos.TagDifference{})
 	gen(dtos.TagByEvidenceDate{})
+	gen(dtos.FindingCategory{})
 	gen(dtos.CheckConnection{})
 	gen(dtos.NewUserCreatedByAdmin{})
 
