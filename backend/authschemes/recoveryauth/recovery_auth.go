@@ -78,7 +78,7 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 			return
 		}
 		bridge.LoginUser(w, r, userID, nil)
-		http.Redirect(w, r, fmt.Sprintf("/operations"), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("/account/authmethods"), http.StatusFound)
 	}))
 
 	remux.Route(r, "DELETE", "/expired", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
