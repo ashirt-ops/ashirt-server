@@ -295,6 +295,15 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			return nil, err
 		}
 
+		emailTaken, err := bridge.CheckIfUserEmailTaken(email, true)
+		if err != nil {
+			return nil, err
+		}
+
+		if emailTaken {
+			return nil, backend.BadInputErr(fmt.Errorf("error linking account: email taken"), "An account for this user already exists")
+		}
+
 		encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			return nil, backend.WrapError("Unable to encrypt new password", err)

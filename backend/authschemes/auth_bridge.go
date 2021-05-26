@@ -5,12 +5,14 @@ package authschemes
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
 	"github.com/theparanoids/ashirt-server/backend/session"
@@ -249,4 +251,34 @@ func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, userKey stri
 // but is provided in situations where unique-access to the database is required.
 func (ah AShirtAuthBridge) GetDatabase() *database.Connection {
 	return ah.db
+}
+
+func (ah AShirtAuthBridge) FindUserByEmail(email string, includeDeleted bool) (models.User, error) {
+	var userRecord models.User
+
+	whereClause := sq.Eq{
+		"email": email,
+	}
+	if !includeDeleted {
+		whereClause["deleted_at"] = nil
+	}
+	err := ah.db.Get(&userRecord,
+		sq.Select("*").From("users").Where(whereClause))
+	if err != nil {
+		return models.User{}, backend.DatabaseErr(err)
+	}
+	return userRecord, nil
+}
+
+func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, includeDeleted bool) (bool, error) {
+	_, err := ah.FindUserByEmail(email, includeDeleted)
+	if err == nil {
+		return true, nil
+	} else {
+		trueErr, ok := err.(*backend.HTTPError)
+		if ok && trueErr.WrappedError == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
 }
