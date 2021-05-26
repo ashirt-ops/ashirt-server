@@ -5,6 +5,7 @@ package authschemes
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -211,6 +212,19 @@ func (ah AShirtAuthBridge) FindUserByEmail(email string, includeDeleted bool) (m
 		return models.User{}, backend.DatabaseErr(err)
 	}
 	return userRecord, nil
+}
+
+func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, includeDeleted bool) (bool, error) {
+	_, err := ah.FindUserByEmail(email, includeDeleted)
+	if err == nil {
+		return true, nil
+	} else {
+		trueErr, ok := err.(*backend.HTTPError)
+		if ok && trueErr.WrappedError == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
 }
 
 // FindUserAuthsByUserEmail retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail for NON-DELETED accounts.
