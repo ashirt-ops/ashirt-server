@@ -214,9 +214,12 @@ func (ah AShirtAuthBridge) FindUserByEmail(email string, includeDeleted bool) (m
 	return userRecord, nil
 }
 
-func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, includeDeleted bool) (bool, error) {
-	_, err := ah.FindUserByEmail(email, includeDeleted)
+func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, allowUserID int64, includeDeleted bool) (bool, error) {
+	user, err := ah.FindUserByEmail(email, includeDeleted)
 	if err == nil {
+		if user.ID == allowUserID { // check if the user requesting the email account already "owns" it.
+			return false, nil
+		}
 		return true, nil
 	} else {
 		trueErr, ok := err.(*backend.HTTPError)

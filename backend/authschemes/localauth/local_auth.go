@@ -300,7 +300,9 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			return nil, backend.WrapError("Unable to encrypt new password", err)
 		}
 
-		emailTaken, err := bridge.CheckIfUserEmailTaken(email, true)
+		callingUserId := middleware.UserID(r.Context())
+
+		emailTaken, err := bridge.CheckIfUserEmailTaken(email, callingUserId, true)
 		if err != nil {
 			return nil, err
 		}
@@ -310,7 +312,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 		}
 
 		err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
-			UserID:            middleware.UserID(r.Context()),
+			UserID:            callingUserId,
 			UserKey:           email,
 			EncryptedPassword: encryptedPassword,
 		})
