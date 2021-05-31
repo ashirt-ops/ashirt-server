@@ -54,6 +54,7 @@ func (m *SMTPMailer) AddToQueue(job EmailJob) error {
 		return err
 	}
 	err = smtp.SendMail(config.EmailHost(), m.auth(), job.From, []string{job.To}, msg)
+	job.OnCompleted(err)
 	return err
 }
 
