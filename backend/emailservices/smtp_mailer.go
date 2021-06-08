@@ -2,8 +2,10 @@ package emailservices
 
 import (
 	"bytes"
+	"fmt"
+	"mime/multipart"
 	"net/smtp"
-	"text/template"
+	"net/textproto"
 
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -59,16 +61,65 @@ func (m *SMTPMailer) AddToQueue(job EmailJob) error {
 }
 
 func buildSMTPEmail(job EmailJob) ([]byte, error) {
-	buff := bytes.NewBuffer(make([]byte, 0, 1024))
-	err := emailSMTPFormat.Execute(buff, job)
+	smtpEmailContent, err := buildEmailContent(job)
+
 	if err != nil {
 		return []byte{}, err
 	}
 
-	return buff.Bytes(), nil
+	return []byte(smtpEmailContent), nil
 }
 
-var emailSMTPFormat = template.Must(template.New("smtp-email").Parse(
-	"To: {{ .To }}\r\n" +
-		"Subject: | {{ .Subject }}\r\n" +
-		"\r\n{{ .Body }}\r\n"))
+func buildEmailContent(job EmailJob) (string, error) {
+	emailMessage := &bytes.Buffer{}
+	emailMessageWriter := multipart.NewWriter(emailMessage)
+
+	boundary := emailMessageWriter.Boundary()
+
+	// check errs
+	err := buildPlaintextPart(emailMessageWriter, job.Body)
+	if err != nil {
+		return "", err
+	}
+	err = buildHTMLPart(emailMessageWriter, job.HTMLBody)
+	if err != nil {
+		return "", err
+	}
+	err = emailMessageWriter.Close()
+	if err != nil {
+		return "", err
+	}
+
+	start := buildEmailHeader(job, boundary)
+	return start + emailMessage.String(), nil
+}
+
+func buildPlaintextPart(partWriter *multipart.Writer, content string) error {
+	return buildEmailBodyPart(partWriter, content, `text/plain; charset="utf-8"`)
+}
+
+func buildHTMLPart(partWriter *multipart.Writer, content string) error {
+	return buildEmailBodyPart(partWriter, content, `text/html; charset="utf-8"`)
+}
+
+func buildEmailBodyPart(partWriter *multipart.Writer, content string, contentType string) error {
+	mimeHeader := textproto.MIMEHeader{"Content-Type": {contentType}}
+	mimeHeader.Add("Content-Transfer-Encoding", "quoted-printable")
+	mimeHeader.Add("Content-Disposition", "inline")
+	childWriter, err := partWriter.CreatePart(mimeHeader)
+	if err != nil {
+		return err
+	}
+	_, err = childWriter.Write([]byte(content))
+	return err
+}
+
+func buildEmailHeader(job EmailJob, boundary string) string {
+	to := fmt.Sprintf("To: %v\r\n", job.To)
+	from := fmt.Sprintf("From: AShirt <%v>\r\n", job.From)
+	subject := fmt.Sprintf("Subject: %v\r\n", job.Subject)
+	mimeVersion := "MIME-Version: 1.0\r\n"
+	contentType := fmt.Sprintf("Content-Type: multipart/mixed; boundary=%v\r\n", boundary)
+
+	return to + from + subject + mimeVersion + contentType
+}
