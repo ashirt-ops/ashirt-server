@@ -148,7 +148,7 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 		UserRecord: &user,
 		DB:         w.db,
 	}
-	body, subject, err := emailtemplates.BuildEmailContent(email.Template, templateData)
+	emailContent, err := emailtemplates.BuildEmailContent(email.Template, templateData)
 
 	if err != nil {
 		setEmailFailed(w.db, email.EmailID, w.logger, err)
@@ -158,10 +158,11 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 		return fmt.Errorf("Email servicer has not been assigned to email worker")
 	}
 	err = w.servicer.AddToQueue(emailservices.EmailJob{
-		Body:    body,
-		Subject: subject,
-		To:      email.To,
-		From:    config.EmailFromAddress(),
+		Body:     emailContent.PlaintTextContent,
+		HTMLBody: emailContent.HTMLContent,
+		Subject:  emailContent.Subject,
+		To:       email.To,
+		From:     config.EmailFromAddress(),
 		OnCompleted: func(encounteredErr error) {
 			if encounteredErr != nil {
 				setEmailFailed(w.db, email.EmailID, w.logger, encounteredErr)

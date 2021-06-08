@@ -18,13 +18,14 @@ func TestBuildEmailContent(t *testing.T) {
 	}
 
 	for _, tmpl := range allTemplates {
-		body, subject, err := emailtemplates.BuildEmailContent(tmpl, emailtemplates.EmailTemplateData{
+		emailContent, err := emailtemplates.BuildEmailContent(tmpl, emailtemplates.EmailTemplateData{
 			DB:         db,
 			UserRecord: &seeding.UserHarry,
 		})
 		require.NoError(t, err)
-		require.NotEmpty(t, body)
-		require.NotEmpty(t, subject)
+		require.NotEmpty(t, emailContent.HTMLContent)
+		require.NotEmpty(t, emailContent.PlaintTextContent)
+		require.NotEmpty(t, emailContent.Subject)
 	}
 }
 

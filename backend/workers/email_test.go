@@ -55,7 +55,7 @@ func TestEmailWorkerProcessEmail(t *testing.T) {
 	givenTemplate := emailtemplates.EmailRecoveryTemplate // we need some valid template to produce data, so here we are
 	badTemplate := "some-email-template"
 
-	_, expectedSubject, err := emailtemplates.BuildEmailContent(givenTemplate, emailtemplates.EmailTemplateData{
+	emailContent, err := emailtemplates.BuildEmailContent(givenTemplate, emailtemplates.EmailTemplateData{
 		DB:         db,
 		UserRecord: &targetUser,
 	})
@@ -81,7 +81,7 @@ func TestEmailWorkerProcessEmail(t *testing.T) {
 	// check that the success email went through
 	require.Equal(t, 1, len(sentEmails))
 	resultEmail := sentEmails[0]
-	require.Equal(t, expectedSubject, resultEmail.Subject)
+	require.Equal(t, emailContent.Subject, resultEmail.Subject)
 	require.NotEmpty(t, resultEmail.Body) // recovery code won't match, so making the test a bit easier
 	require.Equal(t, targetUser.Email, resultEmail.To)
 
