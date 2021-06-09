@@ -116,10 +116,14 @@ func buildEmailBodyPart(partWriter *multipart.Writer, content string, contentTyp
 
 func buildEmailHeader(job EmailJob, boundary string) string {
 	to := fmt.Sprintf("To: %v\r\n", job.To)
-	from := fmt.Sprintf("From: AShirt <%v>\r\n", job.From)
+	from := job.From
+	if from == "" {
+		from = "AShirt"
+	}
+	from = fmt.Sprintf("From: %v", from)
 	subject := fmt.Sprintf("Subject: %v\r\n", job.Subject)
 	mimeVersion := "MIME-Version: 1.0\r\n"
-	contentType := fmt.Sprintf("Content-Type: multipart/mixed; boundary=%v\r\n", boundary)
+	contentType := fmt.Sprintf("Content-Type: multipart/alternative; boundary=%v\r\n", boundary)
 
 	return to + from + subject + mimeVersion + contentType
 }
