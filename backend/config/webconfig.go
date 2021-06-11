@@ -21,6 +21,7 @@ type WebConfig struct {
 	SessionStoreKey          string        `split_words:"true"`
 	RecoveryExpiry           time.Duration `split_words:"true" default:"24h"`
 	DisableLocalRegistration bool          `split_words:"true"`
+	FrontendIndexURL         string        `split_words:"true"`
 	Port                     int
 }
 
@@ -49,9 +50,10 @@ type AuthInstanceConfig struct {
 }
 
 var (
-	app  WebConfig
-	db   DBConfig
-	auth AuthConfig
+	app   WebConfig
+	db    DBConfig
+	auth  AuthConfig
+	email EmailConfig
 )
 
 // LoadConfig loads all of the environment configuration specified in environment variables
@@ -75,6 +77,7 @@ func LoadWebConfig() error {
 		loadAppConfig,
 		loadDBConfig,
 		loadAuthConfig,
+		loadEmailConfig,
 	})
 }
 
@@ -176,6 +179,11 @@ func Port() string {
 // RecoveryExpiry retrieves the APP_RECOVERY_EXPIRY value from the environment
 func RecoveryExpiry() time.Duration {
 	return app.RecoveryExpiry
+}
+
+// FrontendIndexURL retrieves the APP_FRONTEND_INDEX_URL value from the environment
+func FrontendIndexURL() string {
+	return app.FrontendIndexURL
 }
 
 // IsRegistrationEnabled returns true if local registration is enabled, false otherwise.

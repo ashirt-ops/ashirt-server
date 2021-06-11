@@ -19,6 +19,21 @@ services:
       APP_CSRF_AUTH_KEY: ""
       APP_SESSION_STORE_KEY: ""
       APP_PORT: 3000
+      APP_FRONTEND_INDEX_URL: "http://localhost:8080"
+      
+      # Common Value for all emailers
+      EMAIL_FROM_ADDRESS: AShirt
+
+      # For normal testing (writes plaintext emails to stdout)
+      EMAIL_TYPE: stdout
+
+      # For SMTP (specifically, gmail) setup
+      # EMAIL_TYPE: smtp
+      # EMAIL_SMTP_AUTH_TYPE: login
+      # EMAIL_HOST: smtp.gmail.com:587
+      # EMAIL_USER_NAME: "actual-email-account+forAshirtTesting@gmail.com"
+      # EMAIL_PASSWORD: "totally-secret-password"
+
       APP_DISABLE_LOCAL_REGISTRATION: "false"
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
       AUTH_SERVICES: ashirt

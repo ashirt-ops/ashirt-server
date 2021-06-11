@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
@@ -16,8 +17,10 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
+	"github.com/theparanoids/ashirt-server/backend/emailservices"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server"
+	"github.com/theparanoids/ashirt-server/backend/workers"
 )
 
 func main() {
@@ -75,6 +78,12 @@ func tryRunServer(logger logging.Logger) error {
 		}
 	}
 
+	if config.EmailType() != "" {
+		startEmailServices(db, logger)
+	} else {
+		logger.Log("msg", "No Emailer selected")
+	}
+
 	http.Handle("/web/", http.StripPrefix("/web", server.Web(
 		db, contentStore, &server.WebConfig{
 			CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
@@ -90,4 +99,28 @@ func tryRunServer(logger logging.Logger) error {
 
 	logger.Log("port", config.Port(), "msg", "Now Serving")
 	return http.ListenAndServe(":"+config.Port(), nil)
+}
+
+func startEmailServices(db *database.Connection, logger logging.Logger) {
+	var emailServicer emailservices.EmailServicer
+	emailLogger := logging.With(logger, "service", "email-sender", "type", config.EmailType)
+	switch config.EmailType() {
+	case string(emailservices.StdOutEmailer):
+		mailer := emailservices.MakeWriterMailer(os.Stdout, emailLogger)
+		emailServicer = &mailer
+	case string(emailservices.MemoryEmailer):
+		mailer := emailservices.MakeMemoryMailer(emailLogger)
+		emailServicer = &mailer
+	case string(emailservices.SMTPEmailer):
+		mailer := emailservices.MakeSMTPMailer(emailLogger)
+		emailServicer = &mailer
+	}
+
+	if emailServicer == nil {
+		logger.Log("msg", "unsupported emailer", "type", config.EmailType)
+	} else {
+		emailLogger.Log("msg", "Staring emailer")
+		emailWorker := workers.MakeEmailWorker(db, emailServicer, logging.With(logger, "service", "email-worker"))
+		emailWorker.Start()
+	}
 }

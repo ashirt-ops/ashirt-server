@@ -32,8 +32,12 @@ func TestCreateUser(t *testing.T) {
 	require.Equal(t, luna.Email, i.Email)
 	require.Equal(t, luna.LastName, i.LastName)
 
-	// Verify 2nd user (non-admin, no matching slug)
+	// Verify re-register will fail (due to unique email constraint)
+	createUserOutput, err = services.CreateUser(db, i)
+	require.Error(t, err)
 
+	// Verify 2nd user (non-admin, no matching slug)
+	i.Email = "luna.lovegood+extra@hogwarts.edu" // change the password to something that won't exist
 	createUserOutput, err = services.CreateUser(db, i)
 	require.NoError(t, err)
 	// Since Luna's already exists, a new slug should be created

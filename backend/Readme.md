@@ -67,6 +67,24 @@ Configuration is handled entirely via environment variables. To that end, here a
         * `/autherror/noverify`: User authentication failed (either challenge or token)
         * `/autherror/noaccess`: User authentication succeeded, but the user is excluded from using this application
         * `/autherror/incomplete`: User authentication succeeded and is able to use the application, but a matching ashirt user profile could not be created.
+  * `EMAIL_FROM_ADDRESS`
+    * The email address to use when sending emails. The specific value may be influenced by your email provider
+  * `EMAIL_TYPE`
+    * Indicates what kind of email service is used to send the emails.
+    * Valid values: `smtp`, `memory` (for test), `stdout` (for test)
+  * `EMAIL_HOST`
+    * The location of the email server. If connecting to an SMTP server, a port is also required (e.g. `my-email-server:25`)
+  * `EMAIL_USER_NAME`
+    * The username to use when authenticating with PLAIN or LOGIN SMTP servers
+  * `EMAIL_PASSWORD`
+    * The password to use when authenticating with PLAIN or LOGIN SMTP servers
+  * `EMAIL_IDENTITY`
+    * The identity to use when authenticating with PLAIN SMTP servers
+  * `EMAIL_SECRET`
+    * The secret to use when authenticating with CRAM-MD5 SMTP servers
+  * `EMAIL_SMTP_AUTH_TYPE`
+    * Indicates which kind of authentication scheme to use when connecting to an SMTP server
+    * Valid values: `login`, `plain`, `crammd5` (for LOGIN, PLAIN, and CRAM-MD5 respectively)
 
 ### Authentication and Authorization
 
@@ -141,9 +159,17 @@ Presently, at least some kind of authentication is required to use this service.
 
 Account recovery can be triggered by an admin for any user (except themselves). The account in question will generate a one-time-use code that expries in 24 hours. The user will need a special url that includes this code in order to login. Once logged in, the user will have full access to their account. At which point, they should probably link some other authentication system to their account, though this is not a requirement. The recovery scheme is baked into this system automatically, and cannot be disabled, except by recompiling the backend, and specifically removing the addition of this auth scheme.
 
+A separate set of recovery exists for users to initiate a self-service recovery. In this case, users will need to select the "Forgot your password?" option from the login page. This method is expected to only be valid for local/default loigin. Users will receive an email with a link to recover their account. The recover code will expire in 24 hours from the time the email was sent.
+
 ### API Keys
 
 As mentioned above, other services can iteract with the system, under the guise of some registered user, without requiring the user to login while using the tool. To do this, a user must first create an API key pair, and then associate these keys with the external tool (e.g. screenshot client).
+
+### Emails
+
+The backend has a system to send emails out to notify users (with an email address) as needed. Currently, this system is only used to send account recovery emails. An email server will be needed, but stmp services can be configured via environment variables.
+
+Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`. 
 
 ## Development Overview
 

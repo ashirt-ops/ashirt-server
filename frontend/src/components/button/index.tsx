@@ -55,28 +55,28 @@ const Button = (props: ButtonStyle & {
   )
 }
 
-export const NavLinkButton = (props: {
+export const NavLinkButton = (props: ButtonStyle & {
   children: React.ReactNode,
   className?: string,
   exact?: boolean,
   icon?: string,
   to: string,
 }) => (
-    <NavLink exact={props.exact} className={cx('root', props.className)} to={props.to} activeClassName={cx('active')}>
-      <div className={cx('children')}>
-        {props.icon && <img src={props.icon} />}
-        <span>{props.children}</span>
-      </div>
-    </NavLink>
-  )
+  <NavLink exact={props.exact} className={cx('root', props.className, styleToClassname(props))} to={props.to} activeClassName={cx('active')}>
+    <div className={cx('children')}>
+      {props.icon && <img src={props.icon} />}
+      <span>{props.children}</span>
+    </div>
+  </NavLink>
+)
 
 export const ButtonGroup = (props: {
   children: React.ReactNode,
   className?: string,
 }) => (
-    <div className={cx('button-group', props.className)}>
-      {props.children}
-    </div>
-  )
+  <div className={cx('button-group', props.className)}>
+    {props.children}
+  </div>
+)
 
 export default Button

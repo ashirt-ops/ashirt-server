@@ -1,0 +1,32 @@
+// Copyright 2021, Verizon Media
+// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
+package authschemes
+
+import (
+	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/database"
+)
+
+// CreateNewAuthForUserGeneric provides a mechanism for non-auth providers to generate new authentications
+// on behalf of auth providers. This is only intended for recovery.
+//
+// Proper usage:  authschemes.CreateNewAuthForUser(db, recoveryauth.constants.Code, authschemes.UserAuthData{})
+// note: you will need to provide your own database instance
+func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName string, data UserAuthData) error {
+	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
+		"auth_scheme":         authSchemeName,
+		"user_key":            data.UserKey,
+		"user_id":             data.UserID,
+		"encrypted_password":  data.EncryptedPassword,
+		"totp_secret":         data.TOTPSecret,
+		"must_reset_password": data.NeedsPasswordReset,
+	})
+	if err != nil {
+		if database.IsAlreadyExistsError(err) {
+			return backend.BadInputErr(err, "An account for this user already exists")
+		}
+		return backend.WrapError("Unable to generate auth scheme for user", backend.DatabaseErr(err))
+	}
+	return nil
+}

@@ -5,14 +5,14 @@ package recoveryauth
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	recoveryHelpers "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/helpers"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/emailtemplates"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 
@@ -48,16 +48,11 @@ func generateRecoveryCodeForUser(ctx context.Context, bridge authschemes.AShirtA
 		return nil, backend.WrapError("Unable to get UserID from slug", err)
 	}
 
-	authKey := make([]byte, recoveryKeyLength)
-	if _, err := rand.Read(authKey); err != nil {
-		return nil, backend.WrapError("Unable to generate random recovery key", err)
+	authKeyStr, err := recoveryHelpers.GenerateRecoveryCodeForUser(bridge.GetDatabase(), userID)
+	if err != nil {
+		return nil, backend.WrapError("Could not generate recovery code for user", err)
 	}
-	authKeyStr := hex.EncodeToString(authKey)
 
-	err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
-		UserID:  userID,
-		UserKey: authKeyStr,
-	})
 	response := struct {
 		Code string `json:"code"`
 	}{Code: authKeyStr}
@@ -92,4 +87,25 @@ func getRecoveryMetrics(ctx context.Context, db *database.Connection, expiryInMi
 	}
 
 	return metrics, nil
+}
+
+func generateRecoveryEmail(ctx context.Context, bridge authschemes.AShirtAuthBridge, userEmail string) error {
+	userAccount, err := bridge.FindUserByEmail(userEmail, false)
+	if err != nil {
+		return backend.WrapError("Unable to get user account from email", err)
+	}
+
+	var useTemplate string
+	if userAccount.Disabled {
+		useTemplate = emailtemplates.EmailRecoveryDeniedTemplate
+	} else {
+		useTemplate = emailtemplates.EmailRecoveryTemplate
+	}
+
+	err = bridge.AddScheduledEmail(userEmail, userAccount.ID, useTemplate)
+	if err != nil {
+		return backend.WrapError("Unable to generate recovery email", err)
+	}
+
+	return nil
 }
