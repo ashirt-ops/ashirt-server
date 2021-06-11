@@ -104,8 +104,6 @@ func buildHTMLPart(partWriter *multipart.Writer, content string) error {
 
 func buildEmailBodyPart(partWriter *multipart.Writer, content string, contentType string) error {
 	mimeHeader := textproto.MIMEHeader{"Content-Type": {contentType}}
-	mimeHeader.Add("Content-Transfer-Encoding", "quoted-printable")
-	mimeHeader.Add("Content-Disposition", "inline")
 	childWriter, err := partWriter.CreatePart(mimeHeader)
 	if err != nil {
 		return err
