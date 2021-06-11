@@ -1,8 +1,8 @@
 package emailtemplates
 
 import (
-	"text/template"
 	_ "embed"
+	"text/template"
 )
 
 //go:embed recovery.html
