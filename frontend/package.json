@@ -43,7 +43,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "@types/har-format": "^1.2.5",
+    "@types/har-format": "^1.2.6",
     "@types/react-calendar-timeline": "^0.26.3",
     "ace-builds": "^1.4.9",
     "classnames": "^2.3.1",
