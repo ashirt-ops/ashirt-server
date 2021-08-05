@@ -6,12 +6,15 @@ package recoveryauth
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
 
@@ -61,6 +64,32 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 			logging.Log(r.Context(), "msg", "Unable to generate recovery email", "error", err.Error())
 		}
 		return nil, nil
+	}))
+
+	remux.Route(r, "POST", "/admin/register", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+		if !middleware.IsAdmin(r.Context()) {
+			return nil, backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin"))
+		}
+
+		dr := remux.DissectJSONRequest(r)
+		firstName := dr.FromBody("firstName").Required().AsString()
+		lastName := dr.FromBody("lastName").AsString()
+		profile := authschemes.UserProfile{
+			FirstName: firstName,
+			LastName:  lastName,
+			Slug:      strings.ToLower(firstName + "." + lastName),
+			Email:     dr.FromBody("email").Required().AsString(),
+		}
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		userResult, err := bridge.CreateNewUser(profile)
+		if err != nil {
+			return nil, backend.WrapError("Unable to create new user", err)
+		}
+
+		return generateRecoveryCodeForUser(r.Context(), bridge, userResult.RealSlug)
 	}))
 
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
