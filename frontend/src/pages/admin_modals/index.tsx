@@ -7,7 +7,8 @@ import classnames from 'classnames/bind'
 import { User, UserAdminView } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
-  deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser
+  deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
+  adminInviteUser
 } from 'src/services'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
@@ -208,6 +209,64 @@ export const RecoverAccountModal = (props: {
       <Button primary onClick={() => props.onRequestClose()}>Close</Button>
     </div>
   </Modal>
+}
+
+export const InviteUserModal = (props: {
+  onRequestClose: () => void,
+}) => {
+  const firstName = useFormField<string>("")
+  const lastName = useFormField<string>("")
+  const contactEmail = useFormField<string>("")
+
+  const [url, setUrl] = React.useState<string>("")
+  const [isDisabled, setDisabled] = React.useState<boolean>(false)
+
+  const formComponentProps = useForm({
+    fields: [firstName, lastName, contactEmail],
+    handleSubmit: () => {
+      if (firstName.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Users should have at least a first name")))
+      }
+      if (contactEmail.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Users must have an email address")))
+      }
+      // TODO: this should create the user, then update the form with the new user/password combo
+      // to share.
+      const runSubmit = async () => {
+        const result = await adminInviteUser({
+          firstName: firstName.value,
+          lastName: lastName.value,
+          email: contactEmail.value,
+        })
+        const url = `${window.location.origin}/web/auth/recovery/login?code=${result.code}`
+
+        setUrl(url)
+        setDisabled(true) // lock the form -- we don't need to allow submits at this time.
+      }
+
+      return runSubmit()
+    },
+  })
+
+  return (
+    <Modal title="Create New User" onRequestClose={props.onRequestClose}>
+      <Form {...formComponentProps} loading={isDisabled}
+        submitText={isDisabled ? undefined : "Submit"}
+      >
+        <Input label="First Name" {...firstName} disabled={isDisabled} />
+        <Input label="Last Name" {...lastName} disabled={isDisabled} />
+        <Input label="Email" {...contactEmail} disabled={isDisabled} />
+      </Form>
+      {isDisabled && (<>
+        <div className={cx('success-area')}>
+          <p>The user can login with the link below to configure their account:</p>
+          <InputWithCopyButton label="Recovery Code" value={url} />
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      }
+    </Modal>
+  )
 }
 
 export const RemoveTotpModal = (props: {
