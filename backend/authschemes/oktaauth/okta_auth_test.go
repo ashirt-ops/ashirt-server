@@ -411,5 +411,5 @@ func initBridge(t *testing.T) authschemes.AShirtAuthBridge {
 	db := database.NewTestConnectionFromNonStandardMigrationPath(t, "okta-test-db", "../../migrations")
 	sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
 	require.NoError(t, err)
-	return authschemes.MakeAuthBridge(db, sessionStore, "test")
+	return authschemes.MakeAuthBridge(db, sessionStore, "test", "okta")
 }

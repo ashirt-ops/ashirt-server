@@ -13,9 +13,10 @@ import (
 //
 // Proper usage:  authschemes.CreateNewAuthForUser(db, recoveryauth.constants.Code, authschemes.UserAuthData{})
 // note: you will need to provide your own database instance
-func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName string, data UserAuthData) error {
+func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName, authSchemeType string, data UserAuthData) error {
 	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme":         authSchemeName,
+		"auth_type":           authSchemeType,
 		"user_key":            data.UserKey,
 		"user_id":             data.UserID,
 		"encrypted_password":  data.EncryptedPassword,

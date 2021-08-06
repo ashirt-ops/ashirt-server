@@ -46,6 +46,10 @@ func (s LocalAuthScheme) Flags() []string {
 	return flags
 }
 
+func (LocalAuthScheme) Type() string {
+	return constants.Code
+}
+
 // BindRoutes creates many routes for local database routes:
 //
 // * POST   ${prefix}/register             Flags that a new user should be created

@@ -26,15 +26,17 @@ type AShirtAuthBridge struct {
 	db             *database.Connection
 	sessionStore   *session.Store
 	authSchemeName string
+	authSchemeType string
 }
 
 // MakeAuthBridge constructs returns a set of functions to interact with the underlying AShirt
 // authentication scheme
-func MakeAuthBridge(db *database.Connection, sessionStore *session.Store, authSchemeName string) AShirtAuthBridge {
+func MakeAuthBridge(db *database.Connection, sessionStore *session.Store, authSchemeName, authSchemeType string) AShirtAuthBridge {
 	return AShirtAuthBridge{
 		db:             db,
 		sessionStore:   sessionStore,
 		authSchemeName: authSchemeName,
+		authSchemeType: authSchemeType,
 	}
 }
 
@@ -272,7 +274,7 @@ func (ah AShirtAuthBridge) FindUserAuthsByUserSlug(slug string) ([]UserAuthData,
 // Returns nil if no error was occurred, BadInputErr if the user account already exists, or DatabaseErr
 // if any other issue occurs
 func (ah AShirtAuthBridge) CreateNewAuthForUser(data UserAuthData) error {
-	return CreateNewAuthForUserGeneric(ah.db, ah.authSchemeName, data)
+	return CreateNewAuthForUserGeneric(ah.db, ah.authSchemeName, ah.authSchemeType, data)
 }
 
 // UpdateAuthForUser updates a user's authentication password, and can flag whether the user needs to

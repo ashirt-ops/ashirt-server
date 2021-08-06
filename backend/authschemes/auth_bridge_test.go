@@ -253,7 +253,7 @@ func initBridgeTest(t *testing.T) (*database.Connection, *session.Store, authsch
 	db := database.NewTestConnection(t, "authschemes-test-db")
 	sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
 	require.NoError(t, err)
-	return db, sessionStore, authschemes.MakeAuthBridge(db, sessionStore, "test")
+	return db, sessionStore, authschemes.MakeAuthBridge(db, sessionStore, "test", "test-type")
 }
 
 func createDummyUser(t *testing.T, bridge authschemes.AShirtAuthBridge, extra string) int64 {
