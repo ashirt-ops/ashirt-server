@@ -16,6 +16,7 @@ import (
 
 type detailedSchemeTable struct {
 	AuthScheme      string     `db:"auth_scheme"`
+	AuthType        string     `db:"auth_type"`
 	UserCount       int64      `db:"num_users"`
 	UniqueUserCount int64      `db:"unique_users"`
 	LastUsed        *time.Time `db:"last_used"`
@@ -28,7 +29,7 @@ func ListAuthDetails(ctx context.Context, db *database.Connection, supportedAuth
 
 	var detailedAuthData []detailedSchemeTable
 	err := db.Select(&detailedAuthData,
-		sq.Select("auth_scheme",
+		sq.Select("auth_scheme", "auth_type",
 			"COUNT(*) AS num_users",
 			"COALESCE(SUM(is_unique), 0) AS unique_users",
 			"MAX(last_login) AS last_used").
@@ -38,7 +39,7 @@ func ListAuthDetails(ctx context.Context, db *database.Connection, supportedAuth
 					"ON t.user_id = auth_scheme_data.user_id",
 			).
 			Where(sq.NotEq{"auth_scheme": "recovery"}).
-			GroupBy("auth_scheme"))
+			GroupBy("auth_scheme", "auth_type"))
 
 	if err != nil {
 		return nil, backend.WrapError("Cannot list auth details", backend.DatabaseErr(err))
@@ -61,6 +62,7 @@ func mergeSchemes(foundSchemes []detailedSchemeTable, supportedAuthSchemes *[]dt
 	for i, scheme := range foundSchemes {
 		schemes = append(schemes, &dtos.DetailedAuthenticationInfo{ // pre-populate known values
 			AuthSchemeCode:  scheme.AuthScheme,
+			AuthSchemeType:  scheme.AuthType,
 			UserCount:       scheme.UserCount,
 			UniqueUserCount: scheme.UniqueUserCount,
 			LastUsed:        scheme.LastUsed,
@@ -70,10 +72,8 @@ func mergeSchemes(foundSchemes []detailedSchemeTable, supportedAuthSchemes *[]dt
 		if matchingSchemeIndex == -1 {
 			schemes[i].AuthSchemeName = scheme.AuthScheme
 			schemes[i].Labels = append(schemes[i].Labels, "Unsupported")
-			schemes[i].AuthSchemeType = "Unknown"
 		} else {
 			schemes[i].AuthSchemeName = clonedSchemes[matchingSchemeIndex].SchemeName
-			schemes[i].AuthSchemeType = clonedSchemes[matchingSchemeIndex].SchemeType
 
 			// Remove the used element (swap + remove last)
 			clonedSchemes[matchingSchemeIndex], clonedSchemes[len(clonedSchemes)-1] = clonedSchemes[len(clonedSchemes)-1], clonedSchemes[matchingSchemeIndex]
