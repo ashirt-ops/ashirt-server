@@ -70,8 +70,10 @@ func mergeSchemes(foundSchemes []detailedSchemeTable, supportedAuthSchemes *[]dt
 		if matchingSchemeIndex == -1 {
 			schemes[i].AuthSchemeName = scheme.AuthScheme
 			schemes[i].Labels = append(schemes[i].Labels, "Unsupported")
+			schemes[i].AuthSchemeType = "Unknown"
 		} else {
 			schemes[i].AuthSchemeName = clonedSchemes[matchingSchemeIndex].SchemeName
+			schemes[i].AuthSchemeType = clonedSchemes[matchingSchemeIndex].SchemeType
 
 			// Remove the used element (swap + remove last)
 			clonedSchemes[matchingSchemeIndex], clonedSchemes[len(clonedSchemes)-1] = clonedSchemes[len(clonedSchemes)-1], clonedSchemes[matchingSchemeIndex]
@@ -85,6 +87,7 @@ func mergeSchemes(foundSchemes []detailedSchemeTable, supportedAuthSchemes *[]dt
 			AuthSchemeName:  scheme.SchemeName,
 			AuthSchemeCode:  scheme.SchemeCode,
 			AuthSchemeFlags: scheme.SchemeFlags,
+			AuthSchemeType:  scheme.SchemeType,
 			Labels:          []string{},
 		})
 	}
