@@ -20,6 +20,9 @@ services:
       APP_SESSION_STORE_KEY: ""
       APP_PORT: 3000
       APP_FRONTEND_INDEX_URL: "http://localhost:8080"
+      APP_BACKEND_URL: "http://localhost:8080/web"
+      APP_SUCCESS_REDIRECT_URL: "http://localhost:8080"
+      APP_FAILURE_REDIRECT_URL_PREFIX: "http://localhost:8080"
       
       # Common Value for all emailers
       EMAIL_FROM_ADDRESS: AShirt
