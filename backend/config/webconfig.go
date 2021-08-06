@@ -22,6 +22,9 @@ type WebConfig struct {
 	RecoveryExpiry           time.Duration `split_words:"true" default:"24h"`
 	DisableLocalRegistration bool          `split_words:"true"`
 	FrontendIndexURL         string        `split_words:"true"`
+	BackendURL               string        `split_words:"true"`
+	SuccessRedirectURL       string        `split_words:"true"`
+	FailureRedirectURLPrefix string        `split_words:"true"`
 	Port                     int
 }
 
@@ -40,13 +43,28 @@ type AuthConfig struct {
 // Note: it is expected that not all fields will be populated. It is up to the user to verify
 // that these fields exist and have correct values
 type AuthInstanceConfig struct {
-	ClientID                 string `split_words:"true"`
-	ClientSecret             string `split_words:"true"`
-	Issuer                   string `split_words:"true"`
-	BackendURL               string `split_words:"true"`
-	SuccessRedirectURL       string `split_words:"true"`
-	FailureRedirectURLPrefix string `split_words:"true"`
-	ProfileToShortnameField  string `split_words:"true"`
+	ClientID                       string `split_words:"true"`
+	ClientSecret                   string `split_words:"true"`
+	ServiceURL                     string `split_words:"true"`
+	TokenURL                       string `split_words:"true"`
+	Scopes                         string
+	Issuer                         string `split_words:"true"`
+	PassIDAndSecretForTokenAsQuery bool   `split_words:"true"`
+	BackendURL                     string `split_words:"true"`
+	SuccessRedirectURL             string `split_words:"true"`
+	FailureRedirectURLPrefix       string `split_words:"true"`
+	ProfileToShortnameField        string `split_words:"true"`
+
+	//generic oidc
+	Name                  string
+	FriendlyName          string `split_words:"true"`
+	ProviderURL           string `split_words:"true"`
+	Type                  string
+	ProfileFirstNameField string `split_words:"true"`
+	ProfileLastNameField  string `split_words:"true"`
+	ProfileEmailField     string `split_words:"true"`
+	ProfileSlugField      string `split_words:"true"`
+	DisableRegistration   bool   `split_words:"true"`
 }
 
 var (
@@ -189,4 +207,8 @@ func FrontendIndexURL() string {
 // IsRegistrationEnabled returns true if local registration is enabled, false otherwise.
 func IsRegistrationEnabled() bool {
 	return !app.DisableLocalRegistration
+}
+
+func AllAppConfig() WebConfig {
+	return app
 }
