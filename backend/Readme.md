@@ -44,6 +44,14 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Valid Options: `"true"` or `"false"`
     * Admins can provision new local auth accounts to provide access to new users.
     * Only valid if deploying using `ashirt` authentication. Otherwise has no effect
+  * `APP_FRONTEND_INDEX_URL`
+    * Used by the backend to redirect to the frontend in some scenarios (e.g. Email-based recovery)
+  * `APP_BACKEND_URL`
+    * Common field used for some authentication schemes. Provides a mechanism for the backend to reference itself to authentication providers
+  * `APP_SUCCESS_REDIRECT_URL`
+    * Used in some authentication schemes to redirect to the frontend after a successful authentication.
+  * `APP_FAILURE_REDIRECT_URL_PREFIX`
+    * Used in some authentication schemes to redirect to the frontend after a failed authentication. 
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
@@ -53,20 +61,67 @@ Configuration is handled entirely via environment variables. To that end, here a
   * `AUTH_${SERVICE}_` Variables
     * These environment variables are namespaced per Auth Service. Each of these is a specific field that can be used to pass configuration details to the authentication service. Note that `${SERVICE}` must be replaced with a proper string, expected in all caps. For example `AUTH_GITHUB`, `AUTH_ASHIRT`, `AUTH_GOOGLE`
     * `AUTH_${SERVICE}_CLIENT_ID`
-      * For OAuth2 solutions. This provides a client ID value to the auth service
+      * This provides a client ID value to the auth service
+      * For OIDC and Okta authentication
     * `AUTH_${SERVICE}_CLIENT_SECRET`
-      * For OAuth2 solutions. This provides the corresponding secret
+      * This provides the corresponding secret
+      * For OIDC and Okta authentication
     * `AUTH_${SERVICE}_ISSUER`
-      * For OAuth2 solutions. This essentially provides a URL to redirect the authentication process
+      * This essentially provides a URL to redirect the authentication process
+      * For Okta authentication
+      * Deprecated
     * `AUTH_${SERVICE}_BACKEND_URL`
       * The location of the ashirt service
+      * For Okta Authentication
+      * Deprecated
     * `AUTH_${SERVICE}_SUCCESS_REDIRECT_URL`
-      * For OAuth2 solutions. Where to redirect the user when login is successful
+      * Where to redirect the user when login is successful
+      * For Okta Authentication
+      * Deprecated
     * `AUTH_${SERVICE}_FAILURE_REDIRECT_URL_PREFIX`
       * Where to redirect the user when login fails for some reason. Note that this is a _prefix_. Current expected values are:
         * `/autherror/noverify`: User authentication failed (either challenge or token)
         * `/autherror/noaccess`: User authentication succeeded, but the user is excluded from using this application
         * `/autherror/incomplete`: User authentication succeeded and is able to use the application, but a matching ashirt user profile could not be created.
+      * For Okta Authentication
+      * Deprecated
+    * `AUTH_${SERVICE}_TYPE`
+      * Supported Values: `oidc` (Note that `local` and `okta` are reserved values, and not usable)
+      * Required for all authentication types
+    * `AUTH_${SERVICE}_NAME`
+      * Must be distinct among auth service names
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_FRIENDLY_NAME`
+      * The name of the authentication scheme presented to the end user
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_SCOPES`
+      * Used to help pull additional scopes, which would be useful if the standard scopes are insufficient.
+      * At a minimum, the `openid` and `profile` scopes are requested.
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_PROVIDER_URL`
+      * Used to help point to the OIDC provider's discovery document. Note that this URL _MUST_ match the issuer value in the discovery document.
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_PROFILE_FIRST_NAME_FIELD`
+      * Used within the application to refer to the user's first name. This is only used as an intitial value. Can be updated in the user's settings
+      * Optional. Defaults to `given_name` (a common claim type)
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_PROFILE_LAST_NAME_FIELD`
+      * Used within the application to refer to the user's last name. This is only used as an intitial value. Can be updated in the user's settings
+      * Optional. Defaults to `family_name` (a common claim type)
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_PROFILE_EMAIL_FIELD`
+      * This is used to as a mechanism to contact the user via email (currently only used for recovery)
+      * Optional. Defaults to `email` (a common claim type)
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_PROFILE_SLUG_FIELD`
+      * This is functionally equivalent to a username or an email for most services. Used internally for associating a user to their content and assignments
+      * Must provide a unique value for all users using this authentication scheme.
+      * Optional. Defaults to `email` (a common claim type)
+      * For OIDC authentication
+    * `AUTH_${SERVICE}_DISABLE_REGISTRATION`
+      * Prevents new registrations for the given service
+      * Optional. Defaults to `false` (open registration)
+      * For OIDC authentication
   * `EMAIL_FROM_ADDRESS`
     * The email address to use when sending emails. The specific value may be influenced by your email provider
   * `EMAIL_TYPE`
@@ -138,6 +193,73 @@ The admin should now be logged in, and can update their security information.
 
 At this point, a proper admin account exists and you can log in via the linked methods.
 
+#### Open ID Connect (OIDC) Authentication
+
+Authentication via OIDC is supported under the condition that the ODIC provider have a discovery document. A discovery document provides the urls necessary for the implementation to interact autonomously with the ODIC provider. An example of a discovery document can be found [here](https://accounts.google.com/.well-known/openid-configuration)
+
+##### Adding an OIDC authentication provider
+
+Each OIDC provider follows the same process:
+
+1. In the `AUTH_SERVICES` environment variable, provide a new short name for the service. The name choice here is arbitary, but should be a single word (with underscores, if desired). The case used here is irrelevant. For our example, we will choose `pro_auth` as our key
+2. Each OIDC authentication will need a number of environment variables with specific names to complete the configuration. The environment variables meaning is detailed [here](#configuration), but briefly, each key must be prefixed with `AUTH_${SERVICE}`, and it's meaning will be detailed below. In our case, since our service name is `pro_auth`, our prefix will be `AUTH_PRO_AUTH` and the expected values are:
+
+  ```sh
+    AUTH_PRO_AUTH_TYPE: oidc                                # Flags to the backend that OIDC authentication should be used
+    AUTH_PRO_AUTH_NAME: pro_auth                            # The name of the service within the database. Can be anything, but it's recommended that it be the same as the auth_service value.
+    AUTH_PRO_AUTH_FRIENDLY_NAME: ProAuth                    # The name of the service, as presented to the user (e.g. in this case, they'll see a button with the text "Login with ProAuth")
+    AUTH_PRO_AUTH_CLIENT_ID: clientID123                    # The client ID provided by the OIDC provider.
+    AUTH_PRO_AUTH_CLIENT_SECRET: sup3rs3cr3tK3y             # The client secret provided by the ODIC provider.
+    AUTH_PRO_AUTH_SCOPES: email                             # What additional scopes to load when getting an identity token. For most services, this can be "email". 
+    AUTH_PRO_AUTH_PROVIDER_URL: https://myacct.proauth.com  # The provider URL for your service. In general, this should be the "issuer" field specified in the discovery document. Convieniently, you can also test this value by adding "/.well-known/openid-configuration" to the end of the URL and seeing if the concatinated value produces a discovery document. If so, then this is likely the provider url
+  ```
+
+3. In most cases, the above should be sufficient to have a working OIDC implementation. However, it may be necessary in some instances to provide some additional configuration. This is because after getting a new login, we need to create a user account for AShirt, which requires some personal info -- specifically, a first and last name, email, and another unique value (which can also be email, if desired). You can use the below fields to customize/complete your experience.
+
+  ```sh
+  AUTH_PRO_AUTH_PROFILE_FIRST_NAME_FIELD: first_name  # Retrieve the "first name" value from the named claim
+  AUTH_PRO_AUTH_PROFILE_LAST_NAME_FIELD: last_name    # Retrieve the "last name" value from the named claim
+  AUTH_PRO_AUTH_PROFILE_EMAIL_FIELD: email            # Retrieve the "email" value from the named claim
+  AUTH_PRO_AUTH_PROFILE_SLUG_FIELD: username          # Retrieve the "slug" value from the named claim -- used to uniquely identify a user within the system -- note that typically, email is sufficient, but other options may be available in your identity provider.
+  ```
+
+4. Finally, OIDC authentication supports registration lockouts. In this scenario, registration will be denied for all new users that do not currently have a login using that authentication scheme. This does not prevent users from linking that authentication type, only preventing completely new accounts. This will be most useful for public OIDC providers (e.g. Google oidc) that cannot limit access via a user's list. To disable registration, using our example configuratoin, we would accomplish this via: `AUTH_PRO_AUTH_DISABLE_REGISTRATION: "true"`. If registration is disabled, you can still invite users via a small workaround. See [here](#recovery-based-user-invites-workaround) for the workaround details.
+
+##### Provider URLs
+
+Here are some provider urls for some common OIDC providers
+
+| Service  | URL                                               |
+| -------- | ------------------------------------------------- |
+| Okta     | https://${Okta-client-ID}.okta.com                |
+| Google   | https://accounts.google.com                       |
+| OneLogin | https://${Onelogin-client-ID}.onelogin.com/oidc/2 |
+
+##### Migrating from Okta to generic OIDC Okta
+
+The original Okta authentication instance has changed. Okta is still supported but the custom
+integration is now deprecated and it is now recommended that Okta integration is accomplished by
+using generic OIDC. Here's a mini-guide on performing that conversion.
+
+This guide assume that your okta authentication (located in `AUTH_SERVICES` is called "okta". If it is not "okta" then each of the environment variables will be slightly different. For example, if your okta instance is called "my_okta" then your "AUTH_OKTA_TYPE" would actually be called "AUTH_MY_OKTA_TYPE"
+
+1. Start with the base configuration:
+
+   ```sh
+   AUTH_OKTA_TYPE: oidc           # Specifies that this uses OIDC authentication
+   AUTH_OKTA_NAME: okta           # This is a name internal to the application -- must be unique
+   AUTH_OKTA_FRIENDLY_NAME: Okta  # This is the name presented to the user when they see the login button
+   AUTH_OKTA_SCOPES: email        # This specifies to load the "email" scope in addition to the standard scopes
+   ```
+
+2. The `AUTH_OKTA_CLIENT_ID` and `AUTH_OKTA_CLIENT_SECRET` fields are unchanged, and can simply be left alone.
+3. Create the `AUTH_OKTA_PROVIDER_URL` with the value from `AUTH_OKTA_ISSUER`. This value need to be updated. Simply remove the `/oauth2/default` portion of the Issuer URL to create the provider URL. For example, given the issuer URL `https://MY_OKTA_INSTANCE.okta.com/oauth2/default`, the provider value will be `https://MY_OKTA_INSTANCE.okta.com`. 
+4. The following fields move from Okta-specific configurations to common configurations. Simply rename the environment variable as follows:
+   * `AUTH_OKTA_BACKEND_URL` => `APP_BACKEND_URL`
+   * `AUTH_OKTA_SUCCESS_REDIRECT_URL` => `APP_SUCCESS_REDIRECT_URL`
+   * `AUTH_OKTA_FAILURE_REDIRECT_URL_PREFIX` => `APP_FAILURE_REDIRECT_URL_PREFIX`
+5. Finally, the `AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD` has been renamed to `AUTH_OIDC_OKTA_PROFILE_SLUG_FIELD`. Simply rename the field and keep the existing value.
+
 #### Custom Authentication
 
 Adding your own authentication is a 3 step process:
@@ -160,6 +282,33 @@ Presently, at least some kind of authentication is required to use this service.
 Account recovery can be triggered by an admin for any user (except themselves). The account in question will generate a one-time-use code that expries in 24 hours. The user will need a special url that includes this code in order to login. Once logged in, the user will have full access to their account. At which point, they should probably link some other authentication system to their account, though this is not a requirement. The recovery scheme is baked into this system automatically, and cannot be disabled, except by recompiling the backend, and specifically removing the addition of this auth scheme.
 
 A separate set of recovery exists for users to initiate a self-service recovery. In this case, users will need to select the "Forgot your password?" option from the login page. This method is expected to only be valid for local/default loigin. Users will receive an email with a link to recover their account. The recover code will expire in 24 hours from the time the email was sent.
+
+#### Preprovisioning / Inviting users
+
+In certain circumstances, you may want to create an account for a user you anticipate joining. Admins can do this via navigating to "User Management" on the frontend admin console, and clicking the "Create new user" button. This will create a new local account, and provide the admin with a one-time login for the new user.
+
+##### Recovery-based user invites (Workaround)
+
+In certain situations, having a local auth user account may not be ideal, but you may still want to preprovision a new user. This is possible via a small workaround with some existing functionality. See the below for the steps.
+
+Note: Local Authentication must still be enabled in this situation, even if it is not used.
+
+1. Login as an admin
+2. Navigate to the admin tools, and specifically to the User Management screen
+3. Click on the `Create New User` button to create an initial user account. Provide valid data for the existing fields, and remember the name given
+4. After creating the new user, search for that user in the User List.
+5. Once you find the user, under `Actions`, choose the `Generate Recovery Code`
+6. Provide the recovery URL to the new user. they can use this to do a one-time login. Along with the code, tell the new user to link their account via one of the approved authentication methods.
+  
+After this, the user will be able to login normally, using their preferred login mechanism.
+
+Note that the one-time login via local auth will still be active.
+
+To remove the one-time password:
+
+1. Find the user in the User List
+2. Choose `Edit User`, and navigate to `Authentication Methods`
+3. Find the `local` authentication scheme, and under Actions, choose `Delete`
 
 ### API Keys
 
