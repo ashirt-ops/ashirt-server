@@ -35,6 +35,7 @@ export default () => {
       <Route exact path="/autherror/noverify" render={makeErrorDisplay("Authentication Error", "Unable to verify user account. Please try again.", true)} />
       <Route exact path="/autherror/incomplete" render={makeErrorDisplay("Authentication Error", "The system could not complete the login process. Please retry, and if the issue persists, please contact a system administrator.", true)} />
       <Route exact path="/autherror/disabled" render={makeErrorDisplay("Authentication Error", "This account has been disabled. Please contact an adminstrator if you think this is an error")} />
+      <Route exact path="/autherror/registrationdisabled" render={makeErrorDisplay("Authentication Error", "Registration has been disabled. Please contract an administrator to request access.", true)} />
       <Redirect to="/login" />
     </Switch>
   )
