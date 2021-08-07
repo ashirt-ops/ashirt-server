@@ -28,4 +28,3 @@ export const makeLinker = (config: OIDCInstanceConfig) => {
     </Button >
   )
 }
-

@@ -54,8 +54,8 @@ func TestDeleteAuthScheme(t *testing.T) {
 	_, err = db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme": schemeName,
 		"auth_type":   schemeName,
-		"user_key": normalUser.FirstName,
-		"user_id":  normalUser.ID,
+		"user_key":    normalUser.FirstName,
+		"user_id":     normalUser.ID,
 	})
 	require.NoError(t, err)
 
