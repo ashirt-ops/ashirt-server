@@ -225,6 +225,25 @@ Each OIDC provider follows the same process:
 
 4. Finally, OIDC authentication supports registration lockouts. In this scenario, registration will be denied for all new users that do not currently have a login using that authentication scheme. This does not prevent users from linking that authentication type, only preventing completely new accounts. This will be most useful for public OIDC providers (e.g. Google oidc) that cannot limit access via a user's list. To disable registration, using our example configuratoin, we would accomplish this via: `AUTH_PRO_AUTH_DISABLE_REGISTRATION: "true"`. If registration is disabled, you can still invite users via a small workaround. See [here](#recovery-based-user-invites-workaround) for the workaround details.
 
+##### Identity Provider - initated Login
+
+Technically, OIDC does not support IDP-initated login. The login request must coem from the source.
+However, some smart values can be provided to effectively provide an IDP-iniated login experience.
+
+If your service provides it, find the configuration for a "login URL" or "Initiate login URI". Then, provide the following value, dependent on your configuration:
+
+`http://<backend_url>/auth/<service_name>/login`
+
+As an example, consider the "proauth" scenario in [OIDC configuration section](#adding-an-oidc-authentication-provider). If all backend routes were routed to `/web`, then the url _could_ look like:
+
+```text
+URL: http://ashirt.mycompany.com/web/auth/proauth/login
+            ^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^
+            Backend URL                   Service Provider
+```
+
+Note that the service provider will need to match the name given in the `AUTH_SERVICES` environment variable.
+
 ##### Provider URLs
 
 Here are some provider urls for some common OIDC providers
