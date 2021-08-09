@@ -3,19 +3,10 @@
 
 import * as React from 'react'
 import Button from 'src/components/button'
+import classnames from 'classnames/bind'
 import { OIDCInstanceConfig } from '..'
 
-// const loginWithOidc = () => {
-//   window.location.href = "/web/auth/oidc/login"
-// }
-
-// export default (props: {
-//   authFlags?: Array<string>
-// }) => (
-//   <div style={{ textAlign: 'right' }}>
-//     <Button primary onClick={loginWithOidc}>Login With OIDC</Button>
-//   </div>
-// )
+const cx = classnames.bind(require('./stylesheet'))
 
 // use the below
 
@@ -31,8 +22,8 @@ export const makeLogin = (config: OIDCInstanceConfig) => {
   return (_props: {
     authFlags?: Array<string>
   }) => (
-    <div style={{ textAlign: 'right' }}>
-      <Button primary onClick={loginFn}>Login With {config.name}</Button>
+    <div>
+      <Button className={cx('full-width-button')} primary onClick={loginFn}>Login With {config.name}</Button>
     </div>
   )
 }
