@@ -12,7 +12,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/oidcauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/oktaauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
@@ -74,20 +73,11 @@ func tryRunServer(logger logging.Logger) error {
 	schemeErrors := make([]SchemeError, 0, len(authSchemeNames))
 
 	for _, svc := range authSchemeNames {
-		switch svc {
-		case "okta":
-			schemes = append(schemes, oktaauth.NewFromConfig(
-				config.AuthConfigInstance(svc),
-				func(map[string]string) bool {
-					return true //everyone can join!
-				}))
-		default:
-			scheme, err := handleAuthType(config.AuthConfigInstance(svc))
-			if err != nil {
-				schemeErrors = append(schemeErrors, SchemeError{svc, err})
-			} else {
-				schemes = append(schemes, scheme)
-			}
+		scheme, err := handleAuthType(config.AuthConfigInstance(svc))
+		if err != nil {
+			schemeErrors = append(schemeErrors, SchemeError{svc, err})
+		} else {
+			schemes = append(schemes, scheme)
 		}
 	}
 
