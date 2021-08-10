@@ -75,10 +75,6 @@ func tryRunServer(logger logging.Logger) error {
 
 	for _, svc := range authSchemeNames {
 		switch svc {
-		case "ashirt":
-			schemes = append(schemes, localauth.LocalAuthScheme{
-				RegistrationEnabled: config.IsRegistrationEnabled(),
-			})
 		case "okta":
 			schemes = append(schemes, oktaauth.NewFromConfig(
 				config.AuthConfigInstance(svc),
@@ -132,6 +128,12 @@ func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, erro
 	if cfg.Type == "oidc" {
 		authScheme, err := oidcauth.New(cfg, &appConfig)
 		return authScheme, err
+	}
+	if cfg.Name == "ashirt" {
+		authScheme := localauth.LocalAuthScheme{
+			RegistrationEnabled: cfg.RegistrationEnabled,
+		}
+		return authScheme, nil
 	}
 
 	return nil, fmt.Errorf("unknown auth type: %v", cfg.Type)

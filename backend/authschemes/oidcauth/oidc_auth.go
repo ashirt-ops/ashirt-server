@@ -28,7 +28,7 @@ type OIDCAuth struct {
 	profileFirstNameField string
 	profileLastNameField  string
 	profileEmailField     string
-	registrationDisabled  bool
+	registrationEnabled   bool
 
 	// do we need this?
 
@@ -72,7 +72,7 @@ func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (OIDCAuth, 
 		profileFirstNameField:         cfg.ProfileFirstNameField,
 		profileLastNameField:          cfg.ProfileLastNameField,
 		profileEmailField:             cfg.ProfileEmailField,
-		registrationDisabled:          cfg.DisableRegistration,
+		registrationEnabled:           cfg.RegistrationEnabled,
 		absoluteBackendPath:           webConfig.BackendURL,
 		authSuccessRedirectPath:       webConfig.SuccessRedirectURL,
 		authFailureRedirectPathPrefix: webConfig.FailureRedirectURLPrefix,
@@ -176,7 +176,7 @@ func (o OIDCAuth) handleCallback(w http.ResponseWriter, r *http.Request, bridge 
 		if linkingAccount {
 			userID = middleware.UserID(r.Context())
 		} else {
-			if o.registrationDisabled {
+			if !o.registrationEnabled {
 				return o.authFailure(w, r, backend.WrapError("Registration is disabled", err), "/autherror/registrationdisabled")
 			}
 

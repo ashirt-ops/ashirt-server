@@ -64,7 +64,7 @@ type AuthInstanceConfig struct {
 	ProfileLastNameField  string `split_words:"true"`
 	ProfileEmailField     string `split_words:"true"`
 	ProfileSlugField      string `split_words:"true"`
-	DisableRegistration   bool   `split_words:"true"`
+	RegistrationEnabled   bool   `ignored:"true"`
 }
 
 var (
@@ -136,10 +136,17 @@ func loadAuthConfig() error {
 		servicesArr[i] = strings.TrimSpace(s)
 	}
 
+	serviceRegistrationStr := os.Getenv("AUTH_SERVICES_ALLOW_REGISTRATION")
+	serviceRegistrationArr := strings.Split(serviceRegistrationStr, ",")
+
 	config.Services = servicesArr
 	config.AuthConfigs = make(map[string]AuthInstanceConfig)
 	for _, service := range servicesArr {
 		innerConfig := AuthInstanceConfig{}
+
+		if listContainsString(serviceRegistrationArr, service) > -1 {
+			innerConfig.RegistrationEnabled = true
+		}
 		err := envconfig.Process("auth_"+service, &innerConfig)
 		if err != nil {
 			return err
@@ -151,6 +158,15 @@ func loadAuthConfig() error {
 	return nil
 }
 
+func listContainsString(haystack []string, needle string) int {
+	for i, v := range haystack {
+		if v == needle {
+			return i
+		}
+	}
+	return -1
+}
+
 // DBUri retrieves the environment variable DB_URI
 func DBUri() string {
 	return db.URI
@@ -160,6 +176,13 @@ func DBUri() string {
 // Note this looks for environment variables prefixed with AUTH_${SERVICE_NAME}, and will only
 // retrieve these values for services named in the AUTH_SERVICES environment
 func AuthConfigInstance(name string) AuthInstanceConfig {
+	if name == "ashirt" { // special case -- local auth doesn't have any normal environment variables
+		return AuthInstanceConfig{
+			Name:                "ashirt",
+			Type:                "local",
+			RegistrationEnabled: auth.AuthConfigs[name].RegistrationEnabled,
+		}
+	}
 	v, _ := auth.AuthConfigs[name]
 	return v
 }
@@ -202,11 +225,6 @@ func RecoveryExpiry() time.Duration {
 // FrontendIndexURL retrieves the APP_FRONTEND_INDEX_URL value from the environment
 func FrontendIndexURL() string {
 	return app.FrontendIndexURL
-}
-
-// IsRegistrationEnabled returns true if local registration is enabled, false otherwise.
-func IsRegistrationEnabled() bool {
-	return !app.DisableLocalRegistration
 }
 
 func AllAppConfig() WebConfig {

@@ -24,7 +24,7 @@ services:
       APP_SUCCESS_REDIRECT_URL: "http://localhost:8080"
       APP_FAILURE_REDIRECT_URL_PREFIX: "http://localhost:8080"
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
-      
+
       # Common Value for all emailers
       EMAIL_FROM_ADDRESS: AShirt
 
@@ -40,7 +40,7 @@ services:
       
       AUTH_SERVICES: ashirt
       # AUTH_SERVICES: ashirt,google
-      APP_DISABLE_LOCAL_REGISTRATION: "false"
+      AUTH_SERVICES_ALLOW_REGISTRATION: ashirt
 
       # Google oidc
       AUTH_GOOGLE_TYPE: oidc
