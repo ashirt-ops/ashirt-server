@@ -39,11 +39,6 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Expected type: time duration (e.g. `60m` => 60 minutes `24h` => 24 hours)
     * Defaults to 24 hours
     * Base unit is 1 minute. Fractional minutes will be ignored
-  * `APP_DISABLE_LOCAL_REGISTRATION`
-    * Removes the registration aspect of local auth. Users will still be able to log in if they already have a local auth account.
-    * Valid Options: `"true"` or `"false"`
-    * Admins can provision new local auth accounts to provide access to new users.
-    * Only valid if deploying using `ashirt` authentication. Otherwise has no effect
   * `APP_FRONTEND_INDEX_URL`
     * Used by the backend to redirect to the frontend in some scenarios (e.g. Email-based recovery)
   * `APP_BACKEND_URL`
@@ -58,6 +53,11 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Example value: `ashirt,otka`
     * Currently valid values: `ashirt`, `okta`
       * This list will likely become outdated over time. Consult the authschemes directory for a better idea of what is supported.
+  * `AUTH_SERVICES_ALLOW_REGISTRATION`
+    * Enables registration for the indicated services.
+    * Values must be comma separated (though commas are only needed when multiple values are used)
+      * Values must match the values indicated in `AUTH_SERVICES`. values that are not listed there will be silently ignored.
+    * Admins can provision new local auth accounts to provide access to new users.
   * `AUTH_${SERVICE}_` Variables
     * These environment variables are namespaced per Auth Service. Each of these is a specific field that can be used to pass configuration details to the authentication service. Note that `${SERVICE}` must be replaced with a proper string, expected in all caps. For example `AUTH_GITHUB`, `AUTH_ASHIRT`, `AUTH_GOOGLE`
     * `AUTH_${SERVICE}_CLIENT_ID`
@@ -118,10 +118,6 @@ Configuration is handled entirely via environment variables. To that end, here a
       * Must provide a unique value for all users using this authentication scheme.
       * Optional. Defaults to `email` (a common claim type)
       * For OIDC authentication
-    * `AUTH_${SERVICE}_DISABLE_REGISTRATION`
-      * Prevents new registrations for the given service
-      * Optional. Defaults to `false` (open registration)
-      * For OIDC authentication
   * `EMAIL_FROM_ADDRESS`
     * The email address to use when sending emails. The specific value may be influenced by your email provider
   * `EMAIL_TYPE`
@@ -143,7 +139,7 @@ Configuration is handled entirely via environment variables. To that end, here a
 
 ### Authentication and Authorization
 
-Authentication is a somewhat modular system that allows for new authentication/identification to occur with external systems. The exact process is left pretty open to allow for maximum extensibility, while trying to keep a fairly simple interface. For details on how to add your own authentication scheme, see the [Custom Authentication](#custom-authentication).
+Authentication is a somewhat modular system that allows for new authentication/identification to occur with external systems. The exact process is left pretty open to allow for maximum extensibility, while trying to keep a fairly simple interface. For details on how to add your own authentication scheme, see the [Custom Authentication](#custom-authentication). Note that, by default, all registration mechanism are disabled. Registration must be specifically enabled for the desired authentication schemes. See [Configuration](#configuration) section for details on the `AUTH_SERVICES_ALLOW_REGISTRATION` environment variable
 
 Authorization is handled via the policy package. Policies are broken into two flavors: what operations can an authenticated user perform, and what operations can an authenticated user perform for a given operation. Each specific action is listed inside the policies, and each check happens prior to performing the requested action; generally, but not necessarily, these checks happen in the services package.
 
@@ -223,7 +219,13 @@ Each OIDC provider follows the same process:
   AUTH_PRO_AUTH_PROFILE_SLUG_FIELD: username          # Retrieve the "slug" value from the named claim -- used to uniquely identify a user within the system -- note that typically, email is sufficient, but other options may be available in your identity provider.
   ```
 
-4. Finally, OIDC authentication supports registration lockouts. In this scenario, registration will be denied for all new users that do not currently have a login using that authentication scheme. This does not prevent users from linking that authentication type, only preventing completely new accounts. This will be most useful for public OIDC providers (e.g. Google oidc) that cannot limit access via a user's list. To disable registration, using our example configuratoin, we would accomplish this via: `AUTH_PRO_AUTH_DISABLE_REGISTRATION: "true"`. If registration is disabled, you can still invite users via a small workaround. See [here](#recovery-based-user-invites-workaround) for the workaround details.
+4. By default, registration for each auth scheme is disabled. Depending on your use case, you may want or need to open it up. Registration can be allowed by adding the `AUTH_SERVICES_ALLOW_REGISTRATION` to your environment variables. In our example case, we can enable registration for Pro_Auth via the following change:
+
+  ```sh
+  AUTH_SERVICES_ALLOW_REGISTRATION: pro_auth
+  ```
+
+  Note that this field works exactly like the `AUTH_SERVICES` variable, so registration can be enabled on a per-auth-scheme level
 
 ##### Identity Provider - initated Login
 
