@@ -48,5 +48,5 @@ async function getAuthFrontend(authSchemeType: string, schemeDetails?: Supported
 export function useAuthFrontendComponent<Key extends keyof AuthFrontend>(authSchemeType: string, key: Key, schemeDetails?: SupportedAuthenticationScheme): AuthFrontend[Key] {
   return useAsyncComponent(React.useCallback(() => (
     getAuthFrontend(authSchemeType, schemeDetails).then(module => module[key])
-  ), [authSchemeType, key]))
+  ), [authSchemeType, key, schemeDetails]))
 }
