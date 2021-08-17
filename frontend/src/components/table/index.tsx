@@ -21,9 +21,24 @@ export default (props: {
   children: React.ReactNode,
   className?: string,
   columns: Array<string | ColumnData>,
-  onColumnClicked?: (colIndex: number)=>void,
-}) => (
-    <table className={cx('root', props.className)}>
+  onColumnClicked?: (colIndex: number) => void,
+  onKeyDown?: (e: KeyboardEvent) => void,
+  tableRef?: React.MutableRefObject<HTMLTableElement | null>
+}) => {
+  const noop = () => { }
+  React.useEffect(() => {
+    const curRootRef = props.tableRef?.current
+    if (!curRootRef) {
+      return
+    }
+    curRootRef.addEventListener('keydown', props.onKeyDown || noop)
+    return () => { curRootRef.removeEventListener('keydown', props.onKeyDown || noop) }
+  })
+
+  return (
+    <table className={cx('root', props.className)} {...(props.onKeyDown ? { tabIndex: 0 } : {})}
+      {...(props.tableRef ? { ref: props.tableRef } : {})}
+    >
       <thead>
         <tr>
           {props.columns.map((column, idx) => {
@@ -50,3 +65,4 @@ export default (props: {
       </tbody>
     </table>
   )
+}

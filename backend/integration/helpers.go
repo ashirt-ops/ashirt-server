@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/cookiejar"
@@ -40,6 +39,8 @@ type Tester struct {
 func NewTester(t *testing.T) *Tester {
 	db := database.NewTestConnection(t, "integration-test-db")
 
+	doMinimalSeed(db)
+
 	contentStore, err := contentstore.NewDevStore()
 	require.NoError(t, err)
 	commonLogger := logging.SetupStdoutLogging()
@@ -49,8 +50,10 @@ func NewTester(t *testing.T) *Tester {
 		db, contentStore, &server.WebConfig{
 			CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
 			SessionStoreKey: []byte("session-store-key-for-integration-tests"),
-			AuthSchemes:     []authschemes.AuthScheme{localauth.LocalAuthScheme{}},
-			Logger:          commonLogger,
+			AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
+				RegistrationEnabled: true,
+			}},
+			Logger: commonLogger,
 		},
 	)))
 	s.Handle("/api/", server.API(
@@ -61,6 +64,22 @@ func NewTester(t *testing.T) *Tester {
 		t: t,
 		s: httptest.NewServer(s),
 	}
+}
+
+func doMinimalSeed(db *database.Connection) {
+	commonFindingCategories := []string{
+		"Product",
+		"Network",
+		"Enterprise",
+		"Vendor",
+		"Behavioral",
+		"Detection Gap",
+	}
+	db.BatchInsert("finding_categories", len(commonFindingCategories), func(i int) map[string]interface{} {
+		return map[string]interface{}{
+			"category": commonFindingCategories[i],
+		}
+	})
 }
 
 type UserSession struct {
@@ -173,7 +192,7 @@ func (b *RequestBuilder) WithMarshaledJSONBody(body map[string]interface{}) *Req
 func (b *RequestBuilder) WithJSONBody(body string) *RequestBuilder {
 	b.t.Helper()
 	b.req.Header.Add("Content-Type", "application/json")
-	b.req.GetBody = func() (io.ReadCloser, error) { return ioutil.NopCloser(strings.NewReader(body)), nil }
+	b.req.GetBody = func() (io.ReadCloser, error) { return io.NopCloser(strings.NewReader(body)), nil }
 	b.req.Body, _ = b.req.GetBody()
 	return b
 }
@@ -193,7 +212,7 @@ func (b *RequestBuilder) WithMultipartBody(fields map[string]string, files map[s
 	}
 	require.NoError(b.t, mp.Close())
 	b.req.Header.Add("Content-Type", mp.FormDataContentType())
-	b.req.GetBody = func() (io.ReadCloser, error) { return ioutil.NopCloser(bytes.NewReader(body.Bytes())), nil }
+	b.req.GetBody = func() (io.ReadCloser, error) { return io.NopCloser(bytes.NewReader(body.Bytes())), nil }
 	b.req.Body, _ = b.req.GetBody()
 	return b
 }
@@ -205,7 +224,7 @@ func (b *RequestBuilder) WithURLEncodedBody(fields map[string]string) *RequestBu
 	for k, v := range fields {
 		data.Set(k, v)
 	}
-	b.req.GetBody = func() (io.ReadCloser, error) { return ioutil.NopCloser(strings.NewReader(data.Encode())), nil }
+	b.req.GetBody = func() (io.ReadCloser, error) { return io.NopCloser(strings.NewReader(data.Encode())), nil }
 	b.req.Body, _ = b.req.GetBody()
 	return b
 }
@@ -318,7 +337,7 @@ func (rt *ResponseTester) ExpectResponse(expectedStatus int, expectedBody []byte
 func (rt *ResponseTester) ResponseBody() []byte {
 	rt.t.Helper()
 	if rt.body == nil {
-		body, err := ioutil.ReadAll(rt.res.Body)
+		body, err := io.ReadAll(rt.res.Body)
 		require.NoError(rt.t, err)
 		rt.body = body
 	}

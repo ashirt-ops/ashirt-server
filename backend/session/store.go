@@ -34,6 +34,7 @@ func NewStore(db *database.Connection, opts StoreOptions) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
+	wrappedStore.SetSessionToUserID(userIDFromSession)
 	wrappedStore.Options.Path = "/"
 	wrappedStore.Options.HttpOnly = true
 	wrappedStore.Options.Secure = opts.UseSecureCookies
@@ -63,4 +64,19 @@ func (store *Store) Delete(w http.ResponseWriter, r *http.Request) error {
 func (store *Store) readRaw(r *http.Request) *sessions.Session {
 	sess, _ := store.wrappedStore.Get(r, "auth") // ignoring, because errors only fire if a bad cookie name is provided
 	return sess
+}
+
+func userIDFromSession(sess *sessions.Session) *int64 {
+	sessionData, ok := sess.Values[sessionDataKey].(*Session)
+	if ok {
+		val := sessionData.UserID
+		// userIDs start at 1. In some cases, the UserID won't be set and will be 0
+		// trying to add a row with userID 0 will result in a foreign key constraint error, so
+		// returning nil ("no user id") instead
+		if val != 0 {
+			return &val
+		}
+		return nil
+	}
+	return nil
 }

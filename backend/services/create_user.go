@@ -6,8 +6,10 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/theparanoids/ashirt-server/backend/logging"
 	"math/rand"
+	"strings"
+
+	"github.com/theparanoids/ashirt-server/backend/logging"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/theparanoids/ashirt-server/backend"
@@ -82,6 +84,10 @@ func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, e
 		})
 		if err != nil {
 			if database.IsAlreadyExistsError(err) {
+				if strings.Contains(err.Error(), "users.unique_email") { // not sure how else to check if this is a duplicate slug vs a duplicate email address
+					return CreateUserOutput{}, backend.WrapError("Unable to insert new user", backend.DatabaseErr(err))
+				}
+
 				// an account with this slug already exists, attempt creating it again with a suffix
 				// TODO: There's a possible, but impractical infinite loop here. We need some way to escape this
 				slugSuffix = fmt.Sprintf("-%d", rand.Intn(99999))

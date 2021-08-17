@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head />
+
+<body>
+    <p>Hi {{ FullName . }},</p>
+    <p>
+        <span>A request was made to recover your account. You can recover your account by</span>
+        <a href="{{ RecoveryURL . }}">clicking here</a><span>.</span>
+    </p>
+    <p>
+        When you click on the link above, you will be directed to the account
+        management area. If you have permanently lost the ability to log in
+        normally, you may need to unlink, and then re-link your authentication
+        method. Here are the steps to do that:
+    </p>
+    <ol>
+        <li>
+            Find your normal authentication method under the
+            "Authentication Methods" header.
+        </li>
+        <li>
+            Press the delete button next to your normal authentication method.
+        </li>
+        <li>
+            You will be prompted to confirm the deletion by entering the name
+            of the authentication method. Do this,
+            then press the "Delete" button.
+        </li>
+        <li>
+            Once again, find your normal authentication method under the
+            "Authentication Methods" header.
+        </li>
+        <li>
+            Click the "Link" button and, depending on the authentication mechanism,
+            choose new values for your authentication.
+        </li>
+    </ol>
+    <p>
+        If you did not make this request, you can ignore this email.
+    </p>
+    <p>
+        Thanks,
+    </p>
+    <p>
+        The ASHIRT Team
+    </p>
+</body>
+
+</html>

@@ -16,10 +16,11 @@ export default (props: {
   submitText?: string,
   title: string,
   submitDanger?:boolean,
+  cancelText?: string,
 }) => (
   <Modal title={props.title} onRequestClose={props.onRequestClose}>
     <Form
-      cancelText="Cancel"
+      cancelText={props.cancelText || "Cancel"}
       children={props.children}
       result={props.result}
       loading={props.loading}

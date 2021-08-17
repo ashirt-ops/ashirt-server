@@ -1,0 +1,67 @@
+@import '~src/vars'
+
+.root
+  height: 100%
+  display: block
+  position: relative
+
+.columns
+  width: 100%
+  margin-left: 5px
+
+.column
+  width: 50%
+  position: absolute
+  top: 0px
+  bottom: 0px
+  box-sizing: border-box
+  padding: 10px
+
+.table-container
+  left: 0
+  overflow-y: auto
+  overflow-x: hidden
+  
+  box-sizing: border-box
+
+  .selected-row
+    background: $darker-primary
+
+    &:hover
+      background: $lighter-primary
+  
+  .table
+    white-space: nowrap
+
+
+.full-width-column
+  width: 100%
+
+.entry-root
+  left: 50%
+  overflow: auto
+
+.tab-menu-group
+  margin-bottom: 2px
+
+.section-container
+  padding: 5px 0px 5px 10px
+
+.section-entry
+  line-height: 1.25
+  display: block
+  text-align: left
+
+.section-key
+  display: inline
+  font-weight: bold
+  font-style: normal
+  color: $lighter-primary
+  white-space: nowrap
+
+.section-value
+  display: inline
+  padding-left: 5px
+  font-family: monospace
+  font-size: small
+  word-break: break-all

@@ -6,7 +6,7 @@ package integration_test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -88,7 +88,7 @@ func TestEvidence(t *testing.T) {
 		a.Put("/web/operations/op/evidence/"+uuid).WithMultipartBody(map[string]string{"description": "new description"}, nil).Do().ExpectSuccess()
 
 		// Ensure image is unmodified
-		imageData, _ := ioutil.ReadFile("fixtures/screenshot.png")
+		imageData, _ := os.ReadFile("fixtures/screenshot.png")
 		a.Get("/web/operations/op/evidence/"+uuid+"/media").Do().ExpectResponse(200, imageData)
 	})
 
@@ -111,8 +111,8 @@ func TestEvidence(t *testing.T) {
 		evidenceUUID1 := a.Post("/web/operations/op/evidence").WithMultipartBody(map[string]string{"description": "Evidence 1"}, nil).Do().ExpectSuccess().ResponseUUID()
 		evidenceUUID2 := a.Post("/web/operations/op/evidence").WithMultipartBody(map[string]string{"description": "Evidence 2"}, nil).Do().ExpectSuccess().ResponseUUID()
 
-		findingUUID1 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 1", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
-		findingUUID2 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 2", "category": "CD", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+		findingUUID1 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 1", "category": "Network", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
+		findingUUID2 := a.Post("/web/operations/op/findings").WithJSONBody(`{"title": "Finding 2", "category": "Network", "description": ""}`).Do().ExpectSuccess().ResponseUUID()
 
 		a.Put("/web/operations/op/findings/" + findingUUID1 + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID1 + `"], "evidenceToRemove": []}`).Do().ExpectSuccess()
 		a.Put("/web/operations/op/findings/" + findingUUID2 + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID2 + `"], "evidenceToRemove": []}`).Do().ExpectSuccess()
@@ -247,7 +247,7 @@ func testWebUploadCodeblock(a *integration.Tester, op dtos.Operation, state test
 	require.NoError(a.TestingT(), err)
 	defer file.Close()
 
-	fileContent, err := ioutil.ReadAll(file)
+	fileContent, err := io.ReadAll(file)
 	require.NoError(a.TestingT(), err)
 	file.Seek(0, 0)
 

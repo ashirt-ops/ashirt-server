@@ -4,21 +4,25 @@
 package localauth
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type LocalAuthScheme struct{}
+type LocalAuthScheme struct {
+	RegistrationEnabled bool
+}
 
 // Name returns the name of this authscheme
 func (LocalAuthScheme) Name() string {
@@ -28,6 +32,18 @@ func (LocalAuthScheme) Name() string {
 // FriendlyName returns "ASHIRT Local Authentication"
 func (LocalAuthScheme) FriendlyName() string {
 	return constants.FriendlyName
+}
+
+// Flags returns auth flags associated with local auth
+// in particular, notes if registration is open or closed
+func (s LocalAuthScheme) Flags() []string {
+	flags := make([]string, 0)
+
+	if s.RegistrationEnabled {
+		flags = append(flags, "open-registration")
+	}
+
+	return flags
 }
 
 // BindRoutes creates many routes for local database routes:
@@ -40,7 +56,9 @@ func (LocalAuthScheme) FriendlyName() string {
 //
 // * PUT    ${prefix}/password             Allows users to change their password
 //
-// * PUT    ${prefix}/password/admin       Allows admins to reset a user's password
+// * PUT    ${prefix}/admin/password       Allows admins to reset a user's password
+//
+// * POST   ${prefix}/admin/register       Allows admins to create new users on behalf of that user.
 //
 // * POST   ${prefix}/link                 Adds local auth to a non-local user
 //
@@ -56,39 +74,66 @@ func (LocalAuthScheme) FriendlyName() string {
 // the underlying system/database
 func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/register", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+		if !p.RegistrationEnabled {
+			return nil, fmt.Errorf("registration is closed to users")
+		}
+
 		dr := remux.DissectJSONRequest(r)
-		firstName := dr.FromBody("firstName").Required().AsString()
-		lastName := dr.FromBody("lastName").Required().AsString()
-		email := dr.FromBody("email").Required().AsString()
-		password := dr.FromBody("password").Required().AsString()
+		info := RegistrationInfo{
+			Email:     dr.FromBody("email").Required().AsString(),
+			FirstName: dr.FromBody("firstName").Required().AsString(),
+			LastName:  dr.FromBody("lastName").Required().AsString(),
+			Password:  dr.FromBody("password").Required().AsString(),
+		}
+
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
 
-		if err := checkPasswordComplexity(password); err != nil {
+		if err := checkPasswordComplexity(info.Password); err != nil {
 			return nil, err
 		}
 
-		encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			return nil, backend.WrapError("Unable to generate encrypted password", err)
+		return nil, registerNewUser(r.Context(), bridge, info)
+	}))
+
+	remux.Route(r, "POST", "/admin/register", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+		if !middleware.IsAdmin(r.Context()) {
+			return nil, backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin"))
 		}
 
-		userResult, err := bridge.CreateNewUser(authschemes.UserProfile{
-			FirstName: firstName,
-			LastName:  lastName,
-			Slug:      strings.ToLower(firstName + "." + lastName),
-			Email:     email,
-		})
-		if err != nil {
+		authKey := make([]byte, 42)
+		if _, err := rand.Read(authKey); err != nil {
+			return nil, backend.WrapError("Unable to generate random new user password key", err)
+		}
+
+		// convert authKey into readable format
+		readKey := base64.StdEncoding.EncodeToString(authKey)
+
+		dr := remux.DissectJSONRequest(r)
+		info := RegistrationInfo{
+			Email:              dr.FromBody("email").Required().AsString(),
+			FirstName:          dr.FromBody("firstName").Required().AsString(),
+			LastName:           dr.FromBody("lastName").AsString(),
+			Password:           string(readKey),
+			ForceResetPassword: true,
+		}
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+
+		if err := checkPasswordComplexity(info.Password); err != nil {
 			return nil, err
 		}
 
-		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
-			UserID:            userResult.UserID,
-			UserKey:           email,
-			EncryptedPassword: encryptedPassword,
-		})
+		if err := registerNewUser(r.Context(), bridge, info); err != nil {
+			return nil, err
+		}
+
+		return dtos.NewUserCreatedByAdmin{
+			TemporaryPassword: info.Password,
+		}, nil
 	}))
 
 	remux.Route(r, "POST", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -255,8 +300,19 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			return nil, backend.WrapError("Unable to encrypt new password", err)
 		}
 
+		callingUserId := middleware.UserID(r.Context())
+
+		emailTaken, err := bridge.CheckIfUserEmailTaken(email, callingUserId, true)
+		if err != nil {
+			return nil, err
+		}
+
+		if emailTaken {
+			return nil, backend.BadInputErr(fmt.Errorf("error linking account: email taken"), "An account for this user already exists")
+		}
+
 		err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
-			UserID:            middleware.UserID(r.Context()),
+			UserID:            callingUserId,
 			UserKey:           email,
 			EncryptedPassword: encryptedPassword,
 		})

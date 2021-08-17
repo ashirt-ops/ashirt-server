@@ -36,7 +36,7 @@ export default function<T extends {uuid: string}>(props: {
         value={query}
         onChange={setQuery}
         disabled={props.disabled}
-        onKeyDown={e => e.which === 13 && e.preventDefault()}
+        onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
       />
       <div className={cx('results')}>
         {wiredResults.render(results => <>

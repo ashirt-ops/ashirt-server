@@ -4,9 +4,11 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
-import { SupportedEvidenceType, CodeBlock } from 'src/global_types'
+import { HarViewer, isAHar } from '../http_cycle_viewer'
+import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint } from 'src/global_types'
 import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
+import ErrorDisplay from 'src/components/error_display'
 
 import TerminalPlayer from 'src/components/terminal_player'
 
@@ -20,6 +22,8 @@ function getComponent(evidenceType: SupportedEvidenceType) {
       return EvidenceImage
     case 'terminal-recording':
       return EvidenceTerminalRecording
+    case 'http-request-cycle':
+      return EvidenceHttpCycle
     case 'none':
     default:
       return null
@@ -30,6 +34,8 @@ export default (props: {
   operationSlug: string,
   evidenceUuid: string,
   contentType: SupportedEvidenceType,
+  viewHint?: EvidenceViewHint,
+  interactionHint?: InteractionHint,
   className?: string,
   fitToContainer?: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
@@ -55,6 +61,8 @@ export default (props: {
 type EvidenceProps = {
   operationSlug: string,
   evidenceUuid: string,
+  viewHint?: EvidenceViewHint,
+  interactionHint?: InteractionHint,
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
@@ -84,4 +92,25 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
   })
 
   return wiredEvidence.render(evi => <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />)
+}
+
+const EvidenceHttpCycle = (props: EvidenceProps) => {
+  const wiredEvidence = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+    operationSlug: props.operationSlug,
+    evidenceUuid: props.evidenceUuid,
+  }), [props.operationSlug, props.evidenceUuid]))
+
+  return wiredEvidence.render(evi => {
+    try {
+      const log = JSON.parse(evi)
+      if (isAHar(log)) {
+        const isActive = props.interactionHint == 'inactive' ? {disableKeyHandler : true} : {}
+        return <HarViewer log={log} viewHint={props.viewHint} {...isActive} />
+      }
+      return <ErrorDisplay title="Corrupted HAR file" err={new Error("unsupported format")} />
+    }
+    catch (err) {
+      return <ErrorDisplay title="Corrupted HAR file" err={err}/>
+    }
+  })
 }

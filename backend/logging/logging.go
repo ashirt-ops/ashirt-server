@@ -32,6 +32,10 @@ func GetSystemLogger() Logger {
 	return systemLogger
 }
 
+func With(logger Logger, keyvals ...interface{}) Logger {
+	return kitlog.With(logger, keyvals...)
+}
+
 // NewNopLogger creates a logger that actually does not log. useful in situations where some logger
 // is needed, but for whatever reason, a real logger is missing (or if you want to conditionally)
 // disable logging.

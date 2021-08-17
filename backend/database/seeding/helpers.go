@@ -29,6 +29,10 @@ func SetInternalClock(newClock clockwork.Clock) {
 	internalClock = newClock
 }
 
+func GetInternalClock() clockwork.Clock {
+	return internalClock
+}
+
 // ContextForUser genereates a user's context as if they had just logged in. All settings are set,
 // except for NeedsReset, which is always false
 func ContextForUser(my models.User, db *database.Connection) context.Context {
@@ -149,14 +153,31 @@ func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentTy
 	}
 }
 
-func newFindingGen(first int64) func(opID int64, uuid, category, title, desc string, ticketLink *string) models.Finding {
+func newFindingCategoryGen(first int64) func(category string, deleted bool) models.FindingCategory {
 	id := iotaLike(first)
-	return func(opID int64, uuid, category, title, desc string, ticketLink *string) models.Finding {
+	return func(category string, deleted bool) models.FindingCategory {
+		findingCategory := models.FindingCategory{
+			ID:        id(),
+			Category:  category,
+			CreatedAt: internalClock.Now(),
+		}
+
+		if deleted {
+			deletedDate := internalClock.Now()
+			findingCategory.DeletedAt = &deletedDate
+		}
+		return findingCategory
+	}
+}
+
+func newFindingGen(first int64) func(opID int64, uuid string, category *int64, title, desc string, ticketLink *string) models.Finding {
+	id := iotaLike(first)
+	return func(opID int64, uuid string, category *int64, title, desc string, ticketLink *string) models.Finding {
 		finding := models.Finding{
 			ID:            id(),
 			OperationID:   opID,
 			UUID:          uuid,
-			Category:      category,
+			CategoryID:    category,
 			Title:         title,
 			Description:   desc,
 			ReadyToReport: (ticketLink != nil),

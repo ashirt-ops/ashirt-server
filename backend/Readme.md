@@ -39,10 +39,17 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Expected type: time duration (e.g. `60m` => 60 minutes `24h` => 24 hours)
     * Defaults to 24 hours
     * Base unit is 1 minute. Fractional minutes will be ignored
+  * `APP_DISABLE_LOCAL_REGISTRATION`
+    * Removes the registration aspect of local auth. Users will still be able to log in if they already have a local auth account.
+    * Valid Options: `"true"` or `"false"`
+    * Admins can provision new local auth accounts to provide access to new users.
+    * Only valid if deploying using `ashirt` authentication. Otherwise has no effect
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
-    * Example value: `ashirt,google,github`
+    * Example value: `ashirt,otka`
+    * Currently valid values: `ashirt`, `okta`
+      * This list will likely become outdated over time. Consult the authschemes directory for a better idea of what is supported.
   * `AUTH_${SERVICE}_` Variables
     * These environment variables are namespaced per Auth Service. Each of these is a specific field that can be used to pass configuration details to the authentication service. Note that `${SERVICE}` must be replaced with a proper string, expected in all caps. For example `AUTH_GITHUB`, `AUTH_ASHIRT`, `AUTH_GOOGLE`
     * `AUTH_${SERVICE}_CLIENT_ID`
@@ -60,6 +67,24 @@ Configuration is handled entirely via environment variables. To that end, here a
         * `/autherror/noverify`: User authentication failed (either challenge or token)
         * `/autherror/noaccess`: User authentication succeeded, but the user is excluded from using this application
         * `/autherror/incomplete`: User authentication succeeded and is able to use the application, but a matching ashirt user profile could not be created.
+  * `EMAIL_FROM_ADDRESS`
+    * The email address to use when sending emails. The specific value may be influenced by your email provider
+  * `EMAIL_TYPE`
+    * Indicates what kind of email service is used to send the emails.
+    * Valid values: `smtp`, `memory` (for test), `stdout` (for test)
+  * `EMAIL_HOST`
+    * The location of the email server. If connecting to an SMTP server, a port is also required (e.g. `my-email-server:25`)
+  * `EMAIL_USER_NAME`
+    * The username to use when authenticating with PLAIN or LOGIN SMTP servers
+  * `EMAIL_PASSWORD`
+    * The password to use when authenticating with PLAIN or LOGIN SMTP servers
+  * `EMAIL_IDENTITY`
+    * The identity to use when authenticating with PLAIN SMTP servers
+  * `EMAIL_SECRET`
+    * The secret to use when authenticating with CRAM-MD5 SMTP servers
+  * `EMAIL_SMTP_AUTH_TYPE`
+    * Indicates which kind of authentication scheme to use when connecting to an SMTP server
+    * Valid values: `login`, `plain`, `crammd5` (for LOGIN, PLAIN, and CRAM-MD5 respectively)
 
 ### Authentication and Authorization
 
@@ -75,7 +100,43 @@ One limitation to this behavior is that, generally speaking, admins cannot alter
 
 ##### First Admin
 
-When a fresh system is deployed, no users are present, thus no admins are present either. The first administration, therefore, is granted to the first user that registers a system.
+When a fresh system is deployed, no users are present, thus no admins are present either. The first administration account, therefore, is granted to the first user that registers within the system.
+
+###### First Admin alternative
+
+In certain situations, there may not be a way for a new user to register with AShirt without an
+admin's help, even for the first user. In these cases, the below SQL can be used to create an initial
+account and a recovery code to link the account to a supported authentication scheme.
+
+Note that this requires direct access to the database. This should only be done for the first user
+when the normal approach will not work.
+
+1. Edit, and execute the below SQL
+
+  ```sql
+  INSERT INTO users (slug, first_name, last_name, email, admin) VALUES
+  ('user@example.com', 'User', 'McUserface', 'user@example.com', true);
+
+  INSERT INTO auth_scheme_data (auth_scheme, user_key, user_id) VALUES
+  ('recovery', 'e3c6ead16e0c25820ba730f278ef54133da5610f9bf1d2e481ff6693c8df85123a29b8dc1f033a2f', 1);
+  ```
+
+  This will add a one-time password to AShirt which will allow the admin to sign in. Note that,
+  per convention, the slug and email should match if using ASHIRT Local Authentication. This is not
+  a hard requirement if you want to deviate from the convention. All other fields can be updated by
+  updating the profile in Account Settings.
+
+2. Start up the AShirt frontend and backend, if not already started
+3. Once started, edit, and navigate to: `http://MY_ASHIRT_DOMAIN/web/auth/recovery/login?code=e3c6ead16e0c25820ba730f278ef54133da5610f9bf1d2e481ff6693c8df85123a29b8dc1f033a2f`
+
+The admin should now be logged in, and can update their security information.
+
+1. Click the person icon and select "Account Settings"
+2. Go to "Authentication Methods"
+3. Find a supported login the admin wishes to use, and click the "Link" button. Follow this process.
+   1. Note: if linking to ASHIRT Local Authentication, when the admin logs in, they will log in via the email address provided during the linking step, not (necessarily) the above sql script.
+
+At this point, a proper admin account exists and you can log in via the linked methods.
 
 #### Custom Authentication
 
@@ -98,9 +159,17 @@ Presently, at least some kind of authentication is required to use this service.
 
 Account recovery can be triggered by an admin for any user (except themselves). The account in question will generate a one-time-use code that expries in 24 hours. The user will need a special url that includes this code in order to login. Once logged in, the user will have full access to their account. At which point, they should probably link some other authentication system to their account, though this is not a requirement. The recovery scheme is baked into this system automatically, and cannot be disabled, except by recompiling the backend, and specifically removing the addition of this auth scheme.
 
+A separate set of recovery exists for users to initiate a self-service recovery. In this case, users will need to select the "Forgot your password?" option from the login page. This method is expected to only be valid for local/default loigin. Users will receive an email with a link to recover their account. The recover code will expire in 24 hours from the time the email was sent.
+
 ### API Keys
 
 As mentioned above, other services can iteract with the system, under the guise of some registered user, without requiring the user to login while using the tool. To do this, a user must first create an API key pair, and then associate these keys with the external tool (e.g. screenshot client).
+
+### Emails
+
+The backend has a system to send emails out to notify users (with an email address) as needed. Currently, this system is only used to send account recovery emails. An email server will be needed, but stmp services can be configured via environment variables.
+
+Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`. 
 
 ## Development Overview
 

@@ -4,7 +4,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import * as dateFns from 'date-fns'
-import { useForm, useFormField, useModal, renderModals, useWiredData } from 'src/helpers'
+import { useFormField, useModal, renderModals, useWiredData } from 'src/helpers'
 import { listEvidenceCreators } from 'src/services'
 import { SearchOptions } from './helpers'
 import { Evidence, Tag, User, ViewName } from 'src/global_types'

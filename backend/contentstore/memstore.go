@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"sync"
 
 	"github.com/google/uuid"
@@ -49,7 +48,7 @@ func (d *MemStore) Upload(data io.Reader) (key string, err error) {
 // Note: to avoid overwriting random keys, DO NOT use uuids as they key
 // Note 2: This is NOT part of the standard ContentStore interface
 func (d *MemStore) UploadWithName(key string, data io.Reader) error {
-	b, err := ioutil.ReadAll(data)
+	b, err := io.ReadAll(data)
 	if err != nil {
 		return backend.WrapError("Unable upload with a given name to MemStore", err)
 	}
@@ -72,10 +71,10 @@ func (d *MemStore) Read(key string) (io.Reader, error) {
 
 // Delete removes files in in your OS's temp directory
 func (d *MemStore) Delete(key string) error {
+	d.mutex.Lock()
 	if _, ok := d.content[key]; !ok { // artificial behavior to match other stores
 		return backend.WrapError("Unable to delete from MemStore", fmt.Errorf("No such key"))
 	}
-	d.mutex.Lock()
 	delete(d.content, key)
 	d.mutex.Unlock()
 	return nil
