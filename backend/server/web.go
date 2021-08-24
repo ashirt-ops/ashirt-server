@@ -11,13 +11,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
@@ -28,6 +27,7 @@ import (
 
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type WebConfig struct {
@@ -70,6 +70,9 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 	}
 
 	r := mux.NewRouter()
+	metricRouter := r.PathPrefix("").Subrouter()
+	metricRouter.Handle("/metrics", promhttp.Handler())
+
 	r.Use(middleware.LogRequests(config.Logger))
 	r.Use(csrf.Protect(config.CSRFAuthKey,
 		csrf.Secure(config.UseSecureCookies),
