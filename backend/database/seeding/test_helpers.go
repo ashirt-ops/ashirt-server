@@ -92,6 +92,8 @@ func CreatePopulatedMemStore(seed Seeder) *contentstore.MemStore {
 			upload(evi.UUID, TinyImg)
 		case "terminal-recording":
 			upload(evi.UUID, TinyTermRec)
+		case "http-request-cycle":
+			// TODO
 		}
 	}
 	return store

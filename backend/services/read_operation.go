@@ -17,7 +17,7 @@ import (
 func ReadOperation(ctx context.Context, db *database.Connection, operationSlug string) (*dtos.Operation, error) {
 	operation, err := lookupOperation(db, operationSlug)
 	if err != nil {
-		return nil, backend.WrapError("Unable to read opeartion", backend.UnauthorizedReadErr(err))
+		return nil, backend.WrapError("Unable to read operation", backend.UnauthorizedReadErr(err))
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanReadOperation{OperationID: operation.ID}); err != nil {

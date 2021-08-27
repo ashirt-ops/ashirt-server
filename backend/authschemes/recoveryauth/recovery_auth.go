@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
 
@@ -22,8 +23,6 @@ func New(maxAge time.Duration) RecoveryAuthScheme {
 	return RecoveryAuthScheme{Expiry: maxAge}
 }
 
-const recoveryKeyLength = 40
-
 // Name returns the name of this authscheme
 func (RecoveryAuthScheme) Name() string {
 	return constants.Code
@@ -32,6 +31,11 @@ func (RecoveryAuthScheme) Name() string {
 // FriendlyName returns "ASHIRT User Recovery"
 func (RecoveryAuthScheme) FriendlyName() string {
 	return constants.FriendlyName
+}
+
+// Flags returns an empty string (no supported auth flags for recovery)
+func (RecoveryAuthScheme) Flags() []string {
+	return []string{}
 }
 
 func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
@@ -43,6 +47,20 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 		}
 
 		return generateRecoveryCodeForUser(r.Context(), bridge, userSlug)
+	}))
+
+	remux.Route(r, "POST", "/generateemail", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+		dr := remux.DissectJSONRequest(r)
+		userEmail := dr.FromBody("userEmail").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+
+		err := generateRecoveryEmail(r.Context(), bridge, userEmail)
+		if err != nil {
+			logging.Log(r.Context(), "msg", "Unable to generate recovery email", "error", err.Error())
+		}
+		return nil, nil
 	}))
 
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +78,7 @@ func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtA
 			return
 		}
 		bridge.LoginUser(w, r, userID, nil)
-		http.Redirect(w, r, fmt.Sprintf("/operations"), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("/account/authmethods"), http.StatusFound)
 	}))
 
 	remux.Route(r, "DELETE", "/expired", remux.JSONHandler(func(r *http.Request) (interface{}, error) {

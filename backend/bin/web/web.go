@@ -5,6 +5,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
@@ -13,8 +14,10 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/emailservices"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server"
+	"github.com/theparanoids/ashirt-server/backend/workers"
 )
 
 func main() {
@@ -45,7 +48,9 @@ func main() {
 	for _, svc := range config.SupportedAuthServices() {
 		switch svc {
 		case "ashirt":
-			schemes = append(schemes, localauth.LocalAuthScheme{})
+			schemes = append(schemes, localauth.LocalAuthScheme{
+				RegistrationEnabled: config.IsRegistrationEnabled(),
+			})
 		case "okta":
 			schemes = append(schemes, oktaauth.NewFromConfig(
 				config.AuthConfigInstance(svc),
@@ -53,6 +58,12 @@ func main() {
 					return true
 				}))
 		}
+	}
+
+	if config.EmailType() != "" {
+		startEmailServices(db, logger)
+	} else {
+		logger.Log("msg", "No Emailer selected")
 	}
 
 	http.Handle("/web/", http.StripPrefix("/web", server.Web(
@@ -68,4 +79,28 @@ func main() {
 	logger.Log("msg", "starting Web server", "port", config.Port())
 	serveErr := http.ListenAndServe(":"+config.Port(), nil)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
+}
+
+func startEmailServices(db *database.Connection, logger logging.Logger) {
+	var emailServicer emailservices.EmailServicer
+	emailLogger := logging.With(logger, "service", "email-sender", "type", config.EmailType)
+	switch config.EmailType() {
+	case string(emailservices.StdOutEmailer):
+		mailer := emailservices.MakeWriterMailer(os.Stdout, emailLogger)
+		emailServicer = &mailer
+	case string(emailservices.MemoryEmailer):
+		mailer := emailservices.MakeMemoryMailer(emailLogger)
+		emailServicer = &mailer
+	case string(emailservices.SMTPEmailer):
+		mailer := emailservices.MakeSMTPMailer(emailLogger)
+		emailServicer = &mailer
+	}
+
+	if emailServicer == nil {
+		logger.Log("msg", "unsupported emailer", "type", config.EmailType)
+	} else {
+		emailLogger.Log("msg", "Staring emailer")
+		emailWorker := workers.MakeEmailWorker(db, emailServicer, logging.With(logger, "service", "email-worker"))
+		emailWorker.Start()
+	}
 }

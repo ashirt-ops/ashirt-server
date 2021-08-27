@@ -3,6 +3,7 @@
 
 import * as React from 'react'
 
+export * from './clamp'
 export * from './compute_delta'
 export * from './query_parser'
 export * from './router'

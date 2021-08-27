@@ -11,13 +11,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
@@ -28,6 +27,7 @@ import (
 
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type WebConfig struct {
@@ -70,6 +70,9 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 	}
 
 	r := mux.NewRouter()
+	metricRouter := r.PathPrefix("").Subrouter()
+	metricRouter.Handle("/metrics", promhttp.Handler())
+
 	r.Use(middleware.LogRequests(config.Logger))
 	r.Use(csrf.Protect(config.CSRFAuthKey,
 		csrf.Secure(config.UseSecureCookies),
@@ -84,7 +87,11 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 	for i, scheme := range config.AuthSchemes {
 		authRouter := r.PathPrefix("/auth/" + scheme.Name()).Subrouter()
 		scheme.BindRoutes(authRouter, authschemes.MakeAuthBridge(db, sessionStore, scheme.Name()))
-		supportedAuthSchemes[i] = dtos.SupportedAuthScheme{SchemeName: scheme.FriendlyName(), SchemeCode: scheme.Name()}
+		supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
+			SchemeName:  scheme.FriendlyName(),
+			SchemeCode:  scheme.Name(),
+			SchemeFlags: scheme.Flags(),
+		}
 	}
 	authsWithOutRecovery := make([]dtos.SupportedAuthScheme, 0, len(supportedAuthSchemes)-1)
 
@@ -680,5 +687,48 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		return nil, services.DeleteAuthScheme(r.Context(), db, i)
+	}))
+
+	route(r, "GET", "/findings/categories", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		includeDeleted := dr.FromQuery("includeDeleted").OrDefault(false).AsBool()
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ListFindingCategories(r.Context(), db, includeDeleted)
+	}))
+
+	route(r, "POST", "/findings/category", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		category := dr.FromBody("category").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.CreateFindingCategory(r.Context(), db, category)
+	}))
+
+	route(r, "DELETE", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.DeleteFindingCategoryInput{
+			FindingCategoryId: dr.FromURL("id").AsInt64(),
+			DoDelete:          dr.FromBody("delete").Required().AsBool(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteFindingCategory(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpdateFindingCategoryInput{
+			Category: dr.FromBody("category").Required().AsString(),
+			ID:       dr.FromURL("id").AsInt64(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.UpdateFindingCategory(r.Context(), db, i)
 	}))
 }

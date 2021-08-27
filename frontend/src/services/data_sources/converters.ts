@@ -62,7 +62,9 @@ function isValidUserRole(maybeRole: string): maybeRole is types.UserRole {
 }
 
 function isValidSupportedEvidenceType(maybeSupportedEvidence: string): maybeSupportedEvidence is types.SupportedEvidenceType {
-  return ['codeblock', 'image', 'terminal-recording', 'none'].indexOf(maybeSupportedEvidence) > -1
+  return ['codeblock', 'image', 'terminal-recording',
+    'http-request-cycle',
+    'none'].indexOf(maybeSupportedEvidence) > -1
 }
 
 function isValidQueryType(maybeQueryType: string): maybeQueryType is types.SavedQueryType {

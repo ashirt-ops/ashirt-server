@@ -34,7 +34,9 @@ func main() {
 	gen(dtos.TagPair{})
 	gen(dtos.TagDifference{})
 	gen(dtos.TagByEvidenceDate{})
+	gen(dtos.FindingCategory{})
 	gen(dtos.CheckConnection{})
+	gen(dtos.NewUserCreatedByAdmin{})
 
 	// Since this file only contains typescript types, webpack doesn't pick up the
 	// changes unless there is some actual executable javascript referenced from

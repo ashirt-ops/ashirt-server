@@ -6,9 +6,9 @@ import { ParsedUrlQuery } from 'querystring'
 import { useAsyncComponent } from 'src/helpers'
 
 export type AuthFrontend = {
-  Linker: React.FunctionComponent<{ onSuccess: () => void }>,
-  Login: React.FunctionComponent<{ query: ParsedUrlQuery }>,
-  Settings: React.FunctionComponent<{ userKey: string }>,
+  Linker: React.FunctionComponent<{ onSuccess: () => void, authFlags?: Array<string> }>,
+  Login: React.FunctionComponent<{ query: ParsedUrlQuery, authFlags?: Array<string> }>,
+  Settings: React.FunctionComponent<{ userKey: string, authFlags?: Array<string> }>,
 }
 
 // @ts-ignore - this is a webpack compile-time include of src/authschemes/*/index.ts

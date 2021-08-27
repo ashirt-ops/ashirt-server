@@ -106,6 +106,8 @@ export default (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
+          viewHint="large"
+          interactionHint="active"
         />
       </div>
     </Lightbox>
@@ -151,6 +153,8 @@ const TimelineRow = (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
+          viewHint="medium"
+          interactionHint="inactive"
         />
       </div>
       <div className={cx('right')}>

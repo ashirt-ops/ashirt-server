@@ -17,6 +17,9 @@ export const operationStatusToLabel = {
   [OperationStatus.COMPLETE]: "Complete",
 }
 
+export type EvidenceViewHint = 'small' | 'medium' | 'large'
+export type InteractionHint = 'active' | 'inactive'
+
 export enum UserRole {
   // Values here are the backend representations of OperationRole defined in backend/policy
   NO_ACCESS = "",
@@ -37,7 +40,7 @@ export type ApiKey = {
   lastAuth: Date | null,
 }
 
-export type SupportedEvidenceType = 'codeblock' | 'terminal-recording' | 'image' | 'none'
+export type SupportedEvidenceType = 'codeblock' | 'terminal-recording' | 'image' | 'http-request-cycle' | 'none'
 
 export type CodeBlock = {
   type: 'codeblock',
@@ -56,6 +59,11 @@ export type TerminalRecording = {
   file: File
 }
 
+export type HttpRequestCycle = {
+  type: 'http-request-cycle',
+  file: File
+}
+
 export type ImageEvidence = {
   type: 'image'
   file: File
@@ -69,6 +77,7 @@ export type SubmittableEvidence =
   | SubmittableCodeblock
   | ImageEvidence
   | TerminalRecording
+  | HttpRequestCycle
   | ContentFreeEvidence
 
 export type Operation = {
@@ -180,6 +189,7 @@ export type PaginationResult<T> = PaginationQuery & {
 export type SupportedAuthenticationScheme = {
   schemeName: string,
   schemeCode: string,
+  schemeFlags: Array<string>
 }
 
 export type AuthSchemeDetails = SupportedAuthenticationScheme & {
@@ -206,4 +216,11 @@ export type TagDifference = {
 
 export type TagByEvidenceDate = Tag & {
   usages: Array<Date>,
+}
+
+export type FindingCategory = {
+  id: number,
+  category: string,
+  deleted: boolean,
+  usageCount: number,
 }

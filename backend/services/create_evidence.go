@@ -50,6 +50,8 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 	if i.Content != nil {
 		var content contentstore.Storable
 		switch i.ContentType {
+		case "http-request-cycle":
+			fallthrough
 		case "terminal-recording":
 			fallthrough
 		case "codeblock":

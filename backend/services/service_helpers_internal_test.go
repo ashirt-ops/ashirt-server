@@ -89,7 +89,7 @@ func TestLookupOperationFinding(t *testing.T) {
 	require.Equal(t, goodOp.Findings[0].ID, foundFinding.ID)
 	require.Equal(t, goodOp.Findings[0].UUID, foundFinding.UUID)
 	require.Equal(t, goodOp.Findings[0].OperationID, foundFinding.OperationID)
-	require.Equal(t, goodOp.Findings[0].Category, foundFinding.Category)
+	require.Equal(t, goodOp.Findings[0].CategoryID, foundFinding.CategoryID)
 	require.Equal(t, goodOp.Findings[0].Title, foundFinding.Title)
 	require.Equal(t, goodOp.Findings[0].Description, foundFinding.Description)
 

@@ -9,22 +9,22 @@ import ImageUpload from 'src/components/image_upload'
 import ModalForm from 'src/components/modal_form'
 import Modal from 'src/components/modal'
 import TagChooser from 'src/components/tag_chooser'
-import TerminalRecordingUpload from 'src/components/termrec_upload'
+import BinaryUpload from 'src/components/binary_upload'
+import ComboBox from 'src/components/combobox'
+import TagList from 'src/components/tag_list'
 import { CodeBlockEditor } from 'src/components/code_block'
-import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence, Operation, TagDifference } from 'src/global_types'
+import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence, Operation, TagDifference, SupportedEvidenceType } from 'src/global_types'
 import { TextArea } from 'src/components/input'
-import { default as TabMenu, Tab } from 'src/components/tabs'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { codeblockToBlob } from 'src/helpers/codeblock_to_blob'
 import { useWiredData } from 'src/helpers'
-
 import {
   createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence,
   getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference,
   moveEvidence
 } from 'src/services'
-import ComboBox from 'src/components/combobox'
-import TagList from 'src/components/tag_list'
+import classnames from 'classnames/bind'
+const cx = classnames.bind(require('./stylesheet'))
 
 export const CreateEvidenceModal = (props: {
   onCreated: () => void,
@@ -36,26 +36,37 @@ export const CreateEvidenceModal = (props: {
   const binaryBlobField = useFormField<File | null>(null)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
 
-  const evidenceTypes: Array<Tab> = [
-    { id: 'screenshot', label: 'Screenshot', content: <ImageUpload label='Screenshot' {...binaryBlobField} /> },
-    { id: 'codeblock', label: 'Code Block', content: <CodeBlockEditor {...codeblockField} /> },
-    { id: 'terminal-recording', label: 'Terminal Recording', content: <TerminalRecordingUpload label='Terminal Recording' {...binaryBlobField} /> },
+  const isATerminalRecording = (file: File) => file.type == ''
+  const isAnHttpRequestCycle = (file: File) => file.name.endsWith("har")
+
+  const evidenceTypeOptions: Array<{ name: string, value: SupportedEvidenceType, content?: React.ReactNode }> = [
+    { name: 'Screenshot', value: 'image', content: <ImageUpload label='Screenshot' {...binaryBlobField} /> },
+    { name: 'Code Block', value: 'codeblock', content: <CodeBlockEditor {...codeblockField} /> },
+    {
+      name: 'Terminal Recording', value: 'terminal-recording',
+      content: <BinaryUpload label='Terminal Recording' isSupportedFile={isATerminalRecording} {...binaryBlobField} />
+    },
+    {
+      name: 'HTTP Request/Response', value: 'http-request-cycle',
+      content: <BinaryUpload label='HAR File' isSupportedFile={isAnHttpRequestCycle} {...binaryBlobField} />
+    },
   ]
 
-  const [selectedTab, setSelectedTab] = React.useState<Tab>(evidenceTypes[0])
+  const [selectedCBValue, setSelectedCBValue] = React.useState<string>(evidenceTypeOptions[0].value)
+  const getSelectedOption = () => evidenceTypeOptions.filter(opt => opt.value === selectedCBValue)[0]
 
   const formComponentProps = useForm({
     fields: [descriptionField, binaryBlobField],
     onSuccess: () => { props.onCreated(); props.onRequestClose() },
     handleSubmit: () => {
       let data: SubmittableEvidence = { type: "none" }
+      const selectedOption = getSelectedOption()
+      const fileBasedKeys = ['image', 'terminal-recording', 'http-request-cycle']
 
-      if (selectedTab.id === 'screenshot' && binaryBlobField.value != null) {
-        data = { type: 'image', file: binaryBlobField.value }
-      } else if (selectedTab.id === 'codeblock' && codeblockField.value !== null) {
+      if (selectedOption.value === 'codeblock' && codeblockField.value !== null) {
         data = { type: 'codeblock', file: codeblockToBlob(codeblockField.value) }
-      } else if (selectedTab.id === 'terminal-recording' && binaryBlobField.value !== null) {
-        data = { type: 'terminal-recording', file: binaryBlobField.value }
+      } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null ) {
+        data = { type: selectedOption.value, file: binaryBlobField.value }
       }
 
       return createEvidence({
@@ -66,13 +77,18 @@ export const CreateEvidenceModal = (props: {
       })
     },
   })
+
   return (
     <ModalForm title="New Evidence" submitText="Create Evidence" onRequestClose={props.onRequestClose} {...formComponentProps}>
       <TextArea label="Description" {...descriptionField} />
-      <TabMenu
-        onTabChanged={(tab, tabIndex) => { setSelectedTab(tab) }}
-        tabs={evidenceTypes}
+      <ComboBox
+        label="Evidence Type"
+        className={cx('dropdown')}
+        options={evidenceTypeOptions}
+        value={selectedCBValue}
+        onChange={setSelectedCBValue}
       />
+      {getSelectedOption().content}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
     </ModalForm>
   )
@@ -231,7 +247,7 @@ export const MoveEvidenceModal = (props: {
         lost in the transition.
       </div>
       {wiredOps.render(operations => {
-        operations.sort((a, b) =>  a.name.localeCompare(b.name))
+        operations.sort((a, b) => a.name.localeCompare(b.name))
 
         const mappedOperations = operations.map(op => ({ name: op.name, value: op }))
         return (

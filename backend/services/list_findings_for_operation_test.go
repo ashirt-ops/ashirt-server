@@ -38,7 +38,7 @@ func TestListFindingsForOperation(t *testing.T) {
 
 func validateFinding(t *testing.T, expected models.Finding, actual *dtos.Finding) {
 	require.Equal(t, expected.UUID, actual.UUID)
-	require.Equal(t, expected.Category, actual.Category)
+	require.Equal(t, HarryPotterSeedData.CategoryForFinding(expected), actual.Category)
 	require.Equal(t, expected.Title, actual.Title)
 	require.Equal(t, expected.Description, actual.Description)
 	require.Equal(t, expected.ReadyToReport, actual.ReadyToReport)

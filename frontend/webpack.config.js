@@ -16,7 +16,7 @@ module.exports = (env, argv) => ({
   output: {
     path: path.resolve(__dirname, 'dist/assets'),
     publicPath: '/assets/',
-    filename: 'main-[hash].js',
+    filename: 'main-[contenthash].js',
     chunkFilename: '[chunkhash].js',
   },
 
@@ -61,7 +61,7 @@ module.exports = (env, argv) => ({
       outputPath: path.resolve(__dirname, 'public')
     }),
     new MiniCssExtractPlugin({
-      filename: 'main-[hash].css',
+      filename: 'main-[contenthash].css',
       chunkFilename: '[chunkhash].css',
     }),
   ],

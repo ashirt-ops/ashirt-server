@@ -71,7 +71,7 @@ export default () => {
       {isSuperAdmin && <Redirect exact from="/account/edit/:slug" to="/account/profile/:slug" />}
 
       {/* Admin Settings */}
-      {isSuperAdmin && <Route exact path="/admin/:view(users|operations|authdata)" component={AsyncAdminSettings} />}
+      {isSuperAdmin && <Route exact path="/admin/:view(users|operations|authdata|findings)" component={AsyncAdminSettings} />}
       {isSuperAdmin && <Redirect from="/admin/" to="/admin/users" />}
 
 
@@ -99,7 +99,7 @@ const makeErrorDisplay = (title: string, message: string, withLoginLink: boolean
       withLoginLink && (
         <>
           <br />
-          <NavLinkButton className={cx('return-button')} to={"/login"}>Return to login</NavLinkButton>
+          <NavLinkButton primary className={cx('return-button')} to={"/login"}>Return to login</NavLinkButton>
         </>
       )
     }

@@ -70,3 +70,23 @@ export const CodeBlockViewer = (props: {
     </div>
   )
 }
+
+export const SourcelessCodeblock = (props: {
+  code: string,
+  language: string | null,
+  className?: string
+}) => {
+  const AceEditor = useAsyncComponent(importAceEditorAsync)
+
+  return (
+    <div className={cx('code-viewer', props.className)}>
+      <div className={cx('ace', 'no-source')}>
+        <AceEditor
+          readOnly
+          mode={props.language || ''}
+          value={props.code}
+        />
+      </div>
+    </div>
+  )
+}

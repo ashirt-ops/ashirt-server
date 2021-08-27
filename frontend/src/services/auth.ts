@@ -28,6 +28,15 @@ export async function adminChangePassword(i: {
   await ds.adminChangePassword(i)
 }
 
+// TODO this should be encapsulated in an admin settings component under src/authschemes/local
+export async function adminCreateLocalUser(i: {
+  firstName: string,
+  lastName?: string,
+  email: string,
+}) {
+  return await ds.adminCreateLocalUser(i)
+}
+
 export async function logout() {
   await ds.logout()
 }
@@ -57,6 +66,7 @@ export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSch
   return schemes.map(details => ({
     schemeName: details.schemeName,
     schemeCode: details.schemeCode,
+    schemeFlags: details.schemeFlags,
     userCount: details.userCount,
     uniqueUserCount: details.uniqueUserCount,
     labels: details.labels,

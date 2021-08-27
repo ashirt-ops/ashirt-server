@@ -11,7 +11,7 @@ import { useWiredData } from 'src/helpers'
 
 import ApiKeys from './api_keys'
 import AuthMethods from './auth_methods'
-import NavVerticalTab from 'src/components/tab_vertical_menu'
+import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
 import Profile from './profile'
 import Security from './security'
 
@@ -44,7 +44,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           {forUser &&
             <em className={cx('notice')}>Editing the profile of: <em className={cx('editing-user-name')}>{`${p.firstName} ${p.lastName}`}</em></em>
           }
-          <NavVerticalTab title="Account Settings" {...props} tabs={tabs} />
+          <NavVerticalTabMenu title="Account Settings" {...props} tabs={tabs} />
         </>)
       })}
     </div>

@@ -56,7 +56,7 @@ export default (props: {
             placeholder="Filter Timeline"
             icon={require('./search.svg')}
             onKeyDown={e => {
-              if (e.which == 13) {
+              if (e.key === 'Enter') {
                 inputRef.current?.blur()
                 props.onSearch(queryInput)
               }

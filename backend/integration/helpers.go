@@ -39,6 +39,8 @@ type Tester struct {
 func NewTester(t *testing.T) *Tester {
 	db := database.NewTestConnection(t, "integration-test-db")
 
+	doMinimalSeed(db)
+
 	contentStore, err := contentstore.NewDevStore()
 	require.NoError(t, err)
 	commonLogger := logging.SetupStdoutLogging()
@@ -48,8 +50,10 @@ func NewTester(t *testing.T) *Tester {
 		db, contentStore, &server.WebConfig{
 			CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
 			SessionStoreKey: []byte("session-store-key-for-integration-tests"),
-			AuthSchemes:     []authschemes.AuthScheme{localauth.LocalAuthScheme{}},
-			Logger:          commonLogger,
+			AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
+				RegistrationEnabled: true,
+			}},
+			Logger: commonLogger,
 		},
 	)))
 	s.Handle("/api/", server.API(
@@ -60,6 +64,22 @@ func NewTester(t *testing.T) *Tester {
 		t: t,
 		s: httptest.NewServer(s),
 	}
+}
+
+func doMinimalSeed(db *database.Connection) {
+	commonFindingCategories := []string{
+		"Product",
+		"Network",
+		"Enterprise",
+		"Vendor",
+		"Behavioral",
+		"Detection Gap",
+	}
+	db.BatchInsert("finding_categories", len(commonFindingCategories), func(i int) map[string]interface{} {
+		return map[string]interface{}{
+			"category": commonFindingCategories[i],
+		}
+	})
 }
 
 type UserSession struct {

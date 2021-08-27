@@ -33,6 +33,7 @@ var initTest = seeding.InitTest
 var getUsersWithRoleForOperationByOperationID = seeding.GetUsersWithRoleForOperationByOperationID
 var contextForUser = seeding.ContextForUser
 var simpleFullContext = seeding.SimpleFullContext
+var GetInternalClock = seeding.GetInternalClock
 
 var getFullEvidenceByFindingID = seeding.GetFullEvidenceByFindingID
 var getFullEvidenceByOperationID = seeding.GetFullEvidenceByOperationID
@@ -209,6 +210,14 @@ var FindingBook2Magic = seeding.FindingBook2Magic
 var FindingBook2CGI = seeding.FindingBook2CGI
 var FindingBook2SpiderFear = seeding.FindingBook2SpiderFear
 
+var ProductFindingCategory = seeding.ProductFindingCategory
+var NetworkFindingCategory = seeding.NetworkFindingCategory
+var EnterpriseFindingCategory = seeding.EnterpriseFindingCategory
+var VendorFindingCategory = seeding.VendorFindingCategory
+var BehavioralFindingCategory = seeding.BehavioralFindingCategory
+var DetectionGapFindingCategory = seeding.DetectionGapFindingCategory
+var DeletedCategory = seeding.DeletedCategory
+
 type TestSeedData struct {
 	seeding.Seeder
 }
@@ -256,4 +265,8 @@ func (seed TestSeedData) EvidenceForOperation(opID int64) []models.Evidence {
 
 func (seed TestSeedData) TagIDsUsageByDate(opID int64) map[int64][]time.Time {
 	return seed.Seeder.TagIDsUsageByDate(opID)
+}
+
+func (seed TestSeedData) CategoryForFinding(finding models.Finding) string {
+	return seed.Seeder.CategoryForFinding(finding)
 }

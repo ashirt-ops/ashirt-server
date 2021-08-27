@@ -4,6 +4,7 @@ import {
   TerminalRecordingData, ExpandedTerminalEvent,
   PositionChangeEventBody
 } from './types'
+import { clamp } from  'src/helpers'
 
 import {EventEmitter} from 'events'
 
@@ -353,10 +354,3 @@ const parseTerminalRecording = (content: string, maxDelay = 1600): TerminalRecor
 
   return response
 }
-
-// clamp constrains n to a number between min and max, inclusive
-// clamp(-1, 0, 4) == 0
-// clamp(5, 0, 4) == 4
-// clamp(1, 0, 4) == 1
-// clamp(2.5, 0, 4) == 2.5
-const clamp = (n: number, min: number, max: number) => Math.max(Math.min(max, n), min)

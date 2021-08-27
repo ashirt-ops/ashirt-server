@@ -10,6 +10,7 @@ type OpSlug = { operationSlug: string }
 type UserSlug = { userSlug: string }
 type QueryId = { queryId: number }
 type TagId = { tagId: number }
+type FindingCategoryId = { findingCategoryId: number }
 
 type FindingPayload = {
   category: string,
@@ -44,6 +45,10 @@ export interface DataSource {
   getEvidenceMigrationDifference(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<dtos.TagDifference>
   moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
 
+  listFindingCategories(includeDeleted: boolean): Promise<Array<dtos.FindingCategory>>
+  createFindingCategory(payload: { category: string }): Promise<dtos.FindingCategory>
+  deleteFindingCategory(ids: FindingCategoryId, payload: { delete: boolean }): Promise<void>
+  updateFindingCategory(ids: FindingCategoryId, payload: { category: string }): Promise<void>
   listFindings(ids: OpSlug, query: string): Promise<Array<dtos.Finding>>
   createFinding(ids: OpSlug, payload: FindingPayload): Promise<dtos.Finding>
   readFinding(ids: OpSlug & FindingUuid): Promise<dtos.Finding>
@@ -85,6 +90,7 @@ export interface DataSource {
   deleteExpiredRecoveryCodes(): Promise<void>
   getRecoveryMetrics(): Promise<any>
   adminChangePassword(i: { userSlug: string, newPassword: string }): Promise<void>
+  adminCreateLocalUser(i: { firstName: string, lastName?: string, email: string }): Promise<dtos.NewUserCreatedByAdmin>,
   getTotpForUser(ids: UserSlug): Promise<boolean>
   deleteTotpForUser(ids: UserSlug): Promise<void>
 }
