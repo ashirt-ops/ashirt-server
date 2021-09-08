@@ -1,0 +1,4 @@
+FROM jkennedyvz/sqlmigrate:latest
+COPY backend/ /backend/
+RUN chmod +x /usr/local/bin/sql-migrate
+ENTRYPOINT ["sql-migrate", "up", "-config=/backend/dbconfig.yml"]
