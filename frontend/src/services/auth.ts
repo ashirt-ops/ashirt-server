@@ -37,6 +37,14 @@ export async function adminCreateLocalUser(i: {
   return await ds.adminCreateLocalUser(i)
 }
 
+export async function adminInviteUser(i: {
+  firstName: string,
+  lastName?: string,
+  email: string,
+}) {
+  return await ds.adminInviteUser(i)
+}
+
 export async function logout() {
   await ds.logout()
 }

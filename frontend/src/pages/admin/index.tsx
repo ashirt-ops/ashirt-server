@@ -9,6 +9,7 @@ import AuthTable from './auth_table'
 import HeadlessButton from './add_headless'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
 import CreateUserButton from "./add_user"
+import InviteuserButton from "./invite_user"
 import OperationsTable from './operations_table'
 import FindingCategoriesTable from "./finding_categories_table"
 import RecoveryMetrics from './recovery_metrics'
@@ -31,6 +32,7 @@ export default (props: RouteComponentProps) => {
               <UserTable {...bus} />
               <HeadlessButton {...bus} />
               <CreateUserButton {...bus} />
+              <InviteuserButton {...bus} />
             </>
           },
           {
