@@ -22,6 +22,9 @@ type WebConfig struct {
 	RecoveryExpiry           time.Duration `split_words:"true" default:"24h"`
 	DisableLocalRegistration bool          `split_words:"true"`
 	FrontendIndexURL         string        `split_words:"true"`
+	BackendURL               string        `split_words:"true"`
+	SuccessRedirectURL       string        `split_words:"true"`
+	FailureRedirectURLPrefix string        `split_words:"true"`
 	Port                     int
 }
 
@@ -40,13 +43,28 @@ type AuthConfig struct {
 // Note: it is expected that not all fields will be populated. It is up to the user to verify
 // that these fields exist and have correct values
 type AuthInstanceConfig struct {
-	ClientID                 string `split_words:"true"`
-	ClientSecret             string `split_words:"true"`
-	Issuer                   string `split_words:"true"`
-	BackendURL               string `split_words:"true"`
-	SuccessRedirectURL       string `split_words:"true"`
-	FailureRedirectURLPrefix string `split_words:"true"`
-	ProfileToShortnameField  string `split_words:"true"`
+	ClientID                       string `split_words:"true"`
+	ClientSecret                   string `split_words:"true"`
+	ServiceURL                     string `split_words:"true"`
+	TokenURL                       string `split_words:"true"`
+	Scopes                         string
+	Issuer                         string `split_words:"true"`
+	PassIDAndSecretForTokenAsQuery bool   `split_words:"true"`
+	BackendURL                     string `split_words:"true"`
+	SuccessRedirectURL             string `split_words:"true"`
+	FailureRedirectURLPrefix       string `split_words:"true"`
+	ProfileToShortnameField        string `split_words:"true"`
+
+	//generic oidc
+	Name                  string
+	FriendlyName          string `split_words:"true"`
+	ProviderURL           string `split_words:"true"`
+	Type                  string
+	ProfileFirstNameField string `split_words:"true"`
+	ProfileLastNameField  string `split_words:"true"`
+	ProfileEmailField     string `split_words:"true"`
+	ProfileSlugField      string `split_words:"true"`
+	RegistrationEnabled   bool   `ignored:"true"`
 }
 
 var (
@@ -118,10 +136,17 @@ func loadAuthConfig() error {
 		servicesArr[i] = strings.TrimSpace(s)
 	}
 
+	serviceRegistrationStr := os.Getenv("AUTH_SERVICES_ALLOW_REGISTRATION")
+	serviceRegistrationArr := strings.Split(serviceRegistrationStr, ",")
+
 	config.Services = servicesArr
 	config.AuthConfigs = make(map[string]AuthInstanceConfig)
 	for _, service := range servicesArr {
 		innerConfig := AuthInstanceConfig{}
+
+		if listContainsString(serviceRegistrationArr, service) > -1 {
+			innerConfig.RegistrationEnabled = true
+		}
 		err := envconfig.Process("auth_"+service, &innerConfig)
 		if err != nil {
 			return err
@@ -133,6 +158,15 @@ func loadAuthConfig() error {
 	return nil
 }
 
+func listContainsString(haystack []string, needle string) int {
+	for i, v := range haystack {
+		if v == needle {
+			return i
+		}
+	}
+	return -1
+}
+
 // DBUri retrieves the environment variable DB_URI
 func DBUri() string {
 	return db.URI
@@ -142,6 +176,13 @@ func DBUri() string {
 // Note this looks for environment variables prefixed with AUTH_${SERVICE_NAME}, and will only
 // retrieve these values for services named in the AUTH_SERVICES environment
 func AuthConfigInstance(name string) AuthInstanceConfig {
+	if name == "ashirt" { // special case -- local auth doesn't have any normal environment variables
+		return AuthInstanceConfig{
+			Name:                "ashirt",
+			Type:                "local",
+			RegistrationEnabled: auth.AuthConfigs[name].RegistrationEnabled,
+		}
+	}
 	v, _ := auth.AuthConfigs[name]
 	return v
 }
@@ -186,7 +227,6 @@ func FrontendIndexURL() string {
 	return app.FrontendIndexURL
 }
 
-// IsRegistrationEnabled returns true if local registration is enabled, false otherwise.
-func IsRegistrationEnabled() bool {
-	return !app.DisableLocalRegistration
+func AllAppConfig() WebConfig {
+	return app
 }

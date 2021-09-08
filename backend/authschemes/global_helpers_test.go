@@ -14,7 +14,7 @@ func TestCreateNewAuthForUserGeneric(t *testing.T) {
 	db, _, bridge := initBridgeTest(t)
 	userID := createDummyUser(t, bridge, "normalUser")
 
-	err := authschemes.CreateNewAuthForUserGeneric(db, "someauth", authschemes.UserAuthData{
+	err := authschemes.CreateNewAuthForUserGeneric(db, "someauth", "someauth-type", authschemes.UserAuthData{
 		UserID:  userID,
 		UserKey: "dummy-user-key",
 	})

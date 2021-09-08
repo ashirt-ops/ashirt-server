@@ -8,27 +8,29 @@ import {RouteComponentProps} from 'react-router-dom'
 import {getSupportedAuthentications} from 'src/services/auth'
 import {useAuthFrontendComponent} from 'src/authschemes'
 import {useWiredData} from 'src/helpers'
+import { SupportedAuthenticationScheme } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
 // This component renders a list of all enabled authscheme login components
 // To add a new authentication method add a new authscheme frontend to
 // src/auth and ensure it is enabled on the backend
 // An optional schemeCode can be provided to only render that auth method
-export default (props: RouteComponentProps<{ schemeCode?: string }>) => {
+export default (props: RouteComponentProps<{ schemeCode?: string}>) => {
   const query = parseQuery(props.location.search.substr(1))
   const renderOnlyScheme = props.match.params.schemeCode
   const wiredAuthSchemes = useWiredData(getSupportedAuthentications)
 
   return wiredAuthSchemes.render(supportedAuthSchemes => (
     <div className={cx('login')}>
-      {supportedAuthSchemes.map(({schemeCode, schemeFlags}) => {
+      {supportedAuthSchemes.map((schemeDetails) => {
+        const { schemeCode, schemeType } = schemeDetails
         if (renderOnlyScheme != null && schemeCode != renderOnlyScheme) return null
         return (
           <AuthSchemeLogin
             key={schemeCode}
-            authSchemeCode={schemeCode}
+            authSchemeType={schemeType}
+            authScheme={schemeDetails}
             query={query}
-            authSchemeFlags={schemeFlags}
           />
         )
       })}
@@ -38,14 +40,14 @@ export default (props: RouteComponentProps<{ schemeCode?: string }>) => {
 
 
 const AuthSchemeLogin = (props: {
-  authSchemeCode: string,
-  authSchemeFlags: Array<string>
+  authSchemeType: string,
+  authScheme: SupportedAuthenticationScheme,
   query: ParsedUrlQuery,
 }) => {
-  const Login = useAuthFrontendComponent(props.authSchemeCode, 'Login')
+  const Login = useAuthFrontendComponent(props.authSchemeType, 'Login', props.authScheme)
   return (
     <div className={cx('auth-scheme-row')}>
-      <Login query={props.query} authFlags={props.authSchemeFlags}/>
+      <Login query={props.query} authFlags={props.authScheme.schemeFlags}/>
     </div>
   )
 }

@@ -37,6 +37,14 @@ export async function adminCreateLocalUser(i: {
   return await ds.adminCreateLocalUser(i)
 }
 
+export async function adminInviteUser(i: {
+  firstName: string,
+  lastName?: string,
+  email: string,
+}) {
+  return await ds.adminInviteUser(i)
+}
+
 export async function logout() {
   await ds.logout()
 }
@@ -66,6 +74,7 @@ export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSch
   return schemes.map(details => ({
     schemeName: details.schemeName,
     schemeCode: details.schemeCode,
+    schemeType: details.schemeType,
     schemeFlags: details.schemeFlags,
     userCount: details.userCount,
     uniqueUserCount: details.uniqueUserCount,

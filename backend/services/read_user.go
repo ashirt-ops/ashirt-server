@@ -39,7 +39,7 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string, sup
 			From("users").
 			Where(sq.Eq{"id": userID}))
 
-		db.Select(&authSchemes, sq.Select("user_key", "auth_scheme", "last_login").
+		db.Select(&authSchemes, sq.Select("user_key", "auth_scheme", "auth_type", "last_login").
 			From("auth_scheme_data").
 			Where(sq.Eq{
 				"user_id":     userID,
@@ -52,10 +52,17 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string, sup
 
 	auths := make([]dtos.AuthenticationInfo, len(authSchemes))
 	for i, v := range authSchemes {
+		index := getMatchingSchemeIndex(supportedAuthSchemes, v.AuthScheme)
+
 		auths[i] = dtos.AuthenticationInfo{
 			UserKey:        v.UserKey,
 			AuthSchemeCode: v.AuthScheme,
+			AuthSchemeType: v.AuthType,
 			AuthLogin:      v.LastLogin,
+			AuthDetails:    nil,
+		}
+		if index > -1 {
+			auths[i].AuthDetails = &(*supportedAuthSchemes)[index]
 		}
 	}
 

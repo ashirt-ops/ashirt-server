@@ -66,7 +66,7 @@ const TableRow = (props: {
   requestReload?: () => void,
 }) => {
   const [linking, setLinking] = React.useState<boolean>(false)
-  const Linker = useAuthFrontendComponent(props.supportedScheme.schemeCode, 'Linker')
+  const Linker = useAuthFrontendComponent(props.supportedScheme.schemeType, 'Linker', props.supportedScheme)
 
   const userScheme = props.authInfo.find(x => x.schemeCode === props.supportedScheme.schemeCode)
   const canDeleteAuth = () => {

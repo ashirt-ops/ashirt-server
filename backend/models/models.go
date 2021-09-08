@@ -132,11 +132,12 @@ type Query struct {
 type AuthSchemeData struct {
 	ID                int64      `db:"id"`
 	AuthScheme        string     `db:"auth_scheme"`
+	AuthType          string     `db:"auth_type"`
 	UserKey           string     `db:"user_key"`
 	UserID            int64      `db:"user_id"`
 	EncryptedPassword []byte     `db:"encrypted_password"`
-	TOTPSecret        *string    `db:"totp_secret"`
 	MustResetPassword bool       `db:"must_reset_password"`
+	TOTPSecret        *string    `db:"totp_secret"`
 	LastLogin         *time.Time `db:"last_login"`
 	CreatedAt         time.Time  `db:"created_at"`
 	UpdatedAt         *time.Time `db:"updated_at"`

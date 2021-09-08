@@ -83,10 +83,12 @@ type UserOwnView struct {
 }
 
 type AuthenticationInfo struct {
-	UserKey        string     `json:"userKey"`
-	AuthSchemeName *string    `json:"schemeName,omitempty"`
-	AuthSchemeCode string     `json:"schemeCode"`
-	AuthLogin      *time.Time `json:"lastLogin"`
+	UserKey        string               `json:"userKey"`
+	AuthSchemeName *string              `json:"schemeName,omitempty"`
+	AuthSchemeCode string               `json:"schemeCode"`
+	AuthSchemeType string               `json:"schemeType"`
+	AuthLogin      *time.Time           `json:"lastLogin"`
+	AuthDetails    *SupportedAuthScheme `json:"authDetails"`
 }
 
 type UserAdminView struct {
@@ -116,6 +118,7 @@ type PaginationWrapper struct {
 type DetailedAuthenticationInfo struct {
 	AuthSchemeName  string     `json:"schemeName"`
 	AuthSchemeCode  string     `json:"schemeCode"`
+	AuthSchemeType  string     `json:"schemeType"`
 	AuthSchemeFlags []string   `json:"schemeFlags"`
 	UserCount       int64      `json:"userCount"`
 	UniqueUserCount int64      `json:"uniqueUserCount"`
@@ -127,6 +130,7 @@ type SupportedAuthScheme struct {
 	SchemeName  string   `json:"schemeName"`
 	SchemeCode  string   `json:"schemeCode"`
 	SchemeFlags []string `json:"schemeFlags"`
+	SchemeType  string   `json:"schemeType"`
 }
 
 type TagDifference struct {

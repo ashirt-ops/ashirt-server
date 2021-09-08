@@ -34,5 +34,5 @@ func GenerateRecoveryCodeForUser(db *database.Connection, userID int64) (string,
 // GenerateNewRecoveryRecord is a shorthand for CreateNewAuthForUserGeneric with the recovery code
 // constant provide
 func GenerateNewRecoveryRecord(db *database.Connection, userAuthData authschemes.UserAuthData) error {
-	return authschemes.CreateNewAuthForUserGeneric(db, recoveryConsts.Code, userAuthData)
+	return authschemes.CreateNewAuthForUserGeneric(db, recoveryConsts.Code, recoveryConsts.Code, userAuthData)
 }
