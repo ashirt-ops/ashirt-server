@@ -48,7 +48,7 @@ jobs:
     needs: [gotest]
     strategy:
       matrix:
-        service: [frontend,web,api]
+        service: [frontend,web,api,init]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:

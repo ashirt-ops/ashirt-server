@@ -1,4 +1,4 @@
-FROM jkennedyvz/sqlmigrate:latest
+FROM golang
+RUN go get -v github.com/rubenv/sql-migrate/...
 COPY backend/ /backend/
-RUN chmod +x /usr/local/bin/sql-migrate
 ENTRYPOINT ["sql-migrate", "up", "-config=/backend/dbconfig.yml"]
