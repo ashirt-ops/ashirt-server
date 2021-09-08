@@ -27,12 +27,14 @@ func TestDeleteAuthScheme(t *testing.T) {
 	// add some recovery data
 	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme": recoveryScheme,
+		"auth_type":   recoveryScheme,
 		"user_key":    normalUser.FirstName,
 		"user_id":     normalUser.ID,
 	})
 	require.NoError(t, err)
 	_, err = db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme": recoveryScheme,
+		"auth_type":   recoveryScheme,
 		"user_key":    targetUser.FirstName,
 		"user_id":     targetUser.ID,
 	})
@@ -51,6 +53,7 @@ func TestDeleteAuthScheme(t *testing.T) {
 	// add back in deleted auth
 	_, err = db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme": schemeName,
+		"auth_type":   schemeName,
 		"user_key":    normalUser.FirstName,
 		"user_id":     normalUser.ID,
 	})

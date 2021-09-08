@@ -87,6 +87,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 			return map[string]interface{}{
 				"id":                 seed.Users[i].ID,
 				"auth_scheme":        localConsts.Code,
+				"auth_type":          localConsts.Code,
 				"user_key":           seed.Users[i].FirstName,
 				"user_id":            seed.Users[i].ID,
 				"encrypted_password": encryptedPassword, //the user's first name, lowercased

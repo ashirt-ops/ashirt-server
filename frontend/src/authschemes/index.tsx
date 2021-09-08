@@ -4,6 +4,7 @@
 import * as React from 'react'
 import { ParsedUrlQuery } from 'querystring'
 import { useAsyncComponent } from 'src/helpers'
+import { SupportedAuthenticationScheme } from "src/global_types"
 
 export type AuthFrontend = {
   Linker: React.FunctionComponent<{ onSuccess: () => void, authFlags?: Array<string> }>,
@@ -17,18 +18,23 @@ export type AuthFrontend = {
 const ctx = require.context('src/authschemes', true, /\.\/[^/]+\/index.ts$/, 'lazy')
 
 const bundledModuleNames: Array<string> = ctx.keys()
-const loadAuthModule: (name: string) => Promise<{default: AuthFrontend}> = ctx
+const loadAuthModule: (name: string) => Promise<{ default: AuthFrontend, configure: (schemeDetails: SupportedAuthenticationScheme) => AuthFrontend }> = ctx
 
-// getAuthFrontend fetches a auth frontend module by name and returns the promise for the AuthFrontend for the given authschemecode
+// getAuthFrontend fetches a auth frontend module by name and returns the promise for the AuthFrontend for the given authSchemeType
 // assuming its frontend is exported in `src/authschemes/<schemecode>/index.ts`
-async function getAuthFrontend(authSchemeCode: string): Promise<AuthFrontend> {
-  const modulePath = `./${authSchemeCode}/index.ts`
+async function getAuthFrontend(authSchemeType: string, schemeDetails?: SupportedAuthenticationScheme): Promise<AuthFrontend> {
+  const modulePath = `./${authSchemeType}/index.ts`
   if (bundledModuleNames.indexOf(modulePath) === -1) {
-    throw Error(`Unable to load frontend auth module for "${authSchemeCode}". Please make sure "${modulePath}" exists`)
+    throw Error(`Unable to load frontend auth module for "${authSchemeType}". Please make sure "${modulePath}" exists`)
   }
 
   const module = await loadAuthModule(modulePath)
-  return module.default
+
+  const rtn = schemeDetails
+    ? module.configure(schemeDetails)
+    : module.default
+
+  return rtn
 }
 
 // useAuthFrontendComponent is a helper to include a specific AuthFrontend component for a given authScheme
@@ -39,8 +45,8 @@ async function getAuthFrontend(authSchemeCode: string): Promise<AuthFrontend> {
 //
 // const Login = useAuthFrontend('local', 'Login')
 // return <Login query={{}} />
-export function useAuthFrontendComponent<Key extends keyof AuthFrontend>(authSchemeCode: string, key: Key): AuthFrontend[Key] {
+export function useAuthFrontendComponent<Key extends keyof AuthFrontend>(authSchemeType: string, key: Key, schemeDetails?: SupportedAuthenticationScheme): AuthFrontend[Key] {
   return useAsyncComponent(React.useCallback(() => (
-    getAuthFrontend(authSchemeCode).then(module => module[key])
-  ), [authSchemeCode, key]))
+    getAuthFrontend(authSchemeType, schemeDetails).then(module => module[key])
+  ), [authSchemeType, key, schemeDetails]))
 }

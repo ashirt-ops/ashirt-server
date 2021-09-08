@@ -12,9 +12,9 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
-var patronusAuthScheme = dtos.SupportedAuthScheme{SchemeName: "Patronus Charm", SchemeCode: "patronus"}
-var localAuthScheme = dtos.SupportedAuthScheme{SchemeName: localConsts.FriendlyName, SchemeCode: localConsts.Code}
-var darkMarkScheme = dtos.SupportedAuthScheme{SchemeName: "Death Eaters", SchemeCode: "dark mark"}
+var patronusAuthScheme = dtos.SupportedAuthScheme{SchemeName: "Patronus Charm", SchemeCode: "patronus", SchemeType: "magical"}
+var localAuthScheme = dtos.SupportedAuthScheme{SchemeName: localConsts.FriendlyName, SchemeCode: localConsts.Code, SchemeType: localConsts.Code}
+var darkMarkScheme = dtos.SupportedAuthScheme{SchemeName: "Death Eaters", SchemeCode: "dark mark", SchemeType: "magical"}
 
 func TestListAuthDetailsKeys(t *testing.T) {
 	db := initTest(t)
@@ -62,11 +62,14 @@ func TestListAuthDetailsKeys(t *testing.T) {
 	require.Equal(t, 0, len(schemeLocal.Labels))
 
 	// Add in an unsupported scheme
-	db.Insert("auth_scheme_data", map[string]interface{}{
+	_, err = db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme": darkMarkScheme.SchemeCode,
 		"user_key":    "Half-Blood Prince",
 		"user_id":     UserSnape.ID,
+		"auth_type":   darkMarkScheme.SchemeType,
 	})
+
+	require.NoError(t, err)
 	results, err = services.ListAuthDetails(ctx, db, &supportedSchemes)
 	require.NoError(t, err)
 	require.Equal(t, 3, len(results))

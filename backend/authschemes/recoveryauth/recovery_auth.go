@@ -38,6 +38,10 @@ func (RecoveryAuthScheme) Flags() []string {
 	return []string{}
 }
 
+func (RecoveryAuthScheme) Type() string {
+	return constants.Code
+}
+
 func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/generate", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		dr := remux.DissectJSONRequest(r)

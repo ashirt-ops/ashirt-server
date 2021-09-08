@@ -89,6 +89,10 @@ func (OktaAuth) Flags() []string {
 	return []string{}
 }
 
+func (o OktaAuth) Type() string {
+	return o.Name()
+}
+
 func (okta OktaAuth) authSuccess(w http.ResponseWriter, r *http.Request, linking bool) (interface{}, error) {
 	if linking {
 		return authDone(w, r, "/account/authmethods", nil)

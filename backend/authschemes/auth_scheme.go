@@ -27,4 +27,5 @@ type AuthScheme interface {
 	Name() string
 	FriendlyName() string
 	Flags() []string
+	Type() string
 }

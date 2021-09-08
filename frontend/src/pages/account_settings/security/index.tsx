@@ -4,6 +4,7 @@
 import * as React from 'react'
 import AuthContext from 'src/auth_context'
 import {useAuthFrontendComponent} from 'src/authschemes'
+import { SupportedAuthenticationScheme } from 'src/global_types'
 
 export default (props: {
 }) => {
@@ -14,7 +15,8 @@ export default (props: {
     {user.authSchemes.map(authScheme => (
       <AuthSchemeSettings
         key={authScheme.schemeCode}
-        authSchemeCode={authScheme.schemeCode}
+        authSchemeDetails={authScheme.authDetails}
+        authSchemeType={authScheme.schemeType}
         userKey={authScheme.userKey}
       />
     ))}
@@ -22,12 +24,12 @@ export default (props: {
 }
 
 const AuthSchemeSettings = (props: {
-  authSchemeCode: string,
+  authSchemeDetails?: SupportedAuthenticationScheme
+  authSchemeType: string,
   userKey: string,
 }) => {
-  const Settings = useAuthFrontendComponent(props.authSchemeCode, 'Settings')
+  const Settings = useAuthFrontendComponent(props.authSchemeType, 'Settings', props.authSchemeDetails)
   return (
-    // TODO: we should figure out how to get flag info below
-    <Settings userKey={props.userKey} authFlags={[]} />
+    <Settings userKey={props.userKey} authFlags={props.authSchemeDetails?.schemeFlags || []} />
   )
 }

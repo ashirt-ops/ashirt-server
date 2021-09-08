@@ -20,7 +20,7 @@ func initBridge(t *testing.T) authschemes.AShirtAuthBridge {
 	seeding.ApplySeeding(t, seeding.HarryPotterSeedData, db)
 	sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
 	require.NoError(t, err)
-	return authschemes.MakeAuthBridge(db, sessionStore, "local")
+	return authschemes.MakeAuthBridge(db, sessionStore, "local", "local")
 }
 
 func TestReadUserTotpStatus(t *testing.T) {

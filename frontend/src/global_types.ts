@@ -145,8 +145,11 @@ export type UserWithAuth = User & {
 
 export type AuthenticationInfo = {
   userKey: string,
+  schemeName: string | undefined,
   schemeCode: string,
+  schemeType: string,
   lastLogin: Date | null
+  authDetails: SupportedAuthenticationScheme | undefined,
 }
 
 export type UserOwnView = UserWithAuth & {
@@ -189,6 +192,7 @@ export type PaginationResult<T> = PaginationQuery & {
 export type SupportedAuthenticationScheme = {
   schemeName: string,
   schemeCode: string,
+  schemeType: string,
   schemeFlags: Array<string>
 }
 

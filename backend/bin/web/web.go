@@ -4,11 +4,13 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
+	"github.com/theparanoids/ashirt-server/backend/authschemes/oidcauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/oktaauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
 	"github.com/theparanoids/ashirt-server/backend/config"
@@ -19,6 +21,11 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/server"
 	"github.com/theparanoids/ashirt-server/backend/workers"
 )
+
+type SchemeError struct {
+	name string
+	err  error
+}
 
 func main() {
 	err := config.LoadWebConfig()
@@ -45,19 +52,34 @@ func main() {
 	schemes := []authschemes.AuthScheme{
 		recoveryauth.New(config.RecoveryExpiry()),
 	}
-	for _, svc := range config.SupportedAuthServices() {
+	authSchemeNames := config.SupportedAuthServices()
+	schemeErrors := make([]SchemeError, 0, len(authSchemeNames))
+
+	for _, svc := range authSchemeNames {
 		switch svc {
-		case "ashirt":
-			schemes = append(schemes, localauth.LocalAuthScheme{
-				RegistrationEnabled: config.IsRegistrationEnabled(),
-			})
 		case "okta":
 			schemes = append(schemes, oktaauth.NewFromConfig(
 				config.AuthConfigInstance(svc),
 				func(map[string]string) bool {
 					return true
 				}))
+		default:
+			scheme, err := handleAuthType(config.AuthConfigInstance(svc))
+			if err != nil {
+				schemeErrors = append(schemeErrors, SchemeError{svc, err})
+			} else {
+				schemes = append(schemes, scheme)
+			}
 		}
+	}
+
+	if len(schemeErrors) > 0 {
+		for _, schemeError := range schemeErrors {
+			logger.Log("msg", "Unable to load auth scheme. Disabling.",
+				"schemeName", schemeError.name,
+				"error", schemeError.err.Error())
+		}
+		// return fmt.Errorf("Cannot continue with auth scheme failures") // Not sure if we want to just now allow certain schemes if they fail, or outright fail to launch
 	}
 
 	if config.EmailType() != "" {
@@ -79,6 +101,22 @@ func main() {
 	logger.Log("msg", "starting Web server", "port", config.Port())
 	serveErr := http.ListenAndServe(":"+config.Port(), nil)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
+}
+
+func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, error) {
+	appConfig := config.AllAppConfig()
+	if cfg.Type == "oidc" {
+		authScheme, err := oidcauth.New(cfg, &appConfig)
+		return authScheme, err
+	}
+	if cfg.Type == "ashirt" {
+		authScheme := localauth.LocalAuthScheme{
+			RegistrationEnabled: cfg.RegistrationEnabled,
+		}
+		return authScheme, nil
+	}
+
+	return nil, fmt.Errorf("unknown auth type: %v", cfg.Type)
 }
 
 func startEmailServices(db *database.Connection, logger logging.Logger) {
