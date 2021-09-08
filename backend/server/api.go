@@ -21,12 +21,16 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var operationIDRegex = regexp.MustCompile(`\d+`)
 
 func API(db *database.Connection, contentStore contentstore.Store, logger logging.Logger) http.Handler {
 	r := mux.NewRouter()
+	metricRouter := r.PathPrefix("").Subrouter()
+	metricRouter.Handle("/api/metrics", promhttp.Handler())
+
 	r.Use(middleware.LogRequests(logger))
 	r.Use(middleware.AuthenticateAppAndInjectCtx(db))
 
