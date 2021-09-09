@@ -109,7 +109,7 @@ func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, erro
 		authScheme, err := oidcauth.New(cfg, &appConfig)
 		return authScheme, err
 	}
-	if cfg.Type == "ashirt" {
+	if cfg.Name == "ashirt" {
 		authScheme := localauth.LocalAuthScheme{
 			RegistrationEnabled: cfg.RegistrationEnabled,
 		}
