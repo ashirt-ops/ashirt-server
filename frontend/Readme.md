@@ -31,7 +31,7 @@ This project utilizes Typescript 3.5 and React 16.8 to construct a versitle and 
 
 ### Dependencies
 
-* Node 10+
+* Node 12+
   * `npm`
 * Docker / Docker-compose (soft requirement. The frontend can be started locally as needed, though pairs best with an entire system)
 * Various npm dependencies, detailed in `package.json`
