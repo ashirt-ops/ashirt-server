@@ -17,6 +17,7 @@ import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 
 
 // @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
+import SettingsSection from 'src/components/settings_section'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -30,10 +31,30 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
   return (
     <>
       <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
-
+      <SettingsSection title="Operation Overview" width="full-width">
+        <div className={cx('preamble')}>
+          <div >
+            The operation overview gives a birds eye view of evidence being generated over time.
+            This helps give an idea of both progress, as well as the nature of the issues being
+            discoverd.
+          </div>
+          <div className={cx('preamble')}>
+            Tags are grouped by type over a variable slice of time. At the top of the chart are two
+            headings. Clicking into the lower heading will zoom in on that region of time, allowing
+            you to drill down into a particular time to see more precisely when tags were assigned.
+            Clicking on the upper heading will zoom out and provide a bigger picture view.
+          </div>
+        </div>
       {wiredTags.render(tags => {
         if (tags.length == 0) {
-          return <div className={cx('no-content')}>Tags are not being utilized for this operation</div>
+          return (
+            <>
+              <div className={cx('no-content')}>
+                This operation does not have any tagged evidence. Tag existing evidence, or create
+                new evidence with tags to enable this feature.
+              </div>
+            </>
+          )
         }
 
         const { groups, items, firstDate, lastDate, itemRenderer, groupRenderer, timeChangeHandler } = prepTimelineRender(tags)
@@ -71,6 +92,8 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           </>
         )
       })}
+
+      </SettingsSection>
     </>
   )
 }
