@@ -67,8 +67,8 @@ export default (props: {
         </div>
 
         <ButtonGroup>
-          <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
           <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
+          <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
         </ButtonGroup>
       </div>
       {renderModals(helpModal, builderModal)}
