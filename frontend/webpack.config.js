@@ -77,9 +77,19 @@ module.exports = (env, argv) => ({
 
   devServer: {
     historyApiFallback: true,
-    publicPath: "/assets/",
     proxy: {
       '/web': {target: process.env.WEB_BACKEND_ORIGIN},
+    },
+    devMiddleware: {
+      publicPath: "/assets/"
+    },
+    static: {
+      directory: "public"
+    },
+    client: {
+      overlay: {
+        warnings: false
+      }
     },
     headers: {
       // Set the same security headers for local development as in production to catch bugs
