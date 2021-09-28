@@ -12,7 +12,7 @@
     "@types/chai": "^4.2.19",
     "@types/classnames": "^2.3.1",
     "@types/lodash": "^4.14.172",
-    "@types/mocha": "^8.2.2",
+    "@types/mocha": "^9.0.0",
     "@types/react": "^17.0.13",
     "@types/react-dom": "^17.0.1",
     "@types/react-router-dom": "^5.1.7",
