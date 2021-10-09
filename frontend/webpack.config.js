@@ -40,8 +40,11 @@ module.exports = (env, argv) => ({
         },
       }}, 'stylus-loader'],
     }, {
-      test: /\.(svg|png|ttf|woff)/,
+      test: /\.(svg|png)/,
       type: 'asset/inline'
+    }, {
+      test: /\.(ttf|woff)/,
+      type: 'asset/resource'
     }],
   },
 
