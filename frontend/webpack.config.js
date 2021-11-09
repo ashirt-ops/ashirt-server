@@ -40,15 +40,11 @@ module.exports = (env, argv) => ({
         },
       }}, 'stylus-loader'],
     }, {
-      test: /\.(svg|png|ttf|woff)/,
-      use: [
-        {
-          loader: 'file-loader',
-          options: {
-            esModule: false
-          }
-        }
-      ]
+      test: /\.(svg|png)/,
+      type: 'asset/inline'
+    }, {
+      test: /\.(ttf|woff)/,
+      type: 'asset/resource'
     }],
   },
 
