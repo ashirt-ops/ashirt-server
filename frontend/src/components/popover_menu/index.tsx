@@ -36,6 +36,10 @@ export default function PopoverMenu<T>(props: {
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') selectItem()
     else if (e.key === 'Escape') props.onRequestClose()
+    else if (e.key === 'Tab') {
+      props.onRequestClose()
+      return
+    }
     else if (isDown(e)) changeSelectedIndex(1)
     else if (isUp(e)) changeSelectedIndex(-1)
     else if (!e.ctrlKey) return
