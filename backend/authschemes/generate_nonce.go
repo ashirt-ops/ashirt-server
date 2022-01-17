@@ -4,9 +4,9 @@ package authschemes
 // Copyright Okta, Inc, 2015-2018
 
 import (
-	"fmt"
-	"encoding/base64"
 	"crypto/rand"
+	"encoding/base64"
+	"fmt"
 )
 
 func GenerateNonce() (string, error) {
