@@ -48,7 +48,7 @@ func (s *gcpStore) Upload(data io.Reader) (string, error) {
 	if err := wc.Close(); err != nil {
 		return key, backend.WrapError("Unable to close gcp writer", err)
 	}
-	
+
 	// TODO: figure out how to properly do ACL for gcp
 	// acl := s.bucketAccess.Object(key).ACL()
 	// err := acl.Set(ctx, storage., storage.ScopeFullControl)
