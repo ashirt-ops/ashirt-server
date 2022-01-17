@@ -80,13 +80,17 @@ export function DumbComboBox<T>(props: {
   // optional values
   className?: string,
   disabled?: boolean,
+  dontFilterOptions?: boolean
 }) {
   const { onChange } = props
+  const filteredOptions = props.dontFilterOptions
+  ? props.options
+  : filterOptions(props.options, props.inputValue)
 
   return (
     <StatelessComboBox
       label={props.label}
-      options={props.options}
+      options={filteredOptions}
       value={props.value}
       popoverOpen={props.popoverOpen}
       inputValue={props.inputValue}
@@ -124,14 +128,12 @@ function StatelessComboBox<T>(props: {
   className?: string,
   disabled?: boolean,
 }) {
-  const filteredOptions = filterOptions(props.options, props.inputValue)
-
   return (
     <PopoverMenu
       isOpen={props.popoverOpen}
       onRequestClose={props.onRequestPopoverClose}
       onSelect={props.onPopoverSelect}
-      options={filteredOptions}
+      options={props.options}
       renderer={item => item.name}
       noOptionsMessage="No Matches"
     >
