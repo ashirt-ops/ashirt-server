@@ -145,6 +145,7 @@ function StatelessComboBox<T>(props: {
         onKeyDown={props.onInputKeyDown}
         onClick={props.onInputClick}
         value={props.inputValue}
+        disabled={props.disabled}
       />
     </PopoverMenu>
   )
