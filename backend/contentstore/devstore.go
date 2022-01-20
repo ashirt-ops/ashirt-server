@@ -60,3 +60,7 @@ func (d *DevStore) Delete(key string) error {
 	}
 	return err
 }
+
+func (d *DevStore) Name() string {
+	return "local"
+}

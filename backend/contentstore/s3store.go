@@ -75,3 +75,7 @@ func (s *S3Store) Delete(key string) error {
 
 	return nil
 }
+
+func (d *S3Store) Name() string {
+	return "s3"
+}

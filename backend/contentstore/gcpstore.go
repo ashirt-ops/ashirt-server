@@ -12,7 +12,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 )
 
-type gcpStore struct {
+type GCPStore struct {
 	bucketName      string
 	gcpClient       *storage.Client
 	bucketAccess    *storage.BucketHandle
@@ -20,13 +20,13 @@ type gcpStore struct {
 }
 
 // NewGCPStore provides a mechanism to initialize a GCP client
-func NewGCPStore(bucketName string) (*gcpStore, error) {
+func NewGCPStore(bucketName string) (*GCPStore, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, backend.WrapError("Unable to establish an gcp session", err)
 	}
-	return &gcpStore{
+	return &GCPStore{
 		bucketName:      bucketName,
 		gcpClient:       client,
 		bucketAccess:    client.Bucket(bucketName),
@@ -35,7 +35,7 @@ func NewGCPStore(bucketName string) (*gcpStore, error) {
 }
 
 // Upload stores a file in the Google Cloud bucket configured when the gcpStore was created
-func (s *gcpStore) Upload(data io.Reader) (string, error) {
+func (s *GCPStore) Upload(data io.Reader) (string, error) {
 	key := uuid.New().String()
 
 	ctx := context.Background()
@@ -60,7 +60,7 @@ func (s *gcpStore) Upload(data io.Reader) (string, error) {
 }
 
 // Read retrieves the indicated file from Google Cloud
-func (s *gcpStore) Read(key string) (io.Reader, error) {
+func (s *GCPStore) Read(key string) (io.Reader, error) {
 	ctx := context.Background()
 	res, err := s.bucketAccess.Object(key).NewReader(ctx)
 	if err != nil {
@@ -70,7 +70,7 @@ func (s *gcpStore) Read(key string) (io.Reader, error) {
 }
 
 // Delete removes the indicated file from GCP
-func (s *gcpStore) Delete(key string) error {
+func (s *GCPStore) Delete(key string) error {
 	ctx := context.Background()
 	err := s.bucketAccess.Object(key).Delete(ctx)
 
@@ -79,4 +79,8 @@ func (s *gcpStore) Delete(key string) error {
 	}
 
 	return nil
+}
+
+func (s *GCPStore) Name() string {
+	return "gcp"
 }

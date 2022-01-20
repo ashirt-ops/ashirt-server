@@ -79,3 +79,7 @@ func (d *MemStore) Delete(key string) error {
 	d.mutex.Unlock()
 	return nil
 }
+
+func (d *MemStore) Name() string {
+	return "memory"
+}

@@ -17,6 +17,7 @@ type Store interface {
 	Upload(data io.Reader) (string, error)
 	Read(key string) (io.Reader, error)
 	Delete(key string) error
+	Name() string
 }
 
 // ContentKeys stores the location/path of the original content, as well as the thumbnail/preview location
