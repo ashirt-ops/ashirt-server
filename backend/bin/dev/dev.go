@@ -4,18 +4,20 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/oidcauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/oktaauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
 	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
+	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
 	"github.com/theparanoids/ashirt-server/backend/emailservices"
@@ -62,10 +64,16 @@ func tryRunServer(logger logging.Logger) error {
 		}
 	}
 
-	contentStore, err := contentstore.NewDevStore()
+	contentStore, err := confighelpers.ChooseContentStoreType(config.AllStoreConfig())
+	if errors.Is(err, backend.ErrorDeprecated) {
+		logger.Log("msg", "No content store provided")
+		contentStore, err = confighelpers.DefaultDevStore()
+	}
 	if err != nil {
 		return err
 	}
+	logger.Log("msg", "Using Storage", "type", contentStore.Name())
+
 	schemes := []authschemes.AuthScheme{
 		recoveryauth.New(config.RecoveryExpiry()),
 	}
