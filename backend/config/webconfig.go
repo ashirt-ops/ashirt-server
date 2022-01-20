@@ -68,9 +68,9 @@ type AuthInstanceConfig struct {
 }
 
 type ContentStoreConfig struct {
-	Type      string `split_words:"true"`
-	Bucket    string `split_words:"true"`
-	Region    string `split_words:"true"`
+	Type   string `split_words:"true"`
+	Bucket string `split_words:"true"`
+	Region string `split_words:"true"`
 }
 
 var (
