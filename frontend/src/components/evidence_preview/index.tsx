@@ -24,6 +24,8 @@ function getComponent(evidenceType: SupportedEvidenceType) {
       return EvidenceTerminalRecording
     case 'http-request-cycle':
       return EvidenceHttpCycle
+    case 'event':
+      return EvidenceEvent
     case 'none':
     default:
       return null
@@ -77,6 +79,10 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 const EvidenceImage = (props: EvidenceProps) => {
   const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
   return <img src={fullUrl} />
+}
+
+const EvidenceEvent = (_props: EvidenceProps) => {
+  return <div className={cx('event')}></div>
 }
 
 const EvidenceTerminalRecording = (props: EvidenceProps) => {
