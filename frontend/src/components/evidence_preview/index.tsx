@@ -6,11 +6,12 @@ import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
 import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint } from 'src/global_types'
-import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
+import { getEvidenceAsCodeblock, getEvidenceAsString, getEvidenceAsBlob, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
 
 import TerminalPlayer from 'src/components/terminal_player'
+import { CopyBlob, CopyButton, CopyText } from '../text_copiers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -71,12 +72,25 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
 
-  return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
+  return wiredEvidence.render(evi => (
+    <CopyContentOverlay
+      type='text'
+      content={() => Promise.resolve(evi.code)}
+    >
+      <CodeBlockViewer value={evi} />
+    </CopyContentOverlay>
+  ))
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
   const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-  return <img src={fullUrl} />
+  return (
+    <CopyContentOverlay
+      type='blob'
+      content={() => getEvidenceAsBlob(props)}>
+      <img src={fullUrl} />
+    </CopyContentOverlay >
+  )
 }
 
 const EvidenceTerminalRecording = (props: EvidenceProps) => {
@@ -104,13 +118,30 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
     try {
       const log = JSON.parse(evi)
       if (isAHar(log)) {
-        const isActive = props.interactionHint == 'inactive' ? {disableKeyHandler : true} : {}
+        const isActive = props.interactionHint == 'inactive' ? { disableKeyHandler: true } : {}
         return <HarViewer log={log} viewHint={props.viewHint} {...isActive} />
       }
       return <ErrorDisplay title="Corrupted HAR file" err={new Error("unsupported format")} />
     }
     catch (err) {
-      return <ErrorDisplay title="Corrupted HAR file" err={err}/>
+      return <ErrorDisplay title="Corrupted HAR file" err={err} />
     }
   })
+}
+
+const CopyContentOverlay = (props: (CopyBlob | CopyText) & {
+  children?: React.ReactNode,
+}) => {
+  const { children, ...copyProps } = props
+  return (
+    <>
+      {children}
+      <div className={cx('overlay')} onClick={(e) => e.stopPropagation()}>
+        <CopyButton
+          {...copyProps}
+          className={cx('overlay-button')}
+        />
+      </div>
+    </>
+  )
 }
