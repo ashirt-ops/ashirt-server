@@ -21,6 +21,10 @@ export async function xhrText(method: string, path: string, data?: Object|null, 
   return request(res => res.text(), method, path, data, query)
 }
 
+export async function xhrBlob(method: string, path: string, data?: Object | null, query?: QueryObj) {
+  return request(res => res.blob(), method, path, data, query)
+}
+
 async function request(decode: (res: Response) => Promise<any>, method: string, path: string, data?: Object | null, query?: QueryObj) {
   path = '/web' + path
   if (query != null) path += `?${stringifyQuerystring(query)}`

@@ -47,6 +47,13 @@ export async function getEvidenceAsString(i: {
   return await ds.readEvidenceContent(i)
 }
 
+export async function getEvidenceAsBlob(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<Blob> {
+  return await ds.readEvidenceContentAsBlob(i)
+}
+
 export async function createEvidence(i: {
   operationSlug: string,
   description: string,

@@ -2,7 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { DataSource, cacheBust } from '../data_source'
-import { default as req, xhrText as reqText, reqMultipart } from './request_helper'
+import { default as req, xhrText as reqText, xhrBlob as reqBlob, reqMultipart } from './request_helper'
 cacheBust()
 
 export const backendDataSource: DataSource = {
@@ -21,6 +21,7 @@ export const backendDataSource: DataSource = {
   listEvidence: (ids, query) => req('GET', `/operations/${ids.operationSlug}/evidence`, null, { query }),
   createEvidence: (ids, formData) => reqMultipart('POST', `/operations/${ids.operationSlug}/evidence`, formData),
   readEvidenceContent: ids => reqText('GET', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/media`),
+  readEvidenceContentAsBlob: ids => reqBlob('GET', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/media`),
   updateEvidence: (ids, formData) => reqMultipart('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, formData),
   deleteEvidence: (ids, payload) => req('DELETE', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, payload),
   getEvidenceMigrationDifference: (ids, fromOperationSlug) => req('GET', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),
