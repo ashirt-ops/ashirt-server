@@ -180,6 +180,15 @@ const SearchHelpModal = (props: {
   </Modal >
 }
 
+const valuesAsCodeSnippets = (vals: Array<string>) => {
+  return vals.map((v, i) => (
+    <span>
+      <CodeSnippet>{v}</CodeSnippet>
+      {(i + 1) == vals.length ? '' : ', '}
+    </span>
+  ))
+}
+
 const HelpText: Array<FilterDetail> = [
   {
     field: 'tag',
@@ -188,7 +197,7 @@ const HelpText: Array<FilterDetail> = [
         <p>
           Filters the result by requiring that the evidence or finding contain each of the
           specified tag fields.
-          </p>
+        </p>
         <p>Multiple <CodeSnippet>tag</CodeSnippet> fields can be specified.</p>
         <p>To easily create this filter, click on the desired tags next to any evidence.</p>
       </>
@@ -200,7 +209,7 @@ const HelpText: Array<FilterDetail> = [
         <p>
           Filters the result by requiring that the evidence or finding was created by a particular
           user.
-          </p>
+        </p>
         <p>Only one <CodeSnippet>operator</CodeSnippet> field can be specified.</p>
         <p>To easily create this filter, click on the desired username next to any evidence.</p>
       </>
@@ -213,11 +222,11 @@ const HelpText: Array<FilterDetail> = [
           Filters the result by requiring that the evidence to have occurred within a particular
           date range. In the findings timeline, this will require that all evidence for a finding
           be contained with the indicated date range. Only one range can be specified.
-            Date Format: <CodeSnippet>yyyy-mm-dd,yyyy-mm-dd</CodeSnippet> where
-            y, m, and d are year, month and day digits respectively.
-            For example: <CodeSnippet>2020-01-01,2020-01-31</CodeSnippet> covers the entire
-            month of January, 2020.
-          </p>
+          Date Format: <CodeSnippet>yyyy-mm-dd,yyyy-mm-dd</CodeSnippet> where
+          y, m, and d are year, month and day digits respectively.
+          For example: <CodeSnippet>2020-01-01,2020-01-31</CodeSnippet> covers the entire
+          month of January, 2020.
+        </p>
         <p>Only one <CodeSnippet>range</CodeSnippet> field can be specified.</p>
         <p>Click on the calendar next to the Timeline Filter to help specify the date.</p>
       </>
@@ -230,17 +239,17 @@ const HelpText: Array<FilterDetail> = [
           Orders the filter in a particular direction. By default, wiith no filter provided,
           results are ordered by "last evidence first", or an effective reverse-chronological
           order.
-          </p>
+        </p>
         <p>
           Possible values:
-            {" "}<CodeSnippet>asc</CodeSnippet>,
-            {" "}<CodeSnippet>ascending</CodeSnippet> or
-            {" "}<CodeSnippet>chronological</CodeSnippet>
+          {" "}<CodeSnippet>asc</CodeSnippet>,
+          {" "}<CodeSnippet>ascending</CodeSnippet> or
+          {" "}<CodeSnippet>chronological</CodeSnippet>
         </p>
         <p>
           Each of the above values will order the results in a "first-evidence-first", or
           chronological order.
-          </p>
+        </p>
         <p>Only one <CodeSnippet>sort</CodeSnippet> field can be specified.</p>
       </>
   },
@@ -250,15 +259,16 @@ const HelpText: Array<FilterDetail> = [
       <>
         <p>
           Filters the result by finding evidence that either has, or has not been attached to a finding.
-          </p>
+        </p>
         <p>
-          Possible values: <CodeSnippet>true</CodeSnippet>, <CodeSnippet>false</CodeSnippet>
+          Possible values: {" "}
+          {valuesAsCodeSnippets(['true', 'false'])}
         </p>
         <p>
           Provide <CodeSnippet>true</CodeSnippet> to require the evidence has been linked
-            with a finding, or <CodeSnippet>false</CodeSnippet> to require evidence that has
-            not been linked with a finding.
-            {" "}<em>This will only have an effect in the Evidence Timeline.</em>
+          with a finding, or <CodeSnippet>false</CodeSnippet> to require evidence that has
+          not been linked with a finding.
+          {" "}<em>This will only have an effect in the Evidence Timeline.</em>
         </p>
         <p>Only one <CodeSnippet>linked</CodeSnippet> field can be specified.</p>
       </>
@@ -269,9 +279,31 @@ const HelpText: Array<FilterDetail> = [
       <>
         <p>
           Filters the result by requiring a fidning to contain a particular piece of evidence.
-            <em>This will only have an effect in the Findings Timeline.</em>
+          <em>This will only have an effect in the Findings Timeline.</em>
         </p>
         <p>Only one <CodeSnippet>with-evidence</CodeSnippet> field can be specified.</p>
+      </>
+  },
+  {
+    field: 'type',
+    description:
+      <>
+        <p>
+          Filters the result by requiring that the evidence have the matching type as the one
+          specified in the filter.
+          {" "}<em>This will only have an effect in the Evidence Timeline.</em>
+        </p>
+        <p>
+          Possible values: {" "}
+          {
+            valuesAsCodeSnippets([
+              'image', 'codeblock', 'terminal-recording', 'http-request-cycle', 'none'
+            ])
+          }
+        </p>
+        <p>
+        </p>
+        <p>Only one <CodeSnippet>type</CodeSnippet> field can be specified.</p>
       </>
   },
   {
@@ -283,7 +315,7 @@ const HelpText: Array<FilterDetail> = [
           This is typically used to share evidence with other users. While it can be specified
           manually, the preferred method is to click the "Copy Permalink" button
           next to the desired evidence, and share the link as needed.
-          </p>
+        </p>
         <p>Only one <CodeSnippet>uuid</CodeSnippet> field can be specified.</p>
       </>
   },

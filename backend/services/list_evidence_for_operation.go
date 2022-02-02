@@ -115,6 +115,10 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 		sb = sb.Where(eviForOpTagWhereComponent, filters.Tags, len(filters.Tags))
 	}
 
+	if filters.Type != "" {
+		sb = sb.Where(sq.Eq{"evidence.content_type": filters.Type})
+	}
+
 	if filters.Linked != nil {
 		query := "evidence.id"
 		if *filters.Linked {

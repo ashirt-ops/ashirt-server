@@ -13,9 +13,12 @@ export type ComboBoxItem<T> = {
   value: T,
 }
 
-function valueToName<T>(value: T, options: Array<ComboBoxItem<T>>): string {
-  for (let option of options) {
+function valueToName<T>(value: T, options: Array<ComboBoxItem<T>>, nonValueDefault?: T): string {
+  for (const option of options) {
     if (option.value === value) return option.name
+  }
+  for (const option of options) {
+    if (option.value === nonValueDefault) return option.name
   }
   throw Error(`Bad value: ${value}`)
 }
@@ -31,6 +34,7 @@ export default function ComboBox<T>(props: {
   onChange: (newValue: T) => void,
   label: string,
   value: T,
+  nonValueDefault?: T,
   className?: string,
   disabled?: boolean,
 }) {
@@ -40,7 +44,7 @@ export default function ComboBox<T>(props: {
   const filteredOptions = filterOptions(props.options, inputValue)
 
   React.useEffect(() => {
-    setInputValue(valueToName(props.value, props.options))
+    setInputValue(valueToName(props.value, props.options, props.nonValueDefault))
   }, [props.value, props.options])
 
   const onSelect = (item: ComboBoxItem<T>) => {
@@ -56,7 +60,7 @@ export default function ComboBox<T>(props: {
 
   const onRequestClose = () => {
     setDropdownVisible(false)
-    setInputValue(valueToName(props.value, props.options))
+    setInputValue(valueToName(props.value, props.options, props.nonValueDefault))
   }
 
   return (
