@@ -73,6 +73,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, e
 	var err error
 	slugSuffix := ""
 	var attemptedSlug string
+	attemptNumber := 1
 	for {
 		attemptedSlug = i.Slug + slugSuffix
 		userID, err = db.Insert("users", map[string]interface{}{
@@ -87,6 +88,18 @@ func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, e
 				if strings.Contains(err.Error(), "users.unique_email") { // not sure how else to check if this is a duplicate slug vs a duplicate email address
 					return CreateUserOutput{}, backend.WrapError("Unable to insert new user", backend.DatabaseErr(err))
 				}
+
+				if attemptNumber > 5 {
+					return CreateUserOutput{}, backend.WrapError("Unable to create new user after many attempts", backend.DatabaseErr(err))
+				}
+
+				logging.GetSystemLogger().Log(
+					"msg", "Unable to create user with slug; trying alternative",
+					"slug", attemptedSlug,
+					"attempt", attemptNumber,
+					"error", err.Error(),
+				)
+				attemptNumber++
 
 				// an account with this slug already exists, attempt creating it again with a suffix
 				// TODO: There's a possible, but impractical infinite loop here. We need some way to escape this
