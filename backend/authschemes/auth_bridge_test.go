@@ -12,6 +12,7 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/session"
 	"github.com/theparanoids/ashirt-server/backend/workers"
@@ -251,6 +252,11 @@ func TestFindUserAuthsByEmail(t *testing.T) {
 
 func initBridgeTest(t *testing.T) (*database.Connection, *session.Store, authschemes.AShirtAuthBridge) {
 	db := database.NewTestConnection(t, "authschemes-test-db")
+
+	if logging.GetSystemLogger() == nil {
+		logging.SetupStdoutLogging()
+	}
+
 	sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
 	require.NoError(t, err)
 	return db, sessionStore, authschemes.MakeAuthBridge(db, sessionStore, "test", "test-type")
