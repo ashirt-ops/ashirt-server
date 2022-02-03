@@ -56,7 +56,7 @@
     "react-day-picker": "^7.4.10",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.5.1",
-    "react-markdown": "^5.0.3",
+    "react-markdown": "^7.1.0",
     "react-router-dom": "^5.1.2",
     "xterm": "^4.16.0"
   }
