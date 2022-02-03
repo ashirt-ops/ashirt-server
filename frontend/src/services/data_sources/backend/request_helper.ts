@@ -1,7 +1,9 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import {stringify as stringifyQuerystring, ParsedUrlQueryInput as QueryObj} from 'querystring'
+import {
+  stringify as stringifyQuerystring,
+} from 'query-string'
 
 var CSRF_TOKEN: string | null = null
 
@@ -13,11 +15,13 @@ class HttpError extends Error {
   }
 }
 
-export default async function xhr(method: string, path: string, data?: Object|null, query?: QueryObj) {
+type QueryObj = Record<string, any>
+
+export default async function xhr(method: string, path: string, data?: Object | null, query?: QueryObj) {
   return request(res => res.json(), method, path, data, query)
 }
 
-export async function xhrText(method: string, path: string, data?: Object|null, query?: QueryObj) {
+export async function xhrText(method: string, path: string, data?: Object | null, query?: QueryObj) {
   return request(res => res.text(), method, path, data, query)
 }
 
@@ -48,7 +52,7 @@ async function request(decode: (res: Response) => Promise<any>, method: string, 
 export async function reqMultipart(method: string, path: string, body: FormData) {
   if (CSRF_TOKEN == null) throw Error('Non-GET request initiated before CSRF Token populated')
   path = '/web' + path
-  const headers = {'X-CSRF-Token': CSRF_TOKEN}
+  const headers = { 'X-CSRF-Token': CSRF_TOKEN }
   const res = await fetch(path, { method, body, headers })
   const responseJson = await res.json()
   if (res.status < 200 || res.status >= 300 || (responseJson && responseJson.error)) {
