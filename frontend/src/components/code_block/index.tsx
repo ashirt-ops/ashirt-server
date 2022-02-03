@@ -29,6 +29,7 @@ export const CodeBlockEditor = (props: {
           value={props.value.language}
           onChange={language => props.onChange({...props.value, language})}
           disabled={props.disabled}
+          nonValueDefault=""
         />
         <Input
           label="Source"

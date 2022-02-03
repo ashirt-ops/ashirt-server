@@ -24,6 +24,7 @@ type TimelineFilters struct {
 	UUID             string
 	Text             []string
 	Tags             []string
+	Type             string
 	Operator         string
 	DateRange        *DateRange
 	WithEvidenceUUID string
@@ -89,7 +90,12 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 			if direction == "asc" || direction == "chronological" || direction == "ascending" {
 				timelineFilters.SortAsc = true
 			}
-
+		case "type":
+			if len(v) != 1 {
+				errReason := "Only one evidence type can be specified"
+				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
+			}
+			timelineFilters.Type = v[0]
 		default:
 			errReason := fmt.Sprintf("Unknown filter key '%s'", k)
 			return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)

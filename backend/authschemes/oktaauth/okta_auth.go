@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	verifier "github.com/okta/okta-jwt-verifier-golang"
-	"github.com/okta/okta-jwt-verifier-golang/utils"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/config"
@@ -127,7 +126,7 @@ func (okta OktaAuth) makeUserProfile(profile map[string]string) authschemes.User
 }
 
 func (okta OktaAuth) redirectLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, mode string) {
-	nonce, _ := utils.GenerateNonce()
+	nonce, _ := authschemes.GenerateNonce()
 	stateChallenge := csrf.Token(r)
 	bridge.SetAuthSchemeSession(w, r, &preLoginAuthSession{
 		Nonce:              nonce,
