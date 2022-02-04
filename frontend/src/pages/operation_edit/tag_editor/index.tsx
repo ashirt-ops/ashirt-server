@@ -33,32 +33,49 @@ const TagTable = (props: {
     <DeleteTagModal {...modalProps} operationSlug={props.operationSlug} onDeleted={props.onUpdate} />
   ))
 
-  // React has a special meaning for passing functions into useState, so re-wrapping the function to
-  // simply store the desired sorting function (we do the same with the setSortFunc value)
-  const [sortFunc, setSortFunc] = React.useState<compareableFunc>(() => sortNone)
+  const [tagTableState, dispatch] = React.useReducer(tagTableReducer, TagTableInitialState)
 
-  const [columns, setColumns] = React.useState<Array<ColumnData & { compareVia: compareableFunc }>>([
+  const baseColumns = [
     { title: '', label: 'Tag', clickable: true, compareVia: sortTags },
     { title: '', label: '# Evidence Attached To', clickable: true, compareVia: sortNums },
     { title: '', label: 'Actions', compareVia: sortNone },
-  ])
+  ]
 
   const updateColumnSorting = (index: number) => {
     const sortDirections: Array<{ compare: compareableFunc, dir: SortDirection }> = [
-      { dir: SortAsc, compare: columns[index].compareVia },
-      { dir: SortDesc, compare: (a, b) => columns[index].compareVia(b, a) },
+      { dir: SortAsc, compare: baseColumns[index].compareVia },
+      { dir: SortDesc, compare: (a, b) => baseColumns[index].compareVia(b, a) },
       { dir: undefined, compare: sortNone }
     ]
-    const matchIndex = (sortDirections.findIndex(x => x.dir == columns[index].sortDirection) + 1) % sortDirections.length
-    setColumns(columns.map((col, idx) => ({ ...col, sortDirection: (idx == index) ? sortDirections[matchIndex].dir : undefined })))
-    setSortFunc(() => sortDirections[matchIndex].compare)
+    const matchIndex = index != tagTableState.sortColIndex
+      ? 0
+      : (sortDirections.findIndex(x => x.dir == tagTableState.sortDir) + 1) % sortDirections.length
+
+    const sortDirIndex = sortDirections[matchIndex]
+
+    dispatch({
+      type: 'sort-column',
+      sortFunc: sortDirIndex.compare,
+      sortColIndex: index,
+      sortDir: sortDirIndex.dir
+    })
   }
 
+  const sortedTags = [...props.tags].sort(tagTableState.sortFunc)
   return <>
-    <Table columns={columns} onColumnClicked={updateColumnSorting}>
-      {[...props.tags].sort(sortFunc).map(tag => (
+    <Table columns={baseColumns.map((col, idx) => ({
+      ...col,
+      sortDirection: (idx == tagTableState.sortColIndex ? tagTableState.sortDir : undefined)
+    }))} onColumnClicked={updateColumnSorting}>
+      {sortedTags.map(tag => (
         <tr key={tag.name}>
-          <td><Tag name={tag.name} color={tag.colorName} onClick={() => history.push(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)} /></td>
+          <td>
+            <Tag
+              name={tag.name}
+              color={tag.colorName}
+              onClick={() => history.push(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)}
+            />
+          </td>
           <td>{tag.evidenceCount}</td>
           <td>
             <ButtonGroup>
@@ -91,3 +108,35 @@ export default (props: {
     </SettingsSection>
   )
 }
+
+const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTableState => {
+  if (action.type == 'sort-column') {
+    return {
+      ...state,
+      ...action
+    }
+  }
+  return state
+}
+
+type TagTableState = {
+  sortFunc: compareableFunc
+  sortDir: SortDirection
+  sortColIndex: number
+}
+
+const TagTableInitialState = {
+  sortFunc: sortNone,
+  sortDir: undefined,
+  sortColIndex: 0
+}
+
+type TagTableSortColumn = {
+  type: 'sort-column'
+  sortFunc: compareableFunc
+  sortColIndex: number
+  sortDir: SortDirection
+}
+
+type TagTableAction =
+  | TagTableSortColumn
