@@ -2,7 +2,9 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { chunk } from 'lodash'
 import SettingsSection from 'src/components/settings_section'
+import { StandardPager } from 'src/components/paging'
 import { default as Table, SortAsc, SortDesc, SortDirection, ColumnData } from 'src/components/table'
 import Tag from 'src/components/tag'
 import { DeleteTagModal, EditTagModal } from './modals'
@@ -62,12 +64,14 @@ const TagTable = (props: {
   }
 
   const sortedTags = [...props.tags].sort(tagTableState.sortFunc)
+  const paginatedTags = chunk(sortedTags, 10)
+
   return <>
     <Table columns={baseColumns.map((col, idx) => ({
       ...col,
       sortDirection: (idx == tagTableState.sortColIndex ? tagTableState.sortDir : undefined)
     }))} onColumnClicked={updateColumnSorting}>
-      {sortedTags.map(tag => (
+      {paginatedTags[tagTableState.page-1].map(tag => (
         <tr key={tag.name}>
           <td>
             <Tag
@@ -86,6 +90,11 @@ const TagTable = (props: {
         </tr>
       ))}
     </Table>
+    <StandardPager
+      page={tagTableState.page}
+      onPageChange={pageNum => dispatch({ type: 'page-change', newPage: pageNum })}
+      maxPages={paginatedTags.length}
+    />
 
     {renderModals(editTagModal, deleteTagModal)}
   </>
@@ -110,6 +119,9 @@ export default (props: {
 }
 
 const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTableState => {
+  if (action.type == 'page-change') {
+    return { ...state, page: action.newPage }
+  }
   if (action.type == 'sort-column') {
     return {
       ...state,
@@ -120,12 +132,14 @@ const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTable
 }
 
 type TagTableState = {
+  page: number
   sortFunc: compareableFunc
   sortDir: SortDirection
   sortColIndex: number
 }
 
 const TagTableInitialState = {
+  page: 1,
   sortFunc: sortNone,
   sortDir: undefined,
   sortColIndex: 0
@@ -138,5 +152,11 @@ type TagTableSortColumn = {
   sortDir: SortDirection
 }
 
+type TagTableUpdatePage = {
+  type: 'page-change'
+  newPage: number
+}
+
 type TagTableAction =
   | TagTableSortColumn
+  | TagTableUpdatePage
