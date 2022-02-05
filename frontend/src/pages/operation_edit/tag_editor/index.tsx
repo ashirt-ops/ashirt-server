@@ -2,6 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
 import { chunk } from 'lodash'
 import { TagWithUsage } from 'src/global_types'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
@@ -17,6 +18,8 @@ import { DeleteTagModal, EditTagModal } from './modals'
 
 // @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
+
+const cx = classnames.bind(require('./stylesheet'))
 
 type compareableFunc = (l: unknown, r: unknown) => number
 
