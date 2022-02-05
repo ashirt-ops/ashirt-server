@@ -38,25 +38,26 @@ func NewGCPStore(bucketName string) (*GCPStore, error) {
 func (s *GCPStore) Upload(data io.Reader) (string, error) {
 	key := uuid.New().String()
 
+	err := s.UploadWithName(key, data)
+
+	return key, err
+}
+
+// UploadWithName is a test/dev helper that places a file on Google Cloud with a given name
+// This is not intended for general use.
+func (s *GCPStore) UploadWithName(key string, data io.Reader) error {
 	ctx := context.Background()
 	wc := s.bucketAccess.Object(key).NewWriter(ctx)
 
 	if _, err := io.Copy(wc, data); err != nil {
-		return key, backend.WrapError("Upload to gcp failed", err)
+		return backend.WrapError("Upload to gcp failed", err)
 	}
 
 	if err := wc.Close(); err != nil {
-		return key, backend.WrapError("Unable to close gcp writer", err)
+		return backend.WrapError("Unable to close gcp writer", err)
 	}
 
-	// TODO: figure out how to properly do ACL for gcp
-	// acl := s.bucketAccess.Object(key).ACL()
-	// err := acl.Set(ctx, storage., storage.ScopeFullControl)
-	// if err != nil {
-	// 	return key, backend.WrapError("Unable to set GCP ACLs", err)
-	// }
-
-	return key, nil
+	return nil
 }
 
 // Read retrieves the indicated file from Google Cloud
