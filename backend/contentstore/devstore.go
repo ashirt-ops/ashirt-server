@@ -4,8 +4,8 @@
 package contentstore
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"path"
