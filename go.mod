@@ -19,7 +19,6 @@ require (
 	github.com/jonboulle/clockwork v0.2.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/okta/okta-jwt-verifier-golang v1.1.2
 	github.com/pquerna/otp v1.3.0
 	github.com/prometheus/client_golang v1.12.1
 	github.com/rubenv/sql-migrate v0.0.0-20200119084958-8794cecc920c
