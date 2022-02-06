@@ -4,6 +4,7 @@
 package contentstore
 
 import (
+	"fmt"
 	"bufio"
 	"io"
 	"os"
@@ -42,6 +43,11 @@ func (d *DevStore) Upload(data io.Reader) (string, error) {
 		return "", backend.WrapError("Unable upload to DevStore", err)
 	}
 	return path.Base(file.Name()), nil
+}
+
+// UploadWithName is unsupported for the devstore.
+func (d *DevStore) UploadWithName(key string, data io.Reader) error {
+	return fmt.Errorf("UploadWithName is Unsupported")
 }
 
 func (d *DevStore) Read(key string) (io.Reader, error) {

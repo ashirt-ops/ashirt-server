@@ -17,12 +17,15 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
+	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
 	"github.com/theparanoids/ashirt-server/backend/emailservices"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server"
 	"github.com/theparanoids/ashirt-server/backend/workers"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 type SchemeError struct {
@@ -55,12 +58,14 @@ func tryRunServer(logger logging.Logger) error {
 		return err
 	}
 
+	seedFiles := false
 	if seeded, err := seeding.IsSeeded(db); !seeded && err == nil {
 		logger.Log("msg", "applying db seeding")
 		err := seeding.HarryPotterSeedData.ApplyTo(db)
 		if err != nil {
 			return err
 		}
+		seedFiles = true
 	}
 
 	contentStore, err := confighelpers.ChooseContentStoreType(config.AllStoreConfig())
@@ -72,6 +77,13 @@ func tryRunServer(logger logging.Logger) error {
 		return err
 	}
 	logger.Log("msg", "Using Storage", "type", contentStore.Name())
+
+	if seedFiles {
+		logger.Log("msg", "Adding files to storage")
+		if contentStore.Name() != "local" {
+			seedEvidenceFiles(db, contentStore, logger)
+		}
+	}
 
 	schemes := []authschemes.AuthScheme{
 		recoveryauth.New(config.RecoveryExpiry()),
@@ -158,5 +170,42 @@ func startEmailServices(db *database.Connection, logger logging.Logger) {
 		emailLogger.Log("msg", "Staring emailer")
 		emailWorker := workers.MakeEmailWorker(db, emailServicer, logging.With(logger, "service", "email-worker"))
 		emailWorker.Start()
+	}
+}
+
+func seedEvidenceFiles(db *database.Connection, dstStore contentstore.Store, logger logging.Logger) {
+	readStore, err := confighelpers.DefaultDevStore()
+	if err != nil {
+		panic("Cannot create temporary devstore for copying evidence")
+	}
+
+	type evidence struct {
+		FullKey  string `db:"full_image_key"`
+		ThumbKey string `db:"thumb_image_key"`
+	}
+	var evidenceData []evidence
+	err = db.Select(&evidenceData, sq.Select(
+		"full_image_key", "thumb_image_key").
+		From("evidence").
+		Where(sq.NotEq{"content_type": "none"}),
+	)
+
+	if err != nil {
+		panic("Cannot fetch evidence")
+	}
+
+	evidenceList := map[string]bool{}
+	for _, evidenceItem := range evidenceData {
+		evidenceList[evidenceItem.FullKey] = true
+		evidenceList[evidenceItem.ThumbKey] = true
+	}
+
+	for k := range evidenceList {
+		_, foundErr := dstStore.Read(k)
+		if foundErr != nil {
+			logger.Log("msg", "Moving content", "key", k)
+			data, _ := readStore.Read(k)
+			dstStore.UploadWithName(k, data)
+		}
 	}
 }
