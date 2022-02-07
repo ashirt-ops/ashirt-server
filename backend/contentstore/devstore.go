@@ -5,6 +5,7 @@ package contentstore
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -44,6 +45,11 @@ func (d *DevStore) Upload(data io.Reader) (string, error) {
 	return path.Base(file.Name()), nil
 }
 
+// UploadWithName is unsupported for the devstore.
+func (d *DevStore) UploadWithName(key string, data io.Reader) error {
+	return fmt.Errorf("UploadWithName is Unsupported")
+}
+
 func (d *DevStore) Read(key string) (io.Reader, error) {
 	reader, err := os.Open(path.Join(d.dir, path.Clean(key)))
 	if err != nil {
@@ -59,4 +65,8 @@ func (d *DevStore) Delete(key string) error {
 		return backend.WrapError("Unable to delete file from DevStore", err)
 	}
 	return err
+}
+
+func (d *DevStore) Name() string {
+	return "local"
 }

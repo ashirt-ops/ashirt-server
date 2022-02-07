@@ -46,7 +46,6 @@ func (d *MemStore) Upload(data io.Reader) (key string, err error) {
 // can allow for re-writing/replacing data if names are not unique
 //
 // Note: to avoid overwriting random keys, DO NOT use uuids as they key
-// Note 2: This is NOT part of the standard ContentStore interface
 func (d *MemStore) UploadWithName(key string, data io.Reader) error {
 	b, err := io.ReadAll(data)
 	if err != nil {
@@ -78,4 +77,8 @@ func (d *MemStore) Delete(key string) error {
 	delete(d.content, key)
 	d.mutex.Unlock()
 	return nil
+}
+
+func (d *MemStore) Name() string {
+	return "memory"
 }

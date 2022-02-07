@@ -36,6 +36,14 @@ func NewS3Store(bucketName string, region string) (*S3Store, error) {
 func (s *S3Store) Upload(data io.Reader) (string, error) {
 	key := uuid.New().String()
 
+	err := s.UploadWithName(key, data)
+
+	return key, err
+}
+
+// UploadWithName is a test/dev helper that places a file on S3 with a given name
+// This is not intended for general use.
+func (s *S3Store) UploadWithName(key string, data io.Reader) error {
 	_, err := s.s3Client.PutObject(&s3.PutObjectInput{
 		ACL:    aws.String("bucket-owner-full-control"),
 		Body:   aws.ReadSeekCloser(data),
@@ -44,10 +52,10 @@ func (s *S3Store) Upload(data io.Reader) (string, error) {
 	})
 
 	if err != nil {
-		return key, backend.WrapError("Upload to s3 failed", err)
+		return backend.WrapError("Upload to s3 failed", err)
 	}
 
-	return key, nil
+	return nil
 }
 
 // Read retrieves the indicated file from Amazon S3
@@ -74,4 +82,8 @@ func (s *S3Store) Delete(key string) error {
 	}
 
 	return nil
+}
+
+func (d *S3Store) Name() string {
+	return "s3"
 }
