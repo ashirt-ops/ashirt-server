@@ -23,8 +23,25 @@ Configuration is handled entirely via environment variables. To that end, here a
     * MySQL connection string
   * `APP_IMGSTORE_BUCKET_NAME`
     * Assumes Amazon S3 storage location
+    * Deprecated. Use the new `STORE` prefixed configuration
   * `APP_IMGSTORE_REGION`
     * Amazon S3 region (e.g. us-west-1)
+    * Deprecated. Use the new `STORE` prefixed configuration
+  * `STORE_*`-prefixed configuration
+    * This captures the configuration details for your ASHIRT storage. Different services require different configuration, so this area captures all possible fields. Their specific use is detailed below. More details on how to use content store can be found [in Storage](#storage)
+      * `STORE_TYPE`
+        * Required for all stores
+        * Valid values: `file`, `s3`, `gcp`, `memory`, `_` (the empty string)
+        * `file` and `memory` are used for local development and testing respectively. These are not recommended for a real deployment
+        * `s3` connects to an AWS S3 bucket. See [below](#aws-s3) for more details
+        * `gcp` connects to a Google Cloud Platform Cloud Storage bucket. See [below](#google-cloud-platform-cloud-storage) for more details
+        * The empty string is technically supported, but acts as a fallback to legacy storage (i.e. S3 storage, configured via `APP_IMGSTORE_BUCKET_NAME` and `APP_IMGSTORE_REGION`).
+      * `STORE_BUCKET`
+        * The cloud provider bucket where the files will be stored
+        * Used with `s3` and `gcp` deployments
+      * `STORE_REGION`
+        * The cloud provider region where the files will be stored
+        * Used with `s3` deployments
   * `APP_CSRF_AUTH_KEY`
     * The actual authorization key
     * Web Only
@@ -331,6 +348,43 @@ To remove the one-time password:
 2. Choose `Edit User`, and navigate to `Authentication Methods`
 3. Find the `local` authentication scheme, and under Actions, choose `Delete`
 
+### Storage
+
+The AShirt service stores all content provided to one of a few different locations. Only one of these storage locations can be active at a time. Additionally, there is no support for migrating data between storage providers.
+
+#### AWS S3
+
+To use S3, configure your deployment as follows:
+
+```sh
+STORE_TYPE: s3
+STORE_BUCKET: my-demo-ashirt-bucket
+STORE_REGION: any-s3-region (e.g. us-west-2)
+```
+
+##### AWS Credentials
+
+The underlying AWS library is responsible for gathering up credentials. See this [AWS configuration guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html) for details on setting up your AWS access.
+
+#### Google Cloud Platform (Cloud Storage)
+
+To use GCP, configure your deployment as follows:
+
+```sh
+STORE_TYPE: gcp
+STORE_BUCKET: my-demo-ashirt-bucket
+```
+
+#### Local files
+
+If needed, this application can also host files locally to the server. This is intended for development only.
+
+Don't use this, but if you must, you can figure this as:
+
+```sh
+STORE_TYPE: local
+```
+
 ### API Keys
 
 As mentioned above, other services can iteract with the system, under the guise of some registered user, without requiring the user to login while using the tool. To do this, a user must first create an API key pair, and then associate these keys with the external tool (e.g. screenshot client).
@@ -357,7 +411,9 @@ This project has been verified to build and run on Linux and MacOS X. Windows ma
 * MySQL 8
   * This is started as part of the docker-compose script (meaning you won't actually need mysql locally), but all queries are targeted against this database system.
 * Docker / Docker-compose
-* Amazon S3 access (for production -- development versions use the `/tmp` directory)
+* Typical deployments will likely require one of the following
+  * Amazon S3 access
+  * Google Cloud Provider with a Cloud Storage bucket
 
 ### Buliding
 

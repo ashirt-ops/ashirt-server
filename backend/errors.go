@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+var (
+	ErrorDeprecated error = errors.New("warning: deprecated")
+)
+
 // HTTPError is a structure for communicating access/availability errors using a common format.
 // Typically, users should opt for a pre-created error, rather than generate their own error.
 //
@@ -172,4 +176,8 @@ func FirstError(errs ...error) error {
 		}
 	}
 	return nil
+}
+
+func DeprecationWarning(message string) error {
+	return WrapError(message, ErrorDeprecated)
 }

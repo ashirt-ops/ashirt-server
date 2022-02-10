@@ -58,11 +58,18 @@ type AuthInstanceConfig struct {
 	RegistrationEnabled   bool   `ignored:"true"`
 }
 
+type ContentStoreConfig struct {
+	Type   string `split_words:"true"`
+	Bucket string `split_words:"true"`
+	Region string `split_words:"true"`
+}
+
 var (
 	app   WebConfig
 	db    DBConfig
 	auth  AuthConfig
 	email EmailConfig
+	store ContentStoreConfig
 )
 
 // LoadConfig loads all of the environment configuration specified in environment variables
@@ -87,6 +94,7 @@ func LoadWebConfig() error {
 		loadDBConfig,
 		loadAuthConfig,
 		loadEmailConfig,
+		loadStoreConfig,
 	})
 }
 
@@ -111,6 +119,14 @@ func loadDBConfig() error {
 	config := DBConfig{}
 	err := envconfig.Process("DB", &config)
 	db = config
+
+	return err
+}
+
+func loadStoreConfig() error {
+	config := ContentStoreConfig{}
+	err := envconfig.Process("store", &config)
+	store = config
 
 	return err
 }
@@ -174,7 +190,7 @@ func AuthConfigInstance(name string) AuthInstanceConfig {
 			RegistrationEnabled: auth.AuthConfigs[name].RegistrationEnabled,
 		}
 	}
-	v, _ := auth.AuthConfigs[name]
+	v := auth.AuthConfigs[name]
 	return v
 }
 
@@ -220,4 +236,20 @@ func FrontendIndexURL() string {
 
 func AllAppConfig() WebConfig {
 	return app
+}
+
+func AllStoreConfig() ContentStoreConfig {
+	return store
+}
+
+func StoreType() string {
+	return store.Type
+}
+
+func StoreBucket() string {
+	return store.Bucket
+}
+
+func StoreRegion() string {
+	return store.Region
 }

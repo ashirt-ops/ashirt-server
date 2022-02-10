@@ -4,10 +4,12 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
+	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server"
@@ -30,7 +32,11 @@ func main() {
 		logging.Fatal(logger, "msg", "schema read error", "error", err)
 	}
 
-	contentStore, err := contentstore.NewS3Store(config.ImageStoreBucketName(), config.ImageStoreRegion())
+	contentStore, err := confighelpers.ChooseContentStoreType(config.AllStoreConfig())
+	if errors.Is(err, backend.ErrorDeprecated) {
+		logger.Log("msg", "No content store provided")
+		contentStore, err = confighelpers.DefaultS3Store()
+	}
 	if err != nil {
 		logging.Fatal(logger, "msg", "store setup error", "error", err)
 	}
