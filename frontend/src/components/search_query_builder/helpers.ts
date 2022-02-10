@@ -4,7 +4,7 @@
 import * as dateFns from 'date-fns'
 
 import { parseQuery, parseDateRangeString } from 'src/helpers'
-import { Tag } from 'src/global_types'
+import { SupportedEvidenceType, Tag } from 'src/global_types'
 
 export type SearchOptions = {
   text: string,
@@ -12,6 +12,7 @@ export type SearchOptions = {
   uuid?: string,
   tags?: Array<Tag>,
   operator?: string,
+  type?: SupportedEvidenceType,
   dateRange?: [Date, Date],
   hasLink?: boolean,
   withEvidenceUuid?: string,
@@ -33,6 +34,7 @@ export const stringifySearch = (searchOpts: SearchOptions) => {
     searchOpts.dateRange ? `range:${dateToRange(searchOpts.dateRange)}` : '',
     (searchOpts.hasLink != undefined) ? `linked:${searchOpts.hasLink}` : '',
     searchOpts.sortAsc ? 'sort:asc' : '',
+    searchOpts.type ? `type:${searchOpts.type}` : '',
     searchOpts.withEvidenceUuid ? `with-evidence:${searchOpts.withEvidenceUuid}` : '',
     searchOpts.uuid ? `uuid:${searchOpts.uuid}` : '',
   ])
@@ -65,6 +67,9 @@ export const stringToSearch = (searchText: string, allTags: Array<Tag> = []) => 
       if (range) {
         opts.dateRange = range
       }
+    }
+    else if (key == 'type') {
+      opts.type = values[0] as SupportedEvidenceType
     }
     else if (key == 'linked') {
       const interpretedVal = values[0].toLowerCase().trim()

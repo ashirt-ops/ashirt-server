@@ -2,21 +2,28 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
+import { chunk } from 'lodash'
+import { TagWithUsage } from 'src/global_types'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
+import { getTags } from 'src/services'
+
 import SettingsSection from 'src/components/settings_section'
-import { default as Table, SortAsc, SortDesc, SortDirection, ColumnData } from 'src/components/table'
+import { StandardPager } from 'src/components/paging'
+import { default as Table, SortAsc, SortDesc, SortDirection } from 'src/components/table'
+import Input from 'src/components/input'
+import { default as Button, ButtonGroup } from 'src/components/button'
 import Tag from 'src/components/tag'
 import { DeleteTagModal, EditTagModal } from './modals'
-import { TagWithUsage } from 'src/global_types'
-import { default as Button, ButtonGroup } from 'src/components/button'
-import { getTags } from 'src/services'
-import { useWiredData, useModal, renderModals } from 'src/helpers'
 
 // @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
 
-type compareableFunc = (l: any, r: any) => number
+const cx = classnames.bind(require('./stylesheet'))
 
-const sortNone: compareableFunc = (a: any, b: any) => 0
+type compareableFunc = (l: unknown, r: unknown) => number
+
+const sortNone: compareableFunc = (a: unknown, b: unknown) => 0
 const sortNums: compareableFunc = (a: TagWithUsage, b: TagWithUsage) => a.evidenceCount - b.evidenceCount
 const sortTags: compareableFunc = (a: TagWithUsage, b: TagWithUsage) => a.name.localeCompare(b.name)
 
@@ -33,42 +40,82 @@ const TagTable = (props: {
     <DeleteTagModal {...modalProps} operationSlug={props.operationSlug} onDeleted={props.onUpdate} />
   ))
 
-  // React has a special meaning for passing functions into useState, so re-wrapping the function to
-  // simply store the desired sorting function (we do the same with the setSortFunc value)
-  const [sortFunc, setSortFunc] = React.useState<compareableFunc>(() => sortNone)
+  const [tagTableState, dispatch] = React.useReducer(tagTableReducer, TagTableInitialState)
 
-  const [columns, setColumns] = React.useState<Array<ColumnData & { compareVia: compareableFunc }>>([
+  const baseColumns = [
     { title: '', label: 'Tag', clickable: true, compareVia: sortTags },
     { title: '', label: '# Evidence Attached To', clickable: true, compareVia: sortNums },
     { title: '', label: 'Actions', compareVia: sortNone },
-  ])
+  ]
 
   const updateColumnSorting = (index: number) => {
     const sortDirections: Array<{ compare: compareableFunc, dir: SortDirection }> = [
-      { dir: SortAsc, compare: columns[index].compareVia },
-      { dir: SortDesc, compare: (a, b) => columns[index].compareVia(b, a) },
+      { dir: SortAsc, compare: baseColumns[index].compareVia },
+      { dir: SortDesc, compare: (a, b) => baseColumns[index].compareVia(b, a) },
       { dir: undefined, compare: sortNone }
     ]
-    const matchIndex = (sortDirections.findIndex(x => x.dir == columns[index].sortDirection) + 1) % sortDirections.length
-    setColumns(columns.map((col, idx) => ({ ...col, sortDirection: (idx == index) ? sortDirections[matchIndex].dir : undefined })))
-    setSortFunc(() => sortDirections[matchIndex].compare)
+    const matchIndex = index != tagTableState.sortColIndex
+      ? 0
+      : (sortDirections.findIndex(x => x.dir == tagTableState.sortDir) + 1) % sortDirections.length
+
+    const sortDirIndex = sortDirections[matchIndex]
+
+    dispatch({
+      type: 'sort-column',
+      sortFunc: sortDirIndex.compare,
+      sortColIndex: index,
+      sortDir: sortDirIndex.dir
+    })
   }
 
+  const sortedTags = props.tags
+    .filter(tag => tag.name.toLowerCase().includes(tagTableState.filterText))
+    .sort(tagTableState.sortFunc)
+  const paginatedTags = chunk(sortedTags, 10)
+
   return <>
-    <Table columns={columns} onColumnClicked={updateColumnSorting}>
-      {[...props.tags].sort(sortFunc).map(tag => (
-        <tr key={tag.name}>
-          <td><Tag name={tag.name} color={tag.colorName} onClick={() => history.push(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)} /></td>
-          <td>{tag.evidenceCount}</td>
-          <td>
-            <ButtonGroup>
-              <Button small onClick={() => editTagModal.show({ tag })}>Edit</Button>
-              <Button small onClick={() => deleteTagModal.show({ tag })}>Delete</Button>
-            </ButtonGroup>
-          </td>
-        </tr>
-      ))}
+    <Input
+      placeholder={"Filter Tags..."}
+      value={tagTableState.filterText}
+      onChange={(val) => dispatch({ type: 'filter-text-change', filterText: val })}
+    />
+    <Table className={cx('table')} columns={baseColumns.map((col, idx) => ({
+      ...col,
+      sortDirection: (idx == tagTableState.sortColIndex ? tagTableState.sortDir : undefined)
+    }))} onColumnClicked={updateColumnSorting}>
+      {
+        paginatedTags.length == 0
+          ? (
+            <tr>
+              <td colSpan={3} style={{textAlign: 'center'}}>
+                No Matching Tags
+              </td>
+            </tr>)
+          : (paginatedTags[tagTableState.page - 1] ?? []).map(tag => (
+            <tr key={tag.name}>
+              <td>
+                <Tag
+                  name={tag.name}
+                  color={tag.colorName}
+                  onClick={() => history.push(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)}
+                />
+              </td>
+              <td>{tag.evidenceCount}</td>
+              <td>
+                <ButtonGroup>
+                  <Button small onClick={() => editTagModal.show({ tag })}>Edit</Button>
+                  <Button small onClick={() => deleteTagModal.show({ tag })}>Delete</Button>
+                </ButtonGroup>
+              </td>
+            </tr>
+          ))
+      }
     </Table>
+    <StandardPager
+      page={tagTableState.page}
+      onPageChange={pageNum => dispatch({ type: 'page-change', newPage: pageNum })}
+      maxPages={paginatedTags.length}
+    />
 
     {renderModals(editTagModal, deleteTagModal)}
   </>
@@ -91,3 +138,61 @@ export default (props: {
     </SettingsSection>
   )
 }
+
+const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTableState => {
+  if (action.type == 'page-change') {
+    return { ...state, page: action.newPage }
+  }
+  if (action.type == 'sort-column') {
+    return {
+      ...state,
+      ...action,
+    }
+  }
+  if (action.type == 'filter-text-change') {
+    return {
+      ...state,
+      ...action,
+      page: 1
+    }
+  }
+  return state
+}
+
+type TagTableState = {
+  page: number
+  sortFunc: compareableFunc
+  sortDir: SortDirection
+  sortColIndex: number
+  filterText: string
+}
+
+const TagTableInitialState = {
+  page: 1,
+  sortFunc: sortNone,
+  sortDir: undefined,
+  sortColIndex: 0,
+  filterText: ""
+}
+
+type TagTableSortColumn = {
+  type: 'sort-column'
+  sortFunc: compareableFunc
+  sortColIndex: number
+  sortDir: SortDirection
+}
+
+type TagTableUpdatePage = {
+  type: 'page-change'
+  newPage: number
+}
+
+type TagTableFilterTextChange = {
+  type: 'filter-text-change',
+  filterText: string
+}
+
+type TagTableAction =
+  | TagTableSortColumn
+  | TagTableUpdatePage
+  | TagTableFilterTextChange

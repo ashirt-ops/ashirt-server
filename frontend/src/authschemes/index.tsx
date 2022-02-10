@@ -2,13 +2,13 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import { ParsedUrlQuery } from 'querystring'
+import { ParsedQuery } from 'query-string'
 import { useAsyncComponent } from 'src/helpers'
 import { SupportedAuthenticationScheme } from "src/global_types"
 
 export type AuthFrontend = {
   Linker: React.FunctionComponent<{ onSuccess: () => void, authFlags?: Array<string> }>,
-  Login: React.FunctionComponent<{ query: ParsedUrlQuery, authFlags?: Array<string> }>,
+  Login: React.FunctionComponent<{ query: ParsedQuery, authFlags?: Array<string> }>,
   Settings: React.FunctionComponent<{ userKey: string, authFlags?: Array<string> }>,
 }
 

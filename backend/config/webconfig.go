@@ -43,23 +43,14 @@ type AuthConfig struct {
 // Note: it is expected that not all fields will be populated. It is up to the user to verify
 // that these fields exist and have correct values
 type AuthInstanceConfig struct {
-	ClientID                       string `split_words:"true"`
-	ClientSecret                   string `split_words:"true"`
-	ServiceURL                     string `split_words:"true"`
-	TokenURL                       string `split_words:"true"`
-	Scopes                         string
-	Issuer                         string `split_words:"true"`
-	PassIDAndSecretForTokenAsQuery bool   `split_words:"true"`
-	BackendURL                     string `split_words:"true"`
-	SuccessRedirectURL             string `split_words:"true"`
-	FailureRedirectURLPrefix       string `split_words:"true"`
-	ProfileToShortnameField        string `split_words:"true"`
-
 	//generic oidc
+	Type                  string
 	Name                  string
 	FriendlyName          string `split_words:"true"`
 	ProviderURL           string `split_words:"true"`
-	Type                  string
+	ClientID              string `split_words:"true"`
+	ClientSecret          string `split_words:"true"`
+	Scopes                string
 	ProfileFirstNameField string `split_words:"true"`
 	ProfileLastNameField  string `split_words:"true"`
 	ProfileEmailField     string `split_words:"true"`
@@ -67,11 +58,18 @@ type AuthInstanceConfig struct {
 	RegistrationEnabled   bool   `ignored:"true"`
 }
 
+type ContentStoreConfig struct {
+	Type   string `split_words:"true"`
+	Bucket string `split_words:"true"`
+	Region string `split_words:"true"`
+}
+
 var (
 	app   WebConfig
 	db    DBConfig
 	auth  AuthConfig
 	email EmailConfig
+	store ContentStoreConfig
 )
 
 // LoadConfig loads all of the environment configuration specified in environment variables
@@ -96,6 +94,7 @@ func LoadWebConfig() error {
 		loadDBConfig,
 		loadAuthConfig,
 		loadEmailConfig,
+		loadStoreConfig,
 	})
 }
 
@@ -120,6 +119,14 @@ func loadDBConfig() error {
 	config := DBConfig{}
 	err := envconfig.Process("DB", &config)
 	db = config
+
+	return err
+}
+
+func loadStoreConfig() error {
+	config := ContentStoreConfig{}
+	err := envconfig.Process("store", &config)
+	store = config
 
 	return err
 }
@@ -183,7 +190,7 @@ func AuthConfigInstance(name string) AuthInstanceConfig {
 			RegistrationEnabled: auth.AuthConfigs[name].RegistrationEnabled,
 		}
 	}
-	v, _ := auth.AuthConfigs[name]
+	v := auth.AuthConfigs[name]
 	return v
 }
 
@@ -229,4 +236,20 @@ func FrontendIndexURL() string {
 
 func AllAppConfig() WebConfig {
 	return app
+}
+
+func AllStoreConfig() ContentStoreConfig {
+	return store
+}
+
+func StoreType() string {
+	return store.Type
+}
+
+func StoreBucket() string {
+	return store.Bucket
+}
+
+func StoreRegion() string {
+	return store.Region
 }

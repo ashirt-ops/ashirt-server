@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import {parse as parseQuery, ParsedUrlQuery} from 'querystring'
+import { parse as parseQuery, ParsedQuery } from 'query-string'
 import {RouteComponentProps} from 'react-router-dom'
 import {getSupportedAuthentications} from 'src/services/auth'
 import {useAuthFrontendComponent} from 'src/authschemes'
@@ -42,7 +42,7 @@ export default (props: RouteComponentProps<{ schemeCode?: string}>) => {
 const AuthSchemeLogin = (props: {
   authSchemeType: string,
   authScheme: SupportedAuthenticationScheme,
-  query: ParsedUrlQuery,
+  query: ParsedQuery,
 }) => {
   const Login = useAuthFrontendComponent(props.authSchemeType, 'Login', props.authScheme)
   return (
