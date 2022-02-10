@@ -182,7 +182,7 @@ const SearchHelpModal = (props: {
 
 const valuesAsCodeSnippets = (vals: Array<string>) => {
   return vals.map((v, i) => (
-    <span>
+    <span key={i}>
       <CodeSnippet>{v}</CodeSnippet>
       {(i + 1) == vals.length ? '' : ', '}
     </span>
