@@ -12,11 +12,16 @@ import (
 // Upload stores the provided file/bytes into the storage service, returning the location of that
 // file or any error that may have occurred
 //
+// Note that UploadWithName is only intended for development and testing. This should not be used
+// directly.
+//
 // Read retrieves the raw bytes from the storage service, given a key obtained by Upload
 type Store interface {
 	Upload(data io.Reader) (string, error)
+	UploadWithName(key string, data io.Reader) error
 	Read(key string) (io.Reader, error)
 	Delete(key string) error
+	Name() string
 }
 
 // ContentKeys stores the location/path of the original content, as well as the thumbnail/preview location

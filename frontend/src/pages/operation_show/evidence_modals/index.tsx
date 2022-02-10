@@ -42,6 +42,7 @@ export const CreateEvidenceModal = (props: {
   const evidenceTypeOptions: Array<{ name: string, value: SupportedEvidenceType, content?: React.ReactNode }> = [
     { name: 'Screenshot', value: 'image', content: <ImageUpload label='Screenshot' {...binaryBlobField} /> },
     { name: 'Code Block', value: 'codeblock', content: <CodeBlockEditor {...codeblockField} /> },
+    { name: 'Event', value: 'event', content: <div /> },
     {
       name: 'Terminal Recording', value: 'terminal-recording',
       content: <BinaryUpload label='Terminal Recording' isSupportedFile={isATerminalRecording} {...binaryBlobField} />
@@ -67,6 +68,8 @@ export const CreateEvidenceModal = (props: {
         data = { type: 'codeblock', file: codeblockToBlob(codeblockField.value) }
       } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null ) {
         data = { type: selectedOption.value, file: binaryBlobField.value }
+      } else if (selectedOption.value === 'event') {
+        data = { type: 'event'}
       }
 
       return createEvidence({

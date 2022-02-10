@@ -9,7 +9,6 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
-	"github.com/okta/okta-jwt-verifier-golang/utils"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/config"
@@ -113,7 +112,7 @@ func (o OIDCAuth) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 }
 
 func (o OIDCAuth) redirectLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, mode string) {
-	nonce, _ := utils.GenerateNonce()
+	nonce, _ := authschemes.GenerateNonce()
 	stateChallenge := csrf.Token(r)
 	bridge.SetAuthSchemeSession(w, r, &preLoginAuthSession{
 		Nonce:              nonce,

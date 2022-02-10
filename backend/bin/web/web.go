@@ -4,17 +4,18 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/oidcauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/oktaauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
 	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
+	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/emailservices"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -44,10 +45,15 @@ func main() {
 		logging.Fatal(logger, "msg", "schema read error", "error", err)
 	}
 
-	contentStore, err := contentstore.NewS3Store(config.ImageStoreBucketName(), config.ImageStoreRegion())
+	contentStore, err := confighelpers.ChooseContentStoreType(config.AllStoreConfig())
+	if errors.Is(err, backend.ErrorDeprecated) {
+		logger.Log("msg", "No content store provided")
+		contentStore, err = confighelpers.DefaultS3Store()
+	}
 	if err != nil {
 		logging.Fatal(logger, "msg", "store setup error", "error", err)
 	}
+	logger.Log("msg", "Using Storage", "type", contentStore.Name())
 
 	schemes := []authschemes.AuthScheme{
 		recoveryauth.New(config.RecoveryExpiry()),
@@ -56,20 +62,11 @@ func main() {
 	schemeErrors := make([]SchemeError, 0, len(authSchemeNames))
 
 	for _, svc := range authSchemeNames {
-		switch svc {
-		case "okta":
-			schemes = append(schemes, oktaauth.NewFromConfig(
-				config.AuthConfigInstance(svc),
-				func(map[string]string) bool {
-					return true
-				}))
-		default:
-			scheme, err := handleAuthType(config.AuthConfigInstance(svc))
-			if err != nil {
-				schemeErrors = append(schemeErrors, SchemeError{svc, err})
-			} else {
-				schemes = append(schemes, scheme)
-			}
+		scheme, err := handleAuthType(config.AuthConfigInstance(svc))
+		if err != nil {
+			schemeErrors = append(schemeErrors, SchemeError{svc, err})
+		} else {
+			schemes = append(schemes, scheme)
 		}
 	}
 

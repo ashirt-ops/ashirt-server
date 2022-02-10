@@ -7,7 +7,7 @@ import * as dateFns from 'date-fns'
 import { useFormField, useModal, renderModals, useWiredData } from 'src/helpers'
 import { listEvidenceCreators } from 'src/services'
 import { SearchOptions } from './helpers'
-import { Evidence, Tag, User, ViewName } from 'src/global_types'
+import { Evidence, SupportedEvidenceType, Tag, User, ViewName } from 'src/global_types'
 import { MaybeDateRange } from 'src/components/date_range_picker/range_picker_helpers'
 
 import Button from 'src/components/button'
@@ -92,6 +92,11 @@ export const FilterFields = (props: {
     value: props.searchOptions.operator,
     onChange: (creator?: string) => props.onChanged({ ...props.searchOptions, operator: creator }),
   }
+  const evidenceTypeProps = {
+    options: supportedEvidenceTypes,
+    value: props.searchOptions.type,
+    onChange: (evidenceType?: SupportedEvidenceType) => props.onChanged({ ...props.searchOptions, type: evidenceType }),
+  }
   const linkedProps = {
     options: supportedLinking,
     value: props.searchOptions.hasLink,
@@ -122,8 +127,13 @@ export const FilterFields = (props: {
       <ComboBox label="Sort Direction" {...sortProps} />
       <ComboBox label="Creator" {...creatorProps} />
 
-      { props.viewName == 'evidence'
-        ? <ComboBox label="Exists in Finding" {...linkedProps} />
+      {props.viewName == 'evidence'
+        ? (
+          <>
+          <ComboBox label="Evidence Type" {...evidenceTypeProps} />
+          <ComboBox label="Exists in Finding" {...linkedProps} />
+          </>
+        )
         : (
           <SplitInputRow label="Includes Evidence (uuid)" className={'linked-evidence-input'}
             inputValue={props.searchOptions.withEvidenceUuid || ''}>
@@ -178,6 +188,16 @@ const supportedLinking: Array<ComboBoxItem<boolean | undefined>> = [
   { name: "Any", value: undefined },
   { name: "Only Included", value: true },
   { name: "Only Non-included", value: false },
+]
+
+const supportedEvidenceTypes: Array<ComboBoxItem<SupportedEvidenceType | undefined>> = [
+  { name: "Any", value: undefined },
+  { name: 'Screenshot', value: 'image' },
+  { name: 'Code Block', value: 'codeblock' },
+  { name: 'Terminal Recording', value: 'terminal-recording' },
+  { name: 'HTTP Request/Response', value: 'http-request-cycle' },
+  { name: 'No Content', value: 'none' },
+  { name: 'Events', value: 'event' },
 ]
 
 const toEnUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")

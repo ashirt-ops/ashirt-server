@@ -14,8 +14,11 @@ services:
       - 3000:3000
     restart: on-failure
     environment:
-      APP_IMGSTORE_BUCKET_NAME: ""
-      APP_IMGSTORE_REGION: ""
+      STORE_TYPE: local
+      # If using GCP or S3...
+      # STORE_BUCKET: 
+      # If using S3...
+      # STORE_REGION: 
       APP_CSRF_AUTH_KEY: ""
       APP_SESSION_STORE_KEY: ""
       APP_PORT: 3000

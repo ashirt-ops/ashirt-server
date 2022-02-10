@@ -61,7 +61,7 @@ export async function createEvidence(i: {
 
   formData.append('contentType', i.evidence.type)
 
-  if (i.evidence.type !== 'none') {
+  if (i.evidence.type !== 'none' && i.evidence.type !== 'event') {
     formData.append('content', i.evidence.file)
   }
 
