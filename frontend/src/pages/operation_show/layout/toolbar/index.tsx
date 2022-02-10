@@ -166,7 +166,7 @@ const SearchHelpModal = (props: {
         Performing this search over a set of movies might return several <em>Star Wars</em> movies but
         exclude <em>Indiana Jones</em>. Removing <CodeSnippet>Darth Vader</CodeSnippet> would
         expand the search to include <em>THX 1138</em>, while adding
-        {" "}<CodeSnippet>"Jar Jar Binks"</CodeSnippet> would condense the results to just
+        {" "}<CodeSnippet>"Jar Jar Binks"</CodeSnippet> would narrow the results to just
         {" "}<em>Star Wars</em> episodes 1-3.
       </p>
       <p>The below table lists all of the currently available filters, and value limitations, if any:</p>
