@@ -297,7 +297,7 @@ const HelpText: Array<FilterDetail> = [
           Possible values: {" "}
           {
             valuesAsCodeSnippets([
-              'image', 'codeblock', 'terminal-recording', 'http-request-cycle', 'none'
+              'image', 'codeblock', 'terminal-recording', 'http-request-cycle', 'event', 'none'
             ])
           }
         </p>
