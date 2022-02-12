@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -15,6 +16,8 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 type CreateOperationInput struct {
@@ -52,6 +55,18 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 			"operation_id": operationID,
 			"role":         policy.OperationRoleAdmin,
 		})
+		
+		// Copy default tags into new operation
+		tx.Exec(sq.Insert("tags").
+			Columns(
+				"name", "color_name",
+				"operation_id",
+			).
+			Select(sq.Select(
+				"name", "color_name",
+				fmt.Sprintf("%v AS operation_id", operationID),
+			).From("default_tags")),
+		)
 	})
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {
