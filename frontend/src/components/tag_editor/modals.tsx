@@ -81,7 +81,7 @@ export const UpsertDefaultTagModal = (props: {
   )
 }
 
-export const DeleteTagModal = (props: {
+const DeleteTagModal = (props: {
   tag: TagType,
   onDeleted: () => void,
   onRequestClose: () => void,
