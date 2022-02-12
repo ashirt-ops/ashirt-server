@@ -12,7 +12,7 @@ import { default as Table, EndAlignedColumn, SortAsc, SortDesc, SortDirection } 
 import Input from 'src/components/input'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import Tag from 'src/components/tag'
-import { DeleteDefaultTagModal, DeleteTagModal, EditTagModal, UpsertDefaultTagModal } from './modals'
+import { DeleteDefaultTagModal, DeleteTagModal, UpsertOperationTagModal, UpsertDefaultTagModal } from './modals'
 
 // @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
@@ -26,7 +26,7 @@ export const OperationTagTable = (props: {
 }) => {
   const history = useHistory()
   const editTagModal = useModal<{ tag: TagWithUsage }>(modalProps => (
-    <EditTagModal {...modalProps} operationSlug={props.operationSlug} onEdited={props.onUpdate} />
+    <UpsertOperationTagModal {...modalProps} operationSlug={props.operationSlug} onEdited={props.onUpdate} />
   ))
   const deleteTagModal = useModal<{ tag: TagWithUsage }>(modalProps => (
     <DeleteTagModal {...modalProps} operationSlug={props.operationSlug} onDeleted={props.onUpdate} />

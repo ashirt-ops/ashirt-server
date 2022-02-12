@@ -52,7 +52,7 @@ function UpsertTagModal(props: {
   )
 }
 
-export const EditTagModal = (props: {
+export const UpsertOperationTagModal = (props: {
   onEdited: () => void,
   onRequestClose: () => void,
   operationSlug: string,
