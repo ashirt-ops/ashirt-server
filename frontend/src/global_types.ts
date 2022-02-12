@@ -130,6 +130,8 @@ export type Tag = {
   colorName: string,
 }
 
+export type DefaultTag = Tag
+
 export type TagWithUsage = {
   id: number,
   name: string,

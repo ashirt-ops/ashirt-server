@@ -85,6 +85,11 @@ export interface DataSource {
   updateTag(ids: OpSlug & TagId, payload: { name: string, colorName: string }): Promise<void>
   deleteTag(ids: OpSlug & TagId): Promise<void>
 
+  listDefaultTags(): Promise<Array<dtos.DefaultTag>>
+  createDefaultTag(payload: { name: string, colorName: string }): Promise<dtos.DefaultTag>
+  updateDefaultTag(ids: TagId, payload: { name: string, colorName: string }): Promise<void>
+  deleteDefaultTag(ids: TagId): Promise<void>
+
   // TODO these should go into their respective authschemes:
   createRecoveryCode(ids: UserSlug): Promise<{ code: string }>
   deleteExpiredRecoveryCodes(): Promise<void>
