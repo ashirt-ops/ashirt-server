@@ -13,6 +13,13 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
+type UpdateDefaultTagInput struct {
+	ID            int64
+	Name          string
+	ColorName     string
+}
+
+
 type UpdateTagInput struct {
 	ID            int64
 	OperationSlug string
@@ -40,6 +47,24 @@ func UpdateTag(ctx context.Context, db *database.Connection, i UpdateTagInput) e
 
 	if err != nil {
 		return backend.WrapError("Cannot update tag", backend.DatabaseErr(err))
+	}
+	return nil
+}
+
+func UpdateDefaultTag(ctx context.Context, db *database.Connection, i UpdateDefaultTagInput) error {
+	if err := policyRequireWithAdminBypass(ctx, policy.AdminUsersOnly{}); err != nil {
+		return backend.WrapError("Unwilling to update default tag", backend.UnauthorizedWriteErr(err))
+	}
+
+	err := db.Update(sq.Update("default_tags").
+		SetMap(map[string]interface{}{
+			"name":       i.Name,
+			"color_name": i.ColorName,
+		}).
+		Where(sq.Eq{"id": i.ID}))
+
+	if err != nil {
+		return backend.WrapError("Cannot update default tag", backend.DatabaseErr(err))
 	}
 	return nil
 }
