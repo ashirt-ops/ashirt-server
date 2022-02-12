@@ -122,6 +122,18 @@ func newTagGen(first int64) func(opID int64, name, colorName string) models.Tag 
 	}
 }
 
+func newDefaultTagGen(first int64) func(name, colorName string) models.DefaultTag {
+	id := iotaLike(first)
+	return func(name, colorName string) models.DefaultTag {
+		return models.DefaultTag{
+			ID:        id(),
+			Name:      name,
+			ColorName: colorName,
+			CreatedAt: internalClock.Now(),
+		}
+	}
+}
+
 func newOperationGen(first int64) func(slug, fullName string) models.Operation {
 	id := iotaLike(first)
 	return func(slug, fullName string) models.Operation {
