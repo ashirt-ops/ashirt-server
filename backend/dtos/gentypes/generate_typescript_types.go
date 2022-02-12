@@ -23,6 +23,7 @@ func main() {
 	gen(dtos.Operation{})
 	gen(dtos.Query{})
 	gen(dtos.Tag{})
+	gen(dtos.DefaultTag{})
 	gen(dtos.TagWithUsage{})
 	gen(dtos.User{})
 	gen(dtos.UserOwnView{})

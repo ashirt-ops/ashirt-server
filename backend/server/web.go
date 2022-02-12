@@ -626,6 +626,9 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return nil, services.DeleteTag(r.Context(), db, i)
 	}))
 
+	route(r, "GET", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return services.ListDefaultTags(r.Context(), db)
+	}))
 	route(r, "GET", "/operations/{operation_slug}/tagsByEvidenceUsage", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListTagsByEvidenceDateInput{

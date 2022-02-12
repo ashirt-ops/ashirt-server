@@ -11,6 +11,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -60,6 +61,30 @@ func listTagsForOperation(db *database.Connection, operationID int64) ([]*dtos.T
 				ColorName: tag.Tag.ColorName,
 			},
 			EvidenceCount: tag.TagCount,
+		}
+	}
+	return tagsDTO, nil
+}
+
+// ListDefaultTags provides a list of all of the tags in the default_tags table. Admin only.
+func ListDefaultTags(ctx context.Context, db *database.Connection) ([]*dtos.DefaultTag, error) {
+	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
+		return nil, backend.WrapError("Unwilling to list default tags", backend.UnauthorizedReadErr(err))
+	}
+
+	var tags []models.Tag
+	err := db.Select(&tags, sq.Select("id", "name", "color_name").From("default_tags"))
+
+	if err != nil {
+		return nil, backend.WrapError("Cannot get default tags", backend.DatabaseErr(err))
+	}
+
+	tagsDTO := make([]*dtos.DefaultTag, len(tags))
+	for idx, tag := range tags {
+		tagsDTO[idx] = &dtos.DefaultTag {
+			ID: tag.ID,
+			Name: tag.Name,
+			ColorName: tag.ColorName,
 		}
 	}
 	return tagsDTO, nil
