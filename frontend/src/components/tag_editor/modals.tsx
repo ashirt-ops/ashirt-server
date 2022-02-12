@@ -56,7 +56,7 @@ export const UpsertOperationTagModal = (props: {
   onEdited: () => void,
   onRequestClose: () => void,
   operationSlug: string,
-  tag: TagType,
+  tag?: TagType,
 }) => {
   return (
     <UpsertTagModal
@@ -85,20 +85,13 @@ export const DeleteTagModal = (props: {
   tag: TagType,
   onDeleted: () => void,
   onRequestClose: () => void,
-  operationSlug: string,
+  deleteFn: (id: number) => Promise<void>
+  children?: React.ReactNode
 }) => {
   const formComponentProps = useForm({
     onSuccess: () => { props.onDeleted(); props.onRequestClose() },
-    handleSubmit: () => deleteTag({
-      id: props.tag.id,
-      operationSlug: props.operationSlug,
-    }),
+    handleSubmit: () => props.deleteFn(props.tag.id)
   })
-
-  const wiredEvidence = useWiredData(React.useCallback(() => getEvidenceList({
-    operationSlug: props.operationSlug,
-    query: `tag:${JSON.stringify(props.tag.name)}`,
-  }), [props.operationSlug, props.tag.name]))
 
   return (
     <Modal title="Delete Tag" onRequestClose={props.onRequestClose}>
@@ -106,21 +99,42 @@ export const DeleteTagModal = (props: {
         <p>
           Are you sure you want to delete <Tag name={props.tag.name} color={props.tag.colorName} />?
         </p>
-        {wiredEvidence.render(evidence => (
-          <p>
-            {evidence.length > 0 && 'This tag belongs to the following evidence and will be removed from them on deletion:'}
-            {evidence.map(evi => (
-              <Link
-                to={`/operations/${props.operationSlug}/evidence/${evi.uuid}`}
-                key={evi.uuid}
-                children={evi.description.substr(0, 50)}
-                style={evidenceLinkStyle}
-              />
-            ))}
-          </p>
-        ))}
+        {props.children}
       </Form>
     </Modal>
+  )
+}
+
+export const DeleteOperationTagModal = (props: {
+  tag: TagType,
+  onDeleted: () => void,
+  onRequestClose: () => void,
+  operationSlug: string,
+}) => {
+  const wiredEvidence = useWiredData(React.useCallback(() => getEvidenceList({
+    operationSlug: props.operationSlug,
+    query: `tag:${JSON.stringify(props.tag.name)}`,
+  }), [props.operationSlug, props.tag.name]))
+
+  return (
+    <DeleteTagModal
+      {...props}
+      deleteFn={(id) => deleteTag({ id, operationSlug: props.operationSlug })}
+    >
+      {wiredEvidence.render(evidence => (
+        <p>
+          {evidence.length > 0 && 'This tag belongs to the following evidence and will be removed from them on deletion:'}
+          {evidence.map(evi => (
+            <Link
+              to={`/operations/${props.operationSlug}/evidence/${evi.uuid}`}
+              key={evi.uuid}
+              children={evi.description.substr(0, 50)}
+              style={evidenceLinkStyle}
+            />
+          ))}
+        </p>
+      ))}
+    </DeleteTagModal>
   )
 }
 
@@ -137,13 +151,9 @@ export const DeleteDefaultTagModal = (props: {
   })
 
   return (
-    <Modal title="Delete Default Tag" onRequestClose={props.onRequestClose}>
-      <Form submitText="Delete Tag" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
-        <p>
-          Are you sure you want to delete <Tag name={props.tag.name} color={props.tag.colorName} />?
-        </p>
-      </Form>
-    </Modal>
+    <DeleteTagModal {...props}
+      deleteFn={(id) => deleteDefaultTag({ id })}
+    />
   )
 }
 
