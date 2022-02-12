@@ -9,8 +9,48 @@ import Modal from 'src/components/modal'
 import Tag from 'src/components/tag'
 import TagColorPicker from 'src/components/tag_color_picker'
 import { Tag as TagType } from 'src/global_types'
-import { deleteTag, updateTag, getEvidenceList, deleteDefaultTag, updateDefaultTag, createDefaultTag } from 'src/services'
+import { deleteTag, updateTag, getEvidenceList, deleteDefaultTag, updateDefaultTag, createDefaultTag, createTag } from 'src/services'
 import { randomTagColorName, useForm, useFormField, useWiredData } from 'src/helpers'
+
+function UpsertTagModal(props: {
+  onEdited: () => void,
+  onRequestClose: () => void,
+  createFn: (tag: Omit<TagType, "id">) => Promise<void>
+  updateFn: (tag: TagType) => Promise<void>
+  tag?: TagType,
+}) {
+  const nameField = useFormField<string>(props.tag?.name ?? "")
+  const colorField = useFormField<string>(props.tag?.colorName ?? randomTagColorName())
+
+  const formComponentProps = useForm({
+    fields: [nameField, colorField],
+    onSuccess: () => { props.onEdited(); props.onRequestClose() },
+    handleSubmit: () => {
+      return (
+        props.tag === undefined
+          ? props.createFn({
+            name: nameField.value.trim(),
+            colorName: colorField.value,
+          })
+          : props.updateFn({
+            id: props.tag.id,
+            name: nameField.value.trim(),
+            colorName: colorField.value,
+
+          })
+      )
+    }
+  })
+
+  return (
+    <Modal title={props.tag ? "Edit Tag" : "Create Tag"} onRequestClose={props.onRequestClose}>
+      <Form submitText="Save" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
+        <Input label="Name" {...nameField} />
+        <TagColorPicker label="Color" {...colorField} />
+      </Form>
+    </Modal>
+  )
+}
 
 export const EditTagModal = (props: {
   onEdited: () => void,
@@ -18,27 +58,26 @@ export const EditTagModal = (props: {
   operationSlug: string,
   tag: TagType,
 }) => {
-  const nameField = useFormField<string>(props.tag.name)
-  const colorField = useFormField<string>(props.tag.colorName)
-
-  const formComponentProps = useForm({
-    fields: [nameField, colorField],
-    onSuccess: () => { props.onEdited(); props.onRequestClose() },
-    handleSubmit: () => updateTag({
-      id: props.tag.id,
-      operationSlug: props.operationSlug,
-      name: nameField.value.trim(),
-      colorName: colorField.value,
-    }),
-  })
-
   return (
-    <Modal title="Edit Tag" onRequestClose={props.onRequestClose}>
-      <Form submitText="Save" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
-        <Input label="Name" {...nameField} />
-        <TagColorPicker label="Color" {...colorField} />
-      </Form>
-    </Modal>
+    <UpsertTagModal
+      {...props}
+      createFn={async (t) => { createTag({ ...t, operationSlug: props.operationSlug }) }}
+      updateFn={async (t) => updateTag({ ...t, operationSlug: props.operationSlug })}
+    />
+  )
+}
+
+export const UpsertDefaultTagModal = (props: {
+  onEdited: () => void,
+  onRequestClose: () => void,
+  tag?: TagType,
+}) => {
+  return (
+    <UpsertTagModal
+      {...props}
+      createFn={async (t) => { await createDefaultTag(t) }}
+      updateFn={updateDefaultTag}
+    />
   )
 }
 
@@ -84,49 +123,6 @@ export const DeleteTagModal = (props: {
     </Modal>
   )
 }
-
-export const UpsertDefaultTagModal = (props: {
-  onEdited: () => void,
-  onRequestClose: () => void,
-  tag?: TagType,
-}) => {
-  const nameField = useFormField<string>(props.tag?.name ?? "")
-  const colorField = useFormField<string>(props.tag?.colorName ?? randomTagColorName())
-
-  const formComponentProps = useForm({
-    fields: [nameField, colorField],
-    onSuccess: () => { props.onEdited(); props.onRequestClose() },
-    handleSubmit: () => {
-      if (props.tag === undefined) {
-        const fn = async () => {
-          await createDefaultTag({
-            name: nameField.value.trim(),
-            colorName: colorField.value,
-          })
-        }
-        // rewrapping to force the proper type
-        return fn()
-      }
-      else {
-        return updateDefaultTag({
-          id: props.tag.id,
-          name: nameField.value.trim(),
-          colorName: colorField.value,
-        })
-      }
-    }
-  })
-
-  return (
-    <Modal title="Edit Tag" onRequestClose={props.onRequestClose}>
-      <Form submitText="Save" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
-        <Input label="Name" {...nameField} />
-        <TagColorPicker label="Color" {...colorField} />
-      </Form>
-    </Modal>
-  )
-}
-
 
 export const DeleteDefaultTagModal = (props: {
   tag: TagType,
