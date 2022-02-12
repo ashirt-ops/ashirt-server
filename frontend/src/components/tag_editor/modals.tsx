@@ -2,15 +2,15 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import Tag from 'src/components/tag'
 import TagColorPicker from 'src/components/tag_color_picker'
-import {Link} from 'react-router-dom'
-import {Tag as TagType} from 'src/global_types'
-import { deleteTag, updateTag, getEvidenceList } from 'src/services'
-import {useForm, useFormField, useWiredData} from 'src/helpers'
+import { Tag as TagType } from 'src/global_types'
+import { deleteTag, updateTag, getEvidenceList, deleteDefaultTag, updateDefaultTag, createDefaultTag } from 'src/services'
+import { randomTagColorName, useForm, useFormField, useWiredData } from 'src/helpers'
 
 export const EditTagModal = (props: {
   onEdited: () => void,
@@ -23,7 +23,7 @@ export const EditTagModal = (props: {
 
   const formComponentProps = useForm({
     fields: [nameField, colorField],
-    onSuccess: () => {props.onEdited(); props.onRequestClose()},
+    onSuccess: () => { props.onEdited(); props.onRequestClose() },
     handleSubmit: () => updateTag({
       id: props.tag.id,
       operationSlug: props.operationSlug,
@@ -49,7 +49,7 @@ export const DeleteTagModal = (props: {
   operationSlug: string,
 }) => {
   const formComponentProps = useForm({
-    onSuccess: () => {props.onDeleted(); props.onRequestClose()},
+    onSuccess: () => { props.onDeleted(); props.onRequestClose() },
     handleSubmit: () => deleteTag({
       id: props.tag.id,
       operationSlug: props.operationSlug,
@@ -80,6 +80,72 @@ export const DeleteTagModal = (props: {
             ))}
           </p>
         ))}
+      </Form>
+    </Modal>
+  )
+}
+
+export const UpsertDefaultTagModal = (props: {
+  onEdited: () => void,
+  onRequestClose: () => void,
+  tag?: TagType,
+}) => {
+  const nameField = useFormField<string>(props.tag?.name ?? "")
+  const colorField = useFormField<string>(props.tag?.colorName ?? randomTagColorName())
+
+  const formComponentProps = useForm({
+    fields: [nameField, colorField],
+    onSuccess: () => { props.onEdited(); props.onRequestClose() },
+    handleSubmit: () => {
+      if (props.tag === undefined) {
+        const fn = async () => {
+          await createDefaultTag({
+            name: nameField.value.trim(),
+            colorName: colorField.value,
+          })
+        }
+        // rewrapping to force the proper type
+        return fn()
+      }
+      else {
+        return updateDefaultTag({
+          id: props.tag.id,
+          name: nameField.value.trim(),
+          colorName: colorField.value,
+        })
+      }
+    }
+  })
+
+  return (
+    <Modal title="Edit Tag" onRequestClose={props.onRequestClose}>
+      <Form submitText="Save" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
+        <Input label="Name" {...nameField} />
+        <TagColorPicker label="Color" {...colorField} />
+      </Form>
+    </Modal>
+  )
+}
+
+
+export const DeleteDefaultTagModal = (props: {
+  tag: TagType,
+  onDeleted: () => void,
+  onRequestClose: () => void,
+}) => {
+  const formComponentProps = useForm({
+    onSuccess: () => { props.onDeleted(); props.onRequestClose() },
+    handleSubmit: () => deleteDefaultTag({
+      id: props.tag.id,
+    }),
+  })
+
+  return (
+    <Modal title="Delete Default Tag" onRequestClose={props.onRequestClose}>
+      <Form submitText="Delete Tag" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
+        <p>
+          Are you sure you want to delete <Tag name={props.tag.name} color={props.tag.colorName} />?
+        </p>
       </Form>
     </Modal>
   )
