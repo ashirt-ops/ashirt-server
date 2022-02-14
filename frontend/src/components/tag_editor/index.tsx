@@ -47,6 +47,7 @@ export const OperationTagTable = (props: {
         onDeleteClick={tag => deleteTagModal.show({ tag })}
         onEditClick={tag => editTagModal.show({ tag })}
         onTagClick={tag => history.push(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)}
+        onCreateClick={() => editTagModal.show({})}
       />
       {renderModals(editTagModal, deleteTagModal)}
     </>
