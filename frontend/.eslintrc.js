@@ -14,7 +14,11 @@ module.exports = {
   extends: [
   ],
   rules: {
-    '@typescript-eslint/no-unused-vars': ['error', {args: 'none', varsIgnorePattern: '^_'}],
+    '@typescript-eslint/no-unused-vars': ['error', {
+      args: 'none',
+      varsIgnorePattern: '^_',
+      ignoreRestSiblings: true
+    }],
     'eol-last': ['error', 'always'],
     'no-multiple-empty-lines': ['error', { max: Infinity, maxEOF: 0 }],
     'no-trailing-spaces': ['error'],
