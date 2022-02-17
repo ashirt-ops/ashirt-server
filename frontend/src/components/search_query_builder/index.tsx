@@ -197,6 +197,7 @@ const supportedEvidenceTypes: Array<ComboBoxItem<SupportedEvidenceType | undefin
   { name: 'Terminal Recording', value: 'terminal-recording' },
   { name: 'HTTP Request/Response', value: 'http-request-cycle' },
   { name: 'No Content', value: 'none' },
+  { name: 'Events', value: 'event' },
 ]
 
 const toEnUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")

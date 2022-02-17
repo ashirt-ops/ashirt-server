@@ -166,7 +166,7 @@ const SearchHelpModal = (props: {
         Performing this search over a set of movies might return several <em>Star Wars</em> movies but
         exclude <em>Indiana Jones</em>. Removing <CodeSnippet>Darth Vader</CodeSnippet> would
         expand the search to include <em>THX 1138</em>, while adding
-        {" "}<CodeSnippet>"Jar Jar Binks"</CodeSnippet> would condense the results to just
+        {" "}<CodeSnippet>"Jar Jar Binks"</CodeSnippet> would narrow the results to just
         {" "}<em>Star Wars</em> episodes 1-3.
       </p>
       <p>The below table lists all of the currently available filters, and value limitations, if any:</p>
@@ -182,7 +182,7 @@ const SearchHelpModal = (props: {
 
 const valuesAsCodeSnippets = (vals: Array<string>) => {
   return vals.map((v, i) => (
-    <span>
+    <span key={i}>
       <CodeSnippet>{v}</CodeSnippet>
       {(i + 1) == vals.length ? '' : ', '}
     </span>
@@ -297,7 +297,7 @@ const HelpText: Array<FilterDetail> = [
           Possible values: {" "}
           {
             valuesAsCodeSnippets([
-              'image', 'codeblock', 'terminal-recording', 'http-request-cycle', 'none'
+              'image', 'codeblock', 'terminal-recording', 'http-request-cycle', 'event', 'none'
             ])
           }
         </p>

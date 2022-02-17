@@ -40,7 +40,11 @@ export type ApiKey = {
   lastAuth: Date | null,
 }
 
-export type SupportedEvidenceType = 'codeblock' | 'terminal-recording' | 'image' | 'http-request-cycle' | 'none'
+export type SupportedEvidenceType = 'codeblock' | 'terminal-recording' | 'image' | 'http-request-cycle' | 'event' | 'none'
+
+export type Event = {
+  type: 'event'
+}
 
 export type CodeBlock = {
   type: 'codeblock',
@@ -79,6 +83,7 @@ export type SubmittableEvidence =
   | TerminalRecording
   | HttpRequestCycle
   | ContentFreeEvidence
+  | Event
 
 export type Operation = {
   slug: string,

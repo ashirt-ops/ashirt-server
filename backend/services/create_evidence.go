@@ -55,6 +55,8 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		case "terminal-recording":
 			fallthrough
 		case "codeblock":
+			fallthrough
+		case "event":
 			content = contentstore.NewBlob(i.Content)
 
 		case "image":
