@@ -27,3 +27,26 @@ func TestDeleteTag(t *testing.T) {
 
 	require.NotContains(t, getTagFromOperationID(t, db, op.ID), TagEarth, "TagEarth should have been deleted")
 }
+
+func TestDeleteDefaultTag(t *testing.T) {
+	db := initTest(t)
+	HarryPotterSeedData.ApplyTo(t, db)
+	tagToRemove := DefaultTagWho
+	normalUser := UserRon
+	adminUser := UserDumbledore
+
+	i := services.DeleteDefaultTagInput{
+		ID: tagToRemove.ID,
+	}
+
+	// verify that a normal user cannot delete default tags
+	ctx := simpleFullContext(normalUser)
+	err := services.DeleteDefaultTag(ctx, db, i)
+	require.Error(t, err)
+
+	// verify that an admin can delete default tags
+	ctx = simpleFullContext(adminUser)
+	err = services.DeleteDefaultTag(ctx, db, i)
+	require.NoError(t, err)
+	require.NotContains(t, getDefaultTags(t, db), tagToRemove)
+}

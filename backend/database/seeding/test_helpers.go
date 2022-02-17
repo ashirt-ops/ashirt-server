@@ -230,11 +230,28 @@ func GetTagByID(t *testing.T, db *database.Connection, id int64) models.Tag {
 	return tag
 }
 
+func GetDefaultTagByID(t *testing.T, db *database.Connection, id int64) models.DefaultTag {
+	var tag models.DefaultTag
+	err := db.Get(&tag, sq.Select("*").
+		From("default_tags").
+		Where(sq.Eq{"id": id}))
+	require.NoError(t, err)
+	return tag
+}
+
 func GetTagFromOperationID(t *testing.T, db *database.Connection, id int64) []models.Tag {
 	var allTags []models.Tag
 	err := db.Select(&allTags, sq.Select("*").
 		From("tags").
 		Where(sq.Eq{"operation_id": id}))
+	require.NoError(t, err)
+	return allTags
+}
+
+func GetDefaultTags(t *testing.T, db *database.Connection) []models.DefaultTag {
+	var allTags []models.DefaultTag
+	err := db.Select(&allTags, sq.Select("*").
+		From("default_tags"))
 	require.NoError(t, err)
 	return allTags
 }

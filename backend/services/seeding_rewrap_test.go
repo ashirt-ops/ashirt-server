@@ -52,7 +52,9 @@ var getUserRolesForOperationByOperationID = seeding.GetUserRolesForOperationByOp
 var getQueryByID = seeding.GetQueryByID
 var getQueriesForOperationID = seeding.GetQueriesForOperationID
 var getTagByID = seeding.GetTagByID
+var getDefaultTagByID = seeding.GetDefaultTagByID
 var getTagFromOperationID = seeding.GetTagFromOperationID
+var getDefaultTags = seeding.GetDefaultTags
 var getFindingsByOperationID = seeding.GetFindingsByOperationID
 var getUserProfile = seeding.GetUserProfile
 var getUserBySlug = seeding.GetUserBySlug
@@ -134,6 +136,12 @@ var OpOrderOfThePhoenix = seeding.OpOrderOfThePhoenix
 var OpHalfBloodPrince = seeding.OpHalfBloodPrince
 var OpDeathlyHallows = seeding.OpDeathlyHallows
 var OpGanttChart = seeding.OpGanttChart
+
+var DefaultTagWho = seeding.DefaultTagWho
+var DefaultTagWhat = seeding.DefaultTagWhat
+var DefaultTagWhere = seeding.DefaultTagWhere
+var DefaultTagWhen = seeding.DefaultTagWhen
+var DefaultTagWhy = seeding.DefaultTagWhy
 
 var TagFamily = seeding.TagFamily
 var TagFriendship = seeding.TagFriendship

@@ -72,3 +72,54 @@ func realTagListToPtr(in []dtos.Tag) []*dtos.Tag {
 	}
 	return rtn
 }
+
+func TestListDefaultTags(t *testing.T) {
+	db := initTest(t)
+	HarryPotterSeedData.ApplyTo(t, db)
+
+	normalUser := UserRon
+	adminUser := UserDumbledore
+
+	allTags := getDefaultTags(t, db)
+	require.NotEqual(t, len(allTags), 0, "Some number of default tags should exist")
+
+	// verify that normal users cannot list default tags
+	ctx := simpleFullContext(normalUser)
+	_, err := services.ListDefaultTags(ctx, db)
+	require.Error(t, err)
+
+	// verify that admins can list default tags
+	ctx = simpleFullContext(adminUser)
+	tags, err := services.ListDefaultTags(ctx, db)
+	require.NoError(t, err)
+	require.Equal(t, len(tags), len(allTags))
+
+	validateDefaultTagSets(t, tags, allTags, validateDefaultTag)
+}
+
+func validateDefaultTagSets(
+	t *testing.T,
+	dtoSet []*dtos.DefaultTag,
+	dbSet []models.DefaultTag,
+	validate func(*testing.T, models.DefaultTag, *dtos.DefaultTag),
+) {
+	var expected *models.DefaultTag = nil
+
+	for _, dtoItem := range dtoSet {
+		expected = nil
+		for _, dbItem := range dbSet {
+			if dbItem.ID == dtoItem.ID {
+				expected = &dbItem
+				break
+			}
+		}
+		require.NotNil(t, expected, "Result should have matching value")
+		validate(t, *expected, dtoItem)
+	}
+}
+
+func validateDefaultTag(t *testing.T, expected models.DefaultTag, actual *dtos.DefaultTag) {
+	require.Equal(t, expected.ID, actual.ID)
+	require.Equal(t, expected.Name, actual.Name)
+	require.Equal(t, expected.ColorName, actual.ColorName)
+}

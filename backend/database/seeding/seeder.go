@@ -39,6 +39,11 @@ func (seed Seeder) AllInitialTagIds() []int64 {
 	return TagIDsFromTags(seed.Tags...)
 }
 
+// AllInitialDefaultTagIds is a (convenience) method version of the function DefaultTagIDsFromTags
+func (seed Seeder) AllInitialDefaultTagIds() []int64 {
+	return DefaultTagIDsFromTags(seed.DefaultTags...)
+}
+
 // ApplyTo takes the configured Seeder and writes these values to the database.
 func (seed Seeder) ApplyTo(db *database.Connection) error {
 	systemLogger := logging.GetSystemLogger()
