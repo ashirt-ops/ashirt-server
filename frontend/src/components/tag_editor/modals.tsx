@@ -143,13 +143,6 @@ export const DeleteDefaultTagModal = (props: {
   onDeleted: () => void,
   onRequestClose: () => void,
 }) => {
-  const formComponentProps = useForm({
-    onSuccess: () => { props.onDeleted(); props.onRequestClose() },
-    handleSubmit: () => deleteDefaultTag({
-      id: props.tag.id,
-    }),
-  })
-
   return (
     <DeleteTagModal {...props}
       deleteFn={(id) => deleteDefaultTag({ id })}
