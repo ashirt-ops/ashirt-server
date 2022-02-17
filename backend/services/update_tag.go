@@ -14,11 +14,10 @@ import (
 )
 
 type UpdateDefaultTagInput struct {
-	ID            int64
-	Name          string
-	ColorName     string
+	ID        int64
+	Name      string
+	ColorName string
 }
-
 
 type UpdateTagInput struct {
 	ID            int64

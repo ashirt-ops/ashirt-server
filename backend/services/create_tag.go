@@ -20,8 +20,8 @@ type CreateTagInput struct {
 }
 
 type CreateDefaultTagInput struct {
-	Name          string
-	ColorName     string
+	Name      string
+	ColorName string
 }
 
 func CreateTag(ctx context.Context, db *database.Connection, i CreateTagInput) (*dtos.Tag, error) {
@@ -64,8 +64,8 @@ func CreateDefaultTag(ctx context.Context, db *database.Connection, i CreateDefa
 	}
 
 	tagID, err := db.Insert("default_tags", map[string]interface{}{
-		"name":         i.Name,
-		"color_name":   i.ColorName,
+		"name":       i.Name,
+		"color_name": i.ColorName,
 	})
 	if err != nil {
 		return nil, backend.WrapError("Cannot add new tag", backend.DatabaseErr(err))

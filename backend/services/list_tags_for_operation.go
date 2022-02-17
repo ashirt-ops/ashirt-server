@@ -81,9 +81,9 @@ func ListDefaultTags(ctx context.Context, db *database.Connection) ([]*dtos.Defa
 
 	tagsDTO := make([]*dtos.DefaultTag, len(tags))
 	for idx, tag := range tags {
-		tagsDTO[idx] = &dtos.DefaultTag {
-			ID: tag.ID,
-			Name: tag.Name,
+		tagsDTO[idx] = &dtos.DefaultTag{
+			ID:        tag.ID,
+			Name:      tag.Name,
 			ColorName: tag.ColorName,
 		}
 	}

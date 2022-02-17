@@ -116,12 +116,12 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 			}
 		})
 		tx.BatchInsert("default_tags", len(seed.DefaultTags), func(i int) map[string]interface{} {
-			return map[string]interface{} {
-				"id":           seed.DefaultTags[i].ID,
-				"name":         seed.DefaultTags[i].Name,
-				"color_name":   seed.DefaultTags[i].ColorName,
-				"created_at":   seed.DefaultTags[i].CreatedAt,
-				"updated_at":   seed.DefaultTags[i].UpdatedAt,
+			return map[string]interface{}{
+				"id":         seed.DefaultTags[i].ID,
+				"name":       seed.DefaultTags[i].Name,
+				"color_name": seed.DefaultTags[i].ColorName,
+				"created_at": seed.DefaultTags[i].CreatedAt,
+				"updated_at": seed.DefaultTags[i].UpdatedAt,
 			}
 		})
 		tx.BatchInsert("tags", len(seed.Tags), func(i int) map[string]interface{} {

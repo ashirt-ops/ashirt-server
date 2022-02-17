@@ -55,7 +55,7 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 			"operation_id": operationID,
 			"role":         policy.OperationRoleAdmin,
 		})
-		
+
 		// Copy default tags into new operation
 		tx.Exec(sq.Insert("tags").
 			Columns(
