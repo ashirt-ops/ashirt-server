@@ -72,7 +72,7 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 		if database.IsAlreadyExistsError(err) {
 			return nil, backend.WrapError("Unable to create operation. Operation slug already exists.", backend.BadInputErr(err, "An operation with this slug already exists"))
 		}
-		return nil, backend.WrapError("Unable to add new operation or permissions", backend.DatabaseErr(err))
+		return nil, backend.WrapError("Unable to add new operation", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Operation{
