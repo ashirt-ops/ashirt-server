@@ -45,7 +45,7 @@ export default function ComboBox<T>(props: {
 
   React.useEffect(() => {
     setInputValue(valueToName(props.value, props.options, props.nonValueDefault))
-  }, [props.value, props.options])
+  }, [props.value, props.options, props.nonValueDefault])
 
   const onSelect = (item: ComboBoxItem<T>) => {
     props.onChange(item.value)
