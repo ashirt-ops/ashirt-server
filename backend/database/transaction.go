@@ -176,7 +176,14 @@ func (tx *Transactable) Delete(dq squirrel.DeleteBuilder) error {
 // dbms directly, or in rare situations where squirrel does not provide sufficient query modeling
 // capability
 func (tx *Transactable) Exec(s squirrel.Sqlizer) error {
+	if tx.Error() != nil {
+		return tx.Error()
+	}
 	_, err := tx.exec(s)
+	if err != nil {
+		tx.transactionError = err
+		return err
+	}
 	return err
 }
 
