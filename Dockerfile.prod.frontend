@@ -7,7 +7,7 @@ COPY backend backend
 RUN go run ./backend/dtos/gentypes > dtos.ts
 
 
-FROM node:14.14-alpine AS build
+FROM node:16.14-alpine AS build
 
 RUN mkdir /build
 WORKDIR /build
