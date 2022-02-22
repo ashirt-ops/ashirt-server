@@ -36,6 +36,7 @@ type mockOperation struct {
 	User     dtos.User
 	UserID   int64
 	Op       *dtos.Operation
+	ID       int64
 	Findings []models.Finding
 	Evidence []models.Evidence
 }
@@ -81,23 +82,23 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 	badOp.UserID = userID
 	ctx := mkTestingContext(userID, &policy.FullAccess{})
 
-	makeOp := func(slug, name string) *dtos.Operation {
+	makeOp := func(slug, name string) (*dtos.Operation, int64) {
 		op, err := CreateOperation(ctx, db, CreateOperationInput{Slug: slug, OwnerID: userID, Name: name})
 		require.NoError(t, err)
 
 		var opID int64
 		err = db.Get(&opID, sq.Select("id").From("operations").Where(sq.Eq{"slug": op.Slug}))
 		require.NoError(t, err)
-		op.ID = opID
 
-		return op
+		return op, opID
 	}
 
-	goodOp.Op = makeOp("goodOp", "Good Operation")
-	badOp.Op = makeOp("badOp", "Bad Operation")
+
+	goodOp.Op, goodOp.ID = makeOp("goodOp", "Good Operation")
+	badOp.Op, badOp.ID = makeOp("badOp", "Bad Operation")
 
 	cs, _ := contentstore.NewMemStore()
-	makeEvidence := func(op *mockOperation, desc string) {
+	makeEvidence := func(op *mockOperation, id int64, desc string) {
 		input := CreateEvidenceInput{OperationSlug: op.Op.Slug, Description: desc, ContentType: "other"}
 		eviResult, err := CreateEvidence(ctx, db, cs, input)
 		require.NoError(t, err)
@@ -108,19 +109,19 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 		op.Evidence = append(op.Evidence, models.Evidence{
 			ID:          evidenceID,
 			UUID:        eviResult.UUID,
-			OperationID: op.Op.ID,
+			OperationID: id,
 			OperatorID:  op.UserID,
 			Description: eviResult.Description,
 			ContentType: input.ContentType,
 			OccurredAt:  eviResult.OccurredAt,
 		})
 	}
-	makeEvidence(&goodOp, "item1")
-	makeEvidence(&goodOp, "item2")
-	makeEvidence(&goodOp, "item3")
-	makeEvidence(&goodOp, "item4")
+	makeEvidence(&goodOp, goodOp.ID, "item1")
+	makeEvidence(&goodOp, goodOp.ID, "item2")
+	makeEvidence(&goodOp, goodOp.ID, "item3")
+	makeEvidence(&goodOp, goodOp.ID, "item4")
 
-	makeEvidence(&badOp, "item5")
+	makeEvidence(&badOp, badOp.ID, "item5")
 
 	makeFinding := func(op *mockOperation, title string) {
 		input := CreateFindingInput{OperationSlug: op.Op.Slug, Category: "Product", Title: title, Description: "desc"}
@@ -139,7 +140,7 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 			Title:       findingResult.Title,
 			Description: findingResult.Description,
 			CategoryID:  &categoryID,
-			OperationID: op.Op.ID,
+			OperationID: op.ID,
 		})
 	}
 
