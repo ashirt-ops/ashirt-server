@@ -48,6 +48,12 @@ export default (props: RouteComponentProps) => {
             id: "operations", label: "Operation Management", content: (
               <>
                 <OperationsTable />
+              </>
+            )
+          },
+          {
+            id: "tags", label: "Tag Management", content: (
+              <>
                 <DefaultTagEditor />
               </>
             )
