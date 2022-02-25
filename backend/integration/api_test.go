@@ -40,7 +40,7 @@ func TestAPI(t *testing.T) {
 		aliceKey := a.APIKeyForUser(alice)
 
 		a.Post("/web/operations").WithJSONBody(`{"name": "Op 1", "slug": "op1"}`).AsUser(alice).Do().ExpectSuccess()
-		evidenceUUID1 := a.Post("/api/operations/1/evidence").WithAPIKey(aliceKey).WithMultipartBody(sampleEvidenceBody, nil).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
+		evidenceUUID1 := a.Post("/api/operations/op1/evidence").WithAPIKey(aliceKey).WithMultipartBody(sampleEvidenceBody, nil).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
 		a.Get("/web/operations/op1/evidence").AsUser(alice).Do().ExpectSubsetJSONArray([]string{
 			`{"uuid": "` + evidenceUUID1 + `", "description": "evi1", "occurredAt": "2019-07-29T23:12:45Z"}`,
 		})
