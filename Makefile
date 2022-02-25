@@ -28,7 +28,7 @@ test-all: test-backend test-frontend
 
 .PHONY: test-backend
 test-backend:
-	cd backend && go test ./...
+	cd backend && go vet ./... && go test ./...
 
 .PHONY: test-frontend
 test-frontend:
