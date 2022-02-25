@@ -93,7 +93,6 @@ func setupBasicTestOperation(t *testing.T, db *database.Connection) (mockOperati
 		return op, opID
 	}
 
-
 	goodOp.Op, goodOp.ID = makeOp("goodOp", "Good Operation")
 	badOp.Op, badOp.ID = makeOp("badOp", "Bad Operation")
 
