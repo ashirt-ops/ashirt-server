@@ -312,7 +312,7 @@ func getOpsIDs(a *integration.Tester, ops *[]dtos.Operation) {
 	for idx, op := range *ops {
 		for _, apiOp := range temp {
 			if apiOp.Slug == op.Slug {
-				(*ops)[idx].ID = apiOp.ID
+				(*ops)[idx].Slug = apiOp.Slug
 				break
 			}
 		}
