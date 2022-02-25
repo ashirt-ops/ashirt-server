@@ -17,12 +17,19 @@ type APIKey struct {
 }
 
 type Evidence struct {
-	UUID        string    `json:"uuid"`
-	Description string    `json:"description"`
-	OccurredAt  time.Time `json:"occurredAt"`
-	Operator    User      `json:"operator"`
-	Tags        []Tag     `json:"tags"`
-	ContentType string    `json:"contentType"`
+	UUID        string             `json:"uuid"`
+	Description string             `json:"description"`
+	OccurredAt  time.Time          `json:"occurredAt"`
+	Operator    User               `json:"operator"`
+	Tags        []Tag              `json:"tags"`
+	ContentType string             `json:"contentType"`
+	Metadata    []EvidenceMetadata `json:"metadata"`
+}
+
+type EvidenceMetadata struct {
+	ID       int64  `json:"id"`
+	Source   string `json:"description"`
+	Metadata string `json:"occurredAt"`
 }
 
 type Finding struct {

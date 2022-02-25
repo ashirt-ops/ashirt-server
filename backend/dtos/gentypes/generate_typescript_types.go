@@ -19,6 +19,7 @@ func main() {
 	fmt.Println("// Changes made will be overridden on next generate")
 	gen(dtos.APIKey{})
 	gen(dtos.Evidence{})
+	gen(dtos.EvidenceMetadata{})
 	gen(dtos.Finding{})
 	gen(dtos.Operation{})
 	gen(dtos.Query{})
