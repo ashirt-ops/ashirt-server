@@ -87,6 +87,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 			OccurredAt:  evi.OccurredAt,
 			ContentType: evi.ContentType,
 			Tags:        tags,
+			Metadata:    []dtos.EvidenceMetadata{}, // TODO
 		}
 	}
 	return evidenceDTO, nil

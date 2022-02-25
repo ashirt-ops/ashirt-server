@@ -69,6 +69,7 @@ func ListEvidenceForFinding(ctx context.Context, db *database.Connection, i List
 			Description: evi.Description,
 			OccurredAt:  evi.OccurredAt,
 			Tags:        tags,
+			Metadata:    []dtos.EvidenceMetadata{},
 			Operator: dtos.User{
 				Slug:      evi.Slug,
 				FirstName: evi.FirstName,
