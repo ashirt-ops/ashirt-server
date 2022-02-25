@@ -70,7 +70,7 @@ func (c *Connection) Insert(tableName string, valueMap map[string]interface{}) (
 // mapFn: A function that produces a single set of values for a new database row.
 //	       Note that this will be called <count> times
 // Returns: an error if the insert fails
-func (c *Connection) BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}) error {
+func (c *Connection) BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}, onDuplicates ...interface{}) error {
 	if count == 0 {
 		return nil
 	}
@@ -93,6 +93,18 @@ func (c *Connection) BatchInsert(tableName string, count int, mapFn func(int) ma
 			values = append(values, valueMap[columnName])
 		}
 		query = query.Values(values...)
+	}
+
+	if len(onDuplicates) > 0 {
+		stmt, ok := onDuplicates[0].(string)
+		if !ok {
+			return fmt.Errorf("onDuplicate[0] value must be a string")
+		}
+		if len(onDuplicates) > 1 {
+			query = query.Suffix(stmt, onDuplicates[1:])
+		} else {
+			query = query.Suffix(stmt)
+		}
 	}
 
 	_, err := c.execSquirrel(query)
