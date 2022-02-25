@@ -76,3 +76,43 @@ func CreateDefaultTag(ctx context.Context, db *database.Connection, i CreateDefa
 		ColorName: i.ColorName,
 	}, nil
 }
+
+func MergeDefaultTags(ctx context.Context, db *database.Connection, i []CreateDefaultTagInput) error {
+	if err := policyRequireWithAdminBypass(ctx, policy.AdminUsersOnly{}); err != nil {
+		return backend.WrapError("Unwilling to update default tag", backend.UnauthorizedWriteErr(err))
+	}
+
+	tagsToInsert := make([]CreateDefaultTagInput, 0, len(i))
+	currentTagNames := make([]string, 0, len(i))
+
+	for _, t := range i {
+		if listContainsString(currentTagNames, t.Name) != -1 {
+			continue // no need to re-process a tag if we've dealt with it -- just use the first instance
+		} else {
+			currentTagNames = append(currentTagNames, t.Name)
+		}
+
+		tagsToInsert = append(tagsToInsert, t)
+	}
+
+	err := db.BatchInsert("default_tags", len(tagsToInsert), func(idx int) map[string]interface{} {
+		return map[string]interface{}{
+			"name":       tagsToInsert[idx].Name,
+			"color_name": tagsToInsert[idx].ColorName,
+		}
+	}, "ON DUPLICATE KEY UPDATE color_name=VALUES(color_name)")
+
+	if err != nil {
+		return backend.WrapError("Cannot update default tag", backend.DatabaseErr(err))
+	}
+	return nil
+}
+
+func listContainsString(haystack []string, needle string) int {
+	for i, v := range haystack {
+		if v == needle {
+			return i
+		}
+	}
+	return -1
+}
