@@ -1,0 +1,40 @@
+{
+"creatingLibrary": {
+"name": "MediaInfoLib",
+"version": "21.09",
+"url": "https://mediaarea.net/MediaInfo"
+},
+"media": {
+"@ref": "seed_wolf",
+"track": [
+{
+"@type": "General",
+"Count": "331",
+"StreamCount": "1",
+"StreamKind": "General",
+"StreamKind_String": "General",
+"StreamKindID": "0",
+"CompleteName": "seed_wolf",
+"FileNameExtension": "seed_wolf",
+"FileName": "seed_wolf",
+"FileSize": "29616",
+"FileSize_String": "28.9 KiB",
+"FileSize_String1": "29 KiB",
+"FileSize_String2": "29 KiB",
+"FileSize_String3": "28.9 KiB",
+"FileSize_String4": "28.92 KiB",
+"StreamSize": "29616",
+"StreamSize_String": "28.9 KiB (100%)",
+"StreamSize_String1": "29 KiB",
+"StreamSize_String2": "29 KiB",
+"StreamSize_String3": "28.9 KiB",
+"StreamSize_String4": "28.92 KiB",
+"StreamSize_String5": "28.9 KiB (100%)",
+"StreamSize_Proportion": "1.00000",
+"File_Modified_Date": "UTC 2020-09-29 20:57:13",
+"File_Modified_Date_Local": "2020-09-29 13:57:13"
+}
+]
+}
+}
+

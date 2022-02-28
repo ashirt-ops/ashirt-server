@@ -1,0 +1,40 @@
+{
+"creatingLibrary": {
+"name": "MediaInfoLib",
+"version": "21.09",
+"url": "https://mediaarea.net/MediaInfo"
+},
+"media": {
+"@ref": "seed_py_aoc201717",
+"track": [
+{
+"@type": "General",
+"Count": "331",
+"StreamCount": "1",
+"StreamKind": "General",
+"StreamKind_String": "General",
+"StreamKindID": "0",
+"CompleteName": "seed_py_aoc201717",
+"FileNameExtension": "seed_py_aoc201717",
+"FileName": "seed_py_aoc201717",
+"FileSize": "1051",
+"FileSize_String": "1.03 KiB",
+"FileSize_String1": "1 KiB",
+"FileSize_String2": "1.0 KiB",
+"FileSize_String3": "1.03 KiB",
+"FileSize_String4": "1.026 KiB",
+"StreamSize": "1051",
+"StreamSize_String": "1.03 KiB (100%)",
+"StreamSize_String1": "1 KiB",
+"StreamSize_String2": "1.0 KiB",
+"StreamSize_String3": "1.03 KiB",
+"StreamSize_String4": "1.026 KiB",
+"StreamSize_String5": "1.03 KiB (100%)",
+"StreamSize_Proportion": "1.00000",
+"File_Modified_Date": "UTC 2020-09-29 20:57:13",
+"File_Modified_Date_Local": "2020-09-29 13:57:13"
+}
+]
+}
+}
+

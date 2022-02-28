@@ -1,0 +1,40 @@
+{
+"creatingLibrary": {
+"name": "MediaInfoLib",
+"version": "21.09",
+"url": "https://mediaarea.net/MediaInfo"
+},
+"media": {
+"@ref": "seed_entry",
+"track": [
+{
+"@type": "General",
+"Count": "331",
+"StreamCount": "1",
+"StreamKind": "General",
+"StreamKind_String": "General",
+"StreamKindID": "0",
+"CompleteName": "seed_entry",
+"FileNameExtension": "seed_entry",
+"FileName": "seed_entry",
+"FileSize": "302",
+"FileSize_String": "302 Bytes",
+"FileSize_String1": "302 Bytes",
+"FileSize_String2": "302 Bytes",
+"FileSize_String3": "302 Bytes",
+"FileSize_String4": "302.0 Bytes",
+"StreamSize": "302",
+"StreamSize_String": "302 Bytes (100%)",
+"StreamSize_String1": "302 Bytes",
+"StreamSize_String2": "302 Bytes",
+"StreamSize_String3": "302 Bytes",
+"StreamSize_String4": "302.0 Bytes",
+"StreamSize_String5": "302 Bytes (100%)",
+"StreamSize_Proportion": "1.00000",
+"File_Modified_Date": "UTC 2020-09-29 20:57:13",
+"File_Modified_Date_Local": "2020-09-29 13:57:13"
+}
+]
+}
+}
+

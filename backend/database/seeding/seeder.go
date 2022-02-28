@@ -24,6 +24,7 @@ type Seeder struct {
 	APIKeys           []models.APIKey
 	Findings          []models.Finding
 	Evidences         []models.Evidence
+	EvidenceMetadata  []models.EvidenceMetadata
 	Users             []models.User
 	Operations        []models.Operation
 	Tags              []models.Tag
@@ -137,6 +138,16 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"occurred_at":     seed.Evidences[i].OccurredAt,
 				"created_at":      seed.Evidences[i].CreatedAt,
 				"updated_at":      seed.Evidences[i].UpdatedAt,
+			}
+		})
+		tx.BatchInsert("evidence_metadata", len(seed.EvidenceMetadata), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":          seed.EvidenceMetadata[i].ID,
+				"evidence_id": seed.EvidenceMetadata[i].EvidenceID,
+				"source":      seed.EvidenceMetadata[i].Source,
+				"metadata":    seed.EvidenceMetadata[i].Metadata,
+				"created_at":  seed.EvidenceMetadata[i].CreatedAt,
+				"updated_at":  seed.EvidenceMetadata[i].UpdatedAt,
 			}
 		})
 		tx.BatchInsert("findings", len(seed.Findings), func(i int) map[string]interface{} {

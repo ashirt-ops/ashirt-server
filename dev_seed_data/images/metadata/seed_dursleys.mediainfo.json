@@ -1,0 +1,85 @@
+{
+"creatingLibrary": {
+"name": "MediaInfoLib",
+"version": "21.09",
+"url": "https://mediaarea.net/MediaInfo"
+},
+"media": {
+"@ref": "seed_dursleys",
+"track": [
+{
+"@type": "General",
+"Count": "332",
+"StreamCount": "1",
+"StreamKind": "General",
+"StreamKind_String": "General",
+"StreamKindID": "0",
+"ImageCount": "1",
+"Image_Format_List": "JPEG",
+"Image_Format_WithHint_List": "JPEG",
+"Image_Codec_List": "JPEG",
+"CompleteName": "seed_dursleys",
+"FileNameExtension": "seed_dursleys",
+"FileName": "seed_dursleys",
+"Format": "JPEG",
+"Format_String": "JPEG",
+"Format_Extensions": "h3d jpeg jpg jpe jps mpo",
+"Format_Commercial": "JPEG",
+"InternetMediaType": "image/jpeg",
+"FileSize": "338535",
+"FileSize_String": "331 KiB",
+"FileSize_String1": "331 KiB",
+"FileSize_String2": "331 KiB",
+"FileSize_String3": "331 KiB",
+"FileSize_String4": "330.6 KiB",
+"StreamSize": "0",
+"StreamSize_String": "0.00 Byte (0%)",
+"StreamSize_String1": " Byte0",
+"StreamSize_String2": "0.0 Byte",
+"StreamSize_String3": "0.00 Byte",
+"StreamSize_String4": "0.000 Byte",
+"StreamSize_String5": "0.00 Byte (0%)",
+"StreamSize_Proportion": "0.00000",
+"File_Modified_Date": "UTC 2020-09-29 20:57:13",
+"File_Modified_Date_Local": "2020-09-29 13:57:13",
+"extra": {
+"FileExtension_Invalid": "h3d jpeg jpg jpe jps mpo"
+}
+},
+{
+"@type": "Image",
+"Count": "125",
+"StreamCount": "1",
+"StreamKind": "Image",
+"StreamKind_String": "Image",
+"StreamKindID": "0",
+"Format": "JPEG",
+"Format_String": "JPEG",
+"Format_Commercial": "JPEG",
+"InternetMediaType": "image/jpeg",
+"Width": "1800",
+"Width_String": "1 800 pixels",
+"Height": "2700",
+"Height_String": "2 700 pixels",
+"ColorSpace": "YUV",
+"ChromaSubsampling": "4:2:0",
+"BitDepth": "8",
+"BitDepth_String": "8 bits",
+"Compression_Mode": "Lossy",
+"Compression_Mode_String": "Lossy",
+"StreamSize": "338535",
+"StreamSize_String": "331 KiB (100%)",
+"StreamSize_String1": "331 KiB",
+"StreamSize_String2": "331 KiB",
+"StreamSize_String3": "331 KiB",
+"StreamSize_String4": "330.6 KiB",
+"StreamSize_String5": "331 KiB (100%)",
+"StreamSize_Proportion": "1.00000",
+"extra": {
+"ColorSpace_ICC": "RGB"
+}
+}
+]
+}
+}
+

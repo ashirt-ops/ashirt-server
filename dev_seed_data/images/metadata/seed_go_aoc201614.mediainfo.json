@@ -1,0 +1,40 @@
+{
+"creatingLibrary": {
+"name": "MediaInfoLib",
+"version": "21.09",
+"url": "https://mediaarea.net/MediaInfo"
+},
+"media": {
+"@ref": "seed_go_aoc201614",
+"track": [
+{
+"@type": "General",
+"Count": "331",
+"StreamCount": "1",
+"StreamKind": "General",
+"StreamKind_String": "General",
+"StreamKindID": "0",
+"CompleteName": "seed_go_aoc201614",
+"FileNameExtension": "seed_go_aoc201614",
+"FileName": "seed_go_aoc201614",
+"FileSize": "2610",
+"FileSize_String": "2.55 KiB",
+"FileSize_String1": "3 KiB",
+"FileSize_String2": "2.5 KiB",
+"FileSize_String3": "2.55 KiB",
+"FileSize_String4": "2.549 KiB",
+"StreamSize": "2610",
+"StreamSize_String": "2.55 KiB (100%)",
+"StreamSize_String1": "3 KiB",
+"StreamSize_String2": "2.5 KiB",
+"StreamSize_String3": "2.55 KiB",
+"StreamSize_String4": "2.549 KiB",
+"StreamSize_String5": "2.55 KiB (100%)",
+"StreamSize_Proportion": "1.00000",
+"File_Modified_Date": "UTC 2020-04-29 19:22:06",
+"File_Modified_Date_Local": "2020-04-29 12:22:06"
+}
+]
+}
+}
+

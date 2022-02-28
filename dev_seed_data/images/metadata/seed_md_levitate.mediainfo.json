@@ -1,0 +1,40 @@
+{
+"creatingLibrary": {
+"name": "MediaInfoLib",
+"version": "21.09",
+"url": "https://mediaarea.net/MediaInfo"
+},
+"media": {
+"@ref": "seed_md_levitate",
+"track": [
+{
+"@type": "General",
+"Count": "331",
+"StreamCount": "1",
+"StreamKind": "General",
+"StreamKind_String": "General",
+"StreamKindID": "0",
+"CompleteName": "seed_md_levitate",
+"FileNameExtension": "seed_md_levitate",
+"FileName": "seed_md_levitate",
+"FileSize": "1000",
+"FileSize_String": "1 000 Bytes",
+"FileSize_String1": "1 000 Bytes",
+"FileSize_String2": "1 000 Bytes",
+"FileSize_String3": "1 000 Bytes",
+"FileSize_String4": "1 000.0 Bytes",
+"StreamSize": "1000",
+"StreamSize_String": "1 000 Bytes (100%)",
+"StreamSize_String1": "1 000 Bytes",
+"StreamSize_String2": "1 000 Bytes",
+"StreamSize_String3": "1 000 Bytes",
+"StreamSize_String4": "1 000.0 Bytes",
+"StreamSize_String5": "1 000 Bytes (100%)",
+"StreamSize_Proportion": "1.00000",
+"File_Modified_Date": "UTC 2020-09-29 20:57:13",
+"File_Modified_Date_Local": "2020-09-29 13:57:13"
+}
+]
+}
+}
+

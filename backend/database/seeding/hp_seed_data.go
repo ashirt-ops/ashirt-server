@@ -4,11 +4,27 @@
 package seeding
 
 import (
+	"io"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 )
+
+func readMetadataTextFile(name string) string {
+	tmpDir := "/tmp/contentstore"
+	reader, err := os.Open(path.Join(tmpDir, "metadata", name))
+	if err != nil {
+		panic(err)
+	}
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
+}
 
 var HarryPotterSeedData = Seeder{
 	FindingCategories: []models.FindingCategory{
@@ -104,6 +120,11 @@ var HarryPotterSeedData = Seeder{
 		EviGanttLong30, EviGanttLong31, EviGanttLong32, EviGanttLong33, EviGanttLong34, EviGanttLong35, EviGanttLong36, EviGanttLong37, EviGanttLong38, EviGanttLong39,
 		EviGanttLong40, EviGanttLong41, EviGanttLong42, EviGanttLong43, EviGanttLong44, EviGanttLong45, EviGanttLong46, EviGanttLong47, EviGanttLong48, EviGanttLong49,
 		EviGanttLong50, EviGanttLong51, EviGanttLong52, EviGanttLong53, EviGanttLong54, EviGanttLong55, EviGanttLong56, EviGanttLong57, EviGanttLong58, EviGanttLong59,
+	},
+	EvidenceMetadata: []models.EvidenceMetadata{
+		EviDursleysMetadataMI, EviMirrorOfErisedMetadataMI, EviLevitateSpellMetadataMI, EviRulesForQuidditchMetadataMI,
+		EviFlyingCarMetadataMI, EviDobbyMetadataMI, EviSpiderAragogMetadataMI, EviMoaningMyrtleMetadataMI, EviWhompingWillowMetadataMI, EviTomRiddlesDiaryMetadataMI, EviHeadlessHuntApplicationMetadataMI, EviPetrifiedHermioneMetadataMI,
+		EviTristateTrophyMetadataMI, EviEntryFormMetadataMI, EviWizardDanceMetadataMI, EviPolyjuiceMetadataMI, EviWarewolfMetadataMI,
 	},
 	TagEviMap: unionTagEviMap(
 		associateTagsToEvidence(EviDursleys, TagFamily, TagHome),
@@ -393,6 +414,27 @@ var EviGanttLong56 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-56"
 var EviGanttLong57 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-57", "", "none", -57)
 var EviGanttLong58 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-58", "", "none", -58)
 var EviGanttLong59 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-59", "", "none", -59)
+
+var newHPEvidenceMetadata = newEvidenceMetadataGen(1)
+var EviDursleysMetadataMI = newHPEvidenceMetadata(EviDursleys.ID, "mediainfo", readMetadataTextFile("seed_dursleys.mediainfo.json"))
+var EviMirrorOfErisedMetadataMI = newHPEvidenceMetadata(EviMirrorOfErised.ID, "mediainfo", "metadata")
+var EviLevitateSpellMetadataMI = newHPEvidenceMetadata(EviLevitateSpell.ID, "mediainfo", "metadata")
+var EviRulesForQuidditchMetadataMI = newHPEvidenceMetadata(EviRulesForQuidditch.ID, "mediainfo", "metadata")
+
+var EviFlyingCarMetadataMI = newHPEvidenceMetadata(EviFlyingCar.ID, "mediainfo", "metadata")
+var EviDobbyMetadataMI = newHPEvidenceMetadata(EviDobby.ID, "mediainfo", "metadata")
+var EviSpiderAragogMetadataMI = newHPEvidenceMetadata(EviSpiderAragog.ID, "mediainfo", "metadata")
+var EviMoaningMyrtleMetadataMI = newHPEvidenceMetadata(EviMoaningMyrtle.ID, "mediainfo", "metadata")
+var EviWhompingWillowMetadataMI = newHPEvidenceMetadata(EviWhompingWillow.ID, "mediainfo", "metadata")
+var EviTomRiddlesDiaryMetadataMI = newHPEvidenceMetadata(EviTomRiddlesDiary.ID, "mediainfo", "metadata")
+var EviHeadlessHuntApplicationMetadataMI = newHPEvidenceMetadata(EviHeadlessHuntApplication.ID, "mediainfo", "metadata")
+var EviPetrifiedHermioneMetadataMI = newHPEvidenceMetadata(EviPetrifiedHermione.ID, "mediainfo", "metadata")
+
+var EviTristateTrophyMetadataMI = newHPEvidenceMetadata(EviTristateTrophy.ID, "mediainfo", "metadata")
+var EviEntryFormMetadataMI = newHPEvidenceMetadata(EviEntryForm.ID, "mediainfo", "metadata")
+var EviWizardDanceMetadataMI = newHPEvidenceMetadata(EviWizardDance.ID, "mediainfo", "metadata")
+var EviPolyjuiceMetadataMI = newHPEvidenceMetadata(EviPolyjuice.ID, "mediainfo", "metadata")
+var EviWarewolfMetadataMI = newHPEvidenceMetadata(EviWarewolf.ID, "mediainfo", "metadata")
 
 var newHPQuery = newQueryGen(1)
 var QuerySalazarsHier = newHPQuery(OpChamberOfSecrets.ID, "Find Heir", "Magic Query String", "findings")
