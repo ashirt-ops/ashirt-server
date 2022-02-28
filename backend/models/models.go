@@ -51,7 +51,7 @@ type Evidence struct {
 
 type EvidenceMetadata struct {
 	ID         int64      `db:"id"`
-	EvidenceId int64      `db:"evidence_id"`
+	EvidenceID int64      `db:"evidence_id"`
 	Source     string     `db:"source"`
 	Metadata   string     `db:"metadata"`
 	CreatedAt  time.Time  `db:"created_at"`
