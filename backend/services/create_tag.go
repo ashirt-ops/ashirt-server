@@ -86,7 +86,7 @@ func MergeDefaultTags(ctx context.Context, db *database.Connection, i []CreateDe
 	currentTagNames := make([]string, 0, len(i))
 
 	for _, t := range i {
-		if listContainsString(currentTagNames, t.Name) != -1 || t.Name == ""{
+		if listContainsString(currentTagNames, t.Name) != -1 || t.Name == "" {
 			continue // no need to re-process a tag if we've dealt with it -- just use the first instance
 		} else {
 			currentTagNames = append(currentTagNames, t.Name)
