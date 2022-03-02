@@ -127,7 +127,7 @@ func (tx *Transactable) Insert(tableName string, valueMap map[string]interface{}
 // but allows the caller to provide multiple db rows. The mapFn parameter should return back data for
 // the i'th row to be added
 // Returns an error if an error has been encountered.
-func (tx *Transactable) BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}) error {
+func (tx *Transactable) BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}, onDuplicates ...interface{}) error {
 	if tx.Error() != nil {
 		return tx.Error()
 	}
@@ -154,6 +154,18 @@ func (tx *Transactable) BatchInsert(tableName string, count int, mapFn func(int)
 			values = append(values, valueMap[columnName])
 		}
 		query = query.Values(values...)
+	}
+
+	if len(onDuplicates) > 0 {
+		stmt, ok := onDuplicates[0].(string)
+		if !ok {
+			return fmt.Errorf("onDuplicate[0] value must be a string")
+		}
+		if len(onDuplicates) > 1 {
+			query = query.Suffix(stmt, onDuplicates[1:])
+		} else {
+			query = query.Suffix(stmt)
+		}
 	}
 
 	_, err := tx.exec(query)

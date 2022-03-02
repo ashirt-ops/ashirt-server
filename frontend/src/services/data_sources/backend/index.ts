@@ -70,6 +70,7 @@ export const backendDataSource: DataSource = {
   createDefaultTag: (payload) => req('POST', `/admin/tags`, payload),
   updateDefaultTag: (ids, payload) => req('PUT', `/admin/tags/${ids.tagId}`, payload),
   deleteDefaultTag: (ids) => req('DELETE', `/admin/tags/${ids.tagId}`),
+  mergeDefaultTags: (payload) => req('POST', `/admin/merge/tags`, payload),
 
   // TODO these should go into their respective authschemes:
   createRecoveryCode: ids => req('POST', '/auth/recovery/generate', ids),
