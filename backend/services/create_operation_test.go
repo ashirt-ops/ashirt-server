@@ -17,20 +17,22 @@ func TestCreateOperation(t *testing.T) {
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
 
+	// verify slug name is invalid
 	i := services.CreateOperationInput{
 		Slug:    "???",
 		OwnerID: UserRon.ID,
 		Name:    "Ron's Op",
 	}
-	createdOp, err := services.CreateOperation(ctx, db, i)
+	_, err := services.CreateOperation(ctx, db, i)
 	require.Error(t, err)
 
+	// verify proper creation of a new operation
 	i = services.CreateOperationInput{
 		Slug:    "rop",
 		OwnerID: UserRon.ID,
 		Name:    "Ron's Op",
 	}
-	createdOp, err = services.CreateOperation(ctx, db, i)
+	createdOp, err := services.CreateOperation(ctx, db, i)
 	require.NoError(t, err)
 	fullOp := getOperationFromSlug(t, db, createdOp.Slug)
 
@@ -42,6 +44,26 @@ func TestCreateOperation(t *testing.T) {
 	require.Equal(t, 1, len(attachedUsers))
 	require.Equal(t, policy.OperationRoleAdmin, attachedUsers[0].Role, "Creator of operation should have admin role for that operation")
 	require.Equal(t, i.OwnerID, attachedUsers[0].UserID)
+
+	attachedTags := getTagFromOperationID(t, db, fullOp.ID)
+	defaultTags := getDefaultTags(t, db)
+	expectedTags := make([]models.Tag, len(defaultTags))
+	for idx, tag := range defaultTags {
+		expectedTags[idx].ColorName = tag.ColorName
+		expectedTags[idx].Name = tag.Name
+	}
+
+	for _, tag := range attachedTags {
+		foundIndex := -1
+		for idx, eTag := range expectedTags {
+			if tag.Name == eTag.Name && tag.ColorName == eTag.ColorName {
+				foundIndex = idx
+			}
+		}
+		require.NotEqual(t, -1, foundIndex, "Each of the created tags must be from default tags")
+		expectedTags = append(expectedTags[:foundIndex], expectedTags[foundIndex+1:]...)
+	}
+	require.Empty(t, expectedTags, "All of the expected tags must be used")
 }
 
 func TestSanitizeOperationSlug(t *testing.T) {

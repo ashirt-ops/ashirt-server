@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { Tag, TagWithUsage, TagByEvidenceDate } from 'src/global_types'
+import { Tag, TagWithUsage, TagByEvidenceDate, DefaultTag } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { tagEvidenceDateFromDto } from './data_sources/converters'
 
@@ -46,4 +46,34 @@ export async function getTagsByEvidenceUsage(i: {
 }): Promise<Array<TagByEvidenceDate>> {
   const data = await ds.listTagsByEvidenceDate(i)
   return data.map(tagEvidenceDateFromDto)
+}
+
+export async function getDefaultTags(): Promise<Array<DefaultTag>> {
+  return await ds.listDefaultTags()
+}
+
+export async function createDefaultTag(i: {
+  name: string,
+  colorName: string,
+}): Promise<DefaultTag> {
+  return await ds.createDefaultTag(
+    { name: i.name, colorName: i.colorName },
+  )
+}
+
+export async function deleteDefaultTag(i: {
+  id: number,
+}): Promise<void> {
+  await ds.deleteDefaultTag({ tagId: i.id })
+}
+
+export async function updateDefaultTag(i: {
+  id: number,
+  name: string,
+  colorName: string,
+}): Promise<void> {
+  await ds.updateDefaultTag(
+    { tagId: i.id },
+    { name: i.name, colorName: i.colorName },
+  )
 }

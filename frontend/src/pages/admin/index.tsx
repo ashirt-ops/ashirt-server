@@ -16,6 +16,7 @@ import RecoveryMetrics from './recovery_metrics'
 import UserTable from './user_table'
 
 import { BuildReloadBus } from 'src/helpers/reload_bus'
+import { DefaultTagEditor } from './default_tag_editor'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -47,6 +48,13 @@ export default (props: RouteComponentProps) => {
             id: "operations", label: "Operation Management", content: (
               <>
                 <OperationsTable />
+              </>
+            )
+          },
+          {
+            id: "tags", label: "Tag Management", content: (
+              <>
+                <DefaultTagEditor />
               </>
             )
           },

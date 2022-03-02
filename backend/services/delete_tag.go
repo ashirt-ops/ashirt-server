@@ -19,6 +19,10 @@ type DeleteTagInput struct {
 	OperationSlug string
 }
 
+type DeleteDefaultTagInput struct {
+	ID int64
+}
+
 // DeleteTag removes a tag and untags all evidence with the tag
 func DeleteTag(ctx context.Context, db *database.Connection, i DeleteTagInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
@@ -36,6 +40,20 @@ func DeleteTag(ctx context.Context, db *database.Connection, i DeleteTagInput) e
 	})
 	if err != nil {
 		return backend.WrapError("Cannot delete tag", backend.DatabaseErr(err))
+	}
+
+	return nil
+}
+
+// DeleteDefaultTag removes a single tag in the default_tags table by the tag id. Admin only.
+func DeleteDefaultTag(ctx context.Context, db *database.Connection, i DeleteDefaultTagInput) error {
+	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
+		return backend.WrapError("Unwilling to delete default tag", backend.UnauthorizedWriteErr(err))
+	}
+
+	err := db.Delete(sq.Delete("default_tags").Where(sq.Eq{"id": i.ID}))
+	if err != nil {
+		return backend.WrapError("Cannot delete default tag", backend.DatabaseErr(err))
 	}
 
 	return nil

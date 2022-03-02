@@ -33,3 +33,27 @@ func TestCreateTag(t *testing.T) {
 
 	require.Equal(t, op.ID, updatedTag.OperationID, "is in right operation")
 }
+
+func TestCreateDefaultTag(t *testing.T) {
+	db := initTest(t)
+	HarryPotterSeedData.ApplyTo(t, db)
+	normalUser := UserRon
+	adminUser := UserDumbledore
+
+	i := services.CreateDefaultTagInput{
+		Name:      "New Tag",
+		ColorName: "indigo",
+	}
+
+	// verify that a normal cannot create a new default tag
+	ctx := simpleFullContext(normalUser)
+	_, err := services.CreateDefaultTag(ctx, db, i)
+	require.Error(t, err)
+
+	// verify that an admin can create a new default tag
+	ctx = simpleFullContext(adminUser)
+	createdTag, err := services.CreateDefaultTag(ctx, db, i)
+	require.NoError(t, err)
+	require.Equal(t, createdTag.Name, i.Name)
+	require.NotContains(t, HarryPotterSeedData.AllInitialDefaultTagIds(), createdTag.ID, "Should have new ID")
+}

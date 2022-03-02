@@ -626,6 +626,46 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return nil, services.DeleteTag(r.Context(), db, i)
 	}))
 
+	route(r, "GET", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return services.ListDefaultTags(r.Context(), db)
+	}))
+
+	route(r, "POST", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.CreateDefaultTagInput{
+			Name:      dr.FromBody("name").Required().AsString(),
+			ColorName: dr.FromBody("colorName").AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.CreateDefaultTag(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpdateDefaultTagInput{
+			ID:        dr.FromURL("tag_id").Required().AsInt64(),
+			Name:      dr.FromBody("name").Required().AsString(),
+			ColorName: dr.FromBody("colorName").AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.UpdateDefaultTag(r.Context(), db, i)
+	}))
+
+	route(r, "DELETE", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.DeleteDefaultTagInput{
+			ID: dr.FromURL("tag_id").Required().AsInt64(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteDefaultTag(r.Context(), db, i)
+	}))
+
 	route(r, "GET", "/operations/{operation_slug}/tagsByEvidenceUsage", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListTagsByEvidenceDateInput{

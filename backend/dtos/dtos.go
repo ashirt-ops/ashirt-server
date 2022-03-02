@@ -59,6 +59,8 @@ type Tag struct {
 	Name      string `json:"name"`
 }
 
+type DefaultTag Tag
+
 type TagWithUsage struct {
 	Tag
 	EvidenceCount int64 `json:"evidenceCount"`

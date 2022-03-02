@@ -59,6 +59,16 @@ func TagIDsFromTags(tags ...models.Tag) []int64 {
 	return ids
 }
 
+// DefaultTagIDsFromTags maps over models.DefaultTags to come up with a collection of IDs for those tags
+// equivalent js: tags.map( i => i.ID)
+func DefaultTagIDsFromTags(tags ...models.DefaultTag) []int64 {
+	ids := make([]int64, len(tags))
+	for i, t := range tags {
+		ids[i] = t.ID
+	}
+	return ids
+}
+
 func newAPIKeyGen(first int64) func(int64, string, []byte) models.APIKey {
 	id := iotaLike(first)
 	return func(userID int64, accessKey string, secretKey []byte) models.APIKey {
@@ -118,6 +128,18 @@ func newTagGen(first int64) func(opID int64, name, colorName string) models.Tag 
 			Name:        name,
 			ColorName:   colorName,
 			CreatedAt:   internalClock.Now(),
+		}
+	}
+}
+
+func newDefaultTagGen(first int64) func(name, colorName string) models.DefaultTag {
+	id := iotaLike(first)
+	return func(name, colorName string) models.DefaultTag {
+		return models.DefaultTag{
+			ID:        id(),
+			Name:      name,
+			ColorName: colorName,
+			CreatedAt: internalClock.Now(),
 		}
 	}
 }

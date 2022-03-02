@@ -29,6 +29,9 @@ var HarryPotterSeedData = Seeder{
 		CommonTagWhoGoF, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF, CommonTagWhyGoF,
 		CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk, TagHowGantt,
 	},
+	DefaultTags: []models.DefaultTag{
+		DefaultTagWho, DefaultTagWhat, DefaultTagWhere, DefaultTagWhen, DefaultTagWhy,
+	},
 	APIKeys: []models.APIKey{
 		APIKeyHarry1, APIKeyHarry2,
 		APIKeyRon1, APIKeyRon2,
@@ -240,6 +243,13 @@ var OpDeathlyHallows = newHPOp("HPDH", "Harry Potter and The Deathly Hallows")
 
 // OpGanttChart is reserved to verify the Overview feature
 var OpGanttChart = newHPOp("HPGantt", "Harry Potter and The Curse of Admin Oversight")
+
+var newDefaultHPTag = newDefaultTagGen(1)
+var DefaultTagWho = newDefaultHPTag("Who", "lightRed")
+var DefaultTagWhat = newDefaultHPTag("What", "lightBlue")
+var DefaultTagWhere = newDefaultHPTag("Where", "lightGreen")
+var DefaultTagWhen = newDefaultHPTag("When", "lightIndigo")
+var DefaultTagWhy = newDefaultHPTag("Why", "lightYellow")
 
 var newHPTag = newTagGen(1)
 var TagFamily = newHPTag(OpSorcerersStone.ID, "Family", "red")
