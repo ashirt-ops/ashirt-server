@@ -33,15 +33,15 @@ func getEvidenceIDs(t *testing.T, db *database.Connection, findingID int64) []in
 func testBatchAddEvidence(t *testing.T, db *database.Connection, goodOp, badOp mockOperation) {
 	findingID := goodOp.Findings[1].ID
 	initialEviIDs := getEvidenceIDs(t, db, findingID)
-	err := batchAddEvidenceToFinding(db, []string{}, goodOp.Op.ID, findingID)
+	err := batchAddEvidenceToFinding(db, []string{}, goodOp.ID, findingID)
 	require.NoError(t, err)
 	idsAfterEmptyAdd := getEvidenceIDs(t, db, findingID)
 	require.Equal(t, initialEviIDs, idsAfterEmptyAdd)
 
-	err = batchAddEvidenceToFinding(db, []string{badOp.Evidence[0].UUID}, goodOp.Op.ID, findingID)
+	err = batchAddEvidenceToFinding(db, []string{badOp.Evidence[0].UUID}, goodOp.ID, findingID)
 	require.NotNil(t, err)
 
-	err = batchAddEvidenceToFinding(db, []string{goodOp.Evidence[0].UUID}, goodOp.Op.ID, findingID)
+	err = batchAddEvidenceToFinding(db, []string{goodOp.Evidence[0].UUID}, goodOp.ID, findingID)
 	require.NoError(t, err)
 	idsAfterSingleAdd := getEvidenceIDs(t, db, findingID)
 	require.Equal(t, 1, len(idsAfterSingleAdd))

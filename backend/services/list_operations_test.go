@@ -27,7 +27,7 @@ func TestListOperations(t *testing.T) {
 	for _, op := range ops {
 		var expected *models.Operation = nil
 		for _, fOp := range fullOps {
-			if fOp.ID == op.ID {
+			if fOp.Slug == op.Slug {
 				expected = &fOp
 				break
 			}

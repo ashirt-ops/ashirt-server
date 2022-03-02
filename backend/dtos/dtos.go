@@ -44,10 +44,6 @@ type Operation struct {
 	Name     string                 `json:"name"`
 	NumUsers int                    `json:"numUsers"`
 	Status   models.OperationStatus `json:"status"`
-
-	// ID is only used in list operations for the API since the screenshot client still expects int64 ids.
-	// Once the screenshot client is updated this line can be removed
-	ID int64 `json:"id"`
 }
 
 type Query struct {
