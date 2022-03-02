@@ -34,30 +34,13 @@ func TestAPI(t *testing.T) {
 		a.Get("/api/operations").WithAPIKey(bobKey).Do().ExpectSubsetJSONArray([]string{`{"slug": "bob-op"}`})
 	})
 
-	t.Run("Reading operations from API", func(t *testing.T) {
-		a := integration.NewTester(t)
-		alice := a.NewUser("adefaultuser", "Alice", "DefaultUser")
-		bob := a.NewUser("bsnooper", "Bob", "Snooper")
-		aliceKey := a.APIKeyForUser(alice)
-		bobKey := a.APIKeyForUser(bob)
-
-		a.Post("/web/operations").WithJSONBody(`{"name": "Alice Op", "slug": "alice-op"}`).AsUser(alice).Do().ExpectSuccess()
-		a.Post("/web/operations").WithJSONBody(`{"name": "Bob Op", "slug": "bob-op"}`).AsUser(bob).Do().ExpectSuccess()
-
-		a.Get("/api/operations/1").WithAPIKey(aliceKey).Do().ExpectSubsetJSON(`{"slug": "alice-op"}`)
-		a.Get("/api/operations/2").WithAPIKey(bobKey).Do().ExpectSubsetJSON(`{"slug": "bob-op"}`)
-
-		// Ensure bob cannot read Alice's operation
-		a.Get("/api/operations/1").WithAPIKey(bobKey).Do().ExpectNotFound()
-	})
-
 	t.Run("Creating Evidence from API", func(t *testing.T) {
 		a := integration.NewTester(t)
 		alice := a.NewUser("adefaultuser", "Alice", "DefaultUser")
 		aliceKey := a.APIKeyForUser(alice)
 
 		a.Post("/web/operations").WithJSONBody(`{"name": "Op 1", "slug": "op1"}`).AsUser(alice).Do().ExpectSuccess()
-		evidenceUUID1 := a.Post("/api/operations/1/evidence").WithAPIKey(aliceKey).WithMultipartBody(sampleEvidenceBody, nil).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
+		evidenceUUID1 := a.Post("/api/operations/op1/evidence").WithAPIKey(aliceKey).WithMultipartBody(sampleEvidenceBody, nil).Do().ExpectStatus(http.StatusCreated).ResponseUUID()
 		a.Get("/web/operations/op1/evidence").AsUser(alice).Do().ExpectSubsetJSONArray([]string{
 			`{"uuid": "` + evidenceUUID1 + `", "description": "evi1", "occurredAt": "2019-07-29T23:12:45Z"}`,
 		})
