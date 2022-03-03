@@ -17,6 +17,7 @@ const (
 // Grants permissions based on operation roles
 type Operation struct {
 	UserID           int64
+	IsHeadless       bool
 	OperationRoleMap map[int64]OperationRole
 }
 
