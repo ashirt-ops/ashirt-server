@@ -7,6 +7,7 @@
       "esnext"
     ],
     "moduleResolution": "node",
+    "module": "ES2020",
     "noImplicitAny": true,
     "strictNullChecks": true,
     "baseUrl": "./",

@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { RouteComponentProps } from 'react-router-dom'
+import { useParams, RouteComponentProps } from 'react-router-dom'
 
 import Button from 'src/components/button'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
@@ -15,7 +15,7 @@ import DeleteOperationButton from './delete_operation_button'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: RouteComponentProps<{ slug: string }>) => {
-  const { slug } = props.match.params
+  const {slug} = useParams<{slug: string}>()
 
   return (
     <>
