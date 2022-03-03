@@ -37,7 +37,7 @@ func (o *Operation) Check(permission Permission) bool {
 	case CanModifyFindingsOfOperation:
 		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite)
 	case CanModifyEvidenceOfOperation:
-		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite)
+		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite) || o.IsHeadless
 	case CanModifyOperation:
 		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite)
 	case CanModifyQueriesOfOperation:
@@ -48,7 +48,7 @@ func (o *Operation) Check(permission Permission) bool {
 	case CanListUsersOfOperation:
 		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite, OperationRoleRead)
 	case CanReadOperation:
-		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite, OperationRoleRead)
+		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite, OperationRoleRead) || o.IsHeadless
 	}
 	return false
 }
