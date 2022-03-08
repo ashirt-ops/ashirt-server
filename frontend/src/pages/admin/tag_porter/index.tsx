@@ -5,14 +5,15 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import SettingsSection from 'src/components/settings_section'
 import { getDefaultTags, mergeDefaultTags } from 'src/services'
-import { renderModals, useForm, useFormField, useModal, useWiredData } from 'src/helpers'
+import { renderModals, useForm, useModal, useWiredData } from 'src/helpers'
 import Modal from 'src/components/modal'
 import Button from 'src/components/button'
 import Form from 'src/components/form'
-import { Tag } from 'src/global_types'
-import { SourcelessCodeblock } from 'src/components/code_block'
 import { isError } from 'src/helpers/is_error'
 import { isPlainObject } from 'lodash'
+import { makeInvisibleDownloadAnchor } from 'src/helpers/invisible_download_anchor'
+import { useDropzone } from 'react-dropzone'
+import TagList from "src/components/tag_list"
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -22,10 +23,6 @@ export const TagPorter = (props: {
   offReload: (listener: () => void) => void
 }) => {
   const wiredTags = useWiredData(getDefaultTags)
-
-  const exportTagsModal = useModal<{ tags: Array<Tag> }>(modalProps => (
-    <ExportModal {...modalProps} />
-  ))
 
   const importTagsModal = useModal(modalProps => (
     <ImportModal {...modalProps} requestReload={props.requestReload} />
@@ -44,45 +41,24 @@ export const TagPorter = (props: {
           <>
             <div className={cx('button-group')}>
               <Button primary onClick={() => importTagsModal.show({})}>Import</Button>
-              <Button className={cx('export-button')} primary onClick={() => exportTagsModal.show({ tags })}>Export</Button>
+              <Button className={cx('export-button')} primary onClick={
+                () => {
+                  const jsonData = JSON.stringify(tags
+                    .map(tag => ({
+                      name: tag.name,
+                      colorName: tag.colorName,
+                    })
+                    ), null, 2)
+
+                  makeInvisibleDownloadAnchor(new Blob([jsonData], { type: "application/json" }), "tag_export.json")
+                }
+              }>Export</Button>
             </div>
           </>
         ))}
       </SettingsSection>
-      {renderModals(exportTagsModal, importTagsModal)}
+      {renderModals(importTagsModal)}
     </>
-  )
-}
-
-const ExportModal = (props: {
-  tags: Array<Tag>
-  onRequestClose: () => void,
-}) => {
-  const jsonData = JSON.stringify(props.tags
-    .map(tag => ({
-      name: tag.name,
-      colorName: tag.colorName,
-    })
-    ), null, 2)
-
-  const formComponentProps = useForm({
-    onSuccess: () => { props.onRequestClose() },
-    handleSubmit: async () => {
-      await navigator.clipboard.writeText(jsonData)
-    }
-  })
-
-  return (
-    <Modal title="Export Tags" onRequestClose={props.onRequestClose}>
-      <Form submitText="Copy" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
-        <p>Copy the below text and paste it into another AShirt instance</p>
-        <SourcelessCodeblock
-          className={cx('codeblock')}
-          code={jsonData}
-          language="json"
-        />
-      </Form>
-    </Modal>
   )
 }
 
@@ -91,51 +67,118 @@ const ImportModal = (props: {
   requestReload: () => void
 }) => {
 
-  const codeblockField = useFormField<string>("")
+  const [err, setErr] = React.useState<Error | null>(null)
+  const [content, setContent] = React.useState<Array<UpsertTag> | null>(null)
+  const [contentFilename, setContentFilename] = React.useState<string | null>(null)
+
   const formComponentProps = useForm({
-    fields: [codeblockField],
     onSuccess: () => { props.onRequestClose() },
     handleSubmit: async () => {
+      if (content == null) {
+        return
+      }
       try {
-        const parsedJson = JSON.parse(codeblockField.value) as unknown
-        if (!isTagArray(parsedJson)) {
-          throw new SyntaxError()
-        }
-
-        await mergeDefaultTags(parsedJson)
+        await mergeDefaultTags(content)
         props.requestReload()
         return
       }
       catch (err) {
         if (isError(err)) {
-          if (err instanceof SyntaxError) {
-            throw new Error("Unable to parse data / Unsupported format")
-          }
-          else {
-            throw new Error(err.message)
-          }
+          throw new Error(
+            (err instanceof SyntaxError)
+              ? "Unable to parse data / Unsupported format"
+              : err.message
+          )
         }
         else {
           // this should never really happen, but is helpful in case something throws a non-error
           throw new Error("Something went wrong")
         }
       }
+
     }
+  })
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    multiple: false,
+    onDrop(acceptedFiles: Array<File>) {
+      if (acceptedFiles.length === 1) {
+        if (acceptedFiles[0].type == 'application/json') {
+          setContentFilename(acceptedFiles[0].name)
+          acceptedFiles[0].text()
+            .then(value => {
+              let parsedData = null
+              try {
+                parsedData = JSON.parse(value)
+              }
+              catch (err) {
+                setErr(err)
+                return
+              }
+              isTagArray(parsedData)
+                ? setContent(parsedData)
+                : setErr(new Error("Unsupported Format"))
+            })
+            .catch(err => {
+              setErr(err)
+            })
+        }
+        else {
+          setErr(new Error("Unsupported Format"))
+        }
+      }
+    },
   })
 
   return (
     <Modal title="Import Tags" onRequestClose={props.onRequestClose}>
-      <Form submitText="Submit" cancelText="Cancel" onCancel={props.onRequestClose} {...formComponentProps}>
-        <p>Enter the serialized tags in the textbox below. Tags will be merged by name.</p>
-        <SourcelessCodeblock
-          className={cx('codeblock')}
-          code={codeblockField.value}
-          editable={true}
-          onChange={codeblockField.onChange}
-          language="json"
-        />
+      <div {...getRootProps({
+        className: cx('import-upload-area', { active: isDragActive }),
+      })}>
+        <input {...getInputProps()} />
+        <TagImportUpload contentFilename={contentFilename} err={err} />
+      </div>
+      <Form
+        submitText='Import'
+        cancelText='Close'
+        onCancel={props.onRequestClose}
+        {...formComponentProps}
+      >
+        <div>
+          {content !== null && (
+            <>
+              <div className={cx('tag-list-header')}>These tags will be imported:</div>
+              {/* This list will show duplicates, but the backend will filter them out. I expect that duplicates will be rare anyway */}
+              <TagList tags={content.map((t, index) => ({
+                ...t,
+                id: index, // Faking the id, because we don't actually need a real id here
+              }))} />
+            </>
+          )
+          }
+        </div>
       </Form>
     </Modal>
+  )
+}
+
+const TagImportUpload = (props: {
+  contentFilename: string | null
+  err: Error | null,
+}) => {
+  if (props.contentFilename === null) {
+    return (
+      <div className={cx('no-content')}>
+        Drag the tag_export.json here or <span>Browse for the file</span> to upload
+        {props.err && <div className={cx('error')}>{props.err.message}</div>}
+      </div>
+    )
+  }
+
+  return (
+    <div className={cx('has-content')}>
+      Selected File: "{props.contentFilename}"
+    </div>
   )
 }
 
