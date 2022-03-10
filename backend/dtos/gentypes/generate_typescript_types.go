@@ -69,7 +69,10 @@ func gen(dtoStruct interface{}) {
 
 func genFieldDefinition(field reflect.StructField) string {
 	jsonKey := strings.Split(field.Tag.Get("json"), ",")[0]
-	return fmt.Sprintf("  %s: %s,\n", jsonKey, toTypescriptType(field.Type))
+	if jsonKey != "-" {
+		return fmt.Sprintf("  %s: %s,\n", jsonKey, toTypescriptType(field.Type))
+	}
+	return ""
 }
 
 func toTypescriptType(t reflect.Type) string {
