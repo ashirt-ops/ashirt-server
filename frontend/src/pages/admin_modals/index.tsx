@@ -4,11 +4,12 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 
-import { User, UserAdminView } from 'src/global_types'
+import { ApiKey, User, UserAdminView } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
-  adminInviteUser
+  adminInviteUser,
+  createApiKey
 } from 'src/services'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
@@ -20,6 +21,7 @@ import Form from 'src/components/form'
 import ModalForm from 'src/components/modal_form'
 import { InputWithCopyButton } from 'src/components/text_copiers'
 import { useForm, useFormField } from 'src/helpers'
+import { NewApiKeyModalContents } from 'src/pages/account_settings/api_keys/modals'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -46,26 +48,65 @@ export const ResetPasswordModal = (props: {
 export const AddHeadlessUserModal = (props: {
   onRequestClose: () => void,
 }) => {
+  const [apiKey, setApiKey] = React.useState<ApiKey | null>(null)
+  const [newUserSlug, setNewUserSlug] = React.useState<string | null>(null)
+
   const headlessName = useFormField<string>("")
   const contactEmail = useFormField<string>("")
-  const formComponentProps = useForm({
-    fields: [headlessName, contactEmail],
-    onSuccess: () => props.onRequestClose(),
-    handleSubmit: () => {
-      if (headlessName.value.length == 0) {
-        return new Promise((resolve, reject) => reject(Error("Headless users must be given a name")))
-      }
-      return addHeadlessUser({
+  const doCreateApiKey = useFormField(true)
+
+  const handleSubmit = async () => {
+    if (headlessName.value.length == 0) {
+      throw new Error("Headless users must be given a name")
+    }
+
+    let createdSlug = newUserSlug
+    if (createdSlug == null) {
+      const newUser = await addHeadlessUser({
         firstName: 'Headless',
         lastName: headlessName.value,
         email: contactEmail.value,
       })
-    },
+      setNewUserSlug(newUser.slug)
+      createdSlug = newUser.slug
+    }
+
+    if (doCreateApiKey.value) {
+      setApiKey(await createApiKey({
+        userSlug: createdSlug,
+      }))
+    }
+  }
+
+  const formComponentProps = useForm({
+    fields: [headlessName, contactEmail, doCreateApiKey],
+    handleSubmit,
+    onSuccess: () => {
+      if (!doCreateApiKey.value) {
+        props.onRequestClose()
+      }
+    }
   })
   return (
-    <ModalForm title="Create New Headless User" submitText="Create" onRequestClose={props.onRequestClose} {...formComponentProps}>
+    <ModalForm
+      title="Create New Headless User"
+      submitText="Create"
+      cancelText={apiKey == null ? "Cancel" : "Close"}
+      onRequestClose={props.onRequestClose}
+      {...formComponentProps}
+      disableSubmit={apiKey != null}
+    >
       <Input label="Headless name" {...headlessName} />
       <Input type="email" label="Contact Email" {...contactEmail} />
+      <Checkbox label="Also create API key" {...doCreateApiKey} />
+      {
+        apiKey && <NewApiKeyModalContents apiKey={apiKey} />
+      }
+      {
+        (apiKey == null && newUserSlug != null) && (
+          <div>User created, but received an error creating key. Please try again.</div>
+        )
+      }
     </ModalForm>
   )
 }
