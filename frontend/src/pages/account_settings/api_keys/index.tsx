@@ -13,7 +13,7 @@ import Table from 'src/components/table'
 import { ApiKey } from 'src/global_types'
 import { InputWithCopyButton } from 'src/components/text_copiers'
 import { UserWithAuth } from 'src/global_types'
-import { getApiKeys, createApiKey, deleteApiKey } from 'src/services'
+import { getApiKeys, createApiKey, deleteApiKey, rotateApiKey } from 'src/services'
 import { useWiredData, useForm } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -22,6 +22,7 @@ export default (props: {
   profile: UserWithAuth
 }) => {
   const [deleteKey, setDeleteKey] = React.useState<null | ApiKey>(null)
+  const [rotateKey, setRotateKey] = React.useState<null | ApiKey>(null)
   const wiredApiKeys = useWiredData<Array<ApiKey>>(React.useCallback(() => getApiKeys({ userSlug: props.profile.slug }), [props.profile.slug]))
 
   return (
@@ -33,7 +34,10 @@ export default (props: {
               <td><span className={cx('monospace')}>{apiKey.accessKey}</span></td>
               <td><span className={cx('monospace')}>{apiKey.secretKey || '**************'}</span></td>
               <td>{apiKey.lastAuth ? format(apiKey.lastAuth, "MMMM do, yyyy 'at' HH:mm:ss") : 'Never'}</td>
-              <td><Button small onClick={() => setDeleteKey(apiKey)}>Delete</Button></td>
+              <td>
+                <Button small onClick={() => setRotateKey(apiKey)}>Rotate</Button>
+                <Button small danger onClick={() => setDeleteKey(apiKey)}>Delete</Button>
+              </td>
             </tr>
           ))}
         </Table>
@@ -46,6 +50,14 @@ export default (props: {
           apiKey={deleteKey}
           onRequestClose={() => setDeleteKey(null)}
           onDeleted={wiredApiKeys.reload}
+        />
+      )}
+      {rotateKey && (
+        <RotateApiKeyModal
+          userSlug={props.profile.slug}
+          apiKey={rotateKey}
+          onRequestClose={() => setRotateKey(null)}
+          onRotated={wiredApiKeys.reload}
         />
       )}
     </SettingsSection>
@@ -95,6 +107,53 @@ const DeleteApiKeyModal = (props: {
     <Modal title="Delete API Key" onRequestClose={props.onRequestClose}>
       <Form submitText="Delete API Key" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
         <p>Are you sure you want to delete this API key?</p>
+      </Form>
+    </Modal>
+  )
+}
+
+const RotateApiKeyModal = (props: {
+  apiKey: ApiKey,
+  userSlug: string,
+  onRequestClose: () => void,
+  onRotated: () => void,
+}) => {
+  const [updatedApiKey, setUpdatedApiKey] = React.useState<null | ApiKey>(null)
+
+  const closeModal = () => {
+    setUpdatedApiKey(null)
+    props.onRequestClose()
+  }
+  const formComponentProps = useForm({
+    onSuccess: () => {
+      props.onRotated()
+    },
+    handleSubmit: () => rotateApiKey({ userSlug: props.userSlug, accessKey: props.apiKey.accessKey }).then(setUpdatedApiKey),
+  })
+
+  return (
+    <Modal title="Rotate API Key" onRequestClose={closeModal}>
+      <Form
+        submitText="Rotate API Key"
+        cancelText="Close"
+        disableSubmit={!!updatedApiKey}
+        onCancel={closeModal}
+        {...formComponentProps}>
+        {updatedApiKey != null
+          ? (
+            <div className={cx('new-api-key-modal')}>
+              <p>
+                Below are your seceret and access keys.
+                Once you close this modal, the seceret key will no longer be available.
+              </p>
+              <InputWithCopyButton label="Access Key" value={updatedApiKey.accessKey} />
+              <InputWithCopyButton label="Secret Key" value={updatedApiKey.secretKey || ''} />
+            </div>
+          )
+          : (
+            <p>This will delete and re-create an API key. Are you sure you want to do this?</p>
+          )
+        }
       </Form>
     </Modal>
   )
