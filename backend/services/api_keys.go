@@ -134,3 +134,35 @@ func deleteAPIKey(ctx context.Context, db database.ConnectionProxy, userID int64
 
 	return nil
 }
+
+func rotateAPIKey(ctx context.Context, db database.ConnectionProxy, userID int64, accessKey string) (*dtos.APIKey, error) {
+	var apiKey *dtos.APIKey
+
+	err := db.WithTx(ctx, func(tx *database.Transactable) {
+		err := deleteAPIKey(ctx, tx, userID, accessKey)
+		if err != nil {
+			tx.FailTransaction(err)
+		}
+		apiKey, err = createAPIKey(tx, userID)
+		if err != nil {
+			tx.FailTransaction(err)
+		}
+	})
+
+	return apiKey, err
+}
+
+func RotateAPIKey(ctx context.Context, db *database.Connection, i RotateAPIKeyInput) (*dtos.APIKey, error) {
+	var userID int64
+	var err error
+
+	if userID, err = SelfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
+		return nil, backend.WrapError("Unable to delete API Key", backend.DatabaseErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyAPIKeys{UserID: userID}); err != nil {
+		return nil, backend.WrapError("Unwilling to delete API Key", backend.UnauthorizedWriteErr(err))
+	}
+
+	return rotateAPIKey(ctx, db, userID, i.AccessKey)
+}
