@@ -16,10 +16,15 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
+type operationListItem struct {
+	Op *dtos.Operation
+	ID int64
+}
+
 // listAllOperations is a helper function for both ListOperations and ListOpperationsForAdmin.
 // This retrieves all operations, then relies on the caller to sort which operations are visible
 // to the enduser
-func listAllOperations(db *database.Connection) ([]*dtos.Operation, error) {
+func listAllOperations(db *database.Connection) ([]operationListItem, error) {
 	var operations []struct {
 		models.Operation
 		NumUsers int `db:"num_users"`
@@ -34,16 +39,16 @@ func listAllOperations(db *database.Connection) ([]*dtos.Operation, error) {
 		return nil, backend.WrapError("Cannot list all operations", backend.DatabaseErr(err))
 	}
 
-	operationsDTO := []*dtos.Operation{}
+	operationsDTO := []operationListItem{}
 	for _, operation := range operations {
-		operationsDTO = append(operationsDTO, &dtos.Operation{
-			Slug:     operation.Slug,
-			Name:     operation.Name,
-			Status:   operation.Status,
-			NumUsers: operation.NumUsers,
-
-			// Temporary for screenshot client:
+		operationsDTO = append(operationsDTO, operationListItem{
 			ID: operation.ID,
+			Op: &dtos.Operation{
+				Slug:     operation.Slug,
+				Name:     operation.Name,
+				Status:   operation.Status,
+				NumUsers: operation.NumUsers,
+			},
 		})
 	}
 	return operationsDTO, nil
@@ -60,7 +65,7 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 	operationsDTO := make([]*dtos.Operation, 0, len(operations))
 	for _, operation := range operations {
 		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
-			operationsDTO = append(operationsDTO, operation)
+			operationsDTO = append(operationsDTO, operation.Op)
 		}
 	}
 	return operationsDTO, nil

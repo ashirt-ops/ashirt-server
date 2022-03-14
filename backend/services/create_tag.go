@@ -19,6 +19,11 @@ type CreateTagInput struct {
 	OperationSlug string
 }
 
+type CreateDefaultTagInput struct {
+	Name      string
+	ColorName string
+}
+
 func CreateTag(ctx context.Context, db *database.Connection, i CreateTagInput) (*dtos.Tag, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
@@ -42,6 +47,30 @@ func CreateTag(ctx context.Context, db *database.Connection, i CreateTagInput) (
 		return nil, backend.WrapError("Cannot add new tag", backend.DatabaseErr(err))
 	}
 	return &dtos.Tag{
+		ID:        tagID,
+		Name:      i.Name,
+		ColorName: i.ColorName,
+	}, nil
+}
+
+// CreateDefaultTag creates a single tag in the default_tags table. Admin only.
+func CreateDefaultTag(ctx context.Context, db *database.Connection, i CreateDefaultTagInput) (*dtos.DefaultTag, error) {
+	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
+		return nil, backend.WrapError("Unable to create default tag", backend.UnauthorizedWriteErr(err))
+	}
+
+	if i.Name == "" {
+		return nil, backend.MissingValueErr("Name")
+	}
+
+	tagID, err := db.Insert("default_tags", map[string]interface{}{
+		"name":       i.Name,
+		"color_name": i.ColorName,
+	})
+	if err != nil {
+		return nil, backend.WrapError("Cannot add new tag", backend.DatabaseErr(err))
+	}
+	return &dtos.DefaultTag{
 		ID:        tagID,
 		Name:      i.Name,
 		ColorName: i.ColorName,

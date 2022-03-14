@@ -20,12 +20,12 @@ func TestEnsureTagIDsBelongToOperation(t *testing.T) {
 	db := internalTestDBSetup(t)
 	goodOp, badOp := setupBasicTestOperation(t, db)
 
-	opCopy := opDtoToModel(goodOp.Op)
+	opCopy := opDtoToModel(goodOp.Op, goodOp.ID)
 
 	// Add a tag for testing
 	newTags := []models.Tag{
 		models.Tag{OperationID: opCopy.ID, Name: "good tag", ColorName: "black"},
-		models.Tag{OperationID: badOp.Op.ID, Name: "bad tag", ColorName: "black"},
+		models.Tag{OperationID: badOp.ID, Name: "bad tag", ColorName: "black"},
 	}
 	err := db.BatchInsert("tags", len(newTags), func(i int) map[string]interface{} {
 		return map[string]interface{}{
@@ -42,7 +42,7 @@ func TestEnsureTagIDsBelongToOperation(t *testing.T) {
 	require.NoError(t, err)
 
 	var badTagID int64
-	err = db.Get(&badTagID, getIDQuery.Where(sq.Eq{"operation_id": badOp.Op.ID}))
+	err = db.Get(&badTagID, getIDQuery.Where(sq.Eq{"operation_id": badOp.ID}))
 	require.NoError(t, err)
 
 	// No-data check (should be a noop)
@@ -69,7 +69,7 @@ func TestLookupOperation(t *testing.T) {
 	lookedUp, err := lookupOperation(db, goodOp.Op.Slug)
 	require.NoError(t, err)
 	require.Equal(t, goodOp.Op.Name, lookedUp.Name)
-	require.Equal(t, goodOp.Op.ID, lookedUp.ID)
+	require.Equal(t, goodOp.ID, lookedUp.ID)
 	require.Equal(t, goodOp.Op.Status, lookedUp.Status)
 
 	lookedUp, err = lookupOperation(db, "not-a-slug")
@@ -83,7 +83,7 @@ func TestLookupOperationFinding(t *testing.T) {
 	foundOp, foundFinding, err := lookupOperationFinding(db, goodOp.Op.Slug, goodOp.Findings[0].UUID)
 	require.NoError(t, err)
 	require.Equal(t, goodOp.Op.Name, foundOp.Name)
-	require.Equal(t, goodOp.Op.ID, foundOp.ID)
+	require.Equal(t, goodOp.ID, foundOp.ID)
 	require.Equal(t, goodOp.Op.Status, foundOp.Status)
 
 	require.Equal(t, goodOp.Findings[0].ID, foundFinding.ID)
@@ -110,7 +110,7 @@ func TestLookupOperationEvidence(t *testing.T) {
 	foundOp, foundEvidence, err := lookupOperationEvidence(db, goodOp.Op.Slug, goodOp.Evidence[0].UUID)
 	require.NoError(t, err)
 	require.Equal(t, goodOp.Op.Name, foundOp.Name)
-	require.Equal(t, goodOp.Op.ID, foundOp.ID)
+	require.Equal(t, goodOp.ID, foundOp.ID)
 	require.Equal(t, goodOp.Op.Status, foundOp.Status)
 
 	require.Equal(t, goodOp.Evidence[0].ID, foundEvidence.ID)
@@ -136,7 +136,7 @@ func TestTagsForEvidenceByID(t *testing.T) {
 
 	// Add a tag for testing
 	tagNames := []string{"one fish", "two fish", "red fish", "blue fish"}
-	tagIDs := addTags(t, db, goodOp.Op.ID, tagNames...)
+	tagIDs := addTags(t, db, goodOp.ID, tagNames...)
 	evidenceIDs := mapModelsEvidenceToID(goodOp.Evidence)
 	require.True(t, len(tagIDs) >= len(evidenceIDs), "Future tests require that all tagIDs be used")
 	zippedIDs := zipInt64Lists(tagIDs, evidenceIDs)
@@ -191,9 +191,9 @@ func unionIntSlices(parts ...[]int64) []int64 {
 	return result
 }
 
-func opDtoToModel(op *dtos.Operation) models.Operation {
+func opDtoToModel(op *dtos.Operation, opID int64) models.Operation {
 	return models.Operation{
-		ID:     op.ID,
+		ID:     opID,
 		Slug:   op.Slug,
 		Name:   op.Name,
 		Status: op.Status,

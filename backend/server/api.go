@@ -6,8 +6,6 @@ package server
 import (
 	"encoding/json"
 	"net/http"
-	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
@@ -15,16 +13,12 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
 
-	sq "github.com/Masterminds/squirrel"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
-
-var operationIDRegex = regexp.MustCompile(`\d+`)
 
 func API(db *database.Connection, contentStore contentstore.Store, logger logging.Logger) http.Handler {
 	r := mux.NewRouter()
@@ -36,19 +30,6 @@ func API(db *database.Connection, contentStore contentstore.Store, logger loggin
 
 	bindAPIRoutes(r, db, contentStore)
 	return r
-}
-
-// Temporary for now since the api uses ids still but the services have been swapped over to using slugs
-// Once the screenshot client is updated to use slugs this function can go away:
-func operationIDToSlug(db *database.Connection, operationID int64) string {
-	var operation models.Operation
-	err := db.Get(&operation, sq.Select("slug").From("operations").Where(sq.Eq{"id": operationID}))
-	if err != nil {
-		// If we can't find it the service will return a NotFoundErr for
-		// an empty string operationslug so no need to handle errors here
-		return ""
-	}
-	return operation.Slug
 }
 
 func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contentstore.Store) {
@@ -73,25 +54,14 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.CreateOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/api/operations/{operation_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		operationID := dr.FromURL("operation_id").Required().AsInt64()
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.ReadOperation(r.Context(), db, operationIDToSlug(db, operationID))
-	}))
-
-	route(r, "POST", "/api/operations/{operation_id}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(r, "POST", "/api/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
-		opSlug := dr.FromURL("operation_id").Required().AsString()
-		opSlug = maybeOperationIDToSlug(db, opSlug)
 		i := services.CreateEvidenceInput{
 			Description:   dr.FromBody("notes").Required().AsString(),
 			Content:       dr.FromFile("file"),
 			ContentType:   dr.FromBody("contentType").OrDefault("image").AsString(),
 			OccurredAt:    dr.FromBody("occurred_at").OrDefault(time.Now()).AsUnixTime(),
-			OperationSlug: opSlug,
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 		}
 		tagIDsJSON := dr.FromBody("tagIds").OrDefault("[]").AsString()
 		if dr.Error != nil {
@@ -105,39 +75,22 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 
 	route(r, "GET", "/api/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
-		opSlug := dr.FromURL("operation_slug").Required().AsString()
-		opSlug = maybeOperationIDToSlug(db, opSlug)
-
 		i := services.ListTagsForOperationInput{
-			OperationSlug: opSlug,
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 		}
 		return services.ListTagsForOperation(r.Context(), db, i)
 	}))
 
 	route(r, "POST", "/api/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
-		opSlug := dr.FromURL("operation_slug").Required().AsString()
-
-		opSlug = maybeOperationIDToSlug(db, opSlug)
-
 		i := services.CreateTagInput{
 			Name:          dr.FromBody("name").Required().AsString(),
 			ColorName:     dr.FromBody("colorName").AsString(),
-			OperationSlug: opSlug,
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
 		return services.CreateTag(r.Context(), db, i)
 	}))
-}
-
-func maybeOperationIDToSlug(db *database.Connection, slugOrID string) string {
-	if operationIDRegex.MatchString(slugOrID) {
-		// id to slug
-		if val, err := strconv.ParseInt(slugOrID, 10, 64); err == nil {
-			return operationIDToSlug(db, val)
-		}
-	}
-	return slugOrID // must actually be a slug
 }

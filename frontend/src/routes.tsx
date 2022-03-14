@@ -72,7 +72,7 @@ export default () => {
       {isSuperAdmin && <Redirect exact from="/account/edit/:slug" to="/account/profile/:slug" />}
 
       {/* Admin Settings */}
-      {isSuperAdmin && <Route exact path="/admin/:view(users|operations|authdata|findings)" component={AsyncAdminSettings} />}
+      {isSuperAdmin && <Route exact path="/admin/:view(users|operations|authdata|findings|tags)" component={AsyncAdminSettings} />}
       {isSuperAdmin && <Redirect from="/admin/" to="/admin/users" />}
 
 

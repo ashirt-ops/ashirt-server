@@ -15,7 +15,12 @@ export type ColumnData = {
   title: string,
   sortDirection?: SortDirection,
   clickable?: boolean
+  style?: React.CSSProperties
 }
+
+export const StartAlignedColumn: React.CSSProperties = { display: 'flex', justifyContent: 'flex-start' }
+export const EndAlignedColumn: React.CSSProperties = { display: 'flex', justifyContent: 'flex-end' }
+export const CenterAlignedColumn: React.CSSProperties = { display: 'flex', justifyContent: 'center' }
 
 export default (props: {
   children: React.ReactNode,
@@ -46,7 +51,12 @@ export default (props: {
               const args = {
                 key: `${column.label}-${idx}`,
                 title: column.title,
-                style: column.clickable ? { cursor: "pointer" } : {},
+                style: {
+                  ...column.style, ...(
+                    column.clickable
+                      ? { cursor: "pointer" }
+                      : {})
+                },
                 onClick: () => (column.clickable && props.onColumnClicked) ? props.onColumnClicked(idx) : undefined
               }
               return (

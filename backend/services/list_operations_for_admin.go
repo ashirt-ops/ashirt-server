@@ -17,5 +17,17 @@ func ListOperationsForAdmin(ctx context.Context, db *database.Connection) ([]*dt
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.UnauthorizedReadErr(err)
 	}
-	return listAllOperations(db)
+	ops, err := listAllOperations(db)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fixedOps := make([]*dtos.Operation, len(ops))
+
+	for i, v := range ops {
+		fixedOps[i] = v.Op
+	}
+
+	return fixedOps, nil
 }
