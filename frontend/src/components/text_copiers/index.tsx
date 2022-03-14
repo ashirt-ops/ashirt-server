@@ -32,7 +32,7 @@ export const CopyTextButton = (props: ButtonStyle & {
 
   return (
     <Tooltip content="Copied!" isOpen={tooltipOpen}>
-      <Button {...props} onClick={onClick} children={props.children} />
+      <Button {...props} onClick={onClick} children={props.children} doNotSubmit />
     </Tooltip>
   )
 }

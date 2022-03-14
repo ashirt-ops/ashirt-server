@@ -17,6 +17,8 @@ export default (props: {
   title: string,
   submitDanger?:boolean,
   cancelText?: string,
+  disableSubmit?: boolean,
+  disableCancel?: boolean,
 }) => (
   <Modal title={props.title} onRequestClose={props.onRequestClose}>
     <Form
@@ -28,6 +30,8 @@ export default (props: {
       onSubmit={props.onSubmit}
       submitText={props.submitText}
       submitDanger={props.submitDanger}
+      disableSubmit={props.disableSubmit}
+      disableCancel={props.disableCancel}
     />
   </Modal>
 )
