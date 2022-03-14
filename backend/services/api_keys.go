@@ -23,6 +23,8 @@ type DeleteAPIKeyInput struct {
 	UserSlug  string
 }
 
+type RotateAPIKeyInput = DeleteAPIKeyInput
+
 const accessKeyLength = 18
 const secretKeyLength = 64
 
@@ -38,30 +40,7 @@ func CreateAPIKey(ctx context.Context, db *database.Connection, userSlug string)
 		return nil, backend.WrapError("Unable to create api key", backend.UnauthorizedWriteErr(err))
 	}
 
-	accessKey := make([]byte, accessKeyLength)
-	if _, err := rand.Read(accessKey); err != nil {
-		return nil, backend.WrapError("Unable to generate api key", err)
-	}
-	accessKeyStr := base64.URLEncoding.EncodeToString(accessKey)
-
-	secretKey := make([]byte, secretKeyLength)
-	if _, err := rand.Read(secretKey); err != nil {
-		return nil, backend.WrapError("Unable to create secret key", err)
-	}
-
-	_, err = db.Insert("api_keys", map[string]interface{}{
-		"user_id":    userID,
-		"access_key": accessKeyStr,
-		"secret_key": secretKey,
-	})
-	if err != nil {
-		return nil, backend.WrapError("Unable to record api and secret keys", backend.DatabaseErr(err))
-	}
-
-	return &dtos.APIKey{
-		AccessKey: accessKeyStr,
-		SecretKey: secretKey,
-	}, nil
+	return createAPIKey(db, userID)
 }
 
 func DeleteAPIKey(ctx context.Context, db *database.Connection, i DeleteAPIKeyInput) error {
@@ -76,22 +55,7 @@ func DeleteAPIKey(ctx context.Context, db *database.Connection, i DeleteAPIKeyIn
 		return backend.WrapError("Unwilling to delete API Key", backend.UnauthorizedWriteErr(err))
 	}
 
-	var apiKeyID int64
-
-	err = db.WithTx(ctx, func(tx *database.Transactable) {
-		tx.Get(&apiKeyID, sq.Select("id").
-			From("api_keys").
-			Where(sq.Eq{"user_id": userID, "access_key": i.AccessKey}))
-		tx.Delete(sq.Delete("api_keys").Where(sq.Eq{"id": apiKeyID}))
-	})
-	if err != nil {
-		if database.IsEmptyResultSetError(err) {
-			return backend.WrapError("API key does not exist", backend.UnauthorizedWriteErr(err))
-		}
-		return backend.WrapError("Cannot delete API key", backend.DatabaseErr(err))
-	}
-
-	return nil
+	return deleteAPIKey(ctx, db, userID, i.AccessKey)
 }
 
 func ListAPIKeys(ctx context.Context, db *database.Connection, userSlug string) ([]*dtos.APIKey, error) {
@@ -123,4 +87,50 @@ func ListAPIKeys(ctx context.Context, db *database.Connection, userSlug string) 
 		}
 	}
 	return keysDTO, nil
+}
+
+func createAPIKey(db database.ConnectionProxy, userID int64) (*dtos.APIKey, error) {
+	accessKey := make([]byte, accessKeyLength)
+	if _, err := rand.Read(accessKey); err != nil {
+		return nil, backend.WrapError("Unable to generate api key", err)
+	}
+	accessKeyStr := base64.URLEncoding.EncodeToString(accessKey)
+
+	secretKey := make([]byte, secretKeyLength)
+	if _, err := rand.Read(secretKey); err != nil {
+		return nil, backend.WrapError("Unable to create secret key", err)
+	}
+
+	_, err := db.Insert("api_keys", map[string]interface{}{
+		"user_id":    userID,
+		"access_key": accessKeyStr,
+		"secret_key": secretKey,
+	})
+	if err != nil {
+		return nil, backend.WrapError("Unable to record api and secret keys", backend.DatabaseErr(err))
+	}
+
+	return &dtos.APIKey{
+		AccessKey: accessKeyStr,
+		SecretKey: secretKey,
+	}, nil
+}
+
+func deleteAPIKey(ctx context.Context, db database.ConnectionProxy, userID int64, accessKey string) error {
+	var apiKeyID int64
+
+	err := db.WithTx(ctx, func(tx *database.Transactable) {
+		tx.Get(&apiKeyID, sq.Select("id").
+			From("api_keys").
+			Where(sq.Eq{"user_id": userID, "access_key": accessKey}))
+		tx.Delete(sq.Delete("api_keys").Where(sq.Eq{"id": apiKeyID}))
+	})
+	if err != nil {
+		if database.IsEmptyResultSetError(err) {
+			return backend.WrapError("API key does not exist", backend.UnauthorizedWriteErr(err))
+		}
+		return backend.WrapError("Cannot delete API key", backend.DatabaseErr(err))
+	}
+
+	return nil
 }
