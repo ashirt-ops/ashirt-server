@@ -174,11 +174,17 @@ func TestRotateAPIKey(t *testing.T) {
 	verifyRotateAPIKeys(t, false, ctx, db, targetUser.Slug, true) // Alt
 
 	// Verify that others cannot rotate an api key not owned by them
+	originalAPIKey, err := services.CreateAPIKey(ctx, db, targetUser.Slug)
+	require.NoError(t, err)
+
 	ctx = contextForUser(nonAdminUser, db)
-	verifyRotateAPIKeys(t, true, ctx, db, targetUser.Slug, false) // admins cannot change an api key without specifying the slug (unless they're themselves)
-	verifyRotateAPIKeys(t, true, ctx, db, targetUser.Slug, true)  // Alt
+	_, err = services.RotateAPIKey(ctx, db, services.RotateAPIKeyInput{AccessKey: originalAPIKey.AccessKey})
+	require.Error(t, err)
+	_, err = services.RotateAPIKey(ctx, db, services.RotateAPIKeyInput{AccessKey: originalAPIKey.AccessKey, UserSlug: targetUser.Slug})
+	require.Error(t, err)
 }
 
+// verifyRotateAPIKeys only works when the context reflects an admin user, or a normal user targeting themself
 func verifyRotateAPIKeys(t *testing.T, expectError bool, ctx context.Context, db *database.Connection, apiKeyOwnerSlug string, withSlug bool) {
 	// create initial key to test with
 	originalAPIKey, err := services.CreateAPIKey(ctx, db, apiKeyOwnerSlug)
