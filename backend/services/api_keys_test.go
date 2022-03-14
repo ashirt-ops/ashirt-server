@@ -154,3 +154,70 @@ func verifyListAPIKeys(t *testing.T, expectError bool, ctx context.Context, db *
 	require.Nil(t, apiKeys[0].SecretKey)
 	require.Nil(t, apiKeys[1].SecretKey)
 }
+
+func TestRotateAPIKey(t *testing.T) {
+	db := initTest(t)
+	HarryPotterSeedData.ApplyTo(t, db)
+
+	targetUser := UserRon
+	nonAdminUser := UserNeville
+	adminUser := UserDumbledore
+
+	// verify user can rotate their own keys
+	ctx := contextForUser(targetUser, db)
+	verifyRotateAPIKeys(t, false, ctx, db, targetUser.Slug, false) // primary
+	verifyRotateAPIKeys(t, false, ctx, db, targetUser.Slug, true)  // Alt
+
+	// Verify that admins can rotate keys for a user
+	ctx = contextForUser(adminUser, db)
+	verifyRotateAPIKeys(t, true, ctx, db, targetUser.Slug, false) // admins cannot change an api key without specifying the slug (unless they're themselves)
+	verifyRotateAPIKeys(t, false, ctx, db, targetUser.Slug, true) // Alt
+
+	// Verify that others cannot rotate an api key not owned by them
+	ctx = contextForUser(nonAdminUser, db)
+	verifyRotateAPIKeys(t, true, ctx, db, targetUser.Slug, false) // admins cannot change an api key without specifying the slug (unless they're themselves)
+	verifyRotateAPIKeys(t, true, ctx, db, targetUser.Slug, true)  // Alt
+}
+
+func verifyRotateAPIKeys(t *testing.T, expectError bool, ctx context.Context, db *database.Connection, apiKeyOwnerSlug string, withSlug bool) {
+	// create initial key to test with
+	originalAPIKey, err := services.CreateAPIKey(ctx, db, apiKeyOwnerSlug)
+	require.NoError(t, err)
+
+	// get a list of the new keys
+	originalKeys, err := services.ListAPIKeys(ctx, db, apiKeyOwnerSlug)
+	require.NoError(t, err)
+
+	// rotate the newest key
+	input := services.RotateAPIKeyInput{
+		AccessKey: originalAPIKey.AccessKey,
+	}
+	if withSlug {
+		input.UserSlug = apiKeyOwnerSlug
+	}
+	newAPIKey, err := services.RotateAPIKey(ctx, db, input)
+	if expectError {
+		require.Error(t, err)
+		return
+	}
+	require.NoError(t, err)
+
+	// verify that the old key doesn't exist, but the new key does
+	updatedKeys, err := services.ListAPIKeys(ctx, db, apiKeyOwnerSlug)
+	require.NoError(t, err)
+	require.Equal(t, len(originalKeys), len(updatedKeys)) // check verifies that one was deleted, one was added -- net 0 change
+
+	originalKeyWasDeleted := true
+	newKeyWasFound := false
+
+	for _, key := range updatedKeys {
+		if key.AccessKey == newAPIKey.AccessKey {
+			newKeyWasFound = true
+		}
+		if key.AccessKey == originalAPIKey.AccessKey {
+			originalKeyWasDeleted = false
+		}
+	}
+	require.True(t, newKeyWasFound)
+	require.True(t, originalKeyWasDeleted)
+}
