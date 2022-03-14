@@ -20,3 +20,10 @@ export async function deleteApiKey(i: {
 }): Promise<void> {
   return await ds.deleteApiKey(i)
 }
+
+export async function rotateApiKey(i: {
+  userSlug: string,
+  accessKey: string,
+}): Promise<ApiKey> {
+  return apiKeyFromDto(await ds.rotateApiKey(i))
+}

@@ -9,6 +9,7 @@ export const backendDataSource: DataSource = {
   listApiKeys: ids => req('GET', '/user/apikeys', null, ids),
   createApiKey: ids => req('POST', `/user/${ids.userSlug}/apikeys`),
   deleteApiKey: ids => req('DELETE', `/user/${ids.userSlug}/apikeys/${ids.accessKey}`),
+  rotateApiKey: ids => req('PUT', `/user/${ids.userSlug}/apikeys/${ids.accessKey}`),
 
   readCurrentUser: () => req('GET', '/user'),
   logout: () => req('POST', '/logout'),

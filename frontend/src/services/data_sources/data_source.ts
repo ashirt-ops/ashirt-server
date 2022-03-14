@@ -28,6 +28,7 @@ export interface DataSource {
   listApiKeys(ids?: UserSlug): Promise<Array<dtos.APIKey>>
   createApiKey(ids: UserSlug): Promise<dtos.APIKey>
   deleteApiKey(ids: UserSlug & { accessKey: string }): Promise<void>
+  rotateApiKey(ids: UserSlug & { accessKey: string }): Promise<dtos.APIKey>
 
   readCurrentUser(): Promise<dtos.UserOwnView>
   logout(): Promise<void>
