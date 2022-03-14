@@ -89,6 +89,21 @@ func ListAPIKeys(ctx context.Context, db *database.Connection, userSlug string) 
 	return keysDTO, nil
 }
 
+func RotateAPIKey(ctx context.Context, db *database.Connection, i RotateAPIKeyInput) (*dtos.APIKey, error) {
+	var userID int64
+	var err error
+
+	if userID, err = SelfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
+		return nil, backend.WrapError("Unable to delete API Key", backend.DatabaseErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyAPIKeys{UserID: userID}); err != nil {
+		return nil, backend.WrapError("Unwilling to delete API Key", backend.UnauthorizedWriteErr(err))
+	}
+
+	return rotateAPIKey(ctx, db, userID, i.AccessKey)
+}
+
 func createAPIKey(db database.ConnectionProxy, userID int64) (*dtos.APIKey, error) {
 	accessKey := make([]byte, accessKeyLength)
 	if _, err := rand.Read(accessKey); err != nil {
@@ -150,19 +165,4 @@ func rotateAPIKey(ctx context.Context, db database.ConnectionProxy, userID int64
 	})
 
 	return apiKey, err
-}
-
-func RotateAPIKey(ctx context.Context, db *database.Connection, i RotateAPIKeyInput) (*dtos.APIKey, error) {
-	var userID int64
-	var err error
-
-	if userID, err = SelfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
-		return nil, backend.WrapError("Unable to delete API Key", backend.DatabaseErr(err))
-	}
-
-	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyAPIKeys{UserID: userID}); err != nil {
-		return nil, backend.WrapError("Unwilling to delete API Key", backend.UnauthorizedWriteErr(err))
-	}
-
-	return rotateAPIKey(ctx, db, userID, i.AccessKey)
 }
