@@ -704,6 +704,18 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return nil, services.DeleteAPIKey(r.Context(), db, i)
 	}))
 
+	route(r, "PUT", "/user/{userSlug}/apikeys/{access_key}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.RotateAPIKeyInput{
+			UserSlug:  dr.FromURL("userSlug").Required().AsString(),
+			AccessKey: dr.FromURL("access_key").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.RotateAPIKey(r.Context(), db, i)
+	}))
+
 	route(r, "POST", "/user/profile/{userSlug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateUserProfileInput{
