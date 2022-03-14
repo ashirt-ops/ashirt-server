@@ -1,6 +1,8 @@
 package database
 
 import (
+	"context"
+
 	sq "github.com/Masterminds/squirrel"
 )
 
@@ -14,4 +16,5 @@ type ConnectionProxy interface {
 	BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}) error
 	Update(builder sq.UpdateBuilder) error
 	Delete(builder sq.DeleteBuilder) error
+	WithTx(ctx context.Context, fn func(tx *Transactable)) error
 }

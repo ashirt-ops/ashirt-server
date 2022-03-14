@@ -46,6 +46,7 @@ func (c *Connection) NewTransaction(ctx context.Context) (*Transactable, error) 
 // be created, the function will be bypassed.
 // Note 2: If the provided function needs to be exited early, you can call Rollback or Commit to ensure
 // the desired outcome, and then return from the function as usual.
+// Note 3: any error enountered after a db action will automatically trigger a rollback
 func (c *Connection) WithTx(ctx context.Context, fn func(tx *Transactable)) error {
 	tx, _ := c.NewTransaction(ctx)
 	if tx.Error() == nil {
@@ -54,6 +55,14 @@ func (c *Connection) WithTx(ctx context.Context, fn func(tx *Transactable)) erro
 	err := tx.Commit()
 	if err != nil {
 		return err
+	}
+	return tx.Error()
+}
+
+func (tx *Transactable) WithTx(ctx context.Context, fn func(tx *Transactable)) error {
+	// just pass the current transaction down
+	if tx.Error() == nil {
+		fn(tx)
 	}
 	return tx.Error()
 }
@@ -85,6 +94,12 @@ func (tx *Transactable) Commit() error {
 	}
 	tx.transactionError = tx.commit()
 	return tx.Error()
+}
+
+// FailTransaction marks the transaction as failed without issuing a rollback. This is useful when
+// used with WithTx, since that manages commits and rollbacks
+func (tx *Transactable) FailTransaction(err error) {
+	tx.transactionError = err
 }
 
 // Error retrieves the recorded error, if any (nil otherwise)
