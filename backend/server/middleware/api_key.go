@@ -25,37 +25,44 @@ import (
 // Max allowed difference between the current time and passed Date header
 const maxDateDelta = time.Hour
 
-func authenticateAPI(db *database.Connection, r *http.Request, requestBody io.Reader) (int64, error) {
+type UserData struct {
+	ID       int64
+	Headless bool
+}
+
+func authenticateAPI(db *database.Connection, r *http.Request, requestBody io.Reader) (UserData, error) {
+	emptyUserData := UserData{ID: -1, Headless: false}
 	if err := checkDateHeader(r.Header.Get("Date")); err != nil {
-		return -1, backend.WrapError("Unable to parse date header (for api auth)", err)
+		return emptyUserData, backend.WrapError("Unable to parse date header (for api auth)", err)
 	}
 
 	// Check HMAC
 	accessKey, headerHMAC, err := parseAuthorizationHeader(r.Header.Get("Authorization"))
 	if err != nil {
-		return -1, backend.WrapError("Unable to parse (api) authorization header", err)
+		return emptyUserData, backend.WrapError("Unable to parse (api) authorization header", err)
 	}
 
 	var apiKey struct {
 		models.APIKey
 		DisabledFlag bool `db:"disabled"`
+		Headless     bool `db:"headless"`
 	}
 
 	// var apiKey models.APIKey
 	// Defer checking error here to avoid timing attacks to discover valid access keys
-	err = db.Get(&apiKey, sq.Select("secret_key", "user_id", "disabled").
+	err = db.Get(&apiKey, sq.Select("secret_key", "user_id", "disabled", "headless").
 		From("api_keys").
 		LeftJoin("users ON users.id = user_id").
 		Where(sq.Eq{"access_key": accessKey}))
 	expectedHMAC := signer.BuildRequestHMAC(r, requestBody, apiKey.SecretKey)
 	if !hmac.Equal(headerHMAC, expectedHMAC) {
-		return -1, errors.New("Bad HMAC")
+		return emptyUserData, errors.New("Bad HMAC")
 	}
 	if err != nil {
-		return -1, backend.WrapError("Unable to retrieve API key data", err)
+		return emptyUserData, backend.WrapError("Unable to retrieve API key data", err)
 	}
 	if apiKey.DisabledFlag {
-		return -1, backend.DisabledUserError()
+		return emptyUserData, backend.DisabledUserError()
 	}
 
 	err = db.Update(sq.Update("api_keys").Set("last_auth", time.Now()).Where(sq.Eq{"access_key": accessKey}))
@@ -63,7 +70,7 @@ func authenticateAPI(db *database.Connection, r *http.Request, requestBody io.Re
 		logging.Log(r.Context(), "msg", "Failed to update last_auth", "access_key", accessKey, "error", err)
 	}
 
-	return apiKey.UserID, nil
+	return UserData{ID: apiKey.UserID, Headless: apiKey.Headless}, nil
 }
 
 // parseAuthorizationHeader parses the authorization header and returns the access key and HMAC
