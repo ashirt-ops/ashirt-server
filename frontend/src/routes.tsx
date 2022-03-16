@@ -28,25 +28,43 @@ export default () => {
 
   if (user == null) return (
     <Switch>
-      <Route exact path="/login" component={AsyncLogin} />
-      <Route exact path="/login/:schemeCode" component={AsyncLogin} />
-      <Route exact path="/autherror/recoveryfailed" render={makeErrorDisplay("Authentication Error", "Account recovery failed. The recovery code may be expired or incorrect. Please contact an administrator to provide a new url.", true)} />
-      <Route exact path="/autherror/noaccess" render={makeErrorDisplay("Authentication Error", "This user is not permitted to use this service")} />
-      <Route exact path="/autherror/noverify" render={makeErrorDisplay("Authentication Error", "Unable to verify user account. Please try again.", true)} />
-      <Route exact path="/autherror/incomplete" render={makeErrorDisplay("Authentication Error", "The system could not complete the login process. Please retry, and if the issue persists, please contact a system administrator.", true)} />
-      <Route exact path="/autherror/disabled" render={makeErrorDisplay("Authentication Error", "This account has been disabled. Please contact an adminstrator if you think this is an error")} />
-      <Route exact path="/autherror/registrationdisabled" render={makeErrorDisplay("Authentication Error", "Registration has been disabled. Please contract an administrator to request access.", true)} />
+      <Route exact path="/login" >
+        {(props: RouteComponentProps) => <AsyncLogin {...props} />}
+      </Route>
+      <Route exact path="/login/:schemeCode">
+        {(props: RouteComponentProps) => <AsyncLogin {...props} />}
+      </Route>
+
+      <Route exact path="/autherror/recoveryfailed">
+        <AuthRecoveryFailed />
+      </Route>
+      <Route exact path="/autherror/noaccess">
+        <AuthNoAccess />
+      </Route>
+      <Route exact path="/autherror/noverify">
+        <AuthNoVerify />
+      </Route>
+      <Route exact path="/autherror/incomplete">
+        <AuthIncomplete />
+      </Route>
+      <Route exact path="/autherror/disabled">
+        <AuthDisabled />
+      </Route>
+      <Route exact path="/autherror/registrationdisabled">
+        <AuthNoRegistration />
+      </Route>
+
       <Route render={() => <Redirect to="/login" />} />
     </Switch>
   )
 
   return (
     <Switch>
-      <Route exact path="/login" render={()=> <Redirect to="/operations" />} />
+      <Route exact path="/login" render={() => <Redirect to="/operations" />} />
       <Route exact path="/" render={() => <Redirect to="/operations" />} />
 
       {/* AuthError routes that an admin might reach if testing */}
-      <Route exact path="/autherror/recoveryfailed" render={makeErrorDisplay("Access Error", "This url only works for users that are not logged in. ", true)} />
+      <Route exact path="/autherror/recoveryfailed" render={NoAccess} />
 
       <Route exact path="/operations" component={AsyncOperationList} />
 
