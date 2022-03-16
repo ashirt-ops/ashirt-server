@@ -94,7 +94,7 @@ function makeAsyncPage(page: () => Promise<{ default: React.FunctionComponent<Ro
   }
 }
 
-const makeErrorDisplay = (title: string, message: string, withLoginLink: boolean = false) => (props: RouteComponentProps) => (
+const makeErrorDisplay = (title: string, message: string, withLoginLink = false) => () => (
   <ErrorDisplay title={title} err={new Error(message)}>
     {
       withLoginLink && (
@@ -106,3 +106,12 @@ const makeErrorDisplay = (title: string, message: string, withLoginLink: boolean
     }
   </ErrorDisplay>
 )
+const makeAuthErr = (body: string, addLoginLink?: boolean) => makeErrorDisplay("Authentication Error", body, addLoginLink ?? true)
+
+const AuthRecoveryFailed = makeAuthErr("Account recovery failed. The recovery code may be expired or incorrect. Please contact an administrator to provide a new url.")
+const AuthNoAccess = makeAuthErr("This user is not permitted to use this service", false)
+const AuthNoVerify = makeAuthErr("Unable to verify user account. Please try again.")
+const AuthIncomplete = makeAuthErr("The system could not complete the login process. Please retry, and if the issue persists, please contact a system administrator.")
+const AuthDisabled = makeAuthErr("This account has been disabled. Please contact an adminstrator if you think this is an error", false)
+const AuthNoRegistration = makeAuthErr("Registration has been disabled. Please contract an administrator to request access.")
+const NoAccess = makeErrorDisplay("Access Error", "This url only works for users that are not logged in.", true)
