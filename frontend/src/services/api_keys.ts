@@ -10,7 +10,7 @@ export async function createApiKey(i: { userSlug: string }): Promise<ApiKey> {
 }
 
 export async function getApiKeys(i?: { userSlug: string }): Promise<Array<ApiKey>> {
-  const keys = await ds.listApiKeys()
+  const keys = await ds.listApiKeys(i)
   return keys.map(apiKeyFromDto)
 }
 
