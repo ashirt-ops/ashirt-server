@@ -24,6 +24,11 @@ type UserPayload = {
   email: string,
 }
 
+type TagPayload = {
+  name: string,
+  colorName: string
+}
+
 export interface DataSource {
   listApiKeys(ids?: UserSlug): Promise<Array<dtos.APIKey>>
   createApiKey(ids: UserSlug): Promise<dtos.APIKey>
@@ -81,14 +86,15 @@ export interface DataSource {
 
   listTags(ids: OpSlug): Promise<Array<dtos.TagWithUsage>>
   listTagsByEvidenceDate(ids: OpSlug): Promise<Array<dtos.TagByEvidenceDate>>
-  createTag(ids: OpSlug, payload: { name: string, colorName: string }): Promise<dtos.Tag>
-  updateTag(ids: OpSlug & TagId, payload: { name: string, colorName: string }): Promise<void>
+  createTag(ids: OpSlug, payload: TagPayload): Promise<dtos.Tag>
+  updateTag(ids: OpSlug & TagId, payload: TagPayload): Promise<void>
   deleteTag(ids: OpSlug & TagId): Promise<void>
 
   listDefaultTags(): Promise<Array<dtos.DefaultTag>>
-  createDefaultTag(payload: { name: string, colorName: string }): Promise<dtos.DefaultTag>
-  updateDefaultTag(ids: TagId, payload: { name: string, colorName: string }): Promise<void>
+  createDefaultTag(payload: TagPayload): Promise<dtos.DefaultTag>
+  updateDefaultTag(ids: TagId, payload: TagPayload): Promise<void>
   deleteDefaultTag(ids: TagId): Promise<void>
+  mergeDefaultTags(payload: Array<TagPayload>): Promise<void>
 
   // TODO these should go into their respective authschemes:
   createRecoveryCode(ids: UserSlug): Promise<{ code: string }>

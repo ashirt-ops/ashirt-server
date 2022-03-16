@@ -74,8 +74,10 @@ export const CodeBlockViewer = (props: {
 
 export const SourcelessCodeblock = (props: {
   code: string,
-  language: string | null,
+  language: string | null
   className?: string
+  editable?: boolean
+  onChange?: (newValue: string) => void,
 }) => {
   const AceEditor = useAsyncComponent(importAceEditorAsync)
 
@@ -83,9 +85,10 @@ export const SourcelessCodeblock = (props: {
     <div className={cx('code-viewer', props.className)}>
       <div className={cx('ace', 'no-source')}>
         <AceEditor
-          readOnly
+          readOnly={props.editable ? false : true}
           mode={props.language || ''}
           value={props.code}
+          onChange={props.onChange}
         />
       </div>
     </div>
