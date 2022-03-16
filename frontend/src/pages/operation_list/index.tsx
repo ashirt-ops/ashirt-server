@@ -15,7 +15,7 @@ import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: RouteComponentProps<{}>) => {
+export default (_: RouteComponentProps<{}>) => {
   const wiredOperations = useWiredData<Array<Operation>>(getOperations)
 
   const newOperationModal = useModal<void>(modalProps => (
