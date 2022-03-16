@@ -3,7 +3,6 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { parse as parseQuery, ParsedQuery } from 'query-string'
 import {RouteComponentProps} from 'react-router-dom'
 import {getSupportedAuthentications} from 'src/services/auth'
 import {useAuthFrontendComponent} from 'src/authschemes'
@@ -16,7 +15,7 @@ const cx = classnames.bind(require('./stylesheet'))
 // src/auth and ensure it is enabled on the backend
 // An optional schemeCode can be provided to only render that auth method
 export default (props: RouteComponentProps<{ schemeCode?: string}>) => {
-  const query = parseQuery(props.location.search.substr(1))
+  const query = new URLSearchParams(props.location.search)
   const renderOnlyScheme = props.match.params.schemeCode
   const wiredAuthSchemes = useWiredData(getSupportedAuthentications)
 
@@ -42,7 +41,7 @@ export default (props: RouteComponentProps<{ schemeCode?: string}>) => {
 const AuthSchemeLogin = (props: {
   authSchemeType: string,
   authScheme: SupportedAuthenticationScheme,
-  query: ParsedQuery,
+  query: URLSearchParams,
 }) => {
   const Login = useAuthFrontendComponent(props.authSchemeType, 'Login', props.authScheme)
   return (
