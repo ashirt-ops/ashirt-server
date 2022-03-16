@@ -64,37 +64,78 @@ export default () => {
       <Route exact path="/" render={() => <Redirect to="/operations" />} />
 
       {/* AuthError routes that an admin might reach if testing */}
-      <Route exact path="/autherror/recoveryfailed" render={NoAccess} />
+      <Route exact path="/autherror/recoveryfailed">
+        <NoAccess />
+      </Route>
 
-      <Route exact path="/operations" component={AsyncOperationList} />
+      {/* <Route exact path="/operations" component={AsyncOperationList} /> */}
+      <Route exact path="/operations" >
+        {(props: RouteComponentProps) => <AsyncOperationList {...props} />}
+      </Route>
 
       {/* Operation edit */}
-      <Route exact path="/operations/:slug/edit/:view(settings|users|tags)" component={AsyncOperationEdit} />
-      <Redirect from="/operations/:slug/edit" to="/operations/:slug/edit/settings" />
+      <Route exact path="/operations/:slug/edit/:view(settings|users|tags)">
+        {(props: RouteComponentProps) => <AsyncOperationEdit {...props} />}
+      </Route>
+      <Route from="/operations/:slug/edit" render={(props: RouteComponentProps<{ slug: string }>) => (
+        <Redirect to={`/operations/${props.match.params.slug}/edit/settings`} />
+      )} />
 
       {/* Operation overview */}
-      <Route exact path="/operations/:slug/overview" component={AsyncOperationOverview} />
+      <Route exact path="/operations/:slug/overview" >
+        {(props: RouteComponentProps) => <AsyncOperationOverview {...props} />}
+      </Route>
 
       {/* Operation show */}
-      <Route exact path="/operations/:slug/findings" component={AsyncFindingList} />
-      <Route exact path="/operations/:slug/findings/:uuid" component={AsyncFindingShow} />
-      <Route exact path="/operations/:slug/evidence" component={AsyncEvidenceList} />
-      <Redirect exact path="/operations/:slug/evidence/:uuid" to="/operations/:slug/evidence?q=uuid%3A:uuid" />
-      <Redirect from="/operations/:slug" to="/operations/:slug/evidence" />
+      <Route exact path="/operations/:slug/findings" >
+        {(props: RouteComponentProps) => <AsyncFindingList {...props} />}
+      </Route>
+      <Route exact path="/operations/:slug/findings/:uuid" >
+        {(props: RouteComponentProps) => <AsyncFindingShow {...props} />}
+      </Route>
+      <Route exact path="/operations/:slug/evidence">
+        {(props: RouteComponentProps) => <AsyncEvidenceList {...props} />}
+      </Route>
+      <Route exact path="/operations/:slug/evidence/:uuid" render={
+        (props: RouteComponentProps<{ slug: string, uuid: string }>) => {
+          const { slug, uuid } = props.match.params
+          return <Redirect to={`/operations/${slug}/evidence?q=uuid%3A${uuid}`} />
+        }
+      } />
+      <Route from="/operations/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
+        <Redirect to={`/operations/${props.match.params.slug}/evidence`} />
+      )} />
 
       {/* Account Settings */}
-      <Route exact path="/account/:view(profile|security|apikeys|authmethods)" component={AsyncAccountSettings} />
-      <Redirect exact from="/account" to={`/account/profile`} />
+      <Route exact path="/account/:view(profile|security|apikeys|authmethods)">
+        {(props: RouteComponentProps) => <AsyncAccountSettings {...props} />}
+      </Route>
+      <Route exact from="/account" render={() => <Redirect to="/account/profile" />} />
 
-      {isSuperAdmin && <Route exact path="/account/:view(profile|apikeys|authmethods)/:slug" component={AsyncAccountSettings} />}
-      {isSuperAdmin && <Redirect exact from="/account/edit/:slug" to="/account/profile/:slug" />}
+      {isSuperAdmin && (
+        <Route exact path="/account/:view(profile|apikeys|authmethods)/:slug">
+          {(props: RouteComponentProps) => <AsyncAccountSettings {...props} />}
+        </Route>
+      )}
+      {isSuperAdmin && (
+        <Route exact from="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
+          <Redirect to={`/account/profile/${props.match.params.slug}`} />
+        )} />
+      )}
 
       {/* Admin Settings */}
-      {isSuperAdmin && <Route exact path="/admin/:view(users|operations|authdata|findings|tags)" component={AsyncAdminSettings} />}
-      {isSuperAdmin && <Redirect from="/admin/" to="/admin/users" />}
+      {isSuperAdmin && (
+        <Route exact path="/admin/:view(users|operations|authdata|findings|tags)">
+          {(props: RouteComponentProps) => <AsyncAdminSettings {...props} />}
+        </Route>
+      )}
+      {isSuperAdmin && (
+        <Route from="/admin/" render={() => <Redirect to="/admin/users" />} />
+      )}
 
-
-      <Route component={AsyncNotFound} />
+      <Route>
+        {(props: RouteComponentProps) => <AsyncNotFound {...props} />}
+      </Route>
     </Switch>
   )
 }
