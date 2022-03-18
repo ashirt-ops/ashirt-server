@@ -160,3 +160,8 @@ type FindingCategory struct {
 type NewUserCreatedByAdmin struct {
 	TemporaryPassword string `json:"temporaryPassword"`
 }
+
+type CreateUserOutput struct {
+	RealSlug string `json:"slug"`
+	UserID   int64  `json:"-"` // don't transmit the userid
+}

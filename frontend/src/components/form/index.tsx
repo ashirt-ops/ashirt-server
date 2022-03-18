@@ -24,6 +24,8 @@ export default (props: {
   submitText?: string,
   cancelText?: string,
   submitDanger?: boolean,
+  disableSubmit?: boolean,
+  disableCancel?: boolean,
 }) => {
   const onCancel = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -42,13 +44,14 @@ export default (props: {
           danger={props.submitDanger}
           className={cx('button')}
           loading={props.loading}
+          disabled={props.disableSubmit}
           children={props.submitText}
         />
       )}
       {props.onCancel && <Button
         onClick={onCancel}
         className={cx('button')}
-        disabled={props.loading}
+        disabled={props.loading || props.disableCancel}
         children={props.cancelText}
       />}
     </form>
