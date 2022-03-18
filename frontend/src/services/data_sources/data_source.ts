@@ -72,7 +72,7 @@ export interface DataSource {
   updateUser(ids: UserSlug, payload: UserPayload): Promise<void>
   deleteUserAuthScheme(ids: UserSlug & { authSchemeName: string }): Promise<void>
   adminListUsers(query: { deleted: boolean, name?: string }): Promise<types.PaginationResult<dtos.UserAdminView>>
-  adminCreateHeadlessUser(payload: UserPayload): Promise<void>
+  adminCreateHeadlessUser(payload: UserPayload): Promise<dtos.CreateUserOutput>
 
   listQueries(ids: OpSlug): Promise<Array<dtos.Query>>
   createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings' }): Promise<void>
