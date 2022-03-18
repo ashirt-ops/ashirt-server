@@ -94,8 +94,8 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 
 func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filters helpers.TimelineFilters) sq.SelectBuilder {
 	sb = sb.Where(sq.Eq{"evidence.operation_id": operationID})
-	if filters.UUID != "" {
-		sb = sb.Where(sq.Eq{"evidence.uuid": filters.UUID})
+	if len(filters.UUID) > 0 {
+		sb = sb.Where("evidence.uuid IN (?)", filters.UUID)
 	}
 
 	for _, text := range filters.Text {
@@ -107,16 +107,16 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 			Where(sq.LtOrEq{"evidence.occurred_at": filters.DateRange.To})
 	}
 
-	if filters.Operator != "" {
-		sb = sb.Where(eviForOpOperatorWhereComponent, filters.Operator)
+	if len(filters.Operator) > 0 {
+		sb = sb.Where(eviForOpOperatorWhereComponentMultivalue, filters.Operator)
 	}
 
 	if len(filters.Tags) > 0 {
 		sb = sb.Where(eviForOpTagWhereComponent, filters.Tags, len(filters.Tags))
 	}
 
-	if filters.Type != "" {
-		sb = sb.Where(sq.Eq{"evidence.content_type": filters.Type})
+	if len(filters.Type) > 0 {
+		sb = sb.Where("evidence.content_type IN (?)", filters.Type)
 	}
 
 	if filters.Linked != nil {
@@ -139,5 +139,6 @@ const eviForOpTagWhereComponent = "evidence.id IN (" +
 	"  WHERE tags.name IN (?)" +
 	"  GROUP BY evidence_id HAVING COUNT(*) = ?" +
 	")"
-const eviForOpOperatorWhereComponent = "evidence.operator_id = (SELECT id FROM users WHERE slug = ?)"
+// const eviForOpOperatorWhereComponent = "evidence.operator_id = (SELECT id FROM users WHERE slug = ?)"
+const eviForOpOperatorWhereComponentMultivalue = "evidence.operator_id IN (SELECT id FROM users WHERE slug IN (?))"
 const eviLinkedSubquery = "(SELECT evidence_id FROM evidence_finding_map)"

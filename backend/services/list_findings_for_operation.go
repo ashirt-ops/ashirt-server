@@ -121,29 +121,29 @@ const findingsDateRangeWhereComponent = "findings.id IN (" +
 	"  GROUP BY findings.id HAVING MAX(evidence.occurred_at) >= ? AND MIN(evidence.occurred_at) <= ?" +
 	")"
 
-const findingsOperatorWhereComponent = "findings.id IN (" +
+const findingsOperatorWhereComponentMultivalue = "findings.id IN (" +
 	"  SELECT findings.id FROM findings" +
 	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
 	"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
 	"  LEFT JOIN users ON users.id = evidence.operator_id" +
-	"  WHERE users.slug = ?" +
+	"  WHERE users.slug IN(?)" +
 	")"
 
-const findingsEvidenceUUIDWhereComponent = "findings.id IN (" +
+const findingsEvidenceUUIDWhereComponentMultivalue = "findings.id IN (" +
 	"  SELECT finding_id FROM evidence_finding_map" +
 	"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-	"  WHERE evidence.uuid = ?" +
+	"  WHERE evidence.uuid IN (?)" +
 	")"
 
 const findingsTextWhereComponent = "(findings.title LIKE ? OR findings.description LIKE ?)"
-const findingsUUIDWhereComponent = "findings.uuid = ?"
+const findingsUUIDWhereComponent = "findings.uuid IN (?)"
 const findingsOperationIDWhereComponent = "findings.operation_id = ?"
 
 func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFilters) (string, []interface{}) {
 	queryFilters := []string{findingsOperationIDWhereComponent}
 	queryValues := []interface{}{operationID}
 
-	if filters.UUID != "" {
+	if len(filters.UUID) > 0 {
 		queryFilters = append(queryFilters, findingsUUIDWhereComponent)
 		queryValues = append(queryValues, filters.UUID)
 	}
@@ -164,13 +164,13 @@ func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFil
 		queryValues = append(queryValues, filters.DateRange.From, filters.DateRange.To)
 	}
 
-	if filters.Operator != "" {
-		queryFilters = append(queryFilters, findingsOperatorWhereComponent)
+	if len(filters.Operator) > 0 {
+		queryFilters = append(queryFilters, findingsOperatorWhereComponentMultivalue)
 		queryValues = append(queryValues, filters.Operator)
 	}
 
-	if filters.WithEvidenceUUID != "" {
-		queryFilters = append(queryFilters, findingsEvidenceUUIDWhereComponent)
+	if len(filters.WithEvidenceUUID) > 0 {
+		queryFilters = append(queryFilters, findingsEvidenceUUIDWhereComponentMultivalue)
 		queryValues = append(queryValues, filters.WithEvidenceUUID)
 	}
 

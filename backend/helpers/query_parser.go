@@ -21,13 +21,13 @@ type DateRange struct {
 
 // TimelineFilters represents all of the parsed timeline configuraions
 type TimelineFilters struct {
-	UUID             string
+	UUID             []string
 	Text             []string
 	Tags             []string
-	Type             string
-	Operator         string
+	Type             []string
+	Operator         []string
 	DateRange        *DateRange
-	WithEvidenceUUID string
+	WithEvidenceUUID []string
 	Linked           *bool
 	SortAsc          bool
 }
@@ -44,11 +44,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 		case "tag":
 			timelineFilters.Tags = v
 		case "operator":
-			if len(v) != 1 {
-				errReason := "Only one operator can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.Operator = v[0]
+			timelineFilters.Operator = v
 		case "range":
 			dateRange, err := parseRangeQuery(v)
 			if err != nil {
@@ -56,17 +52,9 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 			}
 			timelineFilters.DateRange = dateRange
 		case "uuid":
-			if len(v) != 1 {
-				errReason := "Only one uuid can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.UUID = v[0]
+			timelineFilters.UUID = v
 		case "with-evidence":
-			if len(v) != 1 {
-				errReason := "Only one with-evidence can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.WithEvidenceUUID = v[0]
+			timelineFilters.WithEvidenceUUID = v
 		case "linked":
 			if len(v) != 1 {
 				errReason := "Linked can only be specified once"
@@ -91,11 +79,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 				timelineFilters.SortAsc = true
 			}
 		case "type":
-			if len(v) != 1 {
-				errReason := "Only one evidence type can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.Type = v[0]
+			timelineFilters.Type = v
 		default:
 			errReason := fmt.Sprintf("Unknown filter key '%s'", k)
 			return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
