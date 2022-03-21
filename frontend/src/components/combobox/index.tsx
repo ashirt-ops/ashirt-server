@@ -33,7 +33,7 @@ function filterOptions<T>(allOptions: Array<ComboBoxItem<T>>, filterValue: strin
  * SmartComboBox (default export) is modeled after a type-able select-style component. This component
  * manages its own state, and conveys selections with the `onChange` prop. If you need more control
  * of the combobox, see {@link DumbComboBox}. There is also a true Select component available which
- * may suit your needs better. 
+ * may suit your needs better.
  */
 export default function SmartComboBox<T>(props: {
   options: Array<ComboBoxItem<T>>,
@@ -70,10 +70,10 @@ export default function SmartComboBox<T>(props: {
 
 /**
  * DumbComboBox is a component that replicates a select while allowing typing. This component offers
- * complete control over the combobox experience. Typically, you will want to pair this with 
+ * complete control over the combobox experience. Typically, you will want to pair this with
  * {@link initialComboBoxState} and/or do state management with
  * {@link standardComboboxStateReducer}
- * In fact, if that's all you want to do, you should probably use the default export 
+ * In fact, if that's all you want to do, you should probably use the default export
  * ({@link SmartComboBox}).
  */
 export function DumbComboBox<T>(props: {
@@ -187,12 +187,12 @@ type ComboBoxReducer<T> = (state: ComboBoxState<T>, action: ComboBoxAction<T>) =
  * this is focused on making sure that the input value is correct, and that the popover is in the
  * correct (i.e. open or closed). This can be applied either in whole, or in part if you want to
  * update how a particular event is handled.
- * 
+ *
  * In many ways, this is like a mini redux-like reducer
- * 
+ *
  * @param currentState The current state of the combobox
  * @param action the combobox event
- * @returns A revised state 
+ * @returns A revised state
  */
 export function standardComboboxStateReducer<T>(
   state: ComboBoxState<T>,
