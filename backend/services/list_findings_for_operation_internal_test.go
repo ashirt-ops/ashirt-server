@@ -43,14 +43,21 @@ func TestBuildListFindingsWhereClause(t *testing.T) {
 	}
 
 	test(helpers.TimelineFilters{}, []string{}, []interface{}{}) // no filters test
-	test(helpers.TimelineFilters{UUID: "abc"}, []string{findingsUUIDWhereComponent}, []interface{}{"abc"})
-	test(helpers.TimelineFilters{Tags: []string{"fraggle", "rock"}}, []string{findingsTagWhereComponent}, []interface{}{[]string{"fraggle", "rock"}, 2})
+	val := []string{"abc"}
+	test(helpers.TimelineFilters{UUID: val}, []string{findingsUUIDWhereComponent}, []interface{}{val})
+	val = []string{"fraggle", "rock"}
+	test(helpers.TimelineFilters{Tags: val}, []string{findingsTagWhereComponent}, []interface{}{val, len(val)})
 	test(helpers.TimelineFilters{Text: []string{"some", "text"}}, []string{findingsTextWhereComponent, findingsTextWhereComponent}, []interface{}{"%some%", "%some%", "%text%", "%text%"})
 
 	start, end := time.Now(), time.Now().Add(5*time.Second)
-	test(helpers.TimelineFilters{DateRange: &helpers.DateRange{From: start, To: end}}, []string{findingsDateRangeWhereComponent}, []interface{}{start, end})
-	test(helpers.TimelineFilters{Operator: "MyOp"}, []string{findingsOperatorWhereComponent}, []interface{}{"MyOp"})
-	test(helpers.TimelineFilters{WithEvidenceUUID: "abc"}, []string{findingsEvidenceUUIDWhereComponent}, []interface{}{"abc"})
+	dates := []helpers.DateRange{
+		helpers.DateRange{From: start, To: end},
+	}
+	test(helpers.TimelineFilters{DateRanges: dates}, []string{findingsDateRangeWhereComponent}, []interface{}{start, end})
+	val = []string{"MyOp"}
+	test(helpers.TimelineFilters{Operator: val}, []string{findingsOperatorWhereComponentMultivalue}, []interface{}{val})
+	val = []string{"abc"}
+	test(helpers.TimelineFilters{WithEvidenceUUID: val}, []string{findingsEvidenceUUIDWhereComponentMultivalue}, []interface{}{val})
 }
 
 // TestAllTagsByID is a unit-test suite for the allTagsByID function.
