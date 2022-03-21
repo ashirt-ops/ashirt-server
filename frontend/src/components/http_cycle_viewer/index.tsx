@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { Har, Entry, Log, Header, PostData, Response } from 'har-format'
+import { Har, Entry, Log, Header, PostData, Response, Request } from 'har-format'
 import { EvidenceViewHint } from 'src/global_types'
 import { trimURL, clamp } from 'src/helpers'
 import { mimetypeToAceLang } from './helpers'
@@ -38,14 +38,14 @@ export const HarViewer = (props: {
 
   return (
     <div className={cx('root')} onClick={e => {
-      if (!props.disableKeyHandler ) {
+      if (!props.disableKeyHandler) {
         e.stopPropagation() // prevent lightbox from showing
       }
     }}>
       {/* <EvidenceHeader creator={log.creator.name} version={log.creator.version} /> */}
       <div className={cx('columns')}>
-        <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={props.disableKeyHandler ? (_)=>{} : setSelectedRow} />
-        {selectedRow > -1  &&
+        <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={props.disableKeyHandler ? (_) => { } : setSelectedRow} />
+        {selectedRow > -1 &&
           <EntryData entry={log.entries[selectedRow]} state={entryState} setState={setEntryState} />
         }
       </div>
@@ -80,6 +80,15 @@ const EntryData = (props: {
           id: 'entry-response', label: 'Response',
           content: <ResponseContent response={props.entry.response} />
         },
+        {
+          id: 'entry-request', label: 'Full Request',
+          content: <FullRequest data={props.entry.request} />
+        },
+        {
+          id: 'entry-response', label: 'Full Response',
+          content: <FullResponse response={props.entry.response} />
+        },
+
       ]}
     />
   </div>
@@ -101,24 +110,39 @@ const EntryHeadersData = (props: {
         <RequestInfo entry={props.entry} />
       }>
         Request Info
-    </ExpandableSection>
+      </ExpandableSection>
       <ExpandableSection {...expandedAreaProps('request-headers')} content={
         <SectionDefintions definitions={formatHeaders(props.entry.request.headers)} />
       }>
         Request Headers
-    </ExpandableSection>
+      </ExpandableSection>
       <ExpandableSection {...expandedAreaProps('response-headers')} content={
         <SectionDefintions definitions={formatHeaders(props.entry.response.headers)} />
       }>
         Response Headers
-    </ExpandableSection>
+      </ExpandableSection>
     </div>
   )
 }
 
-const formatHeaders = (headers: Array<Header>): Array<[string, string]> => headers
-  .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-  .map(header => [header.name, header.value])
+const formatHeaders = (headers: Array<Header>, withSort?: boolean): Array<[string, string]> => {
+  const mapFn: (h: Header) => [string, string] = (header: Header) => [header.name, header.value]
+  const sortFn = (a: Header, b: Header) => (
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  )
+
+  if (withSort) {
+    return (
+      headers
+        .sort(sortFn)
+        .map(mapFn)
+    )
+  }
+  return (
+    headers
+      .map(mapFn)
+  )
+}
 
 const RequestInfo = (props: {
   entry: Entry
@@ -227,6 +251,30 @@ const RequestContent = (props: {
   return <RawContent content={body} language={mimetypeToAceLang(mimetype)} />
 }
 
+const FullRequest = (props: {
+  data: Request
+}) => {
+  const req = props.data
+  const requestUrl = new URL(req.url)
+
+  let content = ''
+
+  // parameter data doesn't work well here, and it's not clear exaclty when we'll see it,
+  // so ignoring it as a possible scenario for now
+  if (req.postData?.text) {
+    content = req.postData.text
+  }
+
+  const body = [
+    `${req.method} ${requestUrl.pathname} ${req.httpVersion}`,
+    ...(formatHeaders(req.headers, false).map(h => `${h[0]}: ${h[1]}`)),
+    '',
+    content,
+  ]
+
+  return <RawContent content={body.join('\n')} language={''} />
+}
+
 const ResponseContent = (props: {
   response: Response
 }) => {
@@ -238,4 +286,25 @@ const ResponseContent = (props: {
     : rawText
 
   return <RawContent content={content} language={mimetypeToAceLang(props.response.content.mimeType)} />
+}
+
+const FullResponse = (props: {
+  response: Response
+}) => {
+  const res = props.response
+  const length = res.content.size
+  const rawText = res.content.text || ''
+
+  const content = (rawText == '' && length > 0)
+    ? `Content is ${length} bytes long, but no data/text was captured`
+    : rawText
+
+  const body = [
+    `${res.httpVersion} ${res.status} ${res.statusText}`,
+    ...(formatHeaders(res.headers, false).map(h => `${h[0]}: ${h[1]}`)),
+    '',
+    content
+  ]
+
+  return <RawContent content={body.join('\n')} language={mimetypeToAceLang('')} />
 }
