@@ -154,7 +154,8 @@ const SearchHelpModal = (props: {
         {" "}<CodeSnippet>Free</CodeSnippet> and <CodeSnippet>Text</CodeSnippet>. The
         {" "}<CodeSnippet>specific-field</CodeSnippet> will search just the specific-field attribute
         for the value <CodeSnippet>specific value</CodeSnippet>. Filters must be specified without a
-        space on either side of the colon. Multiple filters can be provided in a single search. Also
+        space on either side of the colon. Multiple filters can be provided in a single search. 
+        Doing so means that the results must satisfy each part of the filter. Also
         note that <CodeSnippet>specific value</CodeSnippet> was written in quotes. This is not
         required for any field, but provide the ability to search over phrases rather than words.
       </p>
@@ -208,9 +209,9 @@ const HelpText: Array<FilterDetail> = [
       <>
         <p>
           Filters the result by requiring that the evidence or finding was created by a particular
-          user.
+          user. If muliple values are specified, then this will look for evidence that was created
+          by any of the indicated users.
         </p>
-        <p>Only one <CodeSnippet>operator</CodeSnippet> field can be specified.</p>
         <p>To easily create this filter, click on the desired username next to any evidence.</p>
       </>
   },
@@ -221,13 +222,13 @@ const HelpText: Array<FilterDetail> = [
         <p>
           Filters the result by requiring that the evidence to have occurred within a particular
           date range. In the findings timeline, this will require that all evidence for a finding
-          be contained with the indicated date range. Only one range can be specified.
+          be contained with the indicated date range. Only one range can be specified for a finding.
+          Multiple values can be specified for evidence.
           Date Format: <CodeSnippet>yyyy-mm-dd,yyyy-mm-dd</CodeSnippet> where
           y, m, and d are year, month and day digits respectively.
           For example: <CodeSnippet>2020-01-01,2020-01-31</CodeSnippet> covers the entire
           month of January, 2020.
         </p>
-        <p>Only one <CodeSnippet>range</CodeSnippet> field can be specified.</p>
         <p>Click on the calendar next to the Timeline Filter to help specify the date.</p>
       </>
   },
@@ -278,10 +279,10 @@ const HelpText: Array<FilterDetail> = [
     description:
       <>
         <p>
-          Filters the result by requiring a fidning to contain a particular piece of evidence.
+          Filters the result by requiring a finding to contain a particular piece of evidence, or
+          one of the piece of evidence if multiple values are given.
           <em>This will only have an effect in the Findings Timeline.</em>
         </p>
-        <p>Only one <CodeSnippet>with-evidence</CodeSnippet> field can be specified.</p>
       </>
   },
   {
@@ -289,8 +290,8 @@ const HelpText: Array<FilterDetail> = [
     description:
       <>
         <p>
-          Filters the result by requiring that the evidence have the matching type as the one
-          specified in the filter.
+          Filters the result by requiring that the evidence must have a matching type for one of the
+          values given in the filter.
           {" "}<em>This will only have an effect in the Evidence Timeline.</em>
         </p>
         <p>
@@ -301,9 +302,6 @@ const HelpText: Array<FilterDetail> = [
             ])
           }
         </p>
-        <p>
-        </p>
-        <p>Only one <CodeSnippet>type</CodeSnippet> field can be specified.</p>
       </>
   },
   {
@@ -316,7 +314,6 @@ const HelpText: Array<FilterDetail> = [
           manually, the preferred method is to click the "Copy Permalink" button
           next to the desired evidence, and share the link as needed.
         </p>
-        <p>Only one <CodeSnippet>uuid</CodeSnippet> field can be specified.</p>
       </>
   },
 
