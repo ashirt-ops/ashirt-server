@@ -159,9 +159,10 @@ func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFil
 		queryValues = append(queryValues, fuzzyText, fuzzyText)
 	}
 
-	if filters.DateRange != nil {
+	if len(filters.DateRanges) > 0 {
+		// we're only going to support a single date range for now TODO
 		queryFilters = append(queryFilters, findingsDateRangeWhereComponent)
-		queryValues = append(queryValues, filters.DateRange.From, filters.DateRange.To)
+		queryValues = append(queryValues, filters.DateRanges[0].From, filters.DateRanges[0].To)
 	}
 
 	if len(filters.Operator) > 0 {

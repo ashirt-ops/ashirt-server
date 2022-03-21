@@ -26,7 +26,7 @@ type TimelineFilters struct {
 	Tags             []string
 	Type             []string
 	Operator         []string
-	DateRange        *DateRange
+	DateRanges       []DateRange
 	WithEvidenceUUID []string
 	Linked           *bool
 	SortAsc          bool
@@ -46,11 +46,11 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 		case "operator":
 			timelineFilters.Operator = v
 		case "range":
-			dateRange, err := parseRangeQuery(v)
+			ranges, err := parseRangeQuery(v)
 			if err != nil {
 				return timelineFilters, err
 			}
-			timelineFilters.DateRange = dateRange
+			timelineFilters.DateRanges = ranges
 		case "uuid":
 			timelineFilters.UUID = v
 		case "with-evidence":
@@ -142,25 +142,28 @@ func tokenizeTimelineQuery(query string) map[string][]string {
 	return parsed
 }
 
-func parseRangeQuery(rangeQuery []string) (*DateRange, error) {
-	if len(rangeQuery) != 1 {
-		errReason := fmt.Sprintf("Query can only have one date ranges. (%d ranges supplied)", len(rangeQuery))
-		return nil, backend.BadInputErr(errors.New(errReason), errReason)
+func parseRangeQuery(rangeQuery []string) ([]DateRange, error) {
+	dates := make([]DateRange, len(rangeQuery))
+	noVal := []DateRange{}
+
+	for i, v := range rangeQuery {
+		split := strings.Split(v, ",")
+		if len(split) != 2 {
+			errReason := fmt.Sprintf("Query range must be in the format [date],[date]. (Got '%s')", v)
+			return noVal, backend.BadInputErr(errors.New(errReason), errReason)
+		}
+		from, err := parseTime(split[0], false)
+		if err != nil {
+			return noVal, err
+		}
+		to, err := parseTime(split[1], true)
+		if err != nil {
+			return noVal, err
+		}
+		dates[i] = DateRange{from, to}
 	}
-	split := strings.Split(rangeQuery[0], ",")
-	if len(split) != 2 {
-		errReason := fmt.Sprintf("Query range must be in the format [date],[date]. (Got '%s')", rangeQuery[0])
-		return nil, backend.BadInputErr(errors.New(errReason), errReason)
-	}
-	from, err := parseTime(split[0], false)
-	if err != nil {
-		return nil, err
-	}
-	to, err := parseTime(split[1], true)
-	if err != nil {
-		return nil, err
-	}
-	return &DateRange{from, to}, nil
+
+	return dates, nil
 }
 
 func parseTime(str string, useEndOfDayIfTimeIsMissing bool) (time.Time, error) {

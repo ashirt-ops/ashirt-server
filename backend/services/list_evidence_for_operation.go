@@ -102,9 +102,16 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 		sb = sb.Where(sq.Like{"description": "%" + text + "%"})
 	}
 
-	if filters.DateRange != nil {
-		sb = sb.Where(sq.GtOrEq{"evidence.occurred_at": filters.DateRange.From}).
-			Where(sq.LtOrEq{"evidence.occurred_at": filters.DateRange.To})
+	if len(filters.DateRanges) > 0 {
+		// sq.Or is a []sq.Sqlizer, so we can treat it like a slice (because it is one).
+		stmts := make(sq.Or, len(filters.DateRanges))
+		for i, v := range filters.DateRanges {
+			stmts[i] = sq.And{
+				sq.GtOrEq{"evidence.occurred_at": v.From},
+				sq.LtOrEq{"evidence.occurred_at": v.To},
+			}
+		}
+		sb = sb.Where(stmts)
 	}
 
 	if len(filters.Operator) > 0 {
@@ -139,6 +146,5 @@ const eviForOpTagWhereComponent = "evidence.id IN (" +
 	"  WHERE tags.name IN (?)" +
 	"  GROUP BY evidence_id HAVING COUNT(*) = ?" +
 	")"
-// const eviForOpOperatorWhereComponent = "evidence.operator_id = (SELECT id FROM users WHERE slug = ?)"
 const eviForOpOperatorWhereComponentMultivalue = "evidence.operator_id IN (SELECT id FROM users WHERE slug IN (?))"
 const eviLinkedSubquery = "(SELECT evidence_id FROM evidence_finding_map)"
