@@ -2,9 +2,9 @@ name: ci
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   gotest:
@@ -75,7 +75,7 @@ jobs:
         uses: docker/setup-buildx-action@v1.6.0
 
       - name: Build and Push PR
-        if: github.ref != 'refs/heads/master'
+        if: github.ref != 'refs/heads/main'
         uses: docker/build-push-action@v2.10.0
         with:
           context: .
@@ -86,12 +86,12 @@ jobs:
           push: true # Push with pr-### and sha-xxxxxxx tags
 
       - name: Build and Push Latest
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v2.10.0
         with:
           context: .
           file: Dockerfile.prod.${{ matrix.service }}
-          tags: ${{ steps.docker_meta.outputs.tags }}, ashirt/${{ matrix.service }}:latest #Add latest tag for master
+          tags: ${{ steps.docker_meta.outputs.tags }}, ashirt/${{ matrix.service }}:latest #Add latest tag for main
           labels: ${{ steps.docker_meta.outputs.labels }}
           platforms: linux/amd64
           push: true
