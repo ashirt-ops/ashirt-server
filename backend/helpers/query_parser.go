@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package helpers
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
 
 // DateRange is a simple struct representing a slice of time From a point To a point
@@ -40,30 +41,30 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 	for k, v := range tokenizeTimelineQuery(query) {
 		switch k {
 		case "":
-			timelineFilters.Text = v
+			timelineFilters.Text = v.Values()
 		case "tag":
-			timelineFilters.Tags = v
+			timelineFilters.Tags = v.Values()
 		case "operator":
-			timelineFilters.Operator = v
+			timelineFilters.Operator = v.Values()
 		case "range":
-			ranges, err := parseRangeQuery(v)
+			ranges, err := parseRangeQuery(v.Values())
 			if err != nil {
 				return timelineFilters, err
 			}
 			timelineFilters.DateRanges = ranges
 		case "uuid":
-			timelineFilters.UUID = v
+			timelineFilters.UUID = v.Values()
 		case "with-evidence":
-			timelineFilters.WithEvidenceUUID = v
+			timelineFilters.WithEvidenceUUID = v.Values()
 		case "linked":
 			if len(v) != 1 {
 				errReason := "Linked can only be specified once"
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
 			}
-			if strings.ToLower(v[0]) == "all" {
+			if strings.ToLower(v.Value(0)) == "all" {
 				continue // providing a 3rd option here to allow for easy filter-removal
 			}
-			val, err := strconv.ParseBool(v[0])
+			val, err := strconv.ParseBool(v.Value(0))
 			if err != nil {
 				errReason := "Linked value must be True or False"
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
@@ -74,12 +75,12 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 				errReason := "Only one sorting flag can be specified"
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
 			}
-			direction := strings.ToLower(v[0])
+			direction := strings.ToLower(v.Value(0))
 			if direction == "asc" || direction == "chronological" || direction == "ascending" {
 				timelineFilters.SortAsc = true
 			}
 		case "type":
-			timelineFilters.Type = v
+			timelineFilters.Type = v.Values()
 		default:
 			errReason := fmt.Sprintf("Unknown filter key '%s'", k)
 			return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
@@ -107,8 +108,9 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 //   "": []string{"foo", "bar baz"},
 //   "tag": []string{"fizz buzz"},
 // }
-func tokenizeTimelineQuery(query string) map[string][]string {
-	parsed := map[string][]string{}
+func tokenizeTimelineQuery(query string) map[string]filter.Values {
+	parsed := map[string]filter.Values{}
+	modifier := filter.Normal
 	currentToken := ""
 	inQuote := false
 	currentKey := ""
@@ -118,10 +120,12 @@ func tokenizeTimelineQuery(query string) map[string][]string {
 		case ' ':
 			if !inQuote {
 				if len(currentToken) > 0 {
-					parsed[currentKey] = append(parsed[currentKey], currentToken)
+					filterValue := filter.Value{Value: currentToken, Modifier: modifier}
+					parsed[currentKey] = append(parsed[currentKey], filterValue)
 				}
 				currentToken = ""
 				currentKey = ""
+				modifier = filter.Normal
 				continue
 			}
 		case '"':
@@ -133,11 +137,19 @@ func tokenizeTimelineQuery(query string) map[string][]string {
 				currentToken = ""
 				continue
 			}
+
+		// modifiers
+		case '!':
+			if currentKey != "" && currentToken == "" {
+				modifier = filter.Not
+				continue
+			}
 		}
 		currentToken += string(char)
 	}
 	if len(currentToken) > 0 {
-		parsed[currentKey] = append(parsed[currentKey], currentToken)
+		filterValue := filter.Value{Value: currentToken, Modifier: modifier}
+		parsed[currentKey] = append(parsed[currentKey], filterValue)
 	}
 	return parsed
 }
