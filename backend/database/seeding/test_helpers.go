@@ -194,6 +194,16 @@ func GetOperations(t *testing.T, db *database.Connection) []models.Operation {
 	return fullOps
 }
 
+func GetOperationsForUser(t *testing.T, db *database.Connection, userId int64) []models.Operation {
+	var fullOps []models.Operation
+	err := db.Select(&fullOps, sq.Select("id", "slug", "name", "status").
+		From("operations").
+		LeftJoin("user_operation_permissions on operation_id = operations.id").
+		Where(sq.Eq{"user_operation_permissions.user_id": userId}))
+	require.NoError(t, err)
+	return fullOps
+}
+
 func GetUserRolesForOperationByOperationID(t *testing.T, db *database.Connection, id int64) []models.UserOperationPermission {
 	var userRoles []models.UserOperationPermission
 	err := db.Select(&userRoles, sq.Select("*").

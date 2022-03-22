@@ -139,6 +139,10 @@ export type TagWithUsage = {
   evidenceCount: number,
 }
 
+export type NewUser = {
+  slug: string,
+}
+
 export type User = {
   slug: string,
   firstName: string,

@@ -37,7 +37,7 @@ func GetInternalClock() clockwork.Clock {
 // except for NeedsReset, which is always false
 func ContextForUser(my models.User, db *database.Connection) context.Context {
 	ctx := context.Background()
-	return middleware.BuildContextForUser(ctx, db, my.ID, my.Admin)
+	return middleware.BuildContextForUser(ctx, db, my.ID, my.Admin, my.Headless)
 }
 
 // IsSeeded does a check against the database to see if any users are registered. if no users are

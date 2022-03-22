@@ -13,7 +13,7 @@ export default (props: {
 
   return (
     <SettingsSection title="Headless User Creation">
-      <em>Headless users cannot login as regular users, but can access services via API keys.</em>
+      <em>Headless users cannot login as regular users, but can access services via API keys. Headless users are allowed read/write access to all operations.</em>
       <Button primary onClick={() => setNewHeadlessUser(true)}>Create New Headless User</Button>
       {newHeadlessUser && <AddHeadlessUserModal onRequestClose={() => {
         setNewHeadlessUser(false)

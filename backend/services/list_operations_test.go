@@ -9,37 +9,43 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestListOperations(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserDumbledore.ID, &policy.FullAccess{}) // by convention, this user should have admin access to all
 
-	fullOps := getOperations(t, db)
-	require.NotEqual(t, len(fullOps), 0, "Some number of operations should exist")
-
-	ops, err := services.ListOperations(ctx, db)
-	require.NoError(t, err)
-	require.Equal(t, len(ops), len(fullOps))
-	for _, op := range ops {
-		var expected *models.Operation = nil
-		for _, fOp := range fullOps {
-			if fOp.Slug == op.Slug {
-				expected = &fOp
-				break
+	validateOperationList := func(receivedOps []*dtos.Operation, expectedOps []models.Operation) {
+		for _, op := range receivedOps {
+			var expected *models.Operation = nil
+			for _, fOp := range expectedOps {
+				if fOp.Slug == op.Slug {
+					expected = &fOp
+					break
+				}
 			}
+			require.NotNil(t, expected, "Result should have matching value")
+			validateOp(t, *expected, op)
 		}
-		require.NotNil(t, expected, "Result should have matching value")
-		validateOp(t, *expected, op)
 	}
 
-	ctx = fullContext(UserDraco.ID, &policy.Deny{}) // user should have access to nothing
-	ops, err = services.ListOperations(ctx, db)
+	normalUser := UserRon
+	expectedOps := getOperationsForUser(t, db, normalUser.ID)
+
+	ops, err := services.ListOperations(contextForUser(normalUser, db), db)
 	require.NoError(t, err)
-	require.Equal(t, 0, len(ops))
+	require.Equal(t, len(ops), len(expectedOps))
+	validateOperationList(ops, expectedOps)
+
+	// validate headless users
+	headlessUser := UserHeadlessNick
+	fullOps := getOperations(t, db)
+
+	ops, err = services.ListOperations(contextForUser(headlessUser, db), db)
+	require.NoError(t, err)
+	require.Equal(t, len(ops), len(fullOps))
+	validateOperationList(ops, fullOps)
 }
 
 func validateOp(t *testing.T, expected models.Operation, actual *dtos.Operation) {

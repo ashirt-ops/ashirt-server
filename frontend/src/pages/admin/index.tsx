@@ -17,6 +17,7 @@ import UserTable from './user_table'
 
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import { DefaultTagEditor } from './default_tag_editor'
+import { TagPorter } from './tag_porter'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -54,7 +55,8 @@ export default (props: RouteComponentProps) => {
           {
             id: "tags", label: "Tag Management", content: (
               <>
-                <DefaultTagEditor />
+                <DefaultTagEditor {...bus}/>
+                <TagPorter {...bus}/>
               </>
             )
           },
