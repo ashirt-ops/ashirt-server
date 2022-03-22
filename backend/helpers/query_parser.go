@@ -22,11 +22,11 @@ type DateRange struct {
 
 // TimelineFilters represents all of the parsed timeline configuraions
 type TimelineFilters struct {
-	UUID             []string
+	UUID             filter.Values
 	Text             []string
 	Tags             []string
-	Type             []string
-	Operator         []string
+	Type             filter.Values
+	Operator         filter.Values
 	DateRanges       []DateRange
 	WithEvidenceUUID []string
 	Linked           *bool
@@ -45,7 +45,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 		case "tag":
 			timelineFilters.Tags = v.Values()
 		case "operator":
-			timelineFilters.Operator = v.Values()
+			timelineFilters.Operator = v
 		case "range":
 			ranges, err := parseRangeQuery(v.Values())
 			if err != nil {
@@ -53,7 +53,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 			}
 			timelineFilters.DateRanges = ranges
 		case "uuid":
-			timelineFilters.UUID = v.Values()
+			timelineFilters.UUID = v
 		case "with-evidence":
 			timelineFilters.WithEvidenceUUID = v.Values()
 		case "linked":
@@ -80,7 +80,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 				timelineFilters.SortAsc = true
 			}
 		case "type":
-			timelineFilters.Type = v.Values()
+			timelineFilters.Type = v
 		default:
 			errReason := fmt.Sprintf("Unknown filter key '%s'", k)
 			return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)

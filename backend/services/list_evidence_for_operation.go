@@ -10,6 +10,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -95,7 +96,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filters helpers.TimelineFilters) sq.SelectBuilder {
 	sb = sb.Where(sq.Eq{"evidence.operation_id": operationID})
 	if len(filters.UUID) > 0 {
-		sb = sb.Where("evidence.uuid IN (?)", filters.UUID)
+		sb = addWhereAndNot(sb, filters.UUID, evidenceUUIDWhere)
 	}
 
 	for _, text := range filters.Text {
@@ -115,7 +116,7 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 	}
 
 	if len(filters.Operator) > 0 {
-		sb = sb.Where(eviForOpOperatorWhereComponentMultivalue, filters.Operator)
+		sb = addWhereAndNot(sb, filters.Operator, evidenceOperatorWhere)
 	}
 
 	if len(filters.Tags) > 0 {
@@ -123,7 +124,7 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 	}
 
 	if len(filters.Type) > 0 {
-		sb = sb.Where("evidence.content_type IN (?)", filters.Type)
+		sb = addWhereAndNot(sb, filters.Type, evidenceTypeWhere)
 	}
 
 	if filters.Linked != nil {
@@ -146,5 +147,28 @@ const eviForOpTagWhereComponent = "evidence.id IN (" +
 	"  WHERE tags.name IN (?)" +
 	"  GROUP BY evidence_id HAVING COUNT(*) = ?" +
 	")"
-const eviForOpOperatorWhereComponentMultivalue = "evidence.operator_id IN (SELECT id FROM users WHERE slug IN (?))"
 const eviLinkedSubquery = "(SELECT evidence_id FROM evidence_finding_map)"
+
+func evidenceUUIDWhere(is bool) string {
+	return "evidence.uuid " + isOrIsNot(is) + " (?)"
+}
+
+func evidenceOperatorWhere(is bool) string {
+	return "evidence.operator_id " + isOrIsNot(is) + " (SELECT id FROM users WHERE slug IN (?))"
+}
+
+func evidenceTypeWhere(is bool) string {
+	return "evidence.content_type " + isOrIsNot(is) + " (?)"
+}
+
+func addWhereAndNot(sb sq.SelectBuilder, vals filter.Values, whereFunc func(bool) string) sq.SelectBuilder {
+	splitValues := vals.SplitByModifier()
+
+	if values := splitValues[filter.Normal]; len(values) > 0 {
+		sb = sb.Where(whereFunc(true), values)
+	}
+	if values := splitValues[filter.Not]; len(values) > 0 {
+		sb = sb.Where(whereFunc(false), values)
+	}
+	return sb
+}

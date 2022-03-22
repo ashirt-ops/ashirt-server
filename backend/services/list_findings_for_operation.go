@@ -13,6 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -121,14 +122,6 @@ const findingsDateRangeWhereComponent = "findings.id IN (" +
 	"  GROUP BY findings.id HAVING MAX(evidence.occurred_at) >= ? AND MIN(evidence.occurred_at) <= ?" +
 	")"
 
-const findingsOperatorWhereComponentMultivalue = "findings.id IN (" +
-	"  SELECT findings.id FROM findings" +
-	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
-	"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-	"  LEFT JOIN users ON users.id = evidence.operator_id" +
-	"  WHERE users.slug IN(?)" +
-	")"
-
 const findingsEvidenceUUIDWhereComponentMultivalue = "findings.id IN (" +
 	"  SELECT finding_id FROM evidence_finding_map" +
 	"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
@@ -136,16 +129,44 @@ const findingsEvidenceUUIDWhereComponentMultivalue = "findings.id IN (" +
 	")"
 
 const findingsTextWhereComponent = "(findings.title LIKE ? OR findings.description LIKE ?)"
-const findingsUUIDWhereComponent = "findings.uuid IN (?)"
 const findingsOperationIDWhereComponent = "findings.operation_id = ?"
+
+func isOrIsNot(is bool) string {
+	if is {
+		return "IN"
+	}
+	return "NOT IN"
+}
+
+func findingUUIDWhere(is bool) string {
+	return "findings.uuid " + isOrIsNot(is) + " (?)"
+}
+
+func findingOperatorWhere(is bool) string {
+	return "findings.id " + isOrIsNot(is) + " (" +
+		"  SELECT findings.id FROM findings" +
+		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
+		"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
+		"  LEFT JOIN users ON users.id = evidence.operator_id" +
+		"  WHERE users.slug IN(?)" +
+		")"
+}
 
 func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFilters) (string, []interface{}) {
 	queryFilters := []string{findingsOperationIDWhereComponent}
 	queryValues := []interface{}{operationID}
 
 	if len(filters.UUID) > 0 {
-		queryFilters = append(queryFilters, findingsUUIDWhereComponent)
-		queryValues = append(queryValues, filters.UUID)
+		splitValues := filters.UUID.SplitByModifier()
+
+		if values := splitValues[filter.Normal]; len(values) > 0 {
+			queryFilters = append(queryFilters, findingUUIDWhere(true))
+			queryValues = append(queryValues, values)
+		}
+		if values := splitValues[filter.Not]; len(values) > 0 {
+			queryFilters = append(queryFilters, findingUUIDWhere(false))
+			queryValues = append(queryValues, values)
+		}
 	}
 
 	if len(filters.Tags) > 0 {
@@ -166,8 +187,16 @@ func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFil
 	}
 
 	if len(filters.Operator) > 0 {
-		queryFilters = append(queryFilters, findingsOperatorWhereComponentMultivalue)
-		queryValues = append(queryValues, filters.Operator)
+		splitValues := filters.Operator.SplitByModifier()
+
+		if values := splitValues[filter.Normal]; len(values) > 0 {
+			queryFilters = append(queryFilters, findingOperatorWhere(true))
+			queryValues = append(queryValues, values)
+		}
+		if values := splitValues[filter.Not]; len(values) > 0 {
+			queryFilters = append(queryFilters, findingOperatorWhere(false))
+			queryValues = append(queryValues, values)
+		}
 	}
 
 	if len(filters.WithEvidenceUUID) > 0 {
