@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
 
 func testTimelineQueryCase(t *testing.T, input string, expectedOutput helpers.TimelineFilters) {
@@ -52,11 +53,11 @@ func TestParseTimelineQuery(t *testing.T) {
 		Tags: []string{"tag"},
 	})
 	testTimelineQueryCase(t, `operator:alice`, helpers.TimelineFilters{
-		Operator: []string{"alice"},
+		Operator: filter.Values{filter.Val("alice")},
 	})
 	testTimelineQueryCase(t, `Multiple Operators   operator:alice operator:bob`, helpers.TimelineFilters{
 		Text:     []string{"Multiple", "Operators"},
-		Operator: []string{"alice", "bob"},
+		Operator: filter.Values{filter.Val("alice"), filter.Val("bob")},
 	})
 
 	testTimelineQueryCase(t, `Date range example range:2019-05-01,2019-08-05`, helpers.TimelineFilters{
@@ -89,26 +90,37 @@ func TestParseTimelineQuery(t *testing.T) {
 	uuid0 := mkUuid("0")
 	uuid1 := mkUuid("1")
 	testTimelineQueryCase(t, fmt.Sprintf(`uuid:%v`, uuid0), helpers.TimelineFilters{
-		UUID: []string{uuid0},
+		UUID: filter.Values{filter.Val(uuid0)},
+	})
+	testTimelineQueryCase(t, fmt.Sprintf(`uuid:!%v`, uuid0), helpers.TimelineFilters{
+		UUID: filter.Values{filter.NotVal(uuid0)},
 	})
 	testTimelineQueryCase(t, fmt.Sprintf(`Multiple UUIDs   uuid:%v  uuid:%v`, uuid0, uuid1), helpers.TimelineFilters{
 		Text: []string{"Multiple", "UUIDs"},
-		UUID: []string{uuid0, uuid1},
+		UUID: filter.Values{
+			filter.Val(uuid0),
+			filter.Val(uuid1),
+		},
 	})
 	testTimelineQueryCase(t, fmt.Sprintf(`with-evidence:%v`, uuid0), helpers.TimelineFilters{
-		WithEvidenceUUID: []string{uuid0},
+		WithEvidenceUUID: filter.Values{
+			filter.Val(uuid0),
+		},
 	})
 
 	testTimelineQueryCase(t, fmt.Sprintf(`Multiple withEvidence   with-evidence:%v with-evidence:%v`, uuid0, uuid1), helpers.TimelineFilters{
 		Text:             []string{"Multiple", "withEvidence"},
-		WithEvidenceUUID: []string{uuid0, uuid1},
+		WithEvidenceUUID: filter.Values{
+			filter.Val(uuid0),
+			filter.Val(uuid1),
+		},
 	})
 
 	testTimelineQueryCase(t, `type:image`, helpers.TimelineFilters{
-		Type: []string{"image"},
+		Type: filter.Values{filter.Val("image")},
 	})
 	testTimelineQueryCase(t, `type:image type:codeblock`, helpers.TimelineFilters{
-		Type: []string{"image", "codeblock"},
+		Type: filter.Values{filter.Val("image"), filter.Val("codeblock")},
 	})
 
 	True := true

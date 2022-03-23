@@ -122,51 +122,19 @@ const findingsDateRangeWhereComponent = "findings.id IN (" +
 	"  GROUP BY findings.id HAVING MAX(evidence.occurred_at) >= ? AND MIN(evidence.occurred_at) <= ?" +
 	")"
 
-const findingsEvidenceUUIDWhereComponentMultivalue = "findings.id IN (" +
-	"  SELECT finding_id FROM evidence_finding_map" +
-	"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-	"  WHERE evidence.uuid IN (?)" +
-	")"
-
 const findingsTextWhereComponent = "(findings.title LIKE ? OR findings.description LIKE ?)"
 const findingsOperationIDWhereComponent = "findings.operation_id = ?"
-
-func isOrIsNot(is bool) string {
-	if is {
-		return "IN"
-	}
-	return "NOT IN"
-}
-
-func findingUUIDWhere(is bool) string {
-	return "findings.uuid " + isOrIsNot(is) + " (?)"
-}
-
-func findingOperatorWhere(is bool) string {
-	return "findings.id " + isOrIsNot(is) + " (" +
-		"  SELECT findings.id FROM findings" +
-		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
-		"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-		"  LEFT JOIN users ON users.id = evidence.operator_id" +
-		"  WHERE users.slug IN(?)" +
-		")"
-}
 
 func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFilters) (string, []interface{}) {
 	queryFilters := []string{findingsOperationIDWhereComponent}
 	queryValues := []interface{}{operationID}
 
-	if len(filters.UUID) > 0 {
-		splitValues := filters.UUID.SplitByModifier()
+	addWhere := func(vals filter.Values, whereFunc func(bool) string) {
+		findingAddWhereAndNot(&queryFilters, &queryValues, vals, whereFunc)
+	}
 
-		if values := splitValues[filter.Normal]; len(values) > 0 {
-			queryFilters = append(queryFilters, findingUUIDWhere(true))
-			queryValues = append(queryValues, values)
-		}
-		if values := splitValues[filter.Not]; len(values) > 0 {
-			queryFilters = append(queryFilters, findingUUIDWhere(false))
-			queryValues = append(queryValues, values)
-		}
+	if len(filters.UUID) > 0 {
+		addWhere(filters.UUID, findingUUIDWhere)
 	}
 
 	if len(filters.Tags) > 0 {
@@ -187,21 +155,11 @@ func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFil
 	}
 
 	if len(filters.Operator) > 0 {
-		splitValues := filters.Operator.SplitByModifier()
-
-		if values := splitValues[filter.Normal]; len(values) > 0 {
-			queryFilters = append(queryFilters, findingOperatorWhere(true))
-			queryValues = append(queryValues, values)
-		}
-		if values := splitValues[filter.Not]; len(values) > 0 {
-			queryFilters = append(queryFilters, findingOperatorWhere(false))
-			queryValues = append(queryValues, values)
-		}
+		addWhere(filters.Operator, findingOperatorWhere)
 	}
 
 	if len(filters.WithEvidenceUUID) > 0 {
-		queryFilters = append(queryFilters, findingsEvidenceUUIDWhereComponentMultivalue)
-		queryValues = append(queryValues, filters.WithEvidenceUUID)
+		addWhere(filters.WithEvidenceUUID, findingEvidenceUUIDWhere)
 	}
 
 	return strings.Join(queryFilters, " AND "), queryValues
@@ -236,4 +194,46 @@ func allTagsByID(db *database.Connection) (map[int64]dtos.Tag, error) {
 		}
 	}
 	return tagsByID, nil
+}
+
+func findingAddWhereAndNot(queryFilters *[]string, queryValues *[]interface{}, vals filter.Values, whereFunc func(bool) string) {
+	splitValues := vals.SplitByModifier()
+
+	if values := splitValues[filter.Normal]; len(values) > 0 {
+		*queryFilters = append(*queryFilters, whereFunc(true))
+		*queryValues = append(*queryValues, values)
+	}
+	if values := splitValues[filter.Not]; len(values) > 0 {
+		*queryFilters = append(*queryFilters, whereFunc(false))
+		*queryValues = append(*queryValues, values)
+	}
+}
+
+func isOrIsNot(is bool) string {
+	if is {
+		return "IN"
+	}
+	return "NOT IN"
+}
+
+func findingUUIDWhere(is bool) string {
+	return "findings.uuid " + isOrIsNot(is) + " (?)"
+}
+
+func findingOperatorWhere(is bool) string {
+	return "findings.id " + isOrIsNot(is) + " (" +
+		"  SELECT findings.id FROM findings" +
+		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
+		"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
+		"  LEFT JOIN users ON users.id = evidence.operator_id" +
+		"  WHERE users.slug IN(?)" +
+		")"
+}
+
+func findingEvidenceUUIDWhere(is bool) string {
+	return "findings.id " + isOrIsNot(is) + " (" +
+		"  SELECT finding_id FROM evidence_finding_map" +
+		"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
+		"  WHERE evidence.uuid IN (?)" +
+		")"
 }

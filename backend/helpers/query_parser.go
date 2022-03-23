@@ -28,7 +28,7 @@ type TimelineFilters struct {
 	Type             filter.Values
 	Operator         filter.Values
 	DateRanges       []DateRange
-	WithEvidenceUUID []string
+	WithEvidenceUUID filter.Values
 	Linked           *bool
 	SortAsc          bool
 }
@@ -55,7 +55,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 		case "uuid":
 			timelineFilters.UUID = v
 		case "with-evidence":
-			timelineFilters.WithEvidenceUUID = v.Values()
+			timelineFilters.WithEvidenceUUID = v
 		case "linked":
 			if len(v) != 1 {
 				errReason := "Linked can only be specified once"

@@ -22,6 +22,11 @@ func Val(n string) Value {
 	return Value{Value: n}
 }
 
+// NotVal is a shorthand method for creating a filter value with the Not modification.
+func NotVal(n string) Value {
+	return Value{Value: n, Modifier: Not}
+}
+
 // Values converts a filter.Values into a string slice for easier consumption
 // essentially [].map(fv => fv.Value) in javascript
 func (f Values) Values() []string {
