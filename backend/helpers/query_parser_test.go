@@ -36,21 +36,24 @@ func TestParseTimelineQuery(t *testing.T) {
 		Text: []string{"Text", "without", "quotes", "text with quotes"},
 	})
 	testTimelineQueryCase(t, "tag:MyTag", helpers.TimelineFilters{
-		Tags: []string{"MyTag"},
+		Tags: filter.Values{filter.Val("MyTag")},
 	})
 	testTimelineQueryCase(t, "tag:MyTag tag:OtherTag", helpers.TimelineFilters{
-		Tags: []string{"MyTag", "OtherTag"},
+		Tags: filter.Values{
+			filter.Val("MyTag"),
+			filter.Val("OtherTag"),
+		},
 	})
 	testTimelineQueryCase(t, `tag:"Tag with spaces"`, helpers.TimelineFilters{
-		Tags: []string{"Tag with spaces"},
+		Tags: filter.Values{filter.Val("Tag with spaces")},
 	})
 	testTimelineQueryCase(t, `"Some text" search tag:"First tag" more "text search" tag:SecondTag`, helpers.TimelineFilters{
 		Text: []string{"Some text", "search", "more", "text search"},
-		Tags: []string{"First tag", "SecondTag"},
+		Tags: filter.Values{filter.Val("First tag"), filter.Val("SecondTag")},
 	})
 	testTimelineQueryCase(t, "Text   with        extra spaces   tag:tag", helpers.TimelineFilters{
 		Text: []string{"Text", "with", "extra", "spaces"},
-		Tags: []string{"tag"},
+		Tags: filter.Values{filter.Val("tag")},
 	})
 	testTimelineQueryCase(t, `operator:alice`, helpers.TimelineFilters{
 		Operator: filter.Values{filter.Val("alice")},
@@ -109,7 +112,7 @@ func TestParseTimelineQuery(t *testing.T) {
 	})
 
 	testTimelineQueryCase(t, fmt.Sprintf(`Multiple withEvidence   with-evidence:%v with-evidence:%v`, uuid0, uuid1), helpers.TimelineFilters{
-		Text:             []string{"Multiple", "withEvidence"},
+		Text: []string{"Multiple", "withEvidence"},
 		WithEvidenceUUID: filter.Values{
 			filter.Val(uuid0),
 			filter.Val(uuid1),
