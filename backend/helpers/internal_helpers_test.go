@@ -4,38 +4,21 @@
 package helpers
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
 
-type StringSlice []string
-
-func (s StringSlice) Join(between string) string {
-	if len(s) == 0 {
-		return ""
-	}
-
-	rtn := s[0]
-	for _, v := range s[1:] {
-		rtn += between + v
-	}
-
-	return rtn
-}
-func (s StringSlice) AsSlice() []string {
-	return s
-}
-
 func TestTokenizeTimelineQuery(t *testing.T) {
 	// normal tests
-	plainTextPart := StringSlice{"some", "text", "plain"}
+	plainTextPart := []string{"some", "text", "plain"}
 	tokenValue := "token"
 	normalToken := "normal:" + tokenValue
 	notToken := "not:!" + tokenValue
 
-	query := StringSlice{plainTextPart.Join(" "), normalToken, notToken}.Join(" ")
+	query := strings.Join([]string{strings.Join(plainTextPart, " "), normalToken, notToken}, " ")
 	result := tokenizeTimelineQuery(query)
 
 	for i := range plainTextPart {
@@ -49,17 +32,17 @@ func TestTokenizeTimelineQuery(t *testing.T) {
 
 	tokenValueTwo := "double-token"
 	tokenValueThree := `test three`
-	morePlainText := StringSlice{"some", "text", "plain", "!plain"}
+	morePlainText := []string{"some", "text", "plain", "!plain"}
 	normalSecondToken := "normal:" + tokenValueTwo
 	notSecondToken := "not:!" + tokenValueTwo
 	normalThirdToken := `normal:!"` + tokenValueThree + `"`
 
-	query = StringSlice{
-		morePlainText.Join(" "),
+	query = strings.Join([]string{
+		strings.Join(morePlainText, " "),
 		normalToken, notToken,
 		normalSecondToken, notSecondToken,
 		normalThirdToken,
-	}.Join(" ")
+	}, " ")
 	result = tokenizeTimelineQuery(query)
 
 	for i := range morePlainText {
@@ -74,13 +57,13 @@ func TestTokenizeTimelineQuery(t *testing.T) {
 
 	// mixed up
 
-	query = StringSlice{
+	query = strings.Join([]string{
 		normalToken, notToken,
 		normalSecondToken, notSecondToken,
-		morePlainText[0:2].Join(" "),
+		strings.Join(morePlainText[0:2], " "),
 		normalThirdToken,
-		morePlainText[2:].Join(" "),
-	}.Join(" ")
+		strings.Join(morePlainText[2:], " "),
+	}, " ")
 	result = tokenizeTimelineQuery(query)
 
 	for i := range morePlainText {
