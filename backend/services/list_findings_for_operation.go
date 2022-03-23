@@ -209,19 +209,19 @@ func findingAddWhereAndNot(queryFilters *[]string, queryValues *[]interface{}, v
 	}
 }
 
-func isOrIsNot(is bool) string {
-	if is {
+func inOrNotIn(in bool) string {
+	if in {
 		return "IN"
 	}
 	return "NOT IN"
 }
 
-func findingUUIDWhere(is bool) string {
-	return "findings.uuid " + isOrIsNot(is) + " (?)"
+func findingUUIDWhere(in bool) string {
+	return "findings.uuid " + inOrNotIn(in) + " (?)"
 }
 
-func findingOperatorWhere(is bool) string {
-	return "findings.id " + isOrIsNot(is) + " (" +
+func findingOperatorWhere(in bool) string {
+	return "findings.id " + inOrNotIn(in) + " (" +
 		"  SELECT findings.id FROM findings" +
 		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
 		"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
@@ -230,8 +230,8 @@ func findingOperatorWhere(is bool) string {
 		")"
 }
 
-func findingEvidenceUUIDWhere(is bool) string {
-	return "findings.id " + isOrIsNot(is) + " (" +
+func findingEvidenceUUIDWhere(in bool) string {
+	return "findings.id " + inOrNotIn(in) + " (" +
 		"  SELECT finding_id FROM evidence_finding_map" +
 		"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
 		"  WHERE evidence.uuid IN (?)" +

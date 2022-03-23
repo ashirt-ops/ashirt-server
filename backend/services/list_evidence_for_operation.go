@@ -149,16 +149,16 @@ const eviForOpTagWhereComponent = "evidence.id IN (" +
 	")"
 const eviLinkedSubquery = "(SELECT evidence_id FROM evidence_finding_map)"
 
-func evidenceUUIDWhere(is bool) string {
-	return "evidence.uuid " + isOrIsNot(is) + " (?)"
+func evidenceUUIDWhere(in bool) string {
+	return "evidence.uuid " + inOrNotIn(in) + " (?)"
 }
 
-func evidenceOperatorWhere(is bool) string {
-	return "evidence.operator_id " + isOrIsNot(is) + " (SELECT id FROM users WHERE slug IN (?))"
+func evidenceOperatorWhere(in bool) string {
+	return "evidence.operator_id " + inOrNotIn(in) + " (SELECT id FROM users WHERE slug IN (?))"
 }
 
-func evidenceTypeWhere(is bool) string {
-	return "evidence.content_type " + isOrIsNot(is) + " (?)"
+func evidenceTypeWhere(in bool) string {
+	return "evidence.content_type " + inOrNotIn(in) + " (?)"
 }
 
 func addWhereAndNot(sb sq.SelectBuilder, vals filter.Values, whereFunc func(bool) string) sq.SelectBuilder {
