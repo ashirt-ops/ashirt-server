@@ -24,7 +24,7 @@ type DateRange struct {
 type TimelineFilters struct {
 	UUID             filter.Values
 	Text             []string
-	Tags             []string
+	Tags             filter.Values
 	Type             filter.Values
 	Operator         filter.Values
 	DateRanges       []DateRange
@@ -43,7 +43,7 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 		case "":
 			timelineFilters.Text = v.Values()
 		case "tag":
-			timelineFilters.Tags = v.Values()
+			timelineFilters.Tags = v
 		case "operator":
 			timelineFilters.Operator = v
 		case "range":

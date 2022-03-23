@@ -106,15 +106,6 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 	return findingsDTO, nil
 }
 
-const findingsTagWhereComponent = "findings.id IN (" +
-	"  SELECT findings.id FROM findings" +
-	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
-	"  INNER JOIN tag_evidence_map ON tag_evidence_map.evidence_id = evidence_finding_map.evidence_id" +
-	"  LEFT JOIN tags ON tags.id = tag_evidence_map.tag_id" +
-	"  WHERE tags.name IN (?)" +
-	"  GROUP BY findings.id HAVING COUNT(DISTINCT tags.id) = ?" +
-	")"
-
 const findingsDateRangeWhereComponent = "findings.id IN (" +
 	"  SELECT findings.id FROM findings" +
 	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
@@ -138,8 +129,7 @@ func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFil
 	}
 
 	if len(filters.Tags) > 0 {
-		queryFilters = append(queryFilters, findingsTagWhereComponent)
-		queryValues = append(queryValues, filters.Tags, len(filters.Tags))
+		addWhere(filters.Tags, findingTagOrWhere)
 	}
 
 	for _, text := range filters.Text {
@@ -235,5 +225,28 @@ func findingEvidenceUUIDWhere(in bool) string {
 		"  SELECT finding_id FROM evidence_finding_map" +
 		"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
 		"  WHERE evidence.uuid IN (?)" +
+		")"
+}
+
+// func findingTagAndWhere(is bool) string {
+// 	return findingTagWhere(is, true)
+// }
+
+func findingTagOrWhere(in bool) string {
+	return findingTagWhere(in, false)
+}
+
+func findingTagWhere(in, all bool) string {
+	groupBy := ""
+	if all {
+		groupBy = "  GROUP BY findings.id HAVING COUNT(DISTINCT tags.id) = ?"
+	}
+	return "findings.id " + inOrNotIn(in) + " (" +
+		"  SELECT findings.id FROM findings" +
+		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
+		"  INNER JOIN tag_evidence_map ON tag_evidence_map.evidence_id = evidence_finding_map.evidence_id" +
+		"  LEFT JOIN tags ON tags.id = tag_evidence_map.tag_id" +
+		"  WHERE tags.name IN (?)" +
+		groupBy +
 		")"
 }

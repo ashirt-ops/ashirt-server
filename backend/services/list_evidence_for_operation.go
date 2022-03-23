@@ -120,7 +120,7 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 	}
 
 	if len(filters.Tags) > 0 {
-		sb = sb.Where(eviForOpTagWhereComponent, filters.Tags, len(filters.Tags))
+		sb = addWhereAndNot(sb, filters.Tags, evidenceTagOrWhere)
 	}
 
 	if len(filters.Type) > 0 {
@@ -141,12 +141,6 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 	return sb
 }
 
-const eviForOpTagWhereComponent = "evidence.id IN (" +
-	"  SELECT evidence_id FROM tags" +
-	"  LEFT JOIN tag_evidence_map ON tag_evidence_map.tag_id = tags.id" +
-	"  WHERE tags.name IN (?)" +
-	"  GROUP BY evidence_id HAVING COUNT(*) = ?" +
-	")"
 const eviLinkedSubquery = "(SELECT evidence_id FROM evidence_finding_map)"
 
 func evidenceUUIDWhere(in bool) string {
@@ -159,6 +153,27 @@ func evidenceOperatorWhere(in bool) string {
 
 func evidenceTypeWhere(in bool) string {
 	return "evidence.content_type " + inOrNotIn(in) + " (?)"
+}
+
+func evidenceTagOrWhere(in bool) string {
+	return evidenceTagWhere(in, false)
+}
+
+// func evidenceTagAndWhere(is bool) string {
+// 	return evidenceTagWhere(is, true)
+// }
+
+func evidenceTagWhere(in, all bool) string {
+	groupBy := ""
+	if all {
+		groupBy = "  GROUP BY evidence_id HAVING COUNT(*) = ?"
+	}
+	return "evidence.id " + inOrNotIn(in) + " (" +
+		"  SELECT evidence_id FROM tag_evidence_map" +
+		"  LEFT JOIN tags ON tag_evidence_map.tag_id = tags.id" +
+		"  WHERE tags.name IN (?)" +
+		groupBy +
+		")"
 }
 
 func addWhereAndNot(sb sq.SelectBuilder, vals filter.Values, whereFunc func(bool) string) sq.SelectBuilder {
