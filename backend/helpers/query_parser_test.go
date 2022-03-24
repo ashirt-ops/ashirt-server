@@ -65,20 +65,20 @@ func TestParseTimelineQuery(t *testing.T) {
 
 	testTimelineQueryCase(t, `Date range example range:2019-05-01,2019-08-05`, helpers.TimelineFilters{
 		Text: []string{"Date", "range", "example"},
-		DateRanges: []helpers.DateRange{
-			helpers.DateRange{
-				time.Date(2019, 5, 1, 0, 0, 0, 0, time.UTC),
-				time.Date(2019, 8, 5, 23, 59, 59, 0, time.UTC),
-			},
+		DateRanges: filter.DateValues{
+			filter.DateVal(filter.DateRange{
+				From: time.Date(2019, 5, 1, 0, 0, 0, 0, time.UTC),
+				To:   time.Date(2019, 8, 5, 23, 59, 59, 0, time.UTC),
+			}),
 		},
 	})
 	testTimelineQueryCase(t, `Time range example range:2019-05-01T08:00:00Z,2019-08-05T19:30:00Z`, helpers.TimelineFilters{
 		Text: []string{"Time", "range", "example"},
-		DateRanges: []helpers.DateRange{
-			helpers.DateRange{
-				time.Date(2019, 5, 1, 8, 0, 0, 0, time.UTC),
-				time.Date(2019, 8, 5, 19, 30, 0, 0, time.UTC),
-			},
+		DateRanges: filter.DateValues{
+			filter.DateVal(filter.DateRange{
+				From: time.Date(2019, 5, 1, 8, 0, 0, 0, time.UTC),
+				To:   time.Date(2019, 8, 5, 19, 30, 0, 0, time.UTC),
+			}),
 		},
 	})
 
