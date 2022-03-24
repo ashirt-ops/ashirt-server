@@ -14,12 +14,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
 
-// DateRange is a simple struct representing a slice of time From a point To a point
-type DateRange struct {
-	From time.Time
-	To   time.Time
-}
-
 // TimelineFilters represents all of the parsed timeline configuraions
 type TimelineFilters struct {
 	UUID             filter.Values
@@ -27,7 +21,7 @@ type TimelineFilters struct {
 	Tags             filter.Values
 	Type             filter.Values
 	Operator         filter.Values
-	DateRanges       []DateRange
+	DateRanges       filter.DateValues
 	WithEvidenceUUID filter.Values
 	Linked           *bool
 	SortAsc          bool
@@ -47,9 +41,13 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 		case "operator":
 			timelineFilters.Operator = v
 		case "range":
-			ranges, err := parseRangeQuery(v.Values())
-			if err != nil {
-				return timelineFilters, err
+			ranges := make(filter.DateValues, len(v))
+			for i, v := range v {
+				temp, err := parseRangeQuery(v)
+				if err != nil {
+					return timelineFilters, err
+				}
+				ranges[i] = temp
 			}
 			timelineFilters.DateRanges = ranges
 		case "uuid":
@@ -154,28 +152,33 @@ func tokenizeTimelineQuery(query string) map[string]filter.Values {
 	return parsed
 }
 
-func parseRangeQuery(rangeQuery []string) ([]DateRange, error) {
-	dates := make([]DateRange, len(rangeQuery))
-	noVal := []DateRange{}
-
-	for i, v := range rangeQuery {
-		split := strings.Split(v, ",")
-		if len(split) != 2 {
-			errReason := fmt.Sprintf("Query range must be in the format [date],[date]. (Got '%s')", v)
-			return noVal, backend.BadInputErr(errors.New(errReason), errReason)
-		}
-		from, err := parseTime(split[0], false)
-		if err != nil {
-			return noVal, err
-		}
-		to, err := parseTime(split[1], true)
-		if err != nil {
-			return noVal, err
-		}
-		dates[i] = DateRange{from, to}
+func parseRangeQuery(protoDate filter.Value) (filter.DateValue, error) {
+	dateRange, err := parseDateRangeString(protoDate.Value)
+	noVal := filter.DateValue{}
+	if err != nil {
+		return noVal, err
 	}
+	return filter.DateValue{
+		Value:    *dateRange,
+		Modifier: protoDate.Modifier,
+	}, nil
+}
 
-	return dates, nil
+func parseDateRangeString(dateRange string) (*filter.DateRange, error) {
+	split := strings.Split(dateRange, ",")
+	if len(split) != 2 {
+		errReason := fmt.Sprintf("Query range must be in the format [date],[date]. (Got '%s')", dateRange)
+		return nil, backend.BadInputErr(errors.New(errReason), errReason)
+	}
+	from, err := parseTime(split[0], false)
+	if err != nil {
+		return nil, err
+	}
+	to, err := parseTime(split[1], true)
+	if err != nil {
+		return nil, err
+	}
+	return &filter.DateRange{From: from, To: to}, nil
 }
 
 func parseTime(str string, useEndOfDayIfTimeIsMissing bool) (time.Time, error) {

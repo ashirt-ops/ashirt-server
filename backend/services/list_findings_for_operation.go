@@ -106,13 +106,6 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 	return findingsDTO, nil
 }
 
-const findingsDateRangeWhereComponent = "findings.id IN (" +
-	"  SELECT findings.id FROM findings" +
-	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
-	"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-	"  GROUP BY findings.id HAVING MAX(evidence.occurred_at) >= ? AND MIN(evidence.occurred_at) <= ?" +
-	")"
-
 const findingsTextWhereComponent = "(findings.title LIKE ? OR findings.description LIKE ?)"
 const findingsOperationIDWhereComponent = "findings.operation_id = ?"
 
@@ -138,10 +131,13 @@ func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFil
 		queryValues = append(queryValues, fuzzyText, fuzzyText)
 	}
 
-	if len(filters.DateRanges) > 0 {
+	if values := filters.DateRanges; len(values) > 0 {
 		// we're only going to support a single date range for now TODO
-		queryFilters = append(queryFilters, findingsDateRangeWhereComponent)
-		queryValues = append(queryValues, filters.DateRanges[0].From, filters.DateRanges[0].To)
+		dateFilter := values[0]
+		include := !(dateFilter.Modifier == filter.Not)
+
+		queryFilters = append(queryFilters, findingDateRangeWhere(include))
+		queryValues = append(queryValues, dateFilter.Value.From, dateFilter.Value.To)
 	}
 
 	if len(filters.Operator) > 0 {
@@ -225,6 +221,15 @@ func findingEvidenceUUIDWhere(in bool) string {
 		"  SELECT finding_id FROM evidence_finding_map" +
 		"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
 		"  WHERE evidence.uuid IN (?)" +
+		")"
+}
+
+func findingDateRangeWhere(in bool) string {
+	return "findings.id " + inOrNotIn(in) + " (" +
+		"  SELECT findings.id FROM findings" +
+		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
+		"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
+		"  GROUP BY findings.id HAVING MAX(evidence.occurred_at) >= ? AND MIN(evidence.occurred_at) <= ?" +
 		")"
 }
 

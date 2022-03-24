@@ -29,7 +29,7 @@ func TestSplitValuesByModifier(t *testing.T) {
 		filter.Value{Value: val2, Modifier: filter.Not},
 	}
 
-	require.Equal(t, map[filter.StringModifier][]string{
+	require.Equal(t, map[filter.FilterModifier][]string{
 		filter.Normal: []string{val1},
 		filter.Not:    []string{val2},
 	}, values.SplitByModifier())

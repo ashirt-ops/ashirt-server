@@ -103,16 +103,29 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 		sb = sb.Where(sq.Like{"description": "%" + text + "%"})
 	}
 
-	if len(filters.DateRanges) > 0 {
-		// sq.Or is a []sq.Sqlizer, so we can treat it like a slice (because it is one).
-		stmts := make(sq.Or, len(filters.DateRanges))
-		for i, v := range filters.DateRanges {
-			stmts[i] = sq.And{
-				sq.GtOrEq{"evidence.occurred_at": v.From},
-				sq.LtOrEq{"evidence.occurred_at": v.To},
+	if values := filters.DateRanges; len(values) > 0 {
+		splitValues := values.SplitByModifier()
+
+		if splitVals := splitValues[filter.Normal]; len(splitVals) > 0 {
+			stmts := make(sq.Or, len(splitVals))
+			for i, v := range splitVals {
+				stmts[i] = sq.And{
+					sq.GtOrEq{"evidence.occurred_at": v.From},
+					sq.LtOrEq{"evidence.occurred_at": v.To},
+				}
 			}
+			sb = sb.Where(stmts)
 		}
-		sb = sb.Where(stmts)
+		if splitVals := splitValues[filter.Not]; len(splitVals) > 0 {
+			// there's not a great way to do this, so falling back to expr and string construction
+			stmts := make(sq.And, len(splitVals))
+			for i, v := range splitVals {
+				stmts[i] = sq.Expr(
+					"NOT( evidence.occurred_at >= ? AND evidence.occurred_at <= ?)", v.From, v.To,
+				)
+			}
+			sb = sb.Where(stmts)
+		}
 	}
 
 	if len(filters.Operator) > 0 {

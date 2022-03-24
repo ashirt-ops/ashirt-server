@@ -3,36 +3,38 @@
 
 package filter
 
-type Value struct {
-	Value    string
+type DateValue struct {
+	Value    DateRange
 	Modifier FilterModifier
 }
 
-type Values []Value
+type DateValues []DateValue
 
-// Val is a shorthand method for creating a standard, un-modified value.
-func Val(n string) Value {
-	return Value{Value: n}
+// DateVal is a shorthand method for creating a standard, un-modified value.
+func DateVal(val DateRange) DateValue {
+	return DateValue{Value: val}
 }
 
-// NotVal is a shorthand method for creating a filter value with the Not modification.
-func NotVal(n string) Value {
-	return Value{Value: n, Modifier: Not}
+// NotDateVal is a shorthand method for creating a filter value with the Not modification.
+func NotDateVal(val DateRange) DateValue {
+	return DateValue{Value: val, Modifier: Not}
 }
 
 // Values converts a filter.Values into a string slice for easier consumption
 // essentially [].map(fv => fv.Value) in javascript
-func (f Values) Values() []string {
-	values := make([]string, len(f))
+func (f DateValues) Values() []DateRange {
+	values := make([]DateRange, len(f))
 	for i, v := range f {
 		values[i] = v.Value
 	}
 	return values
 }
 
+type DateMap = map[string][]DateRange
+
 // SplitValues divides a Values into a map, based on the given partitioning function
-func (f Values) SplitValues(partitionFn func(Value) string) map[string][]string {
-	splitValues := make(map[string][]string)
+func (f DateValues) SplitValues(partitionFn func(DateValue) string) DateMap {
+	splitValues := make(DateMap)
 
 	for _, v := range f {
 		key := partitionFn(v)
@@ -42,14 +44,14 @@ func (f Values) SplitValues(partitionFn func(Value) string) map[string][]string 
 }
 
 // Value is a shorthand method for retriving the string at a particular index
-func (f Values) Value(index int) string {
+func (f DateValues) Value(index int) DateRange {
 	return f[index].Value
 }
 
 // SplitByModifier divides up a Values into pieces based on what its modifier
 // is.
-func (f Values) SplitByModifier() map[FilterModifier][]string {
-	splitValues := make(map[FilterModifier][]string)
+func (f DateValues) SplitByModifier() map[FilterModifier][]DateRange {
+	splitValues := make(map[FilterModifier][]DateRange)
 
 	for _, v := range f {
 		splitValues[v.Modifier] = append(splitValues[v.Modifier], v.Value)
