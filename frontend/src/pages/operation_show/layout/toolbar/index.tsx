@@ -154,7 +154,7 @@ const SearchHelpModal = (props: {
         {" "}<CodeSnippet>Free</CodeSnippet> and <CodeSnippet>Text</CodeSnippet>. The
         {" "}<CodeSnippet>specific-field</CodeSnippet> will search just the specific-field attribute
         for the value <CodeSnippet>specific value</CodeSnippet>. Filters must be specified without a
-        space on either side of the colon. Multiple filters can be provided in a single search. 
+        space on either side of the colon. Multiple filters can be provided in a single search.
         Doing so means that the results must satisfy each part of the filter. Also
         note that <CodeSnippet>specific value</CodeSnippet> was written in quotes. This is not
         required for any field, but provide the ability to search over phrases rather than words.
