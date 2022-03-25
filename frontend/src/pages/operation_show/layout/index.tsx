@@ -43,6 +43,8 @@ export default (props: {
       </div>
       <div className={cx('sidebar')}>
         <Sidebar
+          onRequestCreateFinding={() => createFindingModal.show()}
+          onRequestCreateEvidence={() => createEvidenceModal.show()}
           currentQuery={props.query}
           currentView={props.view}
           onNavigate={props.onNavigate}
