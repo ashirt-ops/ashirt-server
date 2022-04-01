@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Routes, Navigate, useParams } from 'react-router-dom'
+import { Route, Routes, Navigate, useParams, useRoutes, generatePath } from 'react-router-dom'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -22,21 +22,11 @@ const AsyncAdminSettings = makeAsyncPage(() => import('src/pages/admin'))
 const AsyncAccountSettings = makeAsyncPage(() => import('src/pages/account_settings'))
 const AsyncNotFound = makeAsyncPage(() => import('src/pages/not_found'))
 
-function Nav(props: {
+function Redirect(props: {
   to: string
-  withKeys?: Array<string>
 }) {
-  // This is a buggy replace. If the keys happen to overlap, then you might get bad data
-  // e.g. don't do this: <Nav to="/operation/:slug/user/:slugprofile", keys=["slug", "slugprofile"] />
-  // the value in :slug will be used for both `:slug` and `:slugprofile` (replaced by the slug+"profile")
-  const data = useParams()
-  let to = props.to
-  for (const key of props.withKeys ?? []) {
-    const keyVal: string | undefined = data[key]
-    to = props.to.replaceAll(`:${key}`, keyVal ?? "")
-  }
-
-  return <Navigate to={props.to} replace />
+  const params = useParams()
+  return <Navigate to={generatePath(props.to, params)} replace />
 }
 
 export default () => {
@@ -54,14 +44,14 @@ export default () => {
       <Route path="/autherror/disabled" element={<AuthDisabled />} />
       <Route path="/autherror/registrationdisabled" element={<AuthNoRegistration />} />
 
-      <Route element={() => <Nav to="/login" />} />
+      <Route path="*" element={<Redirect to="/login" />} />
     </Routes>
   )
 
   return (
     <Routes>
-      <Route path="/login" element={() => <Nav to="/operations" />} />
-      <Route path="/" element={() => <Nav to="/operations" />} />
+      <Route path="/login" element={<Redirect to="/operations" />} />
+      <Route path="/" element={<Redirect to="/operations" />} />
 
       {/* AuthError routes that an admin might reach if testing */}
       <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
@@ -70,9 +60,10 @@ export default () => {
 
       {/* Operation edit */}
       <Route path="/operations/:slug/edit/:view" element={<AsyncOperationEdit />} />
-      <Route path="/operations/:slug/edit" element={() => (
-        <Nav to={`/operations/:slug/edit/settings`} withKeys={['slug']} />
-      )} />
+      <Route
+        path="/operations/:slug/edit"
+        element={<Redirect to={`/operations/:slug/edit/settings`}/>}
+      />
 
       {/* Operation overview */}
       <Route path="/operations/:slug/overview" element={<AsyncOperationOverview />} />
@@ -83,24 +74,20 @@ export default () => {
       <Route path="/operations/:slug/evidence" element={<AsyncEvidenceList />} />
 
       <Route path="/operations/:slug/evidence/:uuid" element={
-        <Nav to={`/operations/:slug/evidence?q=uuid%3A:uuid`} withKeys={['slug', 'uuid']} />
+        <Redirect to={`/operations/:slug/evidence?q=uuid%3A:uuid`} />
       } />
-      <Route path="/operations/:slug" element={<Nav to={`/operations/:slug/evidence`} withKeys={['slug']} />} />
+      <Route path="/operations/:slug" element={<Redirect to={`/operations/:slug/evidence`}/>} />
 
       {/* Account Settings */}
       <Route path="/account/:view" element={<AsyncAccountSettings />} />
-      <Route path="/account" element={() => <Nav to="/account/profile" />} />
+      <Route path="/account" element={<Redirect to="/account/profile" />} />
 
       {isSuperAdmin && (
         // For some reason, we can't navigate to this route directly -- only through page links
         <Route path="/account/:view/:slug" element={<AsyncAccountSettings />} />
       )}
       {isSuperAdmin && (
-        // For some reason, we can't navigate to this route directly -- only through page links
-        // <Route path="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
-        //   <Navigate to={`/account/profile/${props.match.params.slug}`} replace />
-        // )} />
-        <Route path="/account/edit/:slug" element={<Nav to={`/account/profile/:slug`} withKeys={['slug']} />} />
+        <Route path="/account/edit/:slug" element={<Redirect to={`/account/profile/:slug`} />} />
       )}
 
       {/* Admin Settings */}
@@ -108,7 +95,7 @@ export default () => {
         <Route path="/admin/:view" element={<AsyncAdminSettings />} />
       )}
       {isSuperAdmin && (
-        <Route path="/admin/*" element={<Nav to="/admin/users" />} />
+        <Route path="/admin/*" element={<Redirect to="/admin/users" />} />
       )}
 
       <Route path="*" element={<AsyncNotFound />} />
