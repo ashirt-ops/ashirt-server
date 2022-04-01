@@ -10,7 +10,6 @@ import {logout} from 'src/services'
 import {useUserIsSuperAdmin} from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-// @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import {useHistory} from 'react-router-dom'
 
 const Avatar = (props: {

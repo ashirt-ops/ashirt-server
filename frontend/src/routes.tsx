@@ -68,7 +68,6 @@ export default () => {
         <NoAccess />
       </Route>
 
-      {/* <Route exact path="/operations" component={AsyncOperationList} /> */}
       <Route exact path="/operations" >
         {(props: RouteComponentProps) => <AsyncOperationList {...props} />}
       </Route>
@@ -113,11 +112,13 @@ export default () => {
       <Route exact from="/account" render={() => <Redirect to="/account/profile" />} />
 
       {isSuperAdmin && (
+        // For some reason, we can't navigate to this route directly -- only through page links
         <Route exact path="/account/:view(profile|apikeys|authmethods)/:slug">
           {(props: RouteComponentProps) => <AsyncAccountSettings {...props} />}
         </Route>
       )}
       {isSuperAdmin && (
+        // For some reason, we can't navigate to this route directly -- only through page links
         <Route exact from="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
           <Redirect to={`/account/profile/${props.match.params.slug}`} />
         )} />

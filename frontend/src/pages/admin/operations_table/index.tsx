@@ -10,7 +10,6 @@ import { Operation } from 'src/global_types'
 import { getOperationsForAdmin } from 'src/services'
 import { useWiredData } from 'src/helpers'
 
-// @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
 
 const columns = [

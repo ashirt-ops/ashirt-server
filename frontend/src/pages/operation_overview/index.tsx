@@ -15,15 +15,12 @@ import WithLabel from 'src/components/with_label'
 import { default as Timeline, TimelineHeaders, DateHeader } from 'react-calendar-timeline'
 import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
 
-// @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
-import { useHistory } from 'react-router-dom'
 import SettingsSection from 'src/components/settings_section'
 
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: RouteComponentProps<{ slug: string }>) => {
   const { slug } = props.match.params
-  const history = useHistory()
   const [disabledTags, setDisabledTags] = React.useState<{ [key: string]: boolean }>({})
 
   const wiredTags = useWiredData(React.useCallback(() => getTagsByEvidenceUsage({ operationSlug: slug }), [slug]))
@@ -81,7 +78,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
                 const item = items.filter(someItem => someItem.id == itemId)[0]
                 const tag = tags.filter(someTag => someTag.id == item.group)[0]
                 const ymd = (d: Date) => format(d, "yyyy-MM-dd")
-                history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
+                props.history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
               }}
             >
               <TimelineHeaders  >
