@@ -9,13 +9,12 @@ import NewOperationButton from './new_operation_button'
 import OperationCard from './operation_card'
 import classnames from 'classnames/bind'
 import { Operation } from 'src/global_types'
-import { RouteComponentProps } from 'react-router-dom'
 import { getOperations, createOperation } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (_: RouteComponentProps<{}>) => {
+export default () => {
   const wiredOperations = useWiredData<Array<Operation>>(getOperations)
 
   const newOperationModal = useModal<void>(modalProps => (

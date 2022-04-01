@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useParams, RouteComponentProps } from 'react-router-dom'
+import { useParams, useHistory } from 'react-router-dom'
 
 import Button from 'src/components/button'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
@@ -14,13 +14,19 @@ import DeleteOperationButton from './delete_operation_button'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: RouteComponentProps<{ slug: string }>) => {
-  const {slug} = useParams<{slug: string}>()
+export default () => {
+  const { slug } = useParams<{ slug: string }>()
+  const history = useHistory()
 
   return (
     <>
-      <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
-      <NavVerticalTabMenu {...props}
+      <Button
+        className={cx('back-button')}
+        icon={require('./back.svg')}
+        onClick={history.goBack}>
+        Back
+      </Button>
+      <NavVerticalTabMenu
         title="Edit Operation"
         tabs={[
           {

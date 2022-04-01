@@ -29,10 +29,10 @@ export default () => {
   if (user == null) return (
     <Switch>
       <Route exact path="/login" >
-        {(props: RouteComponentProps) => <AsyncLogin {...props} />}
+        <AsyncLogin />
       </Route>
       <Route exact path="/login/:schemeCode">
-        {(props: RouteComponentProps) => <AsyncLogin {...props} />}
+        <AsyncLogin />
       </Route>
 
       <Route exact path="/autherror/recoveryfailed">
@@ -69,12 +69,12 @@ export default () => {
       </Route>
 
       <Route exact path="/operations" >
-        {(props: RouteComponentProps) => <AsyncOperationList {...props} />}
+        <AsyncOperationList />
       </Route>
 
       {/* Operation edit */}
       <Route exact path="/operations/:slug/edit/:view(settings|users|tags)">
-        {(props: RouteComponentProps) => <AsyncOperationEdit {...props} />}
+        <AsyncOperationEdit />
       </Route>
       <Route from="/operations/:slug/edit" render={(props: RouteComponentProps<{ slug: string }>) => (
         <Redirect to={`/operations/${props.match.params.slug}/edit/settings`} />
@@ -82,18 +82,18 @@ export default () => {
 
       {/* Operation overview */}
       <Route exact path="/operations/:slug/overview" >
-        {(props: RouteComponentProps) => <AsyncOperationOverview {...props} />}
+        <AsyncOperationOverview />
       </Route>
 
       {/* Operation show */}
       <Route exact path="/operations/:slug/findings" >
-        {(props: RouteComponentProps) => <AsyncFindingList {...props} />}
+        <AsyncFindingList />
       </Route>
       <Route exact path="/operations/:slug/findings/:uuid" >
-        {(props: RouteComponentProps) => <AsyncFindingShow {...props} />}
+        <AsyncFindingShow />
       </Route>
       <Route exact path="/operations/:slug/evidence">
-        {(props: RouteComponentProps) => <AsyncEvidenceList {...props} />}
+        <AsyncEvidenceList />
       </Route>
       <Route exact path="/operations/:slug/evidence/:uuid" render={
         (props: RouteComponentProps<{ slug: string, uuid: string }>) => {
@@ -107,14 +107,14 @@ export default () => {
 
       {/* Account Settings */}
       <Route exact path="/account/:view(profile|security|apikeys|authmethods)">
-        {(props: RouteComponentProps) => <AsyncAccountSettings {...props} />}
+        <AsyncAccountSettings />
       </Route>
       <Route exact from="/account" render={() => <Redirect to="/account/profile" />} />
 
       {isSuperAdmin && (
         // For some reason, we can't navigate to this route directly -- only through page links
         <Route exact path="/account/:view(profile|apikeys|authmethods)/:slug">
-          {(props: RouteComponentProps) => <AsyncAccountSettings {...props} />}
+          <AsyncAccountSettings />
         </Route>
       )}
       {isSuperAdmin && (
@@ -127,16 +127,14 @@ export default () => {
       {/* Admin Settings */}
       {isSuperAdmin && (
         <Route exact path="/admin/:view(users|operations|authdata|findings|tags)">
-          {(props: RouteComponentProps) => <AsyncAdminSettings {...props} />}
+          <AsyncAdminSettings />
         </Route>
       )}
       {isSuperAdmin && (
         <Route from="/admin/" render={() => <Redirect to="/admin/users" />} />
       )}
 
-      <Route>
-        {(props: RouteComponentProps) => <AsyncNotFound {...props} />}
-      </Route>
+      <Route><AsyncNotFound /></Route>
     </Switch>
   )
 }
@@ -146,11 +144,11 @@ export default () => {
 //
 // This is used to break up each page into its own bundle to prevent the main entry bundle from becoming too large and allows
 // page javascript to load on demand.
-function makeAsyncPage(page: () => Promise<{ default: React.FunctionComponent<RouteComponentProps> }>) {
+function makeAsyncPage(page: () => Promise<{ default: React.FunctionComponent }>) {
   const defaultPage = () => page().then(module => module.default)
-  return (props: RouteComponentProps) => {
+  return () => {
     const Page = useAsyncComponent(defaultPage);
-    return <Page {...props} />
+    return <Page />
   }
 }
 

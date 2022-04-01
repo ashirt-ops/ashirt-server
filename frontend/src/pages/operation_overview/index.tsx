@@ -4,7 +4,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { TagByEvidenceDate, Tag as TagType } from 'src/global_types'
-import { RouteComponentProps } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format, addDays } from 'date-fns'
 import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
@@ -19,15 +19,16 @@ import SettingsSection from 'src/components/settings_section'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: RouteComponentProps<{ slug: string }>) => {
-  const { slug } = props.match.params
+export default () => {
+  const { slug } = useParams<{ slug: string }>()
+  const history = useHistory()
   const [disabledTags, setDisabledTags] = React.useState<{ [key: string]: boolean }>({})
 
   const wiredTags = useWiredData(React.useCallback(() => getTagsByEvidenceUsage({ operationSlug: slug }), [slug]))
 
   return (
     <>
-      <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
+      <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => history.goBack()}>Back</Button>
       <SettingsSection title="Operation Overview" width="full-width">
         <div className={cx('preamble')}>
           <div >
@@ -78,7 +79,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
                 const item = items.filter(someItem => someItem.id == itemId)[0]
                 const tag = tags.filter(someTag => someTag.id == item.group)[0]
                 const ymd = (d: Date) => format(d, "yyyy-MM-dd")
-                props.history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
+                history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
               }}
             >
               <TimelineHeaders  >
