@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
+import { Route, Routes, Navigate, useParams } from 'react-router-dom'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -22,120 +22,97 @@ const AsyncAdminSettings = makeAsyncPage(() => import('src/pages/admin'))
 const AsyncAccountSettings = makeAsyncPage(() => import('src/pages/account_settings'))
 const AsyncNotFound = makeAsyncPage(() => import('src/pages/not_found'))
 
+function Nav(props: {
+  to: string
+  withKeys?: Array<string>
+}) {
+  // This is a buggy replace. If the keys happen to overlap, then you might get bad data
+  // e.g. don't do this: <Nav to="/operation/:slug/user/:slugprofile", keys=["slug", "slugprofile"] />
+  // the value in :slug will be used for both `:slug` and `:slugprofile` (replaced by the slug+"profile")
+  const data = useParams()
+  let to = props.to
+  for (const key of props.withKeys ?? []) {
+    const keyVal: string | undefined = data[key]
+    to = props.to.replaceAll(`:${key}`, keyVal ?? "")
+  }
+
+  return <Navigate to={props.to} replace />
+}
+
 export default () => {
   const user = React.useContext(AuthContext).user
   const isSuperAdmin = useUserIsSuperAdmin()
 
   if (user == null) return (
-    <Switch>
-      <Route exact path="/login" >
-        <AsyncLogin />
-      </Route>
-      <Route exact path="/login/:schemeCode">
-        <AsyncLogin />
-      </Route>
+    <Routes>
+      <Route path="/login" element={<AsyncLogin />} />
+      <Route path="/login/:schemeCode" element={<AsyncLogin />} />
+      <Route path="/autherror/recoveryfailed" element={<AuthRecoveryFailed />} />
+      <Route path="/autherror/noaccess" element={<AuthNoAccess />} />
+      <Route path="/autherror/noverify" element={<AuthNoVerify />} />
+      <Route path="/autherror/incomplete" element={<AuthIncomplete />} />
+      <Route path="/autherror/disabled" element={<AuthDisabled />} />
+      <Route path="/autherror/registrationdisabled" element={<AuthNoRegistration />} />
 
-      <Route exact path="/autherror/recoveryfailed">
-        <AuthRecoveryFailed />
-      </Route>
-      <Route exact path="/autherror/noaccess">
-        <AuthNoAccess />
-      </Route>
-      <Route exact path="/autherror/noverify">
-        <AuthNoVerify />
-      </Route>
-      <Route exact path="/autherror/incomplete">
-        <AuthIncomplete />
-      </Route>
-      <Route exact path="/autherror/disabled">
-        <AuthDisabled />
-      </Route>
-      <Route exact path="/autherror/registrationdisabled">
-        <AuthNoRegistration />
-      </Route>
-
-      <Route render={() => <Redirect to="/login" />} />
-    </Switch>
+      <Route element={() => <Nav to="/login" />} />
+    </Routes>
   )
 
   return (
-    <Switch>
-      <Route exact path="/login" render={() => <Redirect to="/operations" />} />
-      <Route exact path="/" render={() => <Redirect to="/operations" />} />
+    <Routes>
+      <Route path="/login" element={() => <Nav to="/operations" />} />
+      <Route path="/" element={() => <Nav to="/operations" />} />
 
       {/* AuthError routes that an admin might reach if testing */}
-      <Route exact path="/autherror/recoveryfailed">
-        <NoAccess />
-      </Route>
+      <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
 
-      <Route exact path="/operations" >
-        <AsyncOperationList />
-      </Route>
+      <Route path="/operations" element={<AsyncOperationList />} />
 
       {/* Operation edit */}
-      <Route exact path="/operations/:slug/edit/:view(settings|users|tags)">
-        <AsyncOperationEdit />
-      </Route>
-      <Route from="/operations/:slug/edit" render={(props: RouteComponentProps<{ slug: string }>) => (
-        <Redirect to={`/operations/${props.match.params.slug}/edit/settings`} />
+      <Route path="/operations/:slug/edit/:view" element={<AsyncOperationEdit />} />
+      <Route path="/operations/:slug/edit" element={() => (
+        <Nav to={`/operations/:slug/edit/settings`} withKeys={['slug']} />
       )} />
 
       {/* Operation overview */}
-      <Route exact path="/operations/:slug/overview" >
-        <AsyncOperationOverview />
-      </Route>
+      <Route path="/operations/:slug/overview" element={<AsyncOperationOverview />} />
 
       {/* Operation show */}
-      <Route exact path="/operations/:slug/findings" >
-        <AsyncFindingList />
-      </Route>
-      <Route exact path="/operations/:slug/findings/:uuid" >
-        <AsyncFindingShow />
-      </Route>
-      <Route exact path="/operations/:slug/evidence">
-        <AsyncEvidenceList />
-      </Route>
-      <Route exact path="/operations/:slug/evidence/:uuid" render={
-        (props: RouteComponentProps<{ slug: string, uuid: string }>) => {
-          const { slug, uuid } = props.match.params
-          return <Redirect to={`/operations/${slug}/evidence?q=uuid%3A${uuid}`} />
-        }
+      <Route path="/operations/:slug/findings" element={<AsyncFindingList />} />
+      <Route path="/operations/:slug/findings/:uuid" element={<AsyncFindingShow />} />
+      <Route path="/operations/:slug/evidence" element={<AsyncEvidenceList />} />
+
+      <Route path="/operations/:slug/evidence/:uuid" element={
+        <Nav to={`/operations/:slug/evidence?q=uuid%3A:uuid`} withKeys={['slug', 'uuid']} />
       } />
-      <Route from="/operations/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
-        <Redirect to={`/operations/${props.match.params.slug}/evidence`} />
-      )} />
+      <Route path="/operations/:slug" element={<Nav to={`/operations/:slug/evidence`} withKeys={['slug']} />} />
 
       {/* Account Settings */}
-      <Route exact path="/account/:view(profile|security|apikeys|authmethods)">
-        <AsyncAccountSettings />
-      </Route>
-      <Route exact from="/account" render={() => <Redirect to="/account/profile" />} />
+      <Route path="/account/:view" element={<AsyncAccountSettings />} />
+      <Route path="/account" element={() => <Nav to="/account/profile" />} />
 
       {isSuperAdmin && (
         // For some reason, we can't navigate to this route directly -- only through page links
-        <Route exact path="/account/:view(profile|apikeys|authmethods)/:slug">
-          <AsyncAccountSettings />
-        </Route>
+        <Route path="/account/:view/:slug" element={<AsyncAccountSettings />} />
       )}
       {isSuperAdmin && (
         // For some reason, we can't navigate to this route directly -- only through page links
-        <Route exact from="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
-          <Redirect to={`/account/profile/${props.match.params.slug}`} />
-        )} />
+        // <Route path="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
+        //   <Navigate to={`/account/profile/${props.match.params.slug}`} replace />
+        // )} />
+        <Route path="/account/edit/:slug" element={<Nav to={`/account/profile/:slug`} withKeys={['slug']} />} />
       )}
 
       {/* Admin Settings */}
       {isSuperAdmin && (
-        <Route exact path="/admin/:view(users|operations|authdata|findings|tags)">
-          <AsyncAdminSettings />
-        </Route>
+        <Route path="/admin/:view" element={<AsyncAdminSettings />} />
       )}
       {isSuperAdmin && (
-        <Route from="/admin/" render={() => <Redirect to="/admin/users" />} />
+        <Route path="/admin/*" element={<Nav to="/admin/users" />} />
       )}
 
-      <Route><AsyncNotFound /></Route>
-    </Switch>
+      <Route path="*" element={<AsyncNotFound />} />
+    </Routes>
   )
 }
 

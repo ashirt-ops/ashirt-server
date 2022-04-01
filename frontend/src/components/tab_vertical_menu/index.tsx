@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { Switch, Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import { subUrl } from 'src/helpers'
 
 import { default as ListMenu, NavListItem, ListItem } from 'src/components/list_menu'
@@ -33,11 +33,11 @@ export const NavVerticalTabMenu = (props: {
         </ListMenu>
       </div>
       <div className={cx("content")}>
-        <Switch>
+        <Routes>
           {props.tabs.map((tab) => {
-            return <Route key={tab.id} exact path={subUrl({ view: tab.id })} render={() => tab.content} />
+            return <Route key={tab.id} path={subUrl({ view: tab.id })} element={() => tab.content} />
           })}
-        </Switch>
+        </Routes>
       </div>
     </div>
   )

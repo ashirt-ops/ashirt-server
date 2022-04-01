@@ -18,7 +18,8 @@ import Security from './security'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
-  const {slug: forUser} = useParams<{ slug: string }>()
+  const {slug} = useParams<{ slug: string }>()
+  const forUser = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const wiredProfile = useWiredData<UserOwnView>(React.useCallback(() => getUser({ userSlug: forUser }), [forUser]))
 
   const bus = BuildReloadBus()

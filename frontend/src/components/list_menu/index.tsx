@@ -31,7 +31,7 @@ export const NavListItem = (props: {
   to: string
 }) => (
     <li className={cx({ selected: (document.location.pathname === props.to) })}>
-      <NavLink exact={props.exact} to={props.to} >
+      <NavLink end={props.exact} to={props.to} >
         {props.name}
       </NavLink>
     </li>

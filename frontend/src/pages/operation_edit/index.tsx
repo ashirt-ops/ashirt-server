@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 import Button from 'src/components/button'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
@@ -16,14 +16,15 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
   const { slug } = useParams<{ slug: string }>()
-  const history = useHistory()
+  const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
+  const navigate = useNavigate()
 
   return (
     <>
       <Button
         className={cx('back-button')}
         icon={require('./back.svg')}
-        onClick={history.goBack}>
+        onClick={() => navigate(-1)}>
         Back
       </Button>
       <NavVerticalTabMenu
@@ -31,12 +32,12 @@ export default () => {
         tabs={[
           {
             id: "settings", label: "Settings", content: <>
-              <OperationEditor operationSlug={slug} />
-              <DeleteOperationButton operationSlug={slug} />
+              <OperationEditor operationSlug={operationSlug} />
+              <DeleteOperationButton operationSlug={operationSlug} />
             </>
           },
-          { id: "users", label: "Users", content: <UserPermissionEditor operationSlug={slug} /> },
-          { id: "tags", label: "Tags", content: <TagEditor operationSlug={slug} /> },
+          { id: "users", label: "Users", content: <UserPermissionEditor operationSlug={operationSlug} /> },
+          { id: "tags", label: "Tags", content: <TagEditor operationSlug={operationSlug} /> },
         ]} />
     </>
   )
