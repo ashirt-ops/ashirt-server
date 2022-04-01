@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 
 	sq "github.com/Masterminds/squirrel"
@@ -22,11 +23,6 @@ type CreateUserInput struct {
 	Slug      string
 	Email     string
 	Headless  bool
-}
-
-type CreateUserOutput struct {
-	RealSlug string
-	UserID   int64
 }
 
 func (cui CreateUserInput) validate() error {
@@ -47,9 +43,9 @@ func (cui CreateUserInput) validate() error {
 
 // CreateHeadlessUser is really just CreateUser. The difference here is that _headless_ users will not have
 // authentication, and instead rely on user-impersonation and API keys for access.
-func CreateHeadlessUser(ctx context.Context, db *database.Connection, i CreateUserInput) (CreateUserOutput, error) {
+func CreateHeadlessUser(ctx context.Context, db *database.Connection, i CreateUserInput) (*dtos.CreateUserOutput, error) {
 	if err := isAdmin(ctx); err != nil {
-		return CreateUserOutput{}, backend.WrapError("Unable to create new headless user", backend.UnauthorizedWriteErr(err))
+		return nil, backend.WrapError("Unable to create new headless user", backend.UnauthorizedWriteErr(err))
 	}
 	i.Headless = true
 	return CreateUser(db, i)
@@ -63,10 +59,10 @@ func CreateHeadlessUser(ctx context.Context, db *database.Connection, i CreateUs
 //
 // Returns a structure containing both the true slug (i.e. what it was mangled to, if it was infact mangled), plus
 // the associated user_id value
-func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, error) {
+func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOutput, error) {
 	validationErr := i.validate()
 	if validationErr != nil {
-		return CreateUserOutput{}, backend.WrapError("Unable to create new user", validationErr)
+		return nil, backend.WrapError("Unable to create new user", validationErr)
 	}
 
 	var userID int64
@@ -86,11 +82,11 @@ func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, e
 		if err != nil {
 			if database.IsAlreadyExistsError(err) {
 				if strings.Contains(err.Error(), "users.unique_email") { // not sure how else to check if this is a duplicate slug vs a duplicate email address
-					return CreateUserOutput{}, backend.WrapError("Unable to insert new user", backend.DatabaseErr(err))
+					return nil, backend.WrapError("Unable to insert new user", backend.DatabaseErr(err))
 				}
 
 				if attemptNumber > 5 {
-					return CreateUserOutput{}, backend.WrapError("Unable to create new user after many attempts", backend.DatabaseErr(err))
+					return nil, backend.WrapError("Unable to create new user after many attempts", backend.DatabaseErr(err))
 				}
 
 				logging.GetSystemLogger().Log(
@@ -106,7 +102,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, e
 				slugSuffix = fmt.Sprintf("-%d", rand.Intn(99999))
 				continue
 			}
-			return CreateUserOutput{}, backend.WrapError("Unable to insert new user", backend.DatabaseErr(err))
+			return nil, backend.WrapError("Unable to insert new user", backend.DatabaseErr(err))
 		}
 		break
 	}
@@ -116,7 +112,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (CreateUserOutput, e
 			logging.GetSystemLogger().Log("msg", "Unable to make the first user an admin", "error", err.Error())
 		}
 	}
-	return CreateUserOutput{
+	return &dtos.CreateUserOutput{
 		RealSlug: attemptedSlug,
 		UserID:   userID,
 	}, nil

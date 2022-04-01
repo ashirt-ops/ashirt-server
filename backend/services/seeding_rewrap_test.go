@@ -48,6 +48,7 @@ var getEvidenceByUUID = seeding.GetEvidenceByUUID
 var getFullEvidenceViaSelectBuilder = seeding.GetFullEvidenceViaSelectBuilder
 var getOperationFromSlug = seeding.GetOperationFromSlug
 var getOperations = seeding.GetOperations
+var getOperationsForUser = seeding.GetOperationsForUser
 var getUserRolesForOperationByOperationID = seeding.GetUserRolesForOperationByOperationID
 var getQueryByID = seeding.GetQueryByID
 var getQueriesForOperationID = seeding.GetQueriesForOperationID
