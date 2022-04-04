@@ -4,7 +4,6 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { Routes, Route } from 'react-router-dom'
-import { subUrl } from 'src/helpers'
 
 import { default as ListMenu, NavListItem, ListItem } from 'src/components/list_menu'
 
@@ -18,7 +17,7 @@ export type Tab = {
 }
 
 export const NavVerticalTabMenu = (props: {
-  title: string,
+  title: string
   tabs: Array<Tab>
 }) => {
   return (
@@ -26,17 +25,16 @@ export const NavVerticalTabMenu = (props: {
       <div className={cx("tabmenu")}>
         <header>{props.title}</header>
         <ListMenu>
-          {props.tabs.map((tab) => <NavListItem
-            key={tab.id}
-            name={tab.label}
-            to={subUrl({ view: tab.id })} />)}
+          {props.tabs.map(tab => (
+            <NavListItem key={tab.id} name={tab.label} to={tab.id} />
+          ))}
         </ListMenu>
       </div>
       <div className={cx("content")}>
         <Routes>
-          {props.tabs.map((tab) => {
-            return <Route key={tab.id} path={subUrl({ view: tab.id })} element={() => tab.content} />
-          })}
+          {props.tabs.map(tab => (
+            <Route key={tab.id} path={tab.id} element={tab.content} />
+          ))}
         </Routes>
       </div>
     </div>

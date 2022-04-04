@@ -59,7 +59,7 @@ export default () => {
       <Route path="/operations" element={<AsyncOperationList />} />
 
       {/* Operation edit */}
-      <Route path="/operations/:slug/edit/:view" element={<AsyncOperationEdit />} />
+      <Route path="/operations/:slug/edit/*" element={<AsyncOperationEdit />} />
       <Route
         path="/operations/:slug/edit"
         element={<Redirect to={`/operations/:slug/edit/settings`}/>}
@@ -79,7 +79,7 @@ export default () => {
       <Route path="/operations/:slug" element={<Redirect to={`/operations/:slug/evidence`}/>} />
 
       {/* Account Settings */}
-      <Route path="/account/:view" element={<AsyncAccountSettings />} />
+      <Route path="/account/*" element={<AsyncAccountSettings />} />
       <Route path="/account" element={<Redirect to="/account/profile" />} />
 
       {isSuperAdmin && (
@@ -92,10 +92,10 @@ export default () => {
 
       {/* Admin Settings */}
       {isSuperAdmin && (
-        <Route path="/admin/:view" element={<AsyncAdminSettings />} />
+        <Route path="/admin/*" element={<AsyncAdminSettings />} />
       )}
       {isSuperAdmin && (
-        <Route path="/admin/*" element={<Redirect to="/admin/users" />} />
+        <Route path="/admin" element={<Redirect to="/admin/users" />} />
       )}
 
       <Route path="*" element={<AsyncNotFound />} />

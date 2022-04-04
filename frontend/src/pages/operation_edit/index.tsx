@@ -31,10 +31,10 @@ export default () => {
         title="Edit Operation"
         tabs={[
           {
-            id: "settings", label: "Settings", content: <>
+            id: "settings", label: "Settings", content: (<>
               <OperationEditor operationSlug={operationSlug} />
               <DeleteOperationButton operationSlug={operationSlug} />
-            </>
+            </>)
           },
           { id: "users", label: "Users", content: <UserPermissionEditor operationSlug={operationSlug} /> },
           { id: "tags", label: "Tags", content: <TagEditor operationSlug={operationSlug} /> },
