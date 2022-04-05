@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { Routes, Route } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 import { default as ListMenu, NavListItem, ListItem } from 'src/components/list_menu'
 
@@ -16,28 +16,32 @@ export type Tab = {
   content?: React.ReactNode
 }
 
+export type NavTab = {
+  id: string,
+  label: string
+  query?: Record<string, string>
+}
+
 export const NavVerticalTabMenu = (props: {
   title: string
-  tabs: Array<Tab>
+  tabs: Array<NavTab>
+  children: React.ReactNode
 }) => {
   return (
-    <div className={cx('root')}>
+    <nav className={cx('root')}>
       <div className={cx("tabmenu")}>
         <header>{props.title}</header>
         <ListMenu>
           {props.tabs.map(tab => (
-            <NavListItem key={tab.id} name={tab.label} to={tab.id} />
+            <NavListItem key={tab.id} name={tab.label} to={tab.id} query={tab.query} />
           ))}
         </ListMenu>
       </div>
       <div className={cx("content")}>
-        <Routes>
-          {props.tabs.map(tab => (
-            <Route key={tab.id} path={tab.id} element={tab.content} />
-          ))}
-        </Routes>
+        {props.children}
+        <Outlet />
       </div>
-    </div>
+    </nav>
   )
 }
 
