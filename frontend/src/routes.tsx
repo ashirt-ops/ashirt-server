@@ -62,7 +62,7 @@ export default () => {
       <Route path="/operations/:slug/edit/*" element={<AsyncOperationEdit />} />
       <Route
         path="/operations/:slug/edit"
-        element={<Redirect to={`/operations/:slug/edit/settings`}/>}
+        element={<Redirect to={`/operations/:slug/edit/settings`} />}
       />
 
       {/* Operation overview */}
@@ -76,30 +76,26 @@ export default () => {
       <Route path="/operations/:slug/evidence/:uuid" element={
         <Redirect to={`/operations/:slug/evidence?q=uuid%3A:uuid`} />
       } />
-      <Route path="/operations/:slug" element={<Redirect to={`/operations/:slug/evidence`}/>} />
+      <Route path="/operations/:slug" element={<Redirect to={`/operations/:slug/evidence`} />} />
 
       {/* Account Settings */}
       <Route path="/account/*" element={<AsyncAccountSettings />} />
       <Route path="/account" element={<Redirect to="/account/profile" />} />
 
-      {isSuperAdmin && (
-        // For some reason, we can't navigate to this route directly -- only through page links
-        <Route path="/account/:view/:slug" element={<AsyncAccountSettings />} />
-      )}
-      {isSuperAdmin && (
-        <Route path="/account/edit/:slug" element={<Redirect to={`/account/profile/:slug`} />} />
-      )}
-
       {/* Admin Settings */}
-      {isSuperAdmin && (
-        <Route path="/admin/*" element={<AsyncAdminSettings />} />
-      )}
-      {isSuperAdmin && (
-        <Route path="/admin" element={<Redirect to="/admin/users" />} />
-      )}
+      {
+        isSuperAdmin && (
+          <Route path="/admin/*" element={<AsyncAdminSettings />} />
+        )
+      }
+      {
+        isSuperAdmin && (
+          <Route path="/admin" element={<Redirect to="/admin/users" />} />
+        )
+      }
 
       <Route path="*" element={<AsyncNotFound />} />
-    </Routes>
+    </Routes >
   )
 }
 
