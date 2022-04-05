@@ -26,14 +26,17 @@ export default (props: {
 // NavListItem is a version of ListItem that sets and relies on the react-router location.pathname
 // to determine selectedness
 export const NavListItem = (props: {
-  name: string,
-  exact?: boolean,
+  name: string
   to: string
+  exact?: boolean
+  query?: Record<string, string>
 }) => {
   const location = useLocation()
+  const query = props.query === undefined ? "" : `?${new URLSearchParams(props.query).toString()}`
+
   return (
     <li className={cx({ selected: (location.pathname.endsWith(`/${props.to}`)) })}>
-      <NavLink end={props.exact} to={props.to} >
+      <NavLink end={props.exact} to={props.to + query}>
         {props.name}
       </NavLink>
     </li>
