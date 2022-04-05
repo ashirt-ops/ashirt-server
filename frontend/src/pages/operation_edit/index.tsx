@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Routes, Route } from 'react-router-dom'
 
 import Button from 'src/components/button'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
@@ -14,7 +14,7 @@ import DeleteOperationButton from './delete_operation_button'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default () => {
+export const OperationEdit = () => {
   const { slug } = useParams<{ slug: string }>()
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const navigate = useNavigate()
@@ -30,15 +30,26 @@ export default () => {
       <NavVerticalTabMenu
         title="Edit Operation"
         tabs={[
-          {
-            id: "settings", label: "Settings", content: (<>
-              <OperationEditor operationSlug={operationSlug} />
-              <DeleteOperationButton operationSlug={operationSlug} />
-            </>)
-          },
-          { id: "users", label: "Users", content: <UserPermissionEditor operationSlug={operationSlug} /> },
-          { id: "tags", label: "Tags", content: <TagEditor operationSlug={operationSlug} /> },
-        ]} />
+          { id: "settings", label: "Settings" },
+          { id: "users", label: "Users" },
+          { id: "tags", label: "Tags" },
+        ]} >
+        <Routes>
+          <Route path="settings" element={<SettingManagement operationSlug={operationSlug} />} />
+          <Route path="users" element={<UserPermissionEditor operationSlug={operationSlug} />} />
+          <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
+        </Routes>
+      </NavVerticalTabMenu>
     </>
   )
+}
+export default OperationEdit
+
+const SettingManagement = (props: {
+  operationSlug: string
+}) => {
+  return (<>
+    <OperationEditor {...props} />
+    <DeleteOperationButton {...props} />
+  </>)
 }

@@ -14,60 +14,64 @@ import FindingCategoriesTable from "./finding_categories_table"
 import RecoveryMetrics from './recovery_metrics'
 import UserTable from './user_table'
 
-import { BuildReloadBus } from 'src/helpers/reload_bus'
+import { BuildReloadBus, BusSupportedService } from 'src/helpers/reload_bus'
 import { DefaultTagEditor } from './default_tag_editor'
 import { TagPorter } from './tag_porter'
+import { Route, Routes } from 'react-router-dom'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default () => {
+export const AdminTools = () => {
   const bus = BuildReloadBus()
 
   return (
-    <div className={cx('root')}>
-      <NavVerticalTabMenu
-        title="Admin Tools"
-        tabs={[
-          {
-            id: "users", label: "User Management", content: <>
-              <UserTable {...bus} />
-              <HeadlessButton {...bus} />
-              <CreateUserButton {...bus} />
-              <InviteuserButton {...bus} />
-            </>
-          },
-          {
-            id: "authdata", label: "Authentication Overview", content: (
-              <>
-                <AuthTable />
-                <RecoveryMetrics />
-              </>
-            )
-          },
-          {
-            id: "operations", label: "Operation Management", content: (
-              <>
-                <OperationsTable />
-              </>
-            )
-          },
-          {
-            id: "tags", label: "Tag Management", content: (
-              <>
-                <DefaultTagEditor {...bus}/>
-                <TagPorter {...bus}/>
-              </>
-            )
-          },
-          {
-            id: "findings", label: "Finding Categories", content: (
-              <>
-                <FindingCategoriesTable />
-              </>
-            )
-          },
-        ]}
-      />
-    </div>
+    <>
+      <div className={cx('root')}>
+        <NavVerticalTabMenu
+          title="Admin Tools"
+          tabs={[
+            { id: "users", label: "User Management" },
+            { id: "authdata", label: "Authentication Overview" },
+            { id: "operations", label: "Operation Management" },
+            { id: "tags", label: "Tag Management" },
+            { id: "findings", label: "Finding Categories" },
+          ]}
+        >
+          <Routes>
+            <Route path="users" element={<UserManagement {...bus} />} />
+            <Route path="authdata" element={<AuthOverview />} />
+            <Route path="operations" element={<OperationsTable />} />
+            <Route path="tags" element={<TagManagement {...bus} />} />
+            <Route path="findings" element={<FindingCategoriesTable />} />
+          </Routes>
+        </NavVerticalTabMenu>
+      </div>
+    </>
+
   )
 }
+
+export default AdminTools
+
+const UserManagement = (props: BusSupportedService) => (
+  <>
+    <UserTable {...props} />
+    <HeadlessButton {...props} />
+    <CreateUserButton {...props} />
+    <InviteuserButton {...props} />
+  </>
+)
+
+const TagManagement = (props: BusSupportedService) => (
+  <>
+    <DefaultTagEditor {...props} />
+    <TagPorter {...props} />
+  </>
+)
+
+const AuthOverview = () => (
+  <>
+    <AuthTable />
+    <RecoveryMetrics />
+  </>
+)
