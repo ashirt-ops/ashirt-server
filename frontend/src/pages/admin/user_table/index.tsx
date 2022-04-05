@@ -43,7 +43,7 @@ export default (props: {
 
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
-  const editUserFn = (u: UserAdminView) => navigate(`/account/edit/${u.slug}`)
+  const editUserFn = (u: UserAdminView) => navigate(`/account/profile?user=${u.slug}`)
   const recoverFn = (u: UserAdminView) => createRecoveryCode({ userSlug: u.slug }).then(setRecoveryCode)
   const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", editUserFn, setResettingPassword, setEditingUserFlags, setDeletingUser, recoverFn, setDeletingTotp)
   const columns = Object.keys(rowBuilder(null, <span />))
