@@ -49,10 +49,10 @@ export default function SmartComboBox<T>(props: {
     standardComboboxStateReducer,
     initialComboBoxState(props.value, props.options, props.nonValueDefault),
   )
-
+  const { onChange } = props
   React.useEffect(() => {
-    props.onChange(cbState.value)
-  }, [cbState])
+    onChange(cbState.value)
+  }, [cbState, onChange])
 
   return (
     <DumbComboBox
