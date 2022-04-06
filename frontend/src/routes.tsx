@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Routes, Navigate, useParams, useRoutes, generatePath } from 'react-router-dom'
+import { Route, Routes, Navigate, useParams, generatePath } from 'react-router-dom'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -37,13 +37,15 @@ export default () => {
     <Routes>
       <Route path="/login" element={<AsyncLogin />} />
       <Route path="/login/:schemeCode" element={<AsyncLogin />} />
-      <Route path="/autherror/recoveryfailed" element={<AuthRecoveryFailed />} />
-      <Route path="/autherror/noaccess" element={<AuthNoAccess />} />
-      <Route path="/autherror/noverify" element={<AuthNoVerify />} />
-      <Route path="/autherror/incomplete" element={<AuthIncomplete />} />
-      <Route path="/autherror/disabled" element={<AuthDisabled />} />
-      <Route path="/autherror/registrationdisabled" element={<AuthNoRegistration />} />
-
+      <Route path="/autherror/*" >
+        <Route index element={<Redirect to="/login" />} />
+        <Route path="recoveryfailed" element={<AuthRecoveryFailed />} />
+        <Route path="noaccess" element={<AuthNoAccess />} />
+        <Route path="noverify" element={<AuthNoVerify />} />
+        <Route path="incomplete" element={<AuthIncomplete />} />
+        <Route path="disabled" element={<AuthDisabled />} />
+        <Route path="registrationdisabled" element={<AuthNoRegistration />} />
+      </Route>
       <Route path="*" element={<Redirect to="/login" />} />
     </Routes>
   )
@@ -53,47 +55,39 @@ export default () => {
       <Route path="/login" element={<Redirect to="/operations" />} />
       <Route path="/" element={<Redirect to="/operations" />} />
 
-      {/* AuthError routes that an admin might reach if testing */}
-      <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
-
-      <Route path="/operations" element={<AsyncOperationList />} />
-
-      {/* Operation edit */}
-      <Route path="/operations/:slug/edit/*" element={<AsyncOperationEdit />} />
-      <Route
-        path="/operations/:slug/edit"
-        element={<Redirect to={`/operations/:slug/edit/settings`} />}
-      />
-
-      {/* Operation overview */}
-      <Route path="/operations/:slug/overview" element={<AsyncOperationOverview />} />
-
-      {/* Operation show */}
-      <Route path="/operations/:slug/findings" element={<AsyncFindingList />} />
-      <Route path="/operations/:slug/findings/:uuid" element={<AsyncFindingShow />} />
-      <Route path="/operations/:slug/evidence" element={<AsyncEvidenceList />} />
-
-      <Route path="/operations/:slug/evidence/:uuid" element={
-        <Redirect to={`/operations/:slug/evidence?q=uuid%3A:uuid`} />
-      } />
-      <Route path="/operations/:slug" element={<Redirect to={`/operations/:slug/evidence`} />} />
+      <Route path="/operations/*">
+        <Route index element={<AsyncOperationList />} />
+        <Route path=":slug/*" >
+          <Route index element={<Redirect to={`evidence`} />} />
+          <Route path="evidence" element={<AsyncEvidenceList />} />
+          <Route path="evidence/:uuid" element={<Redirect to={`../evidence?q=uuid%3A:uuid`} />} />
+          {/* ^^^ we need to do ../evidence because .. points to :slug, while . points to evidence/:uuid */}
+          <Route path="findings" element={<AsyncFindingList />} />
+          <Route path="findings/:uuid" element={<AsyncFindingShow />} />
+          <Route path="edit/*">
+            <Route index element={<Redirect to={`settings`} />} />
+            <Route path="*" element={<AsyncOperationEdit />} />
+          </Route>
+          <Route path="overview" element={<AsyncOperationOverview />} />
+        </Route>
+      </Route>
 
       {/* Account Settings */}
-      <Route path="/account/*" element={<AsyncAccountSettings />} />
-      <Route path="/account" element={<Redirect to="/account/profile" />} />
+      <Route path="/account/*" >
+        <Route index element={<Redirect to="profile" />} />
+        <Route path="*" element={<AsyncAccountSettings />} />
+      </Route>
 
       {/* Admin Settings */}
-      {
-        isSuperAdmin && (
-          <Route path="/admin/*" element={<AsyncAdminSettings />} />
-        )
-      }
-      {
-        isSuperAdmin && (
-          <Route path="/admin" element={<Redirect to="/admin/users" />} />
-        )
-      }
+      {isSuperAdmin && (
+        <Route path="/admin/*" >
+          <Route index element={<Redirect to="users" />} />
+          <Route path="*" element={<AsyncAdminSettings />} />
+        </Route>
+      )}
 
+      {/* AuthError routes that an admin might reach if testing */}
+      <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
       <Route path="*" element={<AsyncNotFound />} />
     </Routes >
   )
