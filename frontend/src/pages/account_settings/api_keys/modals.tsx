@@ -21,7 +21,7 @@ export const NewApiKeyModal = (props: {
   const { apiKey, onRequestClose } = props
   return (
     <Modal title="New API Key" onRequestClose={onRequestClose}>
-      <NewApiKeyModalContents apiKey={props.apiKey}>
+      <NewApiKeyModalContents apiKey={apiKey}>
         <Button primary onClick={() => onRequestClose()}>Close</Button>
       </NewApiKeyModalContents>
     </Modal>
