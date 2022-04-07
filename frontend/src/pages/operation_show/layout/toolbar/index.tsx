@@ -66,10 +66,10 @@ export default (props: {
           <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Query Filters"></a>
         </div>
 
-        <ButtonGroup>
+        {/* <ButtonGroup>
           <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
           <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
-        </ButtonGroup>
+        </ButtonGroup> */}
       </div>
       {renderModals(helpModal, builderModal)}
     </>

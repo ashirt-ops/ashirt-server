@@ -11,9 +11,12 @@ import { SavedQuery, SavedQueryType, ViewName} from 'src/global_types'
 import {default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu} from 'src/components/list_menu'
 import {getSavedQueries, getOperation} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { default as Button, ButtonGroup } from 'src/components/button'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
+  onRequestCreateFinding: () => void,
+  onRequestCreateEvidence: () => void,
   currentQuery: string,
   currentView: ViewName,
   onNavigate: (view: ViewName, query: string) => void,
@@ -32,7 +35,14 @@ export default (props: {
         <Link className={cx('overview')} to={`/operations/${props.operationSlug}/overview`} title="View evidence overview" />
         <OperationBadges {...operation} />
       </header>
+      {/* <ButtonGroup className={cx('create-evi-finding-group')}> */}
+      <div className={cx('create-evi-finding-group')}>
+        <Button small onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
+        <Button small onClick={props.onRequestCreateFinding}>Create Finding</Button>
+      </div>
+      {/* </ButtonGroup> */}
       <QueryList
+        addNew={props.onRequestCreateEvidence}
         name="Evidence"
         type="evidence"
         onSelectQuery={q => props.onNavigate('evidence', q)}
@@ -41,6 +51,7 @@ export default (props: {
         {...props}
       />
       <QueryList
+        addNew={props.onRequestCreateFinding}
         name="Findings"
         type="findings"
         onSelectQuery={q => props.onNavigate('findings', q)}
@@ -53,6 +64,7 @@ export default (props: {
 }
 
 const QueryList = (props: {
+  addNew: () => void
   currentQuery: string,
   currentView: ViewName,
   name: string,
@@ -98,7 +110,10 @@ const QueryList = (props: {
   ))
 
   return <>
-    <h2>{props.name}</h2>
+    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
+      <h2>{props.name}</h2>
+      <Button small onClick={props.addNew}>Add New</Button>
+    </div>
     <ListMenu>
       <ListItem
         name={`All ${props.name}`}

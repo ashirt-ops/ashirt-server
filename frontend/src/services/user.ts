@@ -1,6 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
+import { NewUser } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function updateUserProfile(i: {
@@ -27,8 +28,8 @@ export async function addHeadlessUser(i: {
   firstName: string,
   lastName: string,
   email: string,
-}): Promise<void> {
-  await ds.adminCreateHeadlessUser(i)
+}): Promise<NewUser> {
+  return ds.adminCreateHeadlessUser(i)
 }
 
 export async function createRecoveryCode(i: {
