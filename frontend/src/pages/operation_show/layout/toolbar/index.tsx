@@ -13,6 +13,7 @@ import SearchQueryBuilder from 'src/components/search_query_builder'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { Tag, ViewName } from 'src/global_types'
 import { getTags } from 'src/services'
+import { CreateButtonPosition } from '..'
 const cx = classnames.bind(require('./stylesheet'))
 
 
@@ -23,6 +24,7 @@ export default (props: {
   query: string,
   operationSlug: string,
   viewName: ViewName,
+  showCreateButtons: CreateButtonPosition
 }) => {
   const [queryInput, setQueryInput] = React.useState<string>("")
   const helpModal = useModal<void>(modalProps => <SearchHelpModal {...modalProps} />)
@@ -66,10 +68,13 @@ export default (props: {
           <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Query Filters"></a>
         </div>
 
-        {/* <ButtonGroup>
-          <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
-          <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
-        </ButtonGroup> */}
+        {props.showCreateButtons === 'filter' && (
+          <ButtonGroup>
+            <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
+            <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
+          </ButtonGroup>
+        )}
+        
       </div>
       {renderModals(helpModal, builderModal)}
     </>

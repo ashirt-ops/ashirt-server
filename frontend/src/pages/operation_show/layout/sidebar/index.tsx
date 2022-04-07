@@ -12,15 +12,17 @@ import {default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu}
 import {getSavedQueries, getOperation} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
+import { CreateButtonPosition } from '..'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  onRequestCreateFinding: () => void,
-  onRequestCreateEvidence: () => void,
   currentQuery: string,
   currentView: ViewName,
   onNavigate: (view: ViewName, query: string) => void,
+  onRequestCreateFinding: () => void,
+  onRequestCreateEvidence: () => void,
   operationSlug: string,
+  showCreateButtons: CreateButtonPosition
 }) => {
   const wiredQueries = useWiredData(React.useCallback(() => Promise.all([
     getSavedQueries({operationSlug: props.operationSlug}),
@@ -35,12 +37,12 @@ export default (props: {
         <Link className={cx('overview')} to={`/operations/${props.operationSlug}/overview`} title="View evidence overview" />
         <OperationBadges {...operation} />
       </header>
-      {/* <ButtonGroup className={cx('create-evi-finding-group')}> */}
-      <div className={cx('create-evi-finding-group')}>
-        <Button small onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
-        <Button small onClick={props.onRequestCreateFinding}>Create Finding</Button>
-      </div>
-      {/* </ButtonGroup> */}
+      {props.showCreateButtons == 'sidebar-above' && (
+        <ButtonGroup className={cx('create-evi-finding-group')}>
+          <Button size="medium" onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
+          <Button size="medium" onClick={props.onRequestCreateFinding}>Create Finding</Button>
+        </ButtonGroup>
+      )}
       <QueryList
         addNew={props.onRequestCreateEvidence}
         name="Evidence"
@@ -73,6 +75,7 @@ const QueryList = (props: {
   operationSlug: string,
   savedQueries: Array<SavedQuery>,
   type: SavedQueryType,
+  showCreateButtons: CreateButtonPosition
 }) => {
   const isThisView = props.currentView === props.type
   const currentQueryIsNew = (
@@ -112,7 +115,9 @@ const QueryList = (props: {
   return <>
     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
       <h2>{props.name}</h2>
-      <Button small onClick={props.addNew}>Add New</Button>
+      {props.showCreateButtons === 'sidebar-inline' && (
+        <Button small onClick={props.addNew}>Add New</Button>
+      )}
     </div>
     <ListMenu>
       <ListItem
