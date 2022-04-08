@@ -93,12 +93,12 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
 			}
 			defer cleanup()
 
-			userID, err := authenticateAPI(db, r, body)
+			userData, err := authenticateAPI(db, r, body)
 			if err != nil {
 				respondWithError(w, r, backend.UnauthorizedWriteErr(err))
 				return
 			}
-			ctx := buildContextForUser(r.Context(), db, userID, false)
+			ctx := buildContextForUser(r.Context(), db, userData.ID, false, userData.Headless)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -112,25 +112,26 @@ func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session
 				next.ServeHTTP(w, r)
 				return
 			}
-			ctx := buildContextForUser(r.Context(), db, sess.UserID, sess.IsAdmin)
+			// users that log in to the web (where this is used) cannot be headless users
+			ctx := buildContextForUser(r.Context(), db, sess.UserID, sess.IsAdmin, false)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-func BuildContextForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin bool) context.Context {
-	return buildContextForUser(ctx, db, userID, isSuperAdmin)
+func BuildContextForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin, isHeadless bool) context.Context {
+	return buildContextForUser(ctx, db, userID, isSuperAdmin, isHeadless)
 }
 
-func buildContextForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin bool) context.Context {
+func buildContextForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin, isHeadless bool) context.Context {
 	return InjectIntoContext(ctx, InjectIntoContextInput{
 		IsSuperAdmin: isSuperAdmin,
 		UserID:       userID,
-		UserPolicy:   buildPolicyForUser(ctx, db, userID, isSuperAdmin),
+		UserPolicy:   buildPolicyForUser(ctx, db, userID, isSuperAdmin, isHeadless),
 	})
 }
 
-func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin bool) policy.Policy {
+func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin, isHeadless bool) policy.Policy {
 	var roles []models.UserOperationPermission
 	err := db.Select(&roles, sq.Select("operation_id", "role").
 		From("user_operation_permissions").
@@ -147,6 +148,7 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 		P1: policy.NewAuthenticatedPolicy(userID, isSuperAdmin),
 		P2: &policy.Operation{
 			UserID:           userID,
+			IsHeadless:       isHeadless,
 			OperationRoleMap: roleMap,
 		},
 	}

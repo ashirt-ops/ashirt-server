@@ -642,6 +642,18 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.CreateDefaultTag(r.Context(), db, i)
 	}))
 
+	route(r, "POST", "/admin/merge/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+		var tags []services.CreateDefaultTagInput
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(body, &tags); err != nil {
+			return nil, err
+		}
+		return nil, services.MergeDefaultTags(r.Context(), db, tags)
+	}))
+
 	route(r, "PUT", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateDefaultTagInput{

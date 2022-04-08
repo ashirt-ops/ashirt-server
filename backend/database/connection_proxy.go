@@ -13,7 +13,7 @@ type ConnectionProxy interface {
 	Get(model interface{}, builder sq.SelectBuilder) error
 	// Exec(query string, values ...interface{}) error // not consistent between Transactable and
 	Insert(table string, valueMap map[string]interface{}) (int64, error)
-	BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}) error
+	BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}, onDuplicates ...interface{}) error
 	Update(builder sq.UpdateBuilder) error
 	Delete(builder sq.DeleteBuilder) error
 	WithTx(ctx context.Context, fn func(tx *Transactable)) error
