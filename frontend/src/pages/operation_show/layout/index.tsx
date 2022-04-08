@@ -13,6 +13,8 @@ const cx = classnames.bind(require('./stylesheet'))
 
 const noOp = () => {}
 
+export type CreateButtonPosition = "sidebar-inline" | "sidebar-above" | "filter" | "none"
+
 export default (props: {
   children: React.ReactNode,
   onEvidenceCreated?: () => void,
@@ -29,6 +31,8 @@ export default (props: {
     <CreateFindingModal {...modalProps} onCreated={props.onFindingCreated || noOp} operationSlug={props.operationSlug} />
   ))
 
+  const showCreateButtons: CreateButtonPosition = 'filter'
+
   return (
     <div className={cx('root')}>
       <div className={cx('toolbar')}>
@@ -39,14 +43,18 @@ export default (props: {
           query={props.query}
           operationSlug={props.operationSlug}
           viewName={props.view}
+          showCreateButtons={showCreateButtons}
         />
       </div>
       <div className={cx('sidebar')}>
         <Sidebar
+          onRequestCreateFinding={() => createFindingModal.show()}
+          onRequestCreateEvidence={() => createEvidenceModal.show()}
           currentQuery={props.query}
           currentView={props.view}
           onNavigate={props.onNavigate}
           operationSlug={props.operationSlug}
+          showCreateButtons={showCreateButtons}
         />
       </div>
       <div className={cx('children')}>

@@ -7,14 +7,14 @@ import { format } from 'date-fns'
 
 import Button from 'src/components/button'
 import Form from 'src/components/form'
-import Modal from 'src/components/modal'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import { ApiKey } from 'src/global_types'
-import { InputWithCopyButton } from 'src/components/text_copiers'
 import { UserWithAuth } from 'src/global_types'
-import { getApiKeys, createApiKey, deleteApiKey } from 'src/services'
+import { getApiKeys, createApiKey } from 'src/services'
 import { useWiredData, useForm } from 'src/helpers'
+
+import { NewApiKeyModal, DeleteApiKeyModal } from './modals'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -65,37 +65,7 @@ const GenerateKeyButton = (props: {
   return <>
     <Form submitText="Generate New API Key" {...generateKeyForm} />
     {apiKey && (
-      <Modal title="New API Key" onRequestClose={() => setApiKey(null)}>
-        <div className={cx('new-api-key-modal')}>
-          <p>
-            Below are your seceret and access keys.
-            Once you close this modal, the seceret key will no longer be available.
-          </p>
-          <InputWithCopyButton label="Access Key" value={apiKey.accessKey} />
-          <InputWithCopyButton label="Secret Key" value={apiKey.secretKey || ''} />
-          <Button primary onClick={() => setApiKey(null)}>Close</Button>
-        </div>
-      </Modal>
+      <NewApiKeyModal apiKey={apiKey} onRequestClose={ () => setApiKey(null)} />
     )}
   </>
-}
-
-const DeleteApiKeyModal = (props: {
-  apiKey: ApiKey,
-  userSlug: string,
-  onRequestClose: () => void,
-  onDeleted: () => void,
-}) => {
-  const formComponentProps = useForm({
-    onSuccess: () => { props.onRequestClose(); props.onDeleted() },
-    handleSubmit: () => deleteApiKey({ userSlug: props.userSlug, accessKey: props.apiKey.accessKey }),
-  })
-
-  return (
-    <Modal title="Delete API Key" onRequestClose={props.onRequestClose}>
-      <Form submitText="Delete API Key" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
-        <p>Are you sure you want to delete this API key?</p>
-      </Form>
-    </Modal>
-  )
 }

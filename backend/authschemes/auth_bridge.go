@@ -11,6 +11,7 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -42,7 +43,7 @@ func MakeAuthBridge(db *database.Connection, sessionStore *session.Store, authSc
 
 // CreateNewUser allows new users to be registered into the system, if they do not already exist.
 // Note that slug must be unique
-func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (services.CreateUserOutput, error) {
+func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (*dtos.CreateUserOutput, error) {
 	return services.CreateUser(ah.db, profile.ToCreateUserInput())
 }
 

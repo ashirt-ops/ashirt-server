@@ -14,6 +14,7 @@ export type ButtonStyle = {
   danger?: boolean,
   primary?: boolean,
   small?: boolean,
+  size?: "small" | "medium" | "normal",
 }
 
 function styleToClassname(style: ButtonStyle): string {
@@ -21,7 +22,8 @@ function styleToClassname(style: ButtonStyle): string {
     active: style.active,
     danger: style.danger,
     primary: style.primary,
-    small: style.small,
+    small: style.small === true || style.size === 'small',
+    medium: style.size === 'medium'
   });
 }
 
