@@ -10,7 +10,7 @@ import Form from 'src/components/form'
 import Modal from "src/components/modal"
 import { InputWithCopyButton } from 'src/components/text_copiers'
 import { useForm } from 'src/helpers'
-import { createApiKey, deleteApiKey, rotateApiKey } from 'src/services'
+import { createApiKey, deleteApiKey } from 'src/services'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -77,12 +77,9 @@ export const RotateApiKeyModal = (props: {
   }
   const formComponentProps = useForm({
     onSuccess: () => {
+      props.onUpdated()
       if (updatedApiKey) {
-        props.onUpdated()
         closeModal()
-      }
-      else {
-        props.onUpdated()
       }
     },
     handleSubmit: async () => {
