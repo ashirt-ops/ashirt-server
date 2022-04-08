@@ -154,11 +154,12 @@ func rotateAPIKey(ctx context.Context, db database.ConnectionProxy, userID int64
 	var apiKey *dtos.APIKey
 
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
-		err := deleteAPIKey(ctx, tx, userID, accessKey)
+		var err error 
+		apiKey, err = createAPIKey(tx, userID)
 		if err != nil {
 			tx.FailTransaction(err)
 		}
-		apiKey, err = createAPIKey(tx, userID)
+		err = deleteAPIKey(ctx, tx, userID, accessKey)
 		if err != nil {
 			tx.FailTransaction(err)
 		}
