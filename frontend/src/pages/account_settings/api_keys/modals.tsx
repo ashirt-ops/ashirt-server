@@ -10,7 +10,7 @@ import Form from 'src/components/form'
 import Modal from "src/components/modal"
 import { InputWithCopyButton } from 'src/components/text_copiers'
 import { useForm } from 'src/helpers'
-import { deleteApiKey, rotateApiKey } from 'src/services'
+import { createApiKey, deleteApiKey, rotateApiKey } from 'src/services'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -67,7 +67,7 @@ export const RotateApiKeyModal = (props: {
   apiKey: ApiKey,
   userSlug: string,
   onRequestClose: () => void,
-  onRotated: () => void,
+  onUpdated: () => void,
 }) => {
   const [updatedApiKey, setUpdatedApiKey] = React.useState<null | ApiKey>(null)
 
@@ -77,17 +77,35 @@ export const RotateApiKeyModal = (props: {
   }
   const formComponentProps = useForm({
     onSuccess: () => {
-      props.onRotated()
+      if (updatedApiKey) {
+        props.onUpdated()
+        closeModal()
+      }
+      else {
+        props.onUpdated()
+      }
     },
-    handleSubmit: () => rotateApiKey({ userSlug: props.userSlug, accessKey: props.apiKey.accessKey }).then(setUpdatedApiKey),
+    handleSubmit: async () => {
+      if (updatedApiKey) {
+        await deleteApiKey({
+          userSlug: props.userSlug,
+          accessKey: props.apiKey.accessKey
+        })
+      }
+      else {
+        const newKey = await createApiKey({
+          userSlug: props.userSlug
+        })
+        setUpdatedApiKey(newKey)
+      }
+    },
   })
 
   return (
     <Modal title="Rotate API Key" onRequestClose={closeModal}>
       <Form
-        submitText="Rotate API Key"
-        cancelText="Close"
-        disableSubmit={!!updatedApiKey}
+        submitText={updatedApiKey ? "Delete old API Key" : "Create new API Key"}
+        cancelText={updatedApiKey ? "Close without deleting old api key" : "Close"}
         onCancel={closeModal}
         {...formComponentProps}>
         {updatedApiKey != null
@@ -102,7 +120,7 @@ export const RotateApiKeyModal = (props: {
             </div>
           )
           : (
-            <p>This will delete and re-create an API key. Are you sure you want to do this?</p>
+            <p>This will delete and re-create an API key. Do you want to create a new key?</p>
           )
         }
       </Form>

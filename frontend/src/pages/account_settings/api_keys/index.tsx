@@ -57,7 +57,7 @@ export default (props: {
           userSlug={props.profile.slug}
           apiKey={rotateKey}
           onRequestClose={() => setRotateKey(null)}
-          onRotated={wiredApiKeys.reload}
+          onUpdated={wiredApiKeys.reload}
         />
       )}
     </SettingsSection>
