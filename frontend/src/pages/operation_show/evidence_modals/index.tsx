@@ -14,7 +14,7 @@ import ComboBox from 'src/components/combobox'
 import TagList from 'src/components/tag_list'
 import { CodeBlockEditor } from 'src/components/code_block'
 import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence, Operation, TagDifference, SupportedEvidenceType } from 'src/global_types'
-import { TextArea } from 'src/components/input'
+import { default as Input, TextArea } from 'src/components/input'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { codeblockToBlob } from 'src/helpers/codeblock_to_blob'
 import { useWiredData } from 'src/helpers'
@@ -24,6 +24,8 @@ import {
   moveEvidence
 } from 'src/services'
 import classnames from 'classnames/bind'
+import { ExpandableSection } from 'src/components/expandable_area'
+import { escapeRegExp } from 'lodash'
 const cx = classnames.bind(require('./stylesheet'))
 
 export const CreateEvidenceModal = (props: {
@@ -66,10 +68,10 @@ export const CreateEvidenceModal = (props: {
 
       if (selectedOption.value === 'codeblock' && codeblockField.value !== null) {
         data = { type: 'codeblock', file: codeblockToBlob(codeblockField.value) }
-      } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null ) {
+      } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null) {
         data = { type: selectedOption.value, file: binaryBlobField.value }
       } else if (selectedOption.value === 'event') {
-        data = { type: 'event'}
+        data = { type: 'event' }
       }
 
       return createEvidence({
@@ -284,4 +286,100 @@ const TagListRenderer = (props: {
     <div>The following tags will be removed:</div>
     <TagList tags={props.tags} />
   </>)
+}
+
+/**
+ * highlightSubstring breaks a given string into words that match the given regex, joined with
+ * the rest of the string. This should preserve case.
+ * 
+ * @example 
+ * const result = highlightSubstring("The quick brown fox jumps over the lazy dog.", /the/gi, "highlight")
+ * assert( result, [
+ *   <span className="highlight">The</span>,
+ *   <span> quick brown fox jumps over </span>,
+ *   <span className="highlight">the</span>,
+ *   <span> lazy dog.</span>,
+ * ])
+ * 
+ * @param s The string with a substring to highlight
+ * @param regex What part of the string to match. Must be a global match (/.../g)
+ * @param className What class name to apply to the highlighted word
+ * @returns An array of spans. Spans will either be plain, or with the given classname.
+ */
+const highlightSubstring = (s: string, regexAsStr: string, className: any, options?: { regexFlags: string }): Array<React.ReactNode> => {
+  const rtn: Array<React.ReactNode> = []
+  const matches = [...s.matchAll(new RegExp(escapeRegExp(regexAsStr), "g" + (options?.regexFlags ?? "") ))]
+
+  const endOfWord = (match: RegExpMatchArray) => (match.index ?? 0) + match[0].length
+  const highlight = (v: string) => <span className={className}>{v}</span>
+
+  if (matches.length) {
+    if ((matches[0].index ?? 0) > 0) {
+      rtn.push(<span>{s.substring(0, matches[0].index)}</span>)
+    }
+
+    for (let i = 0; i < matches.length; i++) {
+      const item = matches[i]
+      const next = matches[i + 1]
+      const [value] = item
+      rtn.push(highlight(value))
+      if (next) {
+        const end = endOfWord(item)
+        const startOfNextWord = next.index ?? end
+        if (end != startOfNextWord) {
+          rtn.push(<span>{s.substring(end, startOfNextWord)}</span>)
+        }
+      }
+    }
+    const lastEntry = (matches[matches.length - 1])
+    rtn.push(<span>{s.substring(endOfWord(lastEntry))}</span>)
+  }
+  else {
+    rtn.push(<span>{s}</span>)
+  }
+
+  return rtn
+}
+
+export const ViewEvidenceMetadataModal = (props: {
+  evidence: Evidence,
+  onRequestClose: () => void,
+}) => {
+  const filterField = useFormField<string>("")
+  const initiallyExpanded = props.evidence.metadata.length == 1
+
+  const formComponentProps = useForm({
+    fields: [filterField],
+    onSuccess: () => { props.onRequestClose() },
+    handleSubmit: async () => { },
+  })
+
+  return (
+    <ModalForm title="Evidence Metadata" onRequestClose={props.onRequestClose} {...formComponentProps}>
+      <div className={cx('view-metadata-root')}>
+        <Input label="filter" {...filterField} />
+        {props.evidence.metadata
+          .map((meta) => {
+            const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), {regexFlags: "i"})
+
+            return (
+              <ExpandableSection
+                key={meta.source}
+                label={meta.source}
+                initiallyExpanded={initiallyExpanded}
+                labelClassName={cx(
+                  (content.length == 1 && filterField.value.length > 0)
+                    ? 'label-not-important'
+                    : ''
+                )}
+              >
+                <span className={cx('metadata-content')}>{...content}</span>
+
+              </ExpandableSection>
+            )
+          }
+          )}
+      </div>
+    </ModalForm>
+  )
 }
