@@ -3,8 +3,8 @@ import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
 export const ExpandableSection = (props: {
-  children: string
-  content: React.ReactNode
+  children: React.ReactNode
+  label: string
   className?: string
   initiallyExpanded?: boolean
   onExpanded?: (expanded: boolean)=>void
@@ -18,10 +18,10 @@ export const ExpandableSection = (props: {
         setExpanded(newValue)
         props.onExpanded && props.onExpanded(newValue)
       }}>
-        <section className={cx('expandable-section-label')}>{props.children}</section>
+        <section className={cx('expandable-section-label')}>{props.label}</section>
       </div>
       <div className={cx('expandable-content')}>
-        {expanded && props.content}
+        {expanded && props.children}
       </div>
     </section>
   )

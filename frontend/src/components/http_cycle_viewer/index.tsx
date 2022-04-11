@@ -106,20 +106,14 @@ const EntryHeadersData = (props: {
 
   return (
     <div className={cx('headers-grouping')}>
-      <ExpandableSection {...expandedAreaProps('request-info')} content={
+      <ExpandableSection {...expandedAreaProps('request-info')} label="Request Info">
         <RequestInfo entry={props.entry} />
-      }>
-        Request Info
       </ExpandableSection>
-      <ExpandableSection {...expandedAreaProps('request-headers')} content={
+      <ExpandableSection {...expandedAreaProps('request-headers')} label="Request Headers">
         <SectionDefintions definitions={formatHeaders(props.entry.request.headers)} />
-      }>
-        Request Headers
       </ExpandableSection>
-      <ExpandableSection {...expandedAreaProps('response-headers')} content={
+      <ExpandableSection {...expandedAreaProps('response-headers')} label="Response Headers">
         <SectionDefintions definitions={formatHeaders(props.entry.response.headers)} />
-      }>
-        Response Headers
       </ExpandableSection>
     </div>
   )
