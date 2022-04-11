@@ -49,6 +49,15 @@ type Evidence struct {
 	UpdatedAt     *time.Time `db:"updated_at"`
 }
 
+type EvidenceMetadata struct {
+	ID         int64      `db:"id"`
+	EvidenceID int64      `db:"evidence_id"`
+	Source     string     `db:"source"`
+	Body       string     `db:"body"`
+	CreatedAt  time.Time  `db:"created_at"`
+	UpdatedAt  *time.Time `db:"updated_at"`
+}
+
 // EvidenceFindingMap reflects the structure of the database table 'evidence_finding_map'
 type EvidenceFindingMap struct {
 	EvidenceID int64      `db:"evidence_id"`
