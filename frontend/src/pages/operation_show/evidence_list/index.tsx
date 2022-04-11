@@ -4,7 +4,13 @@
 import * as React from 'react'
 import Layout from '../layout'
 import Timeline from 'src/components/timeline'
-import { EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal, MoveEvidenceModal } from '../evidence_modals'
+import {
+  EditEvidenceModal,
+  DeleteEvidenceModal,
+  ChangeFindingsOfEvidenceModal,
+  MoveEvidenceModal,
+  ViewEvidenceMetadataModal,
+} from '../evidence_modals'
 import { Evidence, ViewName } from 'src/global_types'
 import { RouteComponentProps } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
@@ -30,6 +36,9 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
       setLastEditedUuid(modalProps.evidence.uuid)
       wiredEvidence.reload()
     }} />
+  ))
+  const viewModal = useModal<{ evidence: Evidence }>(modalProps => (
+    <ViewEvidenceMetadataModal {...modalProps} />
   ))
   const deleteModal = useModal<{ evidence: Evidence }>(modalProps => (
     <DeleteEvidenceModal {...modalProps} operationSlug={slug} onDeleted={reloadToTop} />
@@ -66,6 +75,13 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
               act: evidence => editModal.show({ evidence }),
             },
             {
+              label: "Metadata",
+              act: evidence => viewModal.show({ evidence }),
+              canAct: (evidence) => evidence.metadata.length > 0
+                ? { disabled: false }
+                : { disabled: true, title: "No metadata available" },
+            },
+            {
               label: "Assign Findings",
               act: evidence => assignToFindingsModal.show({ evidence }),
             },
@@ -80,7 +96,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
         />
       ))}
 
-      {renderModals(editModal, deleteModal, assignToFindingsModal, moveModal)}
+      {renderModals(editModal, deleteModal, assignToFindingsModal, moveModal, viewModal)}
     </Layout>
   )
 }
