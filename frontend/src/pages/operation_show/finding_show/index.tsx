@@ -64,10 +64,16 @@ export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
           <Timeline
             scrollToUuid={lastEditedUuid}
             evidence={evidence}
-            actions={{
-              'Remove From Finding': evidence => removeEvidenceFromFindingModal.show({evidence, finding}),
-              'Edit': evidence => editEvidenceModal.show({evidence}),
-            }}
+            actions={[
+              {
+                label: 'Remove From Finding',
+                act: evidence => removeEvidenceFromFindingModal.show({ evidence, finding })
+              },
+              {
+                label: 'Edit',
+                act: evidence => editEvidenceModal.show({ evidence })
+              },
+            ]}
             onQueryUpdate={query => props.history.push(`/operations/${slug}/evidence?q=${encodeURIComponent(query.trim())}`)}
             operationSlug={slug}
             query=""
