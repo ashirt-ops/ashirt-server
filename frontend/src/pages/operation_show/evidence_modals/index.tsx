@@ -5,6 +5,7 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import {
   Evidence,
+  EvidenceMetadata,
   Finding,
   Tag,
   CodeBlock,
@@ -24,10 +25,12 @@ import {
   createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence,
   getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference,
   moveEvidence,
-  createEvidenceMetadata
+  createEvidenceMetadata,
+  updateEvidenceMetadata
 } from 'src/services'
 
 import BinaryUpload from 'src/components/binary_upload'
+import { default as Button, ButtonGroup } from 'src/components/button'
 import Checkbox from 'src/components/checkbox'
 import { CodeBlockEditor } from 'src/components/code_block'
 import ComboBox from 'src/components/combobox'
@@ -385,60 +388,169 @@ const AddEvidenceMetadataForm = (props: {
   evidence: Evidence,
   onCreated: () => void,
   onCancel?: () => void,
-}) => {
-  const sourceField = useFormField<string>("")
-  const contentField = useFormField<string>("")
-
-  const formComponentProps = useForm({
-    fields: [sourceField, contentField],
-    onSuccess: () => props.onCreated(),
-    handleSubmit: async () => {
-      if (sourceField.value.trim() == "") {
-        throw new Error("Must specify a source")
-      }
+}) => (
+  <EvidenceMetadataEditorForm
+    metadata={{ body: "", source: "" }}
+    submitText="Create"
+    onSubmit={(metadata: EvidenceMetadata) => {
       return createEvidenceMetadata({
         operationSlug: props.operationSlug,
         evidenceUuid: props.evidence.uuid,
+        body: metadata.body,
+        source: metadata.source,
+      })
+    }}
+    onEdited={props.onCreated}
+  />
+)
+
+const EditEvidenceMetadataForm = (props: {
+  metadata: EvidenceMetadata
+  operationSlug: string
+  evidence: Evidence
+  onEdited: () => void
+  onCancel: () => void
+}) => (
+  <EvidenceMetadataEditorForm
+    metadata={props.metadata}
+    submitText="Save"
+    onSubmit={(metadata: EvidenceMetadata) => {
+      return updateEvidenceMetadata({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+        body: metadata.body,
+        source: metadata.source,
+      })
+    }}
+    onEdited={props.onEdited}
+    onCancel={props.onCancel}
+  />
+)
+
+const EvidenceMetadataEditorForm = (props: {
+  metadata: EvidenceMetadata
+  onSubmit: (metadata: EvidenceMetadata) => Promise<void>
+  onEdited: () => void
+  onCancel?: () => void
+  submitText: string
+  readonlySource?: boolean
+}) => {
+  const sourceField = useFormField<string>(props.metadata.source)
+  const contentField = useFormField<string>(props.metadata.body)
+
+  const formComponentProps = useForm({
+    fields: [sourceField, contentField],
+    onSuccess: () => props.onEdited(),
+    handleSubmit: () => {
+      if (sourceField.value.trim() == "") {
+        throw new Error("Must specify a source")
+      }
+      return props.onSubmit({
         source: sourceField.value,
         body: contentField.value,
       })
     },
   })
+
   return (
-    <Form submitText="Create" {...formComponentProps} onCancel={props.onCancel}>
-      <Input label='Source' {...sourceField} />
+    <Form {...formComponentProps}
+      submitText={props.submitText}
+      onCancel={props.onCancel}
+      cancelText="Cancel"
+    >
+      <Input label='Source' readOnly={props.readonlySource} {...sourceField} />
       <TextArea label="Content" {...contentField} />
     </Form>
   )
 }
 
+// const ViewEvidenceMetadataForm = (props: {
+//   evidence: Evidence,
+//   onMetadataEdited: (metadata: EvidenceMetadata) => void
+//   onCancel?: () => void,
+// }) => {
+//   const filterField = useFormField<string>("")
+//   const initiallyExpanded = props.evidence.metadata.length == 1
+
+//   const formComponentProps = useForm({
+//     fields: [filterField],
+//     onSuccess: () => { },
+//     handleSubmit: async () => { },
+//   })
+//   return (
+//     <Form {...formComponentProps} onCancel={props.onCancel}>
+//       <div className={cx('view-metadata-root')}>
+//         <Input label="Filter Metadata" {...filterField} />
+//         {props.evidence.metadata
+//           .map((meta) => {
+//             const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), { regexFlags: "i" })
+
+//             return (
+//               <ExpandableSection
+//                 key={meta.source}
+//                 label={<ExpandableSectionLabel label={meta.source} actions={[
+//                   {
+//                     label: 'Edit',
+//                     action: (e) => {
+//                       e.stopPropagation()
+//                       props.onMetadataEdited(meta)
+//                     }
+//                   }
+//                 ]} />}
+//                 initiallyExpanded={initiallyExpanded}
+//                 labelClassName={cx(
+//                   (content.length == 1 && filterField.value.length > 0)
+//                     ? 'label-not-important'
+//                     : ''
+//                 )}
+//               >
+//                 <span className={cx('metadata-content')}>{...content}</span>
+
+//               </ExpandableSection>
+//             )
+//           }
+//           )}
+//       </div>
+//     </Form>
+//   )
+// }
+
 const ViewEvidenceMetadataForm = (props: {
   evidence: Evidence,
+  onMetadataEdited: (metadata: EvidenceMetadata) => void
   onCancel?: () => void,
+  filterText: string,
+  onFilterUpdated: (val: string) => void
 }) => {
-  const filterField = useFormField<string>("")
   const initiallyExpanded = props.evidence.metadata.length == 1
 
   const formComponentProps = useForm({
-    fields: [filterField],
     onSuccess: () => { },
     handleSubmit: async () => { },
   })
   return (
     <Form {...formComponentProps} onCancel={props.onCancel}>
       <div className={cx('view-metadata-root')}>
-        <Input label="Filter Metadata" {...filterField} />
+        <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
         {props.evidence.metadata
           .map((meta) => {
-            const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), { regexFlags: "i" })
+            const content = highlightSubstring(meta.body, props.filterText, cx("content-important"), { regexFlags: "i" })
 
             return (
               <ExpandableSection
                 key={meta.source}
-                label={meta.source}
+                label={<ExpandableSectionLabel label={meta.source} actions={[
+                  {
+                    label: 'Edit',
+                    action: (e) => {
+                      e.stopPropagation()
+                      props.onMetadataEdited(meta)
+                    }
+                  }
+                ]} />}
                 initiallyExpanded={initiallyExpanded}
                 labelClassName={cx(
-                  (content.length == 1 && filterField.value.length > 0)
+                  (content.length == 1 && props.filterText.length > 0)
                     ? 'label-not-important'
                     : ''
                 )}
@@ -454,6 +566,40 @@ const ViewEvidenceMetadataForm = (props: {
   )
 }
 
+const ViewEditEvidenceMetadataContainer = (props: {
+  evidence: Evidence,
+  operationSlug: string,
+  onEdited: () => void
+  onCancel?: () => void,
+}) => {
+  const [editedMetadata, setEditedMetadata] = React.useState<null | EvidenceMetadata>(null)
+  const [filterText, setFilterText] = React.useState<string>("")
+
+  return (
+    editedMetadata
+      ? (
+        <EditEvidenceMetadataForm
+          evidence={props.evidence}
+          metadata={editedMetadata}
+          onCancel={() => setEditedMetadata(null)}
+          onEdited={() => {
+            props.onEdited()
+            setEditedMetadata(null)
+          }}
+          operationSlug={props.operationSlug}
+        />
+      )
+      : (
+        <ViewEvidenceMetadataForm
+          evidence={props.evidence}
+          onMetadataEdited={setEditedMetadata}
+          filterText={filterText}
+          onFilterUpdated={setFilterText}
+        />
+      )
+  )
+}
+
 export const EvidenceMetadataModal = (props: {
   operationSlug: string,
   evidence: Evidence,
@@ -466,17 +612,21 @@ export const EvidenceMetadataModal = (props: {
       <TabMenu className={cx('tab-menu')}
         tabs={[
           {
-            id: 'view', label: 'View', content: (
-              <ViewEvidenceMetadataForm evidence={props.evidence} />
+            id: 'view', label: 'View',
+            content: (
+              <ViewEditEvidenceMetadataContainer
+                evidence={props.evidence}
+                operationSlug={props.operationSlug}
+                onEdited={() => { props.onUpdated(); props.onRequestClose() }}
+              />
             )
           },
           {
-            id: 'create',
-            label: 'Create',
+            id: 'create', label: 'Create',
             content: (
               <AddEvidenceMetadataForm
                 evidence={props.evidence}
-                onCreated={() => {props.onUpdated(); props.onRequestClose()}}
+                onCreated={() => { props.onUpdated(); props.onRequestClose() }}
                 operationSlug={props.operationSlug}
               />
             )
@@ -484,5 +634,23 @@ export const EvidenceMetadataModal = (props: {
         ]}
       />
     </Modal>
+  )
+}
+
+const ExpandableSectionLabel = (props: {
+  label: string
+  actions: Array<{ label: string, action: (e: React.MouseEvent<Element, MouseEvent>) => void }>
+}) => {
+  return (
+    <div className={cx('expandable-section-label-container')}>
+      <span className={cx('expandable-section-label')}>{props.label}</span>
+      {props.actions.length > 0 && (
+        <ButtonGroup className={cx('expandable-section-button-group')}>
+          {props.actions.map(act => (
+            <Button small key={act.label} onClick={act.action}>{act.label}</Button>
+          ))}
+        </ButtonGroup>
+      )}
+    </div>
   )
 }
