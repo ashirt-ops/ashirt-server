@@ -81,9 +81,6 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
             {
               label: "Metadata",
               act: evidence => viewModal.show({ evidence }),
-              canAct: (evidence) => evidence.metadata.length > 0
-                ? { disabled: false }
-                : { disabled: true, title: "No metadata available" },
             },
             {
               label: "Assign Findings",

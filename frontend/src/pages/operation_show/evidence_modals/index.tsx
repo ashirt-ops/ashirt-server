@@ -522,8 +522,6 @@ const ViewEvidenceMetadataForm = (props: {
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
-  const initiallyExpanded = props.evidence.metadata.length == 1
-
   const formComponentProps = useForm({
     onSuccess: () => { },
     handleSubmit: async () => { },
@@ -531,38 +529,62 @@ const ViewEvidenceMetadataForm = (props: {
   return (
     <Form {...formComponentProps} onCancel={props.onCancel}>
       <div className={cx('view-metadata-root')}>
-        <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
-        {props.evidence.metadata
-          .map((meta) => {
-            const content = highlightSubstring(meta.body, props.filterText, cx("content-important"), { regexFlags: "i" })
+        {props.evidence.metadata.length == 0
+          ? <em>No metadata exists for this evidence</em>
+          : (<>
+            <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
 
-            return (
-              <ExpandableSection
-                key={meta.source}
-                label={<ExpandableSectionLabel label={meta.source} actions={[
-                  {
-                    label: 'Edit',
-                    action: (e) => {
-                      e.stopPropagation()
-                      props.onMetadataEdited(meta)
-                    }
-                  }
-                ]} />}
-                initiallyExpanded={initiallyExpanded}
-                labelClassName={cx(
-                  (content.length == 1 && props.filterText.length > 0)
-                    ? 'label-not-important'
-                    : ''
-                )}
-              >
-                <span className={cx('metadata-content')}>{...content}</span>
-
-              </ExpandableSection>
-            )
-          }
-          )}
+            {props.evidence.metadata
+              .map((meta) => {
+                return (
+                  <EvidenceMetadataItem
+                    key={meta.source}
+                    meta={meta}
+                    filterText={props.filterText}
+                    onMetadataEdited={props.onMetadataEdited}
+                    expanded={props.evidence.metadata.length == 1}
+                  />
+                )
+              }
+              )}
+          </>)
+        }
       </div>
     </Form>
+  )
+}
+
+const EvidenceMetadataItem = (props: {
+  meta: EvidenceMetadata
+  filterText: string
+  onMetadataEdited: (metadata: EvidenceMetadata) => void
+  expanded?: boolean
+}) => {
+  const content = highlightSubstring(
+    props.meta.body, props.filterText, cx("content-important"), { regexFlags: "i" }
+  )
+
+  return (
+    <ExpandableSection
+      key={props.meta.source}
+      label={(
+        <ExpandableSectionLabel label={props.meta.source} actions={[{
+          label: 'Edit',
+          action: (e) => {
+            e.stopPropagation()
+            props.onMetadataEdited(props.meta)
+          }
+        }]} />
+      )}
+      initiallyExpanded={props.expanded}
+      labelClassName={cx(
+        (content.length == 1 && props.filterText.length > 0)
+          ? 'label-not-important'
+          : ''
+      )}
+    >
+      <span className={cx('metadata-content')}>{...content}</span>
+    </ExpandableSection>
   )
 }
 
