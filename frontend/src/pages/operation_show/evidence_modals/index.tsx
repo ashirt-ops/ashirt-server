@@ -1,32 +1,46 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import Checkbox from 'src/components/checkbox'
-import FindingChooser from 'src/components/finding_chooser'
-import Form from 'src/components/form'
-import ImageUpload from 'src/components/image_upload'
-import ModalForm from 'src/components/modal_form'
-import Modal from 'src/components/modal'
-import TagChooser from 'src/components/tag_chooser'
-import BinaryUpload from 'src/components/binary_upload'
-import ComboBox from 'src/components/combobox'
-import TagList from 'src/components/tag_list'
-import { CodeBlockEditor } from 'src/components/code_block'
-import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence, Operation, TagDifference, SupportedEvidenceType } from 'src/global_types'
-import { default as Input, TextArea } from 'src/components/input'
-import { useForm, useFormField } from 'src/helpers/use_form'
-import { codeblockToBlob } from 'src/helpers/codeblock_to_blob'
-import { useWiredData } from 'src/helpers'
+import classnames from 'classnames/bind'
+import {
+  Evidence,
+  Finding,
+  Tag,
+  CodeBlock,
+  SubmittableEvidence,
+  Operation,
+  TagDifference,
+  SupportedEvidenceType,
+} from 'src/global_types'
+import {
+  codeblockToBlob,
+  highlightSubstring,
+  useForm,
+  useFormField,
+  useWiredData,
+} from 'src/helpers'
 import {
   createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence,
   getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference,
   moveEvidence,
   createEvidenceMetadata
 } from 'src/services'
-import classnames from 'classnames/bind'
+
+import BinaryUpload from 'src/components/binary_upload'
+import Checkbox from 'src/components/checkbox'
+import { CodeBlockEditor } from 'src/components/code_block'
+import ComboBox from 'src/components/combobox'
 import { ExpandableSection } from 'src/components/expandable_area'
-import { escapeRegExp } from 'lodash'
+import FindingChooser from 'src/components/finding_chooser'
+import Form from 'src/components/form'
+import ImageUpload from 'src/components/image_upload'
+import { default as Input, TextArea } from 'src/components/input'
+import ModalForm from 'src/components/modal_form'
+import Modal from 'src/components/modal'
+import TagChooser from 'src/components/tag_chooser'
+import TagList from 'src/components/tag_list'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 export const CreateEvidenceModal = (props: {
@@ -287,59 +301,6 @@ const TagListRenderer = (props: {
     <div>The following tags will be removed:</div>
     <TagList tags={props.tags} />
   </>)
-}
-
-/**
- * highlightSubstring breaks a given string into words that match the given regex, joined with
- * the rest of the string. This should preserve case.
- * 
- * @example 
- * const result = highlightSubstring("The quick brown fox jumps over the lazy dog.", /the/gi, "highlight")
- * assert( result, [
- *   <span className="highlight">The</span>,
- *   <span> quick brown fox jumps over </span>,
- *   <span className="highlight">the</span>,
- *   <span> lazy dog.</span>,
- * ])
- * 
- * @param s The string with a substring to highlight
- * @param regex What part of the string to match. Must be a global match (/.../g)
- * @param className What class name to apply to the highlighted word
- * @returns An array of spans. Spans will either be plain, or with the given classname.
- */
-const highlightSubstring = (s: string, regexAsStr: string, className: any, options?: { regexFlags: string }): Array<React.ReactNode> => {
-  const rtn: Array<React.ReactNode> = []
-  const matches = [...s.matchAll(new RegExp(escapeRegExp(regexAsStr), "g" + (options?.regexFlags ?? "") ))]
-
-  const endOfWord = (match: RegExpMatchArray) => (match.index ?? 0) + match[0].length
-  const highlight = (v: string) => <span className={className}>{v}</span>
-
-  if (matches.length) {
-    if ((matches[0].index ?? 0) > 0) {
-      rtn.push(<span>{s.substring(0, matches[0].index)}</span>)
-    }
-
-    for (let i = 0; i < matches.length; i++) {
-      const item = matches[i]
-      const next = matches[i + 1]
-      const [value] = item
-      rtn.push(highlight(value))
-      if (next) {
-        const end = endOfWord(item)
-        const startOfNextWord = next.index ?? end
-        if (end != startOfNextWord) {
-          rtn.push(<span>{s.substring(end, startOfNextWord)}</span>)
-        }
-      }
-    }
-    const lastEntry = (matches[matches.length - 1])
-    rtn.push(<span>{s.substring(endOfWord(lastEntry))}</span>)
-  }
-  else {
-    rtn.push(<span>{s}</span>)
-  }
-
-  return rtn
 }
 
 export const ViewEvidenceMetadataModal = (props: {
