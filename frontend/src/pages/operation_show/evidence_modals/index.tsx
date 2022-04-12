@@ -21,7 +21,8 @@ import { useWiredData } from 'src/helpers'
 import {
   createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence,
   getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference,
-  moveEvidence
+  moveEvidence,
+  createEvidenceMetadata
 } from 'src/services'
 import classnames from 'classnames/bind'
 import { ExpandableSection } from 'src/components/expandable_area'
@@ -357,7 +358,7 @@ export const ViewEvidenceMetadataModal = (props: {
   return (
     <ModalForm title="Evidence Metadata" onRequestClose={props.onRequestClose} {...formComponentProps}>
       <div className={cx('view-metadata-root')}>
-        <Input label="filter" {...filterField} />
+        <Input label="Filter Metadata" {...filterField} />
         {props.evidence.metadata
           .map((meta) => {
             const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), {regexFlags: "i"})
@@ -380,6 +381,39 @@ export const ViewEvidenceMetadataModal = (props: {
           }
           )}
       </div>
+    </ModalForm>
+  )
+}
+
+export const AddEvidenceMetadataModal = (props: {
+  operationSlug: string,
+  evidence: Evidence,
+  onRequestClose: () => void,
+  onCreated?: () => void,
+}) => {
+  const sourceField = useFormField<string>("")
+  const contentField = useFormField<string>("")
+  
+  const formComponentProps = useForm({
+    fields: [sourceField, contentField],
+    onSuccess: () => { props.onCreated?.(); props.onRequestClose() },
+    handleSubmit: async() => {
+      if (sourceField.value.trim() == "") {
+        throw new Error("Must specify a source")
+      }
+      return createEvidenceMetadata({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+        source: sourceField.value,
+        body: contentField.value,
+      })
+    },
+  })
+
+  return (
+    <ModalForm title="New Evidence Metadata" submitText="Create" onRequestClose={props.onRequestClose} {...formComponentProps}>
+      <Input label='Source' {...sourceField} />
+      <TextArea label="Content" {...contentField} />
     </ModalForm>
   )
 }

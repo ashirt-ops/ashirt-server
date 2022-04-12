@@ -10,6 +10,7 @@ import {
   ChangeFindingsOfEvidenceModal,
   MoveEvidenceModal,
   ViewEvidenceMetadataModal,
+  AddEvidenceMetadataModal,
 } from '../evidence_modals'
 import { Evidence, ViewName } from 'src/global_types'
 import { RouteComponentProps } from 'react-router-dom'
@@ -39,6 +40,9 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
   ))
   const viewModal = useModal<{ evidence: Evidence }>(modalProps => (
     <ViewEvidenceMetadataModal {...modalProps} />
+  ))
+  const createMetadataModal = useModal<{ evidence: Evidence }>(modalProps => (
+    <AddEvidenceMetadataModal {...modalProps} operationSlug={slug} onCreated={wiredEvidence.reload} />
   ))
   const deleteModal = useModal<{ evidence: Evidence }>(modalProps => (
     <DeleteEvidenceModal {...modalProps} operationSlug={slug} onDeleted={reloadToTop} />
@@ -89,6 +93,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           extraActions={[
             { label: 'Move', act: evidence => moveModal.show({ evidence }) },
             { label: 'Delete', act: evidence => deleteModal.show({ evidence }) },
+            { label: 'Create Metadata', act: evidence => createMetadataModal.show({evidence})}
           ]}
           onQueryUpdate={query => navigate('evidence', query)}
           operationSlug={slug}
@@ -96,7 +101,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
         />
       ))}
 
-      {renderModals(editModal, deleteModal, assignToFindingsModal, moveModal, viewModal)}
+      {renderModals(editModal, deleteModal, assignToFindingsModal, moveModal, viewModal, createMetadataModal)}
     </Layout>
   )
 }
