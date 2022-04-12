@@ -67,6 +67,12 @@ func DatabaseErr(err error) error {
 	return HTTPErr(http.StatusInternalServerError, "Internal service error", err)
 }
 
+// SuggestiveDatabaseErr produces a 500 error, but sets the error message as something hopefully helpful to the user.
+// this should be used sparingly, as it provides hints at what data is in the database.
+func SuggestiveDatabaseErr(helpfulMessage string, err error) error {
+	return HTTPErr(http.StatusInternalServerError, helpfulMessage, err)
+}
+
 // UploadErr provides an error for issues encountered while writing to the store
 func UploadErr(err error) error {
 	return HTTPErr(http.StatusInternalServerError, "The upload action could not be completed. Please try again.", err)
