@@ -44,6 +44,7 @@ export interface DataSource {
 
   listEvidence(ids: OpSlug, query: string): Promise<Array<dtos.Evidence>>
   createEvidence(ids: OpSlug, formData: FormData): Promise<void>
+  createEvidenceMetadata(ids: OpSlug & EvidenceUuid, payload: { source: string, body: string }): Promise<void>
   readEvidenceContent(ids: OpSlug & EvidenceUuid): Promise<string>
   updateEvidence(ids: OpSlug & EvidenceUuid, formData: FormData): Promise<void>
   deleteEvidence(ids: OpSlug & EvidenceUuid, payload: { deleteAssociatedFindings: boolean }): Promise<void>
