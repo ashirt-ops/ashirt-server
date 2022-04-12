@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -9,7 +9,6 @@ import {
   DeleteEvidenceModal,
   ChangeFindingsOfEvidenceModal,
   MoveEvidenceModal,
-  ViewEvidenceMetadataModal,
   AddEvidenceMetadataModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
@@ -94,7 +93,6 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           extraActions={[
             { label: 'Move', act: evidence => moveModal.show({ evidence }) },
             { label: 'Delete', act: evidence => deleteModal.show({ evidence }) },
-            { label: 'Create Metadata', act: evidence => createMetadataModal.show({ evidence }) }
           ]}
           onQueryUpdate={query => navigate('evidence', query)}
           operationSlug={slug}
