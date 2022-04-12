@@ -4,7 +4,7 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export const ExpandableSection = (props: {
   children: React.ReactNode
-  label: string
+  label: React.ReactNode
   className?: string
   initiallyExpanded?: boolean
   onExpanded?: (expanded: boolean)=>void
