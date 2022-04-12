@@ -37,6 +37,7 @@ func DeleteEvidence(ctx context.Context, db *database.Connection, contentStore c
 			tx.Exec(sq.Expr("DELETE findings FROM findings INNER JOIN evidence_finding_map ON findings.id = evidence_finding_map.finding_id WHERE evidence_id = ?", evidence.ID))
 		}
 		tx.Delete(sq.Delete("evidence_finding_map").Where(sq.Eq{"evidence_id": evidence.ID}))
+		tx.Delete(sq.Delete("evidence_metadata").Where(sq.Eq{"evidence_id": evidence.ID}))
 		tx.Delete(sq.Delete("evidence").Where(sq.Eq{"id": evidence.ID}))
 	})
 	if err != nil {
