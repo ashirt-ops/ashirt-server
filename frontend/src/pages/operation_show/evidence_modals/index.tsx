@@ -40,6 +40,7 @@ import ModalForm from 'src/components/modal_form'
 import Modal from 'src/components/modal'
 import TagChooser from 'src/components/tag_chooser'
 import TagList from 'src/components/tag_list'
+import TabMenu from 'src/components/tabs'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -322,7 +323,7 @@ export const ViewEvidenceMetadataModal = (props: {
         <Input label="Filter Metadata" {...filterField} />
         {props.evidence.metadata
           .map((meta) => {
-            const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), {regexFlags: "i"})
+            const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), { regexFlags: "i" })
 
             return (
               <ExpandableSection
@@ -354,11 +355,11 @@ export const AddEvidenceMetadataModal = (props: {
 }) => {
   const sourceField = useFormField<string>("")
   const contentField = useFormField<string>("")
-  
+
   const formComponentProps = useForm({
     fields: [sourceField, contentField],
     onSuccess: () => { props.onCreated?.(); props.onRequestClose() },
-    handleSubmit: async() => {
+    handleSubmit: async () => {
       if (sourceField.value.trim() == "") {
         throw new Error("Must specify a source")
       }
@@ -376,5 +377,112 @@ export const AddEvidenceMetadataModal = (props: {
       <Input label='Source' {...sourceField} />
       <TextArea label="Content" {...contentField} />
     </ModalForm>
+  )
+}
+
+const AddEvidenceMetadataForm = (props: {
+  operationSlug: string,
+  evidence: Evidence,
+  onCreated: () => void,
+  onCancel?: () => void,
+}) => {
+  const sourceField = useFormField<string>("")
+  const contentField = useFormField<string>("")
+
+  const formComponentProps = useForm({
+    fields: [sourceField, contentField],
+    onSuccess: () => props.onCreated(),
+    handleSubmit: async () => {
+      if (sourceField.value.trim() == "") {
+        throw new Error("Must specify a source")
+      }
+      return createEvidenceMetadata({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+        source: sourceField.value,
+        body: contentField.value,
+      })
+    },
+  })
+  return (
+    <Form submitText="Create" {...formComponentProps} onCancel={props.onCancel}>
+      <Input label='Source' {...sourceField} />
+      <TextArea label="Content" {...contentField} />
+    </Form>
+  )
+}
+
+const ViewEvidenceMetadataForm = (props: {
+  evidence: Evidence,
+  onCancel?: () => void,
+}) => {
+  const filterField = useFormField<string>("")
+  const initiallyExpanded = props.evidence.metadata.length == 1
+
+  const formComponentProps = useForm({
+    fields: [filterField],
+    onSuccess: () => { },
+    handleSubmit: async () => { },
+  })
+  return (
+    <Form {...formComponentProps} onCancel={props.onCancel}>
+      <div className={cx('view-metadata-root')}>
+        <Input label="Filter Metadata" {...filterField} />
+        {props.evidence.metadata
+          .map((meta) => {
+            const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), { regexFlags: "i" })
+
+            return (
+              <ExpandableSection
+                key={meta.source}
+                label={meta.source}
+                initiallyExpanded={initiallyExpanded}
+                labelClassName={cx(
+                  (content.length == 1 && filterField.value.length > 0)
+                    ? 'label-not-important'
+                    : ''
+                )}
+              >
+                <span className={cx('metadata-content')}>{...content}</span>
+
+              </ExpandableSection>
+            )
+          }
+          )}
+      </div>
+    </Form>
+  )
+}
+
+export const EvidenceMetadataModal = (props: {
+  operationSlug: string,
+  evidence: Evidence,
+  onRequestClose: () => void,
+  onUpdated: () => void,
+}) => {
+
+  return (
+    <Modal title='Evidence Metadata' onRequestClose={props.onRequestClose}>
+      <TabMenu className={cx('tab-menu')}
+        tabs={[
+          {
+            id: 'view', label: 'View', content: (
+              <ViewEvidenceMetadataForm evidence={props.evidence} />
+            )
+          },
+          {
+            id: 'create',
+            label: 'Create',
+            content: (
+              <AddEvidenceMetadataForm
+                evidence={props.evidence}
+                onCreated={() => {props.onUpdated(); props.onRequestClose()}}
+                operationSlug={props.operationSlug}
+              />
+            )
+          },
+        ]}
+      />
+    </Modal>
   )
 }
