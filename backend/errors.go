@@ -164,7 +164,7 @@ func DisabledUserError() error {
 
 // PanicedError represents any error the occurs
 func PanicedError() error {
-	return HTTPErr(http.StatusInternalServerError, "An unknown error occurred", errors.New("Pancied during processing"))
+	return HTTPErr(http.StatusInternalServerError, "An unknown error occurred", errors.New("pancied during processing"))
 }
 
 // InvalidTOTPErr provides an error for users that provide an invalid TOTP passcode
