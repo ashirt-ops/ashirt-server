@@ -127,6 +127,7 @@ func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request)
 	return ah.sessionStore.Delete(w, r)
 }
 
+// UserAuthData is a small structure capturing data relevant to a user for authentication purposes
 type UserAuthData struct {
 	UserID             int64   `db:"user_id"`
 	UserKey            string  `db:"user_key"`
@@ -217,6 +218,8 @@ func (ah AShirtAuthBridge) FindUserByEmail(email string, includeDeleted bool) (m
 	return userRecord, nil
 }
 
+// CheckIfUserEmailTaken attempts to find an account with the provided email. If found, returns true,
+// otherwise, returns false. Note that if the user found is the one with the ID matching allowUserID, then false is returned.
 func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, allowUserID int64, includeDeleted bool) (bool, error) {
 	user, err := ah.FindUserByEmail(email, includeDeleted)
 	if err == nil {
