@@ -48,7 +48,7 @@ export default () => {
 
   const doNavigate = (view: ViewName, query: string) => {
     let path = `/operations/${operationSlug}/${view}`
-    if (query != ''){
+    if (query != '') {
       path += `?q=${encodeURIComponent(query.trim())}`
     }
     navigate(path)
