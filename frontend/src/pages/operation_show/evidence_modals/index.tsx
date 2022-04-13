@@ -413,6 +413,7 @@ const EditEvidenceMetadataForm = (props: {
 }) => (
   <EvidenceMetadataEditorForm
     metadata={props.metadata}
+    readonlySource
     submitText="Save"
     onSubmit={(metadata: EvidenceMetadata) => {
       return updateEvidenceMetadata({
@@ -458,62 +459,11 @@ const EvidenceMetadataEditorForm = (props: {
       onCancel={props.onCancel}
       cancelText="Cancel"
     >
-      <Input label='Source' readOnly={props.readonlySource} {...sourceField} />
+      <Input label={'Source'+(props.readonlySource ? ' (locked)' : '')} readOnly={props.readonlySource} {...sourceField} />
       <TextArea label="Content" {...contentField} />
     </Form>
   )
 }
-
-// const ViewEvidenceMetadataForm = (props: {
-//   evidence: Evidence,
-//   onMetadataEdited: (metadata: EvidenceMetadata) => void
-//   onCancel?: () => void,
-// }) => {
-//   const filterField = useFormField<string>("")
-//   const initiallyExpanded = props.evidence.metadata.length == 1
-
-//   const formComponentProps = useForm({
-//     fields: [filterField],
-//     onSuccess: () => { },
-//     handleSubmit: async () => { },
-//   })
-//   return (
-//     <Form {...formComponentProps} onCancel={props.onCancel}>
-//       <div className={cx('view-metadata-root')}>
-//         <Input label="Filter Metadata" {...filterField} />
-//         {props.evidence.metadata
-//           .map((meta) => {
-//             const content = highlightSubstring(meta.body, filterField.value, cx("content-important"), { regexFlags: "i" })
-
-//             return (
-//               <ExpandableSection
-//                 key={meta.source}
-//                 label={<ExpandableSectionLabel label={meta.source} actions={[
-//                   {
-//                     label: 'Edit',
-//                     action: (e) => {
-//                       e.stopPropagation()
-//                       props.onMetadataEdited(meta)
-//                     }
-//                   }
-//                 ]} />}
-//                 initiallyExpanded={initiallyExpanded}
-//                 labelClassName={cx(
-//                   (content.length == 1 && filterField.value.length > 0)
-//                     ? 'label-not-important'
-//                     : ''
-//                 )}
-//               >
-//                 <span className={cx('metadata-content')}>{...content}</span>
-
-//               </ExpandableSection>
-//             )
-//           }
-//           )}
-//       </div>
-//     </Form>
-//   )
-// }
 
 const ViewEvidenceMetadataForm = (props: {
   evidence: Evidence,
