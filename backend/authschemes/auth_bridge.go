@@ -227,13 +227,13 @@ func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, allowUserID int64
 			return false, nil
 		}
 		return true, nil
-	} else {
-		trueErr, ok := err.(*backend.HTTPError)
-		if ok && trueErr.WrappedError == sql.ErrNoRows {
-			return false, nil
-		}
-		return false, err
 	}
+
+	trueErr, ok := err.(*backend.HTTPError)
+	if ok && trueErr.WrappedError == sql.ErrNoRows {
+		return false, nil
+	}
+	return false, err
 }
 
 // FindUserAuthsByUserEmail retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail for NON-DELETED accounts.
