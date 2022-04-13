@@ -10,6 +10,8 @@ import (
 )
 
 var (
+	// ErrorDeprecated is an error that indicates a feature is deprecated. This would normally not
+	// be used directly, but instead used to verify that a returned error is of "type" ErrorDeprecated
 	ErrorDeprecated error = errors.New("warning: deprecated")
 )
 
@@ -178,6 +180,8 @@ func FirstError(errs ...error) error {
 	return nil
 }
 
+// DeprecationWarning generates a wrapped error, with the given message and the underlying error as
+// ErrorDeprecated
 func DeprecationWarning(message string) error {
 	return WrapError(message, ErrorDeprecated)
 }
