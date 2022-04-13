@@ -76,7 +76,7 @@ export default () => {
       <Route exact path="/operations/:slug/edit/:view(settings|users|tags)">
         <AsyncOperationEdit />
       </Route>
-      <Route from="/operations/:slug/edit" render={(props: RouteComponentProps<{ slug: string }>) => (
+      <Route path="/operations/:slug/edit" render={(props: RouteComponentProps<{ slug: string }>) => (
         <Redirect to={`/operations/${props.match.params.slug}/edit/settings`} />
       )} />
 
@@ -101,7 +101,7 @@ export default () => {
           return <Redirect to={`/operations/${slug}/evidence?q=uuid%3A${uuid}`} />
         }
       } />
-      <Route from="/operations/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
+      <Route path="/operations/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
         <Redirect to={`/operations/${props.match.params.slug}/evidence`} />
       )} />
 
@@ -109,7 +109,7 @@ export default () => {
       <Route exact path="/account/:view(profile|security|apikeys|authmethods)">
         <AsyncAccountSettings />
       </Route>
-      <Route exact from="/account" render={() => <Redirect to="/account/profile" />} />
+      <Route exact path="/account" render={() => <Redirect to="/account/profile" />} />
 
       {isSuperAdmin && (
         // For some reason, we can't navigate to this route directly -- only through page links
@@ -119,7 +119,7 @@ export default () => {
       )}
       {isSuperAdmin && (
         // For some reason, we can't navigate to this route directly -- only through page links
-        <Route exact from="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
+        <Route exact path="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
           <Redirect to={`/account/profile/${props.match.params.slug}`} />
         )} />
       )}
@@ -131,7 +131,7 @@ export default () => {
         </Route>
       )}
       {isSuperAdmin && (
-        <Route from="/admin/" render={() => <Redirect to="/admin/users" />} />
+        <Route path="/admin/" render={() => <Redirect to="/admin/users" />} />
       )}
 
       <Route><AsyncNotFound /></Route>
