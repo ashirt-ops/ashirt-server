@@ -8,14 +8,15 @@ import classnames from 'classnames/bind'
 import {ChangeEvidenceOfFindingModal, RemoveEvidenceFromFindingModal, EditFindingModal, DeleteFindingModal} from '../finding_modals'
 import {EditEvidenceModal} from '../evidence_modals'
 import {Evidence, Finding} from 'src/global_types'
-import {RouteComponentProps} from 'react-router-dom'
+import {useHistory, useParams} from 'react-router-dom'
 import {default as Button, ButtonGroup} from 'src/components/button'
 import {getFinding} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
-  const {slug, uuid} = props.match.params
+export default () => {
+  const { slug, uuid } = useParams<{ slug: string, uuid: string }>()
+  const history = useHistory()
   const wiredFinding = useWiredData(React.useCallback(() => getFinding({
     operationSlug: slug,
     findingUuid: uuid,
@@ -34,7 +35,7 @@ export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
     <EditFindingModal {...modalProps} onEdited={reloadToTop} operationSlug={slug} />
   ))
   const deleteFindingModal = useModal<{finding: Finding}>(modalProps => (
-    <DeleteFindingModal {...modalProps} onDeleted={() => props.history.push(`/operations/${slug}/findings`)} operationSlug={slug} />
+    <DeleteFindingModal {...modalProps} onDeleted={() => history.push(`/operations/${slug}/findings`)} operationSlug={slug} />
   ))
   const editEvidenceModal = useModal<{evidence: Evidence}>(modalProps => (
     <EditEvidenceModal {...modalProps} onEdited={ ()=>{
@@ -51,7 +52,7 @@ export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
       <div className={cx('root')}>
         <div className={cx('finding-info')}>
           <div className={cx('actions')}>
-            <Button small className={cx('left')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
+            <Button small className={cx('left')} icon={require('./back.svg')} onClick={history.goBack}>Back</Button>
             <ButtonGroup className={cx('right')}>
               <Button small onClick={() => addRemoveEvidenceModal.show({ finding, initialEvidence: evidence })}>Add/Remove Evidence</Button>
               <Button small onClick={() => editFindingModal.show({ finding })}>Edit</Button>
@@ -74,7 +75,7 @@ export default (props: RouteComponentProps<{slug: string, uuid: string}>) => {
                 act: evidence => editEvidenceModal.show({ evidence })
               },
             ]}
-            onQueryUpdate={query => props.history.push(`/operations/${slug}/evidence?q=${encodeURIComponent(query.trim())}`)}
+            onQueryUpdate={query => history.push(`/operations/${slug}/evidence?q=${encodeURIComponent(query.trim())}`)}
             operationSlug={slug}
             query=""
           />

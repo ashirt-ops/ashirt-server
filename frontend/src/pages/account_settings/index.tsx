@@ -4,7 +4,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { RouteComponentProps } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { UserOwnView } from 'src/global_types'
 import { getUser } from 'src/services'
 import { useWiredData } from 'src/helpers'
@@ -17,8 +17,8 @@ import Security from './security'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: RouteComponentProps<{ slug: string }>) => {
-  const forUser = props.match.params.slug
+export default () => {
+  const {slug: forUser} = useParams<{ slug: string }>()
   const wiredProfile = useWiredData<UserOwnView>(React.useCallback(() => getUser({ userSlug: forUser }), [forUser]))
 
   const bus = BuildReloadBus()
@@ -44,7 +44,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
           {forUser &&
             <em className={cx('notice')}>Editing the profile of: <em className={cx('editing-user-name')}>{`${p.firstName} ${p.lastName}`}</em></em>
           }
-          <NavVerticalTabMenu title="Account Settings" {...props} tabs={tabs} />
+          <NavVerticalTabMenu title="Account Settings" tabs={tabs} />
         </>)
       })}
     </div>
