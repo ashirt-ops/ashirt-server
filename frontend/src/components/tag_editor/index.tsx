@@ -14,7 +14,6 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 import Tag from 'src/components/tag'
 import { DeleteDefaultTagModal, DeleteOperationTagModal, UpsertOperationTagModal, UpsertDefaultTagModal } from './modals'
 
-// @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
 import { useHistory } from 'react-router-dom'
 
 const cx = classnames.bind(require('./stylesheet'))

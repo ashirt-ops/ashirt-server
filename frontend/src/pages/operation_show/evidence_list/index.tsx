@@ -6,13 +6,16 @@ import Layout from '../layout'
 import Timeline from 'src/components/timeline'
 import { EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal, MoveEvidenceModal } from '../evidence_modals'
 import { Evidence, ViewName } from 'src/global_types'
-import { RouteComponentProps } from 'react-router-dom'
+import { useHistory, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 
-export default (props: RouteComponentProps<{ slug: string }>) => {
-  const { slug } = props.match.params
-  const query: string = new URLSearchParams(props.location.search).get('q') || ''
+export default () => {
+  const { slug } = useParams<{ slug: string }>()
+  const location = useLocation()
+  const history = useHistory()
+
+  const query: string = new URLSearchParams(location.search).get('q') || ''
   const [lastEditedUuid, setLastEditedUuid] = React.useState("")
 
   const wiredEvidence = useWiredData(React.useCallback(() => getEvidenceList({
@@ -45,7 +48,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
   const navigate = (view: ViewName, query: string) => {
     let path = `/operations/${slug}/${view}`
     if (query != '') path += `?q=${encodeURIComponent(query.trim())}`
-    props.history.push(path)
+    history.push(path)
   }
 
   return (

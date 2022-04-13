@@ -4,7 +4,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { TagByEvidenceDate, Tag as TagType } from 'src/global_types'
-import { RouteComponentProps } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format, addDays } from 'date-fns'
 import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
@@ -15,14 +15,12 @@ import WithLabel from 'src/components/with_label'
 import { default as Timeline, TimelineHeaders, DateHeader } from 'react-calendar-timeline'
 import { ReactCalendarItemRendererProps, ReactCalendarGroupRendererProps } from 'react-calendar-timeline'
 
-// @ts-ignore - npm package @types/react-router-dom needs to be updated (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/40131)
-import { useHistory } from 'react-router-dom'
 import SettingsSection from 'src/components/settings_section'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: RouteComponentProps<{ slug: string }>) => {
-  const { slug } = props.match.params
+export default () => {
+  const { slug } = useParams<{ slug: string }>()
   const history = useHistory()
   const [disabledTags, setDisabledTags] = React.useState<{ [key: string]: boolean }>({})
 
@@ -30,7 +28,7 @@ export default (props: RouteComponentProps<{ slug: string }>) => {
 
   return (
     <>
-      <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => props.history.goBack()}>Back</Button>
+      <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => history.goBack()}>Back</Button>
       <SettingsSection title="Operation Overview" width="full-width">
         <div className={cx('preamble')}>
           <div >

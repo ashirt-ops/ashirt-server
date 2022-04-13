@@ -3,7 +3,6 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { RouteComponentProps } from 'react-router-dom'
 
 import AuthTable from './auth_table'
 import HeadlessButton from './add_headless'
@@ -21,12 +20,12 @@ import { TagPorter } from './tag_porter'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: RouteComponentProps) => {
+export default () => {
   const bus = BuildReloadBus()
 
   return (
     <div className={cx('root')}>
-      <NavVerticalTabMenu {...props}
+      <NavVerticalTabMenu
         title="Admin Tools"
         tabs={[
           {
