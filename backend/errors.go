@@ -101,7 +101,10 @@ func BadAuthErr(err error) error { return HTTPErr(http.StatusForbidden, "Forbidd
 // UserRequiresAdditionalAuthenticationErr is a helper for authschemes that need to redirect a user to a custom handler component
 // on the frontend after a login attempt
 func UserRequiresAdditionalAuthenticationErr(reason string) error {
-	return HTTPErr(http.StatusPreconditionFailed, reason, fmt.Errorf("User requires additional auth: %s", reason))
+	return HTTPErr(http.StatusPreconditionFailed, reason,
+		//lint:ignore ST1005 Returned directly to the frontend for render
+		fmt.Errorf("User requires additional auth: %s", reason),
+	)
 }
 
 // InvalidPasswordErr provides an error for users that supply the wrong password.
@@ -155,6 +158,7 @@ func IsErrorAccountDisabled(err error) bool {
 
 // DisabledUserError is a version of AccountDisabled that returns an error, rather than an API Error
 func DisabledUserError() error {
+	//lint:ignore ST1005 Returned directly to the frontend for render
 	return errors.New("This account has been disabled. Please contact an adminstrator if you think this is an error.")
 }
 
