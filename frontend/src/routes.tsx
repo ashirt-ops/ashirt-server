@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
+import { Route, Routes, Navigate, useParams, generatePath } from 'react-router-dom'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -22,120 +22,74 @@ const AsyncAdminSettings = makeAsyncPage(() => import('src/pages/admin'))
 const AsyncAccountSettings = makeAsyncPage(() => import('src/pages/account_settings'))
 const AsyncNotFound = makeAsyncPage(() => import('src/pages/not_found'))
 
+function Redirect(props: {
+  to: string
+}) {
+  const params = useParams()
+  return <Navigate to={generatePath(props.to, params)} replace />
+}
+
 export default () => {
   const user = React.useContext(AuthContext).user
   const isSuperAdmin = useUserIsSuperAdmin()
 
   if (user == null) return (
-    <Switch>
-      <Route exact path="/login" >
-        <AsyncLogin />
+    <Routes>
+      <Route path="/login" element={<AsyncLogin />} />
+      <Route path="/login/:schemeCode" element={<AsyncLogin />} />
+      <Route path="/autherror/*" >
+        <Route index element={<Redirect to="/login" />} />
+        <Route path="recoveryfailed" element={<AuthRecoveryFailed />} />
+        <Route path="noaccess" element={<AuthNoAccess />} />
+        <Route path="noverify" element={<AuthNoVerify />} />
+        <Route path="incomplete" element={<AuthIncomplete />} />
+        <Route path="disabled" element={<AuthDisabled />} />
+        <Route path="registrationdisabled" element={<AuthNoRegistration />} />
       </Route>
-      <Route exact path="/login/:schemeCode">
-        <AsyncLogin />
-      </Route>
-
-      <Route exact path="/autherror/recoveryfailed">
-        <AuthRecoveryFailed />
-      </Route>
-      <Route exact path="/autherror/noaccess">
-        <AuthNoAccess />
-      </Route>
-      <Route exact path="/autherror/noverify">
-        <AuthNoVerify />
-      </Route>
-      <Route exact path="/autherror/incomplete">
-        <AuthIncomplete />
-      </Route>
-      <Route exact path="/autherror/disabled">
-        <AuthDisabled />
-      </Route>
-      <Route exact path="/autherror/registrationdisabled">
-        <AuthNoRegistration />
-      </Route>
-
-      <Route render={() => <Redirect to="/login" />} />
-    </Switch>
+      <Route path="*" element={<Redirect to="/login" />} />
+    </Routes>
   )
 
   return (
-    <Switch>
-      <Route exact path="/login" render={() => <Redirect to="/operations" />} />
-      <Route exact path="/" render={() => <Redirect to="/operations" />} />
+    <Routes>
+      <Route path="/login" element={<Redirect to="/operations" />} />
+      <Route path="/" element={<Redirect to="/operations" />} />
 
-      {/* AuthError routes that an admin might reach if testing */}
-      <Route exact path="/autherror/recoveryfailed">
-        <NoAccess />
+      <Route path="/operations/*">
+        <Route index element={<AsyncOperationList />} />
+        <Route path=":slug/*" >
+          <Route index element={<Redirect to={`evidence`} />} />
+          <Route path="evidence" element={<AsyncEvidenceList />} />
+          <Route path="evidence/:uuid" element={<Redirect to={`../evidence?q=uuid%3A:uuid`} />} />
+          {/* ^^^ we need to do ../evidence because .. points to :slug, while . points to evidence/:uuid */}
+          <Route path="findings" element={<AsyncFindingList />} />
+          <Route path="findings/:uuid" element={<AsyncFindingShow />} />
+          <Route path="edit/*">
+            <Route index element={<Redirect to={`settings`} />} />
+            <Route path="*" element={<AsyncOperationEdit />} />
+          </Route>
+          <Route path="overview" element={<AsyncOperationOverview />} />
+        </Route>
       </Route>
-
-      <Route exact path="/operations" >
-        <AsyncOperationList />
-      </Route>
-
-      {/* Operation edit */}
-      <Route exact path="/operations/:slug/edit/:view(settings|users|tags)">
-        <AsyncOperationEdit />
-      </Route>
-      <Route path="/operations/:slug/edit" render={(props: RouteComponentProps<{ slug: string }>) => (
-        <Redirect to={`/operations/${props.match.params.slug}/edit/settings`} />
-      )} />
-
-      {/* Operation overview */}
-      <Route exact path="/operations/:slug/overview" >
-        <AsyncOperationOverview />
-      </Route>
-
-      {/* Operation show */}
-      <Route exact path="/operations/:slug/findings" >
-        <AsyncFindingList />
-      </Route>
-      <Route exact path="/operations/:slug/findings/:uuid" >
-        <AsyncFindingShow />
-      </Route>
-      <Route exact path="/operations/:slug/evidence">
-        <AsyncEvidenceList />
-      </Route>
-      <Route exact path="/operations/:slug/evidence/:uuid" render={
-        (props: RouteComponentProps<{ slug: string, uuid: string }>) => {
-          const { slug, uuid } = props.match.params
-          return <Redirect to={`/operations/${slug}/evidence?q=uuid%3A${uuid}`} />
-        }
-      } />
-      <Route path="/operations/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
-        <Redirect to={`/operations/${props.match.params.slug}/evidence`} />
-      )} />
 
       {/* Account Settings */}
-      <Route exact path="/account/:view(profile|security|apikeys|authmethods)">
-        <AsyncAccountSettings />
+      <Route path="/account/*" >
+        <Route index element={<Redirect to="profile" />} />
+        <Route path="*" element={<AsyncAccountSettings />} />
       </Route>
-      <Route exact path="/account" render={() => <Redirect to="/account/profile" />} />
-
-      {isSuperAdmin && (
-        // For some reason, we can't navigate to this route directly -- only through page links
-        <Route exact path="/account/:view(profile|apikeys|authmethods)/:slug">
-          <AsyncAccountSettings />
-        </Route>
-      )}
-      {isSuperAdmin && (
-        // For some reason, we can't navigate to this route directly -- only through page links
-        <Route exact path="/account/edit/:slug" render={(props: RouteComponentProps<{ slug: string }>) => (
-          <Redirect to={`/account/profile/${props.match.params.slug}`} />
-        )} />
-      )}
 
       {/* Admin Settings */}
       {isSuperAdmin && (
-        <Route exact path="/admin/:view(users|operations|authdata|findings|tags)">
-          <AsyncAdminSettings />
+        <Route path="/admin/*" >
+          <Route index element={<Redirect to="users" />} />
+          <Route path="*" element={<AsyncAdminSettings />} />
         </Route>
       )}
-      {isSuperAdmin && (
-        <Route path="/admin/" render={() => <Redirect to="/admin/users" />} />
-      )}
 
-      <Route><AsyncNotFound /></Route>
-    </Switch>
+      {/* AuthError routes that an admin might reach if testing */}
+      <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
+      <Route path="*" element={<AsyncNotFound />} />
+    </Routes >
   )
 }
 

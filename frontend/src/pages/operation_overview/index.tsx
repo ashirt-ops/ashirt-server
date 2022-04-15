@@ -1,10 +1,10 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { TagByEvidenceDate, Tag as TagType } from 'src/global_types'
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds, format, addDays } from 'date-fns'
 import { getTagsByEvidenceUsage } from 'src/services'
 import { useWiredData } from 'src/helpers'
@@ -21,14 +21,15 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
   const { slug } = useParams<{ slug: string }>()
-  const history = useHistory()
+  const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
+  const navigate = useNavigate()
   const [disabledTags, setDisabledTags] = React.useState<{ [key: string]: boolean }>({})
 
-  const wiredTags = useWiredData(React.useCallback(() => getTagsByEvidenceUsage({ operationSlug: slug }), [slug]))
+  const wiredTags = useWiredData(React.useCallback(() => getTagsByEvidenceUsage({ operationSlug }), [operationSlug]))
 
   return (
     <>
-      <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => history.goBack()}>Back</Button>
+      <Button className={cx('back-button')} icon={require('./back.svg')} onClick={() => navigate(-1)}>Back</Button>
       <SettingsSection title="Operation Overview" width="full-width">
         <div className={cx('preamble')}>
           <div >
@@ -43,53 +44,53 @@ export default () => {
             Clicking on the upper heading will zoom out and provide a bigger picture view.
           </div>
         </div>
-      {wiredTags.render(tags => {
-        if (tags.length == 0) {
+        {wiredTags.render(tags => {
+          if (tags.length == 0) {
+            return (
+              <>
+                <div className={cx('no-content')}>
+                  This operation does not have any tagged evidence. Tag existing evidence, or create
+                  new evidence with tags to enable this feature.
+                </div>
+              </>
+            )
+          }
+
+          const { groups, items, firstDate, lastDate, itemRenderer, groupRenderer, timeChangeHandler } = prepTimelineRender(tags)
+
+          const filteredGroups = groups.filter(group => !disabledTags[group.title])
+
           return (
             <>
-              <div className={cx('no-content')}>
-                This operation does not have any tagged evidence. Tag existing evidence, or create
-                new evidence with tags to enable this feature.
-              </div>
+              <TagList tags={tags} onStateChange={(data) => {
+                setDisabledTags(data)
+              }} />
+              <Timeline
+                groups={filteredGroups}
+                items={items}
+                defaultTimeStart={firstDate}
+                defaultTimeEnd={lastDate}
+                canMove={false}
+                canResize={false}
+                itemRenderer={itemRenderer}
+                onTimeChange={timeChangeHandler}
+                groupRenderer={groupRenderer}
+                minZoom={1000 * 60 * 60 * 24 * 30} // restrict zoom to 1 day max
+                onItemClick={(itemId, evt, time) => {
+                  const item = items.filter(someItem => someItem.id == itemId)[0]
+                  const tag = tags.filter(someTag => someTag.id == item.group)[0]
+                  const ymd = (d: Date) => format(d, "yyyy-MM-dd")
+                  navigate(`/operations/${operationSlug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
+                }}
+              >
+                <TimelineHeaders  >
+                  <DateHeader unit="primaryHeader" />
+                  <DateHeader />
+                </TimelineHeaders>
+              </Timeline>
             </>
           )
-        }
-
-        const { groups, items, firstDate, lastDate, itemRenderer, groupRenderer, timeChangeHandler } = prepTimelineRender(tags)
-
-        const filteredGroups = groups.filter(group => !disabledTags[group.title])
-
-        return (
-          <>
-            <TagList tags={tags} onStateChange={(data) => {
-              setDisabledTags(data)
-            }} />
-            <Timeline
-              groups={filteredGroups}
-              items={items}
-              defaultTimeStart={firstDate}
-              defaultTimeEnd={lastDate}
-              canMove={false}
-              canResize={false}
-              itemRenderer={itemRenderer}
-              onTimeChange={timeChangeHandler}
-              groupRenderer={groupRenderer}
-              minZoom={1000 * 60 * 60 * 24 * 30} // restrict zoom to 1 day max
-              onItemClick={(itemId, evt, time) => {
-                const item = items.filter(someItem => someItem.id == itemId)[0]
-                const tag = tags.filter(someTag => someTag.id == item.group)[0]
-                const ymd = (d: Date) => format(d, "yyyy-MM-dd")
-                history.push(`/operations/${slug}/evidence?q=tag:${tag.name} range:${ymd(item.start_time)},${ymd(item.end_time)}`)
-              }}
-            >
-              <TimelineHeaders  >
-                <DateHeader unit="primaryHeader" />
-                <DateHeader />
-              </TimelineHeaders>
-            </Timeline>
-          </>
-        )
-      })}
+        })}
 
       </SettingsSection>
     </>

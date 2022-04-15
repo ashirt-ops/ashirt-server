@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { EventEmitter } from 'events'
@@ -34,4 +34,17 @@ export const BuildReloadBus = () => {
       bus.removeAllListeners()
     }
   }
+}
+
+type Runnable = () => void
+type ListenerFunc = (listener: () => void) => void
+
+export type BusSupportedService = {
+  requestReload: Runnable
+  onReload: ListenerFunc
+  offReload: ListenerFunc
+  reloadDone: Runnable
+  onReloadDone: ListenerFunc
+  offReloadDone: ListenerFunc
+  clean: Runnable
 }

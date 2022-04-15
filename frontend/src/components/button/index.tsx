@@ -62,7 +62,11 @@ export const NavLinkButton = (props: ButtonStyle & {
   icon?: string,
   to: string,
 }) => (
-  <NavLink exact={props.exact} className={cx('root', props.className, styleToClassname(props))} to={props.to} activeClassName={cx('active')}>
+  <NavLink
+    end={props.exact}
+    className={({isActive}) => cx('root', props.className, styleToClassname(props), isActive ? "active" : null)}
+    to={props.to}
+  >
     <div className={cx('children')}>
       {props.icon && <img src={props.icon} />}
       <span>{props.children}</span>
