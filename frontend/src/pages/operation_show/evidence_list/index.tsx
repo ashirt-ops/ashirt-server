@@ -85,10 +85,6 @@ export default () => {
               act: evidence => editModal.show({ evidence }),
             },
             {
-              label: "Metadata",
-              act: evidence => viewModal.show({ evidence }),
-            },
-            {
               label: "Assign Findings",
               act: evidence => assignToFindingsModal.show({ evidence }),
             },
@@ -96,6 +92,7 @@ export default () => {
           extraActions={[
             { label: 'Move', act: evidence => moveModal.show({ evidence }) },
             { label: 'Delete', act: evidence => deleteModal.show({ evidence }) },
+            { label: "Metadata", act: evidence => viewModal.show({ evidence }) },
           ]}
           onQueryUpdate={query => doNavigate('evidence', query)}
           operationSlug={operationSlug}
