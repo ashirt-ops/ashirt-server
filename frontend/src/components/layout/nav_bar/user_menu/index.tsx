@@ -1,16 +1,17 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import AuthContext from 'src/auth_context'
+import {useNavigate} from 'react-router-dom'
+
 import classnames from 'classnames/bind'
+import {logout} from 'src/services'
 import {ClickPopover} from 'src/components/popover'
 import {default as Menu, MenuItem, MenuSeparator} from 'src/components/menu'
-import {logout} from 'src/services'
 import {useUserIsSuperAdmin} from 'src/helpers'
-const cx = classnames.bind(require('./stylesheet'))
 
-import {useHistory} from 'react-router-dom'
+const cx = classnames.bind(require('./stylesheet'))
 
 const Avatar = (props: {
   url: string,
@@ -28,7 +29,7 @@ const UserMenuDropdown = (props: {
   name: string,
   avatar: string,
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const isSuperAdmin = useUserIsSuperAdmin()
 
   return (
@@ -38,8 +39,8 @@ const UserMenuDropdown = (props: {
         {props.name}
       </div>
       <MenuSeparator />
-      <MenuItem icon={require('./settings.svg')} onClick={() => history.push('/account/profile')}>Account Settings</MenuItem>
-      {isSuperAdmin && <MenuItem icon={require('./admin.svg')} onClick={() => history.push('/admin')}>Admin</MenuItem>}
+      <MenuItem icon={require('./settings.svg')} onClick={() => navigate('/account/profile')}>Account Settings</MenuItem>
+      {isSuperAdmin && <MenuItem icon={require('./admin.svg')} onClick={() => navigate('/admin')}>Admin</MenuItem>}
       <MenuItem icon={require('./power.svg')} onClick={logoutAndRedirect}>Sign Out</MenuItem>
     </Menu>
   )

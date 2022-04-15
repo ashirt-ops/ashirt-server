@@ -1,9 +1,9 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate, Routes, Route } from 'react-router-dom'
 
 import Button from 'src/components/button'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
@@ -14,30 +14,42 @@ import DeleteOperationButton from './delete_operation_button'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default () => {
+export const OperationEdit = () => {
   const { slug } = useParams<{ slug: string }>()
-  const history = useHistory()
+  const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
+  const navigate = useNavigate()
 
   return (
     <>
       <Button
         className={cx('back-button')}
         icon={require('./back.svg')}
-        onClick={history.goBack}>
+        onClick={() => navigate(-1)}>
         Back
       </Button>
       <NavVerticalTabMenu
         title="Edit Operation"
         tabs={[
-          {
-            id: "settings", label: "Settings", content: <>
-              <OperationEditor operationSlug={slug} />
-              <DeleteOperationButton operationSlug={slug} />
-            </>
-          },
-          { id: "users", label: "Users", content: <UserPermissionEditor operationSlug={slug} /> },
-          { id: "tags", label: "Tags", content: <TagEditor operationSlug={slug} /> },
-        ]} />
+          { id: "settings", label: "Settings" },
+          { id: "users", label: "Users" },
+          { id: "tags", label: "Tags" },
+        ]} >
+        <Routes>
+          <Route path="settings" element={<SettingManagement operationSlug={operationSlug} />} />
+          <Route path="users" element={<UserPermissionEditor operationSlug={operationSlug} />} />
+          <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
+        </Routes>
+      </NavVerticalTabMenu>
     </>
   )
+}
+export default OperationEdit
+
+const SettingManagement = (props: {
+  operationSlug: string
+}) => {
+  return (<>
+    <OperationEditor {...props} />
+    <DeleteOperationButton {...props} />
+  </>)
 }

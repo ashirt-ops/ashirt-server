@@ -1,11 +1,11 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import Button from 'src/components/button'
 import classnames from 'classnames/bind'
 import {ClickPopover} from 'src/components/popover'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 const cx = classnames.bind(require('./stylesheet'))
 
 // Usage:
@@ -23,19 +23,25 @@ export default (props: {
     </ul>
   )
 
-// NavListItem is a version of ListItem that sets and relies on the document.location.pathname to determine
-// selectedness
+// NavListItem is a version of ListItem that sets and relies on the react-router location.pathname
+// to determine selectedness
 export const NavListItem = (props: {
-  name: string,
-  exact?: boolean,
+  name: string
   to: string
-}) => (
-    <li className={cx({ selected: (document.location.pathname === props.to) })}>
-      <NavLink exact={props.exact} to={props.to} >
+  exact?: boolean
+  query?: Record<string, string>
+}) => {
+  const location = useLocation()
+  const query = props.query === undefined ? "" : `?${new URLSearchParams(props.query).toString()}`
+
+  return (
+    <li className={cx({ selected: (location.pathname.endsWith(`/${props.to}`)) })}>
+      <NavLink end={props.exact} to={props.to + query}>
         {props.name}
       </NavLink>
     </li>
   )
+}
 
 export const ListItem = (props: {
   name: string,

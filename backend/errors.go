@@ -10,6 +10,8 @@ import (
 )
 
 var (
+	// ErrorDeprecated is an error that indicates a feature is deprecated. This would normally not
+	// be used directly, but instead used to verify that a returned error is of "type" ErrorDeprecated
 	ErrorDeprecated error = errors.New("warning: deprecated")
 )
 
@@ -105,7 +107,10 @@ func BadAuthErr(err error) error { return HTTPErr(http.StatusForbidden, "Forbidd
 // UserRequiresAdditionalAuthenticationErr is a helper for authschemes that need to redirect a user to a custom handler component
 // on the frontend after a login attempt
 func UserRequiresAdditionalAuthenticationErr(reason string) error {
-	return HTTPErr(http.StatusPreconditionFailed, reason, fmt.Errorf("User requires additional auth: %s", reason))
+	return HTTPErr(http.StatusPreconditionFailed, reason,
+		//lint:ignore ST1005 Returned directly to the frontend for render
+		fmt.Errorf("User requires additional auth: %s", reason),
+	)
 }
 
 // InvalidPasswordErr provides an error for users that supply the wrong password.
@@ -159,12 +164,13 @@ func IsErrorAccountDisabled(err error) bool {
 
 // DisabledUserError is a version of AccountDisabled that returns an error, rather than an API Error
 func DisabledUserError() error {
+	//lint:ignore ST1005 Returned directly to the frontend for render
 	return errors.New("This account has been disabled. Please contact an adminstrator if you think this is an error.")
 }
 
 // PanicedError represents any error the occurs
 func PanicedError() error {
-	return HTTPErr(http.StatusInternalServerError, "An unknown error occurred", errors.New("Pancied during processing"))
+	return HTTPErr(http.StatusInternalServerError, "An unknown error occurred", errors.New("pancied during processing"))
 }
 
 // InvalidTOTPErr provides an error for users that provide an invalid TOTP passcode
@@ -184,6 +190,8 @@ func FirstError(errs ...error) error {
 	return nil
 }
 
+// DeprecationWarning generates a wrapped error, with the given message and the underlying error as
+// ErrorDeprecated
 func DeprecationWarning(message string) error {
 	return WrapError(message, ErrorDeprecated)
 }

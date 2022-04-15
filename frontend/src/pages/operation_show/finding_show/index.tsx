@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -8,7 +8,7 @@ import classnames from 'classnames/bind'
 import {ChangeEvidenceOfFindingModal, RemoveEvidenceFromFindingModal, EditFindingModal, DeleteFindingModal} from '../finding_modals'
 import {EditEvidenceModal} from '../evidence_modals'
 import {Evidence, Finding} from 'src/global_types'
-import {useHistory, useParams} from 'react-router-dom'
+import {useNavigate, useParams} from 'react-router-dom'
 import {default as Button, ButtonGroup} from 'src/components/button'
 import {getFinding} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
@@ -16,11 +16,15 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
   const { slug, uuid } = useParams<{ slug: string, uuid: string }>()
-  const history = useHistory()
+  // useParams puts everything in a partial, so our type above doesn't matter.
+  const operationSlug = slug!
+  const findingUuid = uuid!
+
+  const navigate = useNavigate()
   const wiredFinding = useWiredData(React.useCallback(() => getFinding({
-    operationSlug: slug,
-    findingUuid: uuid,
-  }), [slug, uuid]))
+    operationSlug,
+    findingUuid,
+  }), [operationSlug, findingUuid]))
   const [lastEditedUuid, setLastEditedUuid] = React.useState("")
 
   const reloadToTop = () => {
@@ -29,22 +33,22 @@ export default () => {
   }
 
   const addRemoveEvidenceModal = useModal<{finding: Finding, initialEvidence: Array<Evidence>}>(modalProps => (
-    <ChangeEvidenceOfFindingModal {...modalProps} onChanged={reloadToTop} operationSlug={slug} />
+    <ChangeEvidenceOfFindingModal {...modalProps} onChanged={reloadToTop} operationSlug={operationSlug} />
   ))
   const editFindingModal = useModal<{finding: Finding}>(modalProps => (
-    <EditFindingModal {...modalProps} onEdited={reloadToTop} operationSlug={slug} />
+    <EditFindingModal {...modalProps} onEdited={reloadToTop} operationSlug={operationSlug} />
   ))
   const deleteFindingModal = useModal<{finding: Finding}>(modalProps => (
-    <DeleteFindingModal {...modalProps} onDeleted={() => history.push(`/operations/${slug}/findings`)} operationSlug={slug} />
+    <DeleteFindingModal {...modalProps} onDeleted={() => navigate(`/operations/${operationSlug}/findings`)} operationSlug={operationSlug} />
   ))
   const editEvidenceModal = useModal<{evidence: Evidence}>(modalProps => (
     <EditEvidenceModal {...modalProps} onEdited={ ()=>{
       setLastEditedUuid(modalProps.evidence.uuid)
       wiredFinding.reload()
-    }} operationSlug={slug} />
+    }} operationSlug={operationSlug} />
   ))
   const removeEvidenceFromFindingModal = useModal<{evidence: Evidence, finding: Finding}>(modalProps => (
-    <RemoveEvidenceFromFindingModal {...modalProps} onRemoved={reloadToTop} operationSlug={slug} />
+    <RemoveEvidenceFromFindingModal {...modalProps} onRemoved={reloadToTop} operationSlug={operationSlug} />
   ))
 
   return <>
@@ -52,7 +56,7 @@ export default () => {
       <div className={cx('root')}>
         <div className={cx('finding-info')}>
           <div className={cx('actions')}>
-            <Button small className={cx('left')} icon={require('./back.svg')} onClick={history.goBack}>Back</Button>
+            <Button small className={cx('left')} icon={require('./back.svg')} onClick={() => navigate(-1)}>Back</Button>
             <ButtonGroup className={cx('right')}>
               <Button small onClick={() => addRemoveEvidenceModal.show({ finding, initialEvidence: evidence })}>Add/Remove Evidence</Button>
               <Button small onClick={() => editFindingModal.show({ finding })}>Edit</Button>
@@ -75,8 +79,8 @@ export default () => {
                 act: evidence => editEvidenceModal.show({ evidence })
               },
             ]}
-            onQueryUpdate={query => history.push(`/operations/${slug}/evidence?q=${encodeURIComponent(query.trim())}`)}
-            operationSlug={slug}
+            onQueryUpdate={query => navigate(`/operations/${operationSlug}/evidence?q=${encodeURIComponent(query.trim())}`)}
+            operationSlug={operationSlug}
             query=""
           />
         </div>

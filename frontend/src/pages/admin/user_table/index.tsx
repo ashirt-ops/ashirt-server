@@ -1,8 +1,9 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
+import { useNavigate } from 'react-router-dom'
 import { usePaginatedWiredData } from 'src/helpers'
 
 import { UserAdminView } from 'src/global_types'
@@ -25,8 +26,6 @@ import { default as Menu, MenuItem } from 'src/components/menu'
 import { ClickPopover } from 'src/components/popover'
 import Input from 'src/components/input'
 
-import { useHistory } from 'react-router-dom'
-
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
@@ -40,11 +39,11 @@ export default (props: {
   const [recoveryCode, setRecoveryCode] = React.useState<null | string>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
   const self = React.useContext(AuthContext).user
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
-  const editUserFn = (u: UserAdminView) => history.push(`/account/edit/${u.slug}`)
+  const editUserFn = (u: UserAdminView) => navigate(`/account/profile?user=${u.slug}`)
   const recoverFn = (u: UserAdminView) => createRecoveryCode({ userSlug: u.slug }).then(setRecoveryCode)
   const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", editUserFn, setResettingPassword, setEditingUserFlags, setDeletingUser, recoverFn, setDeletingTotp)
   const columns = Object.keys(rowBuilder(null, <span />))

@@ -1,9 +1,10 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { chunk } from 'lodash'
+import { useNavigate } from 'react-router-dom'
 import { DefaultTag, Tag as TagType, TagWithUsage } from 'src/global_types'
 import { useModal, renderModals } from 'src/helpers'
 
@@ -14,7 +15,6 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 import Tag from 'src/components/tag'
 import { DeleteDefaultTagModal, DeleteOperationTagModal, UpsertOperationTagModal, UpsertDefaultTagModal } from './modals'
 
-import { useHistory } from 'react-router-dom'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -23,7 +23,7 @@ export const OperationTagTable = (props: {
   tags: Array<TagWithUsage>,
   onUpdate: () => void,
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const editTagModal = useModal<{ tag?: TagWithUsage }>(modalProps => (
     <UpsertOperationTagModal {...modalProps} operationSlug={props.operationSlug} onEdited={props.onUpdate} />
   ))
@@ -45,7 +45,7 @@ export const OperationTagTable = (props: {
         onUpdate={props.onUpdate}
         onDeleteClick={tag => deleteTagModal.show({ tag })}
         onEditClick={tag => editTagModal.show({ tag })}
-        onTagClick={tag => history.push(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)}
+        onTagClick={tag => navigate(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)}
         onCreateClick={() => editTagModal.show({})}
       />
       {renderModals(editTagModal, deleteTagModal)}
