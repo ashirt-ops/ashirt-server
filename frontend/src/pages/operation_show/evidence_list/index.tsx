@@ -43,10 +43,10 @@ export default () => {
     }} />
   ))
   const viewModal = useModal<{ evidence: Evidence }>(modalProps => (
-    <EvidenceMetadataModal {...modalProps} operationSlug={slug} onUpdated={wiredEvidence.reload} />
+    <EvidenceMetadataModal {...modalProps} operationSlug={operationSlug} onUpdated={wiredEvidence.reload} />
   ))
   const createMetadataModal = useModal<{ evidence: Evidence }>(modalProps => (
-    <AddEvidenceMetadataModal {...modalProps} operationSlug={slug} onCreated={wiredEvidence.reload} />
+    <AddEvidenceMetadataModal {...modalProps} operationSlug={operationSlug} onCreated={wiredEvidence.reload} />
   ))
   const deleteModal = useModal<{ evidence: Evidence }>(modalProps => (
     <DeleteEvidenceModal {...modalProps} operationSlug={operationSlug} onDeleted={reloadToTop} />
