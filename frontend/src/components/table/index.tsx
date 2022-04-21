@@ -1,9 +1,13 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
+
+export * from './error_row'
+export * from './loading_row'
+export * from './spanned_row'
 
 export const SortAsc = 'asc'
 export const SortDesc = 'desc'
