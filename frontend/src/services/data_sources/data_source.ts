@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as dtos from './dtos/dtos'
@@ -11,6 +11,7 @@ type UserSlug = { userSlug: string }
 type QueryId = { queryId: number }
 type TagId = { tagId: number }
 type FindingCategoryId = { findingCategoryId: number }
+type ServiceWorkerId = { serviceWorkerId: number }
 
 type FindingPayload = {
   category: string,
@@ -27,6 +28,11 @@ type UserPayload = {
 type TagPayload = {
   name: string,
   colorName: string
+}
+
+type ServiceWorkerPayload = {
+  name: string
+  config: string
 }
 
 export interface DataSource {
@@ -97,6 +103,11 @@ export interface DataSource {
   updateDefaultTag(ids: TagId, payload: TagPayload): Promise<void>
   deleteDefaultTag(ids: TagId): Promise<void>
   mergeDefaultTags(payload: Array<TagPayload>): Promise<void>
+
+  adminListServiceWorkers(): Promise<Array<dtos.ServiceWorker>>
+  adminCreateServiceWorker(payload: ServiceWorkerPayload): Promise<void>
+  adminUpdateServiceWorker(ids: ServiceWorkerId, payload: ServiceWorkerPayload): Promise<void>
+  adminDeleteServiceWorker(ids: ServiceWorkerId): Promise<void>
 
   // TODO these should go into their respective authschemes:
   createRecoveryCode(ids: UserSlug): Promise<{ code: string }>

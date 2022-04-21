@@ -171,3 +171,10 @@ type CreateUserOutput struct {
 	RealSlug string `json:"slug"`
 	UserID   int64  `json:"-"` // don't transmit the userid
 }
+
+type ServiceWorker struct {
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Config  string `json:"config"`
+	Deleted bool   `json:"deleted"`
+}

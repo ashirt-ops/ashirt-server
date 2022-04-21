@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 export type Result<T> =
@@ -244,4 +244,11 @@ export type FindingCategory = {
   category: string,
   deleted: boolean,
   usageCount: number,
+}
+
+export type ServiceWorker = {
+  id: number,
+  name: string,
+  config: string,
+  deleted: boolean,
 }
