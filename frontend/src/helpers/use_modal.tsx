@@ -37,6 +37,7 @@ type OnRequestClose = {
 
 export function useModal<ModalProps>(
   modalRenderer: (modalProps: ModalProps & OnRequestClose) => React.ReactNode,
+  onClose?: () => void
 ): UseModalOutput<ModalProps> {
   const [modal, setModal] = React.useState<(ModalProps & OnRequestClose) | null>(null)
   const hide = () => { setModal(null) }
@@ -44,7 +45,12 @@ export function useModal<ModalProps>(
   return {
     node: modal == null ? null : modalRenderer(modal),
     show(modalProps: ModalProps) {
-      setModal({ ...modalProps, onRequestClose: hide })
+      setModal({
+        ...modalProps, onRequestClose: () => {
+          hide()
+          onClose?.()
+        }
+      })
     },
   }
 }

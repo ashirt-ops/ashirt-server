@@ -13,6 +13,8 @@ import OperationsTable from './operations_table'
 import FindingCategoriesTable from "./finding_categories_table"
 import RecoveryMetrics from './recovery_metrics'
 import UserTable from './user_table'
+import ServiceWorkerTable from './service_worker_table'
+import AddServiceWorker from './service_worker_table/add_service_button'
 
 import { BuildReloadBus, BusSupportedService } from 'src/helpers/reload_bus'
 import { DefaultTagEditor } from './default_tag_editor'
@@ -35,6 +37,7 @@ export const AdminTools = () => {
             { id: "operations", label: "Operation Management" },
             { id: "tags", label: "Tag Management" },
             { id: "findings", label: "Finding Categories" },
+            { id: "services", label: "Service Workers" },
           ]}
         >
           <Routes>
@@ -43,11 +46,11 @@ export const AdminTools = () => {
             <Route path="operations" element={<OperationsTable />} />
             <Route path="tags" element={<TagManagement {...bus} />} />
             <Route path="findings" element={<FindingCategoriesTable />} />
+            <Route path="services" element={<ServiceWorkers {...bus}/>} />
           </Routes>
         </NavVerticalTabMenu>
       </div>
     </>
-
   )
 }
 
@@ -73,5 +76,12 @@ const AuthOverview = () => (
   <>
     <AuthTable />
     <RecoveryMetrics />
+  </>
+)
+
+const ServiceWorkers = (props: BusSupportedService) => (
+  <>
+    <ServiceWorkerTable {...props} />
+    <AddServiceWorker {...props} />
   </>
 )
