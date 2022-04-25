@@ -393,7 +393,13 @@ As mentioned above, other services can iteract with the system, under the guise 
 
 The backend has a system to send emails out to notify users (with an email address) as needed. Currently, this system is only used to send account recovery emails. An email server will be needed, but stmp services can be configured via environment variables.
 
-Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`. 
+Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`.
+
+### Evidence Metadata Enrichment
+
+The evidence pipeline enables external services to perform special processing on evidence, and have the result of that processing stored a metadata for that evidence. For example an OCR function might analyze an image, search for words in that image, and return those words. That data would then become searchable/reviewable within the evidence and finding timelines.
+
+The details for this service are detailed in `pipeline_readme.md`
 
 ## Development Overview
 
@@ -605,3 +611,41 @@ TBD
 ## License
 
 TBD
+
+
+## Text-based Content
+
+All text based content has the following structure. Note that currently, we only support one kind of text based content -- codeblocks.
+
+### General Text Definition
+
+```ts
+{
+  "contentType": string, // this currently only supports "codeblock" types, but more may be added in the future
+  "contentSubtype": string,
+  "metadata": Record<string, string>, // this is an object with string keys, and string values. Optional
+  "content": string
+}
+```
+
+### Codeblock Definition
+
+```ts
+{
+  "contentType": "codeblock",
+  "contentSubtype": string, // there are several possibilities. See frontend/src/components/code_block_supported_languages.ts for a complete list
+  "metadata": {
+    "source": striong // where the file was found. Optional
+  },
+  "content": string // this is the actual data
+}
+```
+
+
+THOUGHTS:
+* Use worker's api key to send HMAC message to the worker
+  * Worker would need to be associated with a particular account
+    * We would need to update the UI to both mention that workers require a specific account, _and_ that create those headless accounts when adding new tools. We probably also want to flag these special accounts in the user menu
+    * Would need to consider key rotation here
+  * Talk to Joe about this
+
