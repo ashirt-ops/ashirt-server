@@ -10,6 +10,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/enhancementservices"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -28,6 +29,12 @@ type UpdateServiceWorkerInput struct {
 	Name        string
 	ServiceType string
 	Config      string
+}
+
+type RunServiceWorkerInput struct {
+	OperationSlug string
+	EvidenceUUID  string
+	WorkerName    string
 }
 
 type DeleteServiceWorkerInput struct {
@@ -116,6 +123,21 @@ func DeleteServiceWorker(ctx context.Context, db *database.Connection, i DeleteS
 	if err != nil {
 		return backend.WrapError("Could not delete the service worker", backend.DatabaseErr(err))
 	}
+
+	return nil
+}
+
+func RunServiceWorker(ctx context.Context, db *database.Connection, i RunServiceWorkerInput) error {
+	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
+	if err != nil {
+		return backend.WrapError("Unable to run service worker", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unable to run service worker", backend.UnauthorizedWriteErr(err))
+	}
+
+	enhancementservices.RunSetOfServiceWorkers(db, []string{i.WorkerName}, evidence.ID)
 
 	return nil
 }
