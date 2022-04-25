@@ -54,6 +54,18 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.CreateOperation(r.Context(), db, i)
 	}))
 
+	route(r, "GET", "/api/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ReadEvidenceInput{
+			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ReadEvidence(r.Context(), db, contentStore, i)
+	}))
+
 	route(r, "POST", "/api/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
 		i := services.CreateEvidenceInput{
