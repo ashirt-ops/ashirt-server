@@ -50,12 +50,16 @@ type Evidence struct {
 }
 
 type EvidenceMetadata struct {
-	ID         int64      `db:"id"`
-	EvidenceID int64      `db:"evidence_id"`
-	Source     string     `db:"source"`
-	Body       string     `db:"body"`
-	CreatedAt  time.Time  `db:"created_at"`
-	UpdatedAt  *time.Time `db:"updated_at"`
+	ID             int64      `db:"id"`
+	EvidenceID     int64      `db:"evidence_id"`
+	Source         string     `db:"source"`
+	Body           string     `db:"body"`
+	Status         *string    `db:"status"`
+	LastRunMessage *string    `db:"last_run_message"`
+	CanProcess     *bool      `db:"can_process"`
+	CreatedAt      time.Time  `db:"created_at"`
+	WorkStartedAt  *time.Time `db:"work_started_at"`
+	UpdatedAt      *time.Time `db:"updated_at"`
 }
 
 // EvidenceFindingMap reflects the structure of the database table 'evidence_finding_map'
@@ -192,10 +196,10 @@ type DefaultTag struct {
 }
 
 type ServiceWorker struct {
-	ID          int64      `db:"id"`
-	Name        string     `db:"name"`
-	Config      string     `db:"config"`
-	CreatedAt   time.Time  `db:"created_at"`
-	UpdatedAt   *time.Time `db:"updated_at"`
-	DeletedAt   *time.Time `db:"deleted_at"`
+	ID        int64      `db:"id"`
+	Name      string     `db:"name"`
+	Config    string     `db:"config"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at"`
 }
