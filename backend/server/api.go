@@ -97,11 +97,16 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 
 	route(r, "PUT", "/api/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
-		i := services.EditEvidenceMetadataInput{
-			OperationSlug: dr.FromURL("operation_slug").AsString(),
-			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
-			Source:        dr.FromBody("source").Required().AsString(),
-			Body:          dr.FromBody("body").Required().AsString(),
+		i := services.UpsertEvidenceMetadataInput{
+			EditEvidenceMetadataInput: services.EditEvidenceMetadataInput{
+				OperationSlug: dr.FromURL("operation_slug").AsString(),
+				EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+				Source:        dr.FromBody("source").Required().AsString(),
+				Body:          dr.FromBody("body").Required().AsString(),
+			},
+			Status:     dr.FromBody("status").Required().AsString(),
+			Message:    dr.FromBody("message").AsStringPtr(),
+			CanProcess: dr.FromBody("canProcess").AsBoolPtr(),
 		}
 		return nil, services.UpsertEvidenceMetadata(r.Context(), db, i)
 	}))
