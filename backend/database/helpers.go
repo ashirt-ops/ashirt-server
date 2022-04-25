@@ -50,8 +50,20 @@ func (c *Connection) Exec(query string, values ...interface{}) error {
 // the table to insert into as well as a map of columnName : columnValue. Also assumes that
 // created_at and updated_at columns exist (And are updated with the current time)
 // Returns the inserted record id, or an error if the insert fails
-func (c *Connection) Insert(tableName string, valueMap map[string]interface{}) (int64, error) {
+func (c *Connection) Insert(tableName string, valueMap map[string]interface{}, onDuplicates ...interface{}) (int64, error) {
 	ins := prepInsert(tableName, valueMap)
+
+	if len(onDuplicates) > 0 {
+		stmt, ok := onDuplicates[0].(string)
+		if !ok {
+			return -1, fmt.Errorf("onDuplicate[0] value must be a string")
+		}
+		if len(onDuplicates) > 1 {
+			ins = ins.Suffix(stmt, onDuplicates[1:]...)
+		} else {
+			ins = ins.Suffix(stmt)
+		}
+	}
 
 	result, err := c.execSquirrel(ins)
 	if err != nil {
@@ -101,7 +113,7 @@ func (c *Connection) BatchInsert(tableName string, count int, mapFn func(int) ma
 			return fmt.Errorf("onDuplicate[0] value must be a string")
 		}
 		if len(onDuplicates) > 1 {
-			query = query.Suffix(stmt, onDuplicates[1:])
+			query = query.Suffix(stmt, onDuplicates[1:]...)
 		} else {
 			query = query.Suffix(stmt)
 		}
