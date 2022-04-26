@@ -1,0 +1,30 @@
+{
+  "include": ["**/*.ts", "**/*.js", "test/**/*.json", ".eslintrc.js"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "target": "es2020",
+    "strict": true,
+    "declarationMap": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "moduleResolution": "node",
+    "downlevelIteration": true,
+    "preserveSymlinks": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "composite": true,
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "plugins": []
+  }
+}
