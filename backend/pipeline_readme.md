@@ -54,7 +54,6 @@ Web services, like all pipelien services, must define their configuration to ASh
   "version": 1,
   "url": string,
   "headers": Record<string, string> | undefined // Optional
-  "authType": string, // Indicates the type of authentication to perform. Different authentications may require additional configurations
 }
 ```
 
@@ -144,7 +143,7 @@ If processing fails, then respond with:
   ```ts
   {
       "action": "error",
-      "content": string, // Optional. If specified, recorded as the error encountered
+      "content": string | undefined, // Optional. If specified, recorded as the error encountered
   }
   ```
 
@@ -179,7 +178,7 @@ The vast majority of API calls are JSON requests.
 Headers:
 
 * `Content-Type`: `application/json`
-* `Date`: now, in `GMT`, in RFC1123 format (note: must be `GMT`, not `UTC`). e.g: `Sun, 21 Oct 2018 12:16:24 GMT`
+* `Date`: now, in `GMT`, in RFC1123 format (note: must be `GMT`, not `UTC`). e.g: `Sun, 21 Oct 2018 12:16:24 GMT` (Also known as RFC7231)
 * `Authorization`: HMAC. See below
 
 Authorization is accomplished by constructing an HMAC message. You can find a Golang version in `signer/hmac.go`, in the BuildRequestHMAC function. Likewise, there is a C++ version in AShirt [here](https://github.com/theparanoids/ashirt/blob/main/src/helpers/netman.h#L105-L123) (See the `generateHash` method if the link rusts). However, the process is fairly straight forward, and detailed here:
@@ -218,9 +217,9 @@ function generateAuthorizationHeaderValue(data: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' // more methods with a similar naming style are possible
     path: string
     date: string // in RFC1123 format
-    body: Buffer
+    body: string
     accessKey: string
-    secretKey: string
+    secretKey: Buffer
 }) {
   const stringBuff = Buffer.from(
     data.method + "\n" +
@@ -258,6 +257,12 @@ const result = generateAuthorizationHeaderValue({
 console.log(result)
 // expected output:
 // P4qRS5sa346iHWZBB53qzzNm:RlbnBDbg5hj/foncSzOnfDWOCrTapyaL7fqKxkcCsFE=
+
+// ================== Small helper to format the date in the right way
+import { formatRFC7231 } from 'date-fns'
+export function nowInRFC1123(): string {
+  return formatRFC7231(new Date())
+}
 ```
 
 </details>
