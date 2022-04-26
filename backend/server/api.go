@@ -5,6 +5,7 @@ package server
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -64,6 +65,26 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		return services.ReadEvidence(r.Context(), db, contentStore, i)
+	}))
+
+	route(r, "GET", "/api/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
+		dr := dissectNoBodyRequest(r)
+		i := services.ReadEvidenceInput{
+			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			LoadPreview:   dr.FromURL("type").AsString() == "preview",
+			LoadMedia:     dr.FromURL("type").AsString() == "media",
+		}
+
+		evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
+		if err != nil {
+			return nil, backend.WrapError("Unable to read evidence", err)
+		}
+
+		if i.LoadPreview {
+			return evidence.Preview, nil
+		}
+		return evidence.Media, nil
 	}))
 
 	route(r, "POST", "/api/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
