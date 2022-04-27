@@ -3,9 +3,6 @@ package helpers
 import (
 	"io"
 	"net/http"
-	"time"
-
-	"github.com/theparanoids/ashirt-server/signer"
 )
 
 var client = &http.Client{}
@@ -27,18 +24,12 @@ func MakeJSONRequest(method, url string, body io.Reader, updateRequest ModifyReq
 	return client.Do(req)
 }
 
-func AddAShirtHMAC(req *http.Request, accessKey string, secretKey []byte) error {
-	req.Header.Set("Date", time.Now().In(time.FixedZone("GMT", 0)).Format(time.RFC1123))
-	authorization, err := signer.BuildClientRequestAuthorization(req, accessKey, secretKey)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", authorization)
-	return nil
-}
-
 func AddHeaders(req *http.Request, headers map[string]string) {
 	for k, v := range headers {
 		req.Header.Add(k, v)
 	}
+}
+
+func NoMod(req *http.Request) error {
+	return nil
 }
