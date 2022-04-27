@@ -38,6 +38,7 @@ func (w *webConfigV1Worker) Build(workerName string, evidenceID int64, workerCon
 		return err
 	}
 	w.Config = webConfig
+	w.EvidenceID = evidenceID
 	return nil
 }
 
