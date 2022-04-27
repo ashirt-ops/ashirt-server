@@ -22,7 +22,7 @@ type BasicServiceWorkerConfig struct {
 
 type ServiceWorker interface {
 	Build(workerName string, evidenceID int64, config []byte) error
-	Test() (string, error)
+	Test() (string, bool, error)
 	Process(payload *Payload) (*models.EvidenceMetadata, error)
 }
 

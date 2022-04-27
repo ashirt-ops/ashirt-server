@@ -41,35 +41,35 @@ func (w *webConfigV1Worker) Build(workerName string, evidenceID int64, workerCon
 	return nil
 }
 
-func (w *webConfigV1Worker) Test() (string, error) {
+func (w *webConfigV1Worker) Test() (string, bool, error) {
 	body := []byte(`{"type": "test"}`)
 	resp, err := helpers.MakeJSONRequest("POST", w.Config.URL, bytes.NewReader(body), func(req *http.Request) error {
 		helpers.AddHeaders(req, w.Config.Headers)
 		return nil
 	})
 	if err != nil {
-		return "Unable to verify worker status", err
+		return "Unable to verify worker status", false, err
 	}
 
 	if resp.StatusCode == http.StatusNoContent {
-		return "Service is functional", nil
+		return "Service is functional", true, nil
 	} else {
 		var parsedData webTestResp
 		if err := json.NewDecoder(resp.Body).Decode(&parsedData); err != nil {
-			return "Unable to parse response", err
+			return "Unable to parse response", false, err
 		}
 		if parsedData.Status == "ok" {
-			return "Service is functional", nil
+			return "Service is functional", true, nil
 		}
 		if parsedData.Status == "error" {
 			if parsedData.Message != nil {
-				return *parsedData.Message, nil
+				return *parsedData.Message, false, nil
 			}
-			return "Service is reporting an error", nil
+			return "Service is reporting an error", false, nil
 		}
 	}
 
-	return "Service did not reply with a supported status", nil
+	return "Service did not reply with a supported status", false, nil
 }
 
 func (w *webConfigV1Worker) Process(payload *Payload) (*models.EvidenceMetadata, error) {
