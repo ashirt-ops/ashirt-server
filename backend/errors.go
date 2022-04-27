@@ -64,6 +64,11 @@ func BadInputErr(err error, reason string) error {
 	return HTTPErr(http.StatusBadRequest, reason, err)
 }
 
+// ServerErr provides a generic error for any error during a request, not covered by a more specific error
+func ServerErr(err error) error {
+	return HTTPErr(http.StatusInternalServerError, "Internal service error", err)
+}
+
 // DatabaseErr provides a generic error for any database access error during a request
 func DatabaseErr(err error) error {
 	return HTTPErr(http.StatusInternalServerError, "Internal service error", err)
