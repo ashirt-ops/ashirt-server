@@ -141,3 +141,34 @@ func RunServiceWorker(ctx context.Context, db *database.Connection, i RunService
 
 	return nil
 }
+
+func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWorkerID int64) (*dtos.ServiceWorkerTestOutput, error) {
+	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
+		return nil, backend.WrapError("Insufficient access to test a service worker", backend.UnauthorizedReadErr(err))
+	}
+
+	var worker models.ServiceWorker
+	err := db.Get(&worker, sq.Select("*").
+		From("service_workers").Where(sq.Eq{"id": serviceWorkerID}),
+	)
+
+	if err != nil {
+		return nil, backend.WrapError("Unable to find worker", backend.DatabaseErr(err))
+	}
+
+	message, working, err := enhancementservices.TestServiceWorker(worker)
+
+	if err != nil {
+		return nil, backend.ServerErr(err)
+	}
+
+	result := dtos.ServiceWorkerTestOutput{
+		ID:      serviceWorkerID,
+		Name:    worker.Name,
+		Live:    working,
+		Message: message,
+	}
+
+	return &result, nil
+}
+

@@ -14,6 +14,23 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
+func TestServiceWorker(workerData models.ServiceWorker) (string, bool, error) {
+	var basicConfig BasicServiceWorkerConfig
+	err := json.Unmarshal([]byte(workerData.Config), &basicConfig)
+	if err != nil {
+		return "", false, err
+	}
+	worker, err := findAppropriateWorker(basicConfig)
+	if err != nil {
+		return "", false, err
+	}
+	if err = worker.Build(workerData.Name, 0, []byte(workerData.Config)); err != nil {
+		return "", false, err
+	}
+
+	return worker.Test()
+}
+
 func RunAllServiceWorkers(db *database.Connection, evidenceID int64) ([]string, []error) {
 	return RunSetOfServiceWorkers(db, []string{}, evidenceID)
 }

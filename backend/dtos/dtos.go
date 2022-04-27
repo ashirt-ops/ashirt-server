@@ -178,3 +178,10 @@ type ServiceWorker struct {
 	Config  string `json:"config"`
 	Deleted bool   `json:"deleted"`
 }
+
+type ServiceWorkerTestOutput struct {
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Live    bool   `json:"live"`
+	Message string `json:"message"`
+}

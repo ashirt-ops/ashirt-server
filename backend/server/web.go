@@ -851,4 +851,13 @@ func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 		}
 		return nil, services.DeleteServiceWorker(r.Context(), db, i)
 	}))
+
+	route(r, "GET", "/admin/services/{id}/test", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		workerID := dr.FromURL("id").AsInt64()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.TestServiceWorker(r.Context(), db, workerID)
+	}))
 }
