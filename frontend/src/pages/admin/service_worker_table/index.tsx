@@ -10,7 +10,7 @@ import {
   useModal,
   useWiredData,
 } from 'src/helpers'
-import { listServiceWorkers } from 'src/services/service_workers'
+import { listServiceWorkers, testServiceWorker } from 'src/services/service_workers'
 
 import SettingsSection from 'src/components/settings_section'
 import {
@@ -97,6 +97,7 @@ function cellOrder(worker?: ServiceWorker, actions?: Actions): Array<string | Re
     worker == undefined ? "Actions" : (
       <ButtonGroup>
         <Button small onClick={() => showEdit(worker)}>Edit</Button>
+        <Button small onClick={async() => await testServiceWorker({id: worker.id})}>Test</Button>
         <Button danger small onClick={() => showDelete(worker)}>Delete</Button>
       </ButtonGroup>
     ),

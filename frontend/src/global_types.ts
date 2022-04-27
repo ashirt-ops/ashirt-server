@@ -252,3 +252,10 @@ export type ServiceWorker = {
   config: string,
   deleted: boolean,
 }
+
+export type ServiceWorkerTestOutput = {
+  id: number,
+  name: string,
+  live: boolean,
+  message: string,
+}

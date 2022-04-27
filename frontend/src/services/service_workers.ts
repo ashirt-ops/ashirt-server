@@ -1,7 +1,7 @@
 // Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { ServiceWorker } from 'src/global_types'
+import { ServiceWorker, ServiceWorkerTestOutput } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function createServiceWorker(i: {
@@ -28,4 +28,10 @@ export async function deleteServiceWorkers(i: {
   id: number
 }): Promise<void> {
   return ds.adminDeleteServiceWorker({ serviceWorkerId: i.id })
+}
+
+export async function testServiceWorker(i: {
+  id: number
+}): Promise<ServiceWorkerTestOutput> {
+  return ds.adminTestServiceWorker({ serviceWorkerId: i.id })
 }
