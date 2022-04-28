@@ -18,11 +18,9 @@ export function addRoutes(app: Express, isDev: boolean) {
     if (isSupportedRequest(body)) {
       switch (body.type) {
         case 'test':
-          handleTestRequest(res)
-          return
+          return handleTestRequest(res)
         case 'process':
-          await handleProcessRequest(body, res, ashirtService)
-          return
+          return await handleProcessRequest(body, res, ashirtService)
         default:
           res.sendStatus(StatusCode.NOT_IMPLEMENTED)
       }
@@ -39,7 +37,7 @@ export function addRoutes(app: Express, isDev: boolean) {
     app.get('/test', async (_: Request, res: Response) => {
       try {
         // const data = await ashirtService.getEvidenceContent("HPSS", "seed_dursleys")
-
+        // res.status(200).send(data)
         await handleProcessRequest({
           contentType: 'image',
           evidenceUuid: 'seed_dursleys',
@@ -47,11 +45,9 @@ export function addRoutes(app: Express, isDev: boolean) {
           type: 'process'
         }, res, ashirtService)
 
-        // res.status(200).send(data)
       }
       catch (err) {
-        console.log(err)
-        res.status(200).send({ oh: "shit" })
+        res.status(200).send({ message: "Test failed", err })
       }
 
     })

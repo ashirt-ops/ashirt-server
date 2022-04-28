@@ -1,5 +1,6 @@
 import { AShirtService } from "src/ashirt"
 import { ProcessRequest } from "src/helpers/request_validation"
+import { default as axios, AxiosError } from 'axios'
 
 export type ProcessResultDTO =
   | ProcessResultNormal
@@ -25,19 +26,31 @@ export const handleActionProcess = async (
   svc: AShirtService
 ): Promise<ProcessResultDTO> => {
 
-  if (body.contentType != 'image') {
+  if (body.contentType !== 'image') {
     return {
       action: 'rejected',
     }
   }
 
-  const resp = await svc.getEvidenceContent(body.operationSlug, body.evidenceUuid)
-  
-  const content = convertToPrettyHex(resp.data)
+  try {
+    const resp = await svc.getEvidenceContent(body.operationSlug, body.evidenceUuid)
+    const content = convertToPrettyHex(resp.data)
 
-  return {
-    action: 'processed',
-    content
+    return {
+      action: 'processed',
+      content
+    }
+  }
+  catch(err: unknown) {
+    const content = axios.isAxiosError(err)
+      ? (err as AxiosError).message
+      : null
+
+    const rtn: ProcessResultNormal = {
+      action: 'error',
+      ...(content ? { content } : {}),
+    }
+    return rtn
   }
 }
 

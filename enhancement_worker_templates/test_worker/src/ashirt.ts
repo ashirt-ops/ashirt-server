@@ -43,10 +43,10 @@ export class AShirtService {
     const respData = resp.data
 
     if (guard && !guard(respData)) {
-        Promise.reject(new Error("Response is not in the right format."))
+      Promise.reject(new Error("Response is not in the right format."))
     }
 
-    const reqResult:ResponseWrapper<T> = {
+    const reqResult: ResponseWrapper<T> = {
       contentType: resp.headers['content-type'],
       responseCode: resp.status,
       data: respData
@@ -77,7 +77,7 @@ export class AShirtService {
     if (sendBody != '') {
       req.data = sendBody
     }
-    if( config.responseType) {
+    if (config.responseType) {
       req.responseType = config.responseType
     }
     return req

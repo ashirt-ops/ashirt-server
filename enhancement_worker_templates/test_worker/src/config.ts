@@ -25,6 +25,6 @@ const loadConfig = (): Config => {
     enableDev: (process.env.ENABLE_DEV ?? "false").toLowerCase() == 'true',
     backendUrl: process.env.ASHIRT_BACKEND_URL ?? "",
     accessKey: process.env.ASHIRT_ACCESS_KEY ?? "",
-    secretKeyB64: process.env.ASHIRT_SECRET_KEY_B64 ?? ""
+    secretKeyB64: process.env.ASHIRT_SECRET_KEY ?? ""
   }
 }
