@@ -175,12 +175,15 @@ func markWorkStarting(db *database.Connection, evidenceID int64, sources []strin
 	now := time.Now()
 	return db.BatchInsert("evidence_metadata", len(sources), func(row int) map[string]interface{} {
 		return map[string]interface{}{
+			"body":             "",
 			"evidence_id":      evidenceID,
 			"source":           sources[row],
 			"status":           "Processing",
 			"work_started_at":  now,
 			"last_run_message": nil,
 		}
+		// Note that ON DUPLICATE does not update the body. this helps preserve the last body
+		// until the work is complete.
 	}, "ON DUPLICATE KEY UPDATE "+
 		"status=VALUES(status),"+
 		"work_started_at=VALUES(work_started_at),"+
