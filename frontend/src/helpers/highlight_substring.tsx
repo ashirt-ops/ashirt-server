@@ -19,8 +19,17 @@ import { escapeRegExp } from 'lodash'
  * @param className What class name to apply to the highlighted word
  * @returns An array of spans. Spans will either be plain, or with the given classname.
  */
-export const highlightSubstring = (s: string, regexAsStr: string, className: any, options?: { regexFlags: string }): Array<React.ReactNode> => {
+export const highlightSubstring = (s: string, regexAsStr: string, className: any,
+  options?: {
+    regexFlags?: string
+    minLength?: number
+  }
+): Array<React.ReactNode> => {
   const rtn: Array<React.ReactNode> = []
+  if (s === "" || regexAsStr.length < (options?.minLength ?? 1)) {
+    return [<span>{s}</span>]
+  }
+
   const matches = [...s.matchAll(new RegExp(escapeRegExp(regexAsStr), "g" + (options?.regexFlags ?? "")))]
 
   const endOfWord = (match: RegExpMatchArray) => (match.index ?? 0) + match[0].length

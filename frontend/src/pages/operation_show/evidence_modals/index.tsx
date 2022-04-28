@@ -510,13 +510,13 @@ const EvidenceMetadataItem = (props: {
   onMetadataEdited: (metadata: EvidenceMetadata) => void
   expanded?: boolean
 }) => {
+  const minLength = 3
   const content = highlightSubstring(
-    props.meta.body, props.filterText, cx("content-important"), { regexFlags: "i" }
+    props.meta.body, props.filterText, cx("content-important"), { regexFlags: "i", minLength }
   )
 
   return (
     <ExpandableSection
-      key={props.meta.source}
       label={(
         <ExpandableSectionLabel label={props.meta.source} actions={[{
           label: 'Edit',
@@ -528,7 +528,7 @@ const EvidenceMetadataItem = (props: {
       )}
       initiallyExpanded={props.expanded}
       labelClassName={cx(
-        (content.length == 1 && props.filterText.length > 0)
+        (content.length == 1 && props.filterText.length >= minLength)
           ? 'label-not-important'
           : ''
       )}
