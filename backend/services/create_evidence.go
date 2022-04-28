@@ -13,6 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/enhancementservices"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 )
@@ -75,9 +76,10 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 	}
 
 	evidenceUUID := uuid.New().String()
+	var evidenceID int64
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
-		evidenceID, _ := tx.Insert("evidence", map[string]interface{}{
+		evidenceID, _ = tx.Insert("evidence", map[string]interface{}{
 			"uuid":            evidenceUUID,
 			"description":     i.Description,
 			"content_type":    i.ContentType,
@@ -98,6 +100,11 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 	if err != nil {
 		return nil, backend.WrapError("Could not create evidence and tags", backend.DatabaseErr(err))
 	}
+
+	go func() {
+		// TODO: deal with errors somewhere?
+		enhancementservices.RunAllServiceWorkers(db, evidenceID)
+	}()
 
 	return &dtos.Evidence{
 		UUID:        evidenceUUID,
