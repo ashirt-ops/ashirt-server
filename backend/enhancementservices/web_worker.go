@@ -37,6 +37,7 @@ func (w *webConfigV1Worker) Build(workerName string, evidenceID int64, workerCon
 	if err := json.Unmarshal([]byte(workerConfig), &webConfig); err != nil {
 		return err
 	}
+	w.WorkerName = workerName
 	w.Config = webConfig
 	w.EvidenceID = evidenceID
 	return nil
