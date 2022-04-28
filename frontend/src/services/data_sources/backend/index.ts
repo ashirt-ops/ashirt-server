@@ -77,7 +77,7 @@ export const backendDataSource: DataSource = {
   adminListServiceWorkers: () => req('GET', `/admin/services`),
   adminCreateServiceWorker: (payload) => req('POST', `/admin/services`, payload),
   adminUpdateServiceWorker: (ids, payload) => req('PUT', `/admin/services/${ids.serviceWorkerId}`, payload),
-  adminDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`),
+  adminDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, {delete: true}),
   adminTestServiceWorker: (ids) => req('GET', `/admin/services/${ids.serviceWorkerId}/test`),
 
   // TODO these should go into their respective authschemes:
