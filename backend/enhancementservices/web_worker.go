@@ -127,7 +127,7 @@ func handleWebResponse(dbModel *models.EvidenceMetadata, resp *http.Response) {
 	switch resp.StatusCode {
 	case http.StatusOK: // 200
 		switch parsedData.Action {
-		case "procssed":
+		case "processed":
 			if parsedData.Content != nil {
 				recordProcessed(*parsedData.Content)
 			} else {
@@ -140,7 +140,7 @@ func handleWebResponse(dbModel *models.EvidenceMetadata, resp *http.Response) {
 		case "deferred":
 			recordDeferral()
 		default:
-			recordError(helpers.SprintfPtr("Unexpceted response format (%v)", parsedData.Action))
+			recordError(helpers.SprintfPtr("Unexpected response format (%v)", parsedData.Action))
 		}
 	case http.StatusAccepted:
 		recordDeferral()
@@ -149,6 +149,6 @@ func handleWebResponse(dbModel *models.EvidenceMetadata, resp *http.Response) {
 	case http.StatusInternalServerError:
 		recordError(nil)
 	default:
-		recordError(helpers.SprintfPtr("Unexpceted response status code (%v)", resp.StatusCode))
+		recordError(helpers.SprintfPtr("Unexpected response status code (%v)", resp.StatusCode))
 	}
 }
