@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",
-    "@types/chai": "^4.2.19",
+    "@types/chai": "^4.3.1",
     "@types/classnames": "^2.3.1",
     "@types/lodash": "^4.14.179",
     "@types/mocha": "^9.1.1",
