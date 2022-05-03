@@ -1,21 +1,21 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import 'react-day-picker/lib/style.css'
+import 'react-day-picker/dist/style.css'
 import * as React from 'react'
 import Button from 'src/components/button'
-import DayPicker from 'react-day-picker'
+import { DayPicker } from 'react-day-picker'
 import classnames from 'classnames/bind'
 import Popover from 'src/components/popover'
-import {subDays, startOfMonth, endOfMonth} from 'date-fns'
-import {DateRange, MaybeDateRange, stringifyRange, addDateToRange, lengthenRangeToDayBoundaries} from './range_picker_helpers'
+import { subDays, startOfMonth, endOfMonth } from 'date-fns'
+import { DateRange, MaybeDateRange, stringifyRange, addDateToRange, lengthenRangeToDayBoundaries } from './range_picker_helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 const now = new Date
-const presetRanges: {[name: string]: DateRange} = {
-  'Today'        : lengthenRangeToDayBoundaries([now, now]),
-  'This Month'   : lengthenRangeToDayBoundaries([startOfMonth(now), endOfMonth(now)]),
-  'Past 90 Days' : lengthenRangeToDayBoundaries([subDays(now, 90), now]),
+const presetRanges: { [name: string]: DateRange } = {
+  'Today': lengthenRangeToDayBoundaries([now, now]),
+  'This Month': lengthenRangeToDayBoundaries([startOfMonth(now), endOfMonth(now)]),
+  'Past 90 Days': lengthenRangeToDayBoundaries([subDays(now, 90), now]),
 }
 
 const DropDown = (props: {
@@ -35,9 +35,9 @@ const DropDown = (props: {
       <DayPicker
         className={cx('day-picker')}
         numberOfMonths={2}
-        selectedDays={props.range != null ? {from: props.range[0], to: props.range[1]} : undefined}
+        selected={props.range != null ? { from: props.range[0], to: props.range[1] } : undefined}
         onDayClick={d => props.onSelectRange(addDateToRange(d, props.range))}
-        modifiers={props.range != null ? {start: props.range[0], end: props.range[1]} : undefined}
+        modifiers={props.range != null ? { start: props.range[0], end: props.range[1] } : undefined}
       />
       <Button primary className={cx('close-button')} onClick={props.onButtonClick} >Close</Button>
     </div>
