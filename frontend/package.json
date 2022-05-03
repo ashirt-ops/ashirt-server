@@ -18,7 +18,7 @@
     "@types/sinon": "^10.0.11",
     "@types/sinon-chai": "^3.2.8",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
-    "@typescript-eslint/parser": "^5.21.0",
+    "@typescript-eslint/parser": "^5.22.0",
     "chai": "^4.3.6",
     "css-loader": "^6.7.1",
     "eslint": "^8.14.0",
