@@ -38,7 +38,7 @@
     "typescript": "^4.6.4",
     "webpack": "5.69",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.7.0"
+    "webpack-dev-server": "^4.8.1"
   },
   "dependencies": {
     "@types/har-format": "^1.2.8",
@@ -52,7 +52,7 @@
     "react": "^17.0.2",
     "react-ace": "^10.1.0",
     "react-calendar-timeline": "^0.27.0",
-    "react-day-picker": "^7.4.10",
+    "react-day-picker": "^8.0.4",
     "react-dom": "^17.0.2",
     "react-dropzone": "^14.2.0",
     "react-markdown": "^8.0.3",
