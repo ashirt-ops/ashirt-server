@@ -34,6 +34,7 @@ const DropDown = (props: {
     <div className={cx('day-picker-area')}>
       <DayPicker
         className={cx('day-picker')}
+        mode='range'
         numberOfMonths={2}
         selected={props.range != null ? { from: props.range[0], to: props.range[1] } : undefined}
         onDayClick={d => props.onSelectRange(addDateToRange(d, props.range))}
