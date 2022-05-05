@@ -5,10 +5,11 @@ import * as React from 'react'
 import Layout from '../layout'
 import Timeline from 'src/components/timeline'
 import { EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal, MoveEvidenceModal } from '../evidence_modals'
-import { Evidence, ViewName } from 'src/global_types'
+import { Evidence } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
+import { mkNavTo } from 'src/helpers/navigate-to-query'
 
 export default () => {
   const { slug } = useParams<{ slug: string }>()
@@ -46,18 +47,15 @@ export default () => {
     <MoveEvidenceModal {...modalProps} operationSlug={operationSlug} onEvidenceMoved={() => { }} />
   ))
 
-  const doNavigate = (view: ViewName, query: string) => {
-    let path = `/operations/${operationSlug}/${view}`
-    if (query != '') {
-      path += `?q=${encodeURIComponent(query.trim())}`
-    }
-    navigate(path)
-  }
+  const navTo = mkNavTo({
+    navTo: navigate,
+    slug: operationSlug
+  })
 
   return (
     <Layout
       onEvidenceCreated={reloadToTop}
-      onNavigate={doNavigate}
+      onNavigate={navTo}
       operationSlug={operationSlug}
       query={query}
       view="evidence"
@@ -74,7 +72,7 @@ export default () => {
             'Move': evidence => moveModal.show({ evidence }),
             'Delete': evidence => deleteModal.show({ evidence }),
           }}
-          onQueryUpdate={query => doNavigate('evidence', query)}
+          onQueryUpdate={query => navTo('evidence', query)}
           operationSlug={operationSlug}
           query={query}
         />
