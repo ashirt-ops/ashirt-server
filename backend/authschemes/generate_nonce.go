@@ -9,6 +9,8 @@ import (
 	"fmt"
 )
 
+// GenerateNonce creates a random base64 string. This is used to help prevent replay attacks.
+// see: https://en.wikipedia.org/wiki/Cryptographic_nonce
 func GenerateNonce() (string, error) {
 	nonceBytes := make([]byte, 32)
 	_, err := rand.Read(nonceBytes)

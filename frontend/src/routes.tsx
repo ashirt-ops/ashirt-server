@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Switch, Redirect, RouteComponentProps } from 'react-router-dom'
+import { Route, Routes, Navigate, useParams, generatePath } from 'react-router-dom'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -22,62 +22,74 @@ const AsyncAdminSettings = makeAsyncPage(() => import('src/pages/admin'))
 const AsyncAccountSettings = makeAsyncPage(() => import('src/pages/account_settings'))
 const AsyncNotFound = makeAsyncPage(() => import('src/pages/not_found'))
 
+function Redirect(props: {
+  to: string
+}) {
+  const params = useParams()
+  return <Navigate to={generatePath(props.to, params)} replace />
+}
+
 export default () => {
   const user = React.useContext(AuthContext).user
   const isSuperAdmin = useUserIsSuperAdmin()
 
   if (user == null) return (
-    <Switch>
-      <Route exact path="/login" component={AsyncLogin} />
-      <Route exact path="/login/:schemeCode" component={AsyncLogin} />
-      <Route exact path="/autherror/recoveryfailed" render={makeErrorDisplay("Authentication Error", "Account recovery failed. The recovery code may be expired or incorrect. Please contact an administrator to provide a new url.", true)} />
-      <Route exact path="/autherror/noaccess" render={makeErrorDisplay("Authentication Error", "This user is not permitted to use this service")} />
-      <Route exact path="/autherror/noverify" render={makeErrorDisplay("Authentication Error", "Unable to verify user account. Please try again.", true)} />
-      <Route exact path="/autherror/incomplete" render={makeErrorDisplay("Authentication Error", "The system could not complete the login process. Please retry, and if the issue persists, please contact a system administrator.", true)} />
-      <Route exact path="/autherror/disabled" render={makeErrorDisplay("Authentication Error", "This account has been disabled. Please contact an adminstrator if you think this is an error")} />
-      <Route exact path="/autherror/registrationdisabled" render={makeErrorDisplay("Authentication Error", "Registration has been disabled. Please contract an administrator to request access.", true)} />
-      <Redirect to="/login" />
-    </Switch>
+    <Routes>
+      <Route path="/login" element={<AsyncLogin />} />
+      <Route path="/login/:schemeCode" element={<AsyncLogin />} />
+      <Route path="/autherror/*" >
+        <Route index element={<Redirect to="/login" />} />
+        <Route path="recoveryfailed" element={<AuthRecoveryFailed />} />
+        <Route path="noaccess" element={<AuthNoAccess />} />
+        <Route path="noverify" element={<AuthNoVerify />} />
+        <Route path="incomplete" element={<AuthIncomplete />} />
+        <Route path="disabled" element={<AuthDisabled />} />
+        <Route path="registrationdisabled" element={<AuthNoRegistration />} />
+      </Route>
+      <Route path="*" element={<Redirect to="/login" />} />
+    </Routes>
   )
 
   return (
-    <Switch>
-      <Redirect exact from="/login" to="/operations" />
-      <Redirect exact from="/" to="/operations" />
+    <Routes>
+      <Route path="/login" element={<Redirect to="/operations" />} />
+      <Route path="/" element={<Redirect to="/operations" />} />
 
-      {/* AuthError routes that an admin might reach if testing */}
-      <Route exact path="/autherror/recoveryfailed" render={makeErrorDisplay("Access Error", "This url only works for users that are not logged in. ", true)} />
-
-      <Route exact path="/operations" component={AsyncOperationList} />
-
-      {/* Operation edit */}
-      <Route exact path="/operations/:slug/edit/:view(settings|users|tags)" component={AsyncOperationEdit} />
-      <Redirect from="/operations/:slug/edit" to="/operations/:slug/edit/settings" />
-
-      {/* Operation overview */}
-      <Route exact path="/operations/:slug/overview" component={AsyncOperationOverview} />
-
-      {/* Operation show */}
-      <Route exact path="/operations/:slug/findings" component={AsyncFindingList} />
-      <Route exact path="/operations/:slug/findings/:uuid" component={AsyncFindingShow} />
-      <Route exact path="/operations/:slug/evidence" component={AsyncEvidenceList} />
-      <Redirect exact path="/operations/:slug/evidence/:uuid" to="/operations/:slug/evidence?q=uuid%3A:uuid" />
-      <Redirect from="/operations/:slug" to="/operations/:slug/evidence" />
+      <Route path="/operations/*">
+        <Route index element={<AsyncOperationList />} />
+        <Route path=":slug/*" >
+          <Route index element={<Redirect to={`evidence`} />} />
+          <Route path="evidence" element={<AsyncEvidenceList />} />
+          <Route path="evidence/:uuid" element={<Redirect to={`../evidence?q=uuid%3A:uuid`} />} />
+          {/* ^^^ we need to do ../evidence because .. points to :slug, while . points to evidence/:uuid */}
+          <Route path="findings" element={<AsyncFindingList />} />
+          <Route path="findings/:uuid" element={<AsyncFindingShow />} />
+          <Route path="edit/*">
+            <Route index element={<Redirect to={`settings`} />} />
+            <Route path="*" element={<AsyncOperationEdit />} />
+          </Route>
+          <Route path="overview" element={<AsyncOperationOverview />} />
+        </Route>
+      </Route>
 
       {/* Account Settings */}
-      <Route exact path="/account/:view(profile|security|apikeys|authmethods)" component={AsyncAccountSettings} />
-      <Redirect exact from="/account" to={`/account/profile`} />
-
-      {isSuperAdmin && <Route exact path="/account/:view(profile|apikeys|authmethods)/:slug" component={AsyncAccountSettings} />}
-      {isSuperAdmin && <Redirect exact from="/account/edit/:slug" to="/account/profile/:slug" />}
+      <Route path="/account/*" >
+        <Route index element={<Redirect to="profile" />} />
+        <Route path="*" element={<AsyncAccountSettings />} />
+      </Route>
 
       {/* Admin Settings */}
-      {isSuperAdmin && <Route exact path="/admin/:view(users|operations|authdata|findings|tags)" component={AsyncAdminSettings} />}
-      {isSuperAdmin && <Redirect from="/admin/" to="/admin/users" />}
+      {isSuperAdmin && (
+        <Route path="/admin/*" >
+          <Route index element={<Redirect to="users" />} />
+          <Route path="*" element={<AsyncAdminSettings />} />
+        </Route>
+      )}
 
-
-      <Route component={AsyncNotFound} />
-    </Switch>
+      {/* AuthError routes that an admin might reach if testing */}
+      <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
+      <Route path="*" element={<AsyncNotFound />} />
+    </Routes >
   )
 }
 
@@ -86,15 +98,15 @@ export default () => {
 //
 // This is used to break up each page into its own bundle to prevent the main entry bundle from becoming too large and allows
 // page javascript to load on demand.
-function makeAsyncPage(page: () => Promise<{default: React.FunctionComponent<RouteComponentProps>}>) {
+function makeAsyncPage(page: () => Promise<{ default: React.FunctionComponent }>) {
   const defaultPage = () => page().then(module => module.default)
-  return (props: RouteComponentProps) => {
+  return () => {
     const Page = useAsyncComponent(defaultPage);
-    return <Page {...props} />
+    return <Page />
   }
 }
 
-const makeErrorDisplay = (title: string, message: string, withLoginLink: boolean = false) => (props: RouteComponentProps) => (
+const makeErrorDisplay = (title: string, message: string, withLoginLink = false) => () => (
   <ErrorDisplay title={title} err={new Error(message)}>
     {
       withLoginLink && (
@@ -106,3 +118,12 @@ const makeErrorDisplay = (title: string, message: string, withLoginLink: boolean
     }
   </ErrorDisplay>
 )
+const makeAuthErr = (body: string, addLoginLink?: boolean) => makeErrorDisplay("Authentication Error", body, addLoginLink ?? true)
+
+const AuthRecoveryFailed = makeAuthErr("Account recovery failed. The recovery code may be expired or incorrect. Please contact an administrator to provide a new url.")
+const AuthNoAccess = makeAuthErr("This user is not permitted to use this service", false)
+const AuthNoVerify = makeAuthErr("Unable to verify user account. Please try again.")
+const AuthIncomplete = makeAuthErr("The system could not complete the login process. Please retry, and if the issue persists, please contact a system administrator.")
+const AuthDisabled = makeAuthErr("This account has been disabled. Please contact an adminstrator if you think this is an error", false)
+const AuthNoRegistration = makeAuthErr("Registration has been disabled. Please contract an administrator to request access.")
+const NoAccess = makeErrorDisplay("Access Error", "This url only works for users that are not logged in.", true)

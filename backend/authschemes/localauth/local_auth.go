@@ -20,6 +20,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// LocalAuthScheme is a small structure capturing the data requirements specific to local authentication
 type LocalAuthScheme struct {
 	RegistrationEnabled bool
 }

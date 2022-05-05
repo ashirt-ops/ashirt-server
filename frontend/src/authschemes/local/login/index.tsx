@@ -7,7 +7,6 @@ import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import { NavLinkButton } from 'src/components/button'
 import classnames from 'classnames/bind'
-import { ParsedQuery } from 'query-string'
 import { login, register, requestRecovery, userResetPassword, totpLogin } from '../services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals } from 'src/helpers'
@@ -38,10 +37,10 @@ function getValueAndClear(field: { value: string, onChange: (s: string) => void 
 }
 
 export default (props: {
-  query: ParsedQuery,
+  query: URLSearchParams,
   authFlags?: Array<string>
 }) => {
-  switch (props.query.step) {
+  switch (props.query.get('step')) {
     case 'reset': return <ResetPassword />
     case 'totp': return <EnterTotp />
     case 'recovery': return <RecoverUserAccount />

@@ -128,7 +128,7 @@ export const DeleteOperationTagModal = (props: {
             <Link
               to={`/operations/${props.operationSlug}/evidence/${evi.uuid}`}
               key={evi.uuid}
-              children={evi.description.substr(0, 50)}
+              children={evi.description.substring(0, 50)}
               style={evidenceLinkStyle}
             />
           ))}

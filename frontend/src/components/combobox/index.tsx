@@ -50,10 +50,6 @@ export default function SmartComboBox<T>(props: {
     initialComboBoxState(props.value, props.options, props.nonValueDefault),
   )
 
-  React.useEffect(() => {
-    props.onChange(cbState.value)
-  }, [cbState])
-
   return (
     <DumbComboBox
       options={props.options}
@@ -63,7 +59,12 @@ export default function SmartComboBox<T>(props: {
       value={cbState.value}
       disabled={props.disabled}
       className={props.className}
-      onChange={dispatch}
+      onChange={(v) => {
+        dispatch(v)
+        if( v.type == 'popover-selected') {
+          props.onChange(v.item.value)
+        }
+      }}
     />
   )
 }

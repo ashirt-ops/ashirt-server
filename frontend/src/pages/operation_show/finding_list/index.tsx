@@ -1,52 +1,56 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import FindingsTable from './findings_table'
 import Layout from '../layout'
 import { Finding, ViewName } from 'src/global_types'
-import {DeleteFindingModal, EditFindingModal} from '../finding_modals'
-import {RouteComponentProps} from 'react-router-dom'
-import {getFindings} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { DeleteFindingModal, EditFindingModal } from '../finding_modals'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import { getFindings } from 'src/services'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
 
-export default (props: RouteComponentProps<{slug: string}>) => {
-  const {slug} = props.match.params
-  const query: string = new URLSearchParams(props.location.search).get('q') || ''
+export default () => {
+  const { slug } = useParams<{ slug: string }>()
+  const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const query: string = new URLSearchParams(location.search).get('q') || ''
 
   const wiredFindings = useWiredData(React.useCallback(() => getFindings({
-    operationSlug: slug,
-    query: query,
-  }), [slug, query]))
+    operationSlug,
+    query,
+  }), [operationSlug, query]))
 
-  const navigate = (view: ViewName, query: string) => {
-    let path = `/operations/${slug}/${view}`
+  const doNavigate = (view: ViewName, query: string) => {
+    let path = `/operations/${operationSlug}/${view}`
     if (query != '') path += `?q=${encodeURIComponent(query.trim())}`
-    props.history.push(path)
+    navigate(path)
   }
 
-  const editFindingModal = useModal<{finding: Finding}>(modalProps => (
-    <EditFindingModal {...modalProps} onEdited={wiredFindings.reload} operationSlug={slug} />
+  const editFindingModal = useModal<{ finding: Finding }>(modalProps => (
+    <EditFindingModal {...modalProps} onEdited={wiredFindings.reload} operationSlug={operationSlug} />
   ))
-  const deleteFindingModal = useModal<{finding: Finding}>(modalProps => (
-    <DeleteFindingModal {...modalProps} onDeleted={wiredFindings.reload} operationSlug={slug} />
+  const deleteFindingModal = useModal<{ finding: Finding }>(modalProps => (
+    <DeleteFindingModal {...modalProps} onDeleted={wiredFindings.reload} operationSlug={operationSlug} />
   ))
 
   return (
     <Layout
       onFindingCreated={wiredFindings.reload}
-      onNavigate={navigate}
-      operationSlug={slug}
+      onNavigate={doNavigate}
+      operationSlug={operationSlug}
       query={query}
       view="findings"
     >
       {wiredFindings.render(findings => (
-        <div style={{padding: 20}}>
+        <div style={{ padding: 20 }}>
           <FindingsTable
             findings={findings}
-            onDelete={finding => deleteFindingModal.show({finding})}
-            onEdit={finding => editFindingModal.show({finding})}
-            operationSlug={slug}
+            onDelete={finding => deleteFindingModal.show({ finding })}
+            onEdit={finding => editFindingModal.show({ finding })}
+            operationSlug={operationSlug}
           />
         </div>
       ))}
