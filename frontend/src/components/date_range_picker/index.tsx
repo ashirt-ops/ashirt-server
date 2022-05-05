@@ -3,12 +3,21 @@
 
 import 'react-day-picker/dist/style.css'
 import * as React from 'react'
-import Button from 'src/components/button'
 import { DayPicker } from 'react-day-picker'
 import classnames from 'classnames/bind'
-import Popover from 'src/components/popover'
 import { subDays, startOfMonth, endOfMonth } from 'date-fns'
-import { DateRange, MaybeDateRange, stringifyRange, addDateToRange, lengthenRangeToDayBoundaries } from './range_picker_helpers'
+
+import Button from 'src/components/button'
+import Popover from 'src/components/popover'
+
+import { 
+  DateRange,
+  MaybeDateRange,
+  stringifyRange,
+  addDateToRange,
+  lengthenRangeToDayBoundaries
+} from './range_picker_helpers'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 const now = new Date
