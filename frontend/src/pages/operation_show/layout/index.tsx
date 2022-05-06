@@ -25,6 +25,7 @@ export default (props: {
   query: string,
   view: ViewName,
 }) => {
+  const [expanded, setExpanded] = React.useState(false)
   const createEvidenceModal = useModal<void>(modalProps => (
     <CreateEvidenceModal {...modalProps} onCreated={props.onEvidenceCreated || noOp} operationSlug={props.operationSlug} />
   ))
@@ -36,11 +37,13 @@ export default (props: {
 
   return (
     <div className={cx('root')}>
-      <div className={cx('toolbar')}>
+      <div className={cx(expanded ? 'expanded-toolbar' : 'toolbar' )}>
         <Toolbar
           operationSlug={props.operationSlug}
           query={props.query}
           onSearch={query => props.onNavigate(props.view, query)}
+          expandedView={expanded}
+          setExpandedView={setExpanded}
           viewName={props.view}
           onRequestCreateFinding={() => createFindingModal.show()}
           onRequestCreateEvidence={() => createEvidenceModal.show()}

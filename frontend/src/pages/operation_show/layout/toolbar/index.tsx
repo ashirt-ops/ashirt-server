@@ -1,325 +1,152 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import Input from 'src/components/input'
 import classnames from 'classnames/bind'
+import { Tag, User, ViewName } from 'src/global_types'
+
 import { default as Button, ButtonGroup } from 'src/components/button'
-
+import { FilterFieldsGrid } from 'src/components/filter_fields/filter-field-grid'
+import Input from 'src/components/input'
 import { stringToSearch, SearchOptions, stringifySearch } from 'src/components/search_query_builder/helpers'
-import Modal from 'src/components/modal'
-import SearchQueryBuilder from 'src/components/search_query_builder'
-
-import { useModal, renderModals, useWiredData } from 'src/helpers'
-import { Tag, ViewName } from 'src/global_types'
-import { getTags } from 'src/services'
+import { useWiredData, useModal, renderModals } from 'src/helpers'
+import { getTags, listEvidenceCreators } from 'src/services'
 import { CreateButtonPosition } from '..'
+import { SearchHelpModal } from './search_modal'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 
-export default (props: {
+export const Toolbar = (props: {
+  operationSlug: string,
+  expandedView: boolean,
+  query: string,
+  setExpandedView: (expand: boolean) => void,
+  viewName: ViewName,
+  onSearch: (query: string) => void,
   onRequestCreateFinding: () => void,
   onRequestCreateEvidence: () => void,
-  onSearch: (query: string) => void,
-  query: string,
-  operationSlug: string,
-  viewName: ViewName,
   showCreateButtons: CreateButtonPosition
 }) => {
-  const [queryInput, setQueryInput] = React.useState<string>("")
-  const helpModal = useModal<void>(modalProps => <SearchHelpModal {...modalProps} />)
+  const [queryString, setQueryString] = React.useState<string>(props.query)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
   React.useEffect(() => {
-    setQueryInput(props.query)
+    setQueryString(props.query)
   }, [props.query])
 
-  const inputRef = React.useRef<HTMLInputElement>(null)
-  const builderModal = useModal<{ searchText: string }>(modalProps => (
-    <SearchBuilderModal
-      {...modalProps}
-      onChanged={(result: string) => {
-        setQueryInput(result)
-        props.onSearch(result)
-      }}
-      operationSlug={props.operationSlug}
-      viewName={props.viewName}
-    />
-  ))
+  const wiredData = useWiredData<[Array<Tag>, Array<User>]>(
+    React.useCallback(() =>
+      Promise.all([
+        getTags({ operationSlug: props.operationSlug }),
+        listEvidenceCreators({ operationSlug: props.operationSlug }),
+      ]), [props.operationSlug]
+    ))
 
   return (
-    <>
-      <div className={cx('root')}>
-        <div className={cx('search-container')}>
-          <Input
-            ref={inputRef}
-            className={cx('search')}
-            inputClassName={cx('search-input')}
-            value={queryInput}
-            onChange={setQueryInput}
-            placeholder="Filter Timeline"
-            icon={require('./search.svg')}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                inputRef.current?.blur()
-                props.onSearch(queryInput)
-              }
-            }}
-          />
-          <a className={cx('search-help-icon')} onClick={() => helpModal.show()} title="Search Help"></a>
-          <a className={cx('edit-filter-icon')} onClick={() => builderModal.show({ searchText: queryInput })} title="Edit Query Filters"></a>
-        </div>
+    <div className={cx('toolbar-root')}>
+      {wiredData.render(([tags, users]) => {
+        const searchOptions = stringToSearch(queryString, tags, users)
+        return (
+          <>
+            <div className={cx('toolbar-flex')}>
+              <Button
+                className={cx('tb-expand-button')}
+                onClick={() => props.setExpandedView(!props.expandedView)}
+              />
 
-        {props.showCreateButtons === 'filter' && (
-          <ButtonGroup>
-            <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
-            <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
-          </ButtonGroup>
-        )}
-        
+              <div className={cx('tb-content')}>
+                {!props.expandedView && (
+                  <SearchInput
+                    queryString={queryString}
+                    inputRef={inputRef}
+                    setQueryString={setQueryString}
+                    onSearch={props.onSearch}
+                  />
+                )}
+              </div>
+
+              {props.showCreateButtons === 'filter' && (
+                <ButtonGroup className={cx('tb-create-buttons')}>
+                  <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
+                  <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
+                </ButtonGroup>
+              )}
+            </div>
+            {props.expandedView && (
+              <div className={cx('toolbar-overlay')}>
+                <ExpandedSearch
+                  {...props}
+                  searchOptions={searchOptions}
+                  setQueryString={setQueryString}
+                />
+              </div>
+            )}
+
+          </>
+        )
+      })}
+    </div>
+  )
+}
+
+const ExpandedSearch = (props: {
+  operationSlug: string
+  viewName: ViewName
+  searchOptions: SearchOptions
+  setExpandedView: (expand: boolean) => void
+  onSearch: (query: string) => void
+  setQueryString: (query: string) => void
+}) => {
+  const { operationSlug, viewName, searchOptions, setQueryString, onSearch, setExpandedView } = props
+  return (
+    <FilterFieldsGrid
+      className={cx('filter-grid')}
+      operationSlug={operationSlug}
+      viewName={viewName}
+      withButtonRow
+      value={searchOptions}
+      onChange={(v) => setQueryString(stringifySearch(v))}
+      onCanceled={() => setExpandedView(false)}
+      onSubmit={(options) => {
+        setExpandedView(false)
+        const updatedQueryString = stringifySearch(options)
+        setQueryString(updatedQueryString)
+        onSearch(updatedQueryString)
+      }}
+    />
+  )
+}
+
+const SearchInput = (props: {
+  queryString: string
+  inputRef: React.RefObject<HTMLInputElement>
+  onSearch: (query: string) => void
+  setQueryString: (query: string) => void
+}) => {
+  const { inputRef, queryString, setQueryString } = props
+  const helpModal = useModal<void>(modalProps => <SearchHelpModal {...modalProps} />)
+  return (
+    <>
+      <div className={cx('tb-search-container')}>
+        <Input
+          ref={inputRef}
+          className={cx('tb-search')}
+          inputClassName={cx('tb-search-input')}
+          value={queryString}
+          onChange={setQueryString}
+          placeholder="Filter Timeline"
+          icon={require('./search.svg')}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              inputRef.current?.blur()
+              props.onSearch(queryString)
+            }
+          }}
+        />
+        <a className={cx('search-help-icon')} onClick={() => helpModal.show()} title="Search Help"></a>
       </div>
-      {renderModals(helpModal, builderModal)}
+      {renderModals(helpModal)}
     </>
   )
 }
-
-const SearchBuilderModal = (props: {
-  searchText: string,
-  operationSlug: string,
-  viewName: ViewName,
-  onRequestClose: () => void,
-  onChanged: (resultString: string) => void,
-}) => {
-  const wiredTags = useWiredData<Array<Tag>>(
-    React.useCallback(() => getTags({ operationSlug: props.operationSlug }), [props.operationSlug])
-  )
-
-  return (<>
-    {wiredTags.render(tags => (
-      <Modal title="Query Builder" onRequestClose={props.onRequestClose}>
-        <SearchQueryBuilder
-          searchOptions={stringToSearch(props.searchText, tags)}
-          onChanged={(result: SearchOptions) => {
-            props.onChanged(stringifySearch(result))
-            props.onRequestClose()
-          }}
-          operationSlug={props.operationSlug}
-          viewName={props.viewName}
-        />
-      </Modal>
-    ))}
-  </>)
-}
-
-const CodeSnippet = (props: {
-  children: React.ReactNode,
-  className?: string | Array<string>
-}) => <span className={cx('code', props.className)}>{props.children}</span>
-
-const CodeExample = (props: {
-  children: React.ReactNode
-  className?: string | Array<string>
-}) => <span className={cx('example', props.className)}>{props.children}</span>
-
-type FilterDetail = { field: string, description: React.ReactNode }
-const FilterDescriptionRow = (props: {
-  filter: FilterDetail
-}) => (
-  <tr className={cx('filter-row')}>
-    <td className={cx('filter-field')}>{props.filter.field}</td>
-    <td className={cx('filter-description')}>{props.filter.description}</td>
-  </tr>
-)
-
-const SearchHelpModal = (props: {
-  onRequestClose: () => void,
-}) => {
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      props.onRequestClose()
-    }
-  }
-
-  React.useEffect(() => {
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  })
-
-  return <Modal title="Search Help" onRequestClose={props.onRequestClose} >
-    <div>
-      <p>
-        Timeline results can be influenced by using the Filter Timeline text box. Filters are applied
-        by specifying the correct syntax, and are joined together to provide ever-narrower search
-        results.
-      </p>
-      <p>
-        In general, search queries are presented in the following form:
-
-        <CodeExample>Free Text specific-field:"specific value"</CodeExample>
-
-        Here, the "Free Text Section" phrase will search all evidence for any occurance of
-        {" "}<CodeSnippet>Free</CodeSnippet> and <CodeSnippet>Text</CodeSnippet>. The
-        {" "}<CodeSnippet>specific-field</CodeSnippet> will search just the specific-field attribute
-        for the value <CodeSnippet>specific value</CodeSnippet>. Filters must be specified without a
-        space on either side of the colon. Multiple filters can be provided in a single search.
-        Doing so means that the results must satisfy each part of the filter. Also
-        note that <CodeSnippet>specific value</CodeSnippet> was written in quotes. This is not
-        required for any field, but provide the ability to search over phrases rather than words.
-      </p>
-      <p>
-        As an example, consider the search:
-
-        <CodeExample>"Darth Vader" creator:"George Lucas" tag:sci-fi</CodeExample>
-
-        Performing this search over a set of movies might return several <em>Star Wars</em> movies but
-        exclude <em>Indiana Jones</em>. Removing <CodeSnippet>Darth Vader</CodeSnippet> would
-        expand the search to include <em>THX 1138</em>, while adding
-        {" "}<CodeSnippet>"Jar Jar Binks"</CodeSnippet> would narrow the results to just
-        {" "}<em>Star Wars</em> episodes 1-3.
-      </p>
-      <p>The below table lists all of the currently available filters, and value limitations, if any:</p>
-      <table>
-        <tbody>
-          {HelpText.map(f => <FilterDescriptionRow filter={f} key={f.field} />)}
-        </tbody>
-      </table>
-    </div>
-
-  </Modal >
-}
-
-const valuesAsCodeSnippets = (vals: Array<string>) => {
-  return vals.map((v, i) => (
-    <span key={i}>
-      <CodeSnippet>{v}</CodeSnippet>
-      {(i + 1) == vals.length ? '' : ', '}
-    </span>
-  ))
-}
-
-const HelpText: Array<FilterDetail> = [
-  {
-    field: 'tag',
-    description:
-      <>
-        <p>
-          Filters the result by requiring that the evidence or finding contain each of the
-          specified tag fields.
-        </p>
-        <p>Multiple <CodeSnippet>tag</CodeSnippet> fields can be specified.</p>
-        <p>To easily create this filter, click on the desired tags next to any evidence.</p>
-      </>
-  },
-  {
-    field: 'operator',
-    description:
-      <>
-        <p>
-          Filters the result by requiring that the evidence or finding was created by a particular
-          user. If muliple values are specified, then this will look for evidence that was created
-          by any of the indicated users.
-        </p>
-        <p>To easily create this filter, click on the desired username next to any evidence.</p>
-      </>
-  },
-  {
-    field: 'range',
-    description:
-      <>
-        <p>
-          Filters the result by requiring that the evidence to have occurred within a particular
-          date range. In the findings timeline, this will require that all evidence for a finding
-          be contained with the indicated date range. Only one range can be specified for a finding.
-          Multiple values can be specified for evidence.
-          Date Format: <CodeSnippet>yyyy-mm-dd,yyyy-mm-dd</CodeSnippet> where
-          y, m, and d are year, month and day digits respectively.
-          For example: <CodeSnippet>2020-01-01,2020-01-31</CodeSnippet> covers the entire
-          month of January, 2020.
-        </p>
-        <p>Click on the calendar next to the Timeline Filter to help specify the date.</p>
-      </>
-  },
-  {
-    field: 'sort',
-    description:
-      <>
-        <p>
-          Orders the filter in a particular direction. By default, wiith no filter provided,
-          results are ordered by "last evidence first", or an effective reverse-chronological
-          order.
-        </p>
-        <p>
-          Possible values:
-          {" "}<CodeSnippet>asc</CodeSnippet>,
-          {" "}<CodeSnippet>ascending</CodeSnippet> or
-          {" "}<CodeSnippet>chronological</CodeSnippet>
-        </p>
-        <p>
-          Each of the above values will order the results in a "first-evidence-first", or
-          chronological order.
-        </p>
-        <p>Only one <CodeSnippet>sort</CodeSnippet> field can be specified.</p>
-      </>
-  },
-  {
-    field: 'linked',
-    description:
-      <>
-        <p>
-          Filters the result by finding evidence that either has, or has not been attached to a finding.
-        </p>
-        <p>
-          Possible values: {" "}
-          {valuesAsCodeSnippets(['true', 'false'])}
-        </p>
-        <p>
-          Provide <CodeSnippet>true</CodeSnippet> to require the evidence has been linked
-          with a finding, or <CodeSnippet>false</CodeSnippet> to require evidence that has
-          not been linked with a finding.
-          {" "}<em>This will only have an effect in the Evidence Timeline.</em>
-        </p>
-        <p>Only one <CodeSnippet>linked</CodeSnippet> field can be specified.</p>
-      </>
-  },
-  {
-    field: 'with-evidence',
-    description:
-      <>
-        <p>
-          Filters the result by requiring a finding to contain a particular piece of evidence, or
-          one of the piece of evidence if multiple values are given.
-          <em>This will only have an effect in the Findings Timeline.</em>
-        </p>
-      </>
-  },
-  {
-    field: 'type',
-    description:
-      <>
-        <p>
-          Filters the result by requiring that the evidence must have a matching type for one of the
-          values given in the filter.
-          {" "}<em>This will only have an effect in the Evidence Timeline.</em>
-        </p>
-        <p>
-          Possible values: {" "}
-          {
-            valuesAsCodeSnippets([
-              'image', 'codeblock', 'terminal-recording', 'http-request-cycle', 'event', 'none'
-            ])
-          }
-        </p>
-      </>
-  },
-  {
-    field: 'uuid',
-    description:
-      <>
-        <p>
-          Filters the result by requiring that the evidence or finding have a particular ID.
-          This is typically used to share evidence with other users. While it can be specified
-          manually, the preferred method is to click the "Copy Permalink" button
-          next to the desired evidence, and share the link as needed.
-        </p>
-      </>
-  },
-
-]
