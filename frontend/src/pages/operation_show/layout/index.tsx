@@ -10,6 +10,7 @@ import {CreateFindingModal} from '../finding_modals'
 import {ViewName} from 'src/global_types'
 import {useModal, renderModals} from 'src/helpers'
 import { NavToFunction } from 'src/helpers/navigate-to-query'
+import { BuildReloadBus } from 'src/helpers/reload_bus'
 const cx = classnames.bind(require('./stylesheet'))
 
 const noOp = () => {}
@@ -34,6 +35,7 @@ export default (props: {
   ))
 
   const showCreateButtons: CreateButtonPosition = 'filter'
+  const queryBus = BuildReloadBus()
 
   return (
     <div className={cx('root')}>
@@ -48,6 +50,7 @@ export default (props: {
           onRequestCreateFinding={() => createFindingModal.show()}
           onRequestCreateEvidence={() => createEvidenceModal.show()}
           showCreateButtons={showCreateButtons}
+          requestQueriesReload={queryBus.requestReload}
         />
       </div>
       <div className={cx('sidebar')}>
@@ -59,6 +62,7 @@ export default (props: {
           onNavigate={props.onNavigate}
           operationSlug={props.operationSlug}
           showCreateButtons={showCreateButtons}
+          {...queryBus}
         />
       </div>
       <div className={cx('children')}>

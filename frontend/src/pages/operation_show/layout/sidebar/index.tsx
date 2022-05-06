@@ -22,6 +22,8 @@ export default (props: {
   onNavigate: NavToFunction,
   onRequestCreateFinding: () => void,
   onRequestCreateEvidence: () => void,
+  onReload: (listener: () => void) => void
+  offReload: (listener: () => void) => void
   operationSlug: string,
   showCreateButtons: CreateButtonPosition
 }) => {
@@ -29,6 +31,11 @@ export default (props: {
     getSavedQueries({operationSlug: props.operationSlug}),
     getOperation(props.operationSlug),
   ]), [props.operationSlug]))
+
+  React.useEffect(() => {
+    props.onReload(wiredQueries.reload)
+    return () => { props.offReload(wiredQueries.reload) }
+  })
 
   return wiredQueries.render(([queries, operation]) => (
     <div className={cx('root')}>

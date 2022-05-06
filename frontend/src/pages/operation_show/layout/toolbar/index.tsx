@@ -13,6 +13,7 @@ import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { getTags, listEvidenceCreators } from 'src/services'
 import { CreateButtonPosition } from '..'
 import { SearchHelpModal } from './search_modal'
+import { useLocation } from 'react-router-dom'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -23,9 +24,10 @@ export const Toolbar = (props: {
   query: string,
   setExpandedView: (expand: boolean) => void,
   viewName: ViewName,
-  onSearch: (query: string) => void,
-  onRequestCreateFinding: () => void,
-  onRequestCreateEvidence: () => void,
+  onSearch: (query: string) => void
+  onRequestCreateFinding: () => void
+  onRequestCreateEvidence: () => void
+  requestQueriesReload?: () => void
   showCreateButtons: CreateButtonPosition
 }) => {
   const [queryString, setQueryString] = React.useState<string>(props.query)
@@ -79,6 +81,7 @@ export const Toolbar = (props: {
                   {...props}
                   searchOptions={searchOptions}
                   setQueryString={setQueryString}
+                  requestQueriesReload={props.requestQueriesReload}
                 />
               </div>
             )}
@@ -97,15 +100,23 @@ const ExpandedSearch = (props: {
   setExpandedView: (expand: boolean) => void
   onSearch: (query: string) => void
   setQueryString: (query: string) => void
+  requestQueriesReload?: () => void
 }) => {
-  const { operationSlug, viewName, searchOptions, setQueryString, onSearch, setExpandedView } = props
+  const { operationSlug, viewName, searchOptions,
+    setQueryString, onSearch, setExpandedView, requestQueriesReload, } = props
+
+  const location = useLocation()
+  const queryName = new URLSearchParams(location.search).get('name') ?? undefined
+
   return (
     <FilterFieldsGrid
       className={cx('filter-grid')}
       operationSlug={operationSlug}
       viewName={viewName}
+      queryName={queryName}
       withButtonRow
       value={searchOptions}
+      requestQueriesReload={requestQueriesReload}
       onChange={(v) => setQueryString(stringifySearch(v))}
       onCanceled={() => setExpandedView(false)}
       onSubmit={(options) => {
