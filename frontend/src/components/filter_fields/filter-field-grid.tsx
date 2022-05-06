@@ -1,25 +1,30 @@
+// Copyright 2022, Yahoo Inc.
+// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import * as dateFns from 'date-fns'
 
 import { Evidence, ViewName } from "src/global_types"
-import { useFormField, useModal, renderModals } from 'src/helpers'
+import { useForm, useFormField, useModal, renderModals } from 'src/helpers'
 
 import {
   EvidenceTypeChooser,
   ManagedCreatorChooser as CreatorChooser,
   TagPicker,
 } from 'src/components/bullet_chooser'
-import { default as Button } from 'src/components/button'
+import { ButtonGroup, default as Button } from 'src/components/button'
 import { ComboBoxItem, default as ComboBox } from 'src/components/combobox'
 import DateRangePicker from 'src/components/date_range_picker'
 import { DateRange } from 'src/components/date_range_picker/range_picker_helpers'
 import EvidenceChooser from 'src/components/evidence_chooser'
+import ModalForm from 'src/components/modal_form'
 import Input from 'src/components/input'
-import { SearchOptions } from "src/components/search_query_builder/helpers"
+import { SearchOptions, stringifySearch } from "src/components/search_query_builder/helpers"
 import WithLabel from 'src/components/with_label'
 
 import Modal from 'src/components/modal'
+import { upsertQuery } from 'src/services'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -31,12 +36,13 @@ export const FilterFieldsGrid = (props: {
   value: SearchOptions
   onChange: (result: SearchOptions) => void
   withButtonRow: boolean
-
+  queryName?: string
   cancelText?: string
   onCanceled?: () => void
   submitText?: string
   onSubmit?: (data: SearchOptions) => void
   className?: string
+  requestQueriesReload?: () => void
 }) => {
   const [state, dispatch] = React.useReducer<SearchOptionsReducer>(searchOptionsReducer, props.value)
   const chooseEvidenceModal = useModal<void>(modalProps => (
@@ -52,6 +58,19 @@ export const FilterFieldsGrid = (props: {
         field: "withEvidenceUuid",
         newValue: uuid
       })}
+      {...modalProps}
+    />
+  ))
+  const saveQueryModal = useModal<void>(modalProps=> (
+    <SaveQueryModal
+      query={stringifySearch(state)}
+      onSaved={() => {
+        props.requestQueriesReload?.()
+        props.onSubmit?.(state)
+      }} // reload queries sidebar
+      operationSlug={props.operationSlug}
+      view={props.viewName}
+      name={props.queryName}
       {...modalProps}
     />
   ))
@@ -143,12 +162,15 @@ export const FilterFieldsGrid = (props: {
 
       {/* Always the last row */}
       {props.withButtonRow && (
-        <div className={cx('button-row')}>
-          <Button onClick={() => props.onCanceled?.()}>{props.cancelText ?? "Close"}</Button>
-          <Button primary onClick={() => props.onSubmit?.(state)}>{props.cancelText ?? "Apply"}</Button>
-        </div>
+        <>
+          <ButtonGroup className={cx('button-row')}>
+            <Button onClick={() => props.onCanceled?.()}>{props.cancelText ?? "Close"}</Button>
+            <Button primary onClick={() => props.onSubmit?.(state)}>{props.cancelText ?? "Apply"}</Button>
+          </ButtonGroup>
+          <Button className={cx('save-button')} primary onClick={() =>saveQueryModal.show()}>Save</Button>
+        </>
       )}
-      {renderModals(chooseEvidenceModal)}
+      {renderModals(chooseEvidenceModal, saveQueryModal)}
     </div>
   )
 }
@@ -246,5 +268,38 @@ const ChooseEvidenceModal = (props: {
         props.onRequestClose()
       }}>Select</Button>
     </Modal>
+  )
+}
+
+const SaveQueryModal = (props: {
+  name?: string,
+  query: string,
+  operationSlug: string,
+  view: ViewName,
+  onRequestClose: () => void,
+  onSaved: (name: string) => void,
+}) => {
+  const nameField = useFormField(props.name ?? '')
+  const queryForm = useForm({
+    fields: [nameField],
+    onSuccess: () => {
+      props.onRequestClose()
+      props.onSaved(nameField.value)
+    },
+    handleSubmit: async () => {
+      const replaceName = nameField.value !== props.name
+      const { operationSlug, query, view } = props
+      upsertQuery({
+        operationSlug, query, replaceName,
+        type: view,
+        name: nameField.value,
+      })
+    }
+  })
+
+  return (
+    <ModalForm title="Save Query" submitText="Save" onRequestClose={props.onRequestClose} {...queryForm}>
+      <Input label="Name" {...nameField} />
+    </ModalForm>
   )
 }
