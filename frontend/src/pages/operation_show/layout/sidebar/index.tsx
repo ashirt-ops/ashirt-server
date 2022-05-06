@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -7,10 +7,9 @@ import OperationBadges from 'src/components/operation_badges'
 import classnames from 'classnames/bind'
 import {Link} from 'react-router-dom'
 import { EditQueryModal, DeleteQueryModal} from './query_modal'
-import { SavedQuery, SavedQueryType, ViewName} from 'src/global_types'
+import { Operation, SavedQuery, SavedQueryType, ViewName} from 'src/global_types'
 import {default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu} from 'src/components/list_menu'
-import {getSavedQueries, getOperation} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { useModal, renderModals} from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CreateButtonPosition } from '..'
 import { NavToFunction } from 'src/helpers/navigate-to-query'
@@ -23,27 +22,18 @@ export default (props: {
   onNavigate: NavToFunction,
   onRequestCreateFinding: () => void,
   onRequestCreateEvidence: () => void,
-  onReload: (listener: () => void) => void
-  offReload: (listener: () => void) => void
-  operationSlug: string,
   showCreateButtons: CreateButtonPosition
+  queries: Array<SavedQuery>
+  operation: Operation
+  requestQueriesReload?: () => void
 }) => {
-  const wiredQueries = useWiredData(React.useCallback(() => Promise.all([
-    getSavedQueries({operationSlug: props.operationSlug}),
-    getOperation(props.operationSlug),
-  ]), [props.operationSlug]))
-
-  React.useEffect(() => {
-    props.onReload(wiredQueries.reload)
-    return () => { props.offReload(wiredQueries.reload) }
-  })
-
-  return wiredQueries.render(([queries, operation]) => (
+  const {operation, queries} = props
+  return (
     <div className={cx('root')}>
       <header>
         <h1 title={operation.name}>{operation.name}</h1>
-        <Link className={cx('edit')} to={`/operations/${props.operationSlug}/edit`} title="Edit this operation" />
-        <Link className={cx('overview')} to={`/operations/${props.operationSlug}/overview`} title="View evidence overview" />
+        <Link className={cx('edit')} to={`/operations/${operation.slug}/edit`} title="Edit this operation" />
+        <Link className={cx('overview')} to={`/operations/${operation.slug}/overview`} title="View evidence overview" />
         <OperationBadges {...operation} />
       </header>
       {props.showCreateButtons == 'sidebar-above' && (
@@ -58,7 +48,8 @@ export default (props: {
         type="evidence"
         onSelectQuery={props.onNavigate.bind(null, 'evidence')}
         savedQueries={queries.filter(q => q.type === 'evidence')}
-        onSavedQueryChange={wiredQueries.reload}
+        onSavedQueryChange={() => props.requestQueriesReload?.()}
+        operationSlug={operation.slug}
         {...props}
       />
       <QueryList
@@ -67,11 +58,12 @@ export default (props: {
         type="findings"
         onSelectQuery={props.onNavigate.bind(null, 'findings')}
         savedQueries={queries.filter(q => q.type === 'findings')}
-        onSavedQueryChange={wiredQueries.reload}
+        onSavedQueryChange={() => props.requestQueriesReload?.() }
+        operationSlug={operation.slug}
         {...props}
       />
     </div>
-  ))
+  )
 }
 
 const QueryList = (props: {
@@ -158,7 +150,7 @@ const QueryList = (props: {
           key={savedQuery.id}
           name={savedQuery.name}
           selected={isThisView && props.currentQuery === savedQuery.query}
-          onSelect={() => props.onSelectQuery(savedQuery.query, savedQuery.name)}
+          onSelect={() => props.onSelectQuery(savedQuery.query)}
           menu={(
             <ActionMenu
               name={savedQuery.name}

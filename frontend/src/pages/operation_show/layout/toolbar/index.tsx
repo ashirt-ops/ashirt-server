@@ -13,7 +13,6 @@ import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { getTags, listEvidenceCreators } from 'src/services'
 import { CreateButtonPosition } from '..'
 import { SearchHelpModal } from './search_modal'
-import { useLocation } from 'react-router-dom'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -22,6 +21,7 @@ export const Toolbar = (props: {
   operationSlug: string,
   expandedView: boolean,
   query: string,
+  queryName?: string
   setExpandedView: (expand: boolean) => void,
   viewName: ViewName,
   onSearch: (query: string) => void
@@ -82,6 +82,7 @@ export const Toolbar = (props: {
                   searchOptions={searchOptions}
                   setQueryString={setQueryString}
                   requestQueriesReload={props.requestQueriesReload}
+                  queryName={props.queryName}
                 />
               </div>
             )}
@@ -97,6 +98,7 @@ const ExpandedSearch = (props: {
   operationSlug: string
   viewName: ViewName
   searchOptions: SearchOptions
+  queryName?: string
   setExpandedView: (expand: boolean) => void
   onSearch: (query: string) => void
   setQueryString: (query: string) => void
@@ -105,15 +107,12 @@ const ExpandedSearch = (props: {
   const { operationSlug, viewName, searchOptions,
     setQueryString, onSearch, setExpandedView, requestQueriesReload, } = props
 
-  const location = useLocation()
-  const queryName = new URLSearchParams(location.search).get('name') ?? undefined
-
   return (
     <FilterFieldsGrid
       className={cx('filter-grid')}
       operationSlug={operationSlug}
       viewName={viewName}
-      queryName={queryName}
+      queryName={props.queryName}
       withButtonRow
       value={searchOptions}
       requestQueriesReload={requestQueriesReload}
