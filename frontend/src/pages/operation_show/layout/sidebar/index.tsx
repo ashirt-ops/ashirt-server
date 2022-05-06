@@ -72,7 +72,7 @@ const QueryList = (props: {
   currentView: ViewName,
   name: string,
   onSavedQueryChange: () => void,
-  onSelectQuery: (query: string) => void,
+  onSelectQuery: (query: string, queryName?: string) => void,
   operationSlug: string,
   savedQueries: Array<SavedQuery>,
   type: SavedQueryType,
@@ -141,7 +141,7 @@ const QueryList = (props: {
           key={savedQuery.id}
           name={savedQuery.name}
           selected={isThisView && props.currentQuery === savedQuery.query}
-          onSelect={() => props.onSelectQuery(savedQuery.query)}
+          onSelect={() => props.onSelectQuery(savedQuery.query, savedQuery.name)}
           menu={(
             <ActionMenu
               name={savedQuery.name}
