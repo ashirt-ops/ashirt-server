@@ -25,6 +25,17 @@ export async function saveQuery(i: {
   })
 }
 
+export async function upsertQuery(i: {
+  operationSlug: string,
+  name: string,
+  query: string,
+  type: 'evidence' | 'findings',
+  replaceName?: boolean
+}): Promise<void> {
+  const {operationSlug, ...rest} = i
+  await ds.upsertQuery({operationSlug}, rest)
+}
+
 export async function updateSavedQuery(i: {
   operationSlug: string,
   queryId: number,

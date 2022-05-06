@@ -37,6 +37,11 @@ type UpdateQueryInput struct {
 	Query         string
 }
 
+type UpsertQueryInput struct {
+	CreateQueryInput
+	ReplaceName bool
+}
+
 // CreateQuery inserts a new query into the database
 func CreateQuery(ctx context.Context, db *database.Connection, i CreateQueryInput) (*dtos.Query, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
@@ -160,6 +165,50 @@ func UpdateQuery(ctx context.Context, db *database.Connection, i UpdateQueryInpu
 		return backend.WrapError("Cannot update query", backend.UnauthorizedWriteErr(err))
 	}
 	return nil
+}
+
+func UpsertQuery(ctx context.Context, db *database.Connection, i UpsertQueryInput) (*dtos.Query, error) {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to upsert query", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyQueriesOfOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unable to upsert query", backend.UnauthorizedWriteErr(err))
+	}
+
+	validationError := validateCreateQueryInput(i.CreateQueryInput)
+	if validationError != nil {
+		return nil, backend.WrapError("UpsertQuery validation error", validationError)
+	}
+
+	onDuplicates := "ON DUPLICATE KEY UPDATE "
+
+	if i.ReplaceName {
+		onDuplicates += "name=VALUES(name)"
+	} else {
+		onDuplicates += "query=VALUES(query)"
+	}
+
+	queryID, err := db.Insert("queries", map[string]interface{}{
+		"operation_id": operation.ID,
+		"name":         i.Name,
+		"query":        i.Query,
+		"type":         i.Type,
+	}, onDuplicates)
+	if err != nil {
+		if database.IsAlreadyExistsError(err) {
+			return nil, backend.BadInputErr(backend.WrapError("Query already exists", err), "A query with this name already exists")
+		}
+		return nil, backend.WrapError("Unable to add new query", backend.DatabaseErr(err))
+	}
+
+	return &dtos.Query{
+		ID:    queryID,
+		Name:  i.Name,
+		Query: i.Query,
+		Type:  i.Type,
+	}, nil
 }
 
 func validateCreateQueryInput(input CreateQueryInput) error {
