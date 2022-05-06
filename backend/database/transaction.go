@@ -122,12 +122,18 @@ func (tx *Transactable) Get(model interface{}, sb squirrel.SelectBuilder) error 
 
 // Insert executes a SQL INSERT query, given the tablename along with a columnName:value map.
 // Returns the new row ID added (via LastInsertId), along with an error, if one was encountered
-func (tx *Transactable) Insert(tableName string, valueMap map[string]interface{}) (int64, error) {
+func (tx *Transactable) Insert(tableName string, valueMap map[string]interface{}, onDuplicates ...interface{}) (int64, error) {
 	if tx.Error() != nil {
 		return -1, tx.Error()
 	}
 
 	ins := prepInsert(tableName, valueMap)
+
+	ins, err := addDuplicatesClause(ins, onDuplicates...)
+	if err != nil {
+		return -1, err
+	}
+
 	res, err := tx.exec(ins)
 	if err != nil {
 		tx.transactionError = err
@@ -171,19 +177,13 @@ func (tx *Transactable) BatchInsert(tableName string, count int, mapFn func(int)
 		query = query.Values(values...)
 	}
 
-	if len(onDuplicates) > 0 {
-		stmt, ok := onDuplicates[0].(string)
-		if !ok {
-			return fmt.Errorf("onDuplicate[0] value must be a string")
-		}
-		if len(onDuplicates) > 1 {
-			query = query.Suffix(stmt, onDuplicates[1:])
-		} else {
-			query = query.Suffix(stmt)
-		}
+	query, err := addDuplicatesClause(query, onDuplicates...)
+	if err != nil {
+		tx.transactionError = err
+		return err
 	}
 
-	_, err := tx.exec(query)
+	_, err = tx.exec(query)
 	tx.transactionError = err
 	return err
 }
