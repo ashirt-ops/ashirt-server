@@ -61,7 +61,7 @@ export const FilterFieldsGrid = (props: {
       {...modalProps}
     />
   ))
-  const saveQueryModal = useModal<void>(modalProps=> (
+  const saveQueryModal = useModal<void>(modalProps => (
     <SaveQueryModal
       query={stringifySearch(state)}
       onSaved={() => {
@@ -91,6 +91,8 @@ export const FilterFieldsGrid = (props: {
       })
 
   const dateRange = state.dateRange ?? null
+  // this is a hack to squish the two sets of buttons on the same row. There is no magic "last row" css property
+  const lastRowIndex = props.viewName == 'findings' ? 6 : 5
   return (
     <div className={cx('grid-container', props.className)}>
       <Cell startOfRow span={2}>
@@ -163,11 +165,15 @@ export const FilterFieldsGrid = (props: {
       {/* Always the last row */}
       {props.withButtonRow && (
         <>
-          <ButtonGroup className={cx('button-row')}>
-            <Button onClick={() => props.onCanceled?.()}>{props.cancelText ?? "Close"}</Button>
-            <Button primary onClick={() => props.onSubmit?.(state)}>{props.cancelText ?? "Apply"}</Button>
-          </ButtonGroup>
-          <Button className={cx('save-button')} primary onClick={() =>saveQueryModal.show()}>Save</Button>
+          <div className={cx('button-row')} style={{ gridRow: lastRowIndex }}>
+            <ButtonGroup >
+              <Button onClick={() => props.onCanceled?.()}>{props.cancelText ?? "Close"}</Button>
+              <Button primary onClick={() => props.onSubmit?.(state)}>{props.cancelText ?? "Apply"}</Button>
+            </ButtonGroup>
+          </div>
+          <div className={cx('save-button')} style={{ gridRow: lastRowIndex }}>
+            <Button primary onClick={() => saveQueryModal.show()}>Save</Button>
+          </div>
         </>
       )}
       {renderModals(chooseEvidenceModal, saveQueryModal)}
