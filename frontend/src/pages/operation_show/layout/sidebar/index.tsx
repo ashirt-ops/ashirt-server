@@ -13,12 +13,13 @@ import {getSavedQueries, getOperation} from 'src/services'
 import {useWiredData, useModal, renderModals} from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CreateButtonPosition } from '..'
+import { NavToFunction } from 'src/helpers/navigate-to-query'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   currentQuery: string,
   currentView: ViewName,
-  onNavigate: (view: ViewName, query: string) => void,
+  onNavigate: NavToFunction,
   onRequestCreateFinding: () => void,
   onRequestCreateEvidence: () => void,
   operationSlug: string,
@@ -47,7 +48,7 @@ export default (props: {
         addNew={props.onRequestCreateEvidence}
         name="Evidence"
         type="evidence"
-        onSelectQuery={q => props.onNavigate('evidence', q)}
+        onSelectQuery={props.onNavigate.bind(null, 'evidence')}
         savedQueries={queries.filter(q => q.type === 'evidence')}
         onSavedQueryChange={wiredQueries.reload}
         {...props}
@@ -56,7 +57,7 @@ export default (props: {
         addNew={props.onRequestCreateFinding}
         name="Findings"
         type="findings"
-        onSelectQuery={q => props.onNavigate('findings', q)}
+        onSelectQuery={props.onNavigate.bind(null, 'findings')}
         savedQueries={queries.filter(q => q.type === 'findings')}
         onSavedQueryChange={wiredQueries.reload}
         {...props}

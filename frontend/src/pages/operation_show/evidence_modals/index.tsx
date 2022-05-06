@@ -24,6 +24,7 @@ import {
   moveEvidence
 } from 'src/services'
 import classnames from 'classnames/bind'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 export const CreateEvidenceModal = (props: {
@@ -66,10 +67,10 @@ export const CreateEvidenceModal = (props: {
 
       if (selectedOption.value === 'codeblock' && codeblockField.value !== null) {
         data = { type: 'codeblock', file: codeblockToBlob(codeblockField.value) }
-      } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null ) {
+      } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null) {
         data = { type: selectedOption.value, file: binaryBlobField.value }
       } else if (selectedOption.value === 'event') {
-        data = { type: 'event'}
+        data = { type: 'event' }
       }
 
       return createEvidence({

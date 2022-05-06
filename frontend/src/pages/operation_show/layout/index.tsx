@@ -3,12 +3,13 @@
 
 import * as React from 'react'
 import Sidebar from './sidebar'
-import Toolbar from './toolbar'
+import { Toolbar } from './toolbar'
 import classnames from 'classnames/bind'
 import {CreateEvidenceModal} from '../evidence_modals'
 import {CreateFindingModal} from '../finding_modals'
 import {ViewName} from 'src/global_types'
 import {useModal, renderModals} from 'src/helpers'
+import { NavToFunction } from 'src/helpers/navigate-to-query'
 const cx = classnames.bind(require('./stylesheet'))
 
 const noOp = () => {}
@@ -19,7 +20,7 @@ export default (props: {
   children: React.ReactNode,
   onEvidenceCreated?: () => void,
   onFindingCreated?: () => void,
-  onNavigate: (view: ViewName, query: string) => void,
+  onNavigate: NavToFunction,
   operationSlug: string,
   query: string,
   view: ViewName,
@@ -37,12 +38,12 @@ export default (props: {
     <div className={cx('root')}>
       <div className={cx('toolbar')}>
         <Toolbar
+          operationSlug={props.operationSlug}
+          query={props.query}
+          onSearch={query => props.onNavigate(props.view, query)}
+          viewName={props.view}
           onRequestCreateFinding={() => createFindingModal.show()}
           onRequestCreateEvidence={() => createEvidenceModal.show()}
-          onSearch={query => props.onNavigate(props.view, query)}
-          query={props.query}
-          operationSlug={props.operationSlug}
-          viewName={props.view}
           showCreateButtons={showCreateButtons}
         />
       </div>
