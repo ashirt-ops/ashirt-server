@@ -18,7 +18,6 @@ export default (props: {
       <div className={cx('query')}>{props.query}</div>
     </div>
     <MenuSeparator />
-    <MenuItem icon={require('./edit.svg')} onClick={props.onEdit}>Edit Query</MenuItem>
     <MenuItem icon={require('./delete.svg')} onClick={props.onDelete}>Delete Query</MenuItem>
   </Menu>
 )
