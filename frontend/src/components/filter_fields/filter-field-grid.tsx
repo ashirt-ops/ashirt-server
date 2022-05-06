@@ -67,7 +67,7 @@ export const FilterFieldsGrid = (props: {
       onSaved={() => {
         props.requestQueriesReload?.()
         props.onSubmit?.(state)
-      }} // reload queries sidebar
+      }}
       operationSlug={props.operationSlug}
       view={props.viewName}
       name={props.queryName}
@@ -271,7 +271,8 @@ const ChooseEvidenceModal = (props: {
   )
 }
 
-const SaveQueryModal = (props: {
+// TODO: we probably want to move this, but I'm not sure where we would put this yet.
+export const SaveQueryModal = (props: {
   name?: string,
   query: string,
   operationSlug: string,
