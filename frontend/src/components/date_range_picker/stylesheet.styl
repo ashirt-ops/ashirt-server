@@ -39,30 +39,64 @@
   margin-bottom: 10px
 
 .day-picker
-  :global(.DayPicker-Day)
-    border-radius: 3px !important
-    &:hover
-      background: $darker-background !important
-      border-radius: 3px !important
+  --rdp-cell-size: 35px
+  --rdp-accent-color: $primary
+  --rdp-background-color: $primary
+  --rdp-accent-color-dark: transparent
+  --rdp-background-color-dark: transparent
+  --rdp-outline-selected: 2px solid transparent
+  --rdp-outline: 2px solid transparent
+  
+  :global
+    .rdp-months
+      margin: 1em
+      display: flex
 
-  :global(.DayPicker-Day--today)
-    color: inherit !important
-    background: $darker-background !important
+    .rdp-caption_label
+      font-size: 1.15rem
+      font-weight: 500
 
-  :global(.DayPicker-Day--selected)
-    background: $primary !important
-    border-radius: 0 !important
-    &:hover { background: $darker-primary !important }
+    .rdp-head_cell
+      font-size: .875rem
+      font-weight: normal
+      text-transform: none
+      color: #8B9898
 
-  :global(.DayPicker-Day--start)
-    border-top-left-radius: 3px !important
-    border-bottom-left-radius: 3px !important
-    background: $lighter-primary !important
+    .rdp-day
+      border-radius: 3px
+      &:hover
+        background: $darker-background
+        border-radius: 3px
 
-  :global(.DayPicker-Day--end)
-    border-top-right-radius: 3px !important
-    border-bottom-right-radius: 3px !important
-    background: $lighter-primary !important
+    .rdp-day_today
+      background: $darker-background
+      border-radius: 3px
+      padding-bottom: 2px
 
-  :global(.DayPicker-Day--outside)
-    background: transparent !important
+    .rdp-day_selected
+      background: $primary
+      border-radius: 0
+      &:hover
+        background: $darker-primary
+
+    .rdp-day_range_start
+      border-top-left-radius: 3px
+      border-bottom-left-radius: 3px
+      background: $lighter-primary !important
+
+    .rdp-day_range_end
+      border-top-right-radius: 3px
+      border-bottom-right-radius: 3px
+      background: $lighter-primary !important
+
+    .rdp-nav_button_previous
+      &:hover
+        background: transparent
+      &:focus
+        background: transparent
+        
+    .rdp-nav_button_next
+      &:hover
+        background: transparent
+      &:focus
+        background: transparent
