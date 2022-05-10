@@ -130,9 +130,9 @@ type Query struct {
 
 // AuthSchemeData reflects the structure of the database table 'auth_scheme_data'
 type AuthSchemeData struct {
-	ID                int64      `db:"id"`
+	ID int64 `db:"id"`
 	// AuthScheme defines the name of the authentication method. e.g. Okta
-	AuthScheme        string     `db:"auth_scheme"`
+	AuthScheme string `db:"auth_scheme"`
 	// AuthType defines how the scheme should work. e.g. "oidc" or "local"
 	AuthType          string     `db:"auth_type"`
 	UserKey           string     `db:"user_key"`
