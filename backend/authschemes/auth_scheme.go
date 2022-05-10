@@ -27,5 +27,9 @@ type AuthScheme interface {
 	Name() string
 	FriendlyName() string
 	Flags() []string
+
+	// Type provides a way to identify how a scheme works apart from its name. Currently this has two
+	// "categories". First is "oidc", which is used for any generic OIDC provider. Second is the name
+	// of the method (e.g. "local"), which is used when there's no real alternative to speak of.
 	Type() string
 }
