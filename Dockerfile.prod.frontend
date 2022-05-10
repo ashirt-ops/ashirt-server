@@ -21,6 +21,8 @@ RUN npm run build
 
 FROM nginx:stable
 
-COPY --from=build /build/frontend/public/ /usr/share/nginx/html/
+# Skipping copying public, since it seems to be wrong some of the time
+# COPY --from=build /build/frontend/public/ /usr/share/nginx/html/
 COPY --from=build /build/frontend/dist/ /usr/share/nginx/html/
+COPY --from=build /build/frontend/dist/assets/index.html /usr/share/nginx/html/index.html
 COPY frontend/default.conf.template /etc/nginx/templates/
