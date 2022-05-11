@@ -16,6 +16,18 @@ To get up and running, open the project root in a terminal, install pipenv, and 
 
 ## Configuration
 
+The typical configuration for deploying this worker archetype is going to look roughly like this:
+
+```json
+{
+    "type": "web", 
+    "version": 1,
+    "url": "http://testapp/ashirt/process"
+}
+```
+
+Note the url: this is likely what will change for your version
+
 ## Adding custom logic
 
 Most programs should be able to largely ignore most of the application, and instead focus on `actions/process_handler.py`. The `handle_process` function is ultimately called when new evidence is added to AShirt. Simply add in your logic here to process new pieces of evidence, and you should be good to go.
