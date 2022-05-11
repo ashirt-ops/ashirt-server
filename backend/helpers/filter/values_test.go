@@ -30,8 +30,8 @@ func TestSplitValuesByModifier(t *testing.T) {
 	}
 
 	require.Equal(t, map[filter.FilterModifier][]string{
-		filter.Normal: []string{val1},
-		filter.Not:    []string{val2},
+		filter.Normal: {val1},
+		filter.Not:    {val2},
 	}, values.SplitByModifier())
 }
 
@@ -44,8 +44,8 @@ func TestSplitValues(t *testing.T) {
 	}
 
 	require.Equal(t, map[string][]string{
-		"short": []string{val1},
-		"long":  []string{val2},
+		"short": {val1},
+		"long":  {val2},
 	}, values.SplitValues(func(v filter.Value) string {
 		if len(v.Value) < 6 {
 			return "short"
