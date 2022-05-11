@@ -91,6 +91,51 @@ func TestUpdateQuery(t *testing.T) {
 	require.Equal(t, input.Query, updatedQuery.Query)
 }
 
+func TestUpsertQuery(t *testing.T) {
+	db := initTest(t)
+	HarryPotterSeedData.ApplyTo(t, db)
+	user := UserRon
+	ctx := contextForUser(user, db)
+	op := OpChamberOfSecrets
+
+	checkQueryData := func(i services.UpsertQueryInput, dbModel models.Query){
+		require.Equal(t, i.Name, dbModel.Name)
+		require.Equal(t, i.Type, dbModel.Type)
+		require.Equal(t, i.Query, dbModel.Query)
+	}
+
+	i := services.UpsertQueryInput{
+		CreateQueryInput: services.CreateQueryInput{
+			OperationSlug: op.Slug,
+			Name:          "Ron's amazing query",
+			Query:         "I can sepll!",
+			Type:          "evidence",
+		},
+		ReplaceName: false, // initial value doesn't matter
+	}
+	createdQuery, err := services.UpsertQuery(ctx, db, i)
+	require.NoError(t, err)
+	fullQuery := getQueryByID(t, db, createdQuery.ID)
+	checkQueryData(i, fullQuery)
+
+	// Update the query
+	i.CreateQueryInput.Query = "I can spell!"
+	updatedQuery, err := services.UpsertQuery(ctx, db, i)
+	require.Equal(t, createdQuery.ID, updatedQuery.ID)
+	require.NoError(t, err)
+	fullUpdatedQuery := getQueryByID(t, db, updatedQuery.ID)
+	checkQueryData(i, fullUpdatedQuery)
+
+	// update the name
+	i.CreateQueryInput.Name = "Ron's pretty good query"
+	i.ReplaceName = true
+	updatedQuery, err = services.UpsertQuery(ctx, db, i)
+	require.Equal(t, createdQuery.ID, updatedQuery.ID)
+	require.NoError(t, err)
+	fullUpdatedQuery = getQueryByID(t, db, updatedQuery.ID)
+	checkQueryData(i, fullUpdatedQuery)
+}
+
 type queryValidator func(*testing.T, models.Query, *dtos.Query)
 
 func validateQuery(t *testing.T, expected models.Query, actual *dtos.Query) {
