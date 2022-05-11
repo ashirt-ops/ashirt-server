@@ -226,4 +226,3 @@ const HelpText: Array<FilterDetail> = [
   },
 
 ]
-

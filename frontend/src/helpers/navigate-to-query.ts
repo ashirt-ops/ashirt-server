@@ -35,7 +35,7 @@ export const navigate = (props: NavigateProps) => {
 /**
  * mkNavTo constructs a navigate function that is compatible with existing places where
  * the old navigate function was used
- * 
+ *
  * @param props.slug Which search to use
  * @param props.navTo the function to use to trigger the navigation
  * @returns a function that will navigate to another page based on the provided data

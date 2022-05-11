@@ -40,9 +40,9 @@ export type ApiKey = {
   lastAuth: Date | null,
 }
 
-export type SupportedEvidenceType = 
+export type SupportedEvidenceType =
   | 'image'
-  | 'codeblock' 
+  | 'codeblock'
   | 'terminal-recording'
   | 'http-request-cycle'
   | 'event'

@@ -59,9 +59,9 @@ export const TagChooser = (props: {
  * a more-standard bulletProps. Second, it allows for "not" versions of tags. Additionally, this
  * does not allow for creating tags. This is primarily designed for the query builder. When used in
  * other scenarios, you should consider opting for TagChooser
- * 
- * @param props 
- * @returns 
+ *
+ * @param props
+ * @returns
  */
 export const TagPicker = (props: {
   operationSlug: string,
