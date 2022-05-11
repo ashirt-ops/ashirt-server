@@ -1,0 +1,42 @@
+FROM python:3.10-alpine
+
+# With help from https://pipenv.pypa.io/en/latest/basics/#pipenv-and-docker-containers
+
+WORKDIR /usr/src
+# ENV PIPENV_VENV_IN_PROJECT=1
+RUN pip install --user pipenv
+
+COPY Pipfile.lock Pipfile ./
+
+RUN /root/.local/bin/pipenv requirements > requirements.txt
+RUN pip install -r requirements.txt
+
+# RUN /root/.local/bin/pipenv sync
+
+# ###
+
+# FROM python:3.10-alpine AS runner
+
+# WORKDIR /usr/src
+
+###################################
+# Install other dependencies here #
+###################################
+
+# COPY --from=builder /usr/src/.venv/ ./venv
+# COPY docker_prod_startup.sh ./start.sh
+COPY src .
+
+EXPOSE 80
+
+# This is alpine's guest user
+USER 405
+
+# some guidance on using gunicorn in containers:
+# https://pythonspeed.com/articles/gunicorn-in-docker/
+# CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", \
+#      "--workers=2", "--threads=4", "--worker-class=gthread", \
+#      "-b", "0.0.0.0:80", "wsgi:app"]
+
+CMD ["watch", "ls -al"]
+# CMD ["start.sh"]
