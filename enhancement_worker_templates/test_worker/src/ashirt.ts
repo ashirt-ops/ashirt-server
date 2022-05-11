@@ -34,6 +34,14 @@ export class AShirtService {
     })
   }
 
+  async createOperation(body: CreateOperationInput) {
+    return this.makeRequest<Buffer>({
+      method: 'POST',
+      path: `/api/operations`,
+      body: JSON.stringify(body)
+    })
+  }
+
   async makeRequest<T>(
     config: RequestConfig,
     guard?: (o: unknown) => o is T,
@@ -87,7 +95,7 @@ export class AShirtService {
     return formatRFC7231(new Date())
   }
 
-  private generateAuthorizationHeaderValue(data: {
+  generateAuthorizationHeaderValue(data: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' // more methods with a similar naming style are possible
     path: string
     date: string // in RFC1123 format
@@ -121,4 +129,9 @@ type ResponseWrapper<T> = {
   responseCode: number,
   contentType: string
   data: T
+}
+
+type CreateOperationInput = {
+  slug: string
+  name: string
 }
