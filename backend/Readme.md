@@ -411,7 +411,7 @@ This project has been verified to build and run on Linux and MacOS X. Windows ma
 
 ### Dependencies
 
-* Go 1.13
+* Go 1.18
   * To get supporing libraries, use `go mod download`
   * To clean up libraries, use `go mod tidy`
 * MySQL 8
