@@ -9,7 +9,7 @@ export default (props: {
   maxHeight?: number,
   children: React.ReactNode,
 }) => (
-  <div className={cx('root')} style={{maxHeight: props.maxHeight}}>
+  <div className={cx('root')} style={{ maxHeight: props.maxHeight }}>
     {props.children}
   </div>
 )
@@ -21,12 +21,14 @@ export const MenuItem = (props: {
   selected?: boolean,
   disabled?: boolean,
   danger?: boolean,
+  onKeyUp?: (e: React.KeyboardEvent) => void,
+  onKeyDown?: (e: React.KeyboardEvent) => void,
 }) => {
-  const ref = React.useRef<HTMLButtonElement|null>(null)
+  const ref = React.useRef<HTMLButtonElement | null>(null)
 
   React.useEffect(() => {
     if (props.selected && ref.current != null) {
-      ref.current.scrollIntoView({block: 'nearest'})
+      ref.current.scrollIntoView({ block: 'nearest' })
     }
   }, [props.selected])
 
@@ -36,12 +38,15 @@ export const MenuItem = (props: {
         selected: props.selected,
         clickable: props.onClick && !props.disabled,
         disabled: props.disabled,
-        danger: props.danger})}
+        danger: props.danger,
+      })}
       onClick={props.onClick}
+      onKeyUp={props.onKeyUp}
+      onKeyDown={props.onKeyDown}
       ref={ref}
     >
       {props.icon && (
-        <div className={cx('icon')} style={{backgroundImage: `url(${props.icon})`}} />
+        <div className={cx('icon')} style={{ backgroundImage: `url(${props.icon})` }} />
       )}
       {props.children}
     </button>

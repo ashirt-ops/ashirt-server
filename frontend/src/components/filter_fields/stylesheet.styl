@@ -1,0 +1,40 @@
+.summary-container
+  margin-bottom: 10px
+
+.grid-container
+  overflow: auto
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  // grid-template-columns: 1fr 1fr 1fr
+  gap: 10px
+  justify-content: space-between
+  align-content: space-between
+  margin-bottom: 5px
+
+.grid-col-1
+  grid-column-start: 1
+
+.grid-span-2
+  grid-column-end: span 2
+
+.button-row
+  grid-column: 1 / span 2
+  justify-self: center
+  margin 2px
+  
+.save-button
+  grid-column: 2
+  justify-self: flex-end
+
+.multi-item-row
+  display: flex
+  justify-content: space-between
+
+  :not(:last-child)
+    margin-right: 5px
+
+.flex-input
+  flex-grow: 1
+
+.checkbox-cell
+  align-self: center

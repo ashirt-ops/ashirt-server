@@ -1,21 +1,23 @@
-// Copyright 2021, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as dateFns from 'date-fns'
 
-import { parseQuery, parseDateRangeString } from 'src/helpers'
-import { SupportedEvidenceType, Tag } from 'src/global_types'
+import { parseQuery, parseDateRangeString, ParsedQuery, FilterModifier, FilterModified } from 'src/helpers'
+import { Tag, User } from 'src/global_types'
+import { BulletProps, creatorToBulletProps, supportedEvidenceTypes, tagToBulletProps } from 'src/components/bullet_chooser'
+import { isNotUndefined } from 'src/helpers/is_not_undefined'
 
 export type SearchOptions = {
   text: string,
   sortAsc: boolean,
   uuid?: string,
-  tags?: Array<Tag>,
-  operator?: string,
-  type?: SupportedEvidenceType,
+  tags?: Array<BulletProps>,
+  operator?: Array<BulletProps>,
+  type?: Array<BulletProps>,
   dateRange?: [Date, Date],
   hasLink?: boolean,
-  withEvidenceUuid?: string,
+  withEvidenceUuid?: Array<string>,
 }
 
 const quoteText = (tagName: string) => tagName.includes(' ') ? `"${tagName}"` : tagName
@@ -26,71 +28,105 @@ const dateToRange = (dates: [Date, Date]) => {
   return `${fmt(dates[0])},${fmt(dates[1])}`
 }
 
+const itemize = <T>(vals: Array<T> | undefined, tf: (v: T) => string): string => (
+  vals ? vals.map(tf).join(' ') : ''
+)
+
+const itemizeBulletProps = (
+  data: Array<BulletProps> | undefined, label: string, tf?: (v: BulletProps) => string
+): string => {
+  const orNot = (v: BulletProps): string => {
+    const trueVal = tf?.(v) ?? v.id
+    return (
+      v.modifier == 'not'
+        ? `!${trueVal}`
+        : `${trueVal}`
+    )
+  }
+
+  return itemize(data, (t) => `${label}:${orNot(t)}`)
+}
+
 export const stringifySearch = (searchOpts: SearchOptions) => {
   return ([
     searchOpts.text,
-    searchOpts.tags ? searchOpts.tags.map(tag => `tag:${quoteText(tag.name)}`).join(' ') : '',
-    searchOpts.operator ? `operator:${searchOpts.operator}` : '',
+    itemizeBulletProps(searchOpts.tags, "tag", tag => quoteText(tag.name)),
+    itemizeBulletProps(searchOpts.operator, "operator"),
     searchOpts.dateRange ? `range:${dateToRange(searchOpts.dateRange)}` : '',
     (searchOpts.hasLink != undefined) ? `linked:${searchOpts.hasLink}` : '',
     searchOpts.sortAsc ? 'sort:asc' : '',
-    searchOpts.type ? `type:${searchOpts.type}` : '',
-    searchOpts.withEvidenceUuid ? `with-evidence:${searchOpts.withEvidenceUuid}` : '',
+    itemizeBulletProps(searchOpts.type, "type"),
+    itemize(searchOpts.withEvidenceUuid, (evi => `with-evidence:${evi}`)),
     searchOpts.uuid ? `uuid:${searchOpts.uuid}` : '',
   ])
     .filter(item => item != '') // remove the entries that aren't actually present
     .join(' ')
 }
 
-export const stringToSearch = (searchText: string, allTags: Array<Tag> = []) => {
-  const tokens: { [key: string]: Array<string> } = parseQuery(searchText)
+const findAndModify = <T>(
+  values: Array<T>,
+  finder: (v: T) => boolean,
+  modifier?: FilterModifier
+): (FilterModified<T>) | undefined => {
+  const result = values.find(finder)
+  return result ? { ...result, modifier } : undefined
+}
+
+export const stringToSearch = (
+  searchText: string,
+  allTags: Array<Tag> = [],
+  allCreators: Array<User> = []
+) => {
+  const tokens: ParsedQuery = parseQuery(searchText)
 
   const opts: SearchOptions = {
     text: '',
     sortAsc: false,
   }
 
-  Object.entries(tokens).forEach(([key, values]) => {
+  Object.entries(tokens).forEach(([key, filterValues]) => {
     if (key == '') {
-      opts.text = values.map(item => quoteText(item)).join(' ')
+      opts.text = filterValues.map(item => quoteText(item.value)).join(' ')
     }
     else if (key == 'tag') {
-      opts.tags = values.
-        map(tagName => allTags.find(tag => tag.name == tagName)).
-        filter(isNotUndefined)
+      opts.tags = filterValues
+        .map(fVal => findAndModify(allTags, (tag => tag.name == fVal.value), fVal.modifier))
+        .map(tagToBulletProps)
+        .filter(isNotUndefined)
     }
     else if (key == 'operator') {
-      opts.operator = values[0]
+      opts.operator = filterValues
+        .map(fVal => findAndModify(allCreators, (c => c.slug == fVal.value), fVal.modifier))
+        .map(creatorToBulletProps)
+        .filter(isNotUndefined)
     }
     else if (key == 'range') {
-      const range = parseDateRangeString(values[0])
+      const range = parseDateRangeString(filterValues[0].value)
       if (range) {
         opts.dateRange = range
       }
     }
     else if (key == 'type') {
-      opts.type = values[0] as SupportedEvidenceType
+      opts.type = filterValues
+        .map(fVal => findAndModify(supportedEvidenceTypes, (t => t.id == fVal.value), fVal.modifier))
+        .filter(isNotUndefined)
     }
     else if (key == 'linked') {
-      const interpretedVal = values[0].toLowerCase().trim()
+      const interpretedVal = filterValues[0].value.toLowerCase().trim()
       if (interpretedVal == 'true' || interpretedVal == 'false') {
         opts.hasLink = (interpretedVal == 'true')
       }
     }
     else if (key == 'uuid') {
-      opts.uuid = values[0]
+      opts.uuid = filterValues[0].value
     }
     else if (key == 'with-evidence') {
-      opts.withEvidenceUuid = values[0]
+      opts.withEvidenceUuid = filterValues.map(v => v.value)
     }
     else if (key == 'sort') {
-      opts.sortAsc = ['asc', 'ascending', 'chronological'].includes(values[0])
+      opts.sortAsc = ['asc', 'ascending', 'chronological'].includes(filterValues[0].value)
     }
   })
 
   return opts
-}
-
-function isNotUndefined<T>(t: T | undefined): t is T {
-  return t != undefined
 }

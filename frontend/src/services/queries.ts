@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { SavedQuery } from 'src/global_types'
@@ -23,6 +23,17 @@ export async function saveQuery(i: {
     query: i.query.trim(),
     type: i.type,
   })
+}
+
+export async function upsertQuery(i: {
+  operationSlug: string,
+  name: string,
+  query: string,
+  type: 'evidence' | 'findings',
+  replaceName?: boolean
+}): Promise<void> {
+  const {operationSlug, ...rest} = i
+  await ds.upsertQuery({operationSlug}, rest)
 }
 
 export async function updateSavedQuery(i: {

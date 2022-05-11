@@ -27,7 +27,7 @@ export default (props: {
   name: string,
   color: string,
   selected?: boolean,
-  onClick?: () => void,
+  onClick?: (e: React.MouseEvent) => void,
   className?: string,
   disabled?: boolean,
 }) => (

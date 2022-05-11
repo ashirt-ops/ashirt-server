@@ -1,80 +1,75 @@
 @import '~src/vars'
 
-.root
-  display: flex
-  justify-content: space-around
+.toolbar-root
   margin: 10px
 
+.toolbar-flex
+  display: flex
+  justify-content: space-between
+
   & > *
-    margin: 0 10px;
+    margin: 0 10px
 
-.search-container
-  position: relative
-  width: 500px
+.tb-expand-button
+  width: 35px
+  height: @width
+  background-image: url('./edit.svg')
+  background-position: center center
+  background-repeat: no-repeat
+  background-size: 12px
+  opacity: 0.75
+  border-radius: 3px
+  align-self: flex-start
+  flex-grow: 0
+
+.tb-content
   flex-grow: 1
+  
+.tb-create-buttons
+  flex-grow: 0
 
-.search
+.tb-search-container
+  position: relative
+  min-width: 500px
+
+.tb-search
   width: 100%
 
-.search-input
-  padding-right: 60px
+.tb-search-input
+  padding-right: 35px
 
-p
-  margin-bottom: 10px
 
-em
-  font-style: italic
-
-.code, .example, .filter-field
-  background-color: #383838
+.toolbar-overlay
+  position: absolute
+  z-index: 1
+  top: 9px
+  left: 70px
+  background-color: $background
   border: 1px solid #222
-  border-radius: 2px
-  font-family: monospace
+  border-radius: 3px
+  padding: 5px
+  animation-duration: 200ms
+  animation-name: overlay-show
+  min-width: 600px
+  width: 60%
 
-.code, .filter-field
-  display: inline
-  padding: 0 2px 0 2px
-  white-space nowrap
+@keyframes overlay-show
+  from
+    opacity: 0
+    visibility: hidden
 
-.filter-field
-  margin-right: 5px
+  to
+    opacity: 1
+    visibility: visible
+    
 
-.example
-  display: block
-  margin: 10px 0 10px 0
-  padding-left: 15px
-  border-radius: 2px
-
-.filter-description
-  padding-bottom: 3px
-
-.filter-row
-  p
-    line-height: 1.1
+.filter-grid
+  padding: 10px 10px 0 10px
 
 .search-help-icon
   position: absolute
   background-image: url('./qmark.svg')
   right: 4px
-  top: 4px
-  width: 25px
-  height: @width
-  background-position: center center
-  background-repeat: no-repeat
-  background-size: 12px
-  transition: all 200ms
-  opacity: 0.4
-  border-radius: 3px
-  cursor: pointer
-
-  &:hover
-    opacity: 1
-    background-color: $background
-
-.edit-filter-icon
-  position: absolute
-  background-image: url('./edit.svg')
-  right: 30px
   top: 4px
   width: 25px
   height: @width

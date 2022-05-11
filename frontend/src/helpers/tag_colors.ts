@@ -1,9 +1,32 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
+export type TagColor =
+  | "blue"
+  | "yellow"
+  | "green"
+  | "indigo"
+  | "orange"
+  | "pink"
+  | "red"
+  | "teal"
+  | "vermilion"
+  | "violet"
+  | "lightBlue"
+  | "lightYellow"
+  | "lightGreen"
+  | "lightIndigo"
+  | "lightOrange"
+  | "lightPink"
+  | "lightRed"
+  | "lightTeal"
+  | "lightVermilion"
+  | "lightViolet"
+  | "disabledGray"
 
 // We store color names instead of hex codes in the
 // database to allow color scheme changes in the future
-const TAG_COLORS: {[key: string]: number} = {
+const TAG_COLORS: Record<TagColor, number> = {
   blue           : 0x0E5A8A,
   yellow         : 0xA67908,
   green          : 0x0A6640,
@@ -33,8 +56,39 @@ export const disabledGray = "disabledGray"
 
 export const tagColorNames = Object.keys(TAG_COLORS)
 
-export const tagColorNameToColor = (key: string): number =>
-  TAG_COLORS[key] || 0x000000
+export const tagColorNameToColor = (key: string): number => {
+  // typescript complains that a string won't match, but we're accounting for that here.
+  return TAG_COLORS[key as TagColor] ?? 0x000000
+}
+
+export const shiftColor = (key: TagColor): TagColor => {
+  const shifted: Record<TagColor, TagColor> = {
+    blue: 'lightBlue',
+    yellow: 'lightYellow',
+    green: 'lightGreen',
+    indigo: 'lightIndigo',
+    orange: 'lightOrange',
+    pink: 'lightPink',
+    red: 'lightRed',
+    teal: 'lightTeal',
+    vermilion: 'lightVermilion',
+    violet: 'lightViolet',
+
+    lightBlue: 'blue',
+    lightYellow: 'yellow',
+    lightGreen: 'green',
+    lightIndigo: 'indigo',
+    lightOrange: 'orange',
+    lightPink: 'pink',
+    lightRed: 'red',
+    lightTeal: 'teal',
+    lightVermilion: 'vermilion',
+    lightViolet: 'violet',
+
+    disabledGray: 'disabledGray',
+  }
+  return shifted[key]
+}
 
 export const randomTagColorName = (): string =>
   tagColorNames[Math.round(Math.random() * (tagColorNames.length - 1))]
