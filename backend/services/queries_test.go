@@ -98,7 +98,7 @@ func TestUpsertQuery(t *testing.T) {
 	ctx := contextForUser(user, db)
 	op := OpChamberOfSecrets
 
-	checkQueryData := func(i services.UpsertQueryInput, dbModel models.Query){
+	checkQueryData := func(i services.UpsertQueryInput, dbModel models.Query) {
 		require.Equal(t, i.Name, dbModel.Name)
 		require.Equal(t, i.Type, dbModel.Type)
 		require.Equal(t, i.Query, dbModel.Query)

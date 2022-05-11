@@ -35,7 +35,7 @@ func TestSplitDateValues(t *testing.T) {
 
 	require.Equal(t, map[string][]filter.DateRange{
 		"in-2020": {val1},
-		"outside":  {val2},
+		"outside": {val2},
 	}, values.SplitValues(func(v filter.DateValue) string {
 		if v.Value.From.Year() == 2020 {
 			return "in-2020"
@@ -50,7 +50,7 @@ func TestDateValue(t *testing.T) {
 	require.Equal(t, val2, values.Value(1))
 }
 
-func testSetup() (filter.DateRange, filter.DateRange, filter.DateValues){
+func testSetup() (filter.DateRange, filter.DateRange, filter.DateValues) {
 	val1 := filter.DateRange{
 		From: date(2020, 1, 10),
 		To:   date(2020, 1, 12),
