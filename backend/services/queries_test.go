@@ -34,7 +34,6 @@ func TestCreateQuery(t *testing.T) {
 	require.Equal(t, i.Query, fullQuery.Query)
 }
 
-
 func TestDeleteQuery(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
@@ -91,7 +90,6 @@ func TestUpdateQuery(t *testing.T) {
 	require.Equal(t, input.Name, updatedQuery.Name)
 	require.Equal(t, input.Query, updatedQuery.Query)
 }
-
 
 type queryValidator func(*testing.T, models.Query, *dtos.Query)
 
