@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as dtos from './dtos/dtos'
@@ -49,6 +49,8 @@ export interface DataSource {
   deleteEvidence(ids: OpSlug & EvidenceUuid, payload: { deleteAssociatedFindings: boolean }): Promise<void>
   getEvidenceMigrationDifference(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<dtos.TagDifference>
   moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
+  createEvidenceMetadata(ids: OpSlug & EvidenceUuid, payload: { source: string, body: string }): Promise<void>
+  updateEvidenceMetadata(ids: OpSlug & EvidenceUuid, payload: { source: string, body: string }): Promise<void>
 
   listFindingCategories(includeDeleted: boolean): Promise<Array<dtos.FindingCategory>>
   createFindingCategory(payload: { category: string }): Promise<dtos.FindingCategory>
