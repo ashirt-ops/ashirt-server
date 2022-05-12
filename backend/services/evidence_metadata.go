@@ -93,7 +93,7 @@ func UpsertEvidenceMetadata(ctx context.Context, db *database.Connection, i Upse
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		var metadata []models.EvidenceMetadata
-		tx.Select(&metadata, sq.Select().From("evidence_metadata").Where(sq.Eq{
+		tx.Select(&metadata, sq.Select("*").From("evidence_metadata").Where(sq.Eq{
 			"evidence_id": evidence.ID,
 			"source":      i.Source,
 		}))
