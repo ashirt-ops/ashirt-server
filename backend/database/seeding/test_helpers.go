@@ -408,10 +408,10 @@ type TestOptions struct {
 
 func (opts *TestOptions) useDefaults() {
 	if opts.DatabasePath == nil {
-		opts.DatabasePath = helpers.StringPtr("../migrations")
+		opts.DatabasePath = helpers.Ptr("../migrations")
 	}
 	if opts.DatabaseName == nil {
-		opts.DatabaseName = helpers.StringPtr("service-test-db")
+		opts.DatabaseName = helpers.Ptr("service-test-db")
 	}
 }
 
