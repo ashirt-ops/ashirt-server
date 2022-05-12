@@ -1,17 +1,20 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as dateFns from 'date-fns'
 
-function stringifyQuery(tokens: {[key: string]: Array<string>}): string {
+function stringifyQuery(tokens: { [key: string]: Array<FilterValue> }): string {
   const query = []
 
   for (let key in tokens) {
     for (let token of tokens[key]) {
       let part = ''
       if (key !== '') part = `${key}:`
-      if (token.indexOf(' ') === -1) part += token
-      else part += `"${token}"`
+      if (token.modifier == 'not') {
+        part += "!"
+      }
+      if (token.value.indexOf(' ') === -1) part += token.value
+      else part += `"${token.value}"`
       query.push(part)
     }
   }
@@ -19,8 +22,22 @@ function stringifyQuery(tokens: {[key: string]: Array<string>}): string {
   return query.join(' ')
 }
 
-export function parseQuery(query: string): {[key: string]: Array<string>} {
-  const tokenized: {[key: string]: Array<string>} = {}
+export type FilterModifier = "not" | undefined
+
+export type FilterValue = {
+  value: string
+  modifier?: FilterModifier
+}
+
+export type FilterModified<T> = T & {
+  modifier?: FilterModifier
+}
+
+export type ParsedQuery = { [key: string]: Array<FilterValue> }
+
+export function parseQuery(query: string): ParsedQuery {
+  const tokenized: { [key: string]: Array<FilterValue> } = {}
+  let modifier: FilterModifier
   let currentToken = ''
   let inQuote = false
   let currentKey = ''
@@ -28,12 +45,16 @@ export function parseQuery(query: string): {[key: string]: Array<string>} {
   const pushToken = () => {
     if (currentToken.length === 0) return
     if (tokenized[currentKey] == null) tokenized[currentKey] = []
-    tokenized[currentKey].push(currentToken)
+    tokenized[currentKey].push({
+      modifier,
+      value: currentToken,
+    })
     currentToken = ''
     currentKey = ''
+    modifier = undefined
   }
 
-  for (let i = 0; i < query.length; i++ ) {
+  for (let i = 0; i < query.length; i++) {
     switch (query[i]) {
       case ' ':
         if (inQuote) break
@@ -47,6 +68,13 @@ export function parseQuery(query: string): {[key: string]: Array<string>} {
         currentKey = currentToken
         currentToken = ''
         continue
+
+      // modifiers
+      case '!':
+        if (currentKey != "" && currentToken == "") {
+          modifier = "not"
+          continue
+        }
     }
     currentToken += query[i]
   }
@@ -55,25 +83,29 @@ export function parseQuery(query: string): {[key: string]: Array<string>} {
 }
 
 export function addTagToQuery(query: string, tagToAdd: string): string {
-  const tokenized = parseQuery(query)
-  if (!tokenized.tag) tokenized.tag = []
-  else if (tokenized.tag.indexOf(tagToAdd) !== -1) return query
-  tokenized.tag.push(tagToAdd)
-  return stringifyQuery(tokenized)
+  return addFieldToQuery(query, "tag", tagToAdd)
 }
 
 export function addOperatorToQuery(query: string, userSlugToAdd: string): string {
+  return addFieldToQuery(query, "operator", userSlugToAdd)
+}
+
+function addFieldToQuery(query: string, field: string, value: string, negate?: boolean): string {
   const tokenized = parseQuery(query)
-  tokenized.operator = [userSlugToAdd]
+  tokenized[field] = (tokenized[field] ?? [])
+  if (tokenized[field].findIndex(item => item.value === value) !== -1) {
+    return query
+  }
+  tokenized[field].push({ value: value, modifier: negate ? "not" : undefined })
   return stringifyQuery(tokenized)
 }
 
 export function getDateRangeFromQuery(query: string): [Date, Date] | null {
   const tokenized = parseQuery(query)
-  if (!tokenized.range){
+  if (!tokenized.range) {
     return null
   }
-  return parseDateRangeString(tokenized.range[0])
+  return parseDateRangeString(tokenized.range[0].value)
 }
 
 export function parseDateRangeString(dateRangeStr: string): [Date, Date] | null {
@@ -96,7 +128,7 @@ export function addOrUpdateDateRangeInQuery(query: string, range: [Date, Date] |
       )
       return useShorthand ? dateFns.format(d, 'yyyy-MM-dd') : d.toISOString()
     })
-    tokenized.range = [stringifiedRange.join(',')]
+    tokenized.range = [{ value: stringifiedRange.join(',') }]
   }
   return stringifyQuery(tokenized)
 }

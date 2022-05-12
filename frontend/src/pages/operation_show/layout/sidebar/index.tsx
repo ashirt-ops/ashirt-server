@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -6,61 +6,77 @@ import ActionMenu from './action_menu'
 import OperationBadges from 'src/components/operation_badges'
 import classnames from 'classnames/bind'
 import {Link} from 'react-router-dom'
-import {NewQueryModal, EditQueryModal, DeleteQueryModal} from './query_modal'
-import { SavedQuery, SavedQueryType, ViewName} from 'src/global_types'
+import { EditQueryModal, DeleteQueryModal} from './query_modal'
+import { Operation, SavedQuery, SavedQueryType, ViewName} from 'src/global_types'
 import {default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu} from 'src/components/list_menu'
-import {getSavedQueries, getOperation} from 'src/services'
-import {useWiredData, useModal, renderModals} from 'src/helpers'
+import { useModal, renderModals} from 'src/helpers'
+import { default as Button, ButtonGroup } from 'src/components/button'
+import { CreateButtonPosition } from '..'
+import { NavToFunction } from 'src/helpers/navigate-to-query'
+import { SaveQueryModal } from 'src/components/filter_fields/filter-field-grid'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   currentQuery: string,
   currentView: ViewName,
-  onNavigate: (view: ViewName, query: string) => void,
-  operationSlug: string,
+  onNavigate: NavToFunction,
+  onRequestCreateFinding: () => void,
+  onRequestCreateEvidence: () => void,
+  showCreateButtons: CreateButtonPosition
+  queries: Array<SavedQuery>
+  operation: Operation
+  requestQueriesReload?: () => void
 }) => {
-  const wiredQueries = useWiredData(React.useCallback(() => Promise.all([
-    getSavedQueries({operationSlug: props.operationSlug}),
-    getOperation(props.operationSlug),
-  ]), [props.operationSlug]))
-
-  return wiredQueries.render(([queries, operation]) => (
+  const {operation, queries} = props
+  return (
     <div className={cx('root')}>
       <header>
         <h1 title={operation.name}>{operation.name}</h1>
-        <Link className={cx('edit')} to={`/operations/${props.operationSlug}/edit`} title="Edit this operation" />
-        <Link className={cx('overview')} to={`/operations/${props.operationSlug}/overview`} title="View evidence overview" />
+        <Link className={cx('edit')} to={`/operations/${operation.slug}/edit`} title="Edit this operation" />
+        <Link className={cx('overview')} to={`/operations/${operation.slug}/overview`} title="View evidence overview" />
         <OperationBadges {...operation} />
       </header>
+      {props.showCreateButtons == 'sidebar-above' && (
+        <ButtonGroup className={cx('create-evi-finding-group')}>
+          <Button size="medium" onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
+          <Button size="medium" onClick={props.onRequestCreateFinding}>Create Finding</Button>
+        </ButtonGroup>
+      )}
       <QueryList
+        addNew={props.onRequestCreateEvidence}
         name="Evidence"
         type="evidence"
-        onSelectQuery={q => props.onNavigate('evidence', q)}
+        onSelectQuery={props.onNavigate.bind(null, 'evidence')}
         savedQueries={queries.filter(q => q.type === 'evidence')}
-        onSavedQueryChange={wiredQueries.reload}
+        onSavedQueryChange={() => props.requestQueriesReload?.()}
+        operationSlug={operation.slug}
         {...props}
       />
       <QueryList
+        addNew={props.onRequestCreateFinding}
         name="Findings"
         type="findings"
-        onSelectQuery={q => props.onNavigate('findings', q)}
+        onSelectQuery={props.onNavigate.bind(null, 'findings')}
         savedQueries={queries.filter(q => q.type === 'findings')}
-        onSavedQueryChange={wiredQueries.reload}
+        onSavedQueryChange={() => props.requestQueriesReload?.() }
+        operationSlug={operation.slug}
         {...props}
       />
     </div>
-  ))
+  )
 }
 
 const QueryList = (props: {
+  addNew: () => void
   currentQuery: string,
   currentView: ViewName,
   name: string,
-  onSavedQueryChange: () => void,
-  onSelectQuery: (query: string) => void,
+  onSavedQueryChange: (queryName?: string) => void,
+  onSelectQuery: (query: string, queryName?: string) => void,
   operationSlug: string,
   savedQueries: Array<SavedQuery>,
   type: SavedQueryType,
+  showCreateButtons: CreateButtonPosition
 }) => {
   const isThisView = props.currentView === props.type
   const currentQueryIsNew = (
@@ -69,8 +85,8 @@ const QueryList = (props: {
     !props.savedQueries.find(q => props.currentQuery === q.query)
   )
 
-  const onCreated = () => {
-    props.onSavedQueryChange()
+  const onCreated = (queryName: string) => {
+    props.onSavedQueryChange(queryName)
   }
   const onEdited = (before: SavedQuery, after: SavedQuery) => {
     if (before.query === props.currentQuery && before.query !== after.query) {
@@ -87,9 +103,18 @@ const QueryList = (props: {
     props.onSavedQueryChange()
   }
 
-  const newQueryModal = useModal<void>(modalProps => (
-    <NewQueryModal {...modalProps} operationSlug={props.operationSlug} query={props.currentQuery} type={props.type} onCreated={onCreated} />
+  const saveQueryModal = useModal<void>(modalProps => (
+    <SaveQueryModal
+      query={props.currentQuery}
+      onSaved={(queryName: string) => {
+        onCreated(queryName)
+      }}
+      operationSlug={props.operationSlug}
+      view={props.currentView}
+      {...modalProps}
+    />
   ))
+
   const editQueryModal = useModal<{savedQuery: SavedQuery}>(modalProps => (
     <EditQueryModal {...modalProps} operationSlug={props.operationSlug} onEdited={onEdited} view={props.type}/>
   ))
@@ -98,7 +123,12 @@ const QueryList = (props: {
   ))
 
   return <>
-    <h2>{props.name}</h2>
+    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
+      <h2>{props.name}</h2>
+      {props.showCreateButtons === 'sidebar-inline' && (
+        <Button small onClick={props.addNew}>Add New</Button>
+      )}
+    </div>
     <ListMenu>
       <ListItem
         name={`All ${props.name}`}
@@ -111,7 +141,7 @@ const QueryList = (props: {
           name={props.currentQuery}
           selected // If this is displayed it is always selected
           onSelect={() => {}}
-          onSave={() => newQueryModal.show()}
+          onSave={() => saveQueryModal.show()}
         />
       )}
 
@@ -133,6 +163,6 @@ const QueryList = (props: {
       ))}
     </ListMenu>
 
-    {renderModals(newQueryModal, editQueryModal, deleteQueryModal)}
+    {renderModals(saveQueryModal, editQueryModal, deleteQueryModal)}
   </>
 }

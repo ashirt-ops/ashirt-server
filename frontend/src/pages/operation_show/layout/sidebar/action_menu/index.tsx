@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -18,7 +18,6 @@ export default (props: {
       <div className={cx('query')}>{props.query}</div>
     </div>
     <MenuSeparator />
-    <MenuItem icon={require('./edit.svg')} onClick={props.onEdit}>Edit Query</MenuItem>
     <MenuItem icon={require('./delete.svg')} onClick={props.onDelete}>Delete Query</MenuItem>
   </Menu>
 )

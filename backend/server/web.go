@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package server
@@ -551,6 +551,23 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		return services.CreateQuery(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpsertQueryInput{
+			CreateQueryInput: services.CreateQueryInput{
+				OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+				Name:          dr.FromBody("name").Required().AsString(),
+				Query:         dr.FromBody("query").Required().AsString(),
+				Type:          dr.FromBody("type").Required().AsString(),
+			},
+			ReplaceName: dr.FromBody("replaceName").OrDefault(false).AsBool(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.UpsertQuery(r.Context(), db, i)
 	}))
 
 	route(r, "PUT", "/operations/{operation_slug}/queries/{query_id}", jsonHandler(func(r *http.Request) (interface{}, error) {

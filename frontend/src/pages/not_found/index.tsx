@@ -11,4 +11,3 @@ export default () => {
     <ErrorDisplay err={new Error(`404 - The path ${pathname} is invalid`)} />
   )
 }
-

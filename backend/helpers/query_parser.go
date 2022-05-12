@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package helpers
@@ -11,23 +11,18 @@ import (
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
-
-// DateRange is a simple struct representing a slice of time From a point To a point
-type DateRange struct {
-	From time.Time
-	To   time.Time
-}
 
 // TimelineFilters represents all of the parsed timeline configuraions
 type TimelineFilters struct {
-	UUID             string
+	UUID             filter.Values
 	Text             []string
-	Tags             []string
-	Type             string
-	Operator         string
-	DateRange        *DateRange
-	WithEvidenceUUID string
+	Tags             filter.Values
+	Type             filter.Values
+	Operator         filter.Values
+	DateRanges       filter.DateValues
+	WithEvidenceUUID filter.Values
 	Linked           *bool
 	SortAsc          bool
 }
@@ -40,42 +35,34 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 	for k, v := range tokenizeTimelineQuery(query) {
 		switch k {
 		case "":
-			timelineFilters.Text = v
+			timelineFilters.Text = v.Values()
 		case "tag":
 			timelineFilters.Tags = v
 		case "operator":
-			if len(v) != 1 {
-				errReason := "Only one operator can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.Operator = v[0]
+			timelineFilters.Operator = v
 		case "range":
-			dateRange, err := parseRangeQuery(v)
-			if err != nil {
-				return timelineFilters, err
+			ranges := make(filter.DateValues, len(v))
+			for i, v := range v {
+				temp, err := parseRangeQuery(v)
+				if err != nil {
+					return timelineFilters, err
+				}
+				ranges[i] = temp
 			}
-			timelineFilters.DateRange = dateRange
+			timelineFilters.DateRanges = ranges
 		case "uuid":
-			if len(v) != 1 {
-				errReason := "Only one uuid can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.UUID = v[0]
+			timelineFilters.UUID = v
 		case "with-evidence":
-			if len(v) != 1 {
-				errReason := "Only one with-evidence can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.WithEvidenceUUID = v[0]
+			timelineFilters.WithEvidenceUUID = v
 		case "linked":
 			if len(v) != 1 {
 				errReason := "Linked can only be specified once"
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
 			}
-			if strings.ToLower(v[0]) == "all" {
+			if strings.ToLower(v.Value(0)) == "all" {
 				continue // providing a 3rd option here to allow for easy filter-removal
 			}
-			val, err := strconv.ParseBool(v[0])
+			val, err := strconv.ParseBool(v.Value(0))
 			if err != nil {
 				errReason := "Linked value must be True or False"
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
@@ -86,16 +73,12 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 				errReason := "Only one sorting flag can be specified"
 				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
 			}
-			direction := strings.ToLower(v[0])
+			direction := strings.ToLower(v.Value(0))
 			if direction == "asc" || direction == "chronological" || direction == "ascending" {
 				timelineFilters.SortAsc = true
 			}
 		case "type":
-			if len(v) != 1 {
-				errReason := "Only one evidence type can be specified"
-				return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
-			}
-			timelineFilters.Type = v[0]
+			timelineFilters.Type = v
 		default:
 			errReason := fmt.Sprintf("Unknown filter key '%s'", k)
 			return timelineFilters, backend.BadInputErr(errors.New(errReason), errReason)
@@ -123,8 +106,9 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 //   "": []string{"foo", "bar baz"},
 //   "tag": []string{"fizz buzz"},
 // }
-func tokenizeTimelineQuery(query string) map[string][]string {
-	parsed := map[string][]string{}
+func tokenizeTimelineQuery(query string) map[string]filter.Values {
+	parsed := map[string]filter.Values{}
+	modifier := filter.Normal
 	currentToken := ""
 	inQuote := false
 	currentKey := ""
@@ -134,10 +118,12 @@ func tokenizeTimelineQuery(query string) map[string][]string {
 		case ' ':
 			if !inQuote {
 				if len(currentToken) > 0 {
-					parsed[currentKey] = append(parsed[currentKey], currentToken)
+					filterValue := filter.Value{Value: currentToken, Modifier: modifier}
+					parsed[currentKey] = append(parsed[currentKey], filterValue)
 				}
 				currentToken = ""
 				currentKey = ""
+				modifier = filter.Normal
 				continue
 			}
 		case '"':
@@ -149,23 +135,39 @@ func tokenizeTimelineQuery(query string) map[string][]string {
 				currentToken = ""
 				continue
 			}
+
+		// modifiers
+		case '!':
+			if currentKey != "" && currentToken == "" {
+				modifier = filter.Not
+				continue
+			}
 		}
 		currentToken += string(char)
 	}
 	if len(currentToken) > 0 {
-		parsed[currentKey] = append(parsed[currentKey], currentToken)
+		filterValue := filter.Value{Value: currentToken, Modifier: modifier}
+		parsed[currentKey] = append(parsed[currentKey], filterValue)
 	}
 	return parsed
 }
 
-func parseRangeQuery(rangeQuery []string) (*DateRange, error) {
-	if len(rangeQuery) != 1 {
-		errReason := fmt.Sprintf("Query can only have one date ranges. (%d ranges supplied)", len(rangeQuery))
-		return nil, backend.BadInputErr(errors.New(errReason), errReason)
+func parseRangeQuery(protoDate filter.Value) (filter.DateValue, error) {
+	dateRange, err := parseDateRangeString(protoDate.Value)
+	noVal := filter.DateValue{}
+	if err != nil {
+		return noVal, err
 	}
-	split := strings.Split(rangeQuery[0], ",")
+	return filter.DateValue{
+		Value:    *dateRange,
+		Modifier: protoDate.Modifier,
+	}, nil
+}
+
+func parseDateRangeString(dateRange string) (*filter.DateRange, error) {
+	split := strings.Split(dateRange, ",")
 	if len(split) != 2 {
-		errReason := fmt.Sprintf("Query range must be in the format [date],[date]. (Got '%s')", rangeQuery[0])
+		errReason := fmt.Sprintf("Query range must be in the format [date],[date]. (Got '%s')", dateRange)
 		return nil, backend.BadInputErr(errors.New(errReason), errReason)
 	}
 	from, err := parseTime(split[0], false)
@@ -176,7 +178,7 @@ func parseRangeQuery(rangeQuery []string) (*DateRange, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DateRange{from, to}, nil
+	return &filter.DateRange{From: from, To: to}, nil
 }
 
 func parseTime(str string, useEndOfDayIfTimeIsMissing bool) (time.Time, error) {

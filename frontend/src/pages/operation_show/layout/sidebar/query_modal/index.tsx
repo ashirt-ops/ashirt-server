@@ -49,7 +49,7 @@ const SaveOrEditModal = (props: {
           operationSlug={props.operationSlug}
           viewName={props.view}
           allCreators={users}
-          searchOptions={searchOptions || stringToSearch(props.query, tags)}
+          searchOptions={searchOptions || stringToSearch(props.query, tags, users)}
           onChanged={setSearchOptions}
         />
       ))}

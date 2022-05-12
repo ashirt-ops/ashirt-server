@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -13,6 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -105,52 +106,23 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 	return findingsDTO, nil
 }
 
-const findingsTagWhereComponent = "findings.id IN (" +
-	"  SELECT findings.id FROM findings" +
-	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
-	"  INNER JOIN tag_evidence_map ON tag_evidence_map.evidence_id = evidence_finding_map.evidence_id" +
-	"  LEFT JOIN tags ON tags.id = tag_evidence_map.tag_id" +
-	"  WHERE tags.name IN (?)" +
-	"  GROUP BY findings.id HAVING COUNT(DISTINCT tags.id) = ?" +
-	")"
-
-const findingsDateRangeWhereComponent = "findings.id IN (" +
-	"  SELECT findings.id FROM findings" +
-	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
-	"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-	"  GROUP BY findings.id HAVING MAX(evidence.occurred_at) >= ? AND MIN(evidence.occurred_at) <= ?" +
-	")"
-
-const findingsOperatorWhereComponent = "findings.id IN (" +
-	"  SELECT findings.id FROM findings" +
-	"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
-	"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-	"  LEFT JOIN users ON users.id = evidence.operator_id" +
-	"  WHERE users.slug = ?" +
-	")"
-
-const findingsEvidenceUUIDWhereComponent = "findings.id IN (" +
-	"  SELECT finding_id FROM evidence_finding_map" +
-	"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
-	"  WHERE evidence.uuid = ?" +
-	")"
-
 const findingsTextWhereComponent = "(findings.title LIKE ? OR findings.description LIKE ?)"
-const findingsUUIDWhereComponent = "findings.uuid = ?"
 const findingsOperationIDWhereComponent = "findings.operation_id = ?"
 
 func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFilters) (string, []interface{}) {
 	queryFilters := []string{findingsOperationIDWhereComponent}
 	queryValues := []interface{}{operationID}
 
-	if filters.UUID != "" {
-		queryFilters = append(queryFilters, findingsUUIDWhereComponent)
-		queryValues = append(queryValues, filters.UUID)
+	addWhere := func(vals filter.Values, whereFunc func(bool) string) {
+		findingAddWhereAndNot(&queryFilters, &queryValues, vals, whereFunc)
+	}
+
+	if len(filters.UUID) > 0 {
+		addWhere(filters.UUID, findingUUIDWhere)
 	}
 
 	if len(filters.Tags) > 0 {
-		queryFilters = append(queryFilters, findingsTagWhereComponent)
-		queryValues = append(queryValues, filters.Tags, len(filters.Tags))
+		addWhere(filters.Tags, findingTagOrWhere)
 	}
 
 	for _, text := range filters.Text {
@@ -159,19 +131,21 @@ func buildListFindingsWhereClause(operationID int64, filters helpers.TimelineFil
 		queryValues = append(queryValues, fuzzyText, fuzzyText)
 	}
 
-	if filters.DateRange != nil {
-		queryFilters = append(queryFilters, findingsDateRangeWhereComponent)
-		queryValues = append(queryValues, filters.DateRange.From, filters.DateRange.To)
+	if values := filters.DateRanges; len(values) > 0 {
+		// we're only going to support a single date range for now TODO
+		dateFilter := values[0]
+		include := !(dateFilter.Modifier == filter.Not)
+
+		queryFilters = append(queryFilters, findingDateRangeWhere(include))
+		queryValues = append(queryValues, dateFilter.Value.From, dateFilter.Value.To)
 	}
 
-	if filters.Operator != "" {
-		queryFilters = append(queryFilters, findingsOperatorWhereComponent)
-		queryValues = append(queryValues, filters.Operator)
+	if len(filters.Operator) > 0 {
+		addWhere(filters.Operator, findingOperatorWhere)
 	}
 
-	if filters.WithEvidenceUUID != "" {
-		queryFilters = append(queryFilters, findingsEvidenceUUIDWhereComponent)
-		queryValues = append(queryValues, filters.WithEvidenceUUID)
+	if len(filters.WithEvidenceUUID) > 0 {
+		addWhere(filters.WithEvidenceUUID, findingEvidenceUUIDWhere)
 	}
 
 	return strings.Join(queryFilters, " AND "), queryValues
@@ -206,4 +180,78 @@ func allTagsByID(db *database.Connection) (map[int64]dtos.Tag, error) {
 		}
 	}
 	return tagsByID, nil
+}
+
+func findingAddWhereAndNot(queryFilters *[]string, queryValues *[]interface{}, vals filter.Values, whereFunc func(bool) string) {
+	splitValues := vals.SplitByModifier()
+
+	if values := splitValues[filter.Normal]; len(values) > 0 {
+		*queryFilters = append(*queryFilters, whereFunc(true))
+		*queryValues = append(*queryValues, values)
+	}
+	if values := splitValues[filter.Not]; len(values) > 0 {
+		*queryFilters = append(*queryFilters, whereFunc(false))
+		*queryValues = append(*queryValues, values)
+	}
+}
+
+func inOrNotIn(in bool) string {
+	if in {
+		return "IN"
+	}
+	return "NOT IN"
+}
+
+func findingUUIDWhere(in bool) string {
+	return "findings.uuid " + inOrNotIn(in) + " (?)"
+}
+
+func findingOperatorWhere(in bool) string {
+	return "findings.id " + inOrNotIn(in) + " (" +
+		"  SELECT findings.id FROM findings" +
+		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
+		"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
+		"  LEFT JOIN users ON users.id = evidence.operator_id" +
+		"  WHERE users.slug IN(?)" +
+		")"
+}
+
+func findingEvidenceUUIDWhere(in bool) string {
+	return "findings.id " + inOrNotIn(in) + " (" +
+		"  SELECT finding_id FROM evidence_finding_map" +
+		"  LEFT JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
+		"  WHERE evidence.uuid IN (?)" +
+		")"
+}
+
+func findingDateRangeWhere(in bool) string {
+	return "findings.id " + inOrNotIn(in) + " (" +
+		"  SELECT findings.id FROM findings" +
+		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
+		"  INNER JOIN evidence ON evidence.id = evidence_finding_map.evidence_id" +
+		"  GROUP BY findings.id HAVING MAX(evidence.occurred_at) >= ? AND MIN(evidence.occurred_at) <= ?" +
+		")"
+}
+
+// func findingTagAndWhere(is bool) string {
+// 	return findingTagWhere(is, true)
+// }
+
+func findingTagOrWhere(in bool) string {
+	return findingTagWhere(in, false)
+}
+
+func findingTagWhere(in, all bool) string {
+	groupBy := ""
+	if all {
+		groupBy = "  GROUP BY findings.id HAVING COUNT(DISTINCT tags.id) = ?"
+	}
+	return "findings.id " + inOrNotIn(in) + " (" +
+		"  SELECT findings.id FROM findings" +
+		"  INNER JOIN evidence_finding_map ON evidence_finding_map.finding_id = findings.id" +
+		"  INNER JOIN tag_evidence_map ON tag_evidence_map.evidence_id = evidence_finding_map.evidence_id" +
+		"  LEFT JOIN tags ON tags.id = tag_evidence_map.tag_id" +
+		"  WHERE tags.name IN (?)" +
+		groupBy +
+		")"
 }

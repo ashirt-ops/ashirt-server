@@ -4,11 +4,12 @@
 import * as React from 'react'
 import FindingsTable from './findings_table'
 import Layout from '../layout'
-import { Finding, ViewName } from 'src/global_types'
+import { Finding } from 'src/global_types'
 import { DeleteFindingModal, EditFindingModal } from '../finding_modals'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getFindings } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
+import { mkNavTo } from 'src/helpers/navigate-to-query'
 
 export default () => {
   const { slug } = useParams<{ slug: string }>()
@@ -23,11 +24,10 @@ export default () => {
     query,
   }), [operationSlug, query]))
 
-  const doNavigate = (view: ViewName, query: string) => {
-    let path = `/operations/${operationSlug}/${view}`
-    if (query != '') path += `?q=${encodeURIComponent(query.trim())}`
-    navigate(path)
-  }
+  const navTo = mkNavTo({
+    navTo: navigate,
+    slug: operationSlug
+  })
 
   const editFindingModal = useModal<{ finding: Finding }>(modalProps => (
     <EditFindingModal {...modalProps} onEdited={wiredFindings.reload} operationSlug={operationSlug} />
@@ -39,7 +39,7 @@ export default () => {
   return (
     <Layout
       onFindingCreated={wiredFindings.reload}
-      onNavigate={doNavigate}
+      onNavigate={navTo}
       operationSlug={operationSlug}
       query={query}
       view="findings"

@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -10,6 +10,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -94,29 +95,49 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 
 func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filters helpers.TimelineFilters) sq.SelectBuilder {
 	sb = sb.Where(sq.Eq{"evidence.operation_id": operationID})
-	if filters.UUID != "" {
-		sb = sb.Where(sq.Eq{"evidence.uuid": filters.UUID})
+	if len(filters.UUID) > 0 {
+		sb = addWhereAndNot(sb, filters.UUID, evidenceUUIDWhere)
 	}
 
 	for _, text := range filters.Text {
 		sb = sb.Where(sq.Like{"description": "%" + text + "%"})
 	}
 
-	if filters.DateRange != nil {
-		sb = sb.Where(sq.GtOrEq{"evidence.occurred_at": filters.DateRange.From}).
-			Where(sq.LtOrEq{"evidence.occurred_at": filters.DateRange.To})
+	if values := filters.DateRanges; len(values) > 0 {
+		splitValues := values.SplitByModifier()
+
+		if splitVals := splitValues[filter.Normal]; len(splitVals) > 0 {
+			stmts := make(sq.Or, len(splitVals))
+			for i, v := range splitVals {
+				stmts[i] = sq.And{
+					sq.GtOrEq{"evidence.occurred_at": v.From},
+					sq.LtOrEq{"evidence.occurred_at": v.To},
+				}
+			}
+			sb = sb.Where(stmts)
+		}
+		if splitVals := splitValues[filter.Not]; len(splitVals) > 0 {
+			// there's not a great way to do this, so falling back to expr and string construction
+			stmts := make(sq.And, len(splitVals))
+			for i, v := range splitVals {
+				stmts[i] = sq.Expr(
+					"NOT( evidence.occurred_at >= ? AND evidence.occurred_at <= ?)", v.From, v.To,
+				)
+			}
+			sb = sb.Where(stmts)
+		}
 	}
 
-	if filters.Operator != "" {
-		sb = sb.Where(eviForOpOperatorWhereComponent, filters.Operator)
+	if len(filters.Operator) > 0 {
+		sb = addWhereAndNot(sb, filters.Operator, evidenceOperatorWhere)
 	}
 
 	if len(filters.Tags) > 0 {
-		sb = sb.Where(eviForOpTagWhereComponent, filters.Tags, len(filters.Tags))
+		sb = addWhereAndNot(sb, filters.Tags, evidenceTagOrWhere)
 	}
 
-	if filters.Type != "" {
-		sb = sb.Where(sq.Eq{"evidence.content_type": filters.Type})
+	if len(filters.Type) > 0 {
+		sb = addWhereAndNot(sb, filters.Type, evidenceTypeWhere)
 	}
 
 	if filters.Linked != nil {
@@ -133,11 +154,49 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 	return sb
 }
 
-const eviForOpTagWhereComponent = "evidence.id IN (" +
-	"  SELECT evidence_id FROM tags" +
-	"  LEFT JOIN tag_evidence_map ON tag_evidence_map.tag_id = tags.id" +
-	"  WHERE tags.name IN (?)" +
-	"  GROUP BY evidence_id HAVING COUNT(*) = ?" +
-	")"
-const eviForOpOperatorWhereComponent = "evidence.operator_id = (SELECT id FROM users WHERE slug = ?)"
 const eviLinkedSubquery = "(SELECT evidence_id FROM evidence_finding_map)"
+
+func evidenceUUIDWhere(in bool) string {
+	return "evidence.uuid " + inOrNotIn(in) + " (?)"
+}
+
+func evidenceOperatorWhere(in bool) string {
+	return "evidence.operator_id " + inOrNotIn(in) + " (SELECT id FROM users WHERE slug IN (?))"
+}
+
+func evidenceTypeWhere(in bool) string {
+	return "evidence.content_type " + inOrNotIn(in) + " (?)"
+}
+
+func evidenceTagOrWhere(in bool) string {
+	return evidenceTagWhere(in, false)
+}
+
+// func evidenceTagAndWhere(is bool) string {
+// 	return evidenceTagWhere(is, true)
+// }
+
+func evidenceTagWhere(in, all bool) string {
+	groupBy := ""
+	if all {
+		groupBy = "  GROUP BY evidence_id HAVING COUNT(*) = ?"
+	}
+	return "evidence.id " + inOrNotIn(in) + " (" +
+		"  SELECT evidence_id FROM tag_evidence_map" +
+		"  LEFT JOIN tags ON tag_evidence_map.tag_id = tags.id" +
+		"  WHERE tags.name IN (?)" +
+		groupBy +
+		")"
+}
+
+func addWhereAndNot(sb sq.SelectBuilder, vals filter.Values, whereFunc func(bool) string) sq.SelectBuilder {
+	splitValues := vals.SplitByModifier()
+
+	if values := splitValues[filter.Normal]; len(values) > 0 {
+		sb = sb.Where(whereFunc(true), values)
+	}
+	if values := splitValues[filter.Not]; len(values) > 0 {
+		sb = sb.Where(whereFunc(false), values)
+	}
+	return sb
+}

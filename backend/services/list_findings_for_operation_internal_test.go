@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
@@ -43,14 +44,22 @@ func TestBuildListFindingsWhereClause(t *testing.T) {
 	}
 
 	test(helpers.TimelineFilters{}, []string{}, []interface{}{}) // no filters test
-	test(helpers.TimelineFilters{UUID: "abc"}, []string{findingsUUIDWhereComponent}, []interface{}{"abc"})
-	test(helpers.TimelineFilters{Tags: []string{"fraggle", "rock"}}, []string{findingsTagWhereComponent}, []interface{}{[]string{"fraggle", "rock"}, 2})
+	val := filter.Values{filter.Val("abc")}
+	test(helpers.TimelineFilters{UUID: val}, []string{findingUUIDWhere(true)}, []interface{}{val.Values()})
+
+	val = filter.Values{filter.Val("fraggle"), filter.Val("rock")}
+	test(helpers.TimelineFilters{Tags: val}, []string{findingTagOrWhere(true)}, []interface{}{val.Values()})
 	test(helpers.TimelineFilters{Text: []string{"some", "text"}}, []string{findingsTextWhereComponent, findingsTextWhereComponent}, []interface{}{"%some%", "%some%", "%text%", "%text%"})
 
 	start, end := time.Now(), time.Now().Add(5*time.Second)
-	test(helpers.TimelineFilters{DateRange: &helpers.DateRange{From: start, To: end}}, []string{findingsDateRangeWhereComponent}, []interface{}{start, end})
-	test(helpers.TimelineFilters{Operator: "MyOp"}, []string{findingsOperatorWhereComponent}, []interface{}{"MyOp"})
-	test(helpers.TimelineFilters{WithEvidenceUUID: "abc"}, []string{findingsEvidenceUUIDWhereComponent}, []interface{}{"abc"})
+	dates := filter.DateValues{
+		filter.DateVal(filter.DateRange{From: start, To: end}),
+	}
+	test(helpers.TimelineFilters{DateRanges: dates}, []string{findingDateRangeWhere(true)}, []interface{}{start, end})
+	val = filter.Values{filter.Val("MyOp")}
+	test(helpers.TimelineFilters{Operator: val}, []string{findingOperatorWhere(true)}, []interface{}{val.Values()})
+	val = filter.Values{filter.Val("abc")}
+	test(helpers.TimelineFilters{WithEvidenceUUID: val}, []string{findingEvidenceUUIDWhere(true)}, []interface{}{val.Values()})
 }
 
 // TestAllTagsByID is a unit-test suite for the allTagsByID function.

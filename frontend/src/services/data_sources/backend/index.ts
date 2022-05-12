@@ -57,6 +57,7 @@ export const backendDataSource: DataSource = {
 
   listQueries: ids => req('GET', `/operations/${ids.operationSlug}/queries`),
   createQuery: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/queries`, payload),
+  upsertQuery: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/queries`, payload),
   updateQuery: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/queries/${ids.queryId}`, payload),
   deleteQuery: ids => req('DELETE', `/operations/${ids.operationSlug}/queries/${ids.queryId}`),
 

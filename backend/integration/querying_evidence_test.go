@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package integration_test
@@ -90,7 +90,7 @@ func TestQueryingEvidence(t *testing.T) {
 	expectQueryToReturnIDs(t, a, `found password`, []string{e3, e2})
 	expectQueryToReturnIDs(t, a, `"found password"`, []string{e3})
 	expectQueryToReturnIDs(t, a, `tag:"Password Cracking"`, []string{e3, e2})
-	expectQueryToReturnIDs(t, a, `tag:"Password Cracking" tag:"Lateral Movement"`, []string{e3})
+	expectQueryToReturnIDs(t, a, `tag:"Password Cracking" tag:"Lateral Movement"`, []string{e3, e2, e1})
 	expectQueryToReturnIDs(t, a, `dev tag:"Lateral Movement"`, []string{})
 	expectQueryToReturnIDs(t, a, `tag:UnknownTag`, []string{})
 	expectQueryToReturnIDs(t, a, `range:2018-01-01,2018-12-31`, []string{})

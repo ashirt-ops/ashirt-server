@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/require"
@@ -32,10 +33,10 @@ func TestBuildListEvidenceWhereClause(t *testing.T) {
 	require.Equal(t, " WHERE evidence.operation_id = ?", toWhere(noFilterBuilder))
 	require.Equal(t, []interface{}{opID}, toWhereValues(noFilterBuilder))
 
-	uuid := "a"
-	uuidBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{UUID: uuid})
-	require.Equal(t, " WHERE evidence.operation_id = ? AND evidence.uuid = ?", toWhere(uuidBuilder))
-	require.Equal(t, []interface{}{opID, uuid}, toWhereValues(uuidBuilder))
+	uuids := filter.Values{filter.Val("a")}
+	uuidBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{UUID: uuids})
+	require.Equal(t, " WHERE evidence.operation_id = ? AND evidence.uuid IN (?)", toWhere(uuidBuilder))
+	require.Equal(t, []interface{}{opID, uuids.Values()}, toWhereValues(uuidBuilder))
 
 	text := []string{"one", "two"}
 	descBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{Text: text})
@@ -43,17 +44,30 @@ func TestBuildListEvidenceWhereClause(t *testing.T) {
 	require.Equal(t, []interface{}{opID, "%" + text[0] + "%", "%" + text[1] + "%"}, toWhereValues(descBuilder))
 
 	start, end := time.Now(), time.Now().Add(5*time.Second)
-	dateBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{DateRange: &helpers.DateRange{From: start, To: end}})
-	require.Equal(t, " WHERE evidence.operation_id = ? AND evidence.occurred_at >= ? AND evidence.occurred_at <= ?", toWhere(dateBuilder))
-	require.Equal(t, []interface{}{opID, start, end}, toWhereValues(dateBuilder))
+	singleDate := filter.DateValues{
+		filter.DateVal(filter.DateRange{From: start, To: end}),
+	}
+	datePart := "(evidence.occurred_at >= ? AND evidence.occurred_at <= ?)"
+	singleDateBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{DateRanges: singleDate})
+	require.Equal(t, " WHERE evidence.operation_id = ? AND ("+datePart+")", toWhere(singleDateBuilder))
+	require.Equal(t, []interface{}{opID, start, end}, toWhereValues(singleDateBuilder))
 
-	operator := "Johnny 5"
-	operatorBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{Operator: operator})
-	require.Equal(t, " WHERE evidence.operation_id = ? AND "+eviForOpOperatorWhereComponent, toWhere(operatorBuilder))
-	require.Equal(t, []interface{}{opID, operator}, toWhereValues(operatorBuilder))
+	start2, end2 := time.Now(), time.Now().Add(5*time.Second)
+	dates := filter.DateValues{
+		filter.DateVal(filter.DateRange{From: start, To: end}),
+		filter.DateVal(filter.DateRange{From: start2, To: end2}),
+	}
+	multiDateBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{DateRanges: dates})
+	require.Equal(t, " WHERE evidence.operation_id = ? AND ("+datePart+" OR "+datePart+")", toWhere(multiDateBuilder))
+	require.Equal(t, []interface{}{opID, start, end, start2, end2}, toWhereValues(multiDateBuilder))
 
-	tags := []string{"alpha", "beta", "gamma"}
+	operators := filter.Values{filter.Val("Johnny 5")}
+	operatorBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{Operator: operators})
+	require.Equal(t, " WHERE evidence.operation_id = ? AND "+evidenceOperatorWhere(true), toWhere(operatorBuilder))
+	require.Equal(t, []interface{}{opID, operators.Values()}, toWhereValues(operatorBuilder))
+
+	tags := filter.Values{filter.Val("alpha"), filter.Val("beta"), filter.Val("gamma")}
 	tagBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{Tags: tags})
-	require.Equal(t, " WHERE evidence.operation_id = ? AND "+eviForOpTagWhereComponent, toWhere(tagBuilder))
-	require.Equal(t, []interface{}{opID, tags, len(tags)}, toWhereValues(tagBuilder))
+	require.Equal(t, " WHERE evidence.operation_id = ? AND "+evidenceTagOrWhere(true), toWhere(tagBuilder))
+	require.Equal(t, []interface{}{opID, tags.Values()}, toWhereValues(tagBuilder))
 }

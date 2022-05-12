@@ -1,14 +1,16 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package helpers_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
 
 func testTimelineQueryCase(t *testing.T, input string, expectedOutput helpers.TimelineFilters) {
@@ -34,38 +36,94 @@ func TestParseTimelineQuery(t *testing.T) {
 		Text: []string{"Text", "without", "quotes", "text with quotes"},
 	})
 	testTimelineQueryCase(t, "tag:MyTag", helpers.TimelineFilters{
-		Tags: []string{"MyTag"},
+		Tags: filter.Values{filter.Val("MyTag")},
 	})
 	testTimelineQueryCase(t, "tag:MyTag tag:OtherTag", helpers.TimelineFilters{
-		Tags: []string{"MyTag", "OtherTag"},
+		Tags: filter.Values{
+			filter.Val("MyTag"),
+			filter.Val("OtherTag"),
+		},
 	})
 	testTimelineQueryCase(t, `tag:"Tag with spaces"`, helpers.TimelineFilters{
-		Tags: []string{"Tag with spaces"},
+		Tags: filter.Values{filter.Val("Tag with spaces")},
 	})
 	testTimelineQueryCase(t, `"Some text" search tag:"First tag" more "text search" tag:SecondTag`, helpers.TimelineFilters{
 		Text: []string{"Some text", "search", "more", "text search"},
-		Tags: []string{"First tag", "SecondTag"},
+		Tags: filter.Values{filter.Val("First tag"), filter.Val("SecondTag")},
 	})
 	testTimelineQueryCase(t, "Text   with        extra spaces   tag:tag", helpers.TimelineFilters{
 		Text: []string{"Text", "with", "extra", "spaces"},
-		Tags: []string{"tag"},
+		Tags: filter.Values{filter.Val("tag")},
 	})
 	testTimelineQueryCase(t, `operator:alice`, helpers.TimelineFilters{
-		Operator: "alice",
+		Operator: filter.Values{filter.Val("alice")},
 	})
+	testTimelineQueryCase(t, `Multiple Operators   operator:alice operator:bob`, helpers.TimelineFilters{
+		Text:     []string{"Multiple", "Operators"},
+		Operator: filter.Values{filter.Val("alice"), filter.Val("bob")},
+	})
+
 	testTimelineQueryCase(t, `Date range example range:2019-05-01,2019-08-05`, helpers.TimelineFilters{
-		Text:      []string{"Date", "range", "example"},
-		DateRange: &helpers.DateRange{time.Date(2019, 5, 1, 0, 0, 0, 0, time.UTC), time.Date(2019, 8, 5, 23, 59, 59, 0, time.UTC)},
+		Text: []string{"Date", "range", "example"},
+		DateRanges: filter.DateValues{
+			filter.DateVal(filter.DateRange{
+				From: time.Date(2019, 5, 1, 0, 0, 0, 0, time.UTC),
+				To:   time.Date(2019, 8, 5, 23, 59, 59, 0, time.UTC),
+			}),
+		},
 	})
 	testTimelineQueryCase(t, `Time range example range:2019-05-01T08:00:00Z,2019-08-05T19:30:00Z`, helpers.TimelineFilters{
-		Text:      []string{"Time", "range", "example"},
-		DateRange: &helpers.DateRange{time.Date(2019, 5, 1, 8, 0, 0, 0, time.UTC), time.Date(2019, 8, 5, 19, 30, 0, 0, time.UTC)},
+		Text: []string{"Time", "range", "example"},
+		DateRanges: filter.DateValues{
+			filter.DateVal(filter.DateRange{
+				From: time.Date(2019, 5, 1, 8, 0, 0, 0, time.UTC),
+				To:   time.Date(2019, 8, 5, 19, 30, 0, 0, time.UTC),
+			}),
+		},
 	})
-	testTimelineQueryCase(t, `uuid:00000000-1234-5678-ABCD-000000000000`, helpers.TimelineFilters{
-		UUID: "00000000-1234-5678-ABCD-000000000000",
+
+	mkUuid := func(digit string) string {
+		pad := ""
+		for i := 0; i < 8; i++ {
+			pad += digit
+		}
+		return fmt.Sprintf("%v-1234-5678-ABCD-000000000000", pad)
+	}
+
+	uuid0 := mkUuid("0")
+	uuid1 := mkUuid("1")
+	testTimelineQueryCase(t, fmt.Sprintf(`uuid:%v`, uuid0), helpers.TimelineFilters{
+		UUID: filter.Values{filter.Val(uuid0)},
 	})
-	testTimelineQueryCase(t, `with-evidence:00000000-1234-5678-ABCD-000000000000`, helpers.TimelineFilters{
-		WithEvidenceUUID: "00000000-1234-5678-ABCD-000000000000",
+	testTimelineQueryCase(t, fmt.Sprintf(`uuid:!%v`, uuid0), helpers.TimelineFilters{
+		UUID: filter.Values{filter.NotVal(uuid0)},
+	})
+	testTimelineQueryCase(t, fmt.Sprintf(`Multiple UUIDs   uuid:%v  uuid:%v`, uuid0, uuid1), helpers.TimelineFilters{
+		Text: []string{"Multiple", "UUIDs"},
+		UUID: filter.Values{
+			filter.Val(uuid0),
+			filter.Val(uuid1),
+		},
+	})
+	testTimelineQueryCase(t, fmt.Sprintf(`with-evidence:%v`, uuid0), helpers.TimelineFilters{
+		WithEvidenceUUID: filter.Values{
+			filter.Val(uuid0),
+		},
+	})
+
+	testTimelineQueryCase(t, fmt.Sprintf(`Multiple withEvidence   with-evidence:%v with-evidence:%v`, uuid0, uuid1), helpers.TimelineFilters{
+		Text: []string{"Multiple", "withEvidence"},
+		WithEvidenceUUID: filter.Values{
+			filter.Val(uuid0),
+			filter.Val(uuid1),
+		},
+	})
+
+	testTimelineQueryCase(t, `type:image`, helpers.TimelineFilters{
+		Type: filter.Values{filter.Val("image")},
+	})
+	testTimelineQueryCase(t, `type:image type:codeblock`, helpers.TimelineFilters{
+		Type: filter.Values{filter.Val("image"), filter.Val("codeblock")},
 	})
 
 	True := true
@@ -97,12 +155,9 @@ func TestParseTimelineQuery(t *testing.T) {
 	})
 
 	testTimelineQueryExpectErr(t, `invalid keys cause error invalid:value`)
-	testTimelineQueryExpectErr(t, `multiple operators       cause error operator:alice operator:bob`)
-	testTimelineQueryExpectErr(t, `multiple uuids           cause error uuid:ABC123 uuid:XYZ789`) // actual uuid doesn't currently matter
-	testTimelineQueryExpectErr(t, `multiple with_evidence   cause error with-evidence:ABC123 with-evidence:XYZ789`)
 	testTimelineQueryExpectErr(t, `multiple linked          cause error linked:all linked:true`)
 	testTimelineQueryExpectErr(t, `multiple sort_directions cause error sort:desc sort:asc`)
-	testTimelineQueryExpectErr(t, `unparsable bool/not all cause error linked:maybe`)
+	testTimelineQueryExpectErr(t, `unparsable bool/not all  cause error linked:maybe`)
 	testTimelineQueryExpectErr(t, `unparsable date cause error range:2021-01-01,2021-02-31`)
 	testTimelineQueryExpectErr(t, `unparsable date cause error (alt) range:2021-01-01`)
 }

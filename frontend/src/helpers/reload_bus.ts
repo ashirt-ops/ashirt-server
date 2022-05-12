@@ -37,14 +37,14 @@ export const BuildReloadBus = () => {
 }
 
 type Runnable = () => void
-type ListenerFunc = (listener: () => void) => void
+export type ReloadListenerFunc = (listener: () => void) => void
 
 export type BusSupportedService = {
   requestReload: Runnable
-  onReload: ListenerFunc
-  offReload: ListenerFunc
+  onReload: ReloadListenerFunc
+  offReload: ReloadListenerFunc
   reloadDone: Runnable
-  onReloadDone: ListenerFunc
-  offReloadDone: ListenerFunc
+  onReloadDone: ReloadListenerFunc
+  offReloadDone: ReloadListenerFunc
   clean: Runnable
 }

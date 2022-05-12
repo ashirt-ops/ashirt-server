@@ -81,6 +81,7 @@ export interface DataSource {
 
   listQueries(ids: OpSlug): Promise<Array<dtos.Query>>
   createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings' }): Promise<void>
+  upsertQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings', replaceName?: boolean }): Promise<void>
   updateQuery(ids: OpSlug & QueryId, payload: { name: string, query: string }): Promise<void>
   deleteQuery(ids: OpSlug & QueryId): Promise<void>
 
