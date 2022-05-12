@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -63,11 +63,15 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 			tx.Delete(sq.Delete("evidence_finding_map").Where(sq.Eq{"finding_id": findingIDs}))
 			tx.Delete(sq.Delete("findings").Where(sq.Eq{"id": findingIDs}))
 
-			// remove all evidence
 			var evidenceIDs = make([]int64, len(evidence))
 			for i, evi := range evidence {
 				evidenceIDs[i] = evi.ID
 			}
+
+			// remove evidence metadata
+			tx.Delete(sq.Delete("evidence_metadata").Where(sq.Eq{"evidence_id": evidenceIDs}))
+
+			// remove all evidence
 			tx.Delete(sq.Delete("evidence").Where(sq.Eq{"id": evidenceIDs}))
 
 			// remove user/operations map
