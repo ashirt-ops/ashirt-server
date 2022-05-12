@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package server
@@ -93,6 +93,22 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, backend.BadInputErr(err, "tagsToRemove must be a json array of ints")
 		}
 		return nil, services.UpdateEvidence(r.Context(), db, contentStore, i)
+	}))
+
+	route(r, "PUT", "/api/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpsertEvidenceMetadataInput{
+			EditEvidenceMetadataInput: services.EditEvidenceMetadataInput{
+				OperationSlug: dr.FromURL("operation_slug").AsString(),
+				EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+				Source:        dr.FromBody("source").Required().AsString(),
+				Body:          dr.FromBody("body").Required().AsString(),
+			},
+			Status:     dr.FromBody("status").Required().AsString(),
+			Message:    dr.FromBody("message").AsStringPtr(),
+			CanProcess: dr.FromBody("canProcess").AsBoolPtr(),
+		}
+		return nil, services.UpsertEvidenceMetadata(r.Context(), db, i)
 	}))
 
 	route(r, "GET", "/api/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
