@@ -4,7 +4,12 @@
 import * as React from 'react'
 import Layout from '../layout'
 import Timeline from 'src/components/timeline'
-import { EditEvidenceModal, DeleteEvidenceModal, ChangeFindingsOfEvidenceModal, MoveEvidenceModal } from '../evidence_modals'
+import {
+  EditEvidenceModal,
+  DeleteEvidenceModal,
+  ChangeFindingsOfEvidenceModal,
+  MoveEvidenceModal,
+} from '../evidence_modals'
 import { Evidence } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
@@ -64,14 +69,14 @@ export default () => {
         <Timeline
           scrollToUuid={lastEditedUuid}
           evidence={evidence}
-          actions={{
-            'Edit': evidence => editModal.show({ evidence }),
-            'Assign Findings': evidence => assignToFindingsModal.show({ evidence }),
-          }}
-          extraActions={{
-            'Move': evidence => moveModal.show({ evidence }),
-            'Delete': evidence => deleteModal.show({ evidence }),
-          }}
+          actions={[
+            { label: "Edit", act: evidence => editModal.show({ evidence }) },
+            { label: "Assign Findings", act: evidence => assignToFindingsModal.show({ evidence }) },
+          ]}
+          extraActions={[
+            { label: 'Move', act: evidence => moveModal.show({ evidence }) },
+            { label: 'Delete', act: evidence => deleteModal.show({ evidence }) },
+          ]}
           onQueryUpdate={query => navTo('evidence', query)}
           operationSlug={operationSlug}
           query={query}

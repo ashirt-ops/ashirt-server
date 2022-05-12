@@ -69,10 +69,16 @@ export default () => {
           <Timeline
             scrollToUuid={lastEditedUuid}
             evidence={evidence}
-            actions={{
-              'Remove From Finding': evidence => removeEvidenceFromFindingModal.show({evidence, finding}),
-              'Edit': evidence => editEvidenceModal.show({evidence}),
-            }}
+            actions={[
+              {
+                label: 'Remove From Finding',
+                act: evidence => removeEvidenceFromFindingModal.show({ evidence, finding })
+              },
+              {
+                label: 'Edit',
+                act: evidence => editEvidenceModal.show({ evidence })
+              },
+            ]}
             onQueryUpdate={query => navigate(`/operations/${operationSlug}/evidence?q=${encodeURIComponent(query.trim())}`)}
             operationSlug={operationSlug}
             query=""
