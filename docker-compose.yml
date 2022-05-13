@@ -26,6 +26,8 @@ services:
       APP_BACKEND_URL: "http://localhost:8080/web"
       APP_SUCCESS_REDIRECT_URL: "http://localhost:8080"
       APP_FAILURE_REDIRECT_URL_PREFIX: "http://localhost:8080"
+      # APP_FLAGS are comma separated strings
+      APP_FLAGS: "welcome-message"
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
 
       # Common Value for all emailers
