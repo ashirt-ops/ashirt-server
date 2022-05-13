@@ -189,5 +189,6 @@ const uuidToBasicEvidence = (uuid: string): Evidence => ({
   operator: { slug: "", firstName: "", lastName: "", },
   occurredAt: new Date(),
   tags: [],
-  contentType: 'none'
+  contentType: 'none',
+  metadata: [],
 })
