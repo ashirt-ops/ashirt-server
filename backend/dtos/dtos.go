@@ -165,3 +165,7 @@ type CreateUserOutput struct {
 	RealSlug string `json:"slug"`
 	UserID   int64  `json:"-"` // don't transmit the userid
 }
+
+type Flags struct {
+	Flags []string `json:"flags"`
+}

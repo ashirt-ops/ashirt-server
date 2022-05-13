@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package config
@@ -25,6 +25,7 @@ type WebConfig struct {
 	BackendURL               string        `split_words:"true"`
 	SuccessRedirectURL       string        `split_words:"true"`
 	FailureRedirectURLPrefix string        `split_words:"true"`
+	Flags                    string
 	Port                     int
 }
 
