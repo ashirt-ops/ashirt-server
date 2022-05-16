@@ -823,4 +823,59 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		}
 		return nil, services.UpdateFindingCategory(r.Context(), db, i)
 	}))
+
+	bindServiceWorkerRoutes(r, db)
+}
+
+
+func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
+	route(r, "GET", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return services.ListServiceWorker(r.Context(), db)
+	}))
+
+	route(r, "POST", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.CreateServiceWorkerInput{
+			Name:   dr.FromBody("name").Required().AsString(),
+			Config: dr.FromBody("config").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.CreateServiceWorker(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/admin/services/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpdateServiceWorkerInput{
+			ID:     dr.FromURL("id").AsInt64(),
+			Name:   dr.FromBody("name").Required().AsString(),
+			Config: dr.FromBody("config").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.UpdateServiceWorker(r.Context(), db, i)
+	}))
+
+	route(r, "DELETE", "/admin/services/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.DeleteServiceWorkerInput{
+			ID:       dr.FromURL("id").AsInt64(),
+			DoDelete: dr.FromBody("delete").Required().AsBool(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteServiceWorker(r.Context(), db, i)
+	}))
+
+	route(r, "GET", "/admin/services/{id}/test", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		workerID := dr.FromURL("id").AsInt64()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.TestServiceWorker(r.Context(), db, workerID)
+	}))
 }
