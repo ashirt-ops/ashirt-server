@@ -251,3 +251,17 @@ export type FindingCategory = {
   deleted: boolean,
   usageCount: number,
 }
+
+export type ServiceWorker = {
+  id: number,
+  name: string,
+  config: string,
+  deleted: boolean,
+}
+
+export type ServiceWorkerTestOutput = {
+  id: number,
+  name: string,
+  live: boolean,
+  message: string,
+}

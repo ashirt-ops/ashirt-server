@@ -75,6 +75,12 @@ export const backendDataSource: DataSource = {
   deleteDefaultTag: (ids) => req('DELETE', `/admin/tags/${ids.tagId}`),
   mergeDefaultTags: (payload) => req('POST', `/admin/merge/tags`, payload),
 
+  adminListServiceWorkers: () => req('GET', `/admin/services`),
+  adminCreateServiceWorker: (payload) => req('POST', `/admin/services`, payload),
+  adminUpdateServiceWorker: (ids, payload) => req('PUT', `/admin/services/${ids.serviceWorkerId}`, payload),
+  adminDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, { delete: true }),
+  adminTestServiceWorker: (ids) => req('GET', `/admin/services/${ids.serviceWorkerId}/test`),
+
   // TODO these should go into their respective authschemes:
   createRecoveryCode: ids => req('POST', '/auth/recovery/generate', ids),
   deleteExpiredRecoveryCodes: () => req('DELETE', '/auth/recovery/expired'),
