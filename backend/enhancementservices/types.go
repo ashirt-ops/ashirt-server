@@ -50,7 +50,7 @@ func ErrorTestResultWithMessage(err error, message string) ServiceTestResult {
 
 func TestResultSuccess(message string) ServiceTestResult {
 	return ServiceTestResult{
-		Message:       message,
-		Live: true,
+		Message: message,
+		Live:    true,
 	}
 }

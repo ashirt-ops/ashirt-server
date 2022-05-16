@@ -827,7 +827,6 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 	bindServiceWorkerRoutes(r, db)
 }
 
-
 func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 	route(r, "GET", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListServiceWorker(r.Context(), db)
