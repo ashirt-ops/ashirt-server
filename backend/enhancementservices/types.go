@@ -5,12 +5,8 @@ package enhancementservices
 
 import "github.com/theparanoids/ashirt-server/backend/models"
 
-type BasicPayload struct {
-	Type string `json:"type"`
-}
-
 type Payload struct {
-	BasicPayload
+	Type          string `json:"type"`
 	EvidenceUUID  string `json:"evidenceUuid"  db:"uuid"`
 	OperationSlug string `json:"operationSlug" db:"operation_slug"`
 	ContentType   string `json:"contentType"   db:"content_type"`
