@@ -393,7 +393,13 @@ As mentioned above, other services can iteract with the system, under the guise 
 
 The backend has a system to send emails out to notify users (with an email address) as needed. Currently, this system is only used to send account recovery emails. An email server will be needed, but stmp services can be configured via environment variables.
 
-Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`. 
+Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`.
+
+### Evidence Metadata Enrichment
+
+The evidence pipeline enables external services to perform special processing on evidence, and have the result of that processing stored a metadata for that evidence. For example an OCR function might analyze an image, search for words in that image, and return those words. That data would then become searchable/reviewable within the evidence and finding timelines.
+
+The details for this service are detailed in `pipeline_readme.md`
 
 ## Development Overview
 
@@ -405,7 +411,7 @@ This project has been verified to build and run on Linux and MacOS X. Windows ma
 
 ### Dependencies
 
-* Go 1.13
+* Go 1.18
   * To get supporing libraries, use `go mod download`
   * To clean up libraries, use `go mod tidy`
 * MySQL 8
