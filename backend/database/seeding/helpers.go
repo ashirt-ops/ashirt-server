@@ -248,6 +248,18 @@ func newQueryGen(first int64) func(opID int64, name, query, qType string) models
 	}
 }
 
+func newServiceWorkerGen(first int64) func(name, config string) models.ServiceWorker {
+	id := iotaLike(first)
+	return func(name, config string) models.ServiceWorker {
+		return models.ServiceWorker{
+			ID:          id(),
+			Name:        name,
+			Config:       config,
+			CreatedAt:   internalClock.Now(),
+		}
+	}
+}
+
 // associateEvidenceToTag mirrors associateTagsToEvidence. Rather than associating multiple tags
 // with a single piece of evidence this will instead associate a single tag to multiple evidence.
 func associateEvidenceToTag(tag models.Tag, evis ...models.Evidence) []models.TagEvidenceMap {

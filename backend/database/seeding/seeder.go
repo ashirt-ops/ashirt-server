@@ -33,6 +33,7 @@ type Seeder struct {
 	TagEviMap         []models.TagEvidenceMap
 	EviFindingsMap    []models.EvidenceFindingMap
 	Queries           []models.Query
+	ServiceWorkers    []models.ServiceWorker
 }
 
 // AllInitialTagIds is a (convenience) method version of the function TagIDsFromTags
@@ -204,6 +205,16 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"type":         seed.Queries[i].Type,
 				"created_at":   seed.Queries[i].CreatedAt,
 				"updated_at":   seed.Queries[i].UpdatedAt,
+			}
+		})
+		tx.BatchInsert("service_workers", len(seed.ServiceWorkers), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.ServiceWorkers[i].ID,
+				"name":       seed.ServiceWorkers[i].Name,
+				"config":     seed.ServiceWorkers[i].Config,
+				"created_at": seed.ServiceWorkers[i].CreatedAt,
+				"updated_at": seed.ServiceWorkers[i].UpdatedAt,
+				"deleted_at": seed.ServiceWorkers[i].DeletedAt,
 			}
 		})
 	})
