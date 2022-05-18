@@ -57,6 +57,7 @@ export interface DataSource {
   moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
   createEvidenceMetadata(ids: OpSlug & EvidenceUuid, payload: { source: string, body: string }): Promise<void>
   updateEvidenceMetadata(ids: OpSlug & EvidenceUuid, payload: { source: string, body: string }): Promise<void>
+  readEvidenceMetadata(ids: OpSlug & EvidenceUuid): Promise<Array<dtos.EvidenceMetadata>>
 
   listFindingCategories(includeDeleted: boolean): Promise<Array<dtos.FindingCategory>>
   createFindingCategory(payload: { category: string }): Promise<dtos.FindingCategory>

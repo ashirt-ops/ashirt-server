@@ -450,6 +450,16 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return evidence.Media, nil
 	}))
 
+	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ReadEvidenceMetadataInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+		}
+		return services.ReadEvidenceMetadata(r.Context(), db, i)
+	}))
+
+
 	route(r, "POST", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.EditEvidenceMetadataInput{

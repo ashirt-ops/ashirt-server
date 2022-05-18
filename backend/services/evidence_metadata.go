@@ -9,12 +9,19 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
+
+type ReadEvidenceMetadataInput struct {
+	OperationSlug string
+	EvidenceUUID  string
+}
 
 type EditEvidenceMetadataInput struct {
 	OperationSlug string
@@ -127,4 +134,32 @@ func UpsertEvidenceMetadata(ctx context.Context, db *database.Connection, i Upse
 	}
 
 	return nil
+}
+
+func ReadEvidenceMetadata(ctx context.Context, db *database.Connection, i ReadEvidenceMetadataInput) ([]*dtos.EvidenceMetadata, error) {
+	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
+	if err != nil {
+		return nil, backend.WrapError("Unable to read evidence metadata", backend.UnauthorizedReadErr(err))
+	}
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unwilling to read evidence metadata", backend.UnauthorizedReadErr(err))
+	}
+
+	var evidenceMetadata []models.EvidenceMetadata
+	err = db.Select(&evidenceMetadata, sq.Select("*").From("evidence_metadata").Where(sq.Eq{
+		"evidence_id": evidence.ID,
+	}))
+
+	if err != nil {
+		return nil, backend.WrapError("Cannot read evidence metadata", backend.DatabaseErr(err))
+	}
+
+	metadataDTO := helpers.Map(evidenceMetadata, func(item models.EvidenceMetadata) *dtos.EvidenceMetadata {
+		return &dtos.EvidenceMetadata{
+			Source: item.Source,
+			Body:   item.Body,
+		}
+	})
+
+	return metadataDTO, nil
 }
