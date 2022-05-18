@@ -332,50 +332,53 @@ export const EvidenceMetadataModal = (props: {
   return (
     <Modal title='Evidence Metadata' onRequestClose={props.onRequestClose}>
       {wiredMetadata.render(metadata => (<>
-      {viewOnly
-        ? (
-          <ViewEditEvidenceMetadataContainer
-            evidence={props.evidence}
-            operationSlug={props.operationSlug}
-          />
-        )
-        : (
-          <TabMenu className={cx('tab-menu')}
-            tabs={[
-              {
-                id: 'view', label: 'View',
-                content: (
-                  <ViewEditEvidenceMetadataContainer
-                    evidence={props.evidence}
-                    operationSlug={props.operationSlug}
-                    onEdited={() => { props.onUpdated(); props.onRequestClose() }}
-                  />
-                )
-              },
-              {
-                id: 'create', label: 'Create',
-                content: (
-                  <AddEvidenceMetadataForm
-                    evidence={props.evidence}
-                    onCreated={() => { props.onUpdated(); props.onRequestClose() }}
-                    operationSlug={props.operationSlug}
-                  />
-                )
-              },
-            ]}
-          />
-        )
-      }
+        {viewOnly
+          ? (
+            <ViewEditEvidenceMetadataContainer
+              evidenceUuid={props.evidence.uuid}
+              evidenceMetadata={metadata}
+              operationSlug={props.operationSlug}
+            />
+          )
+          : (
+            <TabMenu className={cx('tab-menu')}
+              tabs={[
+                {
+                  id: 'view', label: 'View',
+                  content: (
+                    <ViewEditEvidenceMetadataContainer
+                      evidenceUuid={props.evidence.uuid}
+                      evidenceMetadata={metadata}
+                      operationSlug={props.operationSlug}
+                      onEdited={() => { props.onUpdated(); props.onRequestClose() }}
+                    />
+                  )
+                },
+                {
+                  id: 'create', label: 'Create',
+                  content: (
+                    <AddEvidenceMetadataForm
+                      evidenceUuid={props.evidence.uuid}
+                      onCreated={() => { props.onUpdated(); props.onRequestClose() }}
+                      operationSlug={props.operationSlug}
+                    />
+                  )
+                },
+              ]}
+            />
+          )
+        }
       </>))}
     </Modal>
   )
 }
 
 const ViewEditEvidenceMetadataContainer = (props: {
-  evidence: Evidence,
-  operationSlug: string,
+  evidenceUuid: string
+  evidenceMetadata: Array<EvidenceMetadata>
+  operationSlug: string
   onEdited?: () => void
-  onCancel?: () => void,
+  onCancel?: () => void
 }) => {
   const [editedMetadata, setEditedMetadata] = React.useState<null | EvidenceMetadata>(null)
   const [filterText, setFilterText] = React.useState<string>("")
@@ -384,7 +387,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
     editedMetadata
       ? (
         <EditEvidenceMetadataForm
-          evidence={props.evidence}
+          evidenceUuid={props.evidenceUuid}
           metadata={editedMetadata}
           onCancel={() => setEditedMetadata(null)}
           onEdited={() => {
@@ -396,7 +399,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
       )
       : (
         <ViewEvidenceMetadataForm
-          evidence={props.evidence}
+          metadata={props.evidenceMetadata}
           onMetadataEdited={props.onEdited ? setEditedMetadata : undefined}
           filterText={filterText}
           onFilterUpdated={setFilterText}
@@ -408,7 +411,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
 const EditEvidenceMetadataForm = (props: {
   metadata: EvidenceMetadata
   operationSlug: string
-  evidence: Evidence
+  evidenceUuid: string
   onEdited: () => void
   onCancel: () => void
 }) => (
@@ -419,7 +422,7 @@ const EditEvidenceMetadataForm = (props: {
     onSubmit={(metadata: EvidenceMetadata) => {
       return updateEvidenceMetadata({
         operationSlug: props.operationSlug,
-        evidenceUuid: props.evidence.uuid,
+        evidenceUuid: props.evidenceUuid,
         body: metadata.body,
         source: metadata.source,
       })
@@ -431,7 +434,7 @@ const EditEvidenceMetadataForm = (props: {
 
 const AddEvidenceMetadataForm = (props: {
   operationSlug: string,
-  evidence: Evidence,
+  evidenceUuid: string,
   onCreated: () => void,
   onCancel?: () => void,
 }) => (
@@ -441,7 +444,7 @@ const AddEvidenceMetadataForm = (props: {
     onSubmit={(metadata: EvidenceMetadata) => {
       return createEvidenceMetadata({
         operationSlug: props.operationSlug,
-        evidenceUuid: props.evidence.uuid,
+        evidenceUuid: props.evidenceUuid,
         body: metadata.body,
         source: metadata.source,
       })
@@ -451,34 +454,34 @@ const AddEvidenceMetadataForm = (props: {
 )
 
 const ViewEvidenceMetadataForm = (props: {
-  evidence: Evidence,
+  metadata: Array<EvidenceMetadata>,
   onMetadataEdited?: (metadata: EvidenceMetadata) => void
-  onCancel?: () => void,
+ 
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
   return (
     <div className={cx('view-metadata-root')}>
-        {props.evidence.metadata.length == 0
-          ? <em>No metadata exists for this evidence</em>
-          : (<>
-            <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
+      {props.metadata.length == 0
+        ? <em>No metadata exists for this evidence</em>
+        : (<>
+          <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
 
-            {props.evidence.metadata
-              .map((meta) => {
-                return (
-                  <EvidenceMetadataItem
-                    key={meta.source}
-                    meta={meta}
-                    filterText={props.filterText}
-                    onMetadataEdited={props.onMetadataEdited}
-                    expanded={props.evidence.metadata.length == 1}
-                  />
-                )
-              }
-              )}
-          </>)
-        }
+          {props.metadata
+            .map((meta) => {
+              return (
+                <EvidenceMetadataItem
+                  key={meta.source}
+                  meta={meta}
+                  filterText={props.filterText}
+                  onMetadataEdited={props.onMetadataEdited}
+                  expanded={props.metadata.length == 1}
+                />
+              )
+            }
+            )}
+        </>)
+      }
     </div>
   )
 }
