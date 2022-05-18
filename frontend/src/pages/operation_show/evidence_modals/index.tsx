@@ -451,13 +451,8 @@ const ViewEvidenceMetadataForm = (props: {
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
-  const formComponentProps = useForm({
-    onSuccess: () => { },
-    handleSubmit: async () => { },
-  })
   return (
-    <Form {...formComponentProps} onCancel={props.onCancel}>
-      <div className={cx('view-metadata-root')}>
+    <div className={cx('view-metadata-root')}>
         {props.evidence.metadata.length == 0
           ? <em>No metadata exists for this evidence</em>
           : (<>
@@ -478,8 +473,7 @@ const ViewEvidenceMetadataForm = (props: {
               )}
           </>)
         }
-      </div>
-    </Form>
+    </div>
   )
 }
 
