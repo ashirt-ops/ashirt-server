@@ -320,13 +320,18 @@ export const EvidenceMetadataModal = (props: {
   onRequestClose: () => void,
   onUpdated: () => void,
 }) => {
-
   // this switch controls whether the user is only able to view metadata, or if they can manually
   // create and edit existing metadata. We might get more precise control later.
   const viewOnly = false
 
+  const wiredMetadata = useWiredData(React.useCallback(() => readEvidenceMetadata({
+    operationSlug: props.operationSlug,
+    evidenceUuid: props.evidence.uuid,
+  }), [props.operationSlug, props.evidence.uuid]))
+
   return (
     <Modal title='Evidence Metadata' onRequestClose={props.onRequestClose}>
+      {wiredMetadata.render(metadata => (<>
       {viewOnly
         ? (
           <ViewEditEvidenceMetadataContainer
@@ -361,6 +366,7 @@ export const EvidenceMetadataModal = (props: {
           />
         )
       }
+      </>))}
     </Modal>
   )
 }
