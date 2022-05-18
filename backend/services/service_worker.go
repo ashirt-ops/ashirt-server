@@ -137,7 +137,11 @@ func RunServiceWorker(ctx context.Context, db *database.Connection, i RunService
 		return backend.WrapError("Unable to run service worker", backend.UnauthorizedWriteErr(err))
 	}
 
-	enhancementservices.RunSetOfServiceWorkers(db, []string{i.WorkerName}, evidence.ID)
+	if i.WorkerName == "" {
+		enhancementservices.RunAllServiceWorkers(db, evidence.ID)
+	} else {
+		enhancementservices.RunSetOfServiceWorkers(db, []string{i.WorkerName}, evidence.ID)
+	}
 
 	return nil
 }

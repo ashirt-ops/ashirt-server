@@ -459,7 +459,6 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ReadEvidenceMetadata(r.Context(), db, i)
 	}))
 
-
 	route(r, "POST", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.EditEvidenceMetadataInput{
@@ -480,6 +479,31 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			Body:          dr.FromBody("body").Required().AsString(),
 		}
 		return nil, services.UpdateEvidenceMetadata(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/{service_name}/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.RunServiceWorkerInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+			WorkerName:    dr.FromURL("service_name").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.RunServiceWorker(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.RunServiceWorkerInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.RunServiceWorker(r.Context(), db, i)
 	}))
 
 	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
