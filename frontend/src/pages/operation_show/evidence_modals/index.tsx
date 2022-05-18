@@ -338,6 +338,7 @@ export const EvidenceMetadataModal = (props: {
               evidenceUuid={props.evidence.uuid}
               evidenceMetadata={metadata}
               operationSlug={props.operationSlug}
+              onRefresh={wiredMetadata.reload}
             />
           )
           : (
@@ -351,6 +352,7 @@ export const EvidenceMetadataModal = (props: {
                       evidenceMetadata={metadata}
                       operationSlug={props.operationSlug}
                       onEdited={() => { props.onUpdated(); props.onRequestClose() }}
+                      onRefresh={wiredMetadata.reload}
                     />
                   )
                 },
@@ -379,6 +381,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
   operationSlug: string
   onEdited?: () => void
   onCancel?: () => void
+  onRefresh: () => void
 }) => {
   const [editedMetadata, setEditedMetadata] = React.useState<null | EvidenceMetadata>(null)
   const [filterText, setFilterText] = React.useState<string>("")
@@ -403,6 +406,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
           onMetadataEdited={props.onEdited ? setEditedMetadata : undefined}
           filterText={filterText}
           onFilterUpdated={setFilterText}
+          onRefresh={props.onRefresh}
         />
       )
   )
@@ -456,7 +460,7 @@ const AddEvidenceMetadataForm = (props: {
 const ViewEvidenceMetadataForm = (props: {
   metadata: Array<EvidenceMetadata>,
   onMetadataEdited?: (metadata: EvidenceMetadata) => void
- 
+  onRefresh: () => void
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
@@ -482,6 +486,13 @@ const ViewEvidenceMetadataForm = (props: {
             )}
         </>)
       }
+      <Button
+        className={cx('refresh-button')}
+        icon={require('./refresh.svg')}
+        onClick={props.onRefresh}
+        title="Refresh"
+      >
+      </Button>
     </div>
   )
 }
