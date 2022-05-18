@@ -95,6 +95,20 @@ export async function readEvidenceMetadata(i: {
   return ds.readEvidenceMetadata(i)
 }
 
+export async function runServiceWorkerForEvidence(i:{
+  operationSlug: string,
+  evidenceUuid: string,
+  source: string,
+}): Promise<void> {
+  ds.runServiceWorkerForEvidence(i)
+}
+export async function runAllServiceWorkersForEvidence(i:{
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<void> {
+  ds.runAllServiceWorkersForEvidence(i)
+}
+
 export async function updateEvidence(i: {
   operationSlug: string,
   evidenceUuid: string,
