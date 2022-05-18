@@ -32,7 +32,9 @@ import {
   getOperations,
   getEvidenceMigrationDifference,
   moveEvidence,
+  readEvidenceMetadata,
   updateEvidenceMetadata,
+  runServiceWorkerForEvidence,
 } from 'src/services'
 
 import BinaryUpload from 'src/components/binary_upload'
@@ -50,6 +52,7 @@ import Modal from 'src/components/modal'
 import TagChooser from 'src/components/bullet_chooser/tag_chooser'
 import TabMenu from 'src/components/tabs'
 import TagList from 'src/components/tag_list'
+import { evidenceFromDto } from '~src/services/data_sources/converters'
 
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -329,16 +332,27 @@ export const EvidenceMetadataModal = (props: {
     evidenceUuid: props.evidence.uuid,
   }), [props.operationSlug, props.evidence.uuid]))
 
+  const containerProps: Omit<ViewEditEvidenceMetadataContainerProps, 'evidenceMetadata'> = {
+    evidenceUuid: props.evidence.uuid,
+    operationSlug: props.operationSlug,
+    onRefresh: wiredMetadata.reload,
+    onRerun: async (metadata) => {
+      await runServiceWorkerForEvidence({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+        source: metadata.source,
+      })
+    },
+  }
+
   return (
     <Modal title='Evidence Metadata' onRequestClose={props.onRequestClose}>
       {wiredMetadata.render(metadata => (<>
         {viewOnly
           ? (
             <ViewEditEvidenceMetadataContainer
-              evidenceUuid={props.evidence.uuid}
+              {...containerProps}
               evidenceMetadata={metadata}
-              operationSlug={props.operationSlug}
-              onRefresh={wiredMetadata.reload}
             />
           )
           : (
@@ -348,11 +362,9 @@ export const EvidenceMetadataModal = (props: {
                   id: 'view', label: 'View',
                   content: (
                     <ViewEditEvidenceMetadataContainer
-                      evidenceUuid={props.evidence.uuid}
+                      {...containerProps}
                       evidenceMetadata={metadata}
-                      operationSlug={props.operationSlug}
                       onEdited={() => { props.onUpdated(); props.onRequestClose() }}
-                      onRefresh={wiredMetadata.reload}
                     />
                   )
                 },
@@ -375,14 +387,16 @@ export const EvidenceMetadataModal = (props: {
   )
 }
 
-const ViewEditEvidenceMetadataContainer = (props: {
+type ViewEditEvidenceMetadataContainerProps = {
   evidenceUuid: string
   evidenceMetadata: Array<EvidenceMetadata>
   operationSlug: string
-  onEdited?: () => void
-  onCancel?: () => void
   onRefresh: () => void
-}) => {
+  onEdited?: () => void
+  onRerun?: (metadata: EvidenceMetadata) => void
+}
+
+const ViewEditEvidenceMetadataContainer = (props: ViewEditEvidenceMetadataContainerProps) => {
   const [editedMetadata, setEditedMetadata] = React.useState<null | EvidenceMetadata>(null)
   const [filterText, setFilterText] = React.useState<string>("")
 
@@ -404,6 +418,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
         <ViewEvidenceMetadataForm
           metadata={props.evidenceMetadata}
           onMetadataEdited={props.onEdited ? setEditedMetadata : undefined}
+          onRerun={props.onRerun}
           filterText={filterText}
           onFilterUpdated={setFilterText}
           onRefresh={props.onRefresh}
@@ -460,6 +475,7 @@ const AddEvidenceMetadataForm = (props: {
 const ViewEvidenceMetadataForm = (props: {
   metadata: Array<EvidenceMetadata>,
   onMetadataEdited?: (metadata: EvidenceMetadata) => void
+  onRerun?: (metadata: EvidenceMetadata) => void
   onRefresh: () => void
   filterText: string,
   onFilterUpdated: (val: string) => void
@@ -480,6 +496,7 @@ const ViewEvidenceMetadataForm = (props: {
                   filterText={props.filterText}
                   onMetadataEdited={props.onMetadataEdited}
                   expanded={props.metadata.length == 1}
+                  onRerun={props.onRerun}
                 />
               )
             }
@@ -538,23 +555,35 @@ const EvidenceMetadataItem = (props: {
   meta: EvidenceMetadata
   filterText: string
   onMetadataEdited?: (metadata: EvidenceMetadata) => void
+  onRerun?: (metadata: EvidenceMetadata) => void
   expanded?: boolean
 }) => {
-  const { onMetadataEdited, meta, filterText, expanded } = props
+  const { onMetadataEdited, onRerun, meta, filterText, expanded } = props
   const minLength = 3
   const content = highlightSubstring(
     meta.body, filterText, cx("content-important"), { regexFlags: "i", minLength }
   )
 
-  const actions: Array<ExpandableSectionLabelActionItem> = onMetadataEdited
-    ? [{
-      label: 'Edit',
-      action: (e) => {
-        e.stopPropagation()
-        onMetadataEdited(meta)
-      }
-    }]
-    : []
+  const editAction: ExpandableSectionLabelActionItem = {
+    label: 'Edit',
+    action: (e) => {
+      e.stopPropagation();
+      onMetadataEdited?.(meta)
+    }
+  }
+
+  const rerunAction: ExpandableSectionLabelActionItem = {
+    label: 'Re-Run',
+    action: (e) => {
+      e.stopPropagation();
+      onRerun?.(meta)
+    }
+  }
+
+  const actions: Array<ExpandableSectionLabelActionItem> = [
+    ...(onMetadataEdited ? [editAction] : []),
+    ...(onRerun ? [rerunAction] : []),
+  ]
 
   return (
     <ExpandableSection
