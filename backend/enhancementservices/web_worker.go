@@ -104,7 +104,7 @@ func (w *webConfigV1Worker) Process(payload *Payload) (*models.EvidenceMetadata,
 
 func handleWebResponse(dbModel *models.EvidenceMetadata, resp *http.Response) {
 	recordRejection := func(message *string) {
-		dbModel.Status = evidencemetadata.StatusUnaccepted.Ptr()
+		dbModel.Status = evidencemetadata.StatusCompleted.Ptr()
 		dbModel.CanProcess = helpers.Ptr(false)
 		dbModel.LastRunMessage = message
 	}

@@ -5,7 +5,6 @@ import "github.com/theparanoids/ashirt-server/backend/helpers"
 type Status string
 
 const (
-	StatusUnaccepted Status = "Unaccepted"
 	StatusError      Status = "Error"
 	StatusQueued     Status = "Queued"
 	StatusCompleted  Status = "Completed"

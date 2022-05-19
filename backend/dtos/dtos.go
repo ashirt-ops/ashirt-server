@@ -28,9 +28,10 @@ type Evidence struct {
 }
 
 type EvidenceMetadata struct {
-	Body   string                   `json:"body"`
-	Source string                   `json:"source"`
-	Status *evidencemetadata.Status `json:"status"`
+	Body       string                   `json:"body"`
+	Source     string                   `json:"source"`
+	Status     *evidencemetadata.Status `json:"status"`
+	CanProcess *bool                    `json:"canProcess"`
 }
 
 type Finding struct {

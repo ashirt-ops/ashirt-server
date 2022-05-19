@@ -156,9 +156,10 @@ func ReadEvidenceMetadata(ctx context.Context, db *database.Connection, i ReadEv
 
 	metadataDTO := helpers.Map(evidenceMetadata, func(item models.EvidenceMetadata) *dtos.EvidenceMetadata {
 		return &dtos.EvidenceMetadata{
-			Source: item.Source,
-			Body:   item.Body,
-			Status: item.Status,
+			Source:     item.Source,
+			Body:       item.Body,
+			Status:     item.Status,
+			CanProcess: item.CanProcess,
 		}
 	})
 

@@ -458,7 +458,7 @@ const AddEvidenceMetadataForm = (props: {
   onCancel?: () => void,
 }) => (
   <EvidenceMetadataEditorForm
-    metadata={{ body: "", source: "", status: undefined }}
+    metadata={{ body: "", source: "" }}
     submitText="Create"
     onSubmit={(metadata: EvidenceMetadata) => {
       return createEvidenceMetadata({
