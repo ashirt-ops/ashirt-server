@@ -100,7 +100,7 @@ func metadataForEvidenceByID(db *database.Connection, evidenceIDs []int64) (map[
 		EvidenceID int64 `db:"evidence_id"`
 	}
 
-	err := db.Select(&metadata, sq.Select("evidence_id", "source", "body").
+	err := db.Select(&metadata, sq.Select("evidence_id", "source", "body", "status").
 		From("evidence_metadata").
 		Where(sq.Eq{"evidence_id": evidenceIDs}).
 		OrderBy("source ASC"))
@@ -114,6 +114,7 @@ func metadataForEvidenceByID(db *database.Connection, evidenceIDs []int64) (map[
 		dto := dtos.EvidenceMetadata{
 			Body:   meta.Body,
 			Source: meta.Source,
+			Status: meta.Status,
 		}
 		metadataByEvidenceID[meta.EvidenceID] = append(metadataByEvidenceID[meta.EvidenceID], dto)
 	}

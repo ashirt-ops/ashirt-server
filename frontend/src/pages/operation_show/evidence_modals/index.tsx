@@ -458,7 +458,7 @@ const AddEvidenceMetadataForm = (props: {
   onCancel?: () => void,
 }) => (
   <EvidenceMetadataEditorForm
-    metadata={{ body: "", source: "" }}
+    metadata={{ body: "", source: "", status: undefined }}
     submitText="Create"
     onSubmit={(metadata: EvidenceMetadata) => {
       return createEvidenceMetadata({
@@ -480,6 +480,12 @@ const ViewEvidenceMetadataForm = (props: {
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
+  const disabledTitleForStatus = (status?: string) => {
+    if (status == 'Queued') {
+      return "Work has been queued"
+    }
+    return undefined
+  }
   return (
     <div className={cx('view-metadata-root')}>
       {props.metadata.length == 0
@@ -497,6 +503,7 @@ const ViewEvidenceMetadataForm = (props: {
                   onMetadataEdited={props.onMetadataEdited}
                   expanded={props.metadata.length == 1}
                   onRerun={props.onRerun}
+                  rerunDisabledLabel={disabledTitleForStatus(meta.status)}
                 />
               )
             }
@@ -556,6 +563,7 @@ const EvidenceMetadataItem = (props: {
   filterText: string
   onMetadataEdited?: (metadata: EvidenceMetadata) => void
   onRerun?: (metadata: EvidenceMetadata) => void
+  rerunDisabledLabel?: string
   expanded?: boolean
 }) => {
   const { onMetadataEdited, onRerun, meta, filterText, expanded } = props
@@ -569,7 +577,7 @@ const EvidenceMetadataItem = (props: {
     action: (e) => {
       e.stopPropagation();
       onMetadataEdited?.(meta)
-    }
+    },
   }
 
   const rerunAction: ExpandableSectionLabelActionItem = {
@@ -577,7 +585,9 @@ const EvidenceMetadataItem = (props: {
     action: (e) => {
       e.stopPropagation();
       onRerun?.(meta)
-    }
+    },
+    disabled: props.rerunDisabledLabel !== undefined,
+    title: props.rerunDisabledLabel
   }
 
   const actions: Array<ExpandableSectionLabelActionItem> = [
@@ -602,7 +612,12 @@ const EvidenceMetadataItem = (props: {
   )
 }
 
-type ExpandableSectionLabelActionItem = { label: string, action: (e: React.MouseEvent<Element, MouseEvent>) => void }
+type ExpandableSectionLabelActionItem = {
+  label: string,
+  action: (e: React.MouseEvent<Element, MouseEvent>) => void
+  disabled?: boolean
+  title?: string
+}
 
 const ExpandableSectionLabel = (props: {
   label: string
@@ -614,7 +629,15 @@ const ExpandableSectionLabel = (props: {
       {props.actions.length > 0 && (
         <ButtonGroup className={cx('expandable-section-button-group')}>
           {props.actions.map(act => (
-            <Button small key={act.label} onClick={act.action}>{act.label}</Button>
+            <Button
+              small
+              key={act.label}
+              disabled={act.disabled}
+              title={act.title}
+              onClick={act.action}
+            >
+              {act.label}
+            </Button>
           ))}
         </ButtonGroup>
       )}

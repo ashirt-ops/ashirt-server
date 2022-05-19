@@ -111,6 +111,7 @@ export type Evidence = {
 export type EvidenceMetadata = {
   source: string,
   body: string,
+  status?: string, // "Unaccepted" | "Error" | "Queued" | "Completed"
 }
 
 export type Finding = {

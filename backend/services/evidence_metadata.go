@@ -158,6 +158,7 @@ func ReadEvidenceMetadata(ctx context.Context, db *database.Connection, i ReadEv
 		return &dtos.EvidenceMetadata{
 			Source: item.Source,
 			Body:   item.Body,
+			Status: item.Status,
 		}
 	})
 

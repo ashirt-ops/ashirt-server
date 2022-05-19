@@ -11,6 +11,7 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 type webConfigV1Worker struct {
@@ -103,20 +104,20 @@ func (w *webConfigV1Worker) Process(payload *Payload) (*models.EvidenceMetadata,
 
 func handleWebResponse(dbModel *models.EvidenceMetadata, resp *http.Response) {
 	recordRejection := func(message *string) {
-		dbModel.Status = helpers.Ptr("Unaccepted")
+		dbModel.Status = evidencemetadata.StatusUnaccepted.Ptr()
 		dbModel.CanProcess = helpers.Ptr(false)
 		dbModel.LastRunMessage = message
 	}
 	recordError := func(message *string) {
-		dbModel.Status = helpers.Ptr("Error")
+		dbModel.Status = evidencemetadata.StatusError.Ptr()
 		dbModel.LastRunMessage = message
 	}
 	recordDeferral := func() {
-		dbModel.Status = helpers.Ptr("Queued")
+		dbModel.Status = evidencemetadata.StatusQueued.Ptr()
 		dbModel.CanProcess = helpers.Ptr(true)
 	}
 	recordProcessed := func(content string) {
-		dbModel.Status = helpers.Ptr("Completed")
+		dbModel.Status = evidencemetadata.StatusCompleted.Ptr()
 		dbModel.CanProcess = helpers.Ptr(true)
 		dbModel.Body = content
 	}
