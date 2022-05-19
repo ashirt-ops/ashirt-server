@@ -42,9 +42,19 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 		Slug      string `db:"slug"`
 	}
 
-	sb := sq.Select("evidence.id", "evidence.uuid", "description", "evidence.content_type", "occurred_at", "users.first_name", "users.last_name", "users.slug").
+	sb := sq.Select().
 		From("evidence").
-		LeftJoin("users ON evidence.operator_id = users.id")
+		LeftJoin("users ON evidence.operator_id = users.id").
+		Columns(
+			"evidence.id",
+			"evidence.uuid",
+			"description",
+			"evidence.content_type",
+			"occurred_at",
+			"users.first_name",
+			"users.last_name",
+			"users.slug",
+		)
 
 	if i.Filters.SortAsc {
 		sb = sb.OrderBy("occurred_at ASC")
@@ -110,6 +120,12 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 
 	for _, text := range filters.Text {
 		sb = sb.Where(sq.Like{"description": "%" + text + "%"})
+	}
+
+	for _, text := range filters.Metadata {
+		sb = sb.
+			LeftJoin("evidence_metadata em ON em.evidence_id = evidence.id").
+			Where(sq.Like{"em.body": "%" + text + "%"})
 	}
 
 	if values := filters.DateRanges; len(values) > 0 {
