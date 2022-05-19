@@ -13,6 +13,7 @@ import { TagColor } from 'src/helpers'
 export * from './creator_chooser'
 export * from './evidence_type_chooser'
 export * from './tag_chooser'
+export * from './text_chooser'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -20,13 +21,14 @@ export default function BulletChooser<T extends BulletProps>(props: {
   label: string
   options: Array<T> | ((inputVal: string) => Array<T>)
   value: Array<T>
-  onNoValueSelected?: (inputValue: string) => Promise<T>
+  onNoValueSelected?: (inputValue: string) => Promise<T | null>
   valueRenderer?: BulletRenderer<T>
   noValueRenderer?: (inputValue: string) => React.ReactNode
   onChange: (tags: Array<T>) => void
   className?: string
   disabled?: boolean
   enableNot?: boolean
+  hideDropDown?: boolean
 }) {
   const [inputValue, setInputValue] = React.useState("")
   const [dropdownVisible, setDropdownVisible] = React.useState(false)
@@ -109,7 +111,9 @@ export default function BulletChooser<T extends BulletProps>(props: {
       }
     }
 
-    setDropdownVisible(true)
+    if (!props.hideDropDown) {
+      setDropdownVisible(true)
+    }
   }
 
   const renderer = (bullet: T | null): React.ReactNode => {
@@ -145,7 +149,11 @@ export default function BulletChooser<T extends BulletProps>(props: {
             value={inputValue}
             onKeyDown={onInputKeyDown}
             onKeyUp={setModifierHeld}
-            onFocus={() => setDropdownVisible(true)}
+            onFocus={() => {
+              if (!props.hideDropDown) {
+                setDropdownVisible(true)
+              }
+            }}
           />
         </div>
       </PopoverMenu>
