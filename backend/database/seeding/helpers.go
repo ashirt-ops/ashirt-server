@@ -176,13 +176,14 @@ func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentTy
 	}
 }
 
-func newEvidenceMetadataGen(first int64) func(eviID int64, source, body string, status *evidencemetadata.Status, clockDayOffset int) models.EvidenceMetadata {
+func newEvidenceMetadataGen(first int64) func(eviID int64, source, body string, status *evidencemetadata.Status, canProcess *bool, clockDayOffset int) models.EvidenceMetadata {
 	id := iotaLike(first)
-	return func(eviID int64, source, body string, status *evidencemetadata.Status, clockDayOffset int) models.EvidenceMetadata {
+	return func(eviID int64, source, body string, status *evidencemetadata.Status, canProcess *bool, clockDayOffset int) models.EvidenceMetadata {
 		return models.EvidenceMetadata{
 			ID:         id(),
 			EvidenceID: eviID,
 			Source:     source,
+			CanProcess: canProcess,
 			Body:       body,
 			Status:     status,
 			CreatedAt:  internalClock.Now(),

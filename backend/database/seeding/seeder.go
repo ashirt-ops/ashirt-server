@@ -160,6 +160,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"id":          seed.EvidenceMetadatas[i].ID,
 				"evidence_id": seed.EvidenceMetadatas[i].EvidenceID,
 				"source":      seed.EvidenceMetadatas[i].Source,
+				"can_process": seed.EvidenceMetadatas[i].CanProcess,
 				"body":        seed.EvidenceMetadatas[i].Body,
 				"created_at":  seed.EvidenceMetadatas[i].CreatedAt,
 				"updated_at":  seed.EvidenceMetadatas[i].UpdatedAt,
