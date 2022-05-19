@@ -1,7 +1,7 @@
 // Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { ServiceWorker, ServiceWorkerTestOutput } from 'src/global_types'
+import { ActiveServiceWorker, ServiceWorker, ServiceWorkerTestOutput } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function createServiceWorker(i: {
@@ -13,6 +13,10 @@ export async function createServiceWorker(i: {
 
 export async function listServiceWorkers(): Promise<Array<ServiceWorker>> {
   return ds.adminListServiceWorkers()
+}
+
+export async function listActiveServiceWorkers(): Promise<Array<ActiveServiceWorker>> {
+  return ds.listActiveServiceWorkers()
 }
 
 export async function updateServiceWorker(i: {

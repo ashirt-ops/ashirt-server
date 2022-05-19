@@ -188,3 +188,7 @@ type ServiceWorkerTestOutput struct {
 	Live    bool   `json:"live"`
 	Message string `json:"message"`
 }
+
+type ActiveServiceWorker struct {
+	Name    string `json:"name"`
+}

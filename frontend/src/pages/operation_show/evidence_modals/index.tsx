@@ -35,6 +35,7 @@ import {
   readEvidenceMetadata,
   updateEvidenceMetadata,
   runServiceWorkerForEvidence,
+  listActiveServiceWorkers,
 } from 'src/services'
 
 import BinaryUpload from 'src/components/binary_upload'
@@ -480,6 +481,8 @@ const ViewEvidenceMetadataForm = (props: {
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
+  const wiredServices = useWiredData(listActiveServiceWorkers)
+
   const [hide, setHide] = React.useState(true)
   const disabledTitleForStatus = (status?: string) => (
     status == 'Queued'
@@ -488,6 +491,9 @@ const ViewEvidenceMetadataForm = (props: {
   )
   return (
     <div className={cx('view-metadata-root')}>
+      {wiredServices.render(wrappedServices => {
+        const services = wrappedServices.map(s => s.name)
+        return <>
           {props.metadata.length == 0
             ? <em>No metadata exists for this evidence</em>
             : (<>
@@ -512,6 +518,9 @@ const ViewEvidenceMetadataForm = (props: {
                 )}
             </>)
           }
+        </>
+      })}
+
       <Button
         className={cx('refresh-button')}
         icon={require('./refresh.svg')}

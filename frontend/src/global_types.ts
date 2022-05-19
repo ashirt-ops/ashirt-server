@@ -261,6 +261,10 @@ export type ServiceWorker = {
   deleted: boolean,
 }
 
+export type ActiveServiceWorker = {
+  name: string,
+}
+
 export type ServiceWorkerTestOutput = {
   id: number,
   name: string,

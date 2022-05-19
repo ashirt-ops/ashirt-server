@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -10,6 +10,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -235,4 +236,21 @@ func SelfOrSlugToUserID(ctx context.Context, db *database.Connection, slug strin
 		return middleware.UserID(ctx), nil
 	}
 	return userSlugToUserID(db, slug)
+}
+
+func ListActiveServices(ctx context.Context, db *database.Connection) ([]*dtos.ActiveServiceWorker, error) {
+	var serviceWorkers []models.ServiceWorker
+	err := db.Select(&serviceWorkers, sq.Select("name").
+		From("service_workers").
+		Where(sq.Eq{"deleted_at": nil}))
+	if err != nil {
+		return nil, err
+	}
+
+	servicesDTO := helpers.Map(serviceWorkers, func(t models.ServiceWorker) *dtos.ActiveServiceWorker {
+		return &dtos.ActiveServiceWorker{
+			Name: t.Name,
+		}
+	})
+	return servicesDTO, nil
 }

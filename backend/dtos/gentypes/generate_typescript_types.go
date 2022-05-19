@@ -42,6 +42,7 @@ func main() {
 	gen(dtos.CreateUserOutput{})
 	gen(dtos.ServiceWorker{})
 	gen(dtos.ServiceWorkerTestOutput{})
+	gen(dtos.ActiveServiceWorker{})
 
 	// Since this file only contains typescript types, webpack doesn't pick up the
 	// changes unless there is some actual executable javascript referenced from
