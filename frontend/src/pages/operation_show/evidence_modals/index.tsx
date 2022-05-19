@@ -480,36 +480,38 @@ const ViewEvidenceMetadataForm = (props: {
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
-  const disabledTitleForStatus = (status?: string) => {
-    if (status == 'Queued') {
-      return "Work has been queued"
-    }
-    return undefined
-  }
+  const [hide, setHide] = React.useState(true)
+  const disabledTitleForStatus = (status?: string) => (
+    status == 'Queued'
+      ? "Work has been queued"
+      : undefined
+  )
   return (
     <div className={cx('view-metadata-root')}>
-      {props.metadata.length == 0
-        ? <em>No metadata exists for this evidence</em>
-        : (<>
-          <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
+          {props.metadata.length == 0
+            ? <em>No metadata exists for this evidence</em>
+            : (<>
+              <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
+              <Checkbox label='Hide Unprocessable' className={cx('unprocessable-cb')} value={hide} onChange={setHide} />
 
-          {props.metadata
-            .map((meta) => {
-              return (
-                <EvidenceMetadataItem
-                  key={meta.source}
-                  meta={meta}
-                  filterText={props.filterText}
-                  onMetadataEdited={props.onMetadataEdited}
-                  expanded={props.metadata.length == 1}
-                  onRerun={props.onRerun}
-                  rerunDisabledLabel={disabledTitleForStatus(meta.status)}
-                />
-              )
-            }
-            )}
-        </>)
-      }
+              {props.metadata
+                .filter(meta => hide ? (meta.canProcess !== false) : true)
+                .map((meta) => {
+                  return (
+                    <EvidenceMetadataItem
+                      key={meta.source}
+                      meta={meta}
+                      filterText={props.filterText}
+                      onMetadataEdited={props.onMetadataEdited}
+                      expanded={props.metadata.length == 1}
+                      onRerun={services.includes(meta.source) ? props.onRerun : undefined }
+                      rerunDisabledLabel={disabledTitleForStatus(meta.status)}
+                    />
+                  )
+                }
+                )}
+            </>)
+          }
       <Button
         className={cx('refresh-button')}
         icon={require('./refresh.svg')}
