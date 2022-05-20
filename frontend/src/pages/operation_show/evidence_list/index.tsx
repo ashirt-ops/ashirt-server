@@ -9,6 +9,7 @@ import {
   DeleteEvidenceModal,
   ChangeFindingsOfEvidenceModal,
   MoveEvidenceModal,
+  EvidenceMetadataModal,
 } from '../evidence_modals'
 import { Evidence } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
@@ -40,6 +41,9 @@ export default () => {
       setLastEditedUuid(modalProps.evidence.uuid)
       wiredEvidence.reload()
     }} />
+  ))
+  const viewModal = useModal<{ evidence: Evidence }>(modalProps => (
+    <EvidenceMetadataModal {...modalProps} operationSlug={operationSlug} onUpdated={wiredEvidence.reload} />
   ))
   const deleteModal = useModal<{ evidence: Evidence }>(modalProps => (
     <DeleteEvidenceModal {...modalProps} operationSlug={operationSlug} onDeleted={reloadToTop} />
@@ -76,6 +80,7 @@ export default () => {
           extraActions={[
             { label: 'Move', act: evidence => moveModal.show({ evidence }) },
             { label: 'Delete', act: evidence => deleteModal.show({ evidence }) },
+            { label: "Metadata", act: evidence => viewModal.show({ evidence }) },
           ]}
           onQueryUpdate={query => navTo('evidence', query)}
           operationSlug={operationSlug}
@@ -83,7 +88,7 @@ export default () => {
         />
       ))}
 
-      {renderModals(editModal, deleteModal, assignToFindingsModal, moveModal)}
+      {renderModals(editModal, deleteModal, assignToFindingsModal, moveModal, viewModal)}
     </Layout>
   )
 }

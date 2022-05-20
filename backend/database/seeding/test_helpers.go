@@ -172,7 +172,7 @@ func GetEvidenceMetadataByEvidenceID(t *testing.T, db *database.Connection, id i
 	var evidenceMetadata []models.EvidenceMetadata
 	err := db.Select(&evidenceMetadata, sq.Select("*").
 		From("evidence_metadata").
-		Where(sq.Eq{ "evidence_id": id }))
+		Where(sq.Eq{"evidence_id": id}))
 	require.NoError(t, err)
 	return evidenceMetadata
 }
