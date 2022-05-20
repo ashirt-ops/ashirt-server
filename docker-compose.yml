@@ -92,13 +92,13 @@ services:
 
   demo:
     build:
-      context: enhancement_worker_templates/demo-tesseract
+      context: enhancement_workers/demo-tesseract
       dockerfile: Dockerfile.dev
     ports:
       - 3001:3001
     restart: on-failure
     volumes:
-      - ./enhancement_worker_templates/demo-tesseract/src:/app/src
+      - ./enhancement_workers/demo-tesseract/src:/app/src
     environment:
       PORT: 3001
       ENABLE_DEV: true
