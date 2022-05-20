@@ -13,6 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -154,7 +155,7 @@ func markWorkStarting(db *database.Connection, evidenceID int64, sources []strin
 			"body":             "",
 			"evidence_id":      evidenceID,
 			"source":           sources[row],
-			"status":           "Processing",
+			"status":           evidencemetadata.StatusProcessing,
 			"work_started_at":  now,
 			"last_run_message": nil,
 		}

@@ -485,9 +485,11 @@ const ViewEvidenceMetadataForm = (props: {
 
   const [hide, setHide] = React.useState(true)
   const disabledTitleForStatus = (status?: string) => (
-    status == 'Queued'
+    status === 'Queued'
       ? "Work has been queued"
-      : undefined
+      : status === 'Processing'
+        ? "Evidence is being processed"
+        : undefined
   )
   return (
     <div className={cx('view-metadata-root')}>
