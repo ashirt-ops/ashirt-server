@@ -53,7 +53,6 @@ import Modal from 'src/components/modal'
 import TagChooser from 'src/components/bullet_chooser/tag_chooser'
 import TabMenu from 'src/components/tabs'
 import TagList from 'src/components/tag_list'
-import { evidenceFromDto } from '~src/services/data_sources/converters'
 
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -512,7 +511,7 @@ const ViewEvidenceMetadataForm = (props: {
                       filterText={props.filterText}
                       onMetadataEdited={props.onMetadataEdited}
                       expanded={props.metadata.length == 1}
-                      onRerun={services.includes(meta.source) ? props.onRerun : undefined }
+                      onRerun={services.includes(meta.source) ? props.onRerun : undefined}
                       rerunDisabledLabel={disabledTitleForStatus(meta.status)}
                     />
                   )
@@ -581,8 +580,8 @@ const EvidenceMetadataItem = (props: {
 }) => {
   const { onMetadataEdited, onRerun, meta, filterText, expanded } = props
   const minLength = 3
-  const content = highlightSubstring(
-    meta.body, filterText, cx("content-important"), { regexFlags: "i", minLength }
+  const content = highlightSubstring(meta.body, filterText, cx("content-important"),
+    { regexFlags: "i", minLength }
   )
 
   const editAction: ExpandableSectionLabelActionItem = {
@@ -615,12 +614,12 @@ const EvidenceMetadataItem = (props: {
       )}
       initiallyExpanded={expanded}
       labelClassName={cx(
-        (content.length == 1 && filterText.length >= minLength)
+        (content.length === 1 && filterText.length >= minLength)
           ? 'label-not-important'
           : ''
       )}
     >
-      <span className={cx('metadata-content')}>{...content}</span>
+      <pre className={cx('metadata-content')}>{...content}</pre>
     </ExpandableSection>
   )
 }
