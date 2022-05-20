@@ -68,6 +68,26 @@ export async function createEvidence(i: {
   await ds.createEvidence({ operationSlug: i.operationSlug }, formData)
 }
 
+export async function createEvidenceMetadata(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+  source: string,
+  body: string,
+}): Promise<void> {
+  const { source, body, ...ids } = i
+  await ds.createEvidenceMetadata(ids, { source, body })
+}
+
+export async function updateEvidenceMetadata(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+  source: string,
+  body: string,
+}): Promise<void> {
+  const { source, body, ...ids } = i
+  await ds.updateEvidenceMetadata(ids, { source, body })
+}
+
 export async function updateEvidence(i: {
   operationSlug: string,
   evidenceUuid: string,

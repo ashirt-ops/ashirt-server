@@ -450,6 +450,28 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return evidence.Media, nil
 	}))
 
+	route(r, "POST", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.EditEvidenceMetadataInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+			Source:        dr.FromBody("source").Required().AsString(),
+			Body:          dr.FromBody("body").Required().AsString(),
+		}
+		return nil, services.CreateEvidenceMetadata(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.EditEvidenceMetadataInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+			Source:        dr.FromBody("source").Required().AsString(),
+			Body:          dr.FromBody("body").Required().AsString(),
+		}
+		return nil, services.UpdateEvidenceMetadata(r.Context(), db, i)
+	}))
+
 	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
 		i := services.CreateEvidenceInput{

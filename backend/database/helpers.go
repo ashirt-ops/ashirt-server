@@ -159,7 +159,7 @@ func addDuplicatesClause(query squirrel.InsertBuilder, onDuplicates ...interface
 		return query, fmt.Errorf("onDuplicate[0] value must be a string")
 	}
 	if len(onDuplicates) > 1 {
-		return query.Suffix(stmt, onDuplicates[1:]), nil
+		return query.Suffix(stmt, onDuplicates[1:]...), nil
 	}
 	return query.Suffix(stmt), nil
 }

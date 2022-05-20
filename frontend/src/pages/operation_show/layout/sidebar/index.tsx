@@ -5,10 +5,10 @@ import * as React from 'react'
 import ActionMenu from './action_menu'
 import OperationBadges from 'src/components/operation_badges'
 import classnames from 'classnames/bind'
-import {Link} from 'react-router-dom'
-import { EditQueryModal, DeleteQueryModal} from './query_modal'
+import { Link } from 'react-router-dom'
+import { DeleteQueryModal } from './query_modal'
 import { Operation, SavedQuery, SavedQueryType, ViewName} from 'src/global_types'
-import {default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu} from 'src/components/list_menu'
+import { default as ListMenu, ListItem, ListItemWithSaveButton, ListItemWithMenu} from 'src/components/list_menu'
 import { useModal, renderModals} from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CreateButtonPosition } from '..'
@@ -88,13 +88,7 @@ const QueryList = (props: {
   const onCreated = (queryName: string) => {
     props.onSavedQueryChange(queryName)
   }
-  const onEdited = (before: SavedQuery, after: SavedQuery) => {
-    if (before.query === props.currentQuery && before.query !== after.query) {
-      // Navigate to new query if the current selected query was edited
-      props.onSelectQuery(after.query)
-    }
-    props.onSavedQueryChange()
-  }
+
   const onDeleted = (before: SavedQuery) => {
     if (before.query === props.currentQuery) {
         // Navigate to "All" if the current selected query was deleted
@@ -115,9 +109,6 @@ const QueryList = (props: {
     />
   ))
 
-  const editQueryModal = useModal<{savedQuery: SavedQuery}>(modalProps => (
-    <EditQueryModal {...modalProps} operationSlug={props.operationSlug} onEdited={onEdited} view={props.type}/>
-  ))
   const deleteQueryModal = useModal<{savedQuery: SavedQuery}>(modalProps => (
     <DeleteQueryModal {...modalProps} operationSlug={props.operationSlug} onDeleted={onDeleted} />
   ))
@@ -155,7 +146,6 @@ const QueryList = (props: {
             <ActionMenu
               name={savedQuery.name}
               query={savedQuery.query}
-              onEdit={() => editQueryModal.show({savedQuery})}
               onDelete={() => deleteQueryModal.show({savedQuery})}
             />
           )}
@@ -163,6 +153,6 @@ const QueryList = (props: {
       ))}
     </ListMenu>
 
-    {renderModals(saveQueryModal, editQueryModal, deleteQueryModal)}
+    {renderModals(saveQueryModal, deleteQueryModal)}
   </>
 }

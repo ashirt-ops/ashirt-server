@@ -1,29 +1,56 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
+import {
+  Evidence,
+  EvidenceMetadata,
+  Finding,
+  Tag,
+  CodeBlock,
+  SubmittableEvidence,
+  Operation,
+  TagDifference,
+  SupportedEvidenceType,
+} from 'src/global_types'
+import {
+  codeblockToBlob,
+  highlightSubstring,
+  useForm,
+  useFormField,
+  useWiredData,
+} from 'src/helpers'
+import {
+  createEvidence,
+  createEvidenceMetadata,
+  updateEvidence,
+  deleteEvidence,
+  changeFindingsOfEvidence,
+  getFindingsOfEvidence,
+  getEvidenceAsCodeblock,
+  getOperations,
+  getEvidenceMigrationDifference,
+  moveEvidence,
+  updateEvidenceMetadata,
+} from 'src/services'
+
+import BinaryUpload from 'src/components/binary_upload'
+import { default as Button, ButtonGroup } from 'src/components/button'
 import Checkbox from 'src/components/checkbox'
+import { CodeBlockEditor } from 'src/components/code_block'
+import ComboBox from 'src/components/combobox'
+import { ExpandableSection } from 'src/components/expandable_area'
 import FindingChooser from 'src/components/finding_chooser'
 import Form from 'src/components/form'
 import ImageUpload from 'src/components/image_upload'
+import { default as Input, TextArea } from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
 import Modal from 'src/components/modal'
 import TagChooser from 'src/components/bullet_chooser/tag_chooser'
-import BinaryUpload from 'src/components/binary_upload'
-import ComboBox from 'src/components/combobox'
+import TabMenu from 'src/components/tabs'
 import TagList from 'src/components/tag_list'
-import { CodeBlockEditor } from 'src/components/code_block'
-import { Evidence, Finding, Tag, CodeBlock, SubmittableEvidence, Operation, TagDifference, SupportedEvidenceType } from 'src/global_types'
-import { TextArea } from 'src/components/input'
-import { useForm, useFormField } from 'src/helpers/use_form'
-import { codeblockToBlob } from 'src/helpers/codeblock_to_blob'
-import { useWiredData } from 'src/helpers'
-import {
-  createEvidence, updateEvidence, deleteEvidence, changeFindingsOfEvidence,
-  getFindingsOfEvidence, getEvidenceAsCodeblock, getOperations, getEvidenceMigrationDifference,
-  moveEvidence
-} from 'src/services'
-import classnames from 'classnames/bind'
+
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -285,4 +312,269 @@ const TagListRenderer = (props: {
     <div>The following tags will be removed:</div>
     <TagList tags={props.tags} />
   </>)
+}
+
+export const EvidenceMetadataModal = (props: {
+  operationSlug: string,
+  evidence: Evidence,
+  onRequestClose: () => void,
+  onUpdated: () => void,
+}) => {
+
+  // this switch controls whether the user is only able to view metadata, or if they can manually
+  // create and edit existing metadata. We might get more precise control later.
+  const viewOnly = false
+
+  return (
+    <Modal title='Evidence Metadata' onRequestClose={props.onRequestClose}>
+      {viewOnly
+        ? (
+          <ViewEditEvidenceMetadataContainer
+            evidence={props.evidence}
+            operationSlug={props.operationSlug}
+          />
+        )
+        : (
+          <TabMenu className={cx('tab-menu')}
+            tabs={[
+              {
+                id: 'view', label: 'View',
+                content: (
+                  <ViewEditEvidenceMetadataContainer
+                    evidence={props.evidence}
+                    operationSlug={props.operationSlug}
+                    onEdited={() => { props.onUpdated(); props.onRequestClose() }}
+                  />
+                )
+              },
+              {
+                id: 'create', label: 'Create',
+                content: (
+                  <AddEvidenceMetadataForm
+                    evidence={props.evidence}
+                    onCreated={() => { props.onUpdated(); props.onRequestClose() }}
+                    operationSlug={props.operationSlug}
+                  />
+                )
+              },
+            ]}
+          />
+        )
+      }
+    </Modal>
+  )
+}
+
+const ViewEditEvidenceMetadataContainer = (props: {
+  evidence: Evidence,
+  operationSlug: string,
+  onEdited?: () => void
+  onCancel?: () => void,
+}) => {
+  const [editedMetadata, setEditedMetadata] = React.useState<null | EvidenceMetadata>(null)
+  const [filterText, setFilterText] = React.useState<string>("")
+
+  return (
+    editedMetadata
+      ? (
+        <EditEvidenceMetadataForm
+          evidence={props.evidence}
+          metadata={editedMetadata}
+          onCancel={() => setEditedMetadata(null)}
+          onEdited={() => {
+            props.onEdited?.()
+            setEditedMetadata(null)
+          }}
+          operationSlug={props.operationSlug}
+        />
+      )
+      : (
+        <ViewEvidenceMetadataForm
+          evidence={props.evidence}
+          onMetadataEdited={props.onEdited ? setEditedMetadata : undefined}
+          filterText={filterText}
+          onFilterUpdated={setFilterText}
+        />
+      )
+  )
+}
+
+const EditEvidenceMetadataForm = (props: {
+  metadata: EvidenceMetadata
+  operationSlug: string
+  evidence: Evidence
+  onEdited: () => void
+  onCancel: () => void
+}) => (
+  <EvidenceMetadataEditorForm
+    metadata={props.metadata}
+    readonlySource
+    submitText="Save"
+    onSubmit={(metadata: EvidenceMetadata) => {
+      return updateEvidenceMetadata({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+        body: metadata.body,
+        source: metadata.source,
+      })
+    }}
+    onEdited={props.onEdited}
+    onCancel={props.onCancel}
+  />
+)
+
+const AddEvidenceMetadataForm = (props: {
+  operationSlug: string,
+  evidence: Evidence,
+  onCreated: () => void,
+  onCancel?: () => void,
+}) => (
+  <EvidenceMetadataEditorForm
+    metadata={{ body: "", source: "" }}
+    submitText="Create"
+    onSubmit={(metadata: EvidenceMetadata) => {
+      return createEvidenceMetadata({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+        body: metadata.body,
+        source: metadata.source,
+      })
+    }}
+    onEdited={props.onCreated}
+  />
+)
+
+const ViewEvidenceMetadataForm = (props: {
+  evidence: Evidence,
+  onMetadataEdited?: (metadata: EvidenceMetadata) => void
+  onCancel?: () => void,
+  filterText: string,
+  onFilterUpdated: (val: string) => void
+}) => {
+  const formComponentProps = useForm({
+    onSuccess: () => { },
+    handleSubmit: async () => { },
+  })
+  return (
+    <Form {...formComponentProps} onCancel={props.onCancel}>
+      <div className={cx('view-metadata-root')}>
+        {props.evidence.metadata.length == 0
+          ? <em>No metadata exists for this evidence</em>
+          : (<>
+            <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
+
+            {props.evidence.metadata
+              .map((meta) => {
+                return (
+                  <EvidenceMetadataItem
+                    key={meta.source}
+                    meta={meta}
+                    filterText={props.filterText}
+                    onMetadataEdited={props.onMetadataEdited}
+                    expanded={props.evidence.metadata.length == 1}
+                  />
+                )
+              }
+              )}
+          </>)
+        }
+      </div>
+    </Form>
+  )
+}
+
+const EvidenceMetadataEditorForm = (props: {
+  metadata: EvidenceMetadata
+  onSubmit: (metadata: EvidenceMetadata) => Promise<void>
+  onEdited: () => void
+  onCancel?: () => void
+  submitText: string
+  readonlySource?: boolean
+}) => {
+  const sourceField = useFormField<string>(props.metadata.source)
+  const contentField = useFormField<string>(props.metadata.body)
+
+  const formComponentProps = useForm({
+    fields: [sourceField, contentField],
+    onSuccess: () => props.onEdited(),
+    handleSubmit: () => {
+      if (sourceField.value.trim() == "") {
+        throw new Error("Must specify a source")
+      }
+      return props.onSubmit({
+        source: sourceField.value,
+        body: contentField.value,
+      })
+    },
+  })
+
+  return (
+    <Form {...formComponentProps}
+      submitText={props.submitText}
+      onCancel={props.onCancel}
+      cancelText="Cancel"
+    >
+      <Input label={'Source' + (props.readonlySource ? ' (locked)' : '')} readOnly={props.readonlySource} {...sourceField} />
+      <TextArea label="Content" {...contentField} />
+    </Form>
+  )
+}
+
+const EvidenceMetadataItem = (props: {
+  meta: EvidenceMetadata
+  filterText: string
+  onMetadataEdited?: (metadata: EvidenceMetadata) => void
+  expanded?: boolean
+}) => {
+  const { onMetadataEdited, meta, filterText, expanded } = props
+  const minLength = 3
+  const content = highlightSubstring(
+    meta.body, filterText, cx("content-important"), { regexFlags: "i", minLength }
+  )
+
+  const actions: Array<ExpandableSectionLabelActionItem> = onMetadataEdited
+    ? [{
+      label: 'Edit',
+      action: (e) => {
+        e.stopPropagation()
+        onMetadataEdited(meta)
+      }
+    }]
+    : []
+
+  return (
+    <ExpandableSection
+      label={(
+        <ExpandableSectionLabel label={meta.source} actions={actions} />
+      )}
+      initiallyExpanded={expanded}
+      labelClassName={cx(
+        (content.length == 1 && filterText.length >= minLength)
+          ? 'label-not-important'
+          : ''
+      )}
+    >
+      <span className={cx('metadata-content')}>{...content}</span>
+    </ExpandableSection>
+  )
+}
+
+type ExpandableSectionLabelActionItem = { label: string, action: (e: React.MouseEvent<Element, MouseEvent>) => void }
+
+const ExpandableSectionLabel = (props: {
+  label: string
+  actions: Array<ExpandableSectionLabelActionItem>
+}) => {
+  return (
+    <div className={cx('expandable-section-label-container')}>
+      <span className={cx('expandable-section-label')}>{props.label}</span>
+      {props.actions.length > 0 && (
+        <ButtonGroup className={cx('expandable-section-button-group')}>
+          {props.actions.map(act => (
+            <Button small key={act.label} onClick={act.action}>{act.label}</Button>
+          ))}
+        </ButtonGroup>
+      )}
+    </div>
+  )
 }
