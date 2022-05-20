@@ -18,7 +18,7 @@ func Ptr[T any](t T) *T {
 }
 
 // PTrue returns a pointer to a true value
-func PTrue() *bool{
+func PTrue() *bool {
 	return Ptr(true)
 }
 

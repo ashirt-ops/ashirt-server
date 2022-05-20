@@ -190,5 +190,5 @@ type ServiceWorkerTestOutput struct {
 }
 
 type ActiveServiceWorker struct {
-	Name    string `json:"name"`
+	Name string `json:"name"`
 }

@@ -123,7 +123,7 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 	}
 
 	for i, text := range filters.Metadata {
-		if (i == 0) {
+		if i == 0 {
 			sb = sb.LeftJoin("evidence_metadata em ON em.evidence_id = evidence.id")
 		}
 		sb = sb.

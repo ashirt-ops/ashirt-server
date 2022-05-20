@@ -912,7 +912,7 @@ func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 		return services.TestServiceWorker(r.Context(), db, workerID)
 	}))
 
-	route(r, "GET", "/services", jsonHandler(func(r *http.Request)(interface{}, error) {
+	route(r, "GET", "/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListActiveServices(r.Context(), db)
 	}))
 }

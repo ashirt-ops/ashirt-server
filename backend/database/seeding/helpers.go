@@ -255,10 +255,10 @@ func newServiceWorkerGen(first int64) func(name, config string) models.ServiceWo
 	id := iotaLike(first)
 	return func(name, config string) models.ServiceWorker {
 		return models.ServiceWorker{
-			ID:          id(),
-			Name:        name,
-			Config:       config,
-			CreatedAt:   internalClock.Now(),
+			ID:        id(),
+			Name:      name,
+			Config:    config,
+			CreatedAt: internalClock.Now(),
 		}
 	}
 }
