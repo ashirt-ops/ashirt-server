@@ -224,5 +224,16 @@ const HelpText: Array<FilterDetail> = [
         <p>Only one <CodeSnippet>uuid</CodeSnippet> field can be specified.</p>
       </>
   },
+  {
+    field: 'meta',
+    description:
+      <>
+        <p>
+          Filters the result by requiring that some metadata contains the provided value. Multiple
+          values can be specified. When multiples are specified, the metadata must contain <em>all</em>{" "}
+          of the values. 
+        </p>
+      </>
+  },
 
 ]
