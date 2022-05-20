@@ -37,6 +37,7 @@ var HarryPotterSeedData = Seeder{
 	APIKeys: []models.APIKey{
 		APIKeyHarry1, APIKeyHarry2,
 		APIKeyRon1, APIKeyRon2,
+		APIKeyNick,
 	},
 	UserOpMap: []models.UserOperationPermission{
 		// OpSorcerersStone and OpChamberOfSecrets are used to check read/write permissions
@@ -180,6 +181,9 @@ var HarryPotterSeedData = Seeder{
 		QuerySalazarsHier,
 		QueryWhereIsTheChamberOfSecrets,
 	},
+	ServiceWorkers: []models.ServiceWorker{
+		demoServiceWorker,
+	},
 }
 
 var newHPUser = newUserGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
@@ -223,7 +227,13 @@ var APIKeyHarry1 = newAPIKey(UserHarry.ID, "harry-abc", []byte{0x01, 0x02, 0x03}
 var APIKeyHarry2 = newAPIKey(UserHarry.ID, "harry-123", []byte{0x11, 0x12, 0x13})
 var APIKeyRon1 = newAPIKey(UserRon.ID, "ron-abc", []byte{0x01, 0x02, 0x03})
 var APIKeyRon2 = newAPIKey(UserRon.ID, "ron-123", []byte{0x11, 0x12, 0x13})
-var APIKeyHeadlessNick1 = newAPIKey(UserHeadlessNick.ID, "DAYPFGHnm1Pqes-l0Fm76_y1", []byte("HqmuWylLznR+tqSotZAOc+w47buSFaKKTJozpXEYkuNBiuRJgw3NeJOuVP6kbQBQmiYTqYAaiIKbcO1BxcH52Q==")) // realKey
+var APIKeyNick = newAPIKey(UserHeadlessNick.ID, "gR6nVtaQmp2SvzIqLUWdedDk", []byte{
+	// Corresponds to secret key: WvtvxFaJS0mPs82nCzqamI+bOGXpq7EIQhg4UD8nxS5448XG9N0gNAceJGBLPdCA3kAzC4MdUSHnKCJ/lZD++A==
+	0x5A, 0xFB, 0x6F, 0xC4, 0x56, 0x89, 0x4B, 0x49, 0x8F, 0xB3, 0xCD, 0xA7, 0x0B, 0x3A, 0x9A, 0x98,
+	0x8F, 0x9B, 0x38, 0x65, 0xE9, 0xAB, 0xB1, 0x08, 0x42, 0x18, 0x38, 0x50, 0x3F, 0x27, 0xC5, 0x2E,
+	0x78, 0xE3, 0xC5, 0xC6, 0xF4, 0xDD, 0x20, 0x34, 0x07, 0x1E, 0x24, 0x60, 0x4B, 0x3D, 0xD0, 0x80,
+	0xDE, 0x40, 0x33, 0x0B, 0x83, 0x1D, 0x51, 0x21, 0xE7, 0x28, 0x22, 0x7F, 0x95, 0x90, 0xFE, 0xF8,
+})
 
 var newHPOp = newOperationGen(1)
 
@@ -459,3 +469,6 @@ var FindingBook2Magic = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-b2magic",
 var FindingBook2CGI = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-cgi", &SomeOtherFindingCategory.ID, "this looks fake", "I'm not entirely sure this is all above board", &noLink)
 var FindingBook2SpiderFear = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-spider", &SomeFindingCategory.ID, "how to scare spiders", "Who would have thought?", &spiderLink)
 var FindingBook2Robes = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-robes", nil, "Robes for all seasons", "Turns out there's only one kind of robe.", &spiderLink)
+
+var newHPServiceWorker = newServiceWorkerGen(1)
+var demoServiceWorker = newHPServiceWorker("Demo", `{ "type": "web",  "version": 1, "url": "http://demo:3001/process" }`)

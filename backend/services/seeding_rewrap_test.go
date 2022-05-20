@@ -128,7 +128,7 @@ var APIKeyHarry1 = seeding.APIKeyHarry1
 var APIKeyHarry2 = seeding.APIKeyHarry2
 var APIKeyRon1 = seeding.APIKeyRon1
 var APIKeyRon2 = seeding.APIKeyRon2
-var APIKeyHeadlessNick1 = seeding.APIKeyHeadlessNick1
+var APIKeyNick = seeding.APIKeyNick
 
 var OpSorcerersStone = seeding.OpSorcerersStone
 var OpChamberOfSecrets = seeding.OpChamberOfSecrets
