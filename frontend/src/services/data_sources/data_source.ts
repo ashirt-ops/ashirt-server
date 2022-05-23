@@ -30,6 +30,8 @@ type TagPayload = {
 }
 
 export interface DataSource {
+  flags(): Promise<dtos.Flags>
+  
   listApiKeys(ids?: UserSlug): Promise<Array<dtos.APIKey>>
   createApiKey(ids: UserSlug): Promise<dtos.APIKey>
   deleteApiKey(ids: UserSlug & { accessKey: string }): Promise<void>

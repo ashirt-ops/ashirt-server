@@ -6,6 +6,8 @@ import { default as req, xhrText as reqText, reqMultipart } from './request_help
 cacheBust()
 
 export const backendDataSource: DataSource = {
+  flags: () => req('GET', '/flags'),
+
   listApiKeys: ids => req('GET', '/user/apikeys', null, ids),
   createApiKey: ids => req('POST', `/user/${ids.userSlug}/apikeys`),
   deleteApiKey: ids => req('DELETE', `/user/${ids.userSlug}/apikeys/${ids.accessKey}`),
