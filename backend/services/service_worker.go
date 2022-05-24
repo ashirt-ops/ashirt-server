@@ -153,7 +153,10 @@ func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWork
 
 	var worker models.ServiceWorker
 	err := db.Get(&worker, sq.Select("*").
-		From("service_workers").Where(sq.Eq{"id": serviceWorkerID}),
+		From("service_workers").Where(sq.Eq{
+		"id": serviceWorkerID,
+		// "deleted_at": nil, // Allowing testing of deleted workers
+	}),
 	)
 
 	if err != nil {
@@ -163,7 +166,7 @@ func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWork
 	testResult := enhancementservices.TestServiceWorker(worker)
 
 	if testResult.Error != nil {
-		return nil, backend.ServerErr(err)
+		return nil, backend.SuggestiveDatabaseErr(testResult.Message, testResult.Error)
 	}
 
 	result := dtos.ServiceWorkerTestOutput{
