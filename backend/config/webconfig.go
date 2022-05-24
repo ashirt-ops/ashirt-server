@@ -204,8 +204,8 @@ func ImageStoreBucketName() string {
 	return app.ImgstoreBucketName
 }
 
-// ImageStoreRegion retrieves the APP_IMGSTORE_REGION value from the environment
-func ImageStoreRegion() string {
+// AWSRegion retrieves the APP_IMGSTORE_REGION value from the environment
+func AWSRegion() string {
 	return app.ImgstoreRegion
 }
 
