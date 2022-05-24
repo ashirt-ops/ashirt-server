@@ -20,9 +20,9 @@ type BasicServiceWorkerConfig struct {
 }
 
 type ServiceWorker interface {
-	Build(workerName string, evidenceID int64, config []byte) error
+	Build(workerName string, config []byte) error
 	Test() ServiceTestResult
-	Process(payload *Payload) (*models.EvidenceMetadata, error)
+	Process(evidenceID int64, payload *Payload) (*models.EvidenceMetadata, error)
 }
 
 type ServiceTestResult struct {

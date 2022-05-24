@@ -15,7 +15,6 @@ import (
 )
 
 type webConfigV1Worker struct {
-	EvidenceID int64
 	Config     WebConfigV1
 	WorkerName string
 }
@@ -36,14 +35,13 @@ type webTestResp struct {
 	Message *string `json:"message"`
 }
 
-func (w *webConfigV1Worker) Build(workerName string, evidenceID int64, workerConfig []byte) error {
+func (w *webConfigV1Worker) Build(workerName string, workerConfig []byte) error {
 	var webConfig WebConfigV1
 	if err := json.Unmarshal([]byte(workerConfig), &webConfig); err != nil {
 		return err
 	}
 	w.WorkerName = workerName
 	w.Config = webConfig
-	w.EvidenceID = evidenceID
 	return nil
 }
 
@@ -78,7 +76,7 @@ func (w *webConfigV1Worker) Test() ServiceTestResult {
 	return ErrorTestResultWithMessage(nil, "Service did not reply with a supported status")
 }
 
-func (w *webConfigV1Worker) Process(payload *Payload) (*models.EvidenceMetadata, error) {
+func (w *webConfigV1Worker) Process(evidenceID int64, payload *Payload) (*models.EvidenceMetadata, error) {
 	body, err := json.Marshal(*payload)
 	if err != nil {
 		return nil, fmt.Errorf("unable to construct body")
@@ -95,7 +93,7 @@ func (w *webConfigV1Worker) Process(payload *Payload) (*models.EvidenceMetadata,
 
 	model := models.EvidenceMetadata{
 		Source:     w.WorkerName,
-		EvidenceID: w.EvidenceID,
+		EvidenceID: evidenceID,
 	}
 	handleWebResponse(&model, resp)
 

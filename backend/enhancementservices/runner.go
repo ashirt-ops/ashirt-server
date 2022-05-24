@@ -29,7 +29,7 @@ func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 	if err != nil {
 		return ErrorTestResult(err)
 	}
-	if err = worker.Build(workerData.Name, 0, []byte(workerData.Config)); err != nil {
+	if err = worker.Build(workerData.Name, []byte(workerData.Config)); err != nil {
 		return ErrorTestResult(err)
 	}
 
@@ -93,11 +93,11 @@ func runWorker(db *database.Connection, worker models.ServiceWorker, evidenceID 
 		return err
 	}
 
-	if err = handler.Build(worker.Name, evidenceID, []byte(worker.Config)); err != nil {
+	if err = handler.Build(worker.Name, []byte(worker.Config)); err != nil {
 		return err
 	}
 
-	if pendingUpdate, err := handler.Process(payload); err != nil {
+	if pendingUpdate, err := handler.Process(evidenceID, payload); err != nil {
 		return err
 	} else if pendingUpdate != nil { // should always be not-nil
 		_, err := upsertWorkerCompleteData(db, *pendingUpdate)
