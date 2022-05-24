@@ -1,9 +1,15 @@
 module.exports = {
+  testPassed: () => ({
+    statusCode: 200,
+    body: "ok",
+  }),
+
   errorProcessing: (message) => ({
     statusCode: 500,
     body: message
       ? JSON.stringify({
-          message,
+          action: "Error",
+          content: message,
         })
       : undefined,
   }),
@@ -12,17 +18,19 @@ module.exports = {
   }),
   badRequest: (message) => ({
     statusCode: 400,
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({
+      action: "error",
+      content: message,
+    }),
   }),
   notImplemented: () => ({
     statusCode: 501,
   }),
-  testPassed: () => ({
+  processSuccess: (content) => ({
     statusCode: 200,
-    body: "ok",
+    body: JSON.stringify({
+      action: "Processed",
+      content,
+    }),
   }),
-  processSuccess: (body) => ({
-    statusCode: 200,
-    body: JSON.stringify(body),
-  })
 };

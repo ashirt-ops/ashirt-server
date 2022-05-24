@@ -113,6 +113,11 @@ func findAppropriateWorker(config BasicServiceWorkerConfig) (ServiceWorker, erro
 			return &webConfigV1Worker{}, nil
 		}
 	}
+	if config.Type == "aws" {
+		if config.Version == 1 {
+			return &awsConfigV1Worker{}, nil
+		}
+	}
 	return nil, fmt.Errorf("no worker matches the provided configuration")
 }
 
