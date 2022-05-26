@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/theparanoids/ashirt-server/backend"
@@ -15,7 +14,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
-var lambdaClient *lambda.Lambda = nil
+var lambdaClient LambdaInvokableClient = nil
 
 type awsConfigV1Worker struct {
 	Config     AwsConfigV1
@@ -43,20 +42,19 @@ func buildLambdaClient() error {
 	if err != nil {
 		return backend.WrapError("Unable to establish an aws lambda session", err)
 	}
-	creds := credentials.NewCredentials(&credentials.StaticProvider{
-		Value: credentials.Value{
-			// TODO
-		},
-	})
-	lambdaClient = lambda.New(sess, &aws.Config{
-		Region:      helpers.Ptr(config.AWSRegion()),
-		Credentials: creds,
-	})
+	if config.UseLambdaRIE() {
+		lambdaClient = newRIELambdaClient()
+	} else {
+		lambdaClient = lambda.New(sess, &aws.Config{
+			Region: helpers.Ptr(config.AWSRegion()),
+		})
+	}
 
 	return nil
 }
 
 func (w *awsConfigV1Worker) Build(workerName string, workerConfig []byte) error {
+	// Create long-running lambda client, since we don't need a new one for each worker
 	if lambdaClient == nil {
 		if err := buildLambdaClient(); err != nil {
 			return err

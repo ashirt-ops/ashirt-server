@@ -25,6 +25,7 @@ type WebConfig struct {
 	BackendURL               string        `split_words:"true"`
 	SuccessRedirectURL       string        `split_words:"true"`
 	FailureRedirectURLPrefix string        `split_words:"true"`
+	UseLambdaRIE             bool          `split_words:"true"`
 	Port                     int
 }
 
@@ -252,4 +253,8 @@ func StoreBucket() string {
 
 func StoreRegion() string {
 	return store.Region
+}
+
+func UseLambdaRIE() bool {
+	return app.UseLambdaRIE
 }

@@ -3,7 +3,10 @@
 
 package enhancementservices
 
-import "github.com/theparanoids/ashirt-server/backend/models"
+import (
+	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/theparanoids/ashirt-server/backend/models"
+)
 
 type Payload struct {
 	Type          string `json:"type"`
@@ -29,6 +32,10 @@ type ServiceTestResult struct {
 	Message string
 	Live    bool
 	Error   error
+}
+
+type LambdaInvokableClient interface {
+	Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error)
 }
 
 func ErrorTestResult(err error) ServiceTestResult {
