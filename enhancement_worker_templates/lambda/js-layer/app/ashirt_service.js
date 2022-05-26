@@ -1,5 +1,5 @@
 const { createHmac, createHash } = require("crypto");
-const http = require('http');
+const http = require("http");
 
 class AShirtService {
   constructor(config) {
@@ -11,24 +11,24 @@ class AShirtService {
 
   async getEvidence(operationSlug, evidenceUuid) {
     return this.makeRequest({
-      method: 'GET',
-      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`
+      method: "GET",
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`,
     });
   }
 
   async getEvidenceContent(operationSlug, evidenceUuid, type) {
     return this.makeRequest({
-      method: 'GET',
+      method: "GET",
       path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}/${type}`,
-      responseType: 'arraybuffer'
+      responseType: "arraybuffer",
     });
   }
 
   async createOperation(body) {
     return this.makeRequest({
-      method: 'POST',
+      method: "POST",
       path: `/api/operations`,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
   }
 
@@ -39,7 +39,7 @@ class AShirtService {
 
     return {
       contentType: resp.headers["content-type"],
-      status: resp.status,
+      statusCode: resp.statusCode,
       data: resp.data,
     };
   }
@@ -47,13 +47,15 @@ class AShirtService {
   _reqPromise(config) {
     return new Promise((resolve, reject) => {
       const req = http.request(config.httpsOptions, (res) => {
-        res.on("data", (data) =>
+        let data = Buffer.from([]);
+        res.on("data", (chunk) => (data = Buffer.concat([data, chunk])));
+        res.on("close", () => {
           resolve({
             data,
-            status: res.status,
+            statusCode: res.statusCode,
             headers: res.headers,
-          })
-        );
+          });
+        });
       });
       req.on("error", reject);
       if (config.data) {
@@ -116,9 +118,9 @@ class AShirtService {
 
 module.exports = {
   AShirtService: new AShirtService({
-    apiUrl: process.env.ASHIRT_BACKEND_URL,
+    apiUrl: process.env.ASHIRT_BACKEND_URL ?? "",
     apiPort: parseInt(process.env.ASHIRT_BACKEND_PORT, 10),
-    accessKey: process.env.ASHIRT_ACCESS_KEY,
-    secretKeyB64: process.env.ASHIRT_SECRET_KEY,
+    accessKey: process.env.ASHIRT_ACCESS_KEY ?? "",
+    secretKeyB64: process.env.ASHIRT_SECRET_KEY ?? "",
   }),
 };

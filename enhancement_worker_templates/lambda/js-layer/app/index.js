@@ -7,7 +7,7 @@ const {
   processSuccess,
 } = require("./responses");
 
-const { AShirtService } = require("ashirt_service.js");
+const { AShirtService } = require("./ashirt_service");
 
 exports.handler = async (event) => {
   // Parse and validate the data
@@ -20,7 +20,7 @@ exports.handler = async (event) => {
     return testPassed();
   }
   if (event.type === "process") {
-    return handleProcess(event);
+    return await handleProcess(event);
   }
 
   // we should never actually get here -- validation above should trap anything that won't work
@@ -47,7 +47,7 @@ function isValidateInput(data) {
   );
 }
 
-function handleProcess(requestData) {
+async function handleProcess(requestData) {
   // TODO handle your custom logic here!
   // filter out unprocessable evidence
   if (requestData.contentType != "image") {
