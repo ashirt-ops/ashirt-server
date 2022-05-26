@@ -11,7 +11,6 @@ const {createHash} = require("crypto")
 const { AShirtService } = require("./ashirt_service");
 
 exports.handler = async (event) => {
-  
   // Parse and validate the data
   if (!isValidateInput(event)) {
     return badRequest("Body is not in the expected format");

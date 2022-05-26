@@ -1,7 +1,9 @@
 module.exports = {
   testPassed: () => ({
     statusCode: 200,
-    body: "ok",
+    body: JSON.stringify({
+      status: "ok"
+    }),
   }),
 
   errorProcessing: (message) => ({
