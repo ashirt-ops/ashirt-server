@@ -10,6 +10,8 @@ import ChallengeModalForm from 'src/components/challenge_modal_form'
 import { default as Input, TextArea } from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
 import { createServiceWorker, deleteServiceWorkers, updateServiceWorker } from 'src/services'
+import { SourcelessCodeblock } from 'src/components/code_block'
+import Label from 'src/components/with_label'
 
 export const DeleteServiceModal = (props: {
   worker: ServiceWorker,
@@ -56,8 +58,17 @@ export const AddEditServiceWorkerModal = (props: {
       onRequestClose={props.onRequestClose}
       {...formComponentProps}
     >
-      <Input label="Service name" {...serviceName} />
-      <TextArea label="Service Config" {...serviceConfig} />
+      <Input label="Service Name" {...serviceName} />
+      {/* TODO: this might be a good place to stick a flag for rendering purposes */}
+      {/* <TextArea label="Service Config" {...serviceConfig} /> */}
+      <Label label='Service Config'>
+        <SourcelessCodeblock
+          code={serviceConfig.value}
+          onChange={serviceConfig.onChange}
+          editable
+          language='json'
+        />
+      </Label>
     </ModalForm>
   )
 }
