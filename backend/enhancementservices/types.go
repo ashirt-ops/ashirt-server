@@ -28,10 +28,14 @@ type ServiceWorker interface {
 	Process(evidenceID int64, payload *Payload) (*models.EvidenceMetadata, error)
 }
 
+// ServiceTestResult provides a view of a Worker test
 type ServiceTestResult struct {
+	// Message contains helpful text detailing _why_ there was a failure
 	Message string
-	Live    bool
-	Error   error
+	// Live indicates if the service is available or not
+	Live bool
+	// Error indicates if there was some fundamental error that prevented a full test
+	Error error
 }
 
 type LambdaInvokableClient interface {

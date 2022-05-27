@@ -23,14 +23,14 @@ func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 	var basicConfig BasicServiceWorkerConfig
 	err := json.Unmarshal([]byte(workerData.Config), &basicConfig)
 	if err != nil {
-		return ErrorTestResult(err)
+		return ErrorTestResultWithMessage(err, "Unable to parse worker configuration")
 	}
 	worker, err := findAppropriateWorker(basicConfig)
 	if err != nil {
-		return ErrorTestResult(err)
+		return ErrorTestResultWithMessage(err, "Unable to find matching worker")
 	}
 	if err = worker.Build(workerData.Name, []byte(workerData.Config)); err != nil {
-		return ErrorTestResult(err)
+		return ErrorTestResultWithMessage(err, "Unable to prep worker for test")
 	}
 
 	return worker.Test()
