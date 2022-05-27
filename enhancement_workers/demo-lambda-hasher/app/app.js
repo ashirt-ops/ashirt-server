@@ -60,7 +60,6 @@ async function handleProcess(requestData) {
     
     if (content.statusCode == 200) {
       // hash the file contents
-      console.log("???", content.data)
       const buffer = Buffer.from(content.data);
       const hashResult = createHash("sha256")
         .update(buffer)

@@ -10,7 +10,7 @@ module.exports = {
     statusCode: 500,
     body: message
       ? JSON.stringify({
-          action: "Error",
+          action: "error",
           content: message,
         })
       : undefined,
@@ -31,7 +31,7 @@ module.exports = {
   processSuccess: (content) => ({
     statusCode: 200,
     body: JSON.stringify({
-      action: "Processed",
+      action: "processed",
       content,
     }),
   }),
