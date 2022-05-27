@@ -65,16 +65,22 @@ export default (props: {
                       dispatchTestData({ type: 'start', worker: worker.name })
                       let passedTest = true
                       try {
-                        await testServiceWorker({ id: worker.id })
+                        const data = await testServiceWorker({ id: worker.id })
+                        dispatchTestData({
+                          type: 'finish',
+                          worker: worker.name,
+                          passedTest: data.live,
+                          message: data.message,
+                        })
                       }
                       catch (err) {
-                        passedTest = false
+                        dispatchTestData({
+                          type: 'finish',
+                          worker: worker.name,
+                          passedTest: false,
+                          message: err,
+                        })
                       }
-                      dispatchTestData({
-                        type: 'finish',
-                        worker: worker.name,
-                        passedTest,
-                      })
                     }
                   }).map((v, colIndex) => (
                     <td key={worker.name + ":" + columns[colIndex]}>{v}</td>
@@ -130,6 +136,7 @@ function cellOrder(worker?: ServiceWorker, testData?: TestData, actions?: Action
 type TestData = {
   isTesting: boolean,
   testResult: 'connected' | 'offline' | null
+  testMessage: string
 }
 
 const WorkerStatusIcon = (props: TestData) => {
@@ -137,11 +144,14 @@ const WorkerStatusIcon = (props: TestData) => {
 
   if (isTesting) {
     return (
-      <div>Testing...</div>
+      <div>...</div>
     )
   } else if (testResult != null) {
+    const title = props.testMessage.trim() == ""
+      ? undefined
+      : props.testMessage.split(/>>(.*)/, 2).join("\n") // put error on new line if present
     return (
-      <div>{testResult === 'connected' ? "Working" : "Offline"}</div>
+      <div title={title}>{testResult === 'connected' ? "Working" : "Offline"}</div>
     )
   }
 
@@ -151,6 +161,7 @@ const WorkerStatusIcon = (props: TestData) => {
 const initialTestData: TestData = {
   isTesting: false,
   testResult: null,
+  testMessage: "",
 }
 
 type TestDataState = Record<string, TestData>
@@ -159,7 +170,7 @@ const testDataReducer = (state: TestDataState, action: TestDataAction): TestData
   if (action.type == 'start') {
     return {
       ...state,
-      [action.worker]: { isTesting: true, testResult: null }
+      [action.worker]: { isTesting: true, testResult: null, testMessage: "Testing..." }
     }
   }
   if (action.type == 'finish') {
@@ -167,7 +178,8 @@ const testDataReducer = (state: TestDataState, action: TestDataAction): TestData
       ...state,
       [action.worker]: {
         isTesting: false,
-        testResult: action.passedTest ? 'connected' : 'offline'
+        testResult: action.passedTest ? 'connected' : 'offline',
+        testMessage: action.message
       }
     }
   }
@@ -186,4 +198,5 @@ type TestDataActionFinishTest = {
   type: 'finish'
   passedTest: boolean
   worker: string
+  message: string
 }
