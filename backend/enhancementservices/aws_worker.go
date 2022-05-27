@@ -75,9 +75,6 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 		FunctionName: &w.Config.LambdaName,
 		Payload:      []byte(`{"type": "test"}`),
 	}
-	if w.Config.AsyncFn {
-		input.SetInvocationType("Event")
-	}
 
 	out, err := lambdaClient.Invoke(&input)
 
