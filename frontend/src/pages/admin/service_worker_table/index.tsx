@@ -158,7 +158,7 @@ const WorkerStatusIcon = (props: TestData) => {
         <div className={cx('status-message')}>
           {testResult === 'connected' ? "Working" : "Offline"}
         </div>
-        {title !== undefined && <div title={title} className={cx('status-icon')}></div>}
+        {title !== undefined && props.testResult !== 'connected' && <div title={title} className={cx('status-icon')}></div>}
       </>
 
     )
