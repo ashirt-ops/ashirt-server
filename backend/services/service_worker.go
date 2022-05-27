@@ -165,15 +165,16 @@ func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWork
 
 	testResult := enhancementservices.TestServiceWorker(worker)
 
+	message := testResult.Message
 	if testResult.Error != nil {
-		return nil, backend.SuggestiveDatabaseErr(testResult.Message, testResult.Error)
+		// put a separator in to help distinguish message from error
+		message += ">>" + testResult.Error.Error()
 	}
-
 	result := dtos.ServiceWorkerTestOutput{
 		ID:      serviceWorkerID,
 		Name:    worker.Name,
 		Live:    testResult.Live,
-		Message: testResult.Message,
+		Message: message,
 	}
 
 	return &result, nil
