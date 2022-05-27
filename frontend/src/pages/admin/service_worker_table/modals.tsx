@@ -35,9 +35,25 @@ export const AddEditServiceWorkerModal = (props: {
   const serviceConfig = useFormField<string>(props.worker?.config ?? "")
 
   const handleSubmit = () => {
+    if (serviceName.value.trim() === '') {
+      return Promise.reject(new Error("Service name should contain some value"))
+    }
+    if (serviceConfig.value.trim() === '') {
+      return Promise.reject(new Error("Please provide a configuration"))
+    }
+    try {
+      JSON.parse(serviceConfig.value)
+    }
+    catch(err) {
+      const rejection = "JSON config was not parsable." + (err instanceof Error
+        ? ` Error: ${err.message}`
+        : ""
+      )
+      return Promise.reject(new Error(rejection))
+    }
+
     const commonProps = {
       name: serviceName.value,
-      serviceType: 'aws',
       config: serviceConfig.value,
     }
     return props.worker
