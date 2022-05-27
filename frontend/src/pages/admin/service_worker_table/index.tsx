@@ -2,6 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
 
 import { ServiceWorker } from 'src/global_types'
 import {
@@ -22,6 +23,8 @@ import {
   AddEditServiceWorkerModal,
   DeleteServiceModal,
 } from './modals'
+
+const cx = classnames.bind(require('./stylesheet'))
 
 type WorkerModal = { worker: ServiceWorker }
 
@@ -151,7 +154,13 @@ const WorkerStatusIcon = (props: TestData) => {
       ? undefined
       : props.testMessage.split(/>>(.*)/, 2).join("\n") // put error on new line if present
     return (
-      <div title={title}>{testResult === 'connected' ? "Working" : "Offline"}</div>
+      <>
+        <div className={cx('status-message')}>
+          {testResult === 'connected' ? "Working" : "Offline"}
+        </div>
+        {title !== undefined && <div title={title} className={cx('status-icon')}></div>}
+      </>
+
     )
   }
 
