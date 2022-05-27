@@ -23,6 +23,7 @@ import {
   AddEditServiceWorkerModal,
   DeleteServiceModal,
 } from './modals'
+import Checkbox from 'src/components/checkbox'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -34,6 +35,7 @@ export default (props: {
 }) => {
   const columns: Array<string> = cellOrder()
 
+  const [showDeleted, setShowDeleted] = React.useState(false)
   const wiredServiceWorkers = useWiredData<Array<ServiceWorker>>(
     listServiceWorkers,
     (err) => <ErrorRow span={columns.length} error={err} />,
@@ -55,10 +57,12 @@ export default (props: {
 
   return (
     <SettingsSection title="Service Worker List" width="wide">
+      <Checkbox label='Show Deleted Workers' value={showDeleted} onChange={setShowDeleted} />
       <Table columns={columns}>
         {wiredServiceWorkers.render(data => <>
           {
             data
+              .filter(worker => showDeleted || !worker.deleted)
               .map((worker) => (
                 <tr key={worker.name}>
                   {
@@ -132,7 +136,12 @@ function cellOrder(worker?: ServiceWorker, testData?: TestData, actions?: Action
         <ButtonGroup>
           <Button small onClick={() => showEdit(worker)}>Edit</Button>
           <Button small onClick={() => testService(worker)}>Test</Button>
-          <Button danger small onClick={() => showDelete(worker)}>Delete</Button>
+          {/* {
+            worker.deleted
+              ? (<Button primary small onClick={() => showDelete(worker)}>Restore</Button>)
+              : (<Button danger small onClick={() => showDelete(worker)}>Delete</Button>)
+          } */}
+          <Button danger disabled={worker.deleted} small onClick={() => showDelete(worker)}>Delete</Button>
         </ButtonGroup>
       </>
     ),
