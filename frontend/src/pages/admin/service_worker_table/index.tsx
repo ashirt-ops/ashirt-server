@@ -58,39 +58,42 @@ export default (props: {
       <Table columns={columns}>
         {wiredServiceWorkers.render(data => <>
           {
-            data.map((worker) => (
-              <tr key={worker.name}>
-                {
-                  cellOrder(worker, testDataState[worker.name] ?? initialTestData, {
-                    showDeleteModal: (worker) => deleteModal.show({ worker }),
-                    showEditModal: (worker) => editModal.show({ worker }),
-                    testService: async (worker) => {
-                      dispatchTestData({ type: 'start', worker: worker.name })
-                      let passedTest = true
-                      try {
-                        const data = await testServiceWorker({ id: worker.id })
-                        dispatchTestData({
-                          type: 'finish',
-                          worker: worker.name,
-                          passedTest: data.live,
-                          message: data.message,
-                        })
+            data
+              .map((worker) => (
+                <tr key={worker.name}>
+                  {
+                    cellOrder(worker, testDataState[worker.name] ?? initialTestData, {
+                      showDeleteModal: (worker) => deleteModal.show({ worker }),
+                      showEditModal: (worker) => editModal.show({
+                        // update config to show pretty version
+                        worker: { ...worker, config: prettyPrintJsonString(worker.config) }
+                      }),
+                      testService: async (worker) => {
+                        dispatchTestData({ type: 'start', worker: worker.name })
+                        try {
+                          const data = await testServiceWorker({ id: worker.id })
+                          dispatchTestData({
+                            type: 'finish',
+                            worker: worker.name,
+                            passedTest: data.live,
+                            message: data.message,
+                          })
+                        }
+                        catch (err) {
+                          dispatchTestData({
+                            type: 'finish',
+                            worker: worker.name,
+                            passedTest: false,
+                            message: err,
+                          })
+                        }
                       }
-                      catch (err) {
-                        dispatchTestData({
-                          type: 'finish',
-                          worker: worker.name,
-                          passedTest: false,
-                          message: err,
-                        })
-                      }
-                    }
-                  }).map((v, colIndex) => (
-                    <td key={worker.name + ":" + columns[colIndex]}>{v}</td>
-                  ))
-                }
-              </tr>
-            ))
+                    }).map((v, colIndex) => (
+                      <td key={worker.name + ":" + columns[colIndex]}>{v}</td>
+                    ))
+                  }
+                </tr>
+              ))
           }
         </>)}
       </Table>
@@ -208,4 +211,14 @@ type TestDataActionFinishTest = {
   passedTest: boolean
   worker: string
   message: string
+}
+
+const prettyPrintJsonString = (jsonText: string) => {
+  try {
+    return JSON.stringify(JSON.parse(jsonText), null, 2)
+  }
+  catch (err) {
+    // fall back to whatever was provided
+    return jsonText
+  }
 }
