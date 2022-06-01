@@ -14,6 +14,7 @@ export * from './creator_chooser'
 export * from './evidence_type_chooser'
 export * from './tag_chooser'
 export * from './text_chooser'
+export * from './service_worker_chooser'
 
 const cx = classnames.bind(require('./stylesheet'))
 
