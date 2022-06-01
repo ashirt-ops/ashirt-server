@@ -7,7 +7,7 @@ import { ServiceWorker } from 'src/global_types'
 import { useForm, useFormField } from 'src/helpers'
 
 import ChallengeModalForm from 'src/components/challenge_modal_form'
-import { default as Input, TextArea } from 'src/components/input'
+import { default as Input } from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
 import { createServiceWorker, deleteServiceWorkers, updateServiceWorker } from 'src/services'
 import { SourcelessCodeblock } from 'src/components/code_block'
@@ -19,7 +19,7 @@ export const DeleteServiceModal = (props: {
 }) => (
   <ChallengeModalForm
     modalTitle="Delete Service"
-    warningText="This will remove the service from the system. Existing metadata will be kept, but no new metadata will be added by this worker."
+    warningText="This will remove the service from the system. Existing metadata will be kept, but no new metadata will be added by this worker. Note that queued work will still be completed and recorded."
     submitText="Delete"
     challengeText={props.worker.name}
     handleSubmit={() => deleteServiceWorkers({ id: props.worker.id })}
@@ -44,7 +44,7 @@ export const AddEditServiceWorkerModal = (props: {
     try {
       JSON.parse(serviceConfig.value)
     }
-    catch(err) {
+    catch (err) {
       const rejection = "JSON config was not parsable." + (err instanceof Error
         ? ` Error: ${err.message}`
         : ""
