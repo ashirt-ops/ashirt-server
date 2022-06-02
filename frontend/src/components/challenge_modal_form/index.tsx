@@ -25,7 +25,7 @@ export default <T extends unknown>(props: {
     fields: [challenge],
     onSuccess: () => props.onRequestClose(true),
     handleSubmit: () => {
-      if (challenge.value !== props.challengeText) {
+      if (challenge.value !== props.challengeText && props.challengeText !== undefined) {
         return Promise.reject(Error("Challenge text does not match"))
       }
       return props.handleSubmit()
