@@ -16,7 +16,7 @@ export async function getEvidenceMigrationDifference(i: {
   toOperationSlug: string,
   evidenceUuid: string,
 }): Promise<TagDifference> {
-  return await ds.getEvidenceMigrationDifference({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid}, i.fromOperationSlug)
+  return await ds.getEvidenceMigrationDifference({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid }, i.fromOperationSlug)
 }
 
 export async function moveEvidence(i: {
@@ -95,18 +95,28 @@ export async function readEvidenceMetadata(i: {
   return ds.readEvidenceMetadata(i)
 }
 
-export async function runServiceWorkerForEvidence(i:{
+export async function runServiceWorkerForEvidence(i: {
   operationSlug: string,
   evidenceUuid: string,
   source: string,
 }): Promise<void> {
   ds.runServiceWorkerForEvidence(i)
 }
-export async function runAllServiceWorkersForEvidence(i:{
+
+export async function runAllServiceWorkersForEvidence(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<void> {
   ds.runAllServiceWorkersForEvidence(i)
+}
+
+export async function runServiceWorkerMatrix(i: {
+  operationSlug: string,
+  evidenceUuids: Array<string>
+  workers: Array<string>
+}): Promise<void> {
+  const { operationSlug, ...payload } = i
+  ds.runServiceWorkerBatch({ operationSlug }, payload)
 }
 
 export async function updateEvidence(i: {
