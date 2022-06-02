@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
@@ -12,19 +13,22 @@ import (
 
 type LambdaRIEClient struct{}
 
-func newRIELambdaClient() LambdaInvokableClient {
+// lambdaMutex provides a lock on RIE calls. The RIE does not support parallelized calls.
+var lambdaMutex sync.Mutex
 
+func newRIELambdaClient() LambdaInvokableClient {
 	return LambdaRIEClient{}
 }
 
 func (l LambdaRIEClient) Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error) {
-
 	if input.FunctionName == nil {
 		return nil, fmt.Errorf("missing a function name for RIE lambda client")
 	}
 	url := "http://" + *input.FunctionName + ":8080/2015-03-31/functions/function/invocations"
 
+	lambdaMutex.Lock()
 	resp, err := helpers.MakeJSONRequest("POST", url, bytes.NewReader(input.Payload), helpers.NoMod)
+	lambdaMutex.Unlock()
 
 	if err != nil {
 		return nil, err
@@ -55,6 +59,6 @@ func (l LambdaRIEClient) Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput
 		Payload:       []byte(strBody),
 		StatusCode:    helpers.Ptr(int64(resp.StatusCode)),
 	}
-	
+
 	return &out, nil
 }
