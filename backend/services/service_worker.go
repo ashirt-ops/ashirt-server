@@ -37,6 +37,12 @@ type RunServiceWorkerInput struct {
 	WorkerName    string
 }
 
+type BatchRunServiceWorkerInput struct {
+	OperationSlug string
+	EvidenceUUIDs []string
+	WorkerNames   []string
+}
+
 type DeleteServiceWorkerInput struct {
 	ID       int64
 	DoDelete bool
@@ -144,6 +150,19 @@ func RunServiceWorker(ctx context.Context, db *database.Connection, i RunService
 	}
 
 	return nil
+}
+
+func BatchRunServiceWorker(ctx context.Context, db *database.Connection, i BatchRunServiceWorkerInput) error {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return backend.WrapError("Unable to run service workers", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unable to run service workers", backend.UnauthorizedWriteErr(err))
+	}
+
+	return enhancementservices.RunServiceWorkerMatrix(ctx, db, operation.ID, i.EvidenceUUIDs, i.WorkerNames)
 }
 
 func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWorkerID int64) (*dtos.ServiceWorkerTestOutput, error) {

@@ -866,6 +866,10 @@ func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 		return services.ListServiceWorker(r.Context(), db)
 	}))
 
+	route(r, "GET", "/services", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return services.ListActiveServices(r.Context(), db)
+	}))
+
 	route(r, "POST", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateServiceWorkerInput{
@@ -912,7 +916,16 @@ func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 		return services.TestServiceWorker(r.Context(), db, workerID)
 	}))
 
-	route(r, "GET", "/services", jsonHandler(func(r *http.Request) (interface{}, error) {
-		return services.ListActiveServices(r.Context(), db)
+	route(r, "PUT", "/operations/{operation_slug}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.BatchRunServiceWorkerInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUIDs: dr.FromBody("evidenceUuids").Required().AsStringSlice(),
+			WorkerNames:   dr.FromBody("workers").Required().AsStringSlice(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.BatchRunServiceWorker(r.Context(), db, i)
 	}))
 }
