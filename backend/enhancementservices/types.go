@@ -9,10 +9,15 @@ import (
 )
 
 type Payload struct {
-	Type          string `json:"type"`
+	Type          string `json:"type" db:"type"`
 	EvidenceUUID  string `json:"evidenceUuid"  db:"uuid"`
 	OperationSlug string `json:"operationSlug" db:"operation_slug"`
 	ContentType   string `json:"contentType"   db:"content_type"`
+}
+
+type ExpandedPayload struct {
+	Payload
+	EvidenceID int64 `db:"id"`
 }
 
 type WorkerHandler = func(workerName string, evidenceID int64, configText []byte, payload *Payload) (*models.EvidenceMetadata, error)
