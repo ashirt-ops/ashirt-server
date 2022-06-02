@@ -157,10 +157,18 @@ export const StartWorkerModal = (props: {
   onRequestClose: () => void,
   onSubmit: () => Promise<void>
 }) => {
+  const quantityText = props.allWorkers
+    ? "all pieces"
+    : props.evidence.length == 1 ? "1 piece" : `${props.evidence.length} pieces`
+  const warningText = (
+    `This will start workers for ${quantityText} of evidence. ` +
+    `Are you sure you want to continue?`
+  )
+
   return (
     <ChallengeModalForm
       modalTitle="Start Services"
-      warningText={`This will start workers for ${props.workers.length} pieces of evidence. Are you sure you want to continue?`}
+      warningText={warningText}
       submitText="Start"
       handleSubmit={props.onSubmit}
       onRequestClose={props.onRequestClose}
