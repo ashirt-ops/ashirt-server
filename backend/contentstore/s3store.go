@@ -14,8 +14,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 )
 
-var contentStoreContext = context.Background()
-
 // S3Store is the backing structure needed to interact with an Amazon S3 storage service
 // TODO: this can be unexported
 type S3Store struct {
@@ -25,7 +23,7 @@ type S3Store struct {
 
 // NewS3Store provides a mechanism to initialize an S3 bucket in a particular region
 func NewS3Store(bucketName string, region string) (*S3Store, error) {
-	cfg, err := config.LoadDefaultConfig(contentStoreContext)
+	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return nil, backend.WrapError("Unable to establish an s3 session", err)
 	}
