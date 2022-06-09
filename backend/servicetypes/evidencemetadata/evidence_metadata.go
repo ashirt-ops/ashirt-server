@@ -5,7 +5,7 @@ import "github.com/theparanoids/ashirt-server/backend/helpers"
 type Status string
 
 const (
-	// StatusQueued reflects a short span between when something was requested but before it was sent to the worker
+	// StatusQueued reflects the state where a worker has received the task, but decided it could not process immediately.
 	StatusQueued Status = "Queued"
 	// StatusProcessing reflects the state where a task has been given to the worker, but the worker hasn't responded with the result yet.
 	StatusProcessing Status = "Processing"

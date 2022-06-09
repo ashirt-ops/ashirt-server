@@ -1,8 +1,10 @@
+// Copyright 2022, Yahoo Inc.
+// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
 package enhancementservices
 
 import (
 	"encoding/json"
-	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -11,7 +13,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 var lambdaClient LambdaInvokableClient = nil
@@ -27,20 +28,10 @@ type AwsConfigV1 struct {
 	AsyncFn    bool   `json:"asyncFunction"`
 }
 
-type awsTestResp struct {
-	Status  string  `json:"status"`
-	Message *string `json:"message"`
-}
-
-type awsProcessResp struct {
-	Action  string  `json:"action"`  // Rejected | Deferred | Processed | Error
-	Content *string `json:"content"` // Error => reason, Processed => Result
-}
-
 func buildLambdaClient() error {
 	sess, err := session.NewSession()
 	if err != nil {
-		return backend.WrapError("Unable to establish an aws lambda session", err)
+		return backend.WrapError("unable to establish an aws lambda session", err)
 	}
 	if config.UseLambdaRIE() {
 		lambdaClient = newRIELambdaClient()
@@ -63,7 +54,7 @@ func (w *awsConfigV1Worker) Build(workerName string, workerConfig []byte) error 
 
 	var awsConfig AwsConfigV1
 	if err := json.Unmarshal([]byte(workerConfig), &awsConfig); err != nil {
-		return err // TODO
+		return backend.WrapError("aws worker config is unparsable", err)
 	}
 	w.WorkerName = workerName
 	w.Config = awsConfig
@@ -83,10 +74,10 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 	}
 
 	if out.FunctionError != nil {
-		return ErrorTestResultWithMessage(err, "Service experienced an error: "+*out.FunctionError)
+		return ErrorTestResultWithMessage(nil, "Service experienced an error: "+*out.FunctionError)
 	}
 
-	var parsedData awsTestResp
+	var parsedData TestResp
 	if err := json.Unmarshal(out.Payload, &parsedData); err != nil {
 		return ErrorTestResultWithMessage(err, "Unable to parse response")
 	}
@@ -96,10 +87,9 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 	}
 	if parsedData.Status == "error" {
 		if parsedData.Message != nil {
-			return ErrorTestResultWithMessage(err, "Service reported an error: "+*parsedData.Message)
-		} else {
-			return ErrorTestResultWithMessage(err, "Service reported an error")
+			return ErrorTestResultWithMessage(nil, "Service reported an error: "+*parsedData.Message)
 		}
+		return ErrorTestResultWithMessage(nil, "Service reported an error")
 	}
 
 	return ErrorTestResultWithMessage(nil, "Service did not reply with a supported status")
@@ -138,59 +128,44 @@ func (w *awsConfigV1Worker) Process(evidenceID int64, payload *Payload) (*models
 }
 
 func handleAWSProcessResponse(dbModel *models.EvidenceMetadata, output *lambda.InvokeOutput) {
-	recordRejection := func(message *string) {
-		dbModel.Status = evidencemetadata.StatusCompleted.Ptr()
-		dbModel.CanProcess = helpers.Ptr(false)
-		dbModel.LastRunMessage = message
-	}
-	recordError := func(message *string) {
-		dbModel.Status = evidencemetadata.StatusError.Ptr()
-		dbModel.LastRunMessage = message
-	}
-	recordDeferral := func() {
-		dbModel.Status = evidencemetadata.StatusQueued.Ptr()
-		dbModel.CanProcess = helpers.Ptr(true)
-	}
-	recordProcessed := func(content string) {
-		dbModel.Status = evidencemetadata.StatusCompleted.Ptr()
-		dbModel.CanProcess = helpers.Ptr(true)
-		dbModel.Body = content
-	}
-
 	statusCode := *output.StatusCode
-	var parsedData awsProcessResp
-	err := json.Unmarshal(output.Payload, &parsedData)
+	var parsedData ProcessResponse
 
-	if err != nil {
-		recordError(helpers.Ptr("Unable to parse response"))
-		return
+	if len(output.Payload) > 0 {
+		if err := json.Unmarshal(output.Payload, &parsedData); err != nil {
+			recordError(dbModel, helpers.Ptr("Unable to parse response"))
+			return
+		}
 	}
 
-	switch statusCode {
-	case http.StatusOK: // 200
-		switch parsedData.Action {
-		case "processed":
-			if parsedData.Content != nil {
-				recordProcessed(*parsedData.Content)
-			} else {
-				recordError(helpers.Ptr("Content was not delivered for successful run"))
-			}
-		case "rejected":
-			recordRejection(parsedData.Content)
-		case "error":
-			recordError(parsedData.Content)
-		case "deferred":
-			recordDeferral()
-		default:
-			recordError(helpers.SprintfPtr("Unexpected response format (%v)", parsedData.Action))
-		}
-	case http.StatusAccepted:
-		recordDeferral()
-	case http.StatusNotAcceptable:
-		recordRejection(nil)
-	case http.StatusInternalServerError:
-		recordError(nil)
-	default:
-		recordError(helpers.SprintfPtr("Unexpected response status code (%v)", statusCode))
+	handleProcessResponse(dbModel, int(statusCode), parsedData)
+}
+
+// SetTestLambdaClient provides a way to conduct unit tests. Not intended for regular use
+func SetTestLambdaClient(client LambdaInvokableClient) {
+	lambdaClient = client
+}
+
+// BuildTestLambdaWorker provides a way to conduct unit tests.
+// This function creates a canned worker suitable for immediate use.
+// Not intended for regular use
+func BuildTestLambdaWorker() awsConfigV1Worker {
+	return BuildTestLambdaWorkerWithName("test-worker")
+}
+
+// BuildTestLambdaWorkerWithName provides a way to conduct unit tests.
+// This function creates a canned worker suitable for immediate use, of the provided name.
+// Not intended for regular use
+func BuildTestLambdaWorkerWithName(name string) awsConfigV1Worker {
+	return awsConfigV1Worker{
+		WorkerName: name,
+		Config: AwsConfigV1{
+			AsyncFn:    false,
+			LambdaName: name,
+			BasicServiceWorkerConfig: BasicServiceWorkerConfig{
+				Type:    "aws",
+				Version: 1,
+			},
+		},
 	}
 }

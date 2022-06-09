@@ -4,7 +4,11 @@
 package enhancementservices
 
 import (
+	"io"
+	"net/http"
+
 	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 )
 
@@ -66,3 +70,15 @@ func TestResultSuccess(message string) ServiceTestResult {
 		Live:    true,
 	}
 }
+
+type ProcessResponse struct {
+	Action  string  `json:"action"`  // Rejected | Deferred | Processed | Error
+	Content *string `json:"content"` // Error => reason, Processed => Result
+}
+
+type TestResp struct {
+	Status  string  `json:"status"`
+	Message *string `json:"message"`
+}
+
+type RequestFn = func(method, url string, body io.Reader, updateRequest helpers.ModifyReqFunc) (*http.Response, error)

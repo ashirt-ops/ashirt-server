@@ -6,17 +6,20 @@ package enhancementservices
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"io"
 	"net/http"
 
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 type webConfigV1Worker struct {
 	Config     WebConfigV1
 	WorkerName string
+	// makeRequestFn provides an alternative function to make a JSON based request. Should typically be nil,
+	// except when unit testing
+	makeRequestFn RequestFn
 }
 
 type WebConfigV1 struct {
@@ -25,20 +28,10 @@ type WebConfigV1 struct {
 	Headers map[string]string `json:"headers"`
 }
 
-type webProcessResp struct {
-	Action  string  `json:"action"`  // Rejected | Deferred | Processed | Error
-	Content *string `json:"content"` // Rejected/Error => reason, Deferred => null/ignored, Processed => Result
-}
-
-type webTestResp struct {
-	Status  string  `json:"status"`
-	Message *string `json:"message"`
-}
-
 func (w *webConfigV1Worker) Build(workerName string, workerConfig []byte) error {
 	var webConfig WebConfigV1
 	if err := json.Unmarshal([]byte(workerConfig), &webConfig); err != nil {
-		return err
+		return backend.WrapError("worker configuration is unparsable", err)
 	}
 	w.WorkerName = workerName
 	w.Config = webConfig
@@ -47,7 +40,7 @@ func (w *webConfigV1Worker) Build(workerName string, workerConfig []byte) error 
 
 func (w *webConfigV1Worker) Test() ServiceTestResult {
 	body := []byte(`{"type": "test"}`)
-	resp, err := helpers.MakeJSONRequest("POST", w.Config.URL, bytes.NewReader(body), func(req *http.Request) error {
+	resp, err := w.makeJSONRequest("POST", w.Config.URL, bytes.NewReader(body), func(req *http.Request) error {
 		helpers.AddHeaders(req, w.Config.Headers)
 		return nil
 	})
@@ -58,7 +51,7 @@ func (w *webConfigV1Worker) Test() ServiceTestResult {
 	if resp.StatusCode == http.StatusNoContent {
 		return TestResultSuccess("Service is functional")
 	} else {
-		var parsedData webTestResp
+		var parsedData TestResp
 		if err := json.NewDecoder(resp.Body).Decode(&parsedData); err != nil {
 			return ErrorTestResultWithMessage(err, "Unable to parse response")
 		}
@@ -69,7 +62,7 @@ func (w *webConfigV1Worker) Test() ServiceTestResult {
 			if parsedData.Message != nil {
 				return ErrorTestResultWithMessage(nil, *parsedData.Message)
 			}
-			return ErrorTestResultWithMessage(nil, "Service is reporting an error")
+			return ErrorTestResultWithMessage(nil, "Service reported an error")
 		}
 	}
 
@@ -79,10 +72,10 @@ func (w *webConfigV1Worker) Test() ServiceTestResult {
 func (w *webConfigV1Worker) Process(evidenceID int64, payload *Payload) (*models.EvidenceMetadata, error) {
 	body, err := json.Marshal(*payload)
 	if err != nil {
-		return nil, fmt.Errorf("unable to construct body")
+		return nil, backend.WrapError("unable to construct body", err)
 	}
 
-	resp, err := helpers.MakeJSONRequest("POST", w.Config.URL, bytes.NewReader(body), func(req *http.Request) error {
+	resp, err := w.makeJSONRequest("POST", w.Config.URL, bytes.NewReader(body), func(req *http.Request) error {
 		helpers.AddHeaders(req, w.Config.Headers)
 		return nil
 	})
@@ -101,56 +94,44 @@ func (w *webConfigV1Worker) Process(evidenceID int64, payload *Payload) (*models
 }
 
 func handleWebResponse(dbModel *models.EvidenceMetadata, resp *http.Response) {
-	recordRejection := func(message *string) {
-		dbModel.Status = evidencemetadata.StatusCompleted.Ptr()
-		dbModel.CanProcess = helpers.Ptr(false)
-		dbModel.LastRunMessage = message
-	}
-	recordError := func(message *string) {
-		dbModel.Status = evidencemetadata.StatusError.Ptr()
-		dbModel.LastRunMessage = message
-	}
-	recordDeferral := func() {
-		dbModel.Status = evidencemetadata.StatusQueued.Ptr()
-		dbModel.CanProcess = helpers.Ptr(true)
-	}
-	recordProcessed := func(content string) {
-		dbModel.Status = evidencemetadata.StatusCompleted.Ptr()
-		dbModel.CanProcess = helpers.Ptr(true)
-		dbModel.Body = content
-	}
+	var parsedData ProcessResponse
 
-	var parsedData webProcessResp
-	if err := json.NewDecoder(resp.Body).Decode(&parsedData); err != nil {
-		recordError(helpers.Ptr("Unable to parse response"))
+	bytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		recordError(dbModel, helpers.Ptr("Unable to read response"))
 		return
 	}
-
-	switch resp.StatusCode {
-	case http.StatusOK: // 200
-		switch parsedData.Action {
-		case "processed":
-			if parsedData.Content != nil {
-				recordProcessed(*parsedData.Content)
-			} else {
-				recordError(helpers.Ptr("Content was not delivered for successful run"))
-			}
-		case "rejected":
-			recordRejection(parsedData.Content)
-		case "error":
-			recordError(parsedData.Content)
-		case "deferred":
-			recordDeferral()
-		default:
-			recordError(helpers.SprintfPtr("Unexpected response format (%v)", parsedData.Action))
+	if len(bytes) > 0 {
+		if err := json.Unmarshal(bytes, &parsedData); err != nil {
+			recordError(dbModel, helpers.Ptr("Unable to parse response"))
+			return
 		}
-	case http.StatusAccepted:
-		recordDeferral()
-	case http.StatusNotAcceptable:
-		recordRejection(nil)
-	case http.StatusInternalServerError:
-		recordError(nil)
-	default:
-		recordError(helpers.SprintfPtr("Unexpected response status code (%v)", resp.StatusCode))
 	}
+
+	handleProcessResponse(dbModel, resp.StatusCode, parsedData)
+}
+
+func BuildTestWebWorker() webConfigV1Worker {
+	return webConfigV1Worker{
+		WorkerName: "magic",
+		Config: WebConfigV1{
+			URL:     "http://localhost/failifcalled",
+			Headers: map[string]string{},
+			BasicServiceWorkerConfig: BasicServiceWorkerConfig{
+				Type:    "aws",
+				Version: 1,
+			},
+		},
+	}
+}
+
+func (l webConfigV1Worker) makeJSONRequest(method, url string, body io.Reader, updateRequest helpers.ModifyReqFunc) (*http.Response, error) {
+	if l.makeRequestFn != nil {
+		return l.makeRequestFn(method, url, body, updateRequest)
+	}
+	return helpers.MakeJSONRequest(method, url, body, updateRequest)
+}
+
+func (l *webConfigV1Worker) SetWebRequestFunction(fn RequestFn) {
+	l.makeRequestFn = fn
 }
