@@ -18,13 +18,12 @@ type APIKey struct {
 }
 
 type Evidence struct {
-	UUID        string             `json:"uuid"`
-	Description string             `json:"description"`
-	OccurredAt  time.Time          `json:"occurredAt"`
-	Operator    User               `json:"operator"`
-	Tags        []Tag              `json:"tags"`
-	Metadata    []EvidenceMetadata `json:"metadata"` // we probably don't need this
-	ContentType string             `json:"contentType"`
+	UUID        string    `json:"uuid"`
+	Description string    `json:"description"`
+	OccurredAt  time.Time `json:"occurredAt"`
+	Operator    User      `json:"operator"`
+	Tags        []Tag     `json:"tags"`
+	ContentType string    `json:"contentType"`
 }
 
 type EvidenceMetadata struct {
