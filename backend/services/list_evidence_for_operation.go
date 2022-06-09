@@ -82,10 +82,6 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 	if err != nil {
 		return nil, backend.WrapError("Cannot get tags for evidence", backend.DatabaseErr(err))
 	}
-	metadata, err := metadataForEvidenceByID(db, evidenceIDs)
-	if err != nil {
-		return nil, backend.WrapError("Cannot get metadata for evidence", backend.DatabaseErr(err))
-	}
 
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))
 	for idx, evi := range evidence {
@@ -93,10 +89,6 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 
 		if !ok {
 			tags = []dtos.Tag{}
-		}
-		evidenceMetadata, ok := metadata[evi.ID]
-		if !ok {
-			evidenceMetadata = []dtos.EvidenceMetadata{}
 		}
 
 		evidenceDTO[idx] = &dtos.Evidence{
@@ -106,7 +98,6 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 			OccurredAt:  evi.OccurredAt,
 			ContentType: evi.ContentType,
 			Tags:        tags,
-			Metadata:    evidenceMetadata,
 		}
 	}
 	return evidenceDTO, nil
