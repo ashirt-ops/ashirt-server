@@ -141,7 +141,7 @@ func ReadEvidenceMetadata(ctx context.Context, db *database.Connection, i ReadEv
 	if err != nil {
 		return nil, backend.WrapError("Unable to read evidence metadata", backend.UnauthorizedReadErr(err))
 	}
-	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
+	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read evidence metadata", backend.UnauthorizedReadErr(err))
 	}
 
