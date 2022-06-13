@@ -9,7 +9,7 @@ import { useForm, useFormField } from 'src/helpers'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
 import { default as Input } from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
-import { createServiceWorker, deleteServiceWorkers, updateServiceWorker } from 'src/services'
+import { createServiceWorker, deleteServiceWorkers, restoreServiceWorker, updateServiceWorker } from 'src/services'
 import { SourcelessCodeblock } from 'src/components/code_block'
 import Label from 'src/components/with_label'
 
@@ -26,6 +26,20 @@ export const DeleteServiceModal = (props: {
     onRequestClose={props.onRequestClose}
   />
 )
+
+export const RestoreServiceModal = (props: {
+  worker: ServiceWorker,
+  onRequestClose: () => void,
+}) => (
+  <ChallengeModalForm
+    modalTitle="Restore Service"
+    warningText="This will restore the service to active use. All evidence created after this point can now use this worker."
+    submitText="Restore"
+    handleSubmit={() => restoreServiceWorker({ id: props.worker.id })}
+    onRequestClose={props.onRequestClose}
+  />
+)
+
 
 export const AddEditServiceWorkerModal = (props: {
   worker?: ServiceWorker,
