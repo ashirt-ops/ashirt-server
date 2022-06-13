@@ -332,3 +332,12 @@ func (seed Seeder) TagIDsUsageByDate(opID int64) map[int64][]time.Time {
 
 	return tagIDUsageMap
 }
+
+func (seed Seeder) OperationForEvidence(evidence models.Evidence) *models.Operation {
+	for _, op := range seed.Operations {
+		if op.ID == evidence.OperationID {
+			return &op
+		}
+	}
+	return nil
+}
