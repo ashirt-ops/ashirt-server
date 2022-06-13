@@ -28,6 +28,8 @@ type WebConfigV1 struct {
 	Headers map[string]string `json:"headers"`
 }
 
+var workerRequestFnMap map[string]*RequestFn = map[string]*RequestFn{}
+
 func (w *webConfigV1Worker) Build(workerName string, workerConfig []byte) error {
 	var webConfig WebConfigV1
 	if err := json.Unmarshal([]byte(workerConfig), &webConfig); err != nil {
@@ -35,6 +37,12 @@ func (w *webConfigV1Worker) Build(workerName string, workerConfig []byte) error 
 	}
 	w.WorkerName = workerName
 	w.Config = webConfig
+	
+	// allow for setting request fn based on test stuff
+	if fn, ok := workerRequestFnMap[workerName]; ok && fn != nil {
+		w.makeRequestFn = *fn
+	}
+
 	return nil
 }
 
@@ -118,7 +126,7 @@ func BuildTestWebWorker() webConfigV1Worker {
 			URL:     "http://localhost/failifcalled",
 			Headers: map[string]string{},
 			BasicServiceWorkerConfig: BasicServiceWorkerConfig{
-				Type:    "aws",
+				Type:    "web",
 				Version: 1,
 			},
 		},
@@ -134,4 +142,8 @@ func (l webConfigV1Worker) makeJSONRequest(method, url string, body io.Reader, u
 
 func (l *webConfigV1Worker) SetWebRequestFunction(fn RequestFn) {
 	l.makeRequestFn = fn
+}
+
+func SetWebRequestFunctionForWorker(workerName string, fn *RequestFn) {
+	workerRequestFnMap[workerName] = fn
 }
