@@ -67,6 +67,10 @@ var getUsersForAuth = seeding.GetUsersForAuth
 var getRealUsers = seeding.GetRealUsers
 var getTagUsage = seeding.GetTagUsage
 
+var getServiceWorkerByName = seeding.GetServiceWorkerByName
+var getServiceWorkerByID = seeding.GetServiceWorkerByID
+var listServiceWorkers = seeding.ListServiceWorkers
+
 var TagIDsFromTags = seeding.TagIDsFromTags
 var sorted = seeding.Sorted
 var makeDBRowCounter = seeding.MkDBRowCounter
@@ -227,6 +231,8 @@ var VendorFindingCategory = seeding.VendorFindingCategory
 var BehavioralFindingCategory = seeding.BehavioralFindingCategory
 var DetectionGapFindingCategory = seeding.DetectionGapFindingCategory
 var DeletedCategory = seeding.DeletedCategory
+
+var DemoServiceWorker = seeding.DemoServiceWorker
 
 type TestSeedData struct {
 	seeding.Seeder
