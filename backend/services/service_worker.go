@@ -20,14 +20,12 @@ import (
 
 type CreateServiceWorkerInput struct {
 	Name        string
-	ServiceType string
 	Config      string
 }
 
 type UpdateServiceWorkerInput struct {
 	ID          int64
 	Name        string
-	ServiceType string
 	Config      string
 }
 
@@ -59,7 +57,7 @@ func ListServiceWorker(ctx context.Context, db *database.Connection) ([]*dtos.Se
 	)
 
 	if err != nil {
-		return nil, backend.WrapError("Could not create a service worker", backend.DatabaseErr(err))
+		return nil, backend.WrapError("Could not list service workers", backend.DatabaseErr(err))
 	}
 
 	serviceWorkersDTO := make([]*dtos.ServiceWorker, len(services))
