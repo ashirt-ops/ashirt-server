@@ -113,6 +113,7 @@ export interface DataSource {
   adminCreateServiceWorker(payload: ServiceWorkerPayload): Promise<void>
   adminUpdateServiceWorker(ids: ServiceWorkerId, payload: ServiceWorkerPayload): Promise<void>
   adminDeleteServiceWorker(ids: ServiceWorkerId): Promise<void>
+  adminUnDeleteServiceWorker(ids: ServiceWorkerId): Promise<void>
   adminTestServiceWorker(ids: ServiceWorkerId): Promise<dtos.ServiceWorkerTestOutput>
   listActiveServiceWorkers(): Promise<Array<dtos.ActiveServiceWorker>>
 

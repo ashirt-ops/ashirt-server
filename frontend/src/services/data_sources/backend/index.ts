@@ -84,6 +84,7 @@ export const backendDataSource: DataSource = {
   adminCreateServiceWorker: (payload) => req('POST', `/admin/services`, payload),
   adminUpdateServiceWorker: (ids, payload) => req('PUT', `/admin/services/${ids.serviceWorkerId}`, payload),
   adminDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, { delete: true }),
+  adminUnDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, { delete: false }),
   adminTestServiceWorker: (ids) => req('GET', `/admin/services/${ids.serviceWorkerId}/test`),
   listActiveServiceWorkers: () => req('GET', `/services`),
 

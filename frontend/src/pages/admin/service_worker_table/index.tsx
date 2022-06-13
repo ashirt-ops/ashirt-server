@@ -22,6 +22,7 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 import {
   AddEditServiceWorkerModal,
   DeleteServiceModal,
+  RestoreServiceModal,
 } from './modals'
 import Checkbox from 'src/components/checkbox'
 
@@ -44,6 +45,10 @@ export default (props: {
   const deleteModal = useModal<WorkerModal>(mProps => (
     <DeleteServiceModal {...mProps} />
   ), wiredServiceWorkers.reload)
+  const restoreModal = useModal<WorkerModal>(mProps => (
+    <RestoreServiceModal {...mProps} />
+  ), wiredServiceWorkers.reload)
+
   const editModal = useModal<WorkerModal>(mProps => (
     <AddEditServiceWorkerModal {...mProps} />
   ), wiredServiceWorkers.reload)
@@ -72,6 +77,7 @@ export default (props: {
                         // update config to show pretty version
                         worker: { ...worker, config: prettyPrintJsonString(worker.config) }
                       }),
+                      showRestoreModal: (worker) => restoreModal.show({worker}),
                       testService: async (worker) => {
                         dispatchTestData({ type: 'start', worker: worker.name })
                         try {
@@ -101,18 +107,20 @@ export default (props: {
           }
         </>)}
       </Table>
-      {renderModals(deleteModal, editModal)}
+      {renderModals(deleteModal, editModal, restoreModal)}
     </SettingsSection>
   )
 }
 
 type Actions = {
   showDeleteModal: (worker: ServiceWorker) => void
+  showRestoreModal: (worker: ServiceWorker) => void,
   showEditModal: (worker: ServiceWorker) => void
   testService: (worker: ServiceWorker) => void
 }
 
 const emptyActions: Actions = {
+  showRestoreModal: () => { },
   showDeleteModal: () => { },
   showEditModal: () => { },
   testService: () => { },
@@ -124,6 +132,7 @@ function cellOrder(worker?: ServiceWorker, testData?: TestData, actions?: Action
   const {
     showEditModal: showEdit,
     showDeleteModal: showDelete,
+    showRestoreModal: showRestore,
     testService,
   } = (actions ?? emptyActions)
 
@@ -136,12 +145,12 @@ function cellOrder(worker?: ServiceWorker, testData?: TestData, actions?: Action
         <ButtonGroup>
           <Button small onClick={() => showEdit(worker)}>Edit</Button>
           <Button small onClick={() => testService(worker)}>Test</Button>
-          {/* {
+          {
             worker.deleted
-              ? (<Button primary small onClick={() => showDelete(worker)}>Restore</Button>)
+              ? (<Button primary small onClick={() => showRestore(worker)}>Restore</Button>)
               : (<Button danger small onClick={() => showDelete(worker)}>Delete</Button>)
-          } */}
-          <Button danger disabled={worker.deleted} small onClick={() => showDelete(worker)}>Delete</Button>
+          }
+          {/* <Button danger disabled={worker.deleted} small onClick={() => showDelete(worker)}>Delete</Button> */}
         </ButtonGroup>
       </>
     ),

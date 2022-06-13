@@ -34,6 +34,12 @@ export async function deleteServiceWorkers(i: {
   return ds.adminDeleteServiceWorker({ serviceWorkerId: i.id })
 }
 
+export async function restoreServiceWorker(i: {
+  id: number
+}): Promise<void> {
+  return ds.adminUnDeleteServiceWorker({serviceWorkerId: i.id})
+}
+
 export async function testServiceWorker(i: {
   id: number
 }): Promise<ServiceWorkerTestOutput> {
