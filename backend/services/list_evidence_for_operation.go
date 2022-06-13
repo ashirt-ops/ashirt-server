@@ -117,8 +117,7 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 		if i == 0 {
 			sb = sb.LeftJoin("evidence_metadata em ON em.evidence_id = evidence.id")
 		}
-		sb = sb.
-			Where(sq.Like{"em.body": "%" + text + "%"})
+		sb = sb.Where(sq.Like{"em.body": "%" + text + "%"})
 	}
 
 	if values := filters.DateRanges; len(values) > 0 {
