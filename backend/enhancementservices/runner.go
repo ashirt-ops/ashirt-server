@@ -224,41 +224,40 @@ func buildProcessPayload(db *database.Connection, evidenceID int64) (*Payload, e
 		"e.uuid AS uuid",
 		"e.content_type",
 		"slug AS operation_slug",
+		"'process' AS type", // hardcode in the type so we don't have to edit each entry manually
 	).
 		From("evidence e").
 		LeftJoin("operations o ON e.operation_id = o.id").
 		Where(sq.Eq{"e.id": evidenceID}),
 	)
 
-	payload.Type = "process"
-
 	if err != nil {
-		return nil, fmt.Errorf("unable to gather evidence data for worker")
+		return nil, backend.WrapError("unable to gather evidence data for worker", err)
 	}
 
 	return &payload, nil
 }
 
 func markWorkStarting(db database.ConnectionProxy, evidenceIDs []int64, sources []string) error {
-	now := time.Now()
-
 	type entry struct {
 		source string
 		id     int64
 	}
 
+	// create a set of (source/id) pairs.
 	entries := make([]entry, len(sources)*len(evidenceIDs))
-
 	numEvidenceIDs := len(evidenceIDs)
 	for i, v := range sources {
+		rowOffset := i * numEvidenceIDs
 		for j, w := range evidenceIDs {
-			entries[i*numEvidenceIDs+j] = entry{
+			entries[rowOffset+j] = entry{
 				source: v,
 				id:     w,
 			}
 		}
 	}
 
+	now := time.Now()
 	return db.BatchInsert("evidence_metadata", len(entries), func(row int) map[string]interface{} {
 		return map[string]interface{}{
 			"body":             "",
