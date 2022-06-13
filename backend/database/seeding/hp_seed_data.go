@@ -182,7 +182,7 @@ var HarryPotterSeedData = Seeder{
 		QueryWhereIsTheChamberOfSecrets,
 	},
 	ServiceWorkers: []models.ServiceWorker{
-		demoServiceWorker,
+		DemoServiceWorker,
 	},
 }
 
@@ -471,4 +471,4 @@ var FindingBook2SpiderFear = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-spid
 var FindingBook2Robes = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-robes", nil, "Robes for all seasons", "Turns out there's only one kind of robe.", &spiderLink)
 
 var newHPServiceWorker = newServiceWorkerGen(1)
-var demoServiceWorker = newHPServiceWorker("Demo", `{ "type": "web",  "version": 1, "url": "http://demo:3001/process" }`)
+var DemoServiceWorker = newHPServiceWorker("Demo", `{ "type": "web",  "version": 1, "url": "http://demo:3001/process" }`)
