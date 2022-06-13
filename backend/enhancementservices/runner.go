@@ -23,8 +23,7 @@ import (
 // TestServiceWorker contacts the indicated worker to verify that it's running
 func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 	var basicConfig BasicServiceWorkerConfig
-	err := json.Unmarshal([]byte(workerData.Config), &basicConfig)
-	if err != nil {
+	if err := json.Unmarshal([]byte(workerData.Config), &basicConfig); err != nil {
 		return ErrorTestResultWithMessage(err, "Unable to parse worker configuration")
 	}
 	worker, err := findAppropriateWorker(basicConfig)
@@ -38,6 +37,7 @@ func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 	return worker.Test()
 }
 
+// RunServiceWorkerMatrix starts a specified set of workers for a specified set of evidenceUUIDs
 func RunServiceWorkerMatrix(ctx context.Context, db *database.Connection, operationID int64, evidenceUUIDs []string, workerNames []string) error {
 	var workersToRun []models.ServiceWorker
 	var evidence []models.Evidence
@@ -64,6 +64,7 @@ func RunServiceWorkerMatrix(ctx context.Context, db *database.Connection, operat
 
 	var wg sync.WaitGroup
 	for _, ePayload := range expandedPayloads {
+		// set these aside so that they are preserved in the closure
 		evidenceID := ePayload.EvidenceID
 		payload := ePayload.Payload
 		for _, worker := range workersToRun {
@@ -86,6 +87,10 @@ func RunServiceWorkerMatrix(ctx context.Context, db *database.Connection, operat
 		}
 	}
 	wg.Wait()
+	if notifyWorkersRunForTest != nil {
+		notifyWorkersRunForTest <- true
+	}
+
 	return nil
 }
 
@@ -119,8 +124,7 @@ func RunSetOfServiceWorkers(db *database.Connection, serviceNames []string, evid
 		workerCopy := worker
 		go func() {
 			defer wg.Done()
-			err := runWorker(db, workerCopy, evidenceID, payload)
-			if err != nil {
+			if err := runWorker(db, workerCopy, evidenceID, payload); err != nil {
 				workerErrors <- err
 			} else {
 				completedWorkersChan <- workerCopy.Name
@@ -128,6 +132,9 @@ func RunSetOfServiceWorkers(db *database.Connection, serviceNames []string, evid
 		}()
 	}
 	wg.Wait()
+	if notifyWorkersRunForTest != nil {
+		notifyWorkersRunForTest <- true
+	}
 
 	completedWorkers := helpers.ChanToSlice(&completedWorkersChan)
 	errors := helpers.ChanToSlice(&workerErrors)
@@ -343,10 +350,7 @@ func filterEvidenceByUUID(db database.ConnectionProxy, operationID int64, eviden
 		"uuid":         evidenceUUIDs,
 	}))
 
-	if err != nil {
-		return []models.Evidence{}, err
-	}
-	return evidence, nil
+	return evidence, err
 }
 
 func getAllEvidenceForOperation(db database.ConnectionProxy, operationID int64) ([]models.Evidence, error) {
@@ -356,8 +360,14 @@ func getAllEvidenceForOperation(db database.ConnectionProxy, operationID int64) 
 		"operation_id": operationID,
 	}))
 
-	if err != nil {
-		return []models.Evidence{}, err
+	return evidence, err
+}
+
+var notifyWorkersRunForTest chan<- bool = nil
+
+func SetNotifyWorkersRunForTest(notifier chan<- bool) {
+	if cap(notifier) == 0 {
+		fmt.Println("Capacity for notifier channel is 0. This could easily cause deadlocks")
 	}
-	return evidence, nil
+	notifyWorkersRunForTest = notifier
 }
