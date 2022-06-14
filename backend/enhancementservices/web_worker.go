@@ -37,7 +37,7 @@ func (w *webConfigV1Worker) Build(workerName string, workerConfig []byte) error 
 	}
 	w.WorkerName = workerName
 	w.Config = webConfig
-	
+
 	// allow for setting request fn based on test stuff
 	if fn, ok := workerRequestFnMap[workerName]; ok && fn != nil {
 		w.makeRequestFn = *fn
