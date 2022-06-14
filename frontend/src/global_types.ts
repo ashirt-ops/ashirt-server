@@ -104,7 +104,6 @@ export type Evidence = {
   operator: User,
   occurredAt: Date,
   tags: Array<Tag>,
-  metadata: Array<EvidenceMetadata>,
   contentType: SupportedEvidenceType
 }
 
