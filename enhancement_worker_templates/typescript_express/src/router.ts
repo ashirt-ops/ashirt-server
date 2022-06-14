@@ -30,10 +30,10 @@ export function addRoutes(app: Express, isDev: boolean) {
         case 'process':
           return await handleProcessRequest(body, res, ashirtService)
         default:
-          res.sendStatus(StatusCode.NOT_IMPLEMENTED)
+          res.status(StatusCode.NOT_IMPLEMENTED)
       }
     }
-    res.sendStatus(StatusCode.NOT_IMPLEMENTED)
+    res.status(StatusCode.NOT_IMPLEMENTED)
   })
 
   if (isDev) {
@@ -79,23 +79,23 @@ const handleProcessRequest = async (body: ProcessRequest, res: Response, svc: AS
   const actionResponse = await handleActionProcess(body, svc)
   switch (actionResponse.action) {
     case 'deferred':
-      res.sendStatus(StatusCode.ACCEPTED)
+      res.status(StatusCode.ACCEPTED)
       return
     case 'error':
       actionResponse.content
         ? res.status(StatusCode.INTERNAL_SERVICE_ERROR).send(actionResponse)
-        : res.sendStatus(StatusCode.INTERNAL_SERVICE_ERROR)
+        : res.status(StatusCode.INTERNAL_SERVICE_ERROR)
       return
     case 'rejected':
       actionResponse.content
         ? res.status(StatusCode.NOT_ACCEPTABLE).send(actionResponse)
-        : res.sendStatus(StatusCode.NOT_ACCEPTABLE)
+        : res.status(StatusCode.NOT_ACCEPTABLE)
       return
     case 'processed':
       res.status(StatusCode.OK).send(actionResponse)
       return
     default:
-      res.sendStatus(StatusCode.INTERNAL_SERVICE_ERROR)
+      res.status(StatusCode.INTERNAL_SERVICE_ERROR)
   }
 }
 
