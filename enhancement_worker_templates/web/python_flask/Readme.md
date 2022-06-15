@@ -11,7 +11,8 @@ includes:
 * [structlog](https://www.structlog.org/en/stable/), for structured logging
 * [python-dotenv](https://pypi.org/project/python-dotenv/), for environment loading (this is primarily aimed at development)
 
-In addition, this service tries to be as type-safe as possible, so extra effort has been provided to ensure that the 
+In addition, this service tries to be as type-safe as possible, so extra effort has been provided to ensure that the typing is specified as much as possible.
+
 To get up and running, open the project root in a terminal, install pipenv, and run `pipenv shell`, then `pipenv install`
 
 ## Configuration
@@ -30,7 +31,7 @@ Note the url: this is likely what will change for your version
 
 ## Adding custom logic
 
-Most programs should be able to largely ignore most of the application, and instead focus on `actions/process_handler.py`. The `handle_process` function is ultimately called when new evidence is added to AShirt. Simply add in your logic here to process new pieces of evidence, and you should be good to go.
+Most programs should be able to largely ignore most of the code, and instead focus on `actions/process_handler.py`. The `handle_process` function is ultimately called when new evidence is added to AShirt. Simply add in your logic here to process new pieces of evidence, and you should be good to go.
 
 ## How it works
 
@@ -38,13 +39,13 @@ You only need this if you need more than simply adding your core functionality. 
 
 ### Startup Phase
 
-The Startup Phase is as you expect: entered once the application starts, and is responsible for configuring the application for long-term running. The most important bit here is likely the configuration and route management. `create_app` within `main.py` will load configuration details from the environment (locally: `.env` file), create a class for handling requests to an AShirt backend, and register standard routes. Then, either the main line in `main.py` or `wsgi.py` will start the server. This phase ends once the server starts servicing requests, and the application then enters the serving phase.
+The Startup Phase is as you might expect: this state is entered once the application starts, and is responsible for configuring the application for long-term running. The most important bit here is likely the configuration and route management. `create_app` within `main.py` will load configuration details from the environment (locally: `.env` file), create a class for handling requests to an AShirt backend, and register standard routes. Then, either the main line in `main.py` or `wsgi.py` will start the server. This phase ends once the server starts servicing requests, and the application then enters the serving phase.
 
 ### Serving Phase
 
 The serving phase is largely controlled by what particular route is entered when a user contacts the server. The `routes` directory provides two set of routes: the `ashirt` routes, which are the routes that the AShirt backend will call, and the `dev` routes, which are designed to be only created in a development environment. These serve as helpers and sanity checks.
 
-When a route is reached -- in particular, when the process route is reached (see: `process_request`), then the service will kick off processing of that data. Some initial boilerplate style code manages the request, deferring all of the actual work to the `process_handler.py` file. This function will return one of a handful of responses, which will be used to generate the true response to the AShirt backend.
+When a route is reached -- in particular, when the process route is reached (see: `process_request`), then the service will kick off processing of that data. Some initial boilerplate style code manages the request, and directs all of the actual work to the `process_handler.py` file. This function will return one of a handful of responses, which will be used to generate the true response to the AShirt backend.
 
 Once the request is complete, the application waits for another request.
 
