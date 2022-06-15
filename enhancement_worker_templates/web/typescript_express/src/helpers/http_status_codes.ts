@@ -1,5 +1,3 @@
-import { formatRFC7231 } from 'date-fns'
-
 /**
  * StatusCode is a set of status codes supported by AShirt.
  */
@@ -11,11 +9,4 @@ export const StatusCode = {
   NOT_ACCEPTABLE: 406,
   INTERNAL_SERVICE_ERROR: 500,
   NOT_IMPLEMENTED: 501,
-}
-
-/**
- * now returns the current time in RFC 1123 format -- used for hmacs
- */
-export const now = (): string => {
-  return formatRFC7231(new Date())
 }

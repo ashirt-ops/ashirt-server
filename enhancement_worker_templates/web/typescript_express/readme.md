@@ -6,7 +6,6 @@ It uses [yarn](https://yarnpkg.com/) to manage dependencies, though [npm](https:
 * [Express](https://expressjs.com/), to handle receiving network requests
 * [Typescript](https://www.typescriptlang.org/) As the language of choice
 * [axios](https://axios-http.com/), to make network connections
-* [date-fns](https://date-fns.org/), to manage date converions
 * [dotenv](https://github.com/motdotla/dotenv#readme), to load environment variables
 
 ## Configuration
