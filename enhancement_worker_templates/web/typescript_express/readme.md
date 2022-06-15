@@ -1,7 +1,7 @@
 # Typescript/Express Enhancement Worker
 
-This worker is a microservice-type worker built on Typescriipt/Express.
-It uses [yarn](https://yarnpkg.com/) to manage dependencies, though [npm](https://www.npmjs.com/) works just as well. This project strives to be as minimalistic as possible, but does include some creature comfots. This includes:
+This worker is a microservice-type worker built on Typescript/Express.
+It uses [yarn](https://yarnpkg.com/) to manage dependencies, though [npm](https://www.npmjs.com/) works just as well. This project strives to be as minimalistic as possible, but does include some helpful libraries. This includes:
 
 * [Express](https://expressjs.com/), to handle receiving network requests
 * [Typescript](https://www.typescriptlang.org/) As the language of choice
@@ -24,7 +24,7 @@ Note the url: this is likely what will change for your version
 
 ## Adding custom logic
 
-Most applications can largely ignore the majority of the application and instead focus on just the file at `src/actions/processAction.ts`, and the `handleActionProcess` function in particular. This function is ultimately called when a process request arrives and passes basic validation. From this function, you can focus completely on how a recevied request should be handled.
+Most applications can largely ignore the majority of the source presented here and instead focus on just the file at `src/actions/processAction.ts`, and the `handleActionProcess` function in particular. This function is ultimately called when a process request arrives and passes basic validation. From this function, you can focus completely on how a recevied request should be handled.
 
 ## How it works
 
@@ -38,7 +38,7 @@ The Startup Phase is as you expect: entered once the application starts, and is 
 
 The serving phase is largely controlled by what particular route is entered when a user contacts the server. The `src/router.ts` file provides two types of endpoints. The standard `process` endpoint to handle AShirt requests, and a set of dev routes, which are only enabled when in dev mode. The dev routes act as sanity checks and direct access when testing new features.
 
-When a route is reached -- in particular, when the process route is reached (see: `app.post('/process'`), then the service will kick off processing of that data. Some initial boilerplate style code manages the request, deferring all of the actual work to the `src/actions.processAction.ts` file. This function will return one of a handful of responses, which will be used to generate the true response to the AShirt backend.
+When a route is reached -- in particular, when the process route is reached (see: `app.post('/process'`), then the service will kick off processing of that data. Some initial boilerplate style code manages the request but directs all of the actual work to the `src/actions.processAction.ts` file. This function will return one of a handful of responses, which will be used to generate the true response to the AShirt backend.
 
 Once the request is complete, the application waits for another request.
 
