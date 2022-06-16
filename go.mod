@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	cloud.google.com/go/storage v1.22.1
-	github.com/Masterminds/squirrel v1.5.2
+	github.com/Masterminds/squirrel v1.5.3
 	github.com/aws/aws-sdk-go v1.44.25
 	github.com/coreos/go-oidc/v3 v3.2.0
 	github.com/go-kit/kit v0.12.0
