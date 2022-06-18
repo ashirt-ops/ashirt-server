@@ -5,6 +5,12 @@ import { Logger } from 'pino'
 import { AShirtService } from "src/services/ashirt"
 import { ProcessRequest } from "src/helpers/request_validation"
 
+const config = {
+  lang: "eng",
+  oem: 3,
+  psm: 12,
+}
+
 export type ProcessResultDTO =
   | ProcessResultNormal
   | ProcessResultComplete
@@ -38,7 +44,7 @@ export const handleActionProcess = async (
 
   try {
     const resp = await svc.getEvidenceContent(body.operationSlug, body.evidenceUuid)
-    const content = await tesseract.recognize(resp.data)
+    const content = await tesseract.recognize(resp.data, config)
 
     return {
       action: 'processed',
