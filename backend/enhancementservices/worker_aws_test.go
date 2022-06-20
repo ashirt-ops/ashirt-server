@@ -53,7 +53,7 @@ func TestAWSTest(t *testing.T) {
 func TestAWSProcess(t *testing.T) {
 	worker := this.BuildTestLambdaWorker()
 
-	payload := this.Payload{
+	payload := this.NewEvidencePayload{
 		Type:          "process",
 		EvidenceUUID:  "abc123",
 		OperationSlug: "whatsit",
