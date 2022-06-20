@@ -13,6 +13,8 @@ import (
 )
 
 var allWorkers []string = []string{}
+
+// AllWorkers is an effective constant representing all possible workers (not deleted)
 func AllWorkers() []string {
 	return allWorkers
 }
@@ -43,20 +45,20 @@ type TestResp struct {
 	Message *string `json:"message"`
 }
 
-func ErrorTestResult(err error) ServiceTestResult {
+func errorTestResult(err error) ServiceTestResult {
 	return ServiceTestResult{
 		Error: err,
 		Live:  false,
 	}
 }
 
-func ErrorTestResultWithMessage(err error, message string) ServiceTestResult {
-	rtn := ErrorTestResult(err)
+func errorTestResultWithMessage(err error, message string) ServiceTestResult {
+	rtn := errorTestResult(err)
 	rtn.Message = message
 	return rtn
 }
 
-func TestResultSuccess(message string) ServiceTestResult {
+func testResultSuccess(message string) ServiceTestResult {
 	return ServiceTestResult{
 		Message: message,
 		Live:    true,
