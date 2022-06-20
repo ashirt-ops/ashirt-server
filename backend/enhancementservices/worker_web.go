@@ -53,28 +53,28 @@ func (w *webConfigV1Worker) Test() ServiceTestResult {
 		return nil
 	})
 	if err != nil {
-		return ErrorTestResultWithMessage(err, "Unable to verify worker status")
+		return errorTestResultWithMessage(err, "Unable to verify worker status")
 	}
 
 	if resp.StatusCode == http.StatusNoContent {
-		return TestResultSuccess("Service is functional")
+		return testResultSuccess("Service is functional")
 	} else {
 		var parsedData TestResp
 		if err := json.NewDecoder(resp.Body).Decode(&parsedData); err != nil {
-			return ErrorTestResultWithMessage(err, "Unable to parse response")
+			return errorTestResultWithMessage(err, "Unable to parse response")
 		}
 		if parsedData.Status == "ok" {
-			return TestResultSuccess("Service is functional")
+			return testResultSuccess("Service is functional")
 		}
 		if parsedData.Status == "error" {
 			if parsedData.Message != nil {
-				return ErrorTestResultWithMessage(nil, *parsedData.Message)
+				return errorTestResultWithMessage(nil, *parsedData.Message)
 			}
-			return ErrorTestResultWithMessage(nil, "Service reported an error")
+			return errorTestResultWithMessage(nil, "Service reported an error")
 		}
 	}
 
-	return ErrorTestResultWithMessage(nil, "Service did not reply with a supported status")
+	return errorTestResultWithMessage(nil, "Service did not reply with a supported status")
 }
 
 func (w *webConfigV1Worker) Process(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error) {

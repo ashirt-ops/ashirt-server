@@ -18,11 +18,11 @@ import (
 var lambdaClient LambdaInvokableClient = nil
 
 type awsConfigV1Worker struct {
-	Config     AwsConfigV1
+	Config     AWSConfigV1
 	WorkerName string
 }
 
-type AwsConfigV1 struct {
+type AWSConfigV1 struct {
 	BasicServiceWorkerConfig
 	LambdaName string `json:"lambdaName"`
 	AsyncFn    bool   `json:"asyncFunction"`
@@ -52,7 +52,7 @@ func (w *awsConfigV1Worker) Build(workerName string, workerConfig []byte) error 
 		}
 	}
 
-	var awsConfig AwsConfigV1
+	var awsConfig AWSConfigV1
 	if err := json.Unmarshal([]byte(workerConfig), &awsConfig); err != nil {
 		return backend.WrapError("aws worker config is unparsable", err)
 	}
@@ -70,29 +70,29 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 	out, err := lambdaClient.Invoke(&input)
 
 	if err != nil {
-		return ErrorTestResultWithMessage(err, "Unable to verify worker status")
+		return errorTestResultWithMessage(err, "Unable to verify worker status")
 	}
 
 	if out.FunctionError != nil {
-		return ErrorTestResultWithMessage(nil, "Service experienced an error: "+*out.FunctionError)
+		return errorTestResultWithMessage(nil, "Service experienced an error: "+*out.FunctionError)
 	}
 
 	var parsedData TestResp
 	if err := json.Unmarshal(out.Payload, &parsedData); err != nil {
-		return ErrorTestResultWithMessage(err, "Unable to parse response")
+		return errorTestResultWithMessage(err, "Unable to parse response")
 	}
 
 	if parsedData.Status == "ok" {
-		return TestResultSuccess("Service is functional")
+		return testResultSuccess("Service is functional")
 	}
 	if parsedData.Status == "error" {
 		if parsedData.Message != nil {
-			return ErrorTestResultWithMessage(nil, "Service reported an error: "+*parsedData.Message)
+			return errorTestResultWithMessage(nil, "Service reported an error: "+*parsedData.Message)
 		}
-		return ErrorTestResultWithMessage(nil, "Service reported an error")
+		return errorTestResultWithMessage(nil, "Service reported an error")
 	}
 
-	return ErrorTestResultWithMessage(nil, "Service did not reply with a supported status")
+	return errorTestResultWithMessage(nil, "Service did not reply with a supported status")
 }
 
 func (w *awsConfigV1Worker) Process(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error) {
@@ -159,7 +159,7 @@ func BuildTestLambdaWorker() awsConfigV1Worker {
 func BuildTestLambdaWorkerWithName(name string) awsConfigV1Worker {
 	return awsConfigV1Worker{
 		WorkerName: name,
-		Config: AwsConfigV1{
+		Config: AWSConfigV1{
 			AsyncFn:    false,
 			LambdaName: name,
 			BasicServiceWorkerConfig: BasicServiceWorkerConfig{
