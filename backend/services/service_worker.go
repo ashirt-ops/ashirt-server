@@ -11,6 +11,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/enhancementservices"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -141,11 +142,14 @@ func RunServiceWorker(ctx context.Context, db *database.Connection, i RunService
 		return backend.WrapError("Unable to run service worker", backend.UnauthorizedWriteErr(err))
 	}
 
+	var workers []string 
 	if i.WorkerName == "" {
-		enhancementservices.RunAllServiceWorkers(db, evidence.ID)
+		workers = enhancementservices.AllWorkers()
 	} else {
-		enhancementservices.RunSetOfServiceWorkers(db, []string{i.WorkerName}, evidence.ID)
+		workers = []string{i.WorkerName}
 	}
+
+	enhancementservices.RunServiceWorkerMatrix(db, logging.ReqLogger(ctx), operation.ID, []string{evidence.UUID}, workers)
 
 	return nil
 }
@@ -160,7 +164,7 @@ func BatchRunServiceWorker(ctx context.Context, db *database.Connection, i Batch
 		return backend.WrapError("Unable to run service workers", backend.UnauthorizedWriteErr(err))
 	}
 
-	return enhancementservices.RunServiceWorkerMatrix(ctx, db, operation.ID, i.EvidenceUUIDs, i.WorkerNames)
+	return enhancementservices.RunServiceWorkerMatrix(db, logging.ReqLogger(ctx), operation.ID, i.EvidenceUUIDs, i.WorkerNames)
 }
 
 func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWorkerID int64) (*dtos.ServiceWorkerTestOutput, error) {

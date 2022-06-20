@@ -38,110 +38,68 @@ func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 }
 
 // RunServiceWorkerMatrix starts a specified set of workers for a specified set of evidenceUUIDs
-func RunServiceWorkerMatrix(ctx context.Context, db *database.Connection, operationID int64, evidenceUUIDs []string, workerNames []string) error {
+// Note that this process kicks off a number of goroutines.
+func RunServiceWorkerMatrix(db *database.Connection, reqLogger logging.Logger, operationID int64, evidenceUUIDs []string, workerNames []string) error {
 	var workersToRun []models.ServiceWorker
 	var evidence []models.Evidence
-	var expandedPayloads []ExpandedPayload
+	var expandedPayloads []ExpandedNewEvidencePayload
+	workerContext := context.Background()
 
-	err := db.WithTx(ctx, func(tx *database.Transactable) {
-		workersToRun, _ = filterWorkers(tx, workerNames)
-		if len(evidenceUUIDs) == 0 {
-			evidence, _ = getAllEvidenceForOperation(tx, operationID)
-		} else {
-			evidence, _ = filterEvidenceByUUID(tx, operationID, evidenceUUIDs)
+	go func() {
+		err := db.WithTx(workerContext, func(tx *database.Transactable) {
+			workersToRun, _ = filterWorkers(tx, workerNames)
+			if len(evidenceUUIDs) == 0 {
+				evidence, _ = getAllEvidenceForOperation(tx, operationID)
+			} else {
+				evidence, _ = filterEvidenceByUUID(tx, operationID, evidenceUUIDs)
+			}
+			expandedPayloads, _ = BatchBuildNewEvidencePayload(tx, helpers.Map(evidence, func(i models.Evidence) int64 {
+				return i.ID
+			}))
+
+			evidenceIDs := helpers.Map(evidence, func(e models.Evidence) int64 { return e.ID })
+
+			markWorkStarting(tx, evidenceIDs, helpers.Map(workersToRun, getServiceWorkerName))
+		})
+		if err != nil {
+			reqLogger.Log("msg", "Unable to execute service workers", "error", err.Error())
+			return
 		}
-		expandedPayloads, _ = batchBuildProcessPayload(tx, helpers.Map(evidence, func(i models.Evidence) int64 {
-			return i.ID
-		}))
 
-		evidenceIDs := helpers.Map(evidence, func(e models.Evidence) int64 { return e.ID })
+		var wg sync.WaitGroup
+		for _, ePayload := range expandedPayloads {
+			// set these aside so that they are preserved in the closure
+			evidenceID := ePayload.EvidenceID
+			payload := ePayload.NewEvidencePayload
+			for _, worker := range workersToRun {
+				wg.Add(1)
+				workerCopy := worker
+				go func() {
+					defer wg.Done()
+					err := runWorker(db, workerCopy, evidenceID, &payload)
+					logger := logging.With(reqLogger,
+						"worker", workerCopy.Name,
+						"evidenceID", evidenceID,
+					)
 
-		markWorkStarting(tx, evidenceIDs, helpers.Map(workersToRun, getServiceWorkerName))
-	})
-	if err != nil {
-		return err
-	}
-
-	var wg sync.WaitGroup
-	for _, ePayload := range expandedPayloads {
-		// set these aside so that they are preserved in the closure
-		evidenceID := ePayload.EvidenceID
-		payload := ePayload.Payload
-		for _, worker := range workersToRun {
-			wg.Add(1)
-			workerCopy := worker
-			go func() {
-				defer wg.Done()
-				err := runWorker(db, workerCopy, evidenceID, &payload)
-				logger := logging.With(logging.ReqLogger(ctx),
-					"worker", workerCopy.Name,
-					"evidenceID", evidenceID,
-				)
-
-				if err != nil {
-					logger.Log("msg", "Unable to run worker", "error", err)
-				} else {
-					logger.Log("msg", "Worker completed")
-				}
-			}()
+					if err != nil {
+						logger.Log("msg", "Unable to run worker", "error", err)
+					} else {
+						logger.Log("msg", "Worker completed")
+					}
+				}()
+			}
 		}
-	}
-	wg.Wait()
-	if notifyWorkersRunForTest != nil {
-		notifyWorkersRunForTest <- true
-	}
+		wg.Wait()
+		if notifyWorkersRunForTest != nil {
+			notifyWorkersRunForTest <- true
+		}
+	}()
 
 	return nil
 }
 
-// RunAllServiceWorkers starts _all_ of the currents service workers
-func RunAllServiceWorkers(db *database.Connection, evidenceID int64) ([]string, []error) {
-	return RunSetOfServiceWorkers(db, []string{}, evidenceID)
-}
-
-// RunSetOfServiceWorkers starts the indicated service workers (by name)
-func RunSetOfServiceWorkers(db *database.Connection, serviceNames []string, evidenceID int64) ([]string, []error) {
-	knownWorkers, err := getServiceWorkerList(db)
-	if err != nil {
-		return []string{}, []error{backend.WrapError("Unable to run service worker", backend.UnauthorizedWriteErr(err))}
-	}
-
-	workersToRun, workerErrors := alignWorkers(serviceNames, knownWorkers)
-
-	payload, err := buildProcessPayload(db, evidenceID)
-	if err != nil {
-		return []string{}, []error{backend.WrapError("Unable to construct worker message", backend.UnauthorizedWriteErr(err))}
-	}
-
-	if err = markWorkStarting(db, []int64{evidenceID}, helpers.Map(workersToRun, getServiceWorkerName)); err != nil {
-		return []string{}, []error{backend.WrapError("Unable to run workers", err)}
-	}
-
-	var wg sync.WaitGroup
-	completedWorkersChan := make(chan string, len(workersToRun))
-	for _, worker := range workersToRun {
-		wg.Add(1)
-		workerCopy := worker
-		go func() {
-			defer wg.Done()
-			if err := runWorker(db, workerCopy, evidenceID, payload); err != nil {
-				workerErrors <- err
-			} else {
-				completedWorkersChan <- workerCopy.Name
-			}
-		}()
-	}
-	wg.Wait()
-	if notifyWorkersRunForTest != nil {
-		notifyWorkersRunForTest <- true
-	}
-
-	completedWorkers := helpers.ChanToSlice(&completedWorkersChan)
-	errors := helpers.ChanToSlice(&workerErrors)
-	return completedWorkers, errors
-}
-
-func runWorker(db *database.Connection, worker models.ServiceWorker, evidenceID int64, payload *Payload) error {
+func runWorker(db *database.Connection, worker models.ServiceWorker, evidenceID int64, payload *NewEvidencePayload) error {
 	var err error
 	var basicConfig BasicServiceWorkerConfig
 	if err = json.Unmarshal([]byte(worker.Config), &basicConfig); err != nil {
