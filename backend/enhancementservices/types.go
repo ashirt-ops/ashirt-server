@@ -12,19 +12,10 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/models"
 )
 
-type Payload struct {
-	Type          string `json:"type" db:"type"`
-	EvidenceUUID  string `json:"evidenceUuid"  db:"uuid"`
-	OperationSlug string `json:"operationSlug" db:"operation_slug"`
-	ContentType   string `json:"contentType"   db:"content_type"`
+var allWorkers []string = []string{}
+func AllWorkers() []string {
+	return allWorkers
 }
-
-type ExpandedPayload struct {
-	Payload
-	EvidenceID int64 `db:"id"`
-}
-
-type WorkerHandler = func(workerName string, evidenceID int64, configText []byte, payload *Payload) (*models.EvidenceMetadata, error)
 
 type BasicServiceWorkerConfig struct {
 	Type    string `json:"type"`
@@ -34,7 +25,7 @@ type BasicServiceWorkerConfig struct {
 type ServiceWorker interface {
 	Build(workerName string, config []byte) error
 	Test() ServiceTestResult
-	Process(evidenceID int64, payload *Payload) (*models.EvidenceMetadata, error)
+	Process(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error)
 }
 
 // ServiceTestResult provides a view of a Worker test
@@ -47,8 +38,9 @@ type ServiceTestResult struct {
 	Error error
 }
 
-type LambdaInvokableClient interface {
-	Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error)
+type TestResp struct {
+	Status  string  `json:"status"`
+	Message *string `json:"message"`
 }
 
 func ErrorTestResult(err error) ServiceTestResult {
@@ -71,14 +63,13 @@ func TestResultSuccess(message string) ServiceTestResult {
 	}
 }
 
+type LambdaInvokableClient interface {
+	Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error)
+}
+
 type ProcessResponse struct {
 	Action  string  `json:"action"`  // Rejected | Deferred | Processed | Error
 	Content *string `json:"content"` // Error => reason, Processed => Result
-}
-
-type TestResp struct {
-	Status  string  `json:"status"`
-	Message *string `json:"message"`
 }
 
 type RequestFn = func(method, url string, body io.Reader, updateRequest helpers.ModifyReqFunc) (*http.Response, error)

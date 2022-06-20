@@ -54,7 +54,7 @@ func TestWebTest(t *testing.T) {
 func TestWebProcess(t *testing.T) {
 	worker := helpers.Ptr(this.BuildTestWebWorker())
 
-	payload := this.Payload{
+	payload := this.NewEvidencePayload{
 		Type:          "process",
 		EvidenceUUID:  "abc123",
 		OperationSlug: "whatsit",

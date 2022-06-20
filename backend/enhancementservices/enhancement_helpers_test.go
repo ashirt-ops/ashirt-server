@@ -101,8 +101,8 @@ func verifyTestBody(t *testing.T, req *http.Request) {
 	require.Equal(t, "test", typeVal)
 }
 
-func verifyProcessBody(t *testing.T, req *http.Request, expectedPayload this.Payload) {
-	var processBody this.Payload
+func verifyProcessBody(t *testing.T, req *http.Request, expectedPayload this.NewEvidencePayload) {
+	var processBody this.NewEvidencePayload
 	data, err := io.ReadAll(req.Body)
 	require.NoError(t, err)
 	err = json.Unmarshal(data, &processBody)
