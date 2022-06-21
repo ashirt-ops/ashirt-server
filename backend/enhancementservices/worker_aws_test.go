@@ -54,7 +54,7 @@ func TestAWSProcessMetadata(t *testing.T) {
 	worker := this.BuildTestLambdaWorker()
 
 	payload := this.NewEvidencePayload{
-		Type:          "process",
+		Type:          "evidence_created",
 		EvidenceUUID:  "abc123",
 		OperationSlug: "whatsit",
 		ContentType:   "image",
