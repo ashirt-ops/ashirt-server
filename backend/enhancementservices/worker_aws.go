@@ -127,6 +127,29 @@ func (w *awsConfigV1Worker) ProcessMetadata(evidenceID int64, payload *NewEviden
 	return &model, nil
 }
 
+func (w *awsConfigV1Worker) ProcessEvent(payload interface{}) error {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return backend.WrapError("unable to construct body", err)
+	}
+
+	input := lambda.InvokeInput{
+		FunctionName: &w.Config.LambdaName,
+		Payload:      body,
+	}
+	if w.Config.AsyncFn {
+		input.SetInvocationType("Event")
+	}
+
+	if out, err := lambdaClient.Invoke(&input); err != nil {
+		return backend.WrapError("Unable to invoke lambda function", err)
+	} else if out.FunctionError != nil {
+		return backend.WrapError("Lambda invocation failed", err)
+	}
+
+	return nil
+}
+
 func handleAWSProcessResponse(dbModel *models.EvidenceMetadata, output *lambda.InvokeOutput) {
 	statusCode := *output.StatusCode
 	var parsedData ProcessResponse

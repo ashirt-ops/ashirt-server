@@ -101,6 +101,20 @@ func (w *webConfigV1Worker) ProcessMetadata(evidenceID int64, payload *NewEviden
 	return &model, nil
 }
 
+func (w *webConfigV1Worker) ProcessEvent(payload interface{}) error {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return backend.WrapError("unable to construct body", err)
+	}
+
+	_, err = w.makeJSONRequest("POST", w.Config.URL, bytes.NewReader(body), func(req *http.Request) error {
+		helpers.AddHeaders(req, w.Config.Headers)
+		return nil
+	})
+
+	return err
+}
+
 func handleWebResponse(dbModel *models.EvidenceMetadata, resp *http.Response) {
 	var parsedData ProcessResponse
 
