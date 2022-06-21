@@ -15,6 +15,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+func (*Connection) FailIfTransaction(err error) {}
+
 // Select executes the provided SelectBuilder query, and marshals the response into the provided slice.
 // Note: this is for retriving multiple results, or "rows"
 func (c *Connection) Select(modelSlice interface{}, sb squirrel.SelectBuilder) error {

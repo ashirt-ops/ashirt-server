@@ -59,6 +59,10 @@ func (c *Connection) WithTx(ctx context.Context, fn func(tx *Transactable)) erro
 	return tx.Error()
 }
 
+func (tx *Transactable) FailIfTransaction(err error) {
+	tx.FailTransaction(err)
+}
+
 func (tx *Transactable) WithTx(ctx context.Context, fn func(tx *Transactable)) error {
 	// just pass the current transaction down
 	if tx.Error() == nil {
