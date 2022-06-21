@@ -37,7 +37,59 @@ func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 	return worker.Test()
 }
 
-// RunServiceWorkerMatrix starts a specified set of workers for a specified set of evidenceUUIDs
+type SendServiceWorkerEventInput struct {
+	Logger      logging.Logger
+	WorkerNames []string
+	Builder     func(db database.ConnectionProxy) ([]interface{}, error)
+	EventType   string
+}
+
+func SendServiceWorkerEvent(db *database.Connection, input SendServiceWorkerEventInput) {
+	var workersToRun []models.ServiceWorker
+	var payloads []interface{}
+	workerContext := context.Background()
+
+	go func() {
+		err := db.WithTx(workerContext, func(tx *database.Transactable) {
+			workersToRun, _ = filterWorkers(tx, input.WorkerNames)
+			payloads, _ = input.Builder(tx)
+		})
+		if err != nil {
+			input.Logger.Log("msg", "Unable to execute service workers", "error", err.Error())
+			return
+		}
+
+		var wg sync.WaitGroup
+		for _, payload := range payloads {
+			// set these aside so that they are preserved in the closure
+			payloadCopy := payload
+			for _, worker := range workersToRun {
+				wg.Add(1)
+				workerCopy := worker
+				go func() {
+					defer wg.Done()
+					err := runProcessEvent(db, workerCopy, &payloadCopy)
+					logger := logging.With(input.Logger,
+						"worker", workerCopy.Name,
+						"eventType", input.EventType,
+					)
+
+					if err != nil {
+						logger.Log("msg", "Unable to run worker", "error", err)
+					} else {
+						logger.Log("msg", "Worker completed")
+					}
+				}()
+			}
+		}
+		wg.Wait()
+		if notifyWorkersRunForTest != nil {
+			notifyWorkersRunForTest <- true
+		}
+	}()
+}
+
+// SendEvidenceCreatedEvent starts a specified set of workers for a specified set of evidenceUUIDs
 // Note that this process kicks off a number of goroutines.
 func SendEvidenceCreatedEvent(db *database.Connection, reqLogger logging.Logger, operationID int64, evidenceUUIDs []string, workerNames []string) error {
 	var workersToRun []models.ServiceWorker
@@ -89,6 +141,25 @@ func SendEvidenceCreatedEvent(db *database.Connection, reqLogger logging.Logger,
 	}()
 
 	return nil
+}
+
+func runProcessEvent(db *database.Connection, worker models.ServiceWorker, payload interface{}) error {
+	var err error
+	var basicConfig BasicServiceWorkerConfig
+	if err = json.Unmarshal([]byte(worker.Config), &basicConfig); err != nil {
+		return err
+	}
+
+	var handler ServiceWorker
+	if handler, err = findAppropriateWorker(basicConfig); err != nil {
+		return err
+	}
+
+	if err = handler.Build(worker.Name, []byte(worker.Config)); err != nil {
+		return err
+	}
+
+	return handler.ProcessEvent(payload)
 }
 
 func runProcessMetadata(db *database.Connection, worker models.ServiceWorker, evidenceID int64, payload *NewEvidencePayload) error {

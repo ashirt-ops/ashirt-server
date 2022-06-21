@@ -28,6 +28,7 @@ type ServiceWorker interface {
 	Build(workerName string, config []byte) error
 	Test() ServiceTestResult
 	ProcessMetadata(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error)
+	ProcessEvent(payload interface{}) error
 }
 
 // ServiceTestResult provides a view of a Worker test
