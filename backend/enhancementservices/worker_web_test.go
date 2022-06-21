@@ -55,7 +55,7 @@ func TestWebProcessMetadata(t *testing.T) {
 	worker := helpers.Ptr(this.BuildTestWebWorker())
 
 	payload := this.NewEvidencePayload{
-		Type:          "process",
+		Type:          "evidence_created",
 		EvidenceUUID:  "abc123",
 		OperationSlug: "whatsit",
 		ContentType:   "image",
