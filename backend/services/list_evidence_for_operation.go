@@ -113,11 +113,14 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 		sb = sb.Where(sq.Like{"description": "%" + text + "%"})
 	}
 
-	for i, text := range filters.Metadata {
-		if i == 0 {
-			sb = sb.LeftJoin("evidence_metadata em ON em.evidence_id = evidence.id")
+	if len(filters.Metadata) > 0 {
+		metadataSubquery := sq.Select("evidence_id").From("evidence_metadata")
+		for _, text := range filters.Metadata {
+			metadataSubquery = metadataSubquery.Where(sq.Like{"body": "%" + text + "%"})
 		}
-		sb = sb.Where(sq.Like{"em.body": "%" + text + "%"})
+		if q, v, e := metadataSubquery.ToSql(); e == nil {
+			sb = sb.Where("evidence.id IN ("+q+")", v)
+		}
 	}
 
 	if values := filters.DateRanges; len(values) > 0 {
