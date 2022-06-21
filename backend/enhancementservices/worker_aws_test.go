@@ -50,7 +50,7 @@ func TestAWSTest(t *testing.T) {
 	require.Contains(t, result.Message, msg)
 }
 
-func TestAWSProcess(t *testing.T) {
+func TestAWSProcessMetadata(t *testing.T) {
 	worker := this.BuildTestLambdaWorker()
 
 	payload := this.NewEvidencePayload{
@@ -75,7 +75,7 @@ func TestAWSProcess(t *testing.T) {
 
 	// verify success
 	this.SetTestLambdaClient(buildProcessClient(processSuccessReponse))
-	result, err := worker.Process(eviID, &payload)
+	result, err := worker.ProcessMetadata(eviID, &payload)
 	require.NoError(t, err)
 	require.Equal(t, eviID, result.EvidenceID)
 	require.True(t, *result.CanProcess)
@@ -92,19 +92,19 @@ func TestAWSProcess(t *testing.T) {
 
 		// no-content failure
 		this.SetTestLambdaClient(buildProcessClient(processErrorResponse_NoContent))
-		result, err = worker.Process(eviID, &payload)
+		result, err = worker.ProcessMetadata(eviID, &payload)
 		verifyErrorScenario(result, err)
 		require.NotNil(t, result.LastRunMessage)
 
 		// with message
 		this.SetTestLambdaClient(buildProcessClient(processErrorResponse_WithMessage))
-		result, err = worker.Process(eviID, &payload)
+		result, err = worker.ProcessMetadata(eviID, &payload)
 		verifyErrorScenario(result, err)
 		require.Equal(t, content, *result.LastRunMessage)
 
 		// without message
 		this.SetTestLambdaClient(buildProcessClient(processErrorResponse_StatusCode))
-		result, err = worker.Process(eviID, &payload)
+		result, err = worker.ProcessMetadata(eviID, &payload)
 		verifyErrorScenario(result, err)
 		require.Nil(t, result.LastRunMessage)
 	}
@@ -119,11 +119,11 @@ func TestAWSProcess(t *testing.T) {
 		}
 		// status code version
 		this.SetTestLambdaClient(buildProcessClient(processDeferalResponse_StatusCode))
-		verifyDefferalResult(worker.Process(eviID, &payload))
+		verifyDefferalResult(worker.ProcessMetadata(eviID, &payload))
 
 		// action version
 		this.SetTestLambdaClient(buildProcessClient(processDeferalReponse_Action))
-		verifyDefferalResult(worker.Process(eviID, &payload))
+		verifyDefferalResult(worker.ProcessMetadata(eviID, &payload))
 	}
 
 	// verify Rejections
@@ -135,11 +135,11 @@ func TestAWSProcess(t *testing.T) {
 		}
 		// status code version
 		this.SetTestLambdaClient(buildProcessClient(processRejectedResponse_StatusCode))
-		verifyRejectionResult(worker.Process(eviID, &payload))
+		verifyRejectionResult(worker.ProcessMetadata(eviID, &payload))
 
 		// action version
 		this.SetTestLambdaClient(buildProcessClient(processRejectedReponse_Action))
-		result, err := worker.Process(eviID, &payload)
+		result, err := worker.ProcessMetadata(eviID, &payload)
 		verifyRejectionResult(result, err)
 		require.Equal(t, content, *result.LastRunMessage)
 	}

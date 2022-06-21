@@ -51,7 +51,7 @@ func TestWebTest(t *testing.T) {
 	require.Contains(t, result.Message, msg)
 }
 
-func TestWebProcess(t *testing.T) {
+func TestWebProcessMetadata(t *testing.T) {
 	worker := helpers.Ptr(this.BuildTestWebWorker())
 
 	payload := this.NewEvidencePayload{
@@ -79,7 +79,7 @@ func TestWebProcess(t *testing.T) {
 
 	// verify success
 	setClient(processSuccessReponse)
-	result, err := worker.Process(eviID, &payload)
+	result, err := worker.ProcessMetadata(eviID, &payload)
 	require.NoError(t, err)
 	require.Equal(t, eviID, result.EvidenceID)
 	require.True(t, *result.CanProcess)
@@ -96,19 +96,19 @@ func TestWebProcess(t *testing.T) {
 
 		// no-content failure
 		setClient(processErrorResponse_NoContent)
-		result, err = worker.Process(eviID, &payload)
+		result, err = worker.ProcessMetadata(eviID, &payload)
 		verifyErrorScenario(result, err)
 		require.NotNil(t, result.LastRunMessage)
 
 		// with message
 		setClient(processErrorResponse_WithMessage)
-		result, err = worker.Process(eviID, &payload)
+		result, err = worker.ProcessMetadata(eviID, &payload)
 		verifyErrorScenario(result, err)
 		require.Equal(t, content, *result.LastRunMessage)
 
 		// without message
 		setClient(processErrorResponse_StatusCode)
-		result, err = worker.Process(eviID, &payload)
+		result, err = worker.ProcessMetadata(eviID, &payload)
 		verifyErrorScenario(result, err)
 		require.Nil(t, result.LastRunMessage)
 	}
@@ -123,11 +123,11 @@ func TestWebProcess(t *testing.T) {
 		}
 		// status code version
 		setClient(processDeferalResponse_StatusCode)
-		verifyDefferalResult(worker.Process(eviID, &payload))
+		verifyDefferalResult(worker.ProcessMetadata(eviID, &payload))
 
 		// action version
 		setClient(processDeferalReponse_Action)
-		verifyDefferalResult(worker.Process(eviID, &payload))
+		verifyDefferalResult(worker.ProcessMetadata(eviID, &payload))
 	}
 
 	// verify Rejections
@@ -139,11 +139,11 @@ func TestWebProcess(t *testing.T) {
 		}
 		// status code version
 		setClient(processRejectedResponse_StatusCode)
-		verifyRejectionResult(worker.Process(eviID, &payload))
+		verifyRejectionResult(worker.ProcessMetadata(eviID, &payload))
 
 		// action version
 		setClient(processRejectedReponse_Action)
-		result, err := worker.Process(eviID, &payload)
+		result, err := worker.ProcessMetadata(eviID, &payload)
 		verifyRejectionResult(result, err)
 		require.Equal(t, content, *result.LastRunMessage)
 	}

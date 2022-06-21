@@ -95,7 +95,7 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 	return errorTestResultWithMessage(nil, "Service did not reply with a supported status")
 }
 
-func (w *awsConfigV1Worker) Process(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error) {
+func (w *awsConfigV1Worker) ProcessMetadata(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error) {
 	body, err := json.Marshal(*payload)
 	if err != nil {
 		return nil, backend.WrapError("unable to construct body", err)
