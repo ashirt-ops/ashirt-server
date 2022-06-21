@@ -149,7 +149,7 @@ func RunServiceWorker(ctx context.Context, db *database.Connection, i RunService
 		workers = []string{i.WorkerName}
 	}
 
-	enhancementservices.RunServiceWorkerMatrix(db, logging.ReqLogger(ctx), operation.ID, []string{evidence.UUID}, workers)
+	enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, []string{evidence.UUID}, workers)
 
 	return nil
 }
@@ -164,7 +164,7 @@ func BatchRunServiceWorker(ctx context.Context, db *database.Connection, i Batch
 		return backend.WrapError("Unable to run service workers", backend.UnauthorizedWriteErr(err))
 	}
 
-	return enhancementservices.RunServiceWorkerMatrix(db, logging.ReqLogger(ctx), operation.ID, i.EvidenceUUIDs, i.WorkerNames)
+	return enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, i.EvidenceUUIDs, i.WorkerNames)
 }
 
 func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWorkerID int64) (*dtos.ServiceWorkerTestOutput, error) {

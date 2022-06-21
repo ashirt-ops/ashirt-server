@@ -101,7 +101,7 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		return nil, backend.WrapError("Could not create evidence and tags", backend.DatabaseErr(err))
 	}
 
-	err = enhancementservices.RunServiceWorkerMatrix(db, logging.ReqLogger(ctx), operation.ID, []string{evidenceUUID}, enhancementservices.AllWorkers())
+	err = enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, []string{evidenceUUID}, enhancementservices.AllWorkers())
 
 	if err != nil {
 		logging.Log(ctx, "msg", "Unable to run workers", "error", err.Error())

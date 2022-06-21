@@ -27,7 +27,7 @@ type BasicServiceWorkerConfig struct {
 type ServiceWorker interface {
 	Build(workerName string, config []byte) error
 	Test() ServiceTestResult
-	Process(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error)
+	ProcessMetadata(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error)
 }
 
 // ServiceTestResult provides a view of a Worker test

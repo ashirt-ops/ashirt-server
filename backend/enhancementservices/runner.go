@@ -39,27 +39,19 @@ func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 
 // RunServiceWorkerMatrix starts a specified set of workers for a specified set of evidenceUUIDs
 // Note that this process kicks off a number of goroutines.
-func RunServiceWorkerMatrix(db *database.Connection, reqLogger logging.Logger, operationID int64, evidenceUUIDs []string, workerNames []string) error {
+func SendEvidenceCreatedEvent(db *database.Connection, reqLogger logging.Logger, operationID int64, evidenceUUIDs []string, workerNames []string) error {
 	var workersToRun []models.ServiceWorker
-	var evidence []models.Evidence
 	var expandedPayloads []ExpandedNewEvidencePayload
 	workerContext := context.Background()
 
 	go func() {
 		err := db.WithTx(workerContext, func(tx *database.Transactable) {
 			workersToRun, _ = filterWorkers(tx, workerNames)
-			if len(evidenceUUIDs) == 0 {
-				evidence, _ = getAllEvidenceForOperation(tx, operationID)
-			} else {
-				evidence, _ = filterEvidenceByUUID(tx, operationID, evidenceUUIDs)
-			}
-			expandedPayloads, _ = BatchBuildNewEvidencePayload(tx, helpers.Map(evidence, func(i models.Evidence) int64 {
-				return i.ID
-			}))
+			expandedPayloads, _ = BatchBuildNewEvidencePayload(workerContext, tx, operationID, evidenceUUIDs)
 
-			evidenceIDs := helpers.Map(evidence, func(e models.Evidence) int64 { return e.ID })
-
-			markWorkStarting(tx, evidenceIDs, helpers.Map(workersToRun, getServiceWorkerName))
+			markWorkStarting(tx,
+				helpers.Map(expandedPayloads, getExpandedPayloadID),
+				helpers.Map(workersToRun, getServiceWorkerName))
 		})
 		if err != nil {
 			reqLogger.Log("msg", "Unable to execute service workers", "error", err.Error())
@@ -76,7 +68,7 @@ func RunServiceWorkerMatrix(db *database.Connection, reqLogger logging.Logger, o
 				workerCopy := worker
 				go func() {
 					defer wg.Done()
-					err := runWorker(db, workerCopy, evidenceID, &payload)
+					err := runProcessMetadata(db, workerCopy, evidenceID, &payload)
 					logger := logging.With(reqLogger,
 						"worker", workerCopy.Name,
 						"evidenceID", evidenceID,
@@ -99,7 +91,7 @@ func RunServiceWorkerMatrix(db *database.Connection, reqLogger logging.Logger, o
 	return nil
 }
 
-func runWorker(db *database.Connection, worker models.ServiceWorker, evidenceID int64, payload *NewEvidencePayload) error {
+func runProcessMetadata(db *database.Connection, worker models.ServiceWorker, evidenceID int64, payload *NewEvidencePayload) error {
 	var err error
 	var basicConfig BasicServiceWorkerConfig
 	if err = json.Unmarshal([]byte(worker.Config), &basicConfig); err != nil {
@@ -115,7 +107,7 @@ func runWorker(db *database.Connection, worker models.ServiceWorker, evidenceID 
 		return err
 	}
 
-	if pendingUpdate, err := handler.Process(evidenceID, payload); err != nil {
+	if pendingUpdate, err := handler.ProcessMetadata(evidenceID, payload); err != nil {
 		return err
 	} else if pendingUpdate != nil { // should always be not-nil
 		_, err := upsertWorkerCompleteData(db, *pendingUpdate)
