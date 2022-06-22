@@ -7,13 +7,13 @@ from langdetect import detect
 import pytesseract
 import yake
 
-from message_types import ProcessBody
+from message_types import EvidenceCreatedBody
 from services import AShirtRequestsService
 
 ExtractedKeyword = Tuple[str, float]
 
 
-def process_content(body: ProcessBody):
+def process_content(body: EvidenceCreatedBody):
     ashirt_svc = AShirtRequestsService(
         os.environ.get('ASHIRT_BACKEND_URL', ''),
         os.environ.get('ASHIRT_ACCESS_KEY', ''),
@@ -26,7 +26,8 @@ def process_content(body: ProcessBody):
     img = Image.open(io.BytesIO(evidence_content))
 
     # Run tesseract
-    text = pytesseract.image_to_string(img, config='--oem 3 --psm 12 -c thresholding_method=2')
+    text = pytesseract.image_to_string(
+        img, config='--oem 3 --psm 12 -c thresholding_method=2')
 
     # Extract keywords
     keywords = _extract_keywords(text)

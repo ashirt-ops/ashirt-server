@@ -1,6 +1,6 @@
 from constants import SupportedContentType
 from message_types import (
-    ProcessBody,
+    EvidenceCreatedBody,
     TestBody,
 )
 from responses import (
@@ -18,13 +18,13 @@ def __main__(event, context):
     if TestBody.parse_if_valid(event) is not None:
         return test_passed()
 
-    if (body := ProcessBody.parse_if_valid(event)) is not None:
-        return handle_process(body)
+    if (body := EvidenceCreatedBody.parse_if_valid(event)) is not None:
+        return handle_evidence_created(body)
 
     return bad_request()
 
 
-def handle_process(body: ProcessBody):
+def handle_evidence_created(body: EvidenceCreatedBody):
     # filter out unprocessable evidence
     if body.content_type != SupportedContentType.IMAGE:
         return reject_evidence()
