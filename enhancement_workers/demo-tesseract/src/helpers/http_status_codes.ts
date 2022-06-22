@@ -12,7 +12,3 @@ export const StatusCode = {
   NOT_IMPLEMENTED: 501,
 }
 
-import { formatRFC7231 } from 'date-fns'
-export const now = (): string => {
-  return formatRFC7231(new Date())
-}

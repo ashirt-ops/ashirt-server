@@ -1,6 +1,5 @@
 import { default as axios, AxiosRequestConfig } from 'axios'
 import { createHmac, createHash } from 'crypto'
-import { formatRFC7231 } from 'date-fns'
 
 export type RequestConfig = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -92,7 +91,7 @@ export class AShirtService {
   }
 
   private static nowInRFC1123() {
-    return formatRFC7231(new Date())
+    return new Date().toUTCString()
   }
 
   generateAuthorizationHeaderValue(data: {

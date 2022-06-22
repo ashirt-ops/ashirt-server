@@ -4,7 +4,7 @@ import { Logger } from 'pino'
 import { handleActionProcess } from './actions'
 import { config } from './config'
 import { StatusCode } from './helpers/http_status_codes'
-import { isSupportedRequest, ProcessRequest } from './helpers/request_validation'
+import { isSupportedMessage, EvidenceCreatedMessage } from './helpers/request_validation'
 import { AShirtService } from './services/ashirt'
 import { appWarnLog, getRequestLogger } from './services/logging'
 
@@ -18,11 +18,11 @@ export function addRoutes(app: Express, isDev: boolean) {
   app.post('/process', async (req: Request, res: Response) => {
     const body = req.body
 
-    if (isSupportedRequest(body)) {
+    if (isSupportedMessage(body)) {
       switch (body.type) {
         case 'test':
           return handleTestRequest(res)
-        case 'process':
+        case 'evidence_created':
           const logger = getRequestLogger()
           logger.info(body, "Process request")
           try {
@@ -69,7 +69,7 @@ const handleTestRequest = (res: Response) => {
   })
 }
 
-const handleProcessRequest = async (body: ProcessRequest, res: Response, svc: AShirtService, logger: Logger) => {
+const handleProcessRequest = async (body: EvidenceCreatedMessage, res: Response, svc: AShirtService, logger: Logger) => {
   const actionResponse = await handleActionProcess(body, svc, logger)
   switch (actionResponse.action) {
     case 'deferred':

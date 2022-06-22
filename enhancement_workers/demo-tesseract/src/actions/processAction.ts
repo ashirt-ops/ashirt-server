@@ -3,7 +3,7 @@ import tesseract from 'node-tesseract-ocr'
 import { Logger } from 'pino'
 
 import { AShirtService } from "src/services/ashirt"
-import { ProcessRequest } from "src/helpers/request_validation"
+import { EvidenceCreatedMessage } from "src/helpers/request_validation"
 
 export type ProcessResultDTO =
   | ProcessResultNormal
@@ -25,7 +25,7 @@ type ProcessResultDeferred = {
 }
 
 export const handleActionProcess = async (
-  body: ProcessRequest,
+  body: EvidenceCreatedMessage,
   svc: AShirtService,
   reqLog: Logger,
 ): Promise<ProcessResultDTO> => {
