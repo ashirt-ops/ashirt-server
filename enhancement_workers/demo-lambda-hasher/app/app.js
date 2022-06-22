@@ -6,47 +6,33 @@ const {
   processSuccess,
 } = require("./responses");
 
-const {createHash} = require("crypto")
+const {
+  isValidRequest,
+  MESSAGE_TYPE_TEST,
+  MESSAGE_TYPE_EVIDENCE_CREATED,
+} = require("./message_validators");
+
+const { createHash } = require("crypto");
 
 const { AShirtService } = require("./ashirt_service");
 
 exports.handler = async (event) => {
   // Parse and validate the data
-  if (!isValidateInput(event)) {
+  if (!isValidRequest(event)) {
     return badRequest("Body is not in the expected format");
   }
 
   // handle the request type
-  if (event.type === "test") {
-    return testPassed();
-  }
-  if (event.type === "process") {
-    return await handleProcess(event);
+  switch (event.type) {
+    case MESSAGE_TYPE_TEST:
+      return testPassed();
+    case MESSAGE_TYPE_EVIDENCE_CREATED:
+      return await handleProcess(event);
   }
 
   // we should never actually get here -- validation above should trap anything that won't work
   return notImplemented();
 };
-
-function isValidateInput(data) {
-  if (data.type === "test") {
-    return true;
-  }
-  return (
-    data.type === "process" &&
-    typeof data.evidenceUuid === "string" &&
-    typeof data.operationSlug === "string" &&
-    [
-      // Note: this covers all of current types as of June 2022
-      "http-request-cycle",
-      "terminal-recording",
-      "codeblock",
-      "event",
-      "image",
-      "none",
-    ].includes(data.contentType)
-  );
-}
 
 async function handleProcess(requestData) {
   // accept all forms of content
@@ -57,7 +43,7 @@ async function handleProcess(requestData) {
       requestData.evidenceUuid,
       "media"
     );
-    
+
     if (content.statusCode == 200) {
       // hash the file contents
       const buffer = Buffer.from(content.data);
@@ -68,7 +54,7 @@ async function handleProcess(requestData) {
 
       return processSuccess(hashResult);
     }
-    return errorProcessing("Unable to retrieve content")
+    return errorProcessing("Unable to retrieve content");
   } catch (err) {
     return errorProcessing(err);
   }
