@@ -31,7 +31,7 @@
     "react-test-renderer": "^18.2.0",
     "sinon": "^14.0.0",
     "sinon-chai": "^3.7.0",
-    "stylus": "^0.57.0",
+    "stylus": "^0.58.1",
     "stylus-loader": "^7.0.0",
     "ts-loader": "^9.3.0",
     "ts-node": "^10.8.1",
