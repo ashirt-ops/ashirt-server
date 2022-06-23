@@ -159,7 +159,7 @@ func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWork
 	testResult := enhancementservices.TestServiceWorker(worker)
 
 	if testResult.Error != nil {
-		return nil, backend.ServerErr(err)
+		return nil, backend.ServerErr(testResult.Error)
 	}
 
 	result := dtos.ServiceWorkerTestOutput{
