@@ -5,7 +5,7 @@ import json
 from uuid import uuid4
 
 from constants import APP_LOGGER
-from request_types import (ProcessBody, TestBody)
+from request_types import (EvidenceCreatedBody, TestBody)
 from state import RequestState
 import actions
 
@@ -24,8 +24,8 @@ def process_request() -> Response:
     if TestBody.parse_if_valid(data) is not None:
         return jsonify({"status": "ok"})
 
-    if (body := ProcessBody.parse_if_valid(data)) is not None:
-        action_result = actions.handle_process(body)
+    if (body := EvidenceCreatedBody.parse_if_valid(data)) is not None:
+        action_result = actions.handle_evidence_created(body)
         # Construct a response that provides a body when a body is meaningful
         rtn = (
             Response()

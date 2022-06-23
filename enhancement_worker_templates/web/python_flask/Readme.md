@@ -31,7 +31,7 @@ Note the url: this is likely what will change for your version
 
 ## Adding custom logic
 
-Most programs should be able to largely ignore most of the code, and instead focus on `actions/process_handler.py`. The `handle_process` function is ultimately called when new evidence is added to AShirt. Simply add in your logic here to process new pieces of evidence, and you should be good to go.
+Most programs should be able to largely ignore most of the code, and instead focus on `actions` directory, and specifically the events you want to target.
 
 ## How it works
 
@@ -45,7 +45,7 @@ The Startup Phase is as you might expect: this state is entered once the applica
 
 The serving phase is largely controlled by what particular route is entered when a user contacts the server. The `routes` directory provides two set of routes: the `ashirt` routes, which are the routes that the AShirt backend will call, and the `dev` routes, which are designed to be only created in a development environment. These serve as helpers and sanity checks.
 
-When a route is reached -- in particular, when the process route is reached (see: `process_request`), then the service will kick off processing of that data. Some initial boilerplate style code manages the request, and directs all of the actual work to the `process_handler.py` file. This function will return one of a handful of responses, which will be used to generate the true response to the AShirt backend.
+When a route is reached -- in particular, when the process route is reached (see: `process_request`), then the service will kick off processing of that data. Some initial boilerplate style code manages the request, and directs all of the actual work to some function in the `actions` directory. These functions will return one of a handful of responses, which will be used to generate the true response to the AShirt backend.
 
 Once the request is complete, the application waits for another request.
 

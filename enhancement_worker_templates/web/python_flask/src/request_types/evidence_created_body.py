@@ -7,22 +7,22 @@ from .generic_request_body import GenericRequestBody
 
 
 @dataclass(repr=False, frozen=True)
-class ProcessBody(GenericRequestBody):
+class EvidenceCreatedBody(GenericRequestBody):
     """
-    ProcessBody reflects the message received from AShirt when AShirt requests processing
+    EvidenceCreatedBody reflects the message received from AShirt when AShirt requests processing
     """
-    type: Literal['process']
+    type: Literal['evidence_created']
     evidence_uuid: str
     operation_slug: str
     content_type: SupportedContentType
-    
+
     def is_valid_instance(self) -> bool:
-        return (
-            is_literal(self.type, str, 'process')
-            and type(self.evidence_uuid) == str
-            and type(self.operation_slug) == str
-            and type(self.content_type) == SupportedContentType
-        )
+        return all([
+            is_literal(self.type, str, 'evidence_created'),
+            type(self.evidence_uuid) is str,
+            type(self.operation_slug) is str,
+            type(self.content_type) is SupportedContentType,
+        ])
 
     @classmethod
     def from_json(cls, data: dict[str, Any]):
@@ -32,4 +32,3 @@ class ProcessBody(GenericRequestBody):
         cls.content_type = SupportedContentType.from_str(data['contentType'])
 
         return cls
-
