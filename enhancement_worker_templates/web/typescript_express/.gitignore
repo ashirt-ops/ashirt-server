@@ -1,0 +1,26 @@
+# compiled output
+/dist
+/node_modules
+
+# OS
+.DS_Store
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# local env files
+.env*
+!.env.example

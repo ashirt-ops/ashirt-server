@@ -66,12 +66,12 @@ func JSONHandler(handler func(*http.Request) (interface{}, error)) http.Handler 
 //
 // Note: In general, users should prefer to use JSONHandler or MediaHandler. This function should
 // only be used in instances where those handlers cannot be used (e.g. because of a redirect)
-func HandleError(w http.ResponseWriter, r *http.Request, err error) {
+func HandleError(w http.ResponseWriter, r *http.Request, rootErr error) {
 	var status int
 	var publicReason string
 	var loggedReason error
 
-	switch err := err.(type) {
+	switch err := rootErr.(type) {
 	case *backend.HTTPError:
 		status = err.HTTPStatus
 		publicReason = err.PublicReason
@@ -84,7 +84,13 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 		logging.Log(r.Context(), "msg", "handling non-HTTPError", "stacktrace", formatStackTrace(retrace(20)))
 	}
 
-	logging.Log(r.Context(), "msg", "Error handling request", "error", loggedReason.Error(), "status", status, "url", r.URL)
+	logging.Log(r.Context(),
+		"msg", "Error handling request",
+		"error", loggedReason,
+		"rootError", rootErr,
+		"status", status,
+		"url", r.URL,
+	)
 
 	writeJSONResponse(w, status, map[string]string{"error": publicReason})
 }
