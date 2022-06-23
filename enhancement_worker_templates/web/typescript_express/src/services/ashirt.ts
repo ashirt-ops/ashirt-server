@@ -1,5 +1,19 @@
 import { default as axios, AxiosRequestConfig } from 'axios'
 import { createHmac, createHash } from 'crypto'
+import {
+  CheckConnectionOutput,
+  CreateEvidenceInput,
+  CreateOperationInput,
+  CreateTagInput,
+  EvidenceOutput,
+  ListOperationsOutput,
+  ListOperationTagsOutput,
+  OperationOutputItem,
+  ReadEvidenceOutput,
+  ResponseWrapper,
+  UpdateEvidenceInput,
+  UpsertMetadataInput,
+} from './types'
 
 export type RequestConfig = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -18,8 +32,30 @@ export class AShirtService {
     this.secretKey = Buffer.from(secretKeyB64, "base64")
   }
 
+  async getOperations() {
+    return this.makeRequest<ListOperationsOutput>({
+      method: 'GET',
+      path: `/api/operations`
+    })
+  }
+
+  async checkConnection() {
+    return this.makeRequest<CheckConnectionOutput>({
+      method: 'GET',
+      path: `/api/checkconnection`
+    })
+  }
+
+  async createOperation(body: CreateOperationInput) {
+    return this.makeRequest<OperationOutputItem>({
+      method: 'POST',
+      path: `/api/operations`,
+      body: JSON.stringify(body)
+    })
+  }
+
   async getEvidence(operationSlug: string, evidenceUuid: string) {
-    return this.makeRequest<EvidenceOutput>({
+    return this.makeRequest<ReadEvidenceOutput>({
       method: 'GET',
       path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`
     })
@@ -33,11 +69,44 @@ export class AShirtService {
     })
   }
 
-  async createOperation(body: CreateOperationInput) {
-    return this.makeRequest<Buffer>({
+  // TODO
+  async createEvidence(operationSlug: string, body: CreateEvidenceInput) {
+    return this.makeRequest<EvidenceOutput>({
       method: 'POST',
-      path: `/api/operations`,
+      path: `/api/operations/${operationSlug}/evidence`,
+      body: "" // TODO
+    })
+  }
+
+  // TODO
+  async updateEvidence(operationSlug: string, evidenceUuid: string, body: UpdateEvidenceInput) {
+    return this.makeRequest<void>({
+      method: 'PUT',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`,
+      body: "" // TODO
+    })
+  }
+
+  async upsertEvidenceMetadata(operationSlug: string, evidenceUuid: string, body: UpsertMetadataInput) {
+    return this.makeRequest<void>({
+      method: 'PUT',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}/metadata`,
       body: JSON.stringify(body)
+    })
+  }
+
+  async getOperationTags(operationSlug: string) {
+    return this.makeRequest<ListOperationTagsOutput>({
+      method: 'GET',
+      path: `/api/operations/${operationSlug}/evidence/tags`
+    })
+  }
+
+  async createOperationTag(operationSlug: string, body: CreateTagInput) {
+    return this.makeRequest<ReadEvidenceOutput>({
+      method: 'POST',
+      path: `/api/operations/${operationSlug}/evidence/tags`,
+      body: JSON.stringify(body),
     })
   }
 
@@ -115,22 +184,4 @@ export class AShirtService {
 
     return `${this.accessKey}:${hmacMessage}`
   }
-}
-
-type EvidenceOutput = {
-  uuid: string
-  description: string
-  contentType: string
-  occurredAt: Date
-}
-
-type ResponseWrapper<T> = {
-  responseCode: number,
-  contentType: string
-  data: T
-}
-
-type CreateOperationInput = {
-  slug: string
-  name: string
 }
