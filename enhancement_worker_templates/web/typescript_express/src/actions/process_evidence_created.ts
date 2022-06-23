@@ -1,5 +1,5 @@
 import { AShirtService } from "src/services/ashirt"
-import { ProcessRequest } from "src/helpers/request_validation"
+import { EvidenceCreatedMessage } from "src/helpers/request_validation"
 import { default as axios, AxiosError } from 'axios'
 
 export type ProcessResultDTO =
@@ -22,15 +22,15 @@ type ProcessResultDeferred = {
 }
 
 /**
- * handleActionProcess is the location where actual request processing takes place. The
+ * handleEvidenceCreatedAction is the location where actual request processing takes place. The
  * implementation here is very basic and focuses on the form, rather than the function.
  * 
  * @param body The message received from the AShirt backend, in the ProcessRequest type
  * @param svc The AShirt service, which can be used to get the evidence content, if needed
  * @returns The result of the processing, which will be further interpreted back in router.ts
  */
-export const handleActionProcess = async (
-  body: ProcessRequest,
+export const handleEvidenceCreatedAction = async (
+  body: EvidenceCreatedMessage,
   svc: AShirtService
 ): Promise<ProcessResultDTO> => {
 
@@ -50,7 +50,7 @@ export const handleActionProcess = async (
       content: 'done!', // replace me with your content!
     }
   }
-  catch(err: unknown) {
+  catch (err: unknown) {
     const content = axios.isAxiosError(err)
       ? (err as AxiosError).message
       : null

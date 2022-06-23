@@ -1,8 +1,8 @@
 import { Express, Request, Response } from 'express'
-import { handleActionProcess } from './actions'
+import { handleEvidenceCreatedAction } from './actions'
 import { config } from './config'
 import { StatusCode } from './helpers/http_status_codes'
-import { isSupportedRequest, ProcessRequest } from './helpers/request_validation'
+import { isSupportedMessage, EvidenceCreatedMessage } from './helpers/request_validation'
 import { AShirtService } from './services/ashirt'
 
 
@@ -23,12 +23,12 @@ export function addRoutes(app: Express, isDev: boolean) {
   app.post('/process', async (req: Request, res: Response) => {
     const body = req.body
 
-    if (isSupportedRequest(body)) {
+    if (isSupportedMessage(body)) {
       switch (body.type) {
         case 'test':
           return handleTestRequest(res)
-        case 'process':
-          return await handleProcessRequest(body, res, ashirtService)
+        case 'evidence_created':
+          return await handleEvidenceCreatedRequest(body, res, ashirtService)
         default:
           res.status(StatusCode.NOT_IMPLEMENTED)
       }
@@ -49,7 +49,6 @@ export function addRoutes(app: Express, isDev: boolean) {
       catch (err) {
         res.status(200).send({ message: "Test failed", err })
       }
-
     })
   }
 
@@ -75,8 +74,8 @@ const handleTestRequest = (res: Response) => {
  * @param res The response
  * @param svc The AShirt service, which can be used to gather information on the evidence
  */
-const handleProcessRequest = async (body: ProcessRequest, res: Response, svc: AShirtService) => {
-  const actionResponse = await handleActionProcess(body, svc)
+const handleEvidenceCreatedRequest = async (body: EvidenceCreatedMessage, res: Response, svc: AShirtService) => {
+  const actionResponse = await handleEvidenceCreatedAction(body, svc)
   switch (actionResponse.action) {
     case 'deferred':
       res.status(StatusCode.ACCEPTED)

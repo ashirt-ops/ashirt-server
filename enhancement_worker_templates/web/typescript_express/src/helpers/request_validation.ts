@@ -1,28 +1,28 @@
 
-export type SupportedRequest =
-  | TestRequest
-  | ProcessRequest
+export type SupportedMessage =
+  | TestMessage
+  | EvidenceCreatedMessage
 
-export type TestRequest = {
+export type TestMessage = {
   type: "test"
 }
 
-export type ProcessRequest = {
-  type: "process",
+export type EvidenceCreatedMessage = {
+  type: "evidence_created",
   evidenceUuid: string,
   operationSlug: string,
   contentType: typeof SupportedContentTypes[number]
 }
 
 /**
- * isValidProcessRequest is a type guard that reviews the given body to make sure it matches
+ * isSupportedMessage is a type guard that reviews the given body to make sure it matches
  * a supported request type.
  * 
  * @param body Any json-parsed content. This is not guaranteed to be correct for random bodies --
  * especially esoteric javascript objects.
  * @returns true if the value given has a supported request type. Otherwise, this returns false
  */
-export const isSupportedRequest = (body: unknown): body is SupportedRequest => {
+export const isSupportedMessage = (body: unknown): body is SupportedMessage => {
   if (
     isRecordWithTypeField(body)
     && isString(body.type)
@@ -38,7 +38,7 @@ export const isSupportedRequest = (body: unknown): body is SupportedRequest => {
 }
 
 /**
- * isJsonWithType is a type guard that verifies that the given value is an object with a "type"
+ * isRecordWithTypeField is a type guard that verifies that the given value is an object with a "type"
  * field.
  * @param body Anything.
  * @returns true if the value given is an object with a type field. Otherwise, this returns false.
@@ -51,7 +51,7 @@ const isRecordWithTypeField = (body: unknown): body is { type: unknown } => {
   )
 }
 
-const isTestRequest = (body: BasicRequest): body is TestRequest => {
+const isTestRequest = (body: BasicRequest): body is TestMessage => {
   return body.type == 'test'
 }
 
@@ -61,9 +61,9 @@ const isTestRequest = (body: BasicRequest): body is TestRequest => {
  * @param body 
  * @returns 
  */
-const isProcessRequest = (body: BasicRequest): body is ProcessRequest => {
+const isProcessRequest = (body: BasicRequest): body is EvidenceCreatedMessage => {
   return (
-    body.type === 'process' &&
+    body.type === 'evidence_created' &&
     hasField(body, "evidenceUuid", isString) &&
     hasField(body, "operationSlug", isString) &&
     hasField(body, "contentType", (v) => (
@@ -96,7 +96,7 @@ export const SupportedContentTypes = [
 ] as const
 
 export const SupportedRequestTypes = [
-  "process",
+  "evidence_created",
   "test",
 ] as const
 

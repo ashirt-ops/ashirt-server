@@ -1,4 +1,4 @@
-export * from './processAction'
+export * from './process_evidence_created'
 
 export type ActionResponse<T> = {
   result:
