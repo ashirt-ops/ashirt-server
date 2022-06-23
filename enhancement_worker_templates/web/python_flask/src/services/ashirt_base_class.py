@@ -2,12 +2,15 @@ from abc import ABC, abstractmethod
 from base64 import b64decode
 import json
 from typing import Literal, Optional
+from .helpers import encode_form
+from .types import CreateTagInput, UpdateEvidenceInput, UpsertEvidenceMetadata
 
 from . import (
     make_hmac,
     now_in_rfc1123,
     RequestConfig as RC,
     CreateOperationInput,
+    CreateEvidenceInput,
 )
 
 
@@ -17,6 +20,7 @@ class AShirtService(ABC):
     the proper headers to contact the AShirt backend. Note that this goes up to modeling the request.
     The actual sending of the request is left to the subclasses.
     """
+
     def __init__(self, api_url: str, access_key: str, secret_key_b64: str):
         self.api_url = api_url
         self.access_key = access_key
@@ -39,6 +43,9 @@ class AShirtService(ABC):
     def check_connection(self):
         return self.build_request(RC('GET', '/api/checkconnection'))
 
+    def get_evidence(self, operation_slug: str, evidence_uuid: str):
+        return self.build_request(RC('GET', f'/api/operations/{operation_slug}/evidence/{evidence_uuid}'))
+
     def get_evidence_content(self, operation_slug: str, evidence_uuid: str, content_type: Literal['media', 'preview']):
         return self.build_request(RC(
             'GET',
@@ -46,6 +53,39 @@ class AShirtService(ABC):
             None,
             'raw'
         ))
+
+    def create_evidence(self, operation_slug: str, i: CreateEvidenceInput):
+        body = {
+            'notes': i['notes'],
+            'contentType': i['content_type'],
+            'tagIds': json.dumps(i['tag_ids'])
+        }
+
+        return self.build_request(RC('POST', f'/api/operations/{operation_slug}/evidence', encode_form(body, i['file'])))
+
+    def update_evidence(self, operation_slug: str, evidence_uuid: str, i: UpdateEvidenceInput):
+        body = {
+            'notes': i['notes'],
+            'contentType': i['content_type'],
+            'tagsToAdd': json.dumps(i['add_tag_ids']),
+            'tagsToRemove': json.dumps(i['remove_tag_ids']),
+        }
+
+        return self.build_request(RC('POST', f'/api/operations/{operation_slug}/evidence/{evidence_uuid}', encode_form(body, i['file'])))
+
+    def upsert_evidence_metadata(self, operation_slug: str, evidence_uuid: str, i: UpsertEvidenceMetadata):
+        return self.build_request(
+            RC('POST',
+                f'/api/operations/{operation_slug}/evidence/{evidence_uuid}/metadata', json.dumps(
+                    i)
+               )
+        )
+
+    def get_tags(self, operation_slug: str):
+        return self.build_request(RC('GET', f'/api/operations/{operation_slug}/tags'))
+
+    def create_tag(self, operation_slug: str, i: CreateTagInput):
+        return self.build_request(RC('POST', f'/api/operations/{operation_slug}/tags', json.dumps(i)))
 
     def build_request(self, cfg: RC):
         """
@@ -55,7 +95,7 @@ class AShirtService(ABC):
         now = now_in_rfc1123()
 
         # with_body should now be either bytes or None
-        with_body = cfg.body.encode() if type(cfg.body) == str else cfg.body
+        with_body = cfg.body.encode() if type(cfg.body) is str else cfg.body
 
         auth = make_hmac(cfg.method, cfg.path, now, with_body,
                          self.access_key, self.secret_key)
