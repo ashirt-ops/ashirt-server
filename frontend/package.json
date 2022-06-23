@@ -33,7 +33,7 @@
     "sinon-chai": "^3.7.0",
     "stylus": "^0.58.1",
     "stylus-loader": "^7.0.0",
-    "ts-loader": "^9.3.0",
+    "ts-loader": "^9.3.1",
     "ts-node": "^10.8.1",
     "typescript": "^4.6.4",
     "webpack": "5.73",
