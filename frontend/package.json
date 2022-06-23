@@ -46,7 +46,7 @@
     "ace-builds": "^1.6.0",
     "classnames": "^2.3.1",
     "date-fns": "^2.28.0",
-    "interactjs": "^1.10.11",
+    "interactjs": "^1.10.14",
     "lodash": "^4.17.21",
     "query-string": "^7.1.1",
     "react": "^18.2.0",
