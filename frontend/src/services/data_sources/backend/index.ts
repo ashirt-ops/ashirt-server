@@ -27,6 +27,11 @@ export const backendDataSource: DataSource = {
   moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, { sourceOperationSlug: fromOperationSlug }),
   createEvidenceMetadata: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`, payload),
   updateEvidenceMetadata: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`, payload),
+  readEvidenceMetadata: (ids) => req('GET', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`),
+  runServiceWorkerForEvidence: (ids) => req('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata/${ids.source}/run`),
+  runServiceWorkerBatch: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/metadata/run`, payload),
+
+  runAllServiceWorkersForEvidence: (ids) => req('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata/run`),
 
   listFindingCategories: (includeDeleted) => req('GET', `/findings/categories`, null, { includeDeleted }),
   createFindingCategory: (payload) => req('POST', `/findings/category`, payload),
@@ -79,7 +84,9 @@ export const backendDataSource: DataSource = {
   adminCreateServiceWorker: (payload) => req('POST', `/admin/services`, payload),
   adminUpdateServiceWorker: (ids, payload) => req('PUT', `/admin/services/${ids.serviceWorkerId}`, payload),
   adminDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, { delete: true }),
+  adminUnDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, { delete: false }),
   adminTestServiceWorker: (ids) => req('GET', `/admin/services/${ids.serviceWorkerId}/test`),
+  listActiveServiceWorkers: () => req('GET', `/services`),
 
   // TODO these should go into their respective authschemes:
   createRecoveryCode: ids => req('POST', '/auth/recovery/generate', ids),

@@ -18,6 +18,7 @@ import (
 type TimelineFilters struct {
 	UUID             filter.Values
 	Text             []string
+	Metadata         []string
 	Tags             filter.Values
 	Type             filter.Values
 	Operator         filter.Values
@@ -36,6 +37,8 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 		switch k {
 		case "":
 			timelineFilters.Text = v.Values()
+		case "meta":
+			timelineFilters.Metadata = v.Values()
 		case "tag":
 			timelineFilters.Tags = v
 		case "operator":

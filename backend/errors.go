@@ -69,6 +69,15 @@ func ServerErr(err error) error {
 	return HTTPErr(http.StatusInternalServerError, "Internal service error", err)
 }
 
+// SuggestiveServerErr provides an error with a customized message. This should be used primarily when you need to communicate
+// how to fix an error
+func SuggestiveServerErr(helpfulMessage string, err error) error {
+	if helpfulMessage == "" {
+		return ServerErr(err)
+	}
+	return HTTPErr(http.StatusInternalServerError, helpfulMessage, err)
+}
+
 // DatabaseErr provides a generic error for any database access error during a request
 func DatabaseErr(err error) error {
 	return HTTPErr(http.StatusInternalServerError, "Internal service error", err)

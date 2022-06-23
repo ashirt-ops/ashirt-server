@@ -1,6 +1,6 @@
 # AShirt Evidence Enhancement Pipeline
 
-The evidence pipeline enables external services to perform special processing on evidence and have the result of that processing stored as metadata for that evidence. While the intent is for the service to add metadata for the given piece of evidence, the limitations on what a worker may do with the evidence are open ended, and restricted only by the limitations of the AShirt API.
+The enrichment pipeline enables external services to perform processing on evidence and have the result of the processing stored as metadata for that evidence. While the intent is for the service to add metadata for the given piece of evidence, the limitations on what a worker may do with the evidence are open ended, and restricted only by the limitations of the AShirt API.
 
 Additionally, while AShirt provides some enrichment services, the definition is kept open so that you may create your own services, or use community-created services.
 
@@ -10,7 +10,7 @@ Please review and consider each new service you add to your AShirt instance. The
 
 ## Installing/Adding a Service
 
-To add a service worker, as an admin, navigate to admin/service workers (url: `/admin/services`). Click the "Create New Service Worker" button and specify a name for the worker, as well as the configuration. The configuration will be a JSON body, typically provided by the service itself. Generally this will contain details on how to contact it. See [Below](#web-version-1) for the web configuration schema as an example of what to place here. Once the name and configuration have been specified, click "Create", and processing of _new evidence_ should begin. Old evidence can be processed on an item-by-item basis.
+To add a service worker, as an admin, navigate to admin/service workers (url: `/admin/services`). Click the "Create New Service Worker" button and specify a name for the worker, as well as the configuration. The configuration will be a JSON body, typically provided by the service itself. Generally this will contain details on how to contact the service. See [Below](#web-version-1) for the web configuration schema as an example of what to place here. Once the name and configuration have been specified, click "Create", and processing of _new evidence_ should begin. Old evidence can be processed on an item-by-item basis, or in a batched manner on an operation-by-operation basis.
 
 ## Building a Compliant Service
 
@@ -39,11 +39,11 @@ Additional details may be necessary for the particular type of service you implm
 
 ### Web Service
 
-Web services are any service that can be contacted via an HTTP request, and respond in kind. The details on exactly how the request is sent and what the body is are below.
+Web services are any service that can be contacted via an HTTP request, and respond in kind. The details on exactly how the request is sent and what the body is are below. Note that this can include AWS Lambda services, though there is a more specific tool available if you want to use AWS Lambda.
 
 #### Web Configurations
 
-Web services, like all pipelien services, must define their configuration to AShirt when adding the service. The configuration provided below is mostly concerned with how to contact your service, and provides some ways for ashirt to minimally customize the message your service receives.
+Web services, like all pipeline services, must define their configuration to AShirt when adding the service. The configuration provided below is mostly concerned with how to contact your service, and provides some ways for ashirt to minimally customize the message your service receives.
 
 ##### Web, Version 1
 
@@ -81,31 +81,35 @@ The service should respond with a 200/OK message, or a 204/No Content response. 
 
 #### Process Evidence
 
-This is called whenever new evidence is added, or on demand for existing evidence. Either way, the message will have the following format:
+This is called whenever new evidence is added, or on demand for existing pieces of evidence. Either way, the message will have the following format:
 
 ```ts
 {
   "type": "process",
   "evidenceUuid": string,
   "operationSlug": string,
-  // the below indciates the content type of the evidence. This can help your tool immidately know if processing is worthwhile
+  // the below indciates the content type of the evidence. This can help your tool immediately know if processing is worthwhile
   "contentType": 
     | "http-request-cycle" // These are HAR files detailing a request/response session
     | "terminal-recording" // Terminal Recordings are in asciinema file format. 
-    | "codeblock"          // Codeblocks are json files. Their format is detailed below
-    | "event"              // Events are no-file pieces of evidence. it acts as a time marker
-    | "image"              // Images are typically screenshots. Typically these are in PNG format
+    | "codeblock"          // Codeblocks are json files. Their format is detailed below.
+    | "event"              // Events are no-file pieces of evidence. They act as a time marker
+    | "image"              // Images are typically screenshots. Typically these are in PNG format (though this is not a guarantee)
     | "none"               // These are no-file pieces of evidence, containing only a description
 }
 ```
 
 A worker receiving this message has three options:
 
-* The evidence can be rejected for some reason. For example, the evidence type can't be processed by this worker
-* If the work can be completed in a timely manner, then the worker can do this work, and respond with the completed work data in the same request.
-* If the work would need to be deferred, then the worker can queue this work (the worker would be responsible for maintaining its own queuing mechanism) and respond with a deferred work message. When work finally completes, the worker can use the AShirt API to add metadata manually
+* The work can be rejected for some reason. For example, the evidence type can't be processed by this worker
+* The worker can complete the desired work, and reply to the result in the same request. This is useful if the processing is quick.
+* The worker can "defer" the work, and provide a result once processing has completed (via the AShirt API). This is useful for processing that takes some time to analyze. Note that is the responsibility of the worker to manage any queuing of work.
 
-Each of these responses follows the same structure, but it processed according to the context. See below for how to construct these messages.
+Each of these responses follows the same structure, but is processed according to the context. See below for how to construct these messages.
+
+##### Responding with a status code only
+
+When responding with a status code, it is important that you leave the body empty. Otherwise, json processing of the body will occur, and may trigger an error.
 
 ##### Responding by Rejecting
 
@@ -156,7 +160,7 @@ To defer work on a message, respond with:
   ```ts
   {
       "action": "deferred",
-      "content": undefined, // This can be a string, but it will be ignored
+      "content": undefined, // This can be a json string, but it will be ignored
   }
   ```
 
@@ -182,9 +186,9 @@ Headers:
 
 Authorization is accomplished by constructing an HMAC message. You can find a Golang version in `signer/hmac.go`, in the BuildRequestHMAC function. Likewise, there is a C++ version in AShirt [here](https://github.com/theparanoids/ashirt/blob/main/src/helpers/netman.h#L105-L123) (See the `generateHash` method if the link rusts). However, the process is fairly straight forward, and detailed here:
 
-1. Create the body content. Then, hash this content using the `sha-256` algorithm. Note that in situations where there is no body, you would be hashing an empty string. The output from this should be a series of bytes in no special encoding.
+1. Create the body content. Then, hash this content using the `sha-256` algorithm. Note that in situations where there is no body, you would instead hash an empty string. The output from this should be a series of bytes in no special encoding ("raw" format).
 2. Create a string with the following information:
-   1. Method
+   1. Method (e.g. `GET` or `POST`)
    2. New line
    3. URI/Path of request (e.g. if contacting `http://www.ashirt.com/api/operations`, the path would be `api/operations`)
    4. New line
@@ -232,6 +236,7 @@ function generateAuthorizationHeaderValue(data: {
     .digest('base64')
   return `${data.accessKey}:${hmacMessage}`
 }
+
 // =============== Verify the output
 const b64SecretKey =
   "DuvC7Wzpnsa2vtnOYw0RPGWeSdVB5L2L++PLpwGNb5yPQW47BoT5sohaMknU6Sh6a+0d/8dMh+wBEa2IPMMcNQ=="
@@ -246,12 +251,12 @@ const result = generateAuthorizationHeaderValue({
   accessKey,
 })
 console.log(result)
+console.log("Does this match the expected value? ", result === 'P4qRS5sa346iHWZBB53qzzNm:RlbnBDbg5hj/foncSzOnfDWOCrTapyaL7fqKxkcCsFE=')
 // expected output:
 // P4qRS5sa346iHWZBB53qzzNm:RlbnBDbg5hj/foncSzOnfDWOCrTapyaL7fqKxkcCsFE=
 // ================== Small helper to format the date in the right way
-import { formatRFC7231 } from 'date-fns'
 export function nowInRFC1123(): string {
-  return formatRFC7231(new Date())
+  return new Date().toUTCString()
 }
 ```
 

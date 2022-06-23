@@ -11,6 +11,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/enhancementservices"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -20,14 +21,12 @@ import (
 
 type CreateServiceWorkerInput struct {
 	Name        string
-	ServiceType string
 	Config      string
 }
 
 type UpdateServiceWorkerInput struct {
 	ID          int64
 	Name        string
-	ServiceType string
 	Config      string
 }
 
@@ -35,6 +34,12 @@ type RunServiceWorkerInput struct {
 	OperationSlug string
 	EvidenceUUID  string
 	WorkerName    string
+}
+
+type BatchRunServiceWorkerInput struct {
+	OperationSlug string
+	EvidenceUUIDs []string
+	WorkerNames   []string
 }
 
 type DeleteServiceWorkerInput struct {
@@ -53,7 +58,7 @@ func ListServiceWorker(ctx context.Context, db *database.Connection) ([]*dtos.Se
 	)
 
 	if err != nil {
-		return nil, backend.WrapError("Could not create a service worker", backend.DatabaseErr(err))
+		return nil, backend.WrapError("Could not list service workers", backend.DatabaseErr(err))
 	}
 
 	serviceWorkersDTO := make([]*dtos.ServiceWorker, len(services))
@@ -137,9 +142,29 @@ func RunServiceWorker(ctx context.Context, db *database.Connection, i RunService
 		return backend.WrapError("Unable to run service worker", backend.UnauthorizedWriteErr(err))
 	}
 
-	enhancementservices.RunSetOfServiceWorkers(db, []string{i.WorkerName}, evidence.ID)
+	var workers []string 
+	if i.WorkerName == "" {
+		workers = enhancementservices.AllWorkers()
+	} else {
+		workers = []string{i.WorkerName}
+	}
+
+	enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, []string{evidence.UUID}, workers)
 
 	return nil
+}
+
+func BatchRunServiceWorker(ctx context.Context, db *database.Connection, i BatchRunServiceWorkerInput) error {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return backend.WrapError("Unable to run service workers", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unable to run service workers", backend.UnauthorizedWriteErr(err))
+	}
+
+	return enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, i.EvidenceUUIDs, i.WorkerNames)
 }
 
 func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWorkerID int64) (*dtos.ServiceWorkerTestOutput, error) {
@@ -149,7 +174,10 @@ func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWork
 
 	var worker models.ServiceWorker
 	err := db.Get(&worker, sq.Select("*").
-		From("service_workers").Where(sq.Eq{"id": serviceWorkerID}),
+		From("service_workers").Where(sq.Eq{
+		"id": serviceWorkerID,
+		// "deleted_at": nil, // Allowing testing of deleted workers
+	}),
 	)
 
 	if err != nil {
@@ -158,15 +186,16 @@ func TestServiceWorker(ctx context.Context, db *database.Connection, serviceWork
 
 	testResult := enhancementservices.TestServiceWorker(worker)
 
+	message := testResult.Message
 	if testResult.Error != nil {
-		return nil, backend.ServerErr(testResult.Error)
+		// put a separator in to help distinguish message from error
+		message += ">>" + testResult.Error.Error()
 	}
-
 	result := dtos.ServiceWorkerTestOutput{
 		ID:      serviceWorkerID,
 		Name:    worker.Name,
 		Live:    testResult.Live,
-		Message: testResult.Message,
+		Message: message,
 	}
 
 	return &result, nil

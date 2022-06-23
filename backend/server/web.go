@@ -450,6 +450,15 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return evidence.Media, nil
 	}))
 
+	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ReadEvidenceMetadataInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+		}
+		return services.ReadEvidenceMetadata(r.Context(), db, i)
+	}))
+
 	route(r, "POST", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.EditEvidenceMetadataInput{
@@ -470,6 +479,31 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			Body:          dr.FromBody("body").Required().AsString(),
 		}
 		return nil, services.UpdateEvidenceMetadata(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/{service_name}/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.RunServiceWorkerInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+			WorkerName:    dr.FromURL("service_name").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.RunServiceWorker(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.RunServiceWorkerInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.RunServiceWorker(r.Context(), db, i)
 	}))
 
 	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
@@ -832,6 +866,10 @@ func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 		return services.ListServiceWorker(r.Context(), db)
 	}))
 
+	route(r, "GET", "/services", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return services.ListActiveServices(r.Context(), db)
+	}))
+
 	route(r, "POST", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateServiceWorkerInput{
@@ -876,5 +914,18 @@ func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 			return nil, dr.Error
 		}
 		return services.TestServiceWorker(r.Context(), db, workerID)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.BatchRunServiceWorkerInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUIDs: dr.FromBody("evidenceUuids").Required().AsStringSlice(),
+			WorkerNames:   dr.FromBody("workers").Required().AsStringSlice(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.BatchRunServiceWorker(r.Context(), db, i)
 	}))
 }

@@ -5,11 +5,12 @@ import * as dateFns from 'date-fns'
 
 import { parseQuery, parseDateRangeString, ParsedQuery, FilterModifier, FilterModified } from 'src/helpers'
 import { Tag, User } from 'src/global_types'
-import { BulletProps, creatorToBulletProps, supportedEvidenceTypes, tagToBulletProps } from 'src/components/bullet_chooser'
+import { BulletProps, creatorToBulletProps, supportedEvidenceTypes, tagToBulletProps, textToBulletProps } from 'src/components/bullet_chooser'
 import { isNotUndefined } from 'src/helpers/is_not_undefined'
 
 export type SearchOptions = {
   text: string,
+  meta?: Array<BulletProps>,
   sortAsc: boolean,
   uuid?: string,
   tags?: Array<BulletProps>,
@@ -50,6 +51,7 @@ const itemizeBulletProps = (
 export const stringifySearch = (searchOpts: SearchOptions) => {
   return ([
     searchOpts.text,
+    itemizeBulletProps(searchOpts.meta, "meta", meta => quoteText(meta.name)),
     itemizeBulletProps(searchOpts.tags, "tag", tag => quoteText(tag.name)),
     itemizeBulletProps(searchOpts.operator, "operator"),
     searchOpts.dateRange ? `range:${dateToRange(searchOpts.dateRange)}` : '',
@@ -93,6 +95,13 @@ export const stringToSearch = (
         .map(fVal => findAndModify(allTags, (tag => tag.name == fVal.value), fVal.modifier))
         .map(tagToBulletProps)
         .filter(isNotUndefined)
+    }
+    else if (key == 'meta') {
+      opts.meta = filterValues
+        .map(fv => fv.value)
+        .map(textToBulletProps)
+        .filter(isNotUndefined)
+
     }
     else if (key == 'operator') {
       opts.operator = filterValues

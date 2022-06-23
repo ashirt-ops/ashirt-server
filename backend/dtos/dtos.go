@@ -8,6 +8,7 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 type APIKey struct {
@@ -17,18 +18,19 @@ type APIKey struct {
 }
 
 type Evidence struct {
-	UUID        string             `json:"uuid"`
-	Description string             `json:"description"`
-	OccurredAt  time.Time          `json:"occurredAt"`
-	Operator    User               `json:"operator"`
-	Tags        []Tag              `json:"tags"`
-	Metadata    []EvidenceMetadata `json:"metadata"`
-	ContentType string             `json:"contentType"`
+	UUID        string    `json:"uuid"`
+	Description string    `json:"description"`
+	OccurredAt  time.Time `json:"occurredAt"`
+	Operator    User      `json:"operator"`
+	Tags        []Tag     `json:"tags"`
+	ContentType string    `json:"contentType"`
 }
 
 type EvidenceMetadata struct {
-	Source string `json:"source"`
-	Body   string `json:"body"`
+	Body       string                   `json:"body"`
+	Source     string                   `json:"source"`
+	Status     *evidencemetadata.Status `json:"status"`
+	CanProcess *bool                    `json:"canProcess"`
 }
 
 type Finding struct {
@@ -184,4 +186,8 @@ type ServiceWorkerTestOutput struct {
 	Name    string `json:"name"`
 	Live    bool   `json:"live"`
 	Message string `json:"message"`
+}
+
+type ActiveServiceWorker struct {
+	Name string `json:"name"`
 }

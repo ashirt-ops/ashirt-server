@@ -27,6 +27,7 @@ services:
       APP_SUCCESS_REDIRECT_URL: "http://localhost:8080"
       APP_FAILURE_REDIRECT_URL_PREFIX: "http://localhost:8080"
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
+      APP_USE_LAMBDA_RIE: true
 
       # Common Value for all emailers
       EMAIL_FROM_ADDRESS: AShirt
@@ -89,6 +90,36 @@ services:
       - MYSQL_ROOT_PASSWORD=dev-root-password
       - MYSQL_USER=dev-user
       - MYSQL_PASSWORD=dev-user-password
+
+  demo:
+    build:
+      context: enhancement_workers/demo-tesseract
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3001:3001
+    restart: on-failure
+    volumes:
+      - ./enhancement_workers/demo-tesseract/src:/app/src
+    environment:
+      PORT: 3001
+      ENABLE_DEV: true
+      ASHIRT_BACKEND_URL: http://backend:3000
+      ASHIRT_ACCESS_KEY: gR6nVtaQmp2SvzIqLUWdedDk
+      ASHIRT_SECRET_KEY: WvtvxFaJS0mPs82nCzqamI+bOGXpq7EIQhg4UD8nxS5448XG9N0gNAceJGBLPdCA3kAzC4MdUSHnKCJ/lZD++A==
+
+  hasher:
+    build:
+      context: enhancement_workers/demo-lambda-hasher
+      dockerfile: Dockerfile
+    ports:
+      - 3002:8080
+    restart: on-failure
+    environment:
+      ENABLE_DEV: true
+      ASHIRT_BACKEND_URL: backend
+      ASHIRT_BACKEND_PORT: 3000
+      ASHIRT_ACCESS_KEY: gR6nVtaQmp2SvzIqLUWdedDk
+      ASHIRT_SECRET_KEY: WvtvxFaJS0mPs82nCzqamI+bOGXpq7EIQhg4UD8nxS5448XG9N0gNAceJGBLPdCA3kAzC4MdUSHnKCJ/lZD++A==
 
 volumes:
   typescript-dtos:

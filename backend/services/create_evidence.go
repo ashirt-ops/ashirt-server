@@ -101,20 +101,25 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		return nil, backend.WrapError("Could not create evidence and tags", backend.DatabaseErr(err))
 	}
 
-	go func() {
-		// we don't really care about errors, so we'll just log them
-		_, errs := enhancementservices.RunAllServiceWorkers(db, evidenceID)
-		if len(errs) > 0 {
-			log := logging.ReqLogger(ctx)
-			for _, e := range errs {
-				log.Log("msg", "Unable to run worker", "error", e.Error())
-			}
-		}
-	}()
+	err = enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, []string{evidenceUUID}, enhancementservices.AllWorkers())
+
+	if err != nil {
+		logging.Log(ctx, "msg", "Unable to run workers", "error", err.Error())
+	}
 
 	return &dtos.Evidence{
 		UUID:        evidenceUUID,
 		Description: i.Description,
 		OccurredAt:  i.OccurredAt,
 	}, nil
+}
+
+// cloneContext makes a copy of a context that will persist beyond the given context's lifespan.
+// Note: Most of the time, you probably don't want to use this. This is really only useful when
+// you need to ensure that an operation persists longer than the request
+func cloneContext(ctx context.Context) context.Context {
+	// copy the logger
+	rtnCtx, _ := logging.AddRequestLogger(context.Background(), logging.ReqLogger(ctx))
+
+	return rtnCtx
 }

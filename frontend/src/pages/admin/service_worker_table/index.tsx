@@ -2,6 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import classnames from 'classnames/bind'
 
 import { ServiceWorker } from 'src/global_types'
 import {
@@ -21,7 +22,11 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 import {
   AddEditServiceWorkerModal,
   DeleteServiceModal,
+  RestoreServiceModal,
 } from './modals'
+import Checkbox from 'src/components/checkbox'
+
+const cx = classnames.bind(require('./stylesheet'))
 
 type WorkerModal = { worker: ServiceWorker }
 
@@ -31,6 +36,7 @@ export default (props: {
 }) => {
   const columns: Array<string> = cellOrder()
 
+  const [showDeleted, setShowDeleted] = React.useState(false)
   const wiredServiceWorkers = useWiredData<Array<ServiceWorker>>(
     listServiceWorkers,
     (err) => <ErrorRow span={columns.length} error={err} />,
@@ -39,6 +45,10 @@ export default (props: {
   const deleteModal = useModal<WorkerModal>(mProps => (
     <DeleteServiceModal {...mProps} />
   ), wiredServiceWorkers.reload)
+  const restoreModal = useModal<WorkerModal>(mProps => (
+    <RestoreServiceModal {...mProps} />
+  ), wiredServiceWorkers.reload)
+
   const editModal = useModal<WorkerModal>(mProps => (
     <AddEditServiceWorkerModal {...mProps} />
   ), wiredServiceWorkers.reload)
@@ -52,51 +62,65 @@ export default (props: {
 
   return (
     <SettingsSection title="Service Worker List" width="wide">
+      <Checkbox label='Show Deleted Workers' value={showDeleted} onChange={setShowDeleted} />
       <Table columns={columns}>
         {wiredServiceWorkers.render(data => <>
           {
-            data.map((worker) => (
-              <tr key={worker.name}>
-                {
-                  cellOrder(worker, testDataState[worker.name] ?? initialTestData, {
-                    showDeleteModal: (worker) => deleteModal.show({ worker }),
-                    showEditModal: (worker) => editModal.show({ worker }),
-                    testService: async (worker) => {
-                      dispatchTestData({ type: 'start', worker: worker.name })
-                      let passedTest = true
-                      try {
-                        await testServiceWorker({ id: worker.id })
+            data
+              .filter(worker => showDeleted || !worker.deleted)
+              .map((worker) => (
+                <tr key={worker.name}>
+                  {
+                    cellOrder(worker, testDataState[worker.name] ?? initialTestData, {
+                      showDeleteModal: (worker) => deleteModal.show({ worker }),
+                      showEditModal: (worker) => editModal.show({
+                        // update config to show pretty version
+                        worker: { ...worker, config: prettyPrintJsonString(worker.config) }
+                      }),
+                      showRestoreModal: (worker) => restoreModal.show({worker}),
+                      testService: async (worker) => {
+                        dispatchTestData({ type: 'start', worker: worker.name })
+                        try {
+                          const data = await testServiceWorker({ id: worker.id })
+                          dispatchTestData({
+                            type: 'finish',
+                            worker: worker.name,
+                            passedTest: data.live,
+                            message: data.message,
+                          })
+                        }
+                        catch (err) {
+                          dispatchTestData({
+                            type: 'finish',
+                            worker: worker.name,
+                            passedTest: false,
+                            message: err,
+                          })
+                        }
                       }
-                      catch (err) {
-                        passedTest = false
-                      }
-                      dispatchTestData({
-                        type: 'finish',
-                        worker: worker.name,
-                        passedTest,
-                      })
-                    }
-                  }).map((v, colIndex) => (
-                    <td key={worker.name + ":" + columns[colIndex]}>{v}</td>
-                  ))
-                }
-              </tr>
-            ))
+                    }).map((v, colIndex) => (
+                      <td key={worker.name + ":" + columns[colIndex]}>{v}</td>
+                    ))
+                  }
+                </tr>
+              ))
           }
         </>)}
       </Table>
-      {renderModals(deleteModal, editModal)}
+      {renderModals(deleteModal, editModal, restoreModal)}
     </SettingsSection>
   )
 }
 
 type Actions = {
   showDeleteModal: (worker: ServiceWorker) => void
+  showRestoreModal: (worker: ServiceWorker) => void,
   showEditModal: (worker: ServiceWorker) => void
   testService: (worker: ServiceWorker) => void
 }
 
 const emptyActions: Actions = {
+  showRestoreModal: () => { },
   showDeleteModal: () => { },
   showEditModal: () => { },
   testService: () => { },
@@ -108,6 +132,7 @@ function cellOrder(worker?: ServiceWorker, testData?: TestData, actions?: Action
   const {
     showEditModal: showEdit,
     showDeleteModal: showDelete,
+    showRestoreModal: showRestore,
     testService,
   } = (actions ?? emptyActions)
 
@@ -120,7 +145,12 @@ function cellOrder(worker?: ServiceWorker, testData?: TestData, actions?: Action
         <ButtonGroup>
           <Button small onClick={() => showEdit(worker)}>Edit</Button>
           <Button small onClick={() => testService(worker)}>Test</Button>
-          <Button danger small onClick={() => showDelete(worker)}>Delete</Button>
+          {
+            worker.deleted
+              ? (<Button primary small onClick={() => showRestore(worker)}>Restore</Button>)
+              : (<Button danger small onClick={() => showDelete(worker)}>Delete</Button>)
+          }
+          {/* <Button danger disabled={worker.deleted} small onClick={() => showDelete(worker)}>Delete</Button> */}
         </ButtonGroup>
       </>
     ),
@@ -130,6 +160,7 @@ function cellOrder(worker?: ServiceWorker, testData?: TestData, actions?: Action
 type TestData = {
   isTesting: boolean,
   testResult: 'connected' | 'offline' | null
+  testMessage: string
 }
 
 const WorkerStatusIcon = (props: TestData) => {
@@ -137,11 +168,20 @@ const WorkerStatusIcon = (props: TestData) => {
 
   if (isTesting) {
     return (
-      <div>Testing...</div>
+      <div>...</div>
     )
   } else if (testResult != null) {
+    const title = props.testMessage.trim() == ""
+      ? undefined
+      : props.testMessage.split(/>>(.*)/, 2).join("\n") // put error on new line if present
     return (
-      <div>{testResult === 'connected' ? "Working" : "Offline"}</div>
+      <>
+        <div className={cx('status-message')}>
+          {testResult === 'connected' ? "Working" : "Offline"}
+        </div>
+        {title !== undefined && props.testResult !== 'connected' && <div title={title} className={cx('status-icon')}></div>}
+      </>
+
     )
   }
 
@@ -151,6 +191,7 @@ const WorkerStatusIcon = (props: TestData) => {
 const initialTestData: TestData = {
   isTesting: false,
   testResult: null,
+  testMessage: "",
 }
 
 type TestDataState = Record<string, TestData>
@@ -159,7 +200,7 @@ const testDataReducer = (state: TestDataState, action: TestDataAction): TestData
   if (action.type == 'start') {
     return {
       ...state,
-      [action.worker]: { isTesting: true, testResult: null }
+      [action.worker]: { isTesting: true, testResult: null, testMessage: "Testing..." }
     }
   }
   if (action.type == 'finish') {
@@ -167,7 +208,8 @@ const testDataReducer = (state: TestDataState, action: TestDataAction): TestData
       ...state,
       [action.worker]: {
         isTesting: false,
-        testResult: action.passedTest ? 'connected' : 'offline'
+        testResult: action.passedTest ? 'connected' : 'offline',
+        testMessage: action.message
       }
     }
   }
@@ -186,4 +228,15 @@ type TestDataActionFinishTest = {
   type: 'finish'
   passedTest: boolean
   worker: string
+  message: string
+}
+
+const prettyPrintJsonString = (jsonText: string) => {
+  try {
+    return JSON.stringify(JSON.parse(jsonText), null, 2)
+  }
+  catch (err) {
+    // fall back to whatever was provided
+    return jsonText
+  }
 }

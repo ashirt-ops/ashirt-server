@@ -33,6 +33,7 @@ type Seeder struct {
 	TagEviMap         []models.TagEvidenceMap
 	EviFindingsMap    []models.EvidenceFindingMap
 	Queries           []models.Query
+	ServiceWorkers    []models.ServiceWorker
 }
 
 // AllInitialTagIds is a (convenience) method version of the function TagIDsFromTags
@@ -160,6 +161,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"id":          seed.EvidenceMetadatas[i].ID,
 				"evidence_id": seed.EvidenceMetadatas[i].EvidenceID,
 				"source":      seed.EvidenceMetadatas[i].Source,
+				"can_process": seed.EvidenceMetadatas[i].CanProcess,
 				"body":        seed.EvidenceMetadatas[i].Body,
 				"created_at":  seed.EvidenceMetadatas[i].CreatedAt,
 				"updated_at":  seed.EvidenceMetadatas[i].UpdatedAt,
@@ -204,6 +206,16 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"type":         seed.Queries[i].Type,
 				"created_at":   seed.Queries[i].CreatedAt,
 				"updated_at":   seed.Queries[i].UpdatedAt,
+			}
+		})
+		tx.BatchInsert("service_workers", len(seed.ServiceWorkers), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.ServiceWorkers[i].ID,
+				"name":       seed.ServiceWorkers[i].Name,
+				"config":     seed.ServiceWorkers[i].Config,
+				"created_at": seed.ServiceWorkers[i].CreatedAt,
+				"updated_at": seed.ServiceWorkers[i].UpdatedAt,
+				"deleted_at": seed.ServiceWorkers[i].DeletedAt,
 			}
 		})
 	})
@@ -319,4 +331,13 @@ func (seed Seeder) TagIDsUsageByDate(opID int64) map[int64][]time.Time {
 	}
 
 	return tagIDUsageMap
+}
+
+func (seed Seeder) OperationForEvidence(evidence models.Evidence) *models.Operation {
+	for _, op := range seed.Operations {
+		if op.ID == evidence.OperationID {
+			return &op
+		}
+	}
+	return nil
 }

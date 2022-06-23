@@ -103,3 +103,24 @@ func (c *Connection) retrieveUserWithAuthData(user models.User) (models.UserWith
 
 	return rtn, nil
 }
+
+func GetEvidenceFromUUIDs(db ConnectionProxy, operationID int64, evidenceUUIDs []string) ([]models.Evidence, error) {
+	var evidence []models.Evidence
+
+	err := db.Select(&evidence, sq.Select("*").From("evidence").Where(sq.Eq{
+		"operation_id": operationID,
+		"uuid":         evidenceUUIDs,
+	}))
+
+	return evidence, err
+}
+
+func GetAllEvidenceForOperation(db ConnectionProxy, operationID int64) ([]models.Evidence, error) {
+	var evidence []models.Evidence
+
+	err := db.Select(&evidence, sq.Select("*").From("evidence").Where(sq.Eq{
+		"operation_id": operationID,
+	}))
+
+	return evidence, err
+}

@@ -1,4 +1,4 @@
-import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference } from 'src/global_types'
+import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { evidenceFromDto } from './data_sources/converters'
@@ -16,7 +16,7 @@ export async function getEvidenceMigrationDifference(i: {
   toOperationSlug: string,
   evidenceUuid: string,
 }): Promise<TagDifference> {
-  return await ds.getEvidenceMigrationDifference({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid}, i.fromOperationSlug)
+  return await ds.getEvidenceMigrationDifference({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid }, i.fromOperationSlug)
 }
 
 export async function moveEvidence(i: {
@@ -86,6 +86,37 @@ export async function updateEvidenceMetadata(i: {
 }): Promise<void> {
   const { source, body, ...ids } = i
   await ds.updateEvidenceMetadata(ids, { source, body })
+}
+
+export async function readEvidenceMetadata(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<Array<EvidenceMetadata>> {
+  return ds.readEvidenceMetadata(i)
+}
+
+export async function runServiceWorkerForEvidence(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+  source: string,
+}): Promise<void> {
+  ds.runServiceWorkerForEvidence(i)
+}
+
+export async function runAllServiceWorkersForEvidence(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<void> {
+  ds.runAllServiceWorkersForEvidence(i)
+}
+
+export async function runServiceWorkerMatrix(i: {
+  operationSlug: string,
+  evidenceUuids: Array<string>
+  workers: Array<string>
+}): Promise<void> {
+  const { operationSlug, ...payload } = i
+  ds.runServiceWorkerBatch({ operationSlug }, payload)
 }
 
 export async function updateEvidence(i: {
