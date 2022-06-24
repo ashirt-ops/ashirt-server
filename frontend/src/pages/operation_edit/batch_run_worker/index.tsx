@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { Evidence, ServiceWorker } from "src/global_types"
+import { Evidence } from "src/global_types"
 
 import { useFormField, useModal, renderModals } from 'src/helpers'
 import { runServiceWorkerMatrix } from 'src/services'
@@ -11,7 +11,6 @@ import { runServiceWorkerMatrix } from 'src/services'
 import { BulletProps, ManagedServiceWorkerChooser } from 'src/components/bullet_chooser'
 import Button from 'src/components/button'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
-import Checkbox from 'src/components/checkbox'
 import EvidenceChooser from 'src/components/evidence_chooser'
 import Modal from 'src/components/modal'
 import SettingsSection from 'src/components/settings_section'
@@ -23,7 +22,6 @@ const cx = classnames.bind(require('./stylesheet'))
 export const BatchRunWorker = (props: {
   operationSlug: string
 }) => {
-  const [runAllEvidence, setRunAllEvidence] = React.useState(false)
   const [selectedWorkers, setSelectedWorkers] = React.useState<Array<BulletProps>>([])
   const [selectedEvidence, setSelectedEvidence] = React.useState<Array<Evidence>>([])
 
@@ -53,7 +51,7 @@ export const BatchRunWorker = (props: {
   const startWOrkersModal = useModal<void>(modalProps => (
     <StartWorkerModal
       onSubmit={ async() => {
-        if (selectedEvidence.length == 0 && !runAllEvidence) {
+        if (selectedEvidence.length == 0) {
           throw new Error("Some services must be selected")
         }
         runServiceWorkerMatrix({
@@ -62,7 +60,6 @@ export const BatchRunWorker = (props: {
           evidenceUuids: selectedEvidence.map(bp => bp.uuid),
         })
       }}
-      allWorkers={runAllEvidence}
       workers={selectedWorkers}
       evidence={selectedEvidence}
       {...modalProps}
@@ -71,10 +68,10 @@ export const BatchRunWorker = (props: {
 
   const startButtonEnabled = (
     selectedWorkers.length > 0 // some workers selected
-    && (selectedEvidence.length > 0 || runAllEvidence) // some evidence selected
+    && (selectedEvidence.length > 0) // some evidence selected
   )
 
-  const selectedItemsText = (runAllEvidence ? "All" : `${selectedEvidence.length}`) + " items selected"
+  const selectedItemsText = `${selectedEvidence.length} items selected`
 
   return (
     <SettingsSection title="Run Workers">
@@ -98,7 +95,6 @@ export const BatchRunWorker = (props: {
           <WithLabel label='Select Evidence'>
             <div className={cx('multi-item-row')}>
               <Button
-                disabled={runAllEvidence}
                 className={cx('choose-button')}
                 onClick={() => chooseEvidenceModal.show()}
               >
@@ -108,10 +104,6 @@ export const BatchRunWorker = (props: {
             </div>
           </WithLabel>
         </Area>
-        <Area className={cx('all-evidence-checkbox')}>
-          <Checkbox className={cx('all-button')} label='All Evidence' value={runAllEvidence} onChange={setRunAllEvidence} />
-        </Area>
-
         <Area startOfRow colspan={2} className={cx('start-button')}>
           <Button
             primary
@@ -141,7 +133,7 @@ const ChooseEvidenceModal = (props: {
 
   return (
     <Modal title="Search for evidence" onRequestClose={props.onRequestClose}>
-      <EvidenceChooser operationSlug={props.operationSlug} {...evidenceField} />
+      <EvidenceChooser operationSlug={props.operationSlug} {...evidenceField} includeSelectAll/>
       <Button primary className={cx('submit-button')} onClick={() => {
         props.onChanged(evidenceField.value.map(evi => evi.uuid))
         props.onRequestClose()
@@ -151,15 +143,14 @@ const ChooseEvidenceModal = (props: {
 }
 
 export const StartWorkerModal = (props: {
-  allWorkers: boolean,
   workers: Array<BulletProps>,
   evidence: Array<Evidence>
   onRequestClose: () => void,
   onSubmit: () => Promise<void>
 }) => {
-  const quantityText = props.allWorkers
-    ? "all pieces"
-    : props.evidence.length == 1 ? "1 piece" : `${props.evidence.length} pieces`
+  const quantityText = props.evidence.length == 1
+    ? "1 piece"
+    : `${props.evidence.length} pieces`
   const warningText = (
     `This will start workers for ${quantityText} of evidence. ` +
     `Are you sure you want to continue?`
