@@ -12,6 +12,7 @@ RUN pip install --user pipenv
 ###################################
 
 COPY Pipfile.lock Pipfile ./
+COPY src ./src/
 
 RUN /root/.local/bin/pipenv sync
 

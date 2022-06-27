@@ -19,7 +19,7 @@ COPY --from=builder /build/requirements.txt .
 
 RUN pip install -r  requirements.txt
 
-COPY bin/docker_start.sh ./start.sh
+# COPY bin/docker_start.sh ./start.sh
 COPY src .
 
 EXPOSE 80
@@ -31,6 +31,6 @@ USER 405
 # https://pythonspeed.com/articles/gunicorn-in-docker/
 CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", \
      "--workers=2", "--threads=4", "--worker-class=gthread", \
-     "==log-file=-", \
+     "--log-file=-", \
      "-b", "0.0.0.0:80", "wsgi:app"]
 
