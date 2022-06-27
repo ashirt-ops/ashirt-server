@@ -21,7 +21,7 @@ export type RequestConfig = {
   path: string
   body?: string | Buffer
   responseType?: 'arraybuffer' | 'document' | 'json' | 'text' | 'stream'
-  multipartFormBoundry?: string
+  multipartFormBoundary?: string
 }
 
 export class AShirtService {
@@ -80,12 +80,12 @@ export class AShirtService {
       tagIds: JSON.stringify(body.tagIds)
     }
 
-    const {boundry, data} = encodeForm(fields, { file })
+    const { boundary: boundary, data } = encodeForm(fields, { file })
     return this.makeRequest<EvidenceOutput>({
       method: 'POST',
       path: `/api/operations/${operationSlug}/evidence`,
       body: data,
-      multipartFormBoundry: boundry,
+      multipartFormBoundary: boundary,
     })
   }
 
@@ -99,13 +99,13 @@ export class AShirtService {
       tagsToRemove: body.tagsToRemove ? JSON.stringify(body.tagsToRemove) : undefined,
     }
 
-    const { boundry, data } = encodeForm(fields, { file })
+    const { boundary: boundary, data } = encodeForm(fields, { file })
 
     return this.makeRequest<void>({
       method: 'PUT',
       path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`,
       body: data,
-      multipartFormBoundry: boundry,
+      multipartFormBoundary: boundary,
     })
   }
 
@@ -167,8 +167,8 @@ export class AShirtService {
       method: config.method,
       url: `${this.apiUrl}${config.path}`,
       headers: {
-        "Content-Type": config.multipartFormBoundry
-          ? `multipart/form-data; boundary=${config.multipartFormBoundry}`
+        "Content-Type": config.multipartFormBoundary
+          ? `multipart/form-data; boundary=${config.multipartFormBoundary}`
           : "application/json",
         "Date": now,
         "Authorization": auth,

@@ -7,17 +7,17 @@ function randomChars(length: number): string {
 }
 
 export function encodeForm(fields: Record<string, string | undefined>, files: Record<string, FileData | undefined>) {
-  const boundry = "----AShirtFormData-" + randomChars(30)
+  const boundary = "----AShirtFormData-" + randomChars(30)
   const newline = "\r\n"
-  const boundryStart = "--" + boundry + newline
-  const lastBoundry = "--" + boundry + "--" + newline
+  const boundaryStart = "--" + boundary + newline
+  const lastBoundary = "--" + boundary + "--" + newline
 
   let fieldBuffer = Buffer.from("")
   Object.entries(fields).forEach(([key, value]) => {
     if (value === undefined) {
       return
     }
-    const text = boundryStart +
+    const text = boundaryStart +
       `Content-Disposition: form-data; name="${key}"` +
       newline + newline +
       value +
@@ -30,7 +30,7 @@ export function encodeForm(fields: Record<string, string | undefined>, files: Re
     if (fd === undefined) {
       return
     }
-    const textPart = `${boundryStart}` +
+    const textPart = `${boundaryStart}` +
       `Content-Disposition: form-data; name="${key}"; filename="${fd.filename}"` +
       `${newline}Content-Type: ${fd.mimetype}` +
       `${newline}${newline}`
@@ -39,11 +39,11 @@ export function encodeForm(fields: Record<string, string | undefined>, files: Re
   })
 
   return {
-    boundry,
+    boundary: boundary,
     data: Buffer.concat([
       fieldBuffer,
       fileBuffer,
-      Buffer.from(lastBoundry),
+      Buffer.from(lastBoundary),
     ])
   }
 }
