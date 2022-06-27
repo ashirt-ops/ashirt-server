@@ -44,7 +44,7 @@ export function addRoutes(app: Express, isDev: boolean) {
     })
     app.get('/test', async (_: Request, res: Response) => {
       try {
-        res.status(200).send({working: "yes"})
+        res.status(200).send({ working: "yes" })
       }
       catch (err) {
         res.status(200).send({ message: "Test failed", err })

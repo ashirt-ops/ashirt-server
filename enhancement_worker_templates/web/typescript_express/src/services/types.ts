@@ -66,17 +66,17 @@ export type UpsertMetadataInput = {
 
 export type CreateEvidenceInput = {
   notes: string
-  file: Buffer
-  contentType?: typeof SupportedContentTypes
-  occurred_at: string
+  file: FileData
+  contentType?: typeof SupportedContentTypes[number]
+  occurred_at?: string
   tagIds: Array<number> // int array
 }
 
 export type UpdateEvidenceInput = {
   notes: string
-  file?: Buffer
-  contentType?: typeof SupportedContentTypes
-  occurred_at: string
+  file?: FileData
+  contentType?: typeof SupportedContentTypes[number]
+  occurred_at?: string
   tagsToAdd?: Array<number> // int array
   tagsToRemove?: Array<number> // int array
 }
@@ -84,4 +84,10 @@ export type UpdateEvidenceInput = {
 export type CreateTagInput = {
   name: string
   colorName: string
+}
+
+export type FileData = {
+  filename: string
+  mimetype: string
+  content: Buffer
 }
