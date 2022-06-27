@@ -1,11 +1,15 @@
+// Copyright 2022, Yahoo Inc.
+// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
+
 import * as React from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
 export const ExpandableSection = (props: {
-  children: string
-  content: React.ReactNode
+  children: React.ReactNode
+  label: React.ReactNode
   className?: string
+  labelClassName?: string
   initiallyExpanded?: boolean
   onExpanded?: (expanded: boolean)=>void
 }) => {
@@ -18,10 +22,10 @@ export const ExpandableSection = (props: {
         setExpanded(newValue)
         props.onExpanded && props.onExpanded(newValue)
       }}>
-        <section className={cx('expandable-section-label')}>{props.children}</section>
+        <section className={cx('expandable-section-label', props.labelClassName)}>{props.label}</section>
       </div>
       <div className={cx('expandable-content')}>
-        {expanded && props.content}
+        {expanded && props.children}
       </div>
     </section>
   )

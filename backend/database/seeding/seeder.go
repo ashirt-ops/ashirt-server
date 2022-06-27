@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package seeding
@@ -24,6 +24,7 @@ type Seeder struct {
 	APIKeys           []models.APIKey
 	Findings          []models.Finding
 	Evidences         []models.Evidence
+	EvidenceMetadatas []models.EvidenceMetadata
 	Users             []models.User
 	Operations        []models.Operation
 	DefaultTags       []models.DefaultTag
@@ -152,6 +153,16 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"occurred_at":     seed.Evidences[i].OccurredAt,
 				"created_at":      seed.Evidences[i].CreatedAt,
 				"updated_at":      seed.Evidences[i].UpdatedAt,
+			}
+		})
+		tx.BatchInsert("evidence_metadata", len(seed.EvidenceMetadatas), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":          seed.EvidenceMetadatas[i].ID,
+				"evidence_id": seed.EvidenceMetadatas[i].EvidenceID,
+				"source":      seed.EvidenceMetadatas[i].Source,
+				"body":        seed.EvidenceMetadatas[i].Body,
+				"created_at":  seed.EvidenceMetadatas[i].CreatedAt,
+				"updated_at":  seed.EvidenceMetadatas[i].UpdatedAt,
 			}
 		})
 		tx.BatchInsert("findings", len(seed.Findings), func(i int) map[string]interface{} {

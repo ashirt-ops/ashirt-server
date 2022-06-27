@@ -20,7 +20,7 @@ import { DateRange } from 'src/components/date_range_picker/range_picker_helpers
 import EvidenceChooser from 'src/components/evidence_chooser'
 import ModalForm from 'src/components/modal_form'
 import Input from 'src/components/input'
-import { SearchOptions, stringifySearch } from "src/components/search_query_builder/helpers"
+import { SearchOptions, stringifySearch } from "./helpers"
 import WithLabel from 'src/components/with_label'
 
 import Modal from 'src/components/modal'
@@ -255,7 +255,8 @@ const uuidToBasicEvidence = (uuid: string): Evidence => ({
   operator: { slug: "", firstName: "", lastName: "", },
   occurredAt: new Date(),
   tags: [],
-  contentType: 'none'
+  contentType: 'none',
+  metadata: [],
 })
 
 const ChooseEvidenceModal = (props: {

@@ -10,7 +10,6 @@ export default (props: {
   name: string,
   query: string,
   onDelete: () => void,
-  onEdit: () => void,
 }) => (
   <Menu>
     <div className={cx('top')}>

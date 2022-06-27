@@ -566,6 +566,36 @@ The error model used within this application adopts the following principles:
     * "Cannot" suggests that we tried, and failed, to do the requested operation
     * messages that do not match the above generally have more specific information to identify them
 
+### Content Formats
+
+#### Text-based Content
+
+All text based content has the following structure. Note that currently, we only support one kind of text based content -- codeblocks.
+
+##### General Text Definition
+
+```ts
+{
+  "contentType": string, // this currently only supports "codeblock" types, but more may be added in the future
+  "contentSubtype": string,
+  "metadata": Record<string, string>, // this is an object with string keys, and string values. Optional
+  "content": string
+}
+```
+
+##### Codeblock Definition
+
+```ts
+{
+  "contentType": "codeblock",
+  "contentSubtype": string, // there are several possibilities. See frontend/src/components/code_block_supported_languages.ts for a complete list
+  "metadata": {
+    "source": striong // where the file was found. Optional
+  },
+  "content": string // this is the actual data
+}
+```
+
 ### Visual Studio Code Notes
 
 If you're using Visual Studio Code, you may want to make these changes:

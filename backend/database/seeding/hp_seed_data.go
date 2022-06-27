@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package seeding
@@ -107,6 +107,11 @@ var HarryPotterSeedData = Seeder{
 		EviGanttLong30, EviGanttLong31, EviGanttLong32, EviGanttLong33, EviGanttLong34, EviGanttLong35, EviGanttLong36, EviGanttLong37, EviGanttLong38, EviGanttLong39,
 		EviGanttLong40, EviGanttLong41, EviGanttLong42, EviGanttLong43, EviGanttLong44, EviGanttLong45, EviGanttLong46, EviGanttLong47, EviGanttLong48, EviGanttLong49,
 		EviGanttLong50, EviGanttLong51, EviGanttLong52, EviGanttLong53, EviGanttLong54, EviGanttLong55, EviGanttLong56, EviGanttLong57, EviGanttLong58, EviGanttLong59,
+	},
+	EvidenceMetadatas: []models.EvidenceMetadata{
+		EviMetaDursleys, EviMetaMirrorOfErised, EviMetaLevitateSpell, EviMetaRulesForQuidditch, EviMetaRulesForQuidditchTwo,
+		EviMetaFlyingCar, EviMetaDobby, EviMetaSpiderAragog, EviMetaMoaningMyrtle, EviMetaWhompingWillow, EviMetaTomRiddlesDiary, EviMetaTomRiddlesDiaryTwo, EviMetaPetrifiedHermione, EviMetaHeadlessHuntApplication,
+		EviMetaTristateTrophy, EviMetaEntryForm, EviMetaWizardDance, EviMetaPolyjuice, EviMetaEntryFormTwo, EviMetaWarewolf,
 	},
 	TagEviMap: unionTagEviMap(
 		associateTagsToEvidence(EviDursleys, TagFamily, TagHome),
@@ -305,6 +310,13 @@ var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_m
 var EviLevitateSpell = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_md_levitate", "Documented Levitation Spell effects", "codeblock", 0)
 var EviRulesForQuidditch = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_rs_aoc201501", "Complex rules for a simple game", "codeblock", 0)
 
+var newHPEviMetadata = newEvidenceMetadataGen(1)
+var EviMetaDursleys = newHPEviMetadata(EviDursleys.ID, "color-averager", "rgb(65, 65, 65)\n#414141\nhsl(0, 0%, 25%)", 0)
+var EviMetaMirrorOfErised = newHPEviMetadata(EviMirrorOfErised.ID, "color-averager", "rgb(111, 77, 14)\n#6f4d0e\nhsl(39, 78%, 25%)", 0)
+var EviMetaLevitateSpell = newHPEviMetadata(EviLevitateSpell.ID, "wc -l", "12 seed_md_levitate", 0)
+var EviMetaRulesForQuidditch = newHPEviMetadata(EviRulesForQuidditch.ID, "run-result", "Last floor reached: 138 \n Step on which basement is reached (first time): 1771", 0)
+var EviMetaRulesForQuidditchTwo = newHPEviMetadata(EviRulesForQuidditch.ID, "wc-l", "33 main.rs", 0)
+
 var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_car", "A Car that flies", "image", 0)
 var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_dobby", "an elf?", "image", 0)
 var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "seed_aragog", "Just a big spider", "image", 0)
@@ -314,11 +326,28 @@ var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "see
 var EviHeadlessHuntApplication = newHPEvidence(OpChamberOfSecrets.ID, UserRon.ID, "seed_py_aoc201717", "This group is very particular", "codeblock", 0)
 var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_statue", "Strangely real-looking statue", "image", 0)
 
+var EviMetaFlyingCar = newHPEviMetadata(EviFlyingCar.ID, "color-averager", "rgb(106, 109, 84)\n#6a6d54\nhsl(67, 13%, 38%)", 0)
+var EviMetaDobby = newHPEviMetadata(EviDobby.ID, "color-averager", "rgb(74, 51, 32)\n#4a3320\nhsl(27, 40%, 21%)", 0)
+var EviMetaSpiderAragog = newHPEviMetadata(EviSpiderAragog.ID, "color-averager", "rgb(189, 156, 146)\n#bd9c92\nhsl(14, 25%, 66%)", 0)
+var EviMetaMoaningMyrtle = newHPEviMetadata(EviMoaningMyrtle.ID, "color-averager", "rgb(118, 103, 102)\n#766766\nhsl(4, 7%, 43%)", 0)
+var EviMetaWhompingWillow = newHPEviMetadata(EviWhompingWillow.ID, "color-averager", "rgb(115, 109, 81)\n#736d51\nhsl(49, 17%, 38%)", 0)
+var EviMetaTomRiddlesDiary = newHPEviMetadata(EviTomRiddlesDiary.ID, "run-result", "All keys found by index:  19968", 0)
+var EviMetaTomRiddlesDiaryTwo = newHPEviMetadata(EviTomRiddlesDiary.ID, "wc -l", "98 main.go", 0)
+var EviMetaHeadlessHuntApplication = newHPEviMetadata(EviHeadlessHuntApplication.ID, "run-result", "41797835\nelapsed time (seconds): 3.772843360900879", 0)
+var EviMetaPetrifiedHermione = newHPEviMetadata(EviPetrifiedHermione.ID, "color-averager", "rgb(162, 104, 101)\n#a26865\nhsl(3, 25%, 52%)", 0)
+
 var EviTristateTrophy = newHPEvidence(OpGobletOfFire.ID, UserHarry.ID, "seed_trophy", "First Triwizard Champion Trophy", "image", 0)
 var EviEntryForm = newHPEvidence(OpGobletOfFire.ID, UserCedric.ID, "seed_entry", "Cedric's entry form for Triwizard competition", "codeblock", 0)
 var EviWizardDance = newHPEvidence(OpGobletOfFire.ID, UserCho.ID, "seed_dance", "Advertising for the Triwizard Dance", "image", 0)
 var EviPolyjuice = newHPEvidence(OpGobletOfFire.ID, UserAlastor.ID, "seed_juice", "DIY instructions for Polyjuice Potion", "codeblock", 0)
 var EviWarewolf = newHPEvidence(OpGobletOfFire.ID, UserViktor.ID, "seed_wolf", "Strangely real-looking statue", "terminal-recording", 0)
+
+var EviMetaTristateTrophy = newHPEviMetadata(EviTristateTrophy.ID, "color-averager", "rgb(182, 184, 183)\n#b6b8b7\nhsl(150, 1%, 72%)", 0)
+var EviMetaEntryForm = newHPEviMetadata(EviEntryForm.ID, "run-result", "(No output)", 0)
+var EviMetaEntryFormTwo = newHPEviMetadata(EviEntryForm.ID, "wc -l", "13 seed_entry", 0)
+var EviMetaWizardDance = newHPEviMetadata(EviWizardDance.ID, "color-averager", "rgb(22, 19, 20)\n#161314\nhsl(340, 7%, 8%)", 0)
+var EviMetaPolyjuice = newHPEviMetadata(EviPolyjuice.ID, "wc -l", "13 seed_juice", 0)
+var EviMetaWarewolf = newHPEviMetadata(EviWarewolf.ID, "duration", "348.163058815", 0)
 
 var EviGantt01 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_01", "", "none", -19)
 var EviGantt02 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_02", "", "none", -18)
