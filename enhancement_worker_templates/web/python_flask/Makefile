@@ -1,6 +1,5 @@
 imageNameDev = samplePython-dev
 imageName = samplePython
-hostPort = 9000
 
 .PHONY: build_dev
 build_dev:
@@ -12,6 +11,3 @@ build_release:
 
 run_dev:
 	docker-compose up --build
-
-run_prod:
-	docker-compose -f docker-compose.prod.yml up --build
