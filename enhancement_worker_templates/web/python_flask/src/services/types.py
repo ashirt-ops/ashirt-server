@@ -35,17 +35,17 @@ class CreateOperationInput(TypedDict):
 
 class CreateEvidenceInput(TypedDict):
     notes: str
-    content_type: SupportedContentType
-    tag_ids: list[int]
-    file: FileData
+    content_type: Optional[SupportedContentType]
+    tag_ids: Optional[list[int]]
+    file: Optional[FileData]
 
 
 class UpdateEvidenceInput(TypedDict):
     notes: Optional[str]
-    content_type: SupportedContentType
-    add_tag_ids: list[int]
-    remove_tag_ids: list[int]
-    file: FileData
+    content_type: Optional[SupportedContentType]
+    add_tag_ids: Optional[list[int]]
+    remove_tag_ids: Optional[list[int]]
+    file: Optional[FileData]
 
 
 class UpsertEvidenceMetadata(TypedDict):
