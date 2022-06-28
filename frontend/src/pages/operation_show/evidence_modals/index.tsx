@@ -36,6 +36,7 @@ import {
   updateEvidenceMetadata,
   runServiceWorkerForEvidence,
   listActiveServiceWorkers,
+  hasFlag,
 } from 'src/services'
 
 import BinaryUpload from 'src/components/binary_upload'
@@ -323,14 +324,13 @@ export const EvidenceMetadataModal = (props: {
   onRequestClose: () => void,
   onUpdated: () => void,
 }) => {
-  // this switch controls whether the user is only able to view metadata, or if they can manually
-  // create and edit existing metadata. We might get more precise control later.
-  const viewOnly = false
-
-  const wiredMetadata = useWiredData(React.useCallback(() => readEvidenceMetadata({
-    operationSlug: props.operationSlug,
-    evidenceUuid: props.evidence.uuid,
-  }), [props.operationSlug, props.evidence.uuid]))
+  const wiredMetadata = useWiredData(React.useCallback(() => Promise.all([
+    readEvidenceMetadata({
+      operationSlug: props.operationSlug,
+      evidenceUuid: props.evidence.uuid,
+    }),
+    hasFlag("allow-metadata-edit")
+  ]), [props.operationSlug, props.evidence.uuid]))
 
   const containerProps: Omit<ViewEditEvidenceMetadataContainerProps, 'evidenceMetadata'> = {
     evidenceUuid: props.evidence.uuid,
@@ -347,42 +347,45 @@ export const EvidenceMetadataModal = (props: {
 
   return (
     <Modal title='Evidence Metadata' onRequestClose={props.onRequestClose}>
-      {wiredMetadata.render(metadata => (<>
-        {viewOnly
-          ? (
-            <ViewEditEvidenceMetadataContainer
-              {...containerProps}
-              evidenceMetadata={metadata}
-            />
-          )
-          : (
-            <TabMenu className={cx('tab-menu')}
-              tabs={[
-                {
-                  id: 'view', label: 'View',
-                  content: (
-                    <ViewEditEvidenceMetadataContainer
-                      {...containerProps}
-                      evidenceMetadata={metadata}
-                      onEdited={() => { props.onUpdated(); props.onRequestClose() }}
-                    />
-                  )
-                },
-                {
-                  id: 'create', label: 'Create',
-                  content: (
-                    <AddEvidenceMetadataForm
-                      evidenceUuid={props.evidence.uuid}
-                      onCreated={() => { props.onUpdated(); props.onRequestClose() }}
-                      operationSlug={props.operationSlug}
-                    />
-                  )
-                },
-              ]}
-            />
-          )
-        }
-      </>))}
+      {wiredMetadata.render(([metadata, allowEditing]) => {
+        return (<>
+          {!allowEditing
+            ? (
+              <ViewEditEvidenceMetadataContainer
+                {...containerProps}
+                evidenceMetadata={metadata}
+              />
+            )
+            : (
+              <TabMenu className={cx('tab-menu')}
+                tabs={[
+                  {
+                    id: 'view', label: 'View',
+                    content: (
+                      <ViewEditEvidenceMetadataContainer
+                        {...containerProps}
+                        evidenceMetadata={metadata}
+                        onEdited={() => { props.onUpdated(); props.onRequestClose() }}
+                      />
+                    )
+                  },
+                  {
+                    id: 'create', label: 'Create',
+                    content: (
+                      <AddEvidenceMetadataForm
+                        evidenceUuid={props.evidence.uuid}
+                        onCreated={() => { props.onUpdated(); props.onRequestClose() }}
+                        operationSlug={props.operationSlug}
+                      />
+                    )
+                  },
+                ]}
+              />
+            )
+          }
+        </>)
+      }
+      )}
     </Modal>
   )
 }

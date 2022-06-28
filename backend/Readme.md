@@ -63,7 +63,9 @@ Configuration is handled entirely via environment variables. To that end, here a
   * `APP_SUCCESS_REDIRECT_URL`
     * Used in some authentication schemes to redirect to the frontend after a successful authentication.
   * `APP_FAILURE_REDIRECT_URL_PREFIX`
-    * Used in some authentication schemes to redirect to the frontend after a failed authentication. 
+    * Used in some authentication schemes to redirect to the frontend after a failed authentication.
+  * `APP_FLAGS`
+    * Sets flags that enable or disable certain frontend features. Generally has no direct effect on the backend. See the [flags](#flags) section on a list of supported flags.
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
@@ -153,6 +155,15 @@ Configuration is handled entirely via environment variables. To that end, here a
   * `EMAIL_SMTP_AUTH_TYPE`
     * Indicates which kind of authentication scheme to use when connecting to an SMTP server
     * Valid values: `login`, `plain`, `crammd5` (for LOGIN, PLAIN, and CRAM-MD5 respectively)
+
+#### Flags
+
+Here is the list of currently supported flags, and their meaning on the frontend. This are applied via the APP_FLAGS environment variable. Multiple flags can be specified by separating the flags with a comma (`,`)
+
+| Flag Name           | Description of effect                                              |
+| ------------------- | ------------------------------------------------------------------ |
+| welcome-message     | Presents a welcome message to the user on the operations list page |
+| allow-metadata-edit | Allows users with write access to create or edit evidence metadata |
 
 ### Authentication and Authorization
 
