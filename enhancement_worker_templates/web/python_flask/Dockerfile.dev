@@ -26,4 +26,4 @@ ENV FLAKS_ENV=developement
 EXPOSE 80
 CMD ["/root/.local/bin/pipenv", "run", \
      "flask", "run", \
-     "--host=0.0.0.0", "--port=80"]
+     "--host=0.0.0.0", "--port=8080"]
