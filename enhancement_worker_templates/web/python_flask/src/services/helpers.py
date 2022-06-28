@@ -1,5 +1,4 @@
-from base64 import b64encode
-import binascii
+from base64 import b64encode, urlsafe_b64encode
 from datetime import datetime
 import hashlib
 import hmac
@@ -7,7 +6,7 @@ import os
 from typing import Optional
 from wsgiref.handlers import format_date_time
 
-from .types import HTTP_METHOD, FileData
+from .types import HTTP_METHOD, FileData, MultipartData
 
 
 def make_hmac(
@@ -41,39 +40,43 @@ def now_in_rfc1123():
 
 
 def _random_char(length: int):
-    return binascii.hexlify(os.urandom(length))
+    return urlsafe_b64encode(os.urandom(length))
 
 
-def encode_form(fields: dict[str, str], files:dict[str, FileData]):
-    boundry = "----AShirtFormData-".encode() + _random_char(30)
+def encode_form(fields: dict[str, str], files: dict[str, FileData]) -> MultipartData:
+    boundary = "----AShirtFormData-".encode() + _random_char(30)
     newline = "\r\n".encode()
-    boundry_start = boundry + newline
-    last_boundry = boundry + "--".encode() + newline
+    part = "--".encode()
+    boundary_start = part + boundary + newline
+    last_boundary = part + boundary + part + newline
+    content_dispo = "Content-Disposition: form-data".encode()
 
-    body = bytes()
-
-    def field_part(name: str, value: str | bytes, extra=""):
-        header = f'Content-Disposition: form-data; name="{name}"{extra}\r\n'.encode(
+    field_buff = bytes()
+    for key, value in fields.items():
+        entry = (
+            boundary_start +
+            content_dispo + f'; name="{key}"'.encode() +
+            newline + newline +
+            value.encode() +
+            newline
         )
-        return (
-            boundry_start +
-            header +
-            newline +
-            (value.encode() if type(value) is str else value)
+        field_buff += entry
+
+    file_buff = bytes()
+    for key, value in files.items():
+        if value is None:
+            continue
+        entry = (
+            boundary_start +
+            content_dispo + f'; name="{key}"; filename="{value["filename"]}"'.encode() +
+            newline + f'Content-Type: {value["mimetype"]}'.encode() +
+            newline + newline +
+            value['content'] +
+            newline
         )
+        file_buff += entry
 
-    def file_part(name, value, filename, content_type):
-        extra = f'; filename="{filename}"\r\nContent-Type: {content_type}'
-        return field_part(name, value, extra)
-
-    for k, v in fields.items():
-        body += field_part(k, v)
-        body += newline
-
-    for k, v in files.items():
-        body += file_part(k, v['content'], v['filename'], v['mimetype'])
-        body += newline
-
-    body += last_boundry
-
-    return body
+    return {
+        "boundary": boundary.decode(),
+        "data": field_buff + file_buff + last_boundary
+    }
