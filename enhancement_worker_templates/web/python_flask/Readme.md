@@ -52,3 +52,26 @@ Once the request is complete, the application waits for another request.
 ### Contacting AShirt
 
 The `services` folder contains a class that is used to contact ashirt. This is the typical way of getting the actual content / interacting with ashirt. This is treated mostly as a singleton by preparing the service in `main.py`, and recording an instance in `services/__init__.py`. Any other module can then use the `scv` function to get the loaded instance.
+
+## Integrating into AShirt testing environment
+
+Notably, the dev port exposed is port 8080, so all port mapping has to be done with that in mind. When running locally (not via docker), the exposed port is configurable.
+
+This configuration should work for your scenario, though the volumes mapped might need to be different.
+
+```yaml
+  py_flask:
+    build:
+      context: enhancement_worker_templates/web/python_flask
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3004:8080
+    restart: on-failure
+    volumes:
+      - ./enhancement_worker_templates/web/python_flask/src:/app/src
+    environment:
+      ENABLE_DEV: true
+      ASHIRT_BACKEND_URL: http://backend:3000
+      ASHIRT_ACCESS_KEY: gR6nVtaQmp2SvzIqLUWdedDk
+      ASHIRT_SECRET_KEY: WvtvxFaJS0mPs82nCzqamI+bOGXpq7EIQhg4UD8nxS5448XG9N0gNAceJGBLPdCA3kAzC4MdUSHnKCJ/lZD++A==
+```
