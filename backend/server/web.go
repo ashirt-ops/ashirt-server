@@ -14,6 +14,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
@@ -196,6 +197,10 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 
 	route(r, "GET", "/auths", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return supportedAuthSchemes, nil
+	}))
+
+	route(r, "GET", "/flags", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return dtos.Flags{Flags: config.Flags()}, nil
 	}))
 
 	route(r, "GET", "/auths/breakdown", jsonHandler(func(r *http.Request) (interface{}, error) {

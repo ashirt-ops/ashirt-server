@@ -191,3 +191,7 @@ type ServiceWorkerTestOutput struct {
 type ActiveServiceWorker struct {
 	Name string `json:"name"`
 }
+
+type Flags struct {
+	Flags []string `json:"flags"`
+}

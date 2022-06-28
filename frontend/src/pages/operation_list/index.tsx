@@ -2,29 +2,38 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import AuthContext from 'src/auth_context'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import NewOperationButton from './new_operation_button'
 import OperationCard from './operation_card'
 import classnames from 'classnames/bind'
-import { Operation } from 'src/global_types'
-import { getOperations, createOperation } from 'src/services'
+import { getOperations, createOperation, hasFlag } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
-  const wiredOperations = useWiredData<Array<Operation>>(getOperations)
+  const { user } = React.useContext(AuthContext) // user should never be null
+  const wiredData = useWiredData(React.useCallback(() => Promise.all([
+    getOperations(),
+    hasFlag("welcome-message")
+  ]), []))
 
   const newOperationModal = useModal<void>(modalProps => (
-    <NewOperationModal {...modalProps} onCreated={wiredOperations.reload} />
+    <NewOperationModal {...modalProps} onCreated={wiredData.reload} />
   ))
   const filterText = useFormField<string>('')
 
   return (
     <div className={cx('root')}>
-      {wiredOperations.render(ops => <>
+      {wiredData.render(([ops, welcomeFlag]) => <>
+        {welcomeFlag && (
+          <h1 className={cx('welcomeMessage')}>
+            Welcome Back, {user ? `${user.firstName} ${user.lastName}` : "Kotter"}!
+          </h1>
+        )}
         <Input
           placeholder="Filter Operations"
           className={cx('filterInput')}
