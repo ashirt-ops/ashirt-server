@@ -20,14 +20,14 @@ import (
 )
 
 type CreateServiceWorkerInput struct {
-	Name        string
-	Config      string
+	Name   string
+	Config string
 }
 
 type UpdateServiceWorkerInput struct {
-	ID          int64
-	Name        string
-	Config      string
+	ID     int64
+	Name   string
+	Config string
 }
 
 type RunServiceWorkerInput struct {
@@ -142,7 +142,7 @@ func RunServiceWorker(ctx context.Context, db *database.Connection, i RunService
 		return backend.WrapError("Unable to run service worker", backend.UnauthorizedWriteErr(err))
 	}
 
-	var workers []string 
+	var workers []string
 	if i.WorkerName == "" {
 		workers = enhancementservices.AllWorkers()
 	} else {

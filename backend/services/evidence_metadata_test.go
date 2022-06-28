@@ -176,7 +176,7 @@ func TestReadEvidenceMetadata(t *testing.T) {
 
 	var meta []*dtos.EvidenceMetadata
 	// verify permissions
-	require.Error(t, tryRead(UserDraco, input, &meta))  // no operation access
+	require.Error(t, tryRead(UserDraco, input, &meta))    // no operation access
 	require.NoError(t, tryRead(UserSeamus, input, &meta)) // read access
 
 	// verify read
