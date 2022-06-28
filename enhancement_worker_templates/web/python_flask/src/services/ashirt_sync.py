@@ -15,9 +15,18 @@ class AShirtRequestsService(AShirtService):
     def __init__(self, api_url: str, access_key: str, secret_key_b64: str):
         super().__init__(api_url, access_key, secret_key_b64)
 
-    def _make_request(self, cfg: RC, headers: dict[str, str], body: Optional[bytes]):
+    def _make_request(self, cfg: RC, headers: dict[str, str], body: Optional[bytes])->bytes:
         resp = requests.request(
-            cfg.method, f'{self.api_url}{cfg.path}', headers=headers, data=body)
+            cfg.method, self._route_to(cfg.path), headers=headers, data=body, stream=True)
+
         if cfg.return_type == 'json':
             return resp.json()
+        elif cfg.return_type == 'status':
+            return resp.status_code
+        elif cfg.return_type == 'text':
+            return resp.text
+
         return resp.content
+
+    def _route_to(self, path: str):
+        return f'{self.api_url}{path}'

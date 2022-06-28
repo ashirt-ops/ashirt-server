@@ -22,7 +22,8 @@ class RequestConfig:
     method: HTTP_METHOD
     path: str
     body: Optional[bytes | str] = None
-    return_type: Literal["json", "raw"] = "json"
+    return_type: Literal["json", "raw", "status", "text"] = "json"
+    multipart_boundary: Optional[str] = None
 
 
 # The below are all inputs for various API calls
@@ -58,6 +59,11 @@ class UpsertEvidenceMetadata(TypedDict):
 class CreateTagInput(TypedDict):
     name: str
     colorName: Optional[str]
+
+
+class MultipartData(TypedDict):
+    boundary: str
+    data: bytes
 
 
 def parse_file(filename: str, binary=True):
