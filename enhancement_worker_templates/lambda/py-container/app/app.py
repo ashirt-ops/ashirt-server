@@ -2,7 +2,7 @@ import os
 
 from constants import SupportedContentType
 from message_types import (
-    ProcessBody,
+    EvidenceCreatedBody,
     TestBody,
 )
 from responses import (
@@ -20,13 +20,13 @@ def handler(event, context):
     if TestBody.parse_if_valid(event) is not None:
         return test_passed()
 
-    if (body := ProcessBody.parse_if_valid(event)) is not None:
-        return handle_process(body)
+    if (body := EvidenceCreatedBody.parse_if_valid(event)) is not None:
+        return handle_evidence_created(body)
 
     return bad_request()
 
 
-def handle_process(body: ProcessBody):
+def handle_evidence_created(body: EvidenceCreatedBody):
     # TODO: Handle custom logic here!
 
     # filter out unprocessable evidence
@@ -40,7 +40,7 @@ def handle_process(body: ProcessBody):
         return error_processing(str(err))
 
 
-def do_processing(body: ProcessBody):
+def do_processing(body: EvidenceCreatedBody):
     # Create ashirt services instance
     # ashirt_svc = AShirtRequestsService(
     #     os.environ.get('ASHIRT_BACKEND_URL', ''),

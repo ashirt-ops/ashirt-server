@@ -20,4 +20,8 @@ test-test:
 
 .PHONY: test-process-img
 test-process-img:
-	curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"type": "process", "evidenceUuid": "seed_dursleys", "operationSlug": "HPSS", "contentType": "image"}' | json_pp | pygmentize -l json
+	curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"type": "evidence_created", "evidenceUuid": "seed_dursleys", "operationSlug": "HPSS", "contentType": "image"}' | json_pp | pygmentize -l json
+
+.PHONY: test-unsupported
+test-unsupported:
+	curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"type": "unsupported"}' | json_pp | pygmentize -l json

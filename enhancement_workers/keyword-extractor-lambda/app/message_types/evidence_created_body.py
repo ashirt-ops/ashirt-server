@@ -9,7 +9,7 @@ from .generic_request_body import GenericRequestBody
 @dataclass(repr=False, frozen=True)
 class EvidenceCreatedBody(GenericRequestBody):
     """
-    ProcessBody reflects the message received from AShirt when AShirt requests processing
+    EvidenceCreatedBody reflects the message received from AShirt when AShirt requests metadata processing
     """
     type: Literal['evidence_created']
     evidence_uuid: str

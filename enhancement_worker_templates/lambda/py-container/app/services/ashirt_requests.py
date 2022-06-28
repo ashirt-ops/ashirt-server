@@ -1,14 +1,19 @@
 from base64 import b64decode
 import json
-from typing import Optional, Literal
+from typing import Any, Callable, Literal, Optional
 
 import requests
 
 from . import (
+    encode_form,
     make_hmac,
     now_in_rfc1123,
     RequestConfig as RC,
     CreateOperationInput,
+    CreateEvidenceInput,
+    CreateTagInput,
+    UpdateEvidenceInput,
+    UpsertEvidenceMetadata
 )
 
 
@@ -28,13 +33,62 @@ class AShirtRequestsService:
     def check_connection(self):
         return self.build_request(RC('GET', '/api/checkconnection'))
 
-    def get_evidence_content(self, operation_slug: str, evidence_uuid: str, content_type: Literal['media', 'preview']):
+    def get_evidence(self, operation_slug: str, evidence_uuid: str):
+        return self.build_request(RC('GET', f'/api/operations/{operation_slug}/evidence/{evidence_uuid}'))
+
+    def get_evidence_content(self, operation_slug: str, evidence_uuid: str, content_type: Literal['media', 'preview']='media'):
         return self.build_request(RC(
             'GET',
             f'/api/operations/{operation_slug}/evidence/{evidence_uuid}/{content_type}',
             None,
             'raw'
         ))
+
+    def create_evidence(self, operation_slug: str, i: CreateEvidenceInput):
+        body = {
+            'notes': i['notes'],
+        }
+        add_if_not_none(body, 'contentType', i.get('content_type'))
+        add_if_not_none(body, 'tagIds', i.get('tag_ids'), json.dumps)
+
+        data = encode_form(body, {"file": i.get('file')})
+
+        return self.build_request(RC('POST',
+            f'/api/operations/{operation_slug}/evidence',
+            body=data['data'],
+            multipart_boundary=data['boundary'])
+            )
+
+    def update_evidence(self, operation_slug: str, evidence_uuid: str, i: UpdateEvidenceInput):
+        body = {}
+
+        add_if_not_none(body, 'notes', i.get('notes'))
+        add_if_not_none(body, 'contentType', i.get('content_type'))
+        add_if_not_none(body, 'tagsToAdd', i.get('add_tag_ids'), json.dumps)
+        add_if_not_none(body, 'tagsToRemove', i.get('remove_tag_ids'), json.dumps)
+
+        data = encode_form(body, {"file": i.get('file')})
+
+        return self.build_request(RC('PUT',
+            f'/api/operations/{operation_slug}/evidence/{evidence_uuid}',
+            body=data['data'],
+            multipart_boundary=data['boundary'],
+            return_type='status'
+        ))
+
+    def upsert_evidence_metadata(self, operation_slug: str, evidence_uuid: str, i: UpsertEvidenceMetadata):
+        return self.build_request(RC(
+            'PUT',
+            f'/api/operations/{operation_slug}/evidence/{evidence_uuid}/metadata',
+            body=json.dumps(i),
+            return_type='status'
+        ))
+
+    def get_operation_tags(self, operation_slug: str):
+        return self.build_request(RC('GET', f'/api/operations/{operation_slug}/tags'))
+
+    def create_operation_tag(self, operation_slug: str, i: CreateTagInput):
+        return self.build_request(RC('POST', f'/api/operations/{operation_slug}/tags', json.dumps(i)))
 
     ### Request helpers
 
@@ -46,21 +100,41 @@ class AShirtRequestsService:
         now = now_in_rfc1123()
 
         # with_body should now be either bytes or None
-        with_body = cfg.body.encode() if type(cfg.body) == str else cfg.body
+        with_body = cfg.body.encode() if type(cfg.body) is str else cfg.body
 
         auth = make_hmac(cfg.method, cfg.path, now, with_body,
                          self.access_key, self.secret_key)
+
+        if cfg.multipart_boundary is None:
+            content_type = "application/json"
+        else:
+            content_type = f'multipart/form-data; boundary={cfg.multipart_boundary}'
+
         headers = {
-            "Content-Type": "application/json",
+            "Content-Type": content_type,
             "Date": now,
             "Authorization": auth,
         }
 
         return self._make_request(cfg, headers, with_body)
 
-    def _make_request(self, cfg: RC, headers: dict[str, str], body: Optional[bytes]):
+    def _make_request(self, cfg: RC, headers: dict[str, str], body: Optional[bytes])->bytes:
         resp = requests.request(
-            cfg.method, f'{self.api_url}{cfg.path}', headers=headers, data=body)
+            cfg.method, self._route_to(cfg.path), headers=headers, data=body, stream=True)
+
         if cfg.return_type == 'json':
             return resp.json()
+        elif cfg.return_type == 'status':
+            return resp.status_code
+        elif cfg.return_type == 'text':
+            return resp.text
+
         return resp.content
+
+    def _route_to(self, path: str):
+        return f'{self.api_url}{path}'
+
+
+def add_if_not_none(body: dict[str, Any], key: str, value: Any, tf: Callable[[Any], Any]=None):
+    if value is not None:
+        body.update({key: value if tf is None else tf(value)})

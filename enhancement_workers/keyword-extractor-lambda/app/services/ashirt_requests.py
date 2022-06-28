@@ -28,7 +28,7 @@ class AShirtRequestsService:
     def check_connection(self):
         return self.build_request(RC('GET', '/api/checkconnection'))
 
-    def get_evidence_content(self, operation_slug: str, evidence_uuid: str, content_type: Literal['media', 'preview']):
+    def get_evidence_content(self, operation_slug: str, evidence_uuid: str, content_type: Literal['media', 'preview']='media'):
         return self.build_request(RC(
             'GET',
             f'/api/operations/{operation_slug}/evidence/{evidence_uuid}/{content_type}',
@@ -46,7 +46,7 @@ class AShirtRequestsService:
         now = now_in_rfc1123()
 
         # with_body should now be either bytes or None
-        with_body = cfg.body.encode() if type(cfg.body) == str else cfg.body
+        with_body = cfg.body.encode() if type(cfg.body) is str else cfg.body
 
         auth = make_hmac(cfg.method, cfg.path, now, with_body,
                          self.access_key, self.secret_key)
