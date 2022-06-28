@@ -132,8 +132,8 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		dr := dissectJSONRequest(r)
 		i := services.UpsertEvidenceMetadataInput{
 			EditEvidenceMetadataInput: services.EditEvidenceMetadataInput{
-				OperationSlug: dr.FromURL("operation_slug").AsString(),
-				EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+				OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+				EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
 				Source:        dr.FromBody("source").Required().AsString(),
 				Body:          dr.FromBody("body").Required().AsString(),
 			},
