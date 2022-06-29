@@ -1,4 +1,4 @@
-const { createHmac, createHash } = require("crypto");
+const { createHmac, createHash, randomFillSync } = require("crypto");
 const http = require("http");
 
 class AShirtService {
@@ -9,27 +9,101 @@ class AShirtService {
     this.secretKey = Buffer.from(config.secretKeyB64, "base64");
   }
 
-  async getEvidence(operationSlug, evidenceUuid) {
+  async getOperations() {
     return this.makeRequest({
-      method: "GET",
-      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`,
-    });
+      method: 'GET',
+      path: `/api/operations`
+    })
   }
 
-  async getEvidenceContent(operationSlug, evidenceUuid, type) {
+  async checkConnection() {
     return this.makeRequest({
-      method: "GET",
-      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}/${type}`,
-      responseType: "arraybuffer",
-    });
+      method: 'GET',
+      path: `/api/checkconnection`
+    })
   }
 
   async createOperation(body) {
     return this.makeRequest({
-      method: "POST",
+      method: 'POST',
       path: `/api/operations`,
+      body: JSON.stringify(body)
+    })
+  }
+
+  async getEvidence(operationSlug, evidenceUuid) {
+    return this.makeRequest({
+      method: 'GET',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`
+    })
+  }
+
+  async getEvidenceContent(operationSlug, evidenceUuid, type = 'media') {
+    return this.makeRequest({
+      method: 'GET',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}/${type}`,
+    })
+  }
+
+  async createEvidence(operationSlug, body) {
+    const { file } = body
+    const fields = {
+      notes: body.notes,
+      contentType: body.contentType,
+      occurred_at: body.occurred_at,
+      tagIds: JSON.stringify(body.tagIds)
+    }
+
+    const { boundary: boundary, data } = encodeForm(fields, { file })
+    return this.makeRequest({
+      method: 'POST',
+      path: `/api/operations/${operationSlug}/evidence`,
+      body: data,
+      multipartFormBoundary: boundary,
+    })
+  }
+
+  async updateEvidence(operationSlug, evidenceUuid, body) {
+    const { file } = body
+    const fields = {
+      notes: body.notes,
+      contentType: body.contentType,
+      occurred_at: body.occurred_at,
+      tagsToAdd: body.tagsToAdd ? JSON.stringify(body.tagsToAdd) : undefined,
+      tagsToRemove: body.tagsToRemove ? JSON.stringify(body.tagsToRemove) : undefined,
+    }
+
+    const { boundary: boundary, data } = encodeForm(fields, { file })
+
+    return this.makeRequest({
+      method: 'PUT',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`,
+      body: data,
+      multipartFormBoundary: boundary,
+    })
+  }
+
+  async upsertEvidenceMetadata(operationSlug, evidenceUuid, body) {
+    return this.makeRequest({
+      method: 'PUT',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}/metadata`,
+      body: JSON.stringify(body)
+    })
+  }
+
+  async getOperationTags(operationSlug) {
+    return this.makeRequest({
+      method: 'GET',
+      path: `/api/operations/${operationSlug}/tags`
+    })
+  }
+
+  async createOperationTag(operationSlug, body) {
+    return this.makeRequest({
+      method: 'POST',
+      path: `/api/operations/${operationSlug}/tags`,
       body: JSON.stringify(body),
-    });
+    })
   }
 
   async makeRequest(config) {
@@ -82,7 +156,9 @@ class AShirtService {
         path: config.path,
         method: config.method,
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": config.multipartFormBoundary
+            ? `multipart/form-data; boundary=${config.multipartFormBoundary}`
+            : "application/json",
           Date: now,
           Authorization: auth,
         },
@@ -115,6 +191,58 @@ class AShirtService {
     return `${this.accessKey}:${hmacMessage}`;
   }
 }
+
+function randomChars(length) {
+  const buff = Buffer.alloc(length);
+  return randomFillSync(buff).toString("base64url");
+}
+
+function encodeForm(fields, files) {
+  const boundary = "----AShirtFormData-" + randomChars(30);
+  const newline = "\r\n";
+  const boundaryStart = "--" + boundary + newline;
+  const lastBoundary = "--" + boundary + "--" + newline;
+
+  let fieldBuffer = Buffer.from("");
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value === undefined) {
+      return;
+    }
+    const text =
+      boundaryStart +
+      `Content-Disposition: form-data; name="${key}"` +
+      newline +
+      newline +
+      value +
+      newline;
+    fieldBuffer = Buffer.concat([fieldBuffer, Buffer.from(text)]);
+  });
+
+  let fileBuffer = Buffer.from("");
+  Object.entries(files).forEach(([key, fd]) => {
+    if (fd === undefined) {
+      return;
+    }
+    const textPart =
+      `${boundaryStart}` +
+      `Content-Disposition: form-data; name="${key}"; filename="${fd.filename}"` +
+      `${newline}Content-Type: ${fd.mimetype}` +
+      `${newline}${newline}`;
+
+    fileBuffer = Buffer.concat([
+      fileBuffer,
+      Buffer.from(textPart),
+      fd.content,
+      Buffer.from(newline),
+    ]);
+  });
+
+  return {
+    boundary: boundary,
+    data: Buffer.concat([fieldBuffer, fileBuffer, Buffer.from(lastBoundary)]),
+  };
+}
+
 
 module.exports = {
   AShirtService: new AShirtService({

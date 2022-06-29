@@ -19,8 +19,8 @@ exports.handler = async (event) => {
   if (event.type === "test") {
     return testPassed();
   }
-  if (event.type === "process") {
-    return await handleProcess(event);
+  if (event.type === "evidence_created") {
+    return await handleEvidenceCreated(event);
   }
 
   // we should never actually get here -- validation above should trap anything that won't work
@@ -32,7 +32,7 @@ function isValidateInput(data) {
     return true;
   }
   return (
-    data.type === "process" &&
+    data.type === "evidence_created" &&
     typeof data.evidenceUuid === "string" &&
     typeof data.operationSlug === "string" &&
     [
@@ -47,7 +47,7 @@ function isValidateInput(data) {
   );
 }
 
-async function handleProcess(requestData) {
+async function handleEvidenceCreated(requestData) {
   // TODO handle your custom logic here!
   // filter out unprocessable evidence
   if (requestData.contentType != "image") {
