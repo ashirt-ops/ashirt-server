@@ -4,9 +4,13 @@ This template creates a lambda worker via a [docker image base](https://docs.aws
 
 ## Editing
 
-The boiler plate for this function is largely complete. The majority of the work can be focused on filling out `handle_process` and `do_processing` in app.py. The rest of the code attempts to be as dependency free as possible (currently only requiring `requests`).
+The boiler plate for this function is largely complete. The majority of the work can be focused on filling out `handle_evidence_created` and `do_processing` in app.py. The rest of the code attempts to be as dependency free as possible (currently only requiring `requests`).
 
 You can manage dependencies via [pipenv](https://pipenv.pypa.io/en/latest/), or via a mechanism of your choosing. This template opts into pipenv and leverages its capabilities for easier building. The docker base image can likewise be expanded to both install the dependencies as well as add any extra dependencies/software that is needed.
+
+## Deploying to AWS
+
+AWS provides documentation on how to deploy these functions [here](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-upload)
 
 ## Deploying to AShirt
 
@@ -28,7 +32,7 @@ Add the following config, tweaking to your needs:
 ```yaml
   service-name:
     build:
-      context: path/to/project/service-name
+      context: path/to/project
       dockerfile: Dockerfile
     ports:
       - 3003:8080
@@ -40,7 +44,8 @@ Add the following config, tweaking to your needs:
 
 ```
 
-Note that you will need to replace `service-name` in the config above with your actual service name. The access key and secret key can be left as is if you are using the seed data to test. Otherwise, you will need to create a pair of keys, stop the service, update the configuration, and restart the server.
+Here, update the worker name (must match the lambdaName in the configuration), and you can optionally update the `3003` portion of the `ports` configuration. Likewise, you can add more values to environment as needed. Note that `ASHIRT_ACCESS_KEY` and `ASHIRT_SECRET_KEY` can be kept as is for test deployments using the standard seed, as these values are already baked into the seeding.
+
 
 ## Testing
 

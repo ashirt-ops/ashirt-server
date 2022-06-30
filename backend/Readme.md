@@ -410,7 +410,7 @@ Custom email services can be implemented or extended by meeting the `EmailServic
 
 The evidence pipeline enables external services to perform special processing on evidence and have the result of the processing stored as metadata for that evidence. For example, an OCR function might analyze an image, search for words in that image, and return those words. That data would then become searchable/reviewable within the evidence and finding timelines.
 
-The details for this service are detailed in `pipeline_readme.md`
+The details for this service are detailed in [pipeline readme](/backend/pipeline_readme.md)
 
 ## Development Overview
 

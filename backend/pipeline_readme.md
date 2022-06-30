@@ -1,12 +1,12 @@
-# AShirt Evidence Enhancement Pipeline
+# AShirt API Event System
 
-The enrichment pipeline enables external services to perform processing on evidence and have the result of the processing stored as metadata for that evidence. While the intent is for the service to add metadata for the given piece of evidence, the limitations on what a worker may do with the evidence are open ended, and restricted only by the limitations of the AShirt API.
+The AShirt API Event system enables enrichment and automation opportunties for your ashirt deployment. While this is primarily aimed at providing metadata for evidence, each worker in this sytem communicates via the API, and so has access to all API methods.
 
 Additionally, while AShirt provides some enrichment services, the definition is kept open so that you may create your own services, or use community-created services.
 
 ## A Word on Security
 
-Please review and consider each new service you add to your AShirt instance. These services can get direct access to your evidence, and via API, have access to a wide slice of your AShirt data. As such, it is important that any service you add here has been vetted by you and your team.
+Please review and consider each new service you add to your AShirt instance. These services get direct access to your evidence, and via API, have access to a wide slice of your AShirt data. As such, it is important that any service you add here has been vetted by you and your team.
 
 ## Installing/Adding a Service
 
@@ -14,7 +14,11 @@ To add a service worker, as an admin, navigate to admin/service workers (url: `/
 
 ## Building a Compliant Service
 
-There are various options in how you can construct a valid service. The primary concern is how to safely contact this service. Once contacted, the service is then responsible for the following:
+There are various options in how you can construct a valid service. The primary concern for the AShirt backend is how to contact this service. Once contacted, the service is then responsible for the following:
+
+* Determining if the event is appropriate to process
+
+Additionally, if this is for evidence metadata population:
 
 * Determining if the evidence is appropriate to analyze
 * Responding with the result
@@ -79,13 +83,13 @@ The service should respond with a 200/OK message, or a 204/No Content response. 
 }
 ```
 
-#### Process Evidence
+#### Process Evidence Created Events / Metadata Enhancement
 
 This is called whenever new evidence is added, or on demand for existing pieces of evidence. Either way, the message will have the following format:
 
 ```ts
 {
-  "type": "process",
+  "type": "evidence_created",
   "evidenceUuid": string,
   "operationSlug": string,
   // the below indciates the content type of the evidence. This can help your tool immediately know if processing is worthwhile
@@ -172,7 +176,7 @@ See [the API section](#using-the-ashirt-api) on how to contact AShirt once work 
 
 ### Using the AShirt API
 
-The AShirt API is the medium in which AShirt services and tools can communicate with AShirt and the AShirt database. To communicate, the services need to be attached to a user via an API key and secret. For services, it is recommended a that a headless user is created (this will provide the widest access), and that an API key is generated for that user/service. Once generated, those keys can then be given to the service as a means to construct secure messages to AShirt.
+The AShirt API is the medium in which AShirt services and tools can communicate with AShirt and the AShirt database. To communicate, the services need to be attached to a user via an API key and secret. For services, it is recommended a that a headless user is created (this will provide the widest access without having to add a standard user to every operation), and that an API key is generated for that user/service. Once generated, those keys can then be given to the service as a means to construct secure messages to AShirt.
 
 #### Constructing a Message
 
@@ -262,42 +266,8 @@ export function nowInRFC1123(): string {
 
 </details>
 
-#### API actions
+As of July 2022, the full API is supported via:
 
-This subsection provides a currated view of the available API services. The full list can be found by viewing the code. See `backend/service/api.go` to discover more routes
-
-* <details>
-    <summary>Test Connection</summary>
-
-    Method: `GET`
-
-    Path: `/api/checkconnection`
-
-    Response: 200 with body:
-
-    ```json
-    {
-        "ok": true
-    }
-    ```
-
-  </details>
-* <details>
-    <summary>Add / Set metadata</summary>
-
-    Method: `PUT`
-
-    Path: `/operations/{operation_slug}/evidence/{evidence_uuid}/metadata`
-
-    Body:
-
-    ```ts
-    {
-        "source": string,
-        "body": string,
-    }
-    ```
-
-    Response: 201 with no body
-
-  </details>
+* [typescript](/enhancement_worker_templates/web/typescript_express/src/services/ashirt.ts)
+* [javascript](/enhancement_worker_templates/lambda/js-container/app/ashirt_service.js)
+* [python](/enhancement_worker_templates/web/python_flask/src/services/ashirt_base_class.py)
