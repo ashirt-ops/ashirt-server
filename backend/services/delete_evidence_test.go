@@ -16,6 +16,7 @@ import (
 
 func TestDeleteEvidenceNoPropogate(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
 	memStore := createPopulatedMemStore(HarryPotterSeedData)
@@ -45,6 +46,7 @@ func TestDeleteEvidenceNoPropogate(t *testing.T) {
 
 func TestDeleteEvidenceWithPropogation(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
 	memStore := createPopulatedMemStore(HarryPotterSeedData)

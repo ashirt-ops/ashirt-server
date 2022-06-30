@@ -14,6 +14,7 @@ import (
 
 func TestCreateTag(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 
 	op := OpSorcerersStone
@@ -36,6 +37,7 @@ func TestCreateTag(t *testing.T) {
 
 func TestCreateDefaultTag(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	normalUser := UserRon
 	adminUser := UserDumbledore

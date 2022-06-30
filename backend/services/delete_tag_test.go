@@ -13,6 +13,7 @@ import (
 
 func TestDeleteTag(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 
 	op := OpChamberOfSecrets
@@ -30,6 +31,7 @@ func TestDeleteTag(t *testing.T) {
 
 func TestDeleteDefaultTag(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	tagToRemove := DefaultTagWho
 	normalUser := UserRon
