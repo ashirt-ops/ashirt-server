@@ -56,6 +56,7 @@ func (w *webConfigV1Worker) Test() ServiceTestResult {
 		return errorTestResultWithMessage(err, "Unable to verify worker status")
 	}
 
+	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNoContent {
 		return testResultSuccess("Service is functional")
 	} else {
@@ -91,7 +92,7 @@ func (w *webConfigV1Worker) ProcessMetadata(evidenceID int64, payload *NewEviden
 	if err != nil {
 		return nil, err
 	}
-
+	defer resp.Body.Close()
 	model := models.EvidenceMetadata{
 		Source:     w.WorkerName,
 		EvidenceID: evidenceID,
