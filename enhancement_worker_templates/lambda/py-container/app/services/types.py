@@ -66,6 +66,52 @@ class MultipartData(TypedDict):
     data: bytes
 
 
+class CheckConnectionOutput(TypedDict):
+    ok: bool
+
+
+class ReadEvidenceOutput(TypedDict):
+    uuid: str
+    description: str
+    contentType: str
+    occurredAt: str # date in ISO-8601 format (UTC)
+
+
+class UserOutput(TypedDict):
+  firstName: str
+  lastName: str
+  slug: str
+
+
+class TagOutputItem(TypedDict):
+  id: int
+  colorName: str
+  name: str
+
+
+class EvidenceOutput(TypedDict):
+  uuid: str
+  description: str
+  occurredAt: str # date in ISO-8601 format (UTC)
+  operator: UserOutput
+  tags: list[TagOutputItem]
+  contentType: str
+
+class OperationOutputItem(TypedDict):
+  slug: str
+  name: str
+  numUsers: int
+  status: Literal[1, 2, 3]
+
+
+class TagWithUsageOutputItem(TagOutputItem):
+  evidenceCount: int
+
+
+ListOperationTagsOutput = list[TagWithUsageOutputItem]
+ListOperationsOutput = list[OperationOutputItem]
+
+
 def parse_file(filename: str, binary=True):
     method = 'rb' if binary else 'r'
     with open(filename, method) as fh:

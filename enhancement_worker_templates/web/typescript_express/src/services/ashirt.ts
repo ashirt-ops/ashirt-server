@@ -12,6 +12,7 @@ import {
   OperationOutputItem,
   ReadEvidenceOutput,
   ResponseWrapper,
+  TagOutputItem,
   UpdateEvidenceInput,
   UpsertMetadataInput,
 } from './types'
@@ -125,7 +126,7 @@ export class AShirtService {
   }
 
   async createOperationTag(operationSlug: string, body: CreateTagInput) {
-    return this.makeRequest<ReadEvidenceOutput>({
+    return this.makeRequest<TagOutputItem>({
       method: 'POST',
       path: `/api/operations/${operationSlug}/tags`,
       body: JSON.stringify(body),

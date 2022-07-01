@@ -13,7 +13,14 @@ from . import (
     CreateEvidenceInput,
     CreateTagInput,
     UpdateEvidenceInput,
-    UpsertEvidenceMetadata
+    UpsertEvidenceMetadata,
+    ListOperationsOutput,
+    OperationOutputItem,
+    CheckConnectionOutput,
+    ReadEvidenceOutput,
+    EvidenceOutput,
+    ListOperationTagsOutput,
+    TagOutputItem,
 )
 
 
@@ -24,16 +31,16 @@ class AShirtRequestsService:
         self.secret_key = b64decode(secret_key_b64)
 
     ### Request methods to AShirt
-    def get_operations(self):
+    def get_operations(self) -> ListOperationsOutput:
         return self.build_request(RC('GET', '/api/operations'))
 
-    def create_operation(self, i: CreateOperationInput):
+    def create_operation(self, i: CreateOperationInput) -> OperationOutputItem:
         return self.build_request(RC('POST', '/api/operations', json.dumps(i)))
 
-    def check_connection(self):
+    def check_connection(self) -> CheckConnectionOutput:
         return self.build_request(RC('GET', '/api/checkconnection'))
 
-    def get_evidence(self, operation_slug: str, evidence_uuid: str):
+    def get_evidence(self, operation_slug: str, evidence_uuid: str) -> ReadEvidenceOutput:
         return self.build_request(RC('GET', f'/api/operations/{operation_slug}/evidence/{evidence_uuid}'))
 
     def get_evidence_content(self, operation_slug: str, evidence_uuid: str, content_type: Literal['media', 'preview']='media'):
@@ -44,7 +51,7 @@ class AShirtRequestsService:
             'raw'
         ))
 
-    def create_evidence(self, operation_slug: str, i: CreateEvidenceInput):
+    def create_evidence(self, operation_slug: str, i: CreateEvidenceInput) -> EvidenceOutput:
         body = {
             'notes': i['notes'],
         }
@@ -59,7 +66,8 @@ class AShirtRequestsService:
             multipart_boundary=data['boundary'])
             )
 
-    def update_evidence(self, operation_slug: str, evidence_uuid: str, i: UpdateEvidenceInput):
+    def update_evidence(self, operation_slug: str, evidence_uuid: str, i: UpdateEvidenceInput) -> int:
+        """update_evidence revises evidence per the given input. Returns a 200 response if successful."""
         body = {}
 
         add_if_not_none(body, 'notes', i.get('notes'))
@@ -77,6 +85,9 @@ class AShirtRequestsService:
         ))
 
     def upsert_evidence_metadata(self, operation_slug: str, evidence_uuid: str, i: UpsertEvidenceMetadata):
+        """upsert_evidence_metadata sets or updates evidence metadata per the given input.
+        Returns a 200 response if successful.
+        """
         return self.build_request(RC(
             'PUT',
             f'/api/operations/{operation_slug}/evidence/{evidence_uuid}/metadata',
@@ -84,10 +95,10 @@ class AShirtRequestsService:
             return_type='status'
         ))
 
-    def get_operation_tags(self, operation_slug: str):
+    def get_operation_tags(self, operation_slug: str) -> ListOperationTagsOutput:
         return self.build_request(RC('GET', f'/api/operations/{operation_slug}/tags'))
 
-    def create_operation_tag(self, operation_slug: str, i: CreateTagInput):
+    def create_operation_tag(self, operation_slug: str, i: CreateTagInput) -> TagOutputItem:
         return self.build_request(RC('POST', f'/api/operations/{operation_slug}/tags', json.dumps(i)))
 
     ### Request helpers
