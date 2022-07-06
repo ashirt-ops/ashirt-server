@@ -5,10 +5,13 @@ package services
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
@@ -17,13 +20,115 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"golang.org/x/sync/errgroup"
 
 	sq "github.com/Masterminds/squirrel"
 )
 
+type AddEvidenceToFindingInput struct {
+	OperationSlug    string
+	FindingUUID      string
+	EvidenceToAdd    []string
+	EvidenceToRemove []string
+}
+
+type CreateFindingInput struct {
+	OperationSlug string
+	Category      string
+	Title         string
+	Description   string
+}
+
+type DeleteFindingInput struct {
+	OperationSlug string
+	FindingUUID   string
+}
+
 type ListFindingsForOperationInput struct {
 	OperationSlug string
 	Filters       helpers.TimelineFilters
+}
+
+type ReadFindingInput struct {
+	OperationSlug string
+	FindingUUID   string
+}
+
+type UpdateFindingInput struct {
+	OperationSlug string
+	FindingUUID   string
+	Category      string
+	Title         string
+	Description   string
+	TicketLink    *string
+	ReadyToReport bool
+}
+
+func CreateFinding(ctx context.Context, db *database.Connection, i CreateFindingInput) (*dtos.Finding, error) {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to create finding", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unable to create finding", backend.UnauthorizedWriteErr(err))
+	}
+
+	if i.Title == "" {
+		return nil, backend.MissingValueErr("Title")
+	}
+
+	if i.Category == "" {
+		return nil, backend.MissingValueErr("Category")
+	}
+
+	useCategoryID, err := getFindingCategoryID(i.Category, db.Select)
+
+	if err != nil {
+		return nil, backend.WrapError("Unable create finding", err)
+	}
+	if useCategoryID == nil {
+		return nil, backend.BadInputErr(errors.New("no such category"), "Unknown Category")
+	}
+
+	findingUUID := uuid.New().String()
+	_, err = db.Insert("findings", map[string]interface{}{
+		"uuid":         findingUUID,
+		"operation_id": operation.ID,
+		"category_id":  useCategoryID,
+		"title":        i.Title,
+		"description":  i.Description,
+	})
+	if err != nil {
+		return nil, backend.WrapError("Unable to insert finding", backend.DatabaseErr(err))
+	}
+
+	return &dtos.Finding{
+		UUID:        findingUUID,
+		Title:       i.Title,
+		Description: i.Description,
+	}, nil
+}
+
+func DeleteFinding(ctx context.Context, db *database.Connection, i DeleteFindingInput) error {
+	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
+	if err != nil {
+		return backend.WrapError("Unable to delete finding", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unwilling to delete finding", backend.UnauthorizedWriteErr(err))
+	}
+
+	err = db.WithTx(ctx, func(tx *database.Transactable) {
+		tx.Delete(sq.Delete("evidence_finding_map").Where(sq.Eq{"finding_id": finding.ID}))
+		tx.Delete(sq.Delete("findings").Where(sq.Eq{"id": finding.ID}))
+	})
+	if err != nil {
+		return backend.WrapError("Cannot delete finding", backend.DatabaseErr(err))
+	}
+
+	return nil
 }
 
 func ListFindingsForOperation(ctx context.Context, db *database.Connection, i ListFindingsForOperationInput) ([]*dtos.Finding, error) {
@@ -104,6 +209,148 @@ func ListFindingsForOperation(ctx context.Context, db *database.Connection, i Li
 	}
 
 	return findingsDTO, nil
+}
+
+func ReadFinding(ctx context.Context, db *database.Connection, i ReadFindingInput) (*dtos.Finding, error) {
+	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
+	if err != nil {
+		return nil, backend.WrapError("Unable to read finding", backend.UnauthorizedReadErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unwilling to read finding", backend.UnauthorizedReadErr(err))
+	}
+
+	var evidenceIDs []int64
+
+	err = db.Select(&evidenceIDs, sq.Select("evidence_id").
+		From("evidence_finding_map").
+		Where(sq.Eq{"finding_id": finding.ID}))
+	if err != nil {
+		return nil, backend.WrapError("Cannot load evidence for finding", backend.DatabaseErr(err))
+	}
+
+	_, allTags, err := tagsForEvidenceByID(db, evidenceIDs)
+	if err != nil {
+		return nil, backend.WrapError("Cannot load tags for evidence", backend.DatabaseErr(err))
+	}
+
+	var realCategory = ""
+	if finding.CategoryID != nil {
+		realCategory, err = getFindingCategory(db, *finding.CategoryID)
+		if err != nil {
+			return nil, backend.WrapError("Cannot load finding category for finding", backend.DatabaseErr(err))
+		}
+	}
+
+	return &dtos.Finding{
+		UUID:          i.FindingUUID,
+		Title:         finding.Title,
+		Category:      realCategory,
+		Description:   finding.Description,
+		NumEvidence:   len(evidenceIDs),
+		Tags:          allTags,
+		ReadyToReport: finding.ReadyToReport,
+		TicketLink:    finding.TicketLink,
+	}, nil
+}
+
+func UpdateFinding(ctx context.Context, db *database.Connection, i UpdateFindingInput) error {
+	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
+	if err != nil {
+		return backend.WrapError("Unable to lookup operation", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Failed permission check", backend.UnauthorizedWriteErr(err))
+	}
+
+	err = db.WithTx(ctx, func(tx *database.Transactable) {
+		useCategoryID, _ := getFindingCategoryID(i.Category, tx.Select)
+
+		tx.Update(sq.Update("findings").
+			SetMap(map[string]interface{}{
+				"category_id":     useCategoryID,
+				"title":           i.Title,
+				"description":     i.Description,
+				"ticket_link":     i.TicketLink,
+				"ready_to_report": i.ReadyToReport,
+			}).
+			Where(sq.Eq{"id": finding.ID}))
+	})
+
+	if err != nil {
+		return backend.WrapError("Unable to update database", backend.UnauthorizedWriteErr(err))
+	}
+	return nil
+}
+
+func AddEvidenceToFinding(ctx context.Context, db *database.Connection, i AddEvidenceToFindingInput) error {
+	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
+	if err != nil {
+		return backend.WrapError("Unable to add evidence to finding", backend.UnauthorizedWriteErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyFindingsOfOperation{OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unable to add evidence to finding", backend.UnauthorizedWriteErr(err))
+	}
+
+	var g errgroup.Group
+	g.Go(func() (err error) { return batchAddEvidenceToFinding(db, i.EvidenceToAdd, operation.ID, finding.ID) })
+	g.Go(func() (err error) { return batchRemoveEvidenceFromFinding(db, i.EvidenceToRemove, finding.ID) })
+	if err = g.Wait(); err != nil {
+		return backend.WrapError("Unable to add evidence to finding", backend.UnauthorizedWriteErr(err))
+	}
+
+	return nil
+}
+
+func buildQueryForEvidenceFromUUIDs(evidenceUUIDs []string) sq.SelectBuilder {
+	return sq.Select("*").
+		From("evidence").
+		Where(sq.Eq{"uuid": evidenceUUIDs})
+}
+
+func batchAddEvidenceToFinding(db *database.Connection, evidenceUUIDs []string, operationID int64, findingID int64) error {
+	if len(evidenceUUIDs) == 0 {
+		return nil
+	}
+	var evidence []models.Evidence
+	if err := db.Select(&evidence, buildQueryForEvidenceFromUUIDs(evidenceUUIDs)); err != nil {
+		return backend.WrapError("Unable to get evidence from uuids", err)
+	}
+	evidenceIDs := []int64{}
+	for _, evi := range evidence {
+		if evi.OperationID != operationID {
+			return fmt.Errorf(
+				"Cannot add evidence %d to operation %d. Evidence belongs to operation %d",
+				evi.ID, operationID, evi.OperationID,
+			)
+		}
+		evidenceIDs = append(evidenceIDs, evi.ID)
+	}
+	return db.BatchInsert("evidence_finding_map", len(evidenceIDs), func(idx int) map[string]interface{} {
+		return map[string]interface{}{
+			"finding_id":  findingID,
+			"evidence_id": evidenceIDs[idx],
+		}
+	})
+}
+
+func batchRemoveEvidenceFromFinding(db *database.Connection, evidenceUUIDs []string, findingID int64) error {
+	if len(evidenceUUIDs) == 0 {
+		return nil
+	}
+	var evidence []models.Evidence
+	if err := db.Select(&evidence, buildQueryForEvidenceFromUUIDs(evidenceUUIDs)); err != nil {
+		return backend.WrapError("Unable to get evidence from uuids", err)
+	}
+	evidenceIDs := []int64{}
+	for _, evi := range evidence {
+		evidenceIDs = append(evidenceIDs, evi.ID)
+	}
+
+	return db.Delete(sq.Delete("evidence_finding_map").Where(sq.Eq{"finding_id": findingID, "evidence_id": evidenceIDs}))
 }
 
 const findingsTextWhereComponent = "(findings.title LIKE ? OR findings.description LIKE ?)"
