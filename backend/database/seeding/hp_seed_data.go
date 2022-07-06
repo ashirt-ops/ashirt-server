@@ -6,8 +6,10 @@ package seeding
 import (
 	"strings"
 
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 var HarryPotterSeedData = Seeder{
@@ -35,6 +37,7 @@ var HarryPotterSeedData = Seeder{
 	APIKeys: []models.APIKey{
 		APIKeyHarry1, APIKeyHarry2,
 		APIKeyRon1, APIKeyRon2,
+		APIKeyNick,
 	},
 	UserOpMap: []models.UserOperationPermission{
 		// OpSorcerersStone and OpChamberOfSecrets are used to check read/write permissions
@@ -111,7 +114,7 @@ var HarryPotterSeedData = Seeder{
 	EvidenceMetadatas: []models.EvidenceMetadata{
 		EviMetaDursleys, EviMetaMirrorOfErised, EviMetaLevitateSpell, EviMetaRulesForQuidditch, EviMetaRulesForQuidditchTwo,
 		EviMetaFlyingCar, EviMetaDobby, EviMetaSpiderAragog, EviMetaMoaningMyrtle, EviMetaWhompingWillow, EviMetaTomRiddlesDiary, EviMetaTomRiddlesDiaryTwo, EviMetaPetrifiedHermione, EviMetaHeadlessHuntApplication,
-		EviMetaTristateTrophy, EviMetaEntryForm, EviMetaWizardDance, EviMetaPolyjuice, EviMetaEntryFormTwo, EviMetaWarewolf,
+		EviMetaTristateTrophy, EviMetaEntryForm, EviMetaWizardDance, EviMetaPolyjuice, EviMetaEntryFormTwo, EviMetaWarewolf, EviMetaWarewolfOther,
 	},
 	TagEviMap: unionTagEviMap(
 		associateTagsToEvidence(EviDursleys, TagFamily, TagHome),
@@ -178,6 +181,9 @@ var HarryPotterSeedData = Seeder{
 		QuerySalazarsHier,
 		QueryWhereIsTheChamberOfSecrets,
 	},
+	ServiceWorkers: []models.ServiceWorker{
+		DemoServiceWorker,
+	},
 }
 
 var newHPUser = newUserGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
@@ -221,7 +227,13 @@ var APIKeyHarry1 = newAPIKey(UserHarry.ID, "harry-abc", []byte{0x01, 0x02, 0x03}
 var APIKeyHarry2 = newAPIKey(UserHarry.ID, "harry-123", []byte{0x11, 0x12, 0x13})
 var APIKeyRon1 = newAPIKey(UserRon.ID, "ron-abc", []byte{0x01, 0x02, 0x03})
 var APIKeyRon2 = newAPIKey(UserRon.ID, "ron-123", []byte{0x11, 0x12, 0x13})
-var APIKeyHeadlessNick1 = newAPIKey(UserHeadlessNick.ID, "DAYPFGHnm1Pqes-l0Fm76_y1", []byte("HqmuWylLznR+tqSotZAOc+w47buSFaKKTJozpXEYkuNBiuRJgw3NeJOuVP6kbQBQmiYTqYAaiIKbcO1BxcH52Q==")) // realKey
+var APIKeyNick = newAPIKey(UserHeadlessNick.ID, "gR6nVtaQmp2SvzIqLUWdedDk", []byte{
+	// Corresponds to secret key: WvtvxFaJS0mPs82nCzqamI+bOGXpq7EIQhg4UD8nxS5448XG9N0gNAceJGBLPdCA3kAzC4MdUSHnKCJ/lZD++A==
+	0x5A, 0xFB, 0x6F, 0xC4, 0x56, 0x89, 0x4B, 0x49, 0x8F, 0xB3, 0xCD, 0xA7, 0x0B, 0x3A, 0x9A, 0x98,
+	0x8F, 0x9B, 0x38, 0x65, 0xE9, 0xAB, 0xB1, 0x08, 0x42, 0x18, 0x38, 0x50, 0x3F, 0x27, 0xC5, 0x2E,
+	0x78, 0xE3, 0xC5, 0xC6, 0xF4, 0xDD, 0x20, 0x34, 0x07, 0x1E, 0x24, 0x60, 0x4B, 0x3D, 0xD0, 0x80,
+	0xDE, 0x40, 0x33, 0x0B, 0x83, 0x1D, 0x51, 0x21, 0xE7, 0x28, 0x22, 0x7F, 0x95, 0x90, 0xFE, 0xF8,
+})
 
 var newHPOp = newOperationGen(1)
 
@@ -311,11 +323,11 @@ var EviLevitateSpell = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_md
 var EviRulesForQuidditch = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_rs_aoc201501", "Complex rules for a simple game", "codeblock", 0)
 
 var newHPEviMetadata = newEvidenceMetadataGen(1)
-var EviMetaDursleys = newHPEviMetadata(EviDursleys.ID, "color-averager", "rgb(65, 65, 65)\n#414141\nhsl(0, 0%, 25%)", 0)
-var EviMetaMirrorOfErised = newHPEviMetadata(EviMirrorOfErised.ID, "color-averager", "rgb(111, 77, 14)\n#6f4d0e\nhsl(39, 78%, 25%)", 0)
-var EviMetaLevitateSpell = newHPEviMetadata(EviLevitateSpell.ID, "wc -l", "12 seed_md_levitate", 0)
-var EviMetaRulesForQuidditch = newHPEviMetadata(EviRulesForQuidditch.ID, "run-result", "Last floor reached: 138 \n Step on which basement is reached (first time): 1771", 0)
-var EviMetaRulesForQuidditchTwo = newHPEviMetadata(EviRulesForQuidditch.ID, "wc-l", "33 main.rs", 0)
+var EviMetaDursleys = newHPEviMetadata(EviDursleys.ID, "color-averager", "rgb(65, 65, 65)\n#414141\nhsl(0, 0%, 25%)", nil, helpers.PTrue(), 0)
+var EviMetaMirrorOfErised = newHPEviMetadata(EviMirrorOfErised.ID, "color-averager", "rgb(111, 77, 14)\n#6f4d0e\nhsl(39, 78%, 25%)", nil, helpers.PTrue(), 0)
+var EviMetaLevitateSpell = newHPEviMetadata(EviLevitateSpell.ID, "wc -l", "12 seed_md_levitate", nil, helpers.PTrue(), 0)
+var EviMetaRulesForQuidditch = newHPEviMetadata(EviRulesForQuidditch.ID, "run-result", "Last floor reached: 138 \n Step on which basement is reached (first time): 1771", nil, helpers.PTrue(), 0)
+var EviMetaRulesForQuidditchTwo = newHPEviMetadata(EviRulesForQuidditch.ID, "wc-l", "33 main.rs", nil, helpers.PTrue(), 0)
 
 var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_car", "A Car that flies", "image", 0)
 var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_dobby", "an elf?", "image", 0)
@@ -326,15 +338,15 @@ var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "see
 var EviHeadlessHuntApplication = newHPEvidence(OpChamberOfSecrets.ID, UserRon.ID, "seed_py_aoc201717", "This group is very particular", "codeblock", 0)
 var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_statue", "Strangely real-looking statue", "image", 0)
 
-var EviMetaFlyingCar = newHPEviMetadata(EviFlyingCar.ID, "color-averager", "rgb(106, 109, 84)\n#6a6d54\nhsl(67, 13%, 38%)", 0)
-var EviMetaDobby = newHPEviMetadata(EviDobby.ID, "color-averager", "rgb(74, 51, 32)\n#4a3320\nhsl(27, 40%, 21%)", 0)
-var EviMetaSpiderAragog = newHPEviMetadata(EviSpiderAragog.ID, "color-averager", "rgb(189, 156, 146)\n#bd9c92\nhsl(14, 25%, 66%)", 0)
-var EviMetaMoaningMyrtle = newHPEviMetadata(EviMoaningMyrtle.ID, "color-averager", "rgb(118, 103, 102)\n#766766\nhsl(4, 7%, 43%)", 0)
-var EviMetaWhompingWillow = newHPEviMetadata(EviWhompingWillow.ID, "color-averager", "rgb(115, 109, 81)\n#736d51\nhsl(49, 17%, 38%)", 0)
-var EviMetaTomRiddlesDiary = newHPEviMetadata(EviTomRiddlesDiary.ID, "run-result", "All keys found by index:  19968", 0)
-var EviMetaTomRiddlesDiaryTwo = newHPEviMetadata(EviTomRiddlesDiary.ID, "wc -l", "98 main.go", 0)
-var EviMetaHeadlessHuntApplication = newHPEviMetadata(EviHeadlessHuntApplication.ID, "run-result", "41797835\nelapsed time (seconds): 3.772843360900879", 0)
-var EviMetaPetrifiedHermione = newHPEviMetadata(EviPetrifiedHermione.ID, "color-averager", "rgb(162, 104, 101)\n#a26865\nhsl(3, 25%, 52%)", 0)
+var EviMetaFlyingCar = newHPEviMetadata(EviFlyingCar.ID, "color-averager", "rgb(106, 109, 84)\n#6a6d54\nhsl(67, 13%, 38%)", evidencemetadata.StatusCompleted.Ptr(), helpers.PTrue(), 0)
+var EviMetaDobby = newHPEviMetadata(EviDobby.ID, "color-averager", "rgb(74, 51, 32)\n#4a3320\nhsl(27, 40%, 21%)", nil, helpers.PTrue(), 0)
+var EviMetaSpiderAragog = newHPEviMetadata(EviSpiderAragog.ID, "color-averager", "rgb(189, 156, 146)\n#bd9c92\nhsl(14, 25%, 66%)", nil, helpers.PTrue(), 0)
+var EviMetaMoaningMyrtle = newHPEviMetadata(EviMoaningMyrtle.ID, "color-averager", "rgb(118, 103, 102)\n#766766\nhsl(4, 7%, 43%)", nil, helpers.PTrue(), 0)
+var EviMetaWhompingWillow = newHPEviMetadata(EviWhompingWillow.ID, "color-averager", "rgb(115, 109, 81)\n#736d51\nhsl(49, 17%, 38%)", nil, helpers.PTrue(), 0)
+var EviMetaTomRiddlesDiary = newHPEviMetadata(EviTomRiddlesDiary.ID, "run-result", "All keys found by index:  19968", nil, helpers.PTrue(), 0)
+var EviMetaTomRiddlesDiaryTwo = newHPEviMetadata(EviTomRiddlesDiary.ID, "wc -l", "98 main.go", nil, helpers.PTrue(), 0)
+var EviMetaHeadlessHuntApplication = newHPEviMetadata(EviHeadlessHuntApplication.ID, "run-result", "41797835\nelapsed time (seconds): 3.772843360900879", nil, helpers.PTrue(), 0)
+var EviMetaPetrifiedHermione = newHPEviMetadata(EviPetrifiedHermione.ID, "color-averager", "rgb(162, 104, 101)\n#a26865\nhsl(3, 25%, 52%)", nil, helpers.PTrue(), 0)
 
 var EviTristateTrophy = newHPEvidence(OpGobletOfFire.ID, UserHarry.ID, "seed_trophy", "First Triwizard Champion Trophy", "image", 0)
 var EviEntryForm = newHPEvidence(OpGobletOfFire.ID, UserCedric.ID, "seed_entry", "Cedric's entry form for Triwizard competition", "codeblock", 0)
@@ -342,12 +354,13 @@ var EviWizardDance = newHPEvidence(OpGobletOfFire.ID, UserCho.ID, "seed_dance", 
 var EviPolyjuice = newHPEvidence(OpGobletOfFire.ID, UserAlastor.ID, "seed_juice", "DIY instructions for Polyjuice Potion", "codeblock", 0)
 var EviWarewolf = newHPEvidence(OpGobletOfFire.ID, UserViktor.ID, "seed_wolf", "Strangely real-looking statue", "terminal-recording", 0)
 
-var EviMetaTristateTrophy = newHPEviMetadata(EviTristateTrophy.ID, "color-averager", "rgb(182, 184, 183)\n#b6b8b7\nhsl(150, 1%, 72%)", 0)
-var EviMetaEntryForm = newHPEviMetadata(EviEntryForm.ID, "run-result", "(No output)", 0)
-var EviMetaEntryFormTwo = newHPEviMetadata(EviEntryForm.ID, "wc -l", "13 seed_entry", 0)
-var EviMetaWizardDance = newHPEviMetadata(EviWizardDance.ID, "color-averager", "rgb(22, 19, 20)\n#161314\nhsl(340, 7%, 8%)", 0)
-var EviMetaPolyjuice = newHPEviMetadata(EviPolyjuice.ID, "wc -l", "13 seed_juice", 0)
-var EviMetaWarewolf = newHPEviMetadata(EviWarewolf.ID, "duration", "348.163058815", 0)
+var EviMetaTristateTrophy = newHPEviMetadata(EviTristateTrophy.ID, "color-averager", "rgb(182, 184, 183)\n#b6b8b7\nhsl(150, 1%, 72%)", nil, helpers.PTrue(), 0)
+var EviMetaEntryForm = newHPEviMetadata(EviEntryForm.ID, "run-result", "(No output)", nil, helpers.PTrue(), 0)
+var EviMetaEntryFormTwo = newHPEviMetadata(EviEntryForm.ID, "wc -l", "13 seed_entry", nil, helpers.PTrue(), 0)
+var EviMetaWizardDance = newHPEviMetadata(EviWizardDance.ID, "color-averager", "rgb(22, 19, 2nil, 0)\n#161314\nhsl(340, 7%, 8%)", nil, helpers.PTrue(), 0)
+var EviMetaPolyjuice = newHPEviMetadata(EviPolyjuice.ID, "wc -l", "13 seed_juice", nil, helpers.PTrue(), 0)
+var EviMetaWarewolf = newHPEviMetadata(EviWarewolf.ID, "duration", "348.163058815", nil, helpers.PTrue(), 0)
+var EviMetaWarewolfOther = newHPEviMetadata(EviWarewolf.ID, "color-averager", "Yo, I can't process this", nil, helpers.PFalse(), 0)
 
 var EviGantt01 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_01", "", "none", -19)
 var EviGantt02 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_02", "", "none", -18)
@@ -456,3 +469,6 @@ var FindingBook2Magic = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-b2magic",
 var FindingBook2CGI = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-cgi", &SomeOtherFindingCategory.ID, "this looks fake", "I'm not entirely sure this is all above board", &noLink)
 var FindingBook2SpiderFear = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-spider", &SomeFindingCategory.ID, "how to scare spiders", "Who would have thought?", &spiderLink)
 var FindingBook2Robes = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-robes", nil, "Robes for all seasons", "Turns out there's only one kind of robe.", &spiderLink)
+
+var newHPServiceWorker = newServiceWorkerGen(1)
+var DemoServiceWorker = newHPServiceWorker("Demo", `{ "type": "web",  "version": 1, "url": "http://demo:3001/process" }`)

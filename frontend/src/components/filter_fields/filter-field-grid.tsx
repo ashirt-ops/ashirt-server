@@ -12,6 +12,7 @@ import {
   EvidenceTypeChooser,
   ManagedCreatorChooser as CreatorChooser,
   TagPicker,
+  TextChooser,
 } from 'src/components/bullet_chooser'
 import { ButtonGroup, default as Button } from 'src/components/button'
 import { ComboBoxItem, default as ComboBox } from 'src/components/combobox'
@@ -92,12 +93,21 @@ export const FilterFieldsGrid = (props: {
 
   const dateRange = state.dateRange ?? null
   // this is a hack to squish the two sets of buttons on the same row. There is no magic "last row" css property
-  const lastRowIndex = props.viewName == 'findings' ? 6 : 5
+  const lastRowIndex = 6
   return (
     <div className={cx('grid-container', props.className)}>
       <Cell startOfRow span={2}>
         <Input label="Description" value={state.text} onChange={mkUpdateState('text')} />
       </Cell>
+      {props.viewName == 'evidence' && (
+        <Cell startOfRow span={2}>
+          <TextChooser
+            label='Metadata'
+            onChange={mkUpdateState('meta')}
+            value={state.meta ?? []}
+          />
+        </Cell>
+      )}
 
       <Cell startOfRow>
         <TagPicker
@@ -256,7 +266,6 @@ const uuidToBasicEvidence = (uuid: string): Evidence => ({
   occurredAt: new Date(),
   tags: [],
   contentType: 'none',
-  metadata: [],
 })
 
 const ChooseEvidenceModal = (props: {

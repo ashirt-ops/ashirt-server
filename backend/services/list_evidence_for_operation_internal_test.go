@@ -43,6 +43,14 @@ func TestBuildListEvidenceWhereClause(t *testing.T) {
 	require.Equal(t, " WHERE evidence.operation_id = ? AND description LIKE ? AND description LIKE ?", toWhere(descBuilder))
 	require.Equal(t, []interface{}{opID, "%" + text[0] + "%", "%" + text[1] + "%"}, toWhereValues(descBuilder))
 
+	meta := []string{"one", "two"}
+	metaBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{Metadata: meta})
+	require.Equal(t, " WHERE evidence.operation_id = ? AND evidence.id IN (SELECT evidence_id FROM evidence_metadata WHERE body LIKE ? AND body LIKE ?)", toWhere(metaBuilder))
+	require.Equal(t, []interface{}{opID, []interface{}{
+		"%" + meta[0] + "%",
+		"%" + meta[1] + "%",
+	}}, toWhereValues(metaBuilder))
+
 	start, end := time.Now(), time.Now().Add(5*time.Second)
 	singleDate := filter.DateValues{
 		filter.DateVal(filter.DateRange{From: start, To: end}),

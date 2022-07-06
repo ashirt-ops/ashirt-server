@@ -40,6 +40,9 @@ func main() {
 	gen(dtos.CheckConnection{})
 	gen(dtos.NewUserCreatedByAdmin{})
 	gen(dtos.CreateUserOutput{})
+	gen(dtos.ServiceWorker{})
+	gen(dtos.ServiceWorkerTestOutput{})
+	gen(dtos.ActiveServiceWorker{})
 	gen(dtos.Flags{})
 
 	// Since this file only contains typescript types, webpack doesn't pick up the

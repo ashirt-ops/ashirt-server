@@ -11,6 +11,7 @@ import OperationEditor from './operation_editor'
 import TagEditor from './tag_editor'
 import UserPermissionEditor from './user_permission_editor'
 import DeleteOperationButton from './delete_operation_button'
+import BatchRunWorker from './batch_run_worker'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -33,11 +34,13 @@ export const OperationEdit = () => {
           { id: "settings", label: "Settings" },
           { id: "users", label: "Users" },
           { id: "tags", label: "Tags" },
+          { id: "tasks", label: "Tasks" },
         ]} >
         <Routes>
           <Route path="settings" element={<SettingManagement operationSlug={operationSlug} />} />
           <Route path="users" element={<UserPermissionEditor operationSlug={operationSlug} />} />
           <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
+          <Route path="tasks" element={<BatchRunWorker operationSlug={operationSlug} />} />
         </Routes>
       </NavVerticalTabMenu>
     </>

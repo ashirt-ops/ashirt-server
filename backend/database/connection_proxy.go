@@ -20,6 +20,9 @@ type ConnectionProxy interface {
 	Update(builder sq.UpdateBuilder) error
 	Delete(builder sq.DeleteBuilder) error
 	WithTx(ctx context.Context, fn func(tx *Transactable)) error
+	// FailIfTransaction tries to call FailTransaction if the underlying connection is a Transactable.
+	// Does nothing if the connection is a Connection
+	FailIfTransaction(err error)
 }
 
 // _verifyConnectionProxyInterface is a "canary" function that ensures that the expected concrete

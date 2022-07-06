@@ -15,6 +15,7 @@ import (
 
 func TestDeleteOperation(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := fullContext(UserHarry.ID, &policy.Deny{})
 	memStore := createPopulatedMemStore(HarryPotterSeedData)

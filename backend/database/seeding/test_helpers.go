@@ -370,6 +370,27 @@ func GetFullEvidenceByFindingID(t *testing.T, db *database.Connection, findingID
 	return allFullEvidence
 }
 
+func GetServiceWorkerByName(t *testing.T, db *database.Connection, name string) models.ServiceWorker {
+	var worker models.ServiceWorker
+	err := db.Get(&worker, sq.Select("*").From("service_workers").Where(sq.Eq{"name": name}))
+	require.NoError(t, err)
+	return worker
+}
+
+func GetServiceWorkerByID(t *testing.T, db *database.Connection, id int64) models.ServiceWorker {
+	var worker models.ServiceWorker
+	err := db.Get(&worker, sq.Select("*").From("service_workers").Where(sq.Eq{"id": id}))
+	require.NoError(t, err)
+	return worker
+}
+
+func ListServiceWorkers(t *testing.T, db *database.Connection) []models.ServiceWorker {
+	var workers []models.ServiceWorker
+	err := db.Select(&workers, sq.Select("*").From("service_workers"))
+	require.NoError(t, err)
+	return workers
+}
+
 func GetFullEvidenceByOperationID(t *testing.T, db *database.Connection, operationID int64) []FullEvidence {
 	var allFullEvidence []FullEvidence
 	err := db.Select(&allFullEvidence, sq.Select("evidence.*", "users.first_name", "users.last_name", "users.slug").

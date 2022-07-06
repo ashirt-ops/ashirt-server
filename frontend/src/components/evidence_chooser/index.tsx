@@ -17,6 +17,7 @@ export default (props: {
   onChange: (e: Array<Evidence>) => void,
   operationSlug: string,
   value: Array<Evidence>,
+  includeSelectAll?: true
 }) => {
   const fetchEvidence = React.useCallback((query: string) => getEvidenceList({ operationSlug: props.operationSlug, query }), [props.operationSlug])
   return (

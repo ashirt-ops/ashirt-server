@@ -25,6 +25,7 @@ type WebConfig struct {
 	BackendURL               string        `split_words:"true"`
 	SuccessRedirectURL       string        `split_words:"true"`
 	FailureRedirectURLPrefix string        `split_words:"true"`
+	UseLambdaRIE             bool          `split_words:"true"`
 	Flags                    string
 	Port                     int
 }
@@ -205,8 +206,8 @@ func ImageStoreBucketName() string {
 	return app.ImgstoreBucketName
 }
 
-// ImageStoreRegion retrieves the APP_IMGSTORE_REGION value from the environment
-func ImageStoreRegion() string {
+// AWSRegion retrieves the APP_IMGSTORE_REGION value from the environment
+func AWSRegion() string {
 	return app.ImgstoreRegion
 }
 
@@ -253,4 +254,8 @@ func StoreBucket() string {
 
 func StoreRegion() string {
 	return store.Region
+}
+
+func UseLambdaRIE() bool {
+	return app.UseLambdaRIE
 }

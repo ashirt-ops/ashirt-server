@@ -12,6 +12,7 @@ import (
 
 func TestCreateFindingCategory(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := contextForUser(UserRon, db)
 

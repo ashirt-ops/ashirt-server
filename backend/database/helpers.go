@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package database
@@ -14,6 +14,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
+
+func (*Connection) FailIfTransaction(err error) {}
 
 // Select executes the provided SelectBuilder query, and marshals the response into the provided slice.
 // Note: this is for retriving multiple results, or "rows"

@@ -6,6 +6,7 @@ package services_test
 import (
 	"testing"
 
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/services"
@@ -149,4 +150,48 @@ func TestUpsertEvidenceMetadata(t *testing.T) {
 	require.Equal(t, input.CanProcess, metadataEntry.CanProcess)
 	require.Equal(t, input.Message, input.Message)
 	require.Equal(t, input.Status, input.Status)
+}
+
+func TestReadEvidenceMetadata(t *testing.T) {
+	db := initTest(t)
+	HarryPotterSeedData.ApplyTo(t, db)
+	op := OpChamberOfSecrets
+	evi := EviDobby
+
+	originalMetadataList := getEvidenceMetadataByEvidenceID(t, db, evi.ID)
+	require.NotEmpty(t, originalMetadataList, "Metadata should be present here.")
+
+	tryRead := func(u models.User, input services.ReadEvidenceMetadataInput, metadata *[]*dtos.EvidenceMetadata) error {
+		ctx := contextForUser(u, db)
+		data, err := services.ReadEvidenceMetadata(ctx, db, input)
+		// metadata = &data
+		*metadata = data
+		return err
+	}
+
+	input := services.ReadEvidenceMetadataInput{
+		OperationSlug: op.Slug,
+		EvidenceUUID:  evi.UUID,
+	}
+
+	var meta []*dtos.EvidenceMetadata
+	// verify permissions
+	require.Error(t, tryRead(UserDraco, input, &meta))    // no operation access
+	require.NoError(t, tryRead(UserSeamus, input, &meta)) // read access
+
+	// verify read
+	require.NoError(t, tryRead(UserRon, input, &meta)) // normal access
+
+	// verify items in result set
+	require.Equal(t, len(originalMetadataList), len(meta))
+	for _, v := range originalMetadataList {
+		found := false
+		for _, w := range meta {
+			if w.Source == v.Source {
+				require.Equal(t, v.Body, w.Body)
+				found = true
+			}
+		}
+		require.True(t, found, "Couldn't find metadata for source")
+	}
 }

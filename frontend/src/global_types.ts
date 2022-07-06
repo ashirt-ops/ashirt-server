@@ -104,13 +104,14 @@ export type Evidence = {
   operator: User,
   occurredAt: Date,
   tags: Array<Tag>,
-  metadata: Array<EvidenceMetadata>,
   contentType: SupportedEvidenceType
 }
 
 export type EvidenceMetadata = {
   source: string,
   body: string,
+  canProcess?: boolean,
+  status?: string, // "Error" | "Queued" | "Completed"
 }
 
 export type Finding = {
@@ -250,4 +251,22 @@ export type FindingCategory = {
   category: string,
   deleted: boolean,
   usageCount: number,
+}
+
+export type ServiceWorker = {
+  id: number,
+  name: string,
+  config: string,
+  deleted: boolean,
+}
+
+export type ActiveServiceWorker = {
+  name: string,
+}
+
+export type ServiceWorkerTestOutput = {
+  id: number,
+  name: string,
+  live: boolean,
+  message: string,
 }

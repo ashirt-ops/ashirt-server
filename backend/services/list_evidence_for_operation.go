@@ -42,9 +42,19 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 		Slug      string `db:"slug"`
 	}
 
-	sb := sq.Select("evidence.id", "evidence.uuid", "description", "evidence.content_type", "occurred_at", "users.first_name", "users.last_name", "users.slug").
+	sb := sq.Select().
 		From("evidence").
-		LeftJoin("users ON evidence.operator_id = users.id")
+		LeftJoin("users ON evidence.operator_id = users.id").
+		Columns(
+			"evidence.id",
+			"evidence.uuid",
+			"description",
+			"evidence.content_type",
+			"occurred_at",
+			"users.first_name",
+			"users.last_name",
+			"users.slug",
+		)
 
 	if i.Filters.SortAsc {
 		sb = sb.OrderBy("occurred_at ASC")
@@ -72,10 +82,6 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 	if err != nil {
 		return nil, backend.WrapError("Cannot get tags for evidence", backend.DatabaseErr(err))
 	}
-	metadata, err := metadataForEvidenceByID(db, evidenceIDs)
-	if err != nil {
-		return nil, backend.WrapError("Cannot get metadata for evidence", backend.DatabaseErr(err))
-	}
 
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))
 	for idx, evi := range evidence {
@@ -83,10 +89,6 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 
 		if !ok {
 			tags = []dtos.Tag{}
-		}
-		evidenceMetadata, ok := metadata[evi.ID]
-		if !ok {
-			evidenceMetadata = []dtos.EvidenceMetadata{}
 		}
 
 		evidenceDTO[idx] = &dtos.Evidence{
@@ -96,7 +98,6 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 			OccurredAt:  evi.OccurredAt,
 			ContentType: evi.ContentType,
 			Tags:        tags,
-			Metadata:    evidenceMetadata,
 		}
 	}
 	return evidenceDTO, nil
@@ -110,6 +111,16 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 
 	for _, text := range filters.Text {
 		sb = sb.Where(sq.Like{"description": "%" + text + "%"})
+	}
+
+	if len(filters.Metadata) > 0 {
+		metadataSubquery := sq.Select("evidence_id").From("evidence_metadata")
+		for _, text := range filters.Metadata {
+			metadataSubquery = metadataSubquery.Where(sq.Like{"body": "%" + text + "%"})
+		}
+		if q, v, e := metadataSubquery.ToSql(); e == nil {
+			sb = sb.Where("evidence.id IN ("+q+")", v)
+		}
 	}
 
 	if values := filters.DateRanges; len(values) > 0 {

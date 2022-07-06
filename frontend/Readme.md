@@ -25,6 +25,10 @@ In addition to the above, the following features are supported:
   * Right Arrow / Down Arrow / K to navigate to older content
 * Generating personal API keys for related tooling
 
+## Deployment flags
+
+This service can change its rendering based on the flags provided _to the backend_. See the backend details on flags [here](/backend/Readme.md#flags).
+
 ## Development Overview
 
 This project utilizes Typescript 3.5 and React 16.8 to construct a versitle and robust website. Packaging is handled via webpack, while dependencies are handled via npm. No specific IDE is required to develop this application.

@@ -18,6 +18,7 @@ import (
 
 func TestCreateEvidence(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 
 	memStore, _ := contentstore.NewMemStore()
@@ -62,6 +63,7 @@ func TestCreateEvidence(t *testing.T) {
 
 func TestHeadlessUserAccess(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	memStore, _ := contentstore.NewMemStore()
 

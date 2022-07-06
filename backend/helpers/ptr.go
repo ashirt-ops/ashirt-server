@@ -16,3 +16,13 @@ func SprintfPtr(s string, vals ...any) *string {
 func Ptr[T any](t T) *T {
 	return &t
 }
+
+// PTrue returns a pointer to a true value
+func PTrue() *bool {
+	return Ptr(true)
+}
+
+// PFalse returns a pointer to a false value
+func PFalse() *bool {
+	return Ptr(false)
+}

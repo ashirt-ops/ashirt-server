@@ -32,7 +32,11 @@ import {
   getOperations,
   getEvidenceMigrationDifference,
   moveEvidence,
+  readEvidenceMetadata,
   updateEvidenceMetadata,
+  runServiceWorkerForEvidence,
+  listActiveServiceWorkers,
+  hasFlag,
 } from 'src/services'
 
 import BinaryUpload from 'src/components/binary_upload'
@@ -320,57 +324,82 @@ export const EvidenceMetadataModal = (props: {
   onRequestClose: () => void,
   onUpdated: () => void,
 }) => {
+  const wiredMetadata = useWiredData(React.useCallback(() => Promise.all([
+    readEvidenceMetadata({
+      operationSlug: props.operationSlug,
+      evidenceUuid: props.evidence.uuid,
+    }),
+    hasFlag("allow-metadata-edit")
+  ]), [props.operationSlug, props.evidence.uuid]))
 
-  // this switch controls whether the user is only able to view metadata, or if they can manually
-  // create and edit existing metadata. We might get more precise control later.
-  const viewOnly = false
+  const containerProps: Omit<ViewEditEvidenceMetadataContainerProps, 'evidenceMetadata'> = {
+    evidenceUuid: props.evidence.uuid,
+    operationSlug: props.operationSlug,
+    onRefresh: wiredMetadata.reload,
+    onRerun: async (metadata) => {
+      await runServiceWorkerForEvidence({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+        source: metadata.source,
+      })
+    },
+  }
 
   return (
     <Modal title='Evidence Metadata' onRequestClose={props.onRequestClose}>
-      {viewOnly
-        ? (
-          <ViewEditEvidenceMetadataContainer
-            evidence={props.evidence}
-            operationSlug={props.operationSlug}
-          />
-        )
-        : (
-          <TabMenu className={cx('tab-menu')}
-            tabs={[
-              {
-                id: 'view', label: 'View',
-                content: (
-                  <ViewEditEvidenceMetadataContainer
-                    evidence={props.evidence}
-                    operationSlug={props.operationSlug}
-                    onEdited={() => { props.onUpdated(); props.onRequestClose() }}
-                  />
-                )
-              },
-              {
-                id: 'create', label: 'Create',
-                content: (
-                  <AddEvidenceMetadataForm
-                    evidence={props.evidence}
-                    onCreated={() => { props.onUpdated(); props.onRequestClose() }}
-                    operationSlug={props.operationSlug}
-                  />
-                )
-              },
-            ]}
-          />
-        )
+      {wiredMetadata.render(([metadata, allowEditing]) => {
+        return (<>
+          {!allowEditing
+            ? (
+              <ViewEditEvidenceMetadataContainer
+                {...containerProps}
+                evidenceMetadata={metadata}
+              />
+            )
+            : (
+              <TabMenu className={cx('tab-menu')}
+                tabs={[
+                  {
+                    id: 'view', label: 'View',
+                    content: (
+                      <ViewEditEvidenceMetadataContainer
+                        {...containerProps}
+                        evidenceMetadata={metadata}
+                        onEdited={() => { props.onUpdated(); props.onRequestClose() }}
+                      />
+                    )
+                  },
+                  {
+                    id: 'create', label: 'Create',
+                    content: (
+                      <AddEvidenceMetadataForm
+                        evidenceUuid={props.evidence.uuid}
+                        onCreated={() => { props.onUpdated(); props.onRequestClose() }}
+                        operationSlug={props.operationSlug}
+                      />
+                    )
+                  },
+                ]}
+              />
+            )
+          }
+        </>)
       }
+      )}
     </Modal>
   )
 }
 
-const ViewEditEvidenceMetadataContainer = (props: {
-  evidence: Evidence,
-  operationSlug: string,
+type ViewEditEvidenceMetadataContainerProps = {
+  evidenceUuid: string
+  evidenceMetadata: Array<EvidenceMetadata>
+  operationSlug: string
+  onRefresh: () => void
   onEdited?: () => void
-  onCancel?: () => void,
-}) => {
+  onRerun?: (metadata: EvidenceMetadata) => void
+}
+
+const ViewEditEvidenceMetadataContainer = (props: ViewEditEvidenceMetadataContainerProps) => {
   const [editedMetadata, setEditedMetadata] = React.useState<null | EvidenceMetadata>(null)
   const [filterText, setFilterText] = React.useState<string>("")
 
@@ -378,7 +407,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
     editedMetadata
       ? (
         <EditEvidenceMetadataForm
-          evidence={props.evidence}
+          evidenceUuid={props.evidenceUuid}
           metadata={editedMetadata}
           onCancel={() => setEditedMetadata(null)}
           onEdited={() => {
@@ -390,10 +419,12 @@ const ViewEditEvidenceMetadataContainer = (props: {
       )
       : (
         <ViewEvidenceMetadataForm
-          evidence={props.evidence}
+          metadata={props.evidenceMetadata}
           onMetadataEdited={props.onEdited ? setEditedMetadata : undefined}
+          onRerun={props.onRerun}
           filterText={filterText}
           onFilterUpdated={setFilterText}
+          onRefresh={props.onRefresh}
         />
       )
   )
@@ -402,7 +433,7 @@ const ViewEditEvidenceMetadataContainer = (props: {
 const EditEvidenceMetadataForm = (props: {
   metadata: EvidenceMetadata
   operationSlug: string
-  evidence: Evidence
+  evidenceUuid: string
   onEdited: () => void
   onCancel: () => void
 }) => (
@@ -413,7 +444,7 @@ const EditEvidenceMetadataForm = (props: {
     onSubmit={(metadata: EvidenceMetadata) => {
       return updateEvidenceMetadata({
         operationSlug: props.operationSlug,
-        evidenceUuid: props.evidence.uuid,
+        evidenceUuid: props.evidenceUuid,
         body: metadata.body,
         source: metadata.source,
       })
@@ -425,7 +456,7 @@ const EditEvidenceMetadataForm = (props: {
 
 const AddEvidenceMetadataForm = (props: {
   operationSlug: string,
-  evidence: Evidence,
+  evidenceUuid: string,
   onCreated: () => void,
   onCancel?: () => void,
 }) => (
@@ -435,7 +466,7 @@ const AddEvidenceMetadataForm = (props: {
     onSubmit={(metadata: EvidenceMetadata) => {
       return createEvidenceMetadata({
         operationSlug: props.operationSlug,
-        evidenceUuid: props.evidence.uuid,
+        evidenceUuid: props.evidenceUuid,
         body: metadata.body,
         source: metadata.source,
       })
@@ -445,41 +476,63 @@ const AddEvidenceMetadataForm = (props: {
 )
 
 const ViewEvidenceMetadataForm = (props: {
-  evidence: Evidence,
+  metadata: Array<EvidenceMetadata>,
   onMetadataEdited?: (metadata: EvidenceMetadata) => void
-  onCancel?: () => void,
+  onRerun?: (metadata: EvidenceMetadata) => void
+  onRefresh: () => void
   filterText: string,
   onFilterUpdated: (val: string) => void
 }) => {
-  const formComponentProps = useForm({
-    onSuccess: () => { },
-    handleSubmit: async () => { },
-  })
-  return (
-    <Form {...formComponentProps} onCancel={props.onCancel}>
-      <div className={cx('view-metadata-root')}>
-        {props.evidence.metadata.length == 0
-          ? <em>No metadata exists for this evidence</em>
-          : (<>
-            <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
+  const wiredServices = useWiredData(listActiveServiceWorkers)
 
-            {props.evidence.metadata
-              .map((meta) => {
-                return (
-                  <EvidenceMetadataItem
-                    key={meta.source}
-                    meta={meta}
-                    filterText={props.filterText}
-                    onMetadataEdited={props.onMetadataEdited}
-                    expanded={props.evidence.metadata.length == 1}
-                  />
-                )
-              }
-              )}
-          </>)
-        }
-      </div>
-    </Form>
+  const [hide, setHide] = React.useState(true)
+  const disabledTitleForStatus = (status?: string) => (
+    status === 'Queued'
+      ? "Work has been queued"
+      : status === 'Processing'
+        ? "Evidence is being processed"
+        : undefined
+  )
+  return (
+    <div className={cx('view-metadata-root')}>
+      {wiredServices.render(wrappedServices => {
+        const services = wrappedServices.map(s => s.name)
+        return <>
+          {props.metadata.length == 0
+            ? <em>No metadata exists for this evidence</em>
+            : (<>
+              <Input label="Filter Metadata" value={props.filterText} onChange={props.onFilterUpdated} />
+              <Checkbox label='Hide Unprocessable' className={cx('unprocessable-cb')} value={hide} onChange={setHide} />
+
+              {props.metadata
+                .filter(meta => hide ? (meta.canProcess !== false) : true)
+                .map((meta) => {
+                  return (
+                    <EvidenceMetadataItem
+                      key={meta.source}
+                      meta={meta}
+                      filterText={props.filterText}
+                      onMetadataEdited={props.onMetadataEdited}
+                      expanded={props.metadata.length == 1}
+                      onRerun={services.includes(meta.source) ? props.onRerun : undefined}
+                      rerunDisabledLabel={disabledTitleForStatus(meta.status)}
+                    />
+                  )
+                }
+                )}
+            </>)
+          }
+        </>
+      })}
+
+      <Button
+        className={cx('refresh-button')}
+        icon={require('./refresh.svg')}
+        onClick={props.onRefresh}
+        title="Refresh"
+      >
+      </Button>
+    </div>
   )
 }
 
@@ -524,23 +577,38 @@ const EvidenceMetadataItem = (props: {
   meta: EvidenceMetadata
   filterText: string
   onMetadataEdited?: (metadata: EvidenceMetadata) => void
+  onRerun?: (metadata: EvidenceMetadata) => void
+  rerunDisabledLabel?: string
   expanded?: boolean
 }) => {
-  const { onMetadataEdited, meta, filterText, expanded } = props
+  const { onMetadataEdited, onRerun, meta, filterText, expanded } = props
   const minLength = 3
-  const content = highlightSubstring(
-    meta.body, filterText, cx("content-important"), { regexFlags: "i", minLength }
+  const content = highlightSubstring(meta.body, filterText, cx("content-important"),
+    { regexFlags: "i", minLength }
   )
 
-  const actions: Array<ExpandableSectionLabelActionItem> = onMetadataEdited
-    ? [{
-      label: 'Edit',
-      action: (e) => {
-        e.stopPropagation()
-        onMetadataEdited(meta)
-      }
-    }]
-    : []
+  const editAction: ExpandableSectionLabelActionItem = {
+    label: 'Edit',
+    action: (e) => {
+      e.stopPropagation();
+      onMetadataEdited?.(meta)
+    },
+  }
+
+  const rerunAction: ExpandableSectionLabelActionItem = {
+    label: 'Re-Run',
+    action: (e) => {
+      e.stopPropagation();
+      onRerun?.(meta)
+    },
+    disabled: props.rerunDisabledLabel !== undefined,
+    title: props.rerunDisabledLabel
+  }
+
+  const actions: Array<ExpandableSectionLabelActionItem> = [
+    ...(onMetadataEdited ? [editAction] : []),
+    ...(onRerun ? [rerunAction] : []),
+  ]
 
   return (
     <ExpandableSection
@@ -549,17 +617,22 @@ const EvidenceMetadataItem = (props: {
       )}
       initiallyExpanded={expanded}
       labelClassName={cx(
-        (content.length == 1 && filterText.length >= minLength)
+        (content.length === 1 && filterText.length >= minLength)
           ? 'label-not-important'
           : ''
       )}
     >
-      <span className={cx('metadata-content')}>{...content}</span>
+      <pre className={cx('metadata-content')}>{...content}</pre>
     </ExpandableSection>
   )
 }
 
-type ExpandableSectionLabelActionItem = { label: string, action: (e: React.MouseEvent<Element, MouseEvent>) => void }
+type ExpandableSectionLabelActionItem = {
+  label: string,
+  action: (e: React.MouseEvent<Element, MouseEvent>) => void
+  disabled?: boolean
+  title?: string
+}
 
 const ExpandableSectionLabel = (props: {
   label: string
@@ -571,7 +644,15 @@ const ExpandableSectionLabel = (props: {
       {props.actions.length > 0 && (
         <ButtonGroup className={cx('expandable-section-button-group')}>
           {props.actions.map(act => (
-            <Button small key={act.label} onClick={act.action}>{act.label}</Button>
+            <Button
+              small
+              key={act.label}
+              disabled={act.disabled}
+              title={act.title}
+              onClick={act.action}
+            >
+              {act.label}
+            </Button>
           ))}
         </ButtonGroup>
       )}

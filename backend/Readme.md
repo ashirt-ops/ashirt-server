@@ -63,7 +63,9 @@ Configuration is handled entirely via environment variables. To that end, here a
   * `APP_SUCCESS_REDIRECT_URL`
     * Used in some authentication schemes to redirect to the frontend after a successful authentication.
   * `APP_FAILURE_REDIRECT_URL_PREFIX`
-    * Used in some authentication schemes to redirect to the frontend after a failed authentication. 
+    * Used in some authentication schemes to redirect to the frontend after a failed authentication.
+  * `APP_FLAGS`
+    * Sets flags that enable or disable certain frontend features. Generally has no direct effect on the backend. See the [flags](#flags) section on a list of supported flags.
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
@@ -153,6 +155,15 @@ Configuration is handled entirely via environment variables. To that end, here a
   * `EMAIL_SMTP_AUTH_TYPE`
     * Indicates which kind of authentication scheme to use when connecting to an SMTP server
     * Valid values: `login`, `plain`, `crammd5` (for LOGIN, PLAIN, and CRAM-MD5 respectively)
+
+#### Flags
+
+Here is the list of currently supported flags, and their meaning on the frontend. This are applied via the APP_FLAGS environment variable. Multiple flags can be specified by separating the flags with a comma (`,`)
+
+| Flag Name           | Description of effect                                              |
+| ------------------- | ------------------------------------------------------------------ |
+| welcome-message     | Presents a welcome message to the user on the operations list page |
+| allow-metadata-edit | Allows users with write access to create or edit evidence metadata |
 
 ### Authentication and Authorization
 
@@ -393,7 +404,13 @@ As mentioned above, other services can iteract with the system, under the guise 
 
 The backend has a system to send emails out to notify users (with an email address) as needed. Currently, this system is only used to send account recovery emails. An email server will be needed, but stmp services can be configured via environment variables.
 
-Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`. 
+Custom email services can be implemented or extended by meeting the `EmailServicer` interface in `emailservices/interface.go`.
+
+### Evidence Metadata Enrichment
+
+The evidence pipeline enables external services to perform special processing on evidence and have the result of the processing stored as metadata for that evidence. For example, an OCR function might analyze an image, search for words in that image, and return those words. That data would then become searchable/reviewable within the evidence and finding timelines.
+
+The details for this service are detailed in [pipeline readme](/backend/pipeline_readme.md)
 
 ## Development Overview
 
@@ -405,7 +422,7 @@ This project has been verified to build and run on Linux and MacOS X. Windows ma
 
 ### Dependencies
 
-* Go 1.13
+* Go 1.18
   * To get supporing libraries, use `go mod download`
   * To clean up libraries, use `go mod tidy`
 * MySQL 8

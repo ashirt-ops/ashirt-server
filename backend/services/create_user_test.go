@@ -13,7 +13,7 @@ import (
 
 func TestCreateUser(t *testing.T) {
 	db := initTest(t)
-
+	defer db.DB.Close()
 	// verify first user is an admin
 	i := services.CreateUserInput{
 		FirstName: "Luna",
@@ -53,6 +53,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestCreateHeadlessUser(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 
 	i := services.CreateUserInput{

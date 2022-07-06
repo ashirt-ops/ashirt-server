@@ -11,6 +11,7 @@ type UserSlug = { userSlug: string }
 type QueryId = { queryId: number }
 type TagId = { tagId: number }
 type FindingCategoryId = { findingCategoryId: number }
+type ServiceWorkerId = { serviceWorkerId: number }
 
 type FindingPayload = {
   category: string,
@@ -27,6 +28,11 @@ type UserPayload = {
 type TagPayload = {
   name: string,
   colorName: string
+}
+
+type ServiceWorkerPayload = {
+  name: string
+  config: string
 }
 
 export interface DataSource {
@@ -53,6 +59,10 @@ export interface DataSource {
   moveEvidence(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<void>
   createEvidenceMetadata(ids: OpSlug & EvidenceUuid, payload: { source: string, body: string }): Promise<void>
   updateEvidenceMetadata(ids: OpSlug & EvidenceUuid, payload: { source: string, body: string }): Promise<void>
+  readEvidenceMetadata(ids: OpSlug & EvidenceUuid): Promise<Array<dtos.EvidenceMetadata>>
+  runServiceWorkerForEvidence(ids: OpSlug & EvidenceUuid & { source: string }): Promise<void>
+  runServiceWorkerBatch(ids: OpSlug, payload: { workers: Array<string>, evidenceUuids: Array<string> } ): Promise<void>
+  runAllServiceWorkersForEvidence(ids: OpSlug & EvidenceUuid): Promise<void>
 
   listFindingCategories(includeDeleted: boolean): Promise<Array<dtos.FindingCategory>>
   createFindingCategory(payload: { category: string }): Promise<dtos.FindingCategory>
@@ -100,6 +110,14 @@ export interface DataSource {
   updateDefaultTag(ids: TagId, payload: TagPayload): Promise<void>
   deleteDefaultTag(ids: TagId): Promise<void>
   mergeDefaultTags(payload: Array<TagPayload>): Promise<void>
+
+  adminListServiceWorkers(): Promise<Array<dtos.ServiceWorker>>
+  adminCreateServiceWorker(payload: ServiceWorkerPayload): Promise<void>
+  adminUpdateServiceWorker(ids: ServiceWorkerId, payload: ServiceWorkerPayload): Promise<void>
+  adminDeleteServiceWorker(ids: ServiceWorkerId): Promise<void>
+  adminUnDeleteServiceWorker(ids: ServiceWorkerId): Promise<void>
+  adminTestServiceWorker(ids: ServiceWorkerId): Promise<dtos.ServiceWorkerTestOutput>
+  listActiveServiceWorkers(): Promise<Array<dtos.ActiveServiceWorker>>
 
   // TODO these should go into their respective authschemes:
   createRecoveryCode(ids: UserSlug): Promise<{ code: string }>
