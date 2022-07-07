@@ -12,6 +12,7 @@ import (
 	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
@@ -19,26 +20,22 @@ func TestDeleteAuthScheme(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
+
 	normalUser := UserRon
 	targetUser := UserHarry
-	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 	schemeName := localConsts.Code
 	recoveryScheme := recoveryConsts.Code
 
-	// add some recovery data
-	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
-		"auth_scheme": recoveryScheme,
-		"auth_type":   recoveryScheme,
-		"user_key":    normalUser.FirstName,
-		"user_id":     normalUser.ID,
-	})
-	require.NoError(t, err)
-	_, err = db.Insert("auth_scheme_data", map[string]interface{}{
-		"auth_scheme": recoveryScheme,
-		"auth_type":   recoveryScheme,
-		"user_key":    targetUser.FirstName,
-		"user_id":     targetUser.ID,
+	// seed recovery data
+	users := []models.User{normalUser, targetUser}
+	err := db.BatchInsert("auth_scheme_data", len(users), func(i int) map[string]interface{} {
+		return map[string]interface{}{
+			"auth_scheme": recoveryScheme,
+			"auth_type":   recoveryScheme,
+			"user_key":    users[i].FirstName,
+			"user_id":     users[i].ID,
+		}
 	})
 	require.NoError(t, err)
 
@@ -74,7 +71,7 @@ func TestDeleteAuthScheme(t *testing.T) {
 	})
 
 	// verify delete auth for other (admin)
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(UserDumbledore, db)
 	verifyDeletedScheme(t, false, ctx, db, targetUser.ID, services.DeleteAuthSchemeInput{
 		UserSlug:   targetUser.Slug,
 		SchemeName: schemeName,
@@ -85,7 +82,6 @@ func TestDeleteAuthScheme(t *testing.T) {
 		UserSlug:   targetUser.Slug,
 		SchemeName: recoveryConsts.Code,
 	})
-
 }
 
 func verifyDeletedScheme(t *testing.T, expectError bool, ctx context.Context, db *database.Connection, userID int64, input services.DeleteAuthSchemeInput) {
@@ -108,20 +104,21 @@ func TestDeleteAuthSchemeUsers(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
+
 	normalUser := UserRon
 	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
 	schemeName := localConsts.Code
 
 	baseUsers := getUsersForAuth(t, db, schemeName)
 	require.Greater(t, len(baseUsers), 0)
 
 	// verify non-admins have no access
+	ctx := contextForUser(normalUser, db)
 	err := services.DeleteAuthSchemeUsers(ctx, db, schemeName)
 	require.Error(t, err)
 
 	// verify admins have access + effect works
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	err = services.DeleteAuthSchemeUsers(ctx, db, schemeName)
 	require.NoError(t, err)
 
@@ -139,10 +136,11 @@ var darkMarkScheme = dtos.SupportedAuthScheme{SchemeName: "Death Eaters", Scheme
 
 func TestListAuthDetailsKeys(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
+
 	normalUser := UserRon
 	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
 
 	supportedSchemes := []dtos.SupportedAuthScheme{
 		localAuthScheme,
@@ -150,11 +148,12 @@ func TestListAuthDetailsKeys(t *testing.T) {
 	}
 
 	// verify non-admins cannot access this service
+	ctx := contextForUser(normalUser, db)
 	_, err := services.ListAuthDetails(ctx, db, &supportedSchemes)
 	require.Error(t, err)
 
 	// verify list for admins
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	results, err := services.ListAuthDetails(ctx, db, &supportedSchemes)
 	require.NoError(t, err)
 	require.Equal(t, 2, len(results))

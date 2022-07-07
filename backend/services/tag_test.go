@@ -51,12 +51,12 @@ func TestCreateDefaultTag(t *testing.T) {
 	}
 
 	// verify that a normal cannot create a new default tag
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 	_, err := services.CreateDefaultTag(ctx, db, i)
 	require.Error(t, err)
 
 	// verify that an admin can create a new default tag
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	createdTag, err := services.CreateDefaultTag(ctx, db, i)
 	require.NoError(t, err)
 	require.Equal(t, createdTag.Name, i.Name)
@@ -94,12 +94,12 @@ func TestDeleteDefaultTag(t *testing.T) {
 	}
 
 	// verify that a normal user cannot delete default tags
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 	err := services.DeleteDefaultTag(ctx, db, i)
 	require.Error(t, err)
 
 	// verify that an admin can delete default tags
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	err = services.DeleteDefaultTag(ctx, db, i)
 	require.NoError(t, err)
 	require.NotContains(t, getDefaultTags(t, db), tagToRemove)
@@ -247,12 +247,12 @@ func TestListDefaultTags(t *testing.T) {
 	require.NotEqual(t, len(allTags), 0, "Some number of default tags should exist")
 
 	// verify that normal users cannot list default tags
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 	_, err := services.ListDefaultTags(ctx, db)
 	require.Error(t, err)
 
 	// verify that admins can list default tags
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	tags, err := services.ListDefaultTags(ctx, db)
 	require.NoError(t, err)
 	require.Equal(t, len(tags), len(allTags))
@@ -412,12 +412,12 @@ func TestUpdateDefaultTag(t *testing.T) {
 	}
 
 	// verify that a normal user cannot update a default tags
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 	err := services.UpdateDefaultTag(ctx, db, i)
 	require.Error(t, err)
 
 	// verify that an admin can update default tags
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	err = services.UpdateDefaultTag(ctx, db, i)
 	require.NoError(t, err)
 

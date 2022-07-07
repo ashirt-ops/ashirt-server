@@ -19,7 +19,7 @@ func TestCreateAPIKey(t *testing.T) {
 	normalUser := UserHermione
 	targetUser := UserNeville
 	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 
 	// Verify self actions
 	verifyCreateAPIKey(t, false, ctx, db, normalUser.ID, "")
@@ -29,7 +29,7 @@ func TestCreateAPIKey(t *testing.T) {
 	verifyCreateAPIKey(t, true, ctx, db, targetUser.ID, targetUser.Slug)
 
 	// verify other-based actions (admin)
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	verifyCreateAPIKey(t, false, ctx, db, targetUser.ID, targetUser.Slug)
 }
 
@@ -60,7 +60,7 @@ func TestDeleteAPIKey(t *testing.T) {
 	normalUser := UserRon
 	targetUser := UserHarry
 	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 
 	// verify delete api key for other user (as self)
 	verifyDeleteAPIKey(t, true, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
@@ -91,7 +91,7 @@ func TestDeleteAPIKey(t *testing.T) {
 	})
 
 	// verify delete api key for other (admin)
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	verifyDeleteAPIKey(t, false, ctx, db, targetUser.ID, services.DeleteAPIKeyInput{
 		UserSlug:  targetUser.Slug,
 		AccessKey: APIKeyHarry1.AccessKey,
@@ -126,7 +126,7 @@ func TestListAPIKeys(t *testing.T) {
 	normalUser := UserRon
 	targetUser := UserHarry
 	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 
 	// verify read-self
 	verifyListAPIKeys(t, false, ctx, db, "", APIKeyRon1, APIKeyRon2)
@@ -137,7 +137,7 @@ func TestListAPIKeys(t *testing.T) {
 	verifyListAPIKeys(t, true, ctx, db, targetUser.Slug)
 
 	// verify read-other (admin)
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	verifyListAPIKeys(t, false, ctx, db, targetUser.Slug, APIKeyHarry1, APIKeyHarry2)
 }
 

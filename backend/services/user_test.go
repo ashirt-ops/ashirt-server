@@ -72,11 +72,11 @@ func TestCreateHeadlessUser(t *testing.T) {
 	}
 
 	// Verify non-admin can not create headless users
-	ctx := simpleFullContext(UserHarry)
+	ctx := contextForUser(UserHarry, db)
 	_, err := services.CreateHeadlessUser(ctx, db, i)
 	require.Error(t, err)
 
-	ctx = simpleFullContext(UserDumbledore)
+	ctx = contextForUser(UserDumbledore, db)
 	result, err := services.CreateHeadlessUser(ctx, db, i)
 	require.NoError(t, err)
 
@@ -270,7 +270,7 @@ func TestReadUser(t *testing.T) {
 	normalUser := UserRon
 	targetUser := UserHarry
 	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 
 	supportedAuthSchemes := []dtos.SupportedAuthScheme{
 		{SchemeName: "Local", SchemeCode: "local"},
@@ -291,13 +291,13 @@ func TestReadUser(t *testing.T) {
 	require.Error(t, err)
 
 	// verify read-other (as admin)
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	retrievedUser, err = services.ReadUser(ctx, db, targetUser.Slug, &supportedAuthSchemes)
 	require.NoError(t, err)
 	verifyRetrievedUser(t, targetUser, retrievedUser, supportedAuthSchemes)
 
 	// verify old/removed auth schemes are filtered out
-	ctx = simpleFullContext(normalUser)
+	ctx = contextForUser(normalUser, db)
 	supportedAuthSchemes = []dtos.SupportedAuthScheme{
 		{SchemeName: "Petronus", SchemeCode: "petroni"},
 	}
@@ -330,7 +330,7 @@ func TestUpdateUserProfile(t *testing.T) {
 	normalUser := UserRon
 	targetUser := UserHarry
 	adminUser := UserDumbledore
-	ctx := simpleFullContext(normalUser)
+	ctx := contextForUser(normalUser, db)
 
 	// verify read-self
 	verifyUserProfileUpdate(t, false, ctx, db, normalUser.ID, services.UpdateUserProfileInput{
@@ -356,7 +356,7 @@ func TestUpdateUserProfile(t *testing.T) {
 	})
 
 	// verify read-other (admin)
-	ctx = simpleFullContext(adminUser)
+	ctx = contextForUser(adminUser, db)
 	verifyUserProfileUpdate(t, false, ctx, db, targetUser.ID, services.UpdateUserProfileInput{
 		UserSlug:  targetUser.Slug,
 		FirstName: "Stan4",
