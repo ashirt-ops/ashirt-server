@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -10,9 +10,16 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
+
+type DeleteAuthSchemeInput struct {
+	UserSlug   string
+	SchemeName string
+}
 
 type detailedSchemeTable struct {
 	AuthScheme      string     `db:"auth_scheme"`
@@ -20,6 +27,44 @@ type detailedSchemeTable struct {
 	UserCount       int64      `db:"num_users"`
 	UniqueUserCount int64      `db:"unique_users"`
 	LastUsed        *time.Time `db:"last_used"`
+}
+
+// DeleteAuthScheme removes a user's association with a particular auth_scheme. This function applies for both
+// admin related actions and plain user actions. If UserSlug is not provided, this will apply to the requesting
+// user. If it is provided, then this triggers admin validation, and will apply to the provided user matching the
+// given slug.
+func DeleteAuthScheme(ctx context.Context, db *database.Connection, i DeleteAuthSchemeInput) error {
+	var userID int64
+	var err error
+
+	if userID, err = SelfOrSlugToUserID(ctx, db, i.UserSlug); err != nil {
+		return backend.WrapError("Unable to delete auth scheme", backend.DatabaseErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanDeleteAuthScheme{UserID: userID, SchemeCode: i.SchemeName}); err != nil {
+		return backend.WrapError("Unwilling to delete auth scheme", backend.UnauthorizedWriteErr(err))
+	}
+
+	err = db.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"user_id": userID, "auth_scheme": i.SchemeName}))
+	if err != nil {
+		return backend.WrapError("Cannot delete auth scheme", backend.DatabaseErr(err))
+	}
+
+	return nil
+}
+
+// DeleteAuthSchemeUsers removes/unlinks all users from a provided scheme
+func DeleteAuthSchemeUsers(ctx context.Context, db *database.Connection, schemeCode string) error {
+	if err := policy.Require(middleware.Policy(ctx), policy.CanDeleteAuthForAllUsers{SchemeCode: schemeCode}); err != nil {
+		return backend.WrapError("Unwilling to remove auth schemes for all users", backend.UnauthorizedWriteErr(err))
+	}
+
+	err := db.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"auth_scheme": schemeCode}))
+	if err != nil {
+		return backend.WrapError("Cannot remove auth schemes for all users", backend.DatabaseErr(err))
+	}
+
+	return nil
 }
 
 func ListAuthDetails(ctx context.Context, db *database.Connection, supportedAuthSchemes *[]dtos.SupportedAuthScheme) ([]*dtos.DetailedAuthenticationInfo, error) {
