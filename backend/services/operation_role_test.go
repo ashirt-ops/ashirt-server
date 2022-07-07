@@ -34,14 +34,14 @@ func TestSetUserOperationRole(t *testing.T) {
 	err := services.SetUserOperationRole(ctx, db, input)
 	require.NoError(t, err)
 
-	getDbRole := func() (string, error) {
+	getDBRole := func() (string, error) {
 		var newRole string
 		err := db.Get(&newRole, sq.Select("role").
 			From("user_operation_permissions").
 			Where(sq.Eq{"operation_id": masterOp.ID, "user_id": targetUser.ID}))
 		return newRole, err
 	}
-	newRole, err := getDbRole()
+	newRole, err := getDBRole()
 	require.NoError(t, err)
 	require.Equal(t, string(targetRole), newRole)
 
@@ -54,7 +54,7 @@ func TestSetUserOperationRole(t *testing.T) {
 	err = services.SetUserOperationRole(ctx, db, input)
 	require.NoError(t, err)
 
-	newRole, err = getDbRole()
+	_, err = getDBRole()
 	require.True(t, database.IsEmptyResultSetError(err))
 
 	targetRole = policy.OperationRoleAdmin
@@ -66,7 +66,7 @@ func TestSetUserOperationRole(t *testing.T) {
 	err = services.SetUserOperationRole(ctx, db, input)
 	require.NoError(t, err)
 
-	newRole, err = getDbRole()
+	newRole, err = getDBRole()
 	require.NoError(t, err)
 	require.Equal(t, string(targetRole), newRole)
 }

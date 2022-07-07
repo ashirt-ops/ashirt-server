@@ -91,39 +91,6 @@ func tagsForEvidenceByID(db *database.Connection, evidenceIDs []int64) (tagsByEv
 	return
 }
 
-func metadataForEvidenceByID(db *database.Connection, evidenceIDs []int64) (map[int64][]dtos.EvidenceMetadata, error) {
-	emptyList := map[int64][]dtos.EvidenceMetadata{}
-	if len(evidenceIDs) == 0 {
-		return emptyList, nil
-	}
-	var metadata []struct {
-		models.EvidenceMetadata
-		EvidenceID int64 `db:"evidence_id"`
-	}
-
-	err := db.Select(&metadata, sq.Select("evidence_id", "source", "body", "status", "can_process").
-		From("evidence_metadata").
-		Where(sq.Eq{"evidence_id": evidenceIDs}).
-		OrderBy("source ASC"))
-	if err != nil {
-		return emptyList, err
-	}
-
-	metadataByEvidenceID := map[int64][]dtos.EvidenceMetadata{}
-
-	for _, meta := range metadata {
-		dto := dtos.EvidenceMetadata{
-			Body:       meta.Body,
-			Source:     meta.Source,
-			Status:     meta.Status,
-			CanProcess: meta.CanProcess,
-		}
-		metadataByEvidenceID[meta.EvidenceID] = append(metadataByEvidenceID[meta.EvidenceID], dto)
-	}
-
-	return metadataByEvidenceID, nil
-}
-
 // lookupOperation returns an operation model for the given slug
 func lookupOperation(db *database.Connection, operationSlug string) (*models.Operation, error) {
 	var operation models.Operation

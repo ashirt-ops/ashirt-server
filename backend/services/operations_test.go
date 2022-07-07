@@ -166,7 +166,7 @@ func TestListOperationsForAdmin(t *testing.T) {
 	// verify non admins don't have access
 
 	ctx = fullContext(UserDraco.ID, &policy.FullAccess{}) // Note: not an admin
-	ops, err = services.ListOperationsForAdmin(ctx, db)
+	_, err = services.ListOperationsForAdmin(ctx, db)
 	require.Error(t, err)
 	require.Equal(t, "Requesting user is not an admin", err.Error())
 }

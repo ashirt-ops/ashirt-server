@@ -556,7 +556,7 @@ func validateAdminCanModifyFlag(ctx context.Context, targetUser models.UserWithA
 		if targetUserIsSelf && valueUpdated {
 			return errors.New("Admins cannot alter their own admin status")
 		}
-		if targetUserIsHeadless && *flagsToUpdate.Admin == true {
+		if targetUserIsHeadless && *flagsToUpdate.Admin {
 			return errors.New("Headless users cannot be granted admin status")
 		}
 	}

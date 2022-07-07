@@ -41,7 +41,7 @@ func TestCreateUser(t *testing.T) {
 	require.Equal(t, luna.LastName, i.LastName)
 
 	// Verify re-register will fail (due to unique email constraint)
-	createUserOutput, err = services.CreateUser(db, i)
+	_, err = services.CreateUser(db, i)
 	require.Error(t, err)
 
 	// Verify 2nd user (non-admin, no matching slug)
@@ -109,9 +109,9 @@ func TestDeleteUser(t *testing.T) {
 	err = services.DeleteUser(ctx, db, targetUser.Slug)
 	require.Nil(t, err)
 
-	require.True(t, 0 == countRows(t, db, "api_keys", "user_id=?", targetUser.ID))
-	require.True(t, 0 == countRows(t, db, "auth_scheme_data", "user_id=?", targetUser.ID))
-	require.True(t, 0 == countRows(t, db, "user_operation_permissions", "user_id=?", targetUser.ID))
+	require.True(t, countRows(t, db, "api_keys", "user_id=?", targetUser.ID) == 0)
+	require.True(t, countRows(t, db, "auth_scheme_data", "user_id=?", targetUser.ID) == 0)
+	require.True(t, countRows(t, db, "user_operation_permissions", "user_id=?", targetUser.ID) == 0)
 
 	var user models.User
 	err = db.Get(&user, sq.Select("*").From("users").Where(sq.Eq{"id": targetUser.ID}))
@@ -273,7 +273,7 @@ func TestReadUser(t *testing.T) {
 	ctx := simpleFullContext(normalUser)
 
 	supportedAuthSchemes := []dtos.SupportedAuthScheme{
-		dtos.SupportedAuthScheme{SchemeName: "Local", SchemeCode: "local"},
+		{SchemeName: "Local", SchemeCode: "local"},
 	}
 
 	// verify read-self
@@ -299,7 +299,7 @@ func TestReadUser(t *testing.T) {
 	// verify old/removed auth schemes are filtered out
 	ctx = simpleFullContext(normalUser)
 	supportedAuthSchemes = []dtos.SupportedAuthScheme{
-		dtos.SupportedAuthScheme{SchemeName: "Petronus", SchemeCode: "petroni"},
+		{SchemeName: "Petronus", SchemeCode: "petroni"},
 	}
 	retrievedUser, err = services.ReadUser(ctx, db, "", &supportedAuthSchemes)
 	require.NoError(t, err)
@@ -390,10 +390,10 @@ func TestDeleteSessionsForUserSlug(t *testing.T) {
 
 	// populate some sessions
 	sessionsToAdd := []models.Session{
-		models.Session{UserID: targetedUser.ID, SessionData: []byte("a")},
-		models.Session{UserID: alsoPresentUser.ID, SessionData: []byte("b")},
-		models.Session{UserID: targetedUser.ID, SessionData: []byte("c")},
-		models.Session{UserID: alsoPresentUser.ID, SessionData: []byte("d")},
+		{UserID: targetedUser.ID, SessionData: []byte("a")},
+		{UserID: alsoPresentUser.ID, SessionData: []byte("b")},
+		{UserID: targetedUser.ID, SessionData: []byte("c")},
+		{UserID: alsoPresentUser.ID, SessionData: []byte("d")},
 	}
 	err := db.BatchInsert("sessions", len(sessionsToAdd), func(i int) map[string]interface{} {
 		return map[string]interface{}{

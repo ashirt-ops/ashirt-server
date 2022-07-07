@@ -78,10 +78,10 @@ func testBatchRemoveEvidence(t *testing.T, db *database.Connection, goodOp mockO
 // TestBuildTags is a unit-test suite for the buildTags function.
 func TestBuildTags(t *testing.T) {
 	tagsByID := map[int64]dtos.Tag{
-		1: dtos.Tag{ID: 1, ColorName: "blue", Name: "blueTag"},
-		2: dtos.Tag{ID: 2, ColorName: "red", Name: "redTag"},
-		3: dtos.Tag{ID: 3, ColorName: "aqua", Name: "aquaTag"},
-		4: dtos.Tag{ID: 4, ColorName: "maroon", Name: "maroonTag"},
+		1: {ID: 1, ColorName: "blue", Name: "blueTag"},
+		2: {ID: 2, ColorName: "red", Name: "redTag"},
+		3: {ID: 3, ColorName: "aqua", Name: "aquaTag"},
+		4: {ID: 4, ColorName: "maroon", Name: "maroonTag"},
 	}
 	tagStr := "1,2,4"
 	tags := buildTags(tagsByID, &tagStr)
@@ -125,10 +125,10 @@ func TestAllTagsByID(t *testing.T) {
 	db := internalTestDBSetup(t)
 
 	tags := []models.Tag{
-		models.Tag{ID: 1, OperationID: 1, Name: "firstTag", ColorName: "black", CreatedAt: time.Now()},
-		models.Tag{ID: 2, OperationID: 1, Name: "secondTag", ColorName: "white", CreatedAt: time.Now()},
-		models.Tag{ID: 3, OperationID: 1, Name: "thirdTag", ColorName: "gray", CreatedAt: time.Now()},
-		models.Tag{ID: 7, OperationID: 1, Name: "fourthTag", ColorName: "red", CreatedAt: time.Now()},
+		{ID: 1, OperationID: 1, Name: "firstTag", ColorName: "black", CreatedAt: time.Now()},
+		{ID: 2, OperationID: 1, Name: "secondTag", ColorName: "white", CreatedAt: time.Now()},
+		{ID: 3, OperationID: 1, Name: "thirdTag", ColorName: "gray", CreatedAt: time.Now()},
+		{ID: 7, OperationID: 1, Name: "fourthTag", ColorName: "red", CreatedAt: time.Now()},
 	}
 	db.BatchInsert("tags", len(tags), func(i int) map[string]interface{} {
 		return map[string]interface{}{
