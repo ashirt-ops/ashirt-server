@@ -46,7 +46,7 @@ func TestDeleteFindingCategory(t *testing.T) {
 
 	deleteInput := services.DeleteFindingCategoryInput{
 		DoDelete:          true,
-		FindingCategoryId: deleteTargetCategory.ID,
+		FindingCategoryID: deleteTargetCategory.ID,
 	}
 
 	// verify that normal users cannot delete categories
@@ -61,7 +61,7 @@ func TestDeleteFindingCategory(t *testing.T) {
 	// verify that admins can restore categories
 	restoreInput := services.DeleteFindingCategoryInput{
 		DoDelete:          false,
-		FindingCategoryId: restoreTargetCategory.ID,
+		FindingCategoryID: restoreTargetCategory.ID,
 	}
 
 	// verify that categories cannot be duplicated

@@ -15,7 +15,7 @@ import (
 )
 
 type DeleteFindingCategoryInput struct {
-	FindingCategoryId int64
+	FindingCategoryID int64
 	DoDelete          bool
 }
 
@@ -47,7 +47,7 @@ func DeleteFindingCategory(ctx context.Context, db *database.Connection, i Delet
 	}
 
 	query := sq.Update("finding_categories").
-		Where(sq.Eq{"id": i.FindingCategoryId})
+		Where(sq.Eq{"id": i.FindingCategoryID})
 
 	if i.DoDelete {
 		query = query.Set("deleted_at", time.Now())
