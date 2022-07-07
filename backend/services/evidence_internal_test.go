@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/stretchr/testify/require"
 )
 
 // TestBuildListEvidenceWhereClause is a unit-test for the buildTags function.

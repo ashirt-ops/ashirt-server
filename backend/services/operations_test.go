@@ -201,7 +201,6 @@ func TestUpdateOperation(t *testing.T) {
 	require.Equal(t, input.Status, updatedOperation.Status)
 }
 
-
 func TestReadOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
@@ -217,7 +216,6 @@ func TestReadOperation(t *testing.T) {
 	require.Equal(t, masterOp.Status, retrievedOp.Status)
 	require.Equal(t, len(HarryPotterSeedData.UsersForOp(masterOp)), retrievedOp.NumUsers)
 }
-
 
 func validateOp(t *testing.T, expected models.Operation, actual *dtos.Operation) {
 	require.Equal(t, expected.Slug, actual.Slug, "Slugs should match")

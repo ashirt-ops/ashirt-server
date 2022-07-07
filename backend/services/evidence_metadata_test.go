@@ -6,12 +6,11 @@ package services_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/services"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestCreateEvidenceMetadata(t *testing.T) {
