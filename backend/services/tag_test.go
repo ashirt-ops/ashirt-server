@@ -236,22 +236,6 @@ func validateTagSets(t *testing.T, dtoSet []*dtos.Tag, dbSet []models.Tag, valid
 	}
 }
 
-func ptrTagListToReal(in []*dtos.Tag) []dtos.Tag {
-	rtn := make([]dtos.Tag, len(in))
-	for i, item := range in {
-		rtn[i] = *item
-	}
-	return rtn
-}
-
-func realTagListToPtr(in []dtos.Tag) []*dtos.Tag {
-	rtn := make([]*dtos.Tag, len(in))
-	for i, item := range in {
-		rtn[i] = &item
-	}
-	return rtn
-}
-
 func TestListDefaultTags(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)

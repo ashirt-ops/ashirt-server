@@ -152,6 +152,10 @@ func TestReadFinding(t *testing.T) {
 	validateTagSets(t, realTagListToPtr(retrievedFinding.Tags), HarryPotterSeedData.TagsForFinding(masterFinding), validateTag)
 }
 
+func realTagListToPtr(in []dtos.Tag) []*dtos.Tag {
+	return helpers.Map(in, func(t dtos.Tag) *dtos.Tag { return &t })
+}
+
 func TestUpdateFinding(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
