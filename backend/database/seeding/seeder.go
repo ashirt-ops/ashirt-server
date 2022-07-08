@@ -228,6 +228,14 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 	return err
 }
 
+func (seed Seeder) Reset(db *database.Connection) error {
+	err := ClearDB(db)
+	if err != nil {
+		return err
+	}
+	return seed.ApplyTo(db)
+}
+
 func (seed Seeder) CategoryForFinding(finding models.Finding) string {
 	if finding.CategoryID == nil {
 		return ""
