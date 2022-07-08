@@ -17,7 +17,7 @@ import (
 func TestSetUserOperationRole(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	targetUser := UserHarry

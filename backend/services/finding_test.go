@@ -10,7 +10,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
@@ -20,7 +19,7 @@ func TestCreateFinding(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	op := OpChamberOfSecrets
 	i := services.CreateFindingInput{
@@ -43,7 +42,7 @@ func TestDeleteFinding(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	finding := FindingBook2Magic
 	i := services.DeleteFindingInput{
@@ -65,7 +64,7 @@ func TestDeleteFinding(t *testing.T) {
 func TestListFindingsForOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	input := services.ListFindingsForOperationInput{
@@ -86,7 +85,7 @@ func TestAddEvidenceToFinding(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	masterFinding := FindingBook2Magic
@@ -129,7 +128,7 @@ func TestAddEvidenceToFinding(t *testing.T) {
 func TestReadFinding(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	masterFinding := FindingBook2Magic
@@ -159,7 +158,7 @@ func realTagListToPtr(in []dtos.Tag) []*dtos.Tag {
 func TestUpdateFinding(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	// tests for common fields
 	masterOp := OpChamberOfSecrets

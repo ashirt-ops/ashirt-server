@@ -14,7 +14,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
 
 	sq "github.com/Masterminds/squirrel"
@@ -102,12 +101,12 @@ func TestDeleteEvidenceNoPropogate(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	op := OpChamberOfSecrets
 	memStore := createPopulatedMemStore(HarryPotterSeedData)
 
 	masterEvidence := EviFlyingCar
 	i := services.DeleteEvidenceInput{
-		OperationSlug:            OpChamberOfSecrets.Slug,
+		OperationSlug:            op.Slug,
 		EvidenceUUID:             masterEvidence.UUID,
 		DeleteAssociatedFindings: false,
 	}
@@ -120,6 +119,7 @@ func TestDeleteEvidenceNoPropogate(t *testing.T) {
 	getEvidenceCount := makeDBRowCounter(t, db, "evidence", "uuid=?", i.EvidenceUUID)
 	require.Equal(t, int64(1), getEvidenceCount(), "Database should have evidence to delete")
 
+	ctx := contextForUser(UserRon, db)
 	err := services.DeleteEvidence(ctx, db, memStore, i)
 	require.NoError(t, err)
 	require.Equal(t, int64(0), getEvidenceCount(), "Database should have deleted the evidence")
@@ -132,7 +132,7 @@ func TestDeleteEvidenceWithPropogation(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 	memStore := createPopulatedMemStore(HarryPotterSeedData)
 
 	masterEvidence := EviDobby
@@ -177,7 +177,7 @@ func getAssociatedFindings(t *testing.T, db *database.Connection, evidenceID int
 func TestListEvidenceForFinding(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	masterFinding := FindingBook2Magic
@@ -199,7 +199,7 @@ func TestListEvidenceForFinding(t *testing.T) {
 func TestListEvidenceForOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	allEvidence := getFullEvidenceByOperationID(t, db, masterOp.ID)
@@ -220,7 +220,7 @@ func TestListEvidenceForOperation(t *testing.T) {
 func TestReadEvidence(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 	cs, _ := contentstore.NewMemStore()
 
 	masterOp := OpChamberOfSecrets
@@ -278,7 +278,7 @@ func TestReadEvidence(t *testing.T) {
 func TestUpdateEvidence(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 	cs, _ := contentstore.NewMemStore()
 
 	// tests for common fields

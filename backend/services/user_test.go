@@ -11,7 +11,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
 
 	sq "github.com/Masterminds/squirrel"
@@ -96,12 +95,12 @@ func TestDeleteUser(t *testing.T) {
 	require.True(t, 0 < countRows(t, db, "user_operation_permissions", "user_id=?", targetUser.ID))
 
 	// verify that non-admins cannot delete
-	ctx := fullContext(UserDraco.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserDraco, db)
 	err := services.DeleteUser(ctx, db, targetUser.Slug)
 	require.Error(t, err)
 
 	// verify user cannot delete themselves
-	ctx = fullContextAsAdmin(admin.ID, &policy.FullAccess{})
+	ctx = contextForUser(admin, db)
 	err = services.DeleteUser(ctx, db, admin.Slug)
 	require.NotNil(t, err)
 
@@ -139,12 +138,12 @@ func TestListUsersForAdmin(t *testing.T) {
 	input.Pagination.SetMaxItems(input.Pagination.PageSize) // force constrain not to affect us
 
 	// verify access restricted for non-admins
-	ctx := fullContext(UserDraco.ID, &policy.FullAccess{}) // Note: not an admin
+	ctx := contextForUser(UserDraco, db)
 	_, err := services.ListUsersForAdmin(ctx, db, input)
 	require.Error(t, err)
 
 	// Verify admins can list users (no deleted users)
-	ctx = fullContextAsAdmin(UserDumbledore.ID, &policy.FullAccess{})
+	ctx = contextForUser(UserDumbledore, db)
 	pagedUsers, err := services.ListUsersForAdmin(ctx, db, input)
 	require.NoError(t, err)
 
@@ -190,7 +189,7 @@ func TestListUsersForAdmin(t *testing.T) {
 func TestListUsersForOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	allUserOpRoles := getUsersWithRoleForOperationByOperationID(t, db, masterOp.ID)
@@ -227,7 +226,7 @@ func TestListUsers(t *testing.T) {
 }
 
 func testListUsersCase(t *testing.T, db *database.Connection, query string, includeDeleted bool, expectedUsers []models.User) {
-	ctx := fullContext(UserHarry.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserHarry, db)
 
 	users, err := services.ListUsers(ctx, db, services.ListUsersInput{Query: query, IncludeDeleted: includeDeleted})
 	require.NoError(t, err)
@@ -411,12 +410,12 @@ func TestDeleteSessionsForUserSlug(t *testing.T) {
 	require.True(t, len(targetedUserSessions) > 0)
 
 	// verify non-admin cannot delete session data
-	ctx := fullContext(UserHarry.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserHarry, db)
 	err = services.DeleteSessionsForUserSlug(ctx, db, targetedUser.Slug)
 	require.Error(t, err)
 
 	// verify admin can delete session data
-	ctx = fullContextAsAdmin(UserDumbledore.ID, &policy.FullAccess{})
+	ctx = contextForUser(UserDumbledore, db)
 	err = services.DeleteSessionsForUserSlug(ctx, db, targetedUser.Slug)
 	require.NoError(t, err)
 
@@ -440,12 +439,12 @@ func TestSetUserFlags(t *testing.T) {
 	}
 
 	// verify access restricted for non-admins
-	ctx := fullContext(UserDraco.ID, &policy.FullAccess{}) // Note: not an admin
+	ctx := contextForUser(UserDraco, db)
 	err := services.SetUserFlags(ctx, db, input)
 	require.Error(t, err)
 
 	// As an admin
-	ctx = fullContextAsAdmin(adminUser.ID, &policy.FullAccess{})
+	ctx = contextForUser(adminUser, db)
 
 	// verify users can't disable themselves
 	sameUserInput := services.SetUserFlagsInput{

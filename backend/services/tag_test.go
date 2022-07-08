@@ -11,7 +11,6 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
@@ -27,7 +26,7 @@ func TestCreateTag(t *testing.T) {
 		OperationSlug: op.Slug,
 	}
 
-	ctx := fullContext(UserHarry.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserHarry, db)
 	createdTag, err := services.CreateTag(ctx, db, i)
 	require.NoError(t, err)
 	require.Equal(t, createdTag.Name, i.Name)
@@ -74,7 +73,7 @@ func TestDeleteTag(t *testing.T) {
 		OperationSlug: op.Slug,
 	}
 
-	ctx := fullContext(UserHarry.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserHarry, db)
 	err := services.DeleteTag(ctx, db, i)
 	require.NoError(t, err)
 
@@ -195,7 +194,7 @@ func TestListTagsByEvidenceDate(t *testing.T) {
 func TestListTagsForOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	allTags := getTagFromOperationID(t, db, masterOp.ID)
@@ -383,7 +382,7 @@ func TestUpdateTag(t *testing.T) {
 		ColorName:     "green",
 	}
 
-	ctx := fullContext(UserHarry.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserHarry, db)
 	err := services.UpdateTag(ctx, db, i)
 	require.NoError(t, err)
 

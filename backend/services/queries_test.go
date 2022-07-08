@@ -9,14 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestCreateQuery(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	op := OpChamberOfSecrets
 	i := services.CreateQueryInput{
@@ -36,7 +35,7 @@ func TestCreateQuery(t *testing.T) {
 func TestDeleteQuery(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	i := services.DeleteQueryInput{
 		OperationSlug: OpChamberOfSecrets.Slug,
@@ -54,7 +53,7 @@ func TestDeleteQuery(t *testing.T) {
 func TestListQueriesForOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	allQueries := getQueriesForOperationID(t, db, masterOp.ID)
@@ -69,7 +68,7 @@ func TestListQueriesForOperation(t *testing.T) {
 func TestUpdateQuery(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 	masterQuery := QuerySalazarsHier

@@ -19,7 +19,7 @@ func TestCreateOperation(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	// verify slug name is invalid
 	i := services.CreateOperationInput{
@@ -74,7 +74,7 @@ func TestDeleteOperation(t *testing.T) {
 	db := initTest(t)
 	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserHarry.ID, &policy.Deny{})
+	ctx := contextForUser(UserHarry, db)
 	memStore := createPopulatedMemStore(HarryPotterSeedData)
 
 	masterOp := OpChamberOfSecrets
@@ -85,7 +85,7 @@ func TestDeleteOperation(t *testing.T) {
 	require.Error(t, err)
 
 	// Verify admins can delete
-	ctx = fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx = contextForUser(UserRon, db)
 	err = services.DeleteOperation(ctx, db, memStore, masterOp.Slug)
 	require.NoError(t, err)
 	// ensure content was removed
@@ -143,7 +143,7 @@ func TestListOperations(t *testing.T) {
 func TestListOperationsForAdmin(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContextAsAdmin(UserDumbledore.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserDumbledore, db)
 
 	fullOps := getOperations(t, db)
 	require.NotEqual(t, len(fullOps), 0, "Some number of operations should exist")
@@ -164,8 +164,7 @@ func TestListOperationsForAdmin(t *testing.T) {
 	}
 
 	// verify non admins don't have access
-
-	ctx = fullContext(UserDraco.ID, &policy.FullAccess{}) // Note: not an admin
+	ctx = contextForUser(UserDraco, db)
 	_, err = services.ListOperationsForAdmin(ctx, db)
 	require.Error(t, err)
 	require.Equal(t, "Requesting user is not an admin", err.Error())
@@ -182,7 +181,7 @@ func TestSanitizeOperationSlug(t *testing.T) {
 func TestUpdateOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	// tests for common fields
 	masterOp := OpChamberOfSecrets
@@ -204,7 +203,7 @@ func TestUpdateOperation(t *testing.T) {
 func TestReadOperation(t *testing.T) {
 	db := initTest(t)
 	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	ctx := contextForUser(UserRon, db)
 
 	masterOp := OpChamberOfSecrets
 

@@ -80,25 +80,6 @@ func createPopulatedMemStore(seed TestSeedData) *contentstore.MemStore {
 	return seeding.CreatePopulatedMemStore(seed.Seeder)
 }
 
-// to be replaced
-func fullContext(userid int64, p policy.Policy) context.Context {
-	ctx := context.Background()
-	return middleware.InjectIntoContext(ctx, middleware.InjectIntoContextInput{
-		UserID:       userid,
-		IsSuperAdmin: false,
-		UserPolicy:   p,
-	})
-}
-
-func fullContextAsAdmin(userid int64, p policy.Policy) context.Context {
-	ctx := context.Background()
-	return middleware.InjectIntoContext(ctx, middleware.InjectIntoContextInput{
-		UserID:       userid,
-		IsSuperAdmin: true,
-		UserPolicy:   p,
-	})
-}
-
 // Exported seed data
 var HarryPotterSeedData = TestSeedData{
 	seeding.HarryPotterSeedData,
