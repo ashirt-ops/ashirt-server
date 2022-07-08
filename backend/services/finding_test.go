@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
@@ -16,139 +17,136 @@ import (
 type findingValidator func(*testing.T, models.Finding, *dtos.Finding)
 
 func TestCreateFinding(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	op := OpChamberOfSecrets
-	i := services.CreateFindingInput{
-		OperationSlug: op.Slug,
-		Category:      VendorFindingCategory.Category,
-		Title:         "When Dinosaurs Attack",
-		Description:   "An investigative look into what happens when dinosaurs vandalize neighborhoods like yours",
-	}
-	createdFinding, err := services.CreateFinding(ctx, db, i)
-	require.NoError(t, err)
-	fullFinding, err := services.ReadFinding(ctx, db, services.ReadFindingInput{OperationSlug: op.Slug, FindingUUID: createdFinding.UUID})
-	require.NoError(t, err)
+		op := OpChamberOfSecrets
+		i := services.CreateFindingInput{
+			OperationSlug: op.Slug,
+			Category:      VendorFindingCategory.Category,
+			Title:         "When Dinosaurs Attack",
+			Description:   "An investigative look into what happens when dinosaurs vandalize neighborhoods like yours",
+		}
+		createdFinding, err := services.CreateFinding(ctx, db, i)
+		require.NoError(t, err)
+		fullFinding, err := services.ReadFinding(ctx, db, services.ReadFindingInput{OperationSlug: op.Slug, FindingUUID: createdFinding.UUID})
+		require.NoError(t, err)
 
-	require.Equal(t, i.Category, fullFinding.Category)
-	require.Equal(t, i.Title, fullFinding.Title)
-	require.Equal(t, i.Description, fullFinding.Description)
+		require.Equal(t, i.Category, fullFinding.Category)
+		require.Equal(t, i.Title, fullFinding.Title)
+		require.Equal(t, i.Description, fullFinding.Description)
+	})
 }
 
 func TestDeleteFinding(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	finding := FindingBook2Magic
-	i := services.DeleteFindingInput{
-		OperationSlug: OpChamberOfSecrets.Slug,
-		FindingUUID:   finding.UUID,
-	}
-	getFindingCount := makeDBRowCounter(t, db, "findings", "id=?", finding.ID)
-	require.Equal(t, int64(1), getFindingCount(), "Database should have a finding to delete")
+		finding := FindingBook2Magic
+		i := services.DeleteFindingInput{
+			OperationSlug: OpChamberOfSecrets.Slug,
+			FindingUUID:   finding.UUID,
+		}
+		getFindingCount := makeDBRowCounter(t, db, "findings", "id=?", finding.ID)
+		require.Equal(t, int64(1), getFindingCount(), "Database should have a finding to delete")
 
-	getMappedEvidenceCount := makeDBRowCounter(t, db, "evidence_finding_map", "finding_id=?", finding.ID)
-	require.True(t, getMappedEvidenceCount() > 0, "Database should have associated evidence to delete")
+		getMappedEvidenceCount := makeDBRowCounter(t, db, "evidence_finding_map", "finding_id=?", finding.ID)
+		require.True(t, getMappedEvidenceCount() > 0, "Database should have associated evidence to delete")
 
-	err := services.DeleteFinding(ctx, db, i)
-	require.NoError(t, err)
-	require.Equal(t, int64(0), getFindingCount(), "Database should have deleted the finding")
-	require.Equal(t, int64(0), getMappedEvidenceCount(), "Database should have deleted evidence mapping")
+		err := services.DeleteFinding(ctx, db, i)
+		require.NoError(t, err)
+		require.Equal(t, int64(0), getFindingCount(), "Database should have deleted the finding")
+		require.Equal(t, int64(0), getMappedEvidenceCount(), "Database should have deleted evidence mapping")
+	})
 }
 
 func TestListFindingsForOperation(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
+	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	masterOp := OpChamberOfSecrets
-	input := services.ListFindingsForOperationInput{
-		OperationSlug: masterOp.Slug,
-		Filters:       helpers.TimelineFilters{},
-	}
+		masterOp := OpChamberOfSecrets
+		input := services.ListFindingsForOperationInput{
+			OperationSlug: masterOp.Slug,
+			Filters:       helpers.TimelineFilters{},
+		}
 
-	allFindings := getFindingsByOperationID(t, db, masterOp.ID)
-	require.NotEqual(t, len(allFindings), 0, "Some number of findings should exist")
+		allFindings := getFindingsByOperationID(t, db, masterOp.ID)
+		require.NotEqual(t, len(allFindings), 0, "Some number of findings should exist")
 
-	foundFindings, err := services.ListFindingsForOperation(ctx, db, input)
-	require.NoError(t, err)
-	require.Equal(t, len(foundFindings), len(allFindings))
-	validateFindingSets(t, foundFindings, allFindings, validateFinding)
+		foundFindings, err := services.ListFindingsForOperation(ctx, db, input)
+		require.NoError(t, err)
+		require.Equal(t, len(foundFindings), len(allFindings))
+		validateFindingSets(t, foundFindings, allFindings, buildFindingValidator(seed))
+	})
 }
 
 func TestAddEvidenceToFinding(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	masterOp := OpChamberOfSecrets
-	masterFinding := FindingBook2Magic
-	evidenceToAdd1 := EviSpiderAragog
-	evidenceToAdd2 := EviMoaningMyrtle
-	evidenceToRemove1 := EviDobby
-	evidenceToRemove2 := EviFlyingCar
+		masterOp := OpChamberOfSecrets
+		masterFinding := FindingBook2Magic
+		evidenceToAdd1 := EviSpiderAragog
+		evidenceToAdd2 := EviMoaningMyrtle
+		evidenceToRemove1 := EviDobby
+		evidenceToRemove2 := EviFlyingCar
 
-	initialEvidenceList := getEvidenceIDsFromFinding(t, db, masterFinding.ID)
+		initialEvidenceList := getEvidenceIDsFromFinding(t, db, masterFinding.ID)
 
-	expectedEvidenceSet := make(map[int64]bool)
-	for _, id := range initialEvidenceList {
-		if id != evidenceToRemove1.ID && id != evidenceToRemove2.ID {
-			expectedEvidenceSet[id] = true
+		expectedEvidenceSet := make(map[int64]bool)
+		for _, id := range initialEvidenceList {
+			if id != evidenceToRemove1.ID && id != evidenceToRemove2.ID {
+				expectedEvidenceSet[id] = true
+			}
 		}
-	}
-	expectedEvidenceSet[evidenceToAdd1.ID] = true
-	expectedEvidenceSet[evidenceToAdd2.ID] = true
-	expectedEvidenceList := make([]int64, 0, len(expectedEvidenceSet))
-	for key, v := range expectedEvidenceSet {
-		if v {
-			expectedEvidenceList = append(expectedEvidenceList, key)
+		expectedEvidenceSet[evidenceToAdd1.ID] = true
+		expectedEvidenceSet[evidenceToAdd2.ID] = true
+		expectedEvidenceList := make([]int64, 0, len(expectedEvidenceSet))
+		for key, v := range expectedEvidenceSet {
+			if v {
+				expectedEvidenceList = append(expectedEvidenceList, key)
+			}
 		}
-	}
 
-	i := services.AddEvidenceToFindingInput{
-		OperationSlug:    masterOp.Slug,
-		FindingUUID:      masterFinding.UUID,
-		EvidenceToAdd:    []string{evidenceToAdd1.UUID, evidenceToAdd2.UUID},
-		EvidenceToRemove: []string{evidenceToRemove1.UUID, evidenceToRemove2.UUID},
-	}
-	err := services.AddEvidenceToFinding(ctx, db, i)
-	require.NoError(t, err)
+		i := services.AddEvidenceToFindingInput{
+			OperationSlug:    masterOp.Slug,
+			FindingUUID:      masterFinding.UUID,
+			EvidenceToAdd:    []string{evidenceToAdd1.UUID, evidenceToAdd2.UUID},
+			EvidenceToRemove: []string{evidenceToRemove1.UUID, evidenceToRemove2.UUID},
+		}
+		err := services.AddEvidenceToFinding(ctx, db, i)
+		require.NoError(t, err)
 
-	changedEvidenceList := getEvidenceIDsFromFinding(t, db, masterFinding.ID)
+		changedEvidenceList := getEvidenceIDsFromFinding(t, db, masterFinding.ID)
 
-	require.Equal(t, sorted(expectedEvidenceList), sorted(changedEvidenceList))
+		require.Equal(t, sorted(expectedEvidenceList), sorted(changedEvidenceList))
+	})
 }
 
 func TestReadFinding(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
+	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	masterOp := OpChamberOfSecrets
-	masterFinding := FindingBook2Magic
+		masterOp := OpChamberOfSecrets
+		masterFinding := FindingBook2Magic
 
-	input := services.ReadFindingInput{
-		OperationSlug: masterOp.Slug,
-		FindingUUID:   masterFinding.UUID,
-	}
+		input := services.ReadFindingInput{
+			OperationSlug: masterOp.Slug,
+			FindingUUID:   masterFinding.UUID,
+		}
 
-	retrievedFinding, err := services.ReadFinding(ctx, db, input)
-	require.NoError(t, err)
+		retrievedFinding, err := services.ReadFinding(ctx, db, input)
+		require.NoError(t, err)
 
-	require.Equal(t, masterFinding.UUID, retrievedFinding.UUID)
-	require.Equal(t, masterFinding.Title, retrievedFinding.Title)
-	require.Equal(t, HarryPotterSeedData.CategoryForFinding(masterFinding), retrievedFinding.Category)
-	require.Equal(t, masterFinding.Description, retrievedFinding.Description)
-	require.Equal(t, masterFinding.ReadyToReport, retrievedFinding.ReadyToReport)
-	require.Equal(t, masterFinding.TicketLink, retrievedFinding.TicketLink)
-	require.Equal(t, len(HarryPotterSeedData.EvidenceIDsForFinding(masterFinding)), retrievedFinding.NumEvidence)
-	validateTagSets(t, realTagListToPtr(retrievedFinding.Tags), HarryPotterSeedData.TagsForFinding(masterFinding), validateTag)
+		require.Equal(t, masterFinding.UUID, retrievedFinding.UUID)
+		require.Equal(t, masterFinding.Title, retrievedFinding.Title)
+		require.Equal(t, seed.CategoryForFinding(masterFinding), retrievedFinding.Category)
+		require.Equal(t, masterFinding.Description, retrievedFinding.Description)
+		require.Equal(t, masterFinding.ReadyToReport, retrievedFinding.ReadyToReport)
+		require.Equal(t, masterFinding.TicketLink, retrievedFinding.TicketLink)
+		require.Equal(t, len(seed.EvidenceIDsForFinding(masterFinding)), retrievedFinding.NumEvidence)
+		validateTagSets(t, realTagListToPtr(retrievedFinding.Tags), seed.TagsForFinding(masterFinding), validateTag)
+	})
 }
 
 func realTagListToPtr(in []dtos.Tag) []*dtos.Tag {
@@ -156,37 +154,39 @@ func realTagListToPtr(in []dtos.Tag) []*dtos.Tag {
 }
 
 func TestUpdateFinding(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	// tests for common fields
-	masterOp := OpChamberOfSecrets
-	masterFinding := FindingBook2Magic
-	input := services.UpdateFindingInput{
-		OperationSlug: masterOp.Slug,
-		FindingUUID:   masterFinding.UUID,
-		Category:      DetectionGapFindingCategory.Category,
-		Title:         "New Title",
-		Description:   "New Description",
-	}
+		// tests for common fields
+		masterOp := OpChamberOfSecrets
+		masterFinding := FindingBook2Magic
+		input := services.UpdateFindingInput{
+			OperationSlug: masterOp.Slug,
+			FindingUUID:   masterFinding.UUID,
+			Category:      DetectionGapFindingCategory.Category,
+			Title:         "New Title",
+			Description:   "New Description",
+		}
 
-	err := services.UpdateFinding(ctx, db, input)
-	require.NoError(t, err)
-	finding, err := services.ReadFinding(ctx, db, services.ReadFindingInput{OperationSlug: masterOp.Slug, FindingUUID: masterFinding.UUID})
-	require.NoError(t, err)
-	require.Equal(t, input.Description, finding.Description)
-	require.Equal(t, input.Title, finding.Title)
-	require.Equal(t, input.Category, finding.Category)
+		err := services.UpdateFinding(ctx, db, input)
+		require.NoError(t, err)
+		finding, err := services.ReadFinding(ctx, db, services.ReadFindingInput{OperationSlug: masterOp.Slug, FindingUUID: masterFinding.UUID})
+		require.NoError(t, err)
+		require.Equal(t, input.Description, finding.Description)
+		require.Equal(t, input.Title, finding.Title)
+		require.Equal(t, input.Category, finding.Category)
+	})
 }
 
-func validateFinding(t *testing.T, expected models.Finding, actual *dtos.Finding) {
-	require.Equal(t, expected.UUID, actual.UUID)
-	require.Equal(t, HarryPotterSeedData.CategoryForFinding(expected), actual.Category)
-	require.Equal(t, expected.Title, actual.Title)
-	require.Equal(t, expected.Description, actual.Description)
-	require.Equal(t, expected.ReadyToReport, actual.ReadyToReport)
-	require.Equal(t, expected.TicketLink, actual.TicketLink)
+func buildFindingValidator(seed TestSeedData) findingValidator {
+	return func(t *testing.T, expected models.Finding, actual *dtos.Finding) {
+		require.Equal(t, expected.UUID, actual.UUID)
+		require.Equal(t, seed.CategoryForFinding(expected), actual.Category)
+		require.Equal(t, expected.Title, actual.Title)
+		require.Equal(t, expected.Description, actual.Description)
+		require.Equal(t, expected.ReadyToReport, actual.ReadyToReport)
+		require.Equal(t, expected.TicketLink, actual.TicketLink)
+	}
 }
 
 func validateFindingSets(t *testing.T, dtoSet []*dtos.Finding, dbSet []models.Finding, validate findingValidator) {

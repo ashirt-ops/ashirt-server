@@ -9,208 +9,200 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestCreateTag(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
+		op := OpSorcerersStone
+		i := services.CreateTagInput{
+			Name:          "New Tag",
+			ColorName:     "indigo",
+			OperationSlug: op.Slug,
+		}
 
-	op := OpSorcerersStone
-	i := services.CreateTagInput{
-		Name:          "New Tag",
-		ColorName:     "indigo",
-		OperationSlug: op.Slug,
-	}
+		ctx := contextForUser(UserHarry, db)
+		createdTag, err := services.CreateTag(ctx, db, i)
+		require.NoError(t, err)
+		require.Equal(t, createdTag.Name, i.Name)
+		require.NotContains(t, seed.AllInitialTagIds(), createdTag.ID, "Should have new ID")
 
-	ctx := contextForUser(UserHarry, db)
-	createdTag, err := services.CreateTag(ctx, db, i)
-	require.NoError(t, err)
-	require.Equal(t, createdTag.Name, i.Name)
-	require.NotContains(t, HarryPotterSeedData.AllInitialTagIds(), createdTag.ID, "Should have new ID")
+		updatedTag := getTagByID(t, db, createdTag.ID)
 
-	updatedTag := getTagByID(t, db, createdTag.ID)
-
-	require.Equal(t, op.ID, updatedTag.OperationID, "is in right operation")
+		require.Equal(t, op.ID, updatedTag.OperationID, "is in right operation")
+	})
 }
 
 func TestCreateDefaultTag(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
-	normalUser := UserRon
-	adminUser := UserDumbledore
+	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
+		normalUser := UserRon
+		adminUser := UserDumbledore
 
-	i := services.CreateDefaultTagInput{
-		Name:      "New Tag",
-		ColorName: "indigo",
-	}
+		i := services.CreateDefaultTagInput{
+			Name:      "New Tag",
+			ColorName: "indigo",
+		}
 
-	// verify that a normal cannot create a new default tag
-	ctx := contextForUser(normalUser, db)
-	_, err := services.CreateDefaultTag(ctx, db, i)
-	require.Error(t, err)
+		// verify that a normal cannot create a new default tag
+		ctx := contextForUser(normalUser, db)
+		_, err := services.CreateDefaultTag(ctx, db, i)
+		require.Error(t, err)
 
-	// verify that an admin can create a new default tag
-	ctx = contextForUser(adminUser, db)
-	createdTag, err := services.CreateDefaultTag(ctx, db, i)
-	require.NoError(t, err)
-	require.Equal(t, createdTag.Name, i.Name)
-	require.NotContains(t, HarryPotterSeedData.AllInitialDefaultTagIds(), createdTag.ID, "Should have new ID")
+		// verify that an admin can create a new default tag
+		ctx = contextForUser(adminUser, db)
+		createdTag, err := services.CreateDefaultTag(ctx, db, i)
+		require.NoError(t, err)
+		require.Equal(t, createdTag.Name, i.Name)
+		require.NotContains(t, seed.AllInitialDefaultTagIds(), createdTag.ID, "Should have new ID")
+	})
 }
 
 func TestDeleteTag(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		op := OpChamberOfSecrets
+		i := services.DeleteTagInput{
+			ID:            TagEarth.ID,
+			OperationSlug: op.Slug,
+		}
 
-	op := OpChamberOfSecrets
-	i := services.DeleteTagInput{
-		ID:            TagEarth.ID,
-		OperationSlug: op.Slug,
-	}
+		ctx := contextForUser(UserHarry, db)
+		err := services.DeleteTag(ctx, db, i)
+		require.NoError(t, err)
 
-	ctx := contextForUser(UserHarry, db)
-	err := services.DeleteTag(ctx, db, i)
-	require.NoError(t, err)
-
-	require.NotContains(t, getTagFromOperationID(t, db, op.ID), TagEarth, "TagEarth should have been deleted")
+		require.NotContains(t, getTagFromOperationID(t, db, op.ID), TagEarth, "TagEarth should have been deleted")
+	})
 }
 
 func TestDeleteDefaultTag(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
-	tagToRemove := DefaultTagWho
-	normalUser := UserRon
-	adminUser := UserDumbledore
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		tagToRemove := DefaultTagWho
+		normalUser := UserRon
+		adminUser := UserDumbledore
 
-	i := services.DeleteDefaultTagInput{
-		ID: tagToRemove.ID,
-	}
+		i := services.DeleteDefaultTagInput{
+			ID: tagToRemove.ID,
+		}
 
-	// verify that a normal user cannot delete default tags
-	ctx := contextForUser(normalUser, db)
-	err := services.DeleteDefaultTag(ctx, db, i)
-	require.Error(t, err)
+		// verify that a normal user cannot delete default tags
+		ctx := contextForUser(normalUser, db)
+		err := services.DeleteDefaultTag(ctx, db, i)
+		require.Error(t, err)
 
-	// verify that an admin can delete default tags
-	ctx = contextForUser(adminUser, db)
-	err = services.DeleteDefaultTag(ctx, db, i)
-	require.NoError(t, err)
-	require.NotContains(t, getDefaultTags(t, db), tagToRemove)
+		// verify that an admin can delete default tags
+		ctx = contextForUser(adminUser, db)
+		err = services.DeleteDefaultTag(ctx, db, i)
+		require.NoError(t, err)
+		require.NotContains(t, getDefaultTags(t, db), tagToRemove)
+	})
 }
 
 func TestListTagDifferences(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		startingOp := OpChamberOfSecrets
+		endingOp := OpSorcerersStone
 
-	startingOp := OpChamberOfSecrets
-	endingOp := OpSorcerersStone
+		input := services.ListTagsDifferenceInput{
+			SourceOperationSlug:      startingOp.Slug,
+			DestinationOperationSlug: endingOp.Slug,
+		}
 
-	input := services.ListTagsDifferenceInput{
-		SourceOperationSlug:      startingOp.Slug,
-		DestinationOperationSlug: endingOp.Slug,
-	}
+		// verify that Neville (cannot read endingOp) cannot determine tag differences
+		ctx := contextForUser(UserNeville, db)
+		_, err := services.ListTagDifference(ctx, db, input)
+		require.Error(t, err)
 
-	// verify that Neville (cannot read endingOp) cannot determine tag differences
-	ctx := contextForUser(UserNeville, db)
-	_, err := services.ListTagDifference(ctx, db, input)
-	require.Error(t, err)
+		// verify that Harry (can read both) can determine tag differences
+		ctx = contextForUser(UserHarry, db)
+		data, err := services.ListTagDifference(ctx, db, input)
+		require.NoError(t, err)
 
-	// verify that Harry (can read both) can determine tag differences
-	ctx = contextForUser(UserHarry, db)
-	data, err := services.ListTagDifference(ctx, db, input)
-	require.NoError(t, err)
-
-	verifySharedTags(t, data, CommonTagWhoCoS, CommonTagWhatCoS, CommonTagWhereCoS, CommonTagWhenCoS, CommonTagWhyCoS)
-	verifyDroppedTags(t, data, TagMercury, TagVenus, TagEarth, TagMars, TagJupiter, TagSaturn, TagNeptune)
+		verifySharedTags(t, data, CommonTagWhoCoS, CommonTagWhatCoS, CommonTagWhereCoS, CommonTagWhenCoS, CommonTagWhyCoS)
+		verifyDroppedTags(t, data, TagMercury, TagVenus, TagEarth, TagMars, TagJupiter, TagSaturn, TagNeptune)
+	})
 }
 
 func TestListTagDifferencesForEvidence(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		startingOp := OpChamberOfSecrets
+		endingOp := OpSorcerersStone
+		sourceEvidence := EviPetrifiedHermione //shares tags between the two operations
 
-	startingOp := OpChamberOfSecrets
-	endingOp := OpSorcerersStone
-	sourceEvidence := EviPetrifiedHermione //shares tags between the two operations
+		input := services.ListTagDifferenceForEvidenceInput{
+			ListTagsDifferenceInput: services.ListTagsDifferenceInput{
+				SourceOperationSlug:      startingOp.Slug,
+				DestinationOperationSlug: endingOp.Slug,
+			},
+			SourceEvidenceUUID: sourceEvidence.UUID,
+		}
 
-	input := services.ListTagDifferenceForEvidenceInput{
-		ListTagsDifferenceInput: services.ListTagsDifferenceInput{
-			SourceOperationSlug:      startingOp.Slug,
-			DestinationOperationSlug: endingOp.Slug,
-		},
-		SourceEvidenceUUID: sourceEvidence.UUID,
-	}
+		// verify that Neville (cannot read endingOp) cannot determine tag differences
+		ctx := contextForUser(UserNeville, db)
+		_, err := services.ListTagDifferenceForEvidence(ctx, db, input)
+		require.Error(t, err)
 
-	// verify that Neville (cannot read endingOp) cannot determine tag differences
-	ctx := contextForUser(UserNeville, db)
-	_, err := services.ListTagDifferenceForEvidence(ctx, db, input)
-	require.Error(t, err)
+		// verify that Harry (can read both) can determine tag differences
+		ctx = contextForUser(UserHarry, db)
+		data, err := services.ListTagDifferenceForEvidence(ctx, db, input)
+		require.NoError(t, err)
 
-	// verify that Harry (can read both) can determine tag differences
-	ctx = contextForUser(UserHarry, db)
-	data, err := services.ListTagDifferenceForEvidence(ctx, db, input)
-	require.NoError(t, err)
-
-	verifySharedTags(t, data, CommonTagWhatCoS, CommonTagWhoCoS)
-	verifyDroppedTags(t, data, TagMars)
+		verifySharedTags(t, data, CommonTagWhatCoS, CommonTagWhoCoS)
+		verifyDroppedTags(t, data, TagMars)
+	})
 }
 
 func TestListTagsByEvidenceDate(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
+		masterOp := OpGanttChart
+		input := services.ListTagsByEvidenceDateInput{
+			OperationSlug: masterOp.Slug,
+		}
 
-	masterOp := OpGanttChart
-	input := services.ListTagsByEvidenceDateInput{
-		OperationSlug: masterOp.Slug,
-	}
+		expectedData := seed.TagIDsUsageByDate(masterOp.ID)
 
-	expectedData := HarryPotterSeedData.TagIDsUsageByDate(masterOp.ID)
+		// test no-access
+		_, err := services.ListTagsByEvidenceDate(contextForUser(UserDraco, db), db, input)
+		require.Error(t, err)
 
-	// test no-access
-	_, err := services.ListTagsByEvidenceDate(contextForUser(UserDraco, db), db, input)
-	require.Error(t, err)
+		// test read
+		actualData, err := services.ListTagsByEvidenceDate(contextForUser(UserGinny, db), db, input)
+		require.NoError(t, err)
+		validateTagUsageData(t, seed, expectedData, actualData)
 
-	// test read
-	actualData, err := services.ListTagsByEvidenceDate(contextForUser(UserGinny, db), db, input)
-	require.NoError(t, err)
-	validateTagUsageData(t, HarryPotterSeedData, expectedData, actualData)
+		// test write
+		actualData, err = services.ListTagsByEvidenceDate(contextForUser(UserHarry, db), db, input)
+		require.NoError(t, err)
+		validateTagUsageData(t, seed, expectedData, actualData)
 
-	// test write
-	actualData, err = services.ListTagsByEvidenceDate(contextForUser(UserHarry, db), db, input)
-	require.NoError(t, err)
-	validateTagUsageData(t, HarryPotterSeedData, expectedData, actualData)
-
-	// test admin
-	actualData, err = services.ListTagsByEvidenceDate(contextForUser(UserDumbledore, db), db, input)
-	require.NoError(t, err)
-	validateTagUsageData(t, HarryPotterSeedData, expectedData, actualData)
+		// test admin
+		actualData, err = services.ListTagsByEvidenceDate(contextForUser(UserDumbledore, db), db, input)
+		require.NoError(t, err)
+		validateTagUsageData(t, seed, expectedData, actualData)
+	})
 }
 
 func TestListTagsForOperation(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := contextForUser(UserRon, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	masterOp := OpChamberOfSecrets
-	allTags := getTagFromOperationID(t, db, masterOp.ID)
-	require.NotEqual(t, len(allTags), 0, "Some number of tags should exist")
+		masterOp := OpChamberOfSecrets
+		allTags := getTagFromOperationID(t, db, masterOp.ID)
+		require.NotEqual(t, len(allTags), 0, "Some number of tags should exist")
 
-	tags, err := services.ListTagsForOperation(ctx, db, services.ListTagsForOperationInput{masterOp.Slug})
-	require.NoError(t, err)
-	require.Equal(t, len(tags), len(allTags))
+		tags, err := services.ListTagsForOperation(ctx, db, services.ListTagsForOperationInput{masterOp.Slug})
+		require.NoError(t, err)
+		require.Equal(t, len(tags), len(allTags))
 
-	dtoTags := make([]*dtos.Tag, len(tags))
-	for i, tag := range tags {
-		dtoTags[i] = &tag.Tag
-		require.Equal(t, tag.EvidenceCount, getTagUsage(t, db, tag.ID))
-	}
+		dtoTags := make([]*dtos.Tag, len(tags))
+		for i, tag := range tags {
+			dtoTags[i] = &tag.Tag
+			require.Equal(t, tag.EvidenceCount, getTagUsage(t, db, tag.ID))
+		}
 
-	validateTagSets(t, dtoTags, allTags, validateTag)
+		validateTagSets(t, dtoTags, allTags, validateTag)
+	})
 }
 
 func validateTag(t *testing.T, expected models.Tag, actual *dtos.Tag) {
@@ -236,27 +228,26 @@ func validateTagSets(t *testing.T, dtoSet []*dtos.Tag, dbSet []models.Tag, valid
 }
 
 func TestListDefaultTags(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		normalUser := UserRon
+		adminUser := UserDumbledore
 
-	normalUser := UserRon
-	adminUser := UserDumbledore
+		allTags := getDefaultTags(t, db)
+		require.NotEqual(t, len(allTags), 0, "Some number of default tags should exist")
 
-	allTags := getDefaultTags(t, db)
-	require.NotEqual(t, len(allTags), 0, "Some number of default tags should exist")
+		// verify that normal users cannot list default tags
+		ctx := contextForUser(normalUser, db)
+		_, err := services.ListDefaultTags(ctx, db)
+		require.Error(t, err)
 
-	// verify that normal users cannot list default tags
-	ctx := contextForUser(normalUser, db)
-	_, err := services.ListDefaultTags(ctx, db)
-	require.Error(t, err)
+		// verify that admins can list default tags
+		ctx = contextForUser(adminUser, db)
+		tags, err := services.ListDefaultTags(ctx, db)
+		require.NoError(t, err)
+		require.Equal(t, len(tags), len(allTags))
 
-	// verify that admins can list default tags
-	ctx = contextForUser(adminUser, db)
-	tags, err := services.ListDefaultTags(ctx, db)
-	require.NoError(t, err)
-	require.Equal(t, len(tags), len(allTags))
-
-	validateDefaultTagSets(t, tags, allTags, validateDefaultTag)
+		validateDefaultTagSets(t, tags, allTags, validateDefaultTag)
+	})
 }
 
 func validateDefaultTagSets(
@@ -371,61 +362,60 @@ func verifyDroppedTags(t *testing.T, diff *dtos.TagDifference, separateTags ...m
 }
 
 func TestUpdateTag(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		op := OpChamberOfSecrets
+		i := services.UpdateTagInput{
+			ID:            TagEarth.ID,
+			OperationSlug: op.Slug,
+			Name:          "Moon",
+			ColorName:     "green",
+		}
 
-	op := OpChamberOfSecrets
-	i := services.UpdateTagInput{
-		ID:            TagEarth.ID,
-		OperationSlug: op.Slug,
-		Name:          "Moon",
-		ColorName:     "green",
-	}
+		ctx := contextForUser(UserHarry, db)
+		err := services.UpdateTag(ctx, db, i)
+		require.NoError(t, err)
 
-	ctx := contextForUser(UserHarry, db)
-	err := services.UpdateTag(ctx, db, i)
-	require.NoError(t, err)
-
-	updatedTag := getTagByID(t, db, TagEarth.ID)
-	require.Equal(t, models.Tag{
-		ID:          TagEarth.ID,
-		OperationID: op.ID,
-		Name:        "Moon",
-		ColorName:   "green",
-		CreatedAt:   TagEarth.CreatedAt,
-		UpdatedAt:   updatedTag.UpdatedAt,
-	}, updatedTag)
+		updatedTag := getTagByID(t, db, TagEarth.ID)
+		require.Equal(t, models.Tag{
+			ID:          TagEarth.ID,
+			OperationID: op.ID,
+			Name:        "Moon",
+			ColorName:   "green",
+			CreatedAt:   TagEarth.CreatedAt,
+			UpdatedAt:   updatedTag.UpdatedAt,
+		}, updatedTag)
+	})
 }
 
 func TestUpdateDefaultTag(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	normalUser := UserRon
-	adminUser := UserDumbledore
-	tagToUpdate := DefaultTagWho
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		normalUser := UserRon
+		adminUser := UserDumbledore
+		tagToUpdate := DefaultTagWho
 
-	i := services.UpdateDefaultTagInput{
-		ID:        tagToUpdate.ID,
-		Name:      "How",
-		ColorName: "green",
-	}
+		i := services.UpdateDefaultTagInput{
+			ID:        tagToUpdate.ID,
+			Name:      "How",
+			ColorName: "green",
+		}
 
-	// verify that a normal user cannot update a default tags
-	ctx := contextForUser(normalUser, db)
-	err := services.UpdateDefaultTag(ctx, db, i)
-	require.Error(t, err)
+		// verify that a normal user cannot update a default tags
+		ctx := contextForUser(normalUser, db)
+		err := services.UpdateDefaultTag(ctx, db, i)
+		require.Error(t, err)
 
-	// verify that an admin can update default tags
-	ctx = contextForUser(adminUser, db)
-	err = services.UpdateDefaultTag(ctx, db, i)
-	require.NoError(t, err)
+		// verify that an admin can update default tags
+		ctx = contextForUser(adminUser, db)
+		err = services.UpdateDefaultTag(ctx, db, i)
+		require.NoError(t, err)
 
-	updatedTag := getDefaultTagByID(t, db, tagToUpdate.ID)
-	require.Equal(t, models.DefaultTag{
-		ID:        tagToUpdate.ID,
-		Name:      i.Name,
-		ColorName: i.ColorName,
-		CreatedAt: tagToUpdate.CreatedAt,
-		UpdatedAt: updatedTag.UpdatedAt,
-	}, updatedTag)
+		updatedTag := getDefaultTagByID(t, db, tagToUpdate.ID)
+		require.Equal(t, models.DefaultTag{
+			ID:        tagToUpdate.ID,
+			Name:      i.Name,
+			ColorName: i.ColorName,
+			CreatedAt: tagToUpdate.CreatedAt,
+			UpdatedAt: updatedTag.UpdatedAt,
+		}, updatedTag)
+	})
 }
