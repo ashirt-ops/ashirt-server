@@ -30,10 +30,10 @@ export default (props: {
   const reloadBus = BuildReloadBus()
 
   const [expanded, setExpanded] = React.useState(false)
-  const createEvidenceModal = useModal<void>(modalProps => (
+  const createEvidenceModal = useModal<{}>(modalProps => (
     <CreateEvidenceModal {...modalProps} onCreated={props.onEvidenceCreated || noOp} operationSlug={props.operationSlug} />
   ))
-  const createFindingModal = useModal<void>(modalProps => (
+  const createFindingModal = useModal<{}>(modalProps => (
     <CreateFindingModal {...modalProps} onCreated={props.onFindingCreated || noOp} operationSlug={props.operationSlug} />
   ))
 
@@ -61,8 +61,8 @@ export default (props: {
             expandedView={expanded}
             setExpandedView={setExpanded}
             viewName={props.view}
-            onRequestCreateFinding={() => createFindingModal.show()}
-            onRequestCreateEvidence={() => createEvidenceModal.show()}
+            onRequestCreateFinding={() => createFindingModal.show({})}
+            onRequestCreateEvidence={() => createEvidenceModal.show({})}
             showCreateButtons={showCreateButtons}
             requestQueriesReload={reloadBus.requestReload}
             queryName={currentQuery?.name}
@@ -70,8 +70,8 @@ export default (props: {
         </div>
         <div className={cx('sidebar')}>
           <Sidebar
-            onRequestCreateFinding={() => createFindingModal.show()}
-            onRequestCreateEvidence={() => createEvidenceModal.show()}
+            onRequestCreateFinding={() => createFindingModal.show({})}
+            onRequestCreateEvidence={() => createEvidenceModal.show({})}
             currentQuery={props.query}
             currentView={props.view}
             onNavigate={props.onNavigate}

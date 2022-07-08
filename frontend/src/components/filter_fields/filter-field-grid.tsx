@@ -46,7 +46,7 @@ export const FilterFieldsGrid = (props: {
   requestQueriesReload?: () => void
 }) => {
   const [state, dispatch] = React.useReducer<SearchOptionsReducer>(searchOptionsReducer, props.value)
-  const chooseEvidenceModal = useModal<void>(modalProps => (
+  const chooseEvidenceModal = useModal<{}>(modalProps => (
     <ChooseEvidenceModal
       initialEvidence={
         state.withEvidenceUuid
@@ -62,7 +62,7 @@ export const FilterFieldsGrid = (props: {
       {...modalProps}
     />
   ))
-  const saveQueryModal = useModal<void>(modalProps => (
+  const saveQueryModal = useModal<{}>(modalProps => (
     <SaveQueryModal
       query={stringifySearch(state)}
       onSaved={() => {
@@ -145,7 +145,7 @@ export const FilterFieldsGrid = (props: {
         <Cell startOfRow span={2}>
           <SplitInputRow label="Includes Evidence (uuid)" className={'linked-evidence-input'}
             inputValue={state.withEvidenceUuid?.join(', ') ?? ''}>
-            <Button doNotSubmit onClick={() => chooseEvidenceModal.show()}>Browse</Button>
+            <Button doNotSubmit onClick={() => chooseEvidenceModal.show({})}>Browse</Button>
           </SplitInputRow>
         </Cell>
       )}
@@ -182,7 +182,7 @@ export const FilterFieldsGrid = (props: {
             </ButtonGroup>
           </div>
           <div className={cx('save-button')} style={{ gridRow: lastRowIndex }}>
-            <Button primary onClick={() => saveQueryModal.show()}>Save</Button>
+            <Button primary onClick={() => saveQueryModal.show({})}>Save</Button>
           </div>
         </>
       )}

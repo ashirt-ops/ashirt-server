@@ -9,7 +9,7 @@ import { NavLinkButton } from 'src/components/button'
 import classnames from 'classnames/bind'
 import { login, register, requestRecovery, userResetPassword, totpLogin } from '../services'
 import { useForm, useFormField } from 'src/helpers/use_form'
-import { useModal, renderModals } from 'src/helpers'
+import { useModal, renderModals, OnRequestClose } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
@@ -62,7 +62,7 @@ const Login = (props: {
     ),
   })
 
-  const registerModal = useModal<void>(modalProps => <RegisterModal {...modalProps} />)
+  const registerModal = useModal<void>(modalProps => <RegisterModal {...(modalProps as OnRequestClose)} />)
 
   const allowRegister = props.authFlags?.includes("open-registration")
   const registerProps = allowRegister

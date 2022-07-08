@@ -135,7 +135,7 @@ const SearchInput = (props: {
   setQueryString: (query: string) => void
 }) => {
   const { inputRef, queryString, setQueryString } = props
-  const helpModal = useModal<void>(modalProps => <SearchHelpModal {...modalProps} />)
+  const helpModal = useModal<{}>(modalProps => <SearchHelpModal {...modalProps} />)
   return (
     <>
       <div className={cx('tb-search-container')}>
@@ -154,7 +154,7 @@ const SearchInput = (props: {
             }
           }}
         />
-        <a className={cx('search-help-icon')} onClick={() => helpModal.show()} title="Search Help"></a>
+        <a className={cx('search-help-icon')} onClick={() => helpModal.show({})} title="Search Help"></a>
       </div>
       {renderModals(helpModal)}
     </>

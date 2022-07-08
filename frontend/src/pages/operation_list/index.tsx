@@ -21,7 +21,7 @@ export default () => {
     hasFlag("welcome-message")
   ]), []))
 
-  const newOperationModal = useModal<void>(modalProps => (
+  const newOperationModal = useModal<{}>(modalProps => (
     <NewOperationModal {...modalProps} onCreated={wiredData.reload} />
   ))
   const filterText = useFormField<string>('')
@@ -55,7 +55,7 @@ export default () => {
                 />
               ))
           }
-          <NewOperationButton onClick={() => newOperationModal.show()} />
+          <NewOperationButton onClick={() => newOperationModal.show({})} />
         </div>
       </>)}
 
