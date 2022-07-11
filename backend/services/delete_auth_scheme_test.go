@@ -16,6 +16,7 @@ import (
 
 func TestDeleteAuthScheme(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	normalUser := UserRon
 	targetUser := UserHarry

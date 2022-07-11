@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 // APIKey reflects the structure of the database table 'api_keys'
@@ -47,6 +48,20 @@ type Evidence struct {
 	OccurredAt    time.Time  `db:"occurred_at"`
 	CreatedAt     time.Time  `db:"created_at"`
 	UpdatedAt     *time.Time `db:"updated_at"`
+}
+
+// EvidenceMetadata reflects the structure of the database table 'evidence_metadata'
+type EvidenceMetadata struct {
+	ID             int64                    `db:"id"`
+	EvidenceID     int64                    `db:"evidence_id"`
+	Source         string                   `db:"source"`
+	Body           string                   `db:"body"`
+	Status         *evidencemetadata.Status `db:"status"`
+	LastRunMessage *string                  `db:"last_run_message"`
+	CanProcess     *bool                    `db:"can_process"`
+	CreatedAt      time.Time                `db:"created_at"`
+	WorkStartedAt  *time.Time               `db:"work_started_at"`
+	UpdatedAt      *time.Time               `db:"updated_at"`
 }
 
 // EvidenceFindingMap reflects the structure of the database table 'evidence_finding_map'
@@ -182,4 +197,14 @@ type DefaultTag struct {
 	ColorName string     `db:"color_name"`
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+// ServiceWorker reflects the structure of the database table 'service_workers'
+type ServiceWorker struct {
+	ID        int64      `db:"id"`
+	Name      string     `db:"name"`
+	Config    string     `db:"config"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at"`
 }

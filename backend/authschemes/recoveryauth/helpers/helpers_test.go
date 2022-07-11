@@ -30,8 +30,8 @@ func TestGenerateRecoveryCodeForUser(t *testing.T) {
 
 func setupDb(t *testing.T) *database.Connection {
 	db := seeding.InitTestWithOptions(t, seeding.TestOptions{
-		DatabasePath: helpers.StringPtr("../../../migrations"),
-		DatabaseName: helpers.StringPtr("recovery-auth-helpers-test-db"),
+		DatabasePath: helpers.Ptr("../../../migrations"),
+		DatabaseName: helpers.Ptr("recovery-auth-helpers-test-db"),
 	})
 	seeding.ApplySeeding(t, seeding.HarryPotterSeedData, db)
 

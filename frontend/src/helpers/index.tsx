@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -15,6 +15,8 @@ export * from './use_user_is_super_admin'
 export * from './use_wired_data'
 export * from './localStroage'
 export * from './trim_url'
+export * from './highlight_substring'
+export * from './codeblock_to_blob'
 
 export function useFocusFirstFocusableChild(ref: React.MutableRefObject<HTMLDivElement|null>) {
   React.useLayoutEffect(() => {

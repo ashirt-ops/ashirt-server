@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { DataSource, cacheBust } from '../data_source'
@@ -27,6 +27,13 @@ export const backendDataSource: DataSource = {
   deleteEvidence: (ids, payload) => req('DELETE', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, payload),
   getEvidenceMigrationDifference: (ids, fromOperationSlug) => req('GET', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),
   moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, { sourceOperationSlug: fromOperationSlug }),
+  createEvidenceMetadata: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`, payload),
+  updateEvidenceMetadata: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`, payload),
+  readEvidenceMetadata: (ids) => req('GET', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`),
+  runServiceWorkerForEvidence: (ids) => req('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata/${ids.source}/run`),
+  runServiceWorkerBatch: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/metadata/run`, payload),
+
+  runAllServiceWorkersForEvidence: (ids) => req('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata/run`),
 
   listFindingCategories: (includeDeleted) => req('GET', `/findings/categories`, null, { includeDeleted }),
   createFindingCategory: (payload) => req('POST', `/findings/category`, payload),
@@ -74,6 +81,14 @@ export const backendDataSource: DataSource = {
   updateDefaultTag: (ids, payload) => req('PUT', `/admin/tags/${ids.tagId}`, payload),
   deleteDefaultTag: (ids) => req('DELETE', `/admin/tags/${ids.tagId}`),
   mergeDefaultTags: (payload) => req('POST', `/admin/merge/tags`, payload),
+
+  adminListServiceWorkers: () => req('GET', `/admin/services`),
+  adminCreateServiceWorker: (payload) => req('POST', `/admin/services`, payload),
+  adminUpdateServiceWorker: (ids, payload) => req('PUT', `/admin/services/${ids.serviceWorkerId}`, payload),
+  adminDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, { delete: true }),
+  adminUnDeleteServiceWorker: (ids) => req('DELETE', `/admin/services/${ids.serviceWorkerId}`, { delete: false }),
+  adminTestServiceWorker: (ids) => req('GET', `/admin/services/${ids.serviceWorkerId}/test`),
+  listActiveServiceWorkers: () => req('GET', `/services`),
 
   // TODO these should go into their respective authschemes:
   createRecoveryCode: ids => req('POST', '/auth/recovery/generate', ids),

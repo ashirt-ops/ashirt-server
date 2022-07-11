@@ -1,10 +1,11 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package server
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -54,6 +55,38 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.CreateOperation(r.Context(), db, i)
 	}))
 
+	route(r, "GET", "/api/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ReadEvidenceInput{
+			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ReadEvidence(r.Context(), db, contentStore, i)
+	}))
+
+	route(r, "GET", "/api/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
+		dr := dissectNoBodyRequest(r)
+		i := services.ReadEvidenceInput{
+			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			LoadPreview:   dr.FromURL("type").AsString() == "preview",
+			LoadMedia:     dr.FromURL("type").AsString() == "media",
+		}
+
+		evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
+		if err != nil {
+			return nil, backend.WrapError("Unable to read evidence", err)
+		}
+
+		if i.LoadPreview {
+			return evidence.Preview, nil
+		}
+		return evidence.Media, nil
+	}))
+
 	route(r, "POST", "/api/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
 		i := services.CreateEvidenceInput{
@@ -93,6 +126,22 @@ func bindAPIRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, backend.BadInputErr(err, "tagsToRemove must be a json array of ints")
 		}
 		return nil, services.UpdateEvidence(r.Context(), db, contentStore, i)
+	}))
+
+	route(r, "PUT", "/api/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpsertEvidenceMetadataInput{
+			EditEvidenceMetadataInput: services.EditEvidenceMetadataInput{
+				OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+				EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+				Source:        dr.FromBody("source").Required().AsString(),
+				Body:          dr.FromBody("body").Required().AsString(),
+			},
+			Status:     dr.FromBody("status").Required().AsString(),
+			Message:    dr.FromBody("message").AsStringPtr(),
+			CanProcess: dr.FromBody("canProcess").AsBoolPtr(),
+		}
+		return nil, services.UpsertEvidenceMetadata(r.Context(), db, i)
 	}))
 
 	route(r, "GET", "/api/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {

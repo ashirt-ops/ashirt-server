@@ -15,12 +15,14 @@ import {
   ResetPasswordModal, UpdateUserFlagsModal, DeleteUserModal, RecoverAccountModal,
   RemoveTotpModal
 } from 'src/pages/admin_modals'
-import Table from 'src/components/table'
+import {
+  default as Table,
+  ErrorRow,
+  LoadingRow,
+} from 'src/components/table'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import Checkbox from 'src/components/checkbox'
 import { StandardPager } from 'src/components/paging'
-import ErrorDisplay from 'src/components/error_display'
-import LoadingSpinner from 'src/components/loading_spinner'
 import SettingsSection from 'src/components/settings_section'
 import { default as Menu, MenuItem } from 'src/components/menu'
 import { ClickPopover } from 'src/components/popover'
@@ -48,12 +50,10 @@ export default (props: {
   const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", editUserFn, setResettingPassword, setEditingUserFlags, setDeletingUser, recoverFn, setDeletingTotp)
   const columns = Object.keys(rowBuilder(null, <span />))
 
-  const asFullRow = (el: React.ReactElement): React.ReactElement => <tr><td colSpan={columns.length}>{el}</td></tr>
-
   const wiredUsers = usePaginatedWiredData<UserAdminView>(
     React.useCallback(page => listUsersAdminView({ page, pageSize: 10, deleted: withDeleted, name: usernameFilterValue }), [usernameFilterValue, withDeleted]),
-    (err) => asFullRow(<ErrorDisplay err={err} />),
-    () => asFullRow(<LoadingSpinner />)
+    (err) => <ErrorRow span={columns.length} error={err} />,
+    () => <LoadingRow span={columns.length} />
   )
 
   React.useEffect(() => {

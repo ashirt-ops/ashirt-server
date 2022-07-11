@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package dtos
@@ -8,6 +8,7 @@ import (
 
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 type APIKey struct {
@@ -23,6 +24,13 @@ type Evidence struct {
 	Operator    User      `json:"operator"`
 	Tags        []Tag     `json:"tags"`
 	ContentType string    `json:"contentType"`
+}
+
+type EvidenceMetadata struct {
+	Body       string                   `json:"body"`
+	Source     string                   `json:"source"`
+	Status     *evidencemetadata.Status `json:"status"`
+	CanProcess *bool                    `json:"canProcess"`
 }
 
 type Finding struct {
@@ -164,6 +172,24 @@ type NewUserCreatedByAdmin struct {
 type CreateUserOutput struct {
 	RealSlug string `json:"slug"`
 	UserID   int64  `json:"-"` // don't transmit the userid
+}
+
+type ServiceWorker struct {
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Config  string `json:"config"`
+	Deleted bool   `json:"deleted"`
+}
+
+type ServiceWorkerTestOutput struct {
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	Live    bool   `json:"live"`
+	Message string `json:"message"`
+}
+
+type ActiveServiceWorker struct {
+	Name string `json:"name"`
 }
 
 type Flags struct {

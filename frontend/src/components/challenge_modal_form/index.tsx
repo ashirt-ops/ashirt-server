@@ -12,7 +12,7 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default <T extends unknown>(props: {
   warningText: string,
-  challengeText: string,
+  challengeText?: string,
   modalTitle: string,
   submitText: string,
   onRequestClose: (success?:boolean) => void,
@@ -25,7 +25,7 @@ export default <T extends unknown>(props: {
     fields: [challenge],
     onSuccess: () => props.onRequestClose(true),
     handleSubmit: () => {
-      if (challenge.value !== props.challengeText) {
+      if (challenge.value !== props.challengeText && props.challengeText !== undefined) {
         return Promise.reject(Error("Challenge text does not match"))
       }
       return props.handleSubmit()
@@ -34,8 +34,13 @@ export default <T extends unknown>(props: {
 
   return <ModalForm submitDanger title={props.modalTitle} submitText={props.submitText} onRequestClose={props.onRequestClose} {...formComponentProps}>
     <em className={cx('warning')}>{props.warningText}</em>
-    <p className={cx('challenge-prompt')}>Please enter the following text into the textbox below to continue: </p>
-    <em className={cx('challenge')}>{props.challengeText}</em>
-    <Input label="Challenge" {...challenge} />
+    {
+      props.challengeText
+        && (<>
+          <p className={cx('challenge-prompt')}>Please enter the following text into the textbox below to continue: </p>
+          <em className={cx('challenge')}>{props.challengeText}</em>
+          <Input label="Challenge" {...challenge} />
+        </>)
+    }
   </ModalForm>
 }

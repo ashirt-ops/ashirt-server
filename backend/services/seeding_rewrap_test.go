@@ -45,6 +45,7 @@ var getFindingByUUID = seeding.GetFindingByUUID
 var getEvidenceForOperation = seeding.GetEvidenceForOperation
 var getEvidenceByID = seeding.GetEvidenceByID
 var getEvidenceByUUID = seeding.GetEvidenceByUUID
+var getEvidenceMetadataByEvidenceID = seeding.GetEvidenceMetadataByEvidenceID
 var getFullEvidenceViaSelectBuilder = seeding.GetFullEvidenceViaSelectBuilder
 var getOperationFromSlug = seeding.GetOperationFromSlug
 var getOperations = seeding.GetOperations
@@ -65,6 +66,10 @@ var getAuthsForUser = seeding.GetAuthsForUser
 var getUsersForAuth = seeding.GetUsersForAuth
 var getRealUsers = seeding.GetRealUsers
 var getTagUsage = seeding.GetTagUsage
+
+var getServiceWorkerByName = seeding.GetServiceWorkerByName
+var getServiceWorkerByID = seeding.GetServiceWorkerByID
+var listServiceWorkers = seeding.ListServiceWorkers
 
 var TagIDsFromTags = seeding.TagIDsFromTags
 var sorted = seeding.Sorted
@@ -127,7 +132,7 @@ var APIKeyHarry1 = seeding.APIKeyHarry1
 var APIKeyHarry2 = seeding.APIKeyHarry2
 var APIKeyRon1 = seeding.APIKeyRon1
 var APIKeyRon2 = seeding.APIKeyRon2
-var APIKeyHeadlessNick1 = seeding.APIKeyHeadlessNick1
+var APIKeyNick = seeding.APIKeyNick
 
 var OpSorcerersStone = seeding.OpSorcerersStone
 var OpChamberOfSecrets = seeding.OpChamberOfSecrets
@@ -226,6 +231,8 @@ var VendorFindingCategory = seeding.VendorFindingCategory
 var BehavioralFindingCategory = seeding.BehavioralFindingCategory
 var DetectionGapFindingCategory = seeding.DetectionGapFindingCategory
 var DeletedCategory = seeding.DeletedCategory
+
+var DemoServiceWorker = seeding.DemoServiceWorker
 
 type TestSeedData struct {
 	seeding.Seeder

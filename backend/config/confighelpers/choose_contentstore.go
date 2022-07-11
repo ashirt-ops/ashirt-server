@@ -38,7 +38,7 @@ func DefaultS3Store() (contentstore.Store, error) {
 	if config.StoreBucket() != "" && config.StoreRegion() != "" {
 		return contentstore.NewS3Store(config.StoreBucket(), config.StoreRegion())
 	}
-	return contentstore.NewS3Store(config.ImageStoreBucketName(), config.ImageStoreRegion())
+	return contentstore.NewS3Store(config.ImageStoreBucketName(), config.AWSRegion())
 }
 
 // DefaultDevStore creates a local file store. This is only used for the dev environment.

@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package backend
@@ -64,9 +64,29 @@ func BadInputErr(err error, reason string) error {
 	return HTTPErr(http.StatusBadRequest, reason, err)
 }
 
+// ServerErr provides a generic error for any error during a request, not covered by a more specific error
+func ServerErr(err error) error {
+	return HTTPErr(http.StatusInternalServerError, "Internal service error", err)
+}
+
+// SuggestiveServerErr provides an error with a customized message. This should be used primarily when you need to communicate
+// how to fix an error
+func SuggestiveServerErr(helpfulMessage string, err error) error {
+	if helpfulMessage == "" {
+		return ServerErr(err)
+	}
+	return HTTPErr(http.StatusInternalServerError, helpfulMessage, err)
+}
+
 // DatabaseErr provides a generic error for any database access error during a request
 func DatabaseErr(err error) error {
 	return HTTPErr(http.StatusInternalServerError, "Internal service error", err)
+}
+
+// SuggestiveDatabaseErr produces a 500 error, but sets the error message as something hopefully helpful to the user.
+// this should be used sparingly, as it provides hints at what data is in the database.
+func SuggestiveDatabaseErr(helpfulMessage string, err error) error {
+	return HTTPErr(http.StatusInternalServerError, helpfulMessage, err)
 }
 
 // UploadErr provides an error for issues encountered while writing to the store

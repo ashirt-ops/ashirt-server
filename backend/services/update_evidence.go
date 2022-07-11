@@ -91,7 +91,7 @@ func UpdateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		}
 	})
 	if err != nil {
-		return backend.WrapError("Cannot updat eevidence", backend.DatabaseErr(err))
+		return backend.WrapError("Cannot update evidence", backend.DatabaseErr(err))
 	}
 
 	return nil

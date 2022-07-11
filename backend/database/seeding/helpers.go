@@ -16,6 +16,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 var internalClock clockwork.Clock = clockwork.NewFakeClock()
@@ -175,6 +176,21 @@ func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentTy
 	}
 }
 
+func newEvidenceMetadataGen(first int64) func(eviID int64, source, body string, status *evidencemetadata.Status, canProcess *bool, clockDayOffset int) models.EvidenceMetadata {
+	id := iotaLike(first)
+	return func(eviID int64, source, body string, status *evidencemetadata.Status, canProcess *bool, clockDayOffset int) models.EvidenceMetadata {
+		return models.EvidenceMetadata{
+			ID:         id(),
+			EvidenceID: eviID,
+			Source:     source,
+			CanProcess: canProcess,
+			Body:       body,
+			Status:     status,
+			CreatedAt:  internalClock.Now(),
+		}
+	}
+}
+
 func newFindingCategoryGen(first int64) func(category string, deleted bool) models.FindingCategory {
 	id := iotaLike(first)
 	return func(category string, deleted bool) models.FindingCategory {
@@ -231,6 +247,18 @@ func newQueryGen(first int64) func(opID int64, name, query, qType string) models
 			Query:       query,
 			Type:        qType,
 			CreatedAt:   internalClock.Now(),
+		}
+	}
+}
+
+func newServiceWorkerGen(first int64) func(name, config string) models.ServiceWorker {
+	id := iotaLike(first)
+	return func(name, config string) models.ServiceWorker {
+		return models.ServiceWorker{
+			ID:        id(),
+			Name:      name,
+			Config:    config,
+			CreatedAt: internalClock.Now(),
 		}
 	}
 }

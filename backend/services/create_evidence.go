@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -13,6 +13,8 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/enhancementservices"
+	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 )
@@ -75,9 +77,9 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 	}
 
 	evidenceUUID := uuid.New().String()
-
+	var evidenceID int64
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
-		evidenceID, _ := tx.Insert("evidence", map[string]interface{}{
+		evidenceID, _ = tx.Insert("evidence", map[string]interface{}{
 			"uuid":            evidenceUUID,
 			"description":     i.Description,
 			"content_type":    i.ContentType,
@@ -99,9 +101,25 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		return nil, backend.WrapError("Could not create evidence and tags", backend.DatabaseErr(err))
 	}
 
+	err = enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, []string{evidenceUUID}, enhancementservices.AllWorkers())
+
+	if err != nil {
+		logging.Log(ctx, "msg", "Unable to run workers", "error", err.Error())
+	}
+
 	return &dtos.Evidence{
 		UUID:        evidenceUUID,
 		Description: i.Description,
 		OccurredAt:  i.OccurredAt,
 	}, nil
+}
+
+// cloneContext makes a copy of a context that will persist beyond the given context's lifespan.
+// Note: Most of the time, you probably don't want to use this. This is really only useful when
+// you need to ensure that an operation persists longer than the request
+func cloneContext(ctx context.Context) context.Context {
+	// copy the logger
+	rtnCtx, _ := logging.AddRequestLogger(context.Background(), logging.ReqLogger(ctx))
+
+	return rtnCtx
 }

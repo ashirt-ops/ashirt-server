@@ -11,6 +11,8 @@ import (
 const (
 	// WelcomeFlag is for testing purposes -- displays a welcome message on the operations page
 	WelcomeFlag string = "welcome-message"
+	// AllowMetadataEdit tells the frontend that it can render the metadata-editing capabilities
+	AllowMetadataEdit string = "allow-metadata-edit"
 )
 
 var flags []string

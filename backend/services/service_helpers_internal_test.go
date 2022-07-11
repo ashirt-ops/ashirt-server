@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -24,8 +24,8 @@ func TestEnsureTagIDsBelongToOperation(t *testing.T) {
 
 	// Add a tag for testing
 	newTags := []models.Tag{
-		models.Tag{OperationID: opCopy.ID, Name: "good tag", ColorName: "black"},
-		models.Tag{OperationID: badOp.ID, Name: "bad tag", ColorName: "black"},
+		{OperationID: opCopy.ID, Name: "good tag", ColorName: "black"},
+		{OperationID: badOp.ID, Name: "bad tag", ColorName: "black"},
 	}
 	err := db.BatchInsert("tags", len(newTags), func(i int) map[string]interface{} {
 		return map[string]interface{}{
@@ -73,6 +73,7 @@ func TestLookupOperation(t *testing.T) {
 	require.Equal(t, goodOp.Op.Status, lookedUp.Status)
 
 	lookedUp, err = lookupOperation(db, "not-a-slug")
+	require.Error(t, err)
 	require.Equal(t, &models.Operation{}, lookedUp)
 }
 
@@ -93,14 +94,14 @@ func TestLookupOperationFinding(t *testing.T) {
 	require.Equal(t, goodOp.Findings[0].Title, foundFinding.Title)
 	require.Equal(t, goodOp.Findings[0].Description, foundFinding.Description)
 
-	foundOp, foundFinding, err = lookupOperationFinding(db, "not-a-slug", goodOp.Findings[0].UUID)
-	require.NotNil(t, err)
+	_, _, err = lookupOperationFinding(db, "not-a-slug", goodOp.Findings[0].UUID)
+	require.Error(t, err)
 
-	foundOp, foundFinding, err = lookupOperationFinding(db, goodOp.Op.Slug, "not-a-uuid")
-	require.NotNil(t, err)
+	_, _, err = lookupOperationFinding(db, goodOp.Op.Slug, "not-a-uuid")
+	require.Error(t, err)
 
-	foundOp, foundFinding, err = lookupOperationFinding(db, badOp.Op.Slug, goodOp.Findings[0].UUID)
-	require.NotNil(t, err)
+	_, _, err = lookupOperationFinding(db, badOp.Op.Slug, goodOp.Findings[0].UUID)
+	require.Error(t, err)
 }
 
 func TestLookupOperationEvidence(t *testing.T) {
@@ -120,14 +121,14 @@ func TestLookupOperationEvidence(t *testing.T) {
 	require.Equal(t, goodOp.Evidence[0].Description, foundEvidence.Description)
 	require.Equal(t, goodOp.Evidence[0].ContentType, foundEvidence.ContentType)
 
-	foundOp, foundEvidence, err = lookupOperationEvidence(db, "not-a-slug", goodOp.Evidence[0].UUID)
-	require.NotNil(t, err)
+	_, _, err = lookupOperationEvidence(db, "not-a-slug", goodOp.Evidence[0].UUID)
+	require.Error(t, err)
 
-	foundOp, foundEvidence, err = lookupOperationEvidence(db, goodOp.Op.Slug, "not-a-uuid")
-	require.NotNil(t, err)
+	_, _, err = lookupOperationEvidence(db, goodOp.Op.Slug, "not-a-uuid")
+	require.Error(t, err)
 
-	foundOp, foundEvidence, err = lookupOperationEvidence(db, badOp.Op.Slug, goodOp.Evidence[0].UUID)
-	require.NotNil(t, err)
+	_, _, err = lookupOperationEvidence(db, badOp.Op.Slug, goodOp.Evidence[0].UUID)
+	require.Error(t, err)
 }
 
 func TestTagsForEvidenceByID(t *testing.T) {
@@ -176,19 +177,6 @@ func TestUserSlugToUserID(t *testing.T) {
 	userID, err := userSlugToUserID(db, goodOp.User.Slug)
 	require.NoError(t, err)
 	require.Equal(t, goodOp.UserID, userID)
-}
-
-func unionIntSlices(parts ...[]int64) []int64 {
-	totalLength := 0
-	for _, p := range parts {
-		totalLength += len(p)
-	}
-	result := make([]int64, totalLength)
-	copied := 0
-	for _, part := range parts {
-		copied += copy(result[copied:], part)
-	}
-	return result
 }
 
 func opDtoToModel(op *dtos.Operation, opID int64) models.Operation {

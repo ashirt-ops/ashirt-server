@@ -1,0 +1,42 @@
+
+.preamble
+  margin-bottom: 20px
+
+
+.control-container
+  margin-top: 10px
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 10px
+
+
+.grid-col-1
+  grid-column-start: 1
+
+.grid-col-2
+  grid-column-start: 1
+
+.grid-span-2
+  grid-column-end: span 2
+
+.start-button
+  justify-self: end
+
+.all-evidence-checkbox
+  grid-column-start: 2
+
+.worker-control
+  grid-row-end: span 2
+  
+.multi-item-row
+  display: flex
+  justify-content: space-between
+
+  :not(:last-child)
+    margin-right: 5px
+
+.selected-label
+  align-self: end
+
+.submit-button
+  margin-top: 10px

@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package services
@@ -10,6 +10,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
@@ -88,6 +89,39 @@ func tagsForEvidenceByID(db *database.Connection, evidenceIDs []int64) (tagsByEv
 	}
 
 	return
+}
+
+func metadataForEvidenceByID(db *database.Connection, evidenceIDs []int64) (map[int64][]dtos.EvidenceMetadata, error) {
+	emptyList := map[int64][]dtos.EvidenceMetadata{}
+	if len(evidenceIDs) == 0 {
+		return emptyList, nil
+	}
+	var metadata []struct {
+		models.EvidenceMetadata
+		EvidenceID int64 `db:"evidence_id"`
+	}
+
+	err := db.Select(&metadata, sq.Select("evidence_id", "source", "body", "status", "can_process").
+		From("evidence_metadata").
+		Where(sq.Eq{"evidence_id": evidenceIDs}).
+		OrderBy("source ASC"))
+	if err != nil {
+		return emptyList, err
+	}
+
+	metadataByEvidenceID := map[int64][]dtos.EvidenceMetadata{}
+
+	for _, meta := range metadata {
+		dto := dtos.EvidenceMetadata{
+			Body:       meta.Body,
+			Source:     meta.Source,
+			Status:     meta.Status,
+			CanProcess: meta.CanProcess,
+		}
+		metadataByEvidenceID[meta.EvidenceID] = append(metadataByEvidenceID[meta.EvidenceID], dto)
+	}
+
+	return metadataByEvidenceID, nil
 }
 
 // lookupOperation returns an operation model for the given slug
@@ -202,4 +236,21 @@ func SelfOrSlugToUserID(ctx context.Context, db *database.Connection, slug strin
 		return middleware.UserID(ctx), nil
 	}
 	return userSlugToUserID(db, slug)
+}
+
+func ListActiveServices(ctx context.Context, db *database.Connection) ([]*dtos.ActiveServiceWorker, error) {
+	var serviceWorkers []models.ServiceWorker
+	err := db.Select(&serviceWorkers, sq.Select("name").
+		From("service_workers").
+		Where(sq.Eq{"deleted_at": nil}))
+	if err != nil {
+		return nil, err
+	}
+
+	servicesDTO := helpers.Map(serviceWorkers, func(t models.ServiceWorker) *dtos.ActiveServiceWorker {
+		return &dtos.ActiveServiceWorker{
+			Name: t.Name,
+		}
+	})
+	return servicesDTO, nil
 }

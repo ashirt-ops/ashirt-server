@@ -13,6 +13,7 @@ import (
 
 func TestAddEvidenceToFinding(t *testing.T) {
 	db := initTest(t)
+	defer db.DB.Close()
 	HarryPotterSeedData.ApplyTo(t, db)
 	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
 
