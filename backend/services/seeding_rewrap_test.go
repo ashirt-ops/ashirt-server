@@ -81,7 +81,7 @@ func createPopulatedMemStore(seed TestSeedData) *contentstore.MemStore {
 var HarryPotterSeedData = TestSeedData{
 	seeding.HarryPotterSeedData,
 }
-var NoSeedData = TestSeedData {}
+var NoSeedData = TestSeedData{}
 
 var UserDumbledore = seeding.UserDumbledore
 var UserHarry = seeding.UserHarry

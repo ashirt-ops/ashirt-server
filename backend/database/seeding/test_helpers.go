@@ -69,8 +69,8 @@ func InitTestWithOptions(t *testing.T, options TestOptions) *database.Connection
 // ClearDB empties the database of all values. This leaves behind small residue: IDs are already taken,
 // so, auto-incremented values will use the next value, not re-use values. However, this is easily
 // overcome by specifying what the ID should be -- which is part of each seed anyway.
-// 
-// Note: this should only be done in a testing environment. 
+//
+// Note: this should only be done in a testing environment.
 func ClearDB(db *database.Connection) error {
 	systemLogger := logging.GetSystemLogger()
 	systemLogger.Log("msg", "Clearing Database...")
