@@ -47,20 +47,19 @@ func TestPaginationWrapData(t *testing.T) {
 }
 
 func TestPaginationSelect(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		// full page
+		checkTagSubset(t, services.Pagination{PageSize: 2, Page: 1}, db)
 
-	// full page
-	checkTagSubset(t, services.Pagination{PageSize: 2, Page: 1}, db)
+		// Second page
+		checkTagSubset(t, services.Pagination{PageSize: 2, Page: 2}, db)
 
-	// Second page
-	checkTagSubset(t, services.Pagination{PageSize: 2, Page: 2}, db)
+		// partial page
+		checkTagSubset(t, services.Pagination{PageSize: 100, Page: 1}, db)
 
-	// partial page
-	checkTagSubset(t, services.Pagination{PageSize: 100, Page: 1}, db)
-
-	// emptySet
-	checkTagSubset(t, services.Pagination{PageSize: 100, Page: 2}, db)
+		// emptySet
+		checkTagSubset(t, services.Pagination{PageSize: 100, Page: 2}, db)
+	})
 }
 
 func checkTagSubset(t *testing.T, p services.Pagination, db *database.Connection) {

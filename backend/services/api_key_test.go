@@ -14,23 +14,23 @@ import (
 )
 
 func TestCreateAPIKey(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	normalUser := UserHermione
-	targetUser := UserNeville
-	adminUser := UserDumbledore
-	ctx := contextForUser(normalUser, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		normalUser := UserHermione
+		targetUser := UserNeville
+		adminUser := UserDumbledore
+		ctx := contextForUser(normalUser, db)
 
-	// Verify self actions
-	verifyCreateAPIKey(t, false, ctx, db, normalUser.ID, "")
-	verifyCreateAPIKey(t, false, ctx, db, normalUser.ID, normalUser.Slug)
+		// Verify self actions
+		verifyCreateAPIKey(t, false, ctx, db, normalUser.ID, "")
+		verifyCreateAPIKey(t, false, ctx, db, normalUser.ID, normalUser.Slug)
 
-	// verify other-based actions (non-admin)
-	verifyCreateAPIKey(t, true, ctx, db, targetUser.ID, targetUser.Slug)
+		// verify other-based actions (non-admin)
+		verifyCreateAPIKey(t, true, ctx, db, targetUser.ID, targetUser.Slug)
 
-	// verify other-based actions (admin)
-	ctx = contextForUser(adminUser, db)
-	verifyCreateAPIKey(t, false, ctx, db, targetUser.ID, targetUser.Slug)
+		// verify other-based actions (admin)
+		ctx = contextForUser(adminUser, db)
+		verifyCreateAPIKey(t, false, ctx, db, targetUser.ID, targetUser.Slug)
+	})
 }
 
 func verifyCreateAPIKey(t *testing.T, expectError bool, ctx context.Context, db *database.Connection, userID int64, userSlug string) {
@@ -54,47 +54,46 @@ func verifyCreateAPIKey(t *testing.T, expectError bool, ctx context.Context, db 
 }
 
 func TestDeleteAPIKey(t *testing.T) {
-	db := initTest(t)
-	defer db.DB.Close()
-	HarryPotterSeedData.ApplyTo(t, db)
-	normalUser := UserRon
-	targetUser := UserHarry
-	adminUser := UserDumbledore
-	ctx := contextForUser(normalUser, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		normalUser := UserRon
+		targetUser := UserHarry
+		adminUser := UserDumbledore
+		ctx := contextForUser(normalUser, db)
 
-	// verify delete api key for other user (as self)
-	verifyDeleteAPIKey(t, true, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
-		UserSlug:  normalUser.Slug,
-		AccessKey: APIKeyHarry1.AccessKey,
-	})
+		// verify delete api key for other user (as self)
+		verifyDeleteAPIKey(t, true, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
+			UserSlug:  normalUser.Slug,
+			AccessKey: APIKeyHarry1.AccessKey,
+		})
 
-	// verify delete api key for other user (as self - alt)
-	verifyDeleteAPIKey(t, true, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
-		AccessKey: APIKeyHarry1.AccessKey,
-	})
+		// verify delete api key for other user (as self - alt)
+		verifyDeleteAPIKey(t, true, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
+			AccessKey: APIKeyHarry1.AccessKey,
+		})
 
-	// verify delete api key for self
-	verifyDeleteAPIKey(t, false, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
-		AccessKey: APIKeyRon1.AccessKey,
-	})
+		// verify delete api key for self
+		verifyDeleteAPIKey(t, false, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
+			AccessKey: APIKeyRon1.AccessKey,
+		})
 
-	// verify delete api key for self (alt)
-	verifyDeleteAPIKey(t, false, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
-		UserSlug:  normalUser.Slug,
-		AccessKey: APIKeyRon2.AccessKey,
-	})
+		// verify delete api key for self (alt)
+		verifyDeleteAPIKey(t, false, ctx, db, normalUser.ID, services.DeleteAPIKeyInput{
+			UserSlug:  normalUser.Slug,
+			AccessKey: APIKeyRon2.AccessKey,
+		})
 
-	// verify delete api key for other (non-admin)
-	verifyDeleteAPIKey(t, true, ctx, db, targetUser.ID, services.DeleteAPIKeyInput{
-		UserSlug:  targetUser.Slug,
-		AccessKey: APIKeyHarry1.AccessKey,
-	})
+		// verify delete api key for other (non-admin)
+		verifyDeleteAPIKey(t, true, ctx, db, targetUser.ID, services.DeleteAPIKeyInput{
+			UserSlug:  targetUser.Slug,
+			AccessKey: APIKeyHarry1.AccessKey,
+		})
 
-	// verify delete api key for other (admin)
-	ctx = contextForUser(adminUser, db)
-	verifyDeleteAPIKey(t, false, ctx, db, targetUser.ID, services.DeleteAPIKeyInput{
-		UserSlug:  targetUser.Slug,
-		AccessKey: APIKeyHarry1.AccessKey,
+		// verify delete api key for other (admin)
+		ctx = contextForUser(adminUser, db)
+		verifyDeleteAPIKey(t, false, ctx, db, targetUser.ID, services.DeleteAPIKeyInput{
+			UserSlug:  targetUser.Slug,
+			AccessKey: APIKeyHarry1.AccessKey,
+		})
 	})
 }
 
@@ -121,24 +120,24 @@ func verifyDeleteAPIKey(t *testing.T, expectError bool, ctx context.Context, db 
 }
 
 func TestListAPIKeys(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	normalUser := UserRon
-	targetUser := UserHarry
-	adminUser := UserDumbledore
-	ctx := contextForUser(normalUser, db)
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		normalUser := UserRon
+		targetUser := UserHarry
+		adminUser := UserDumbledore
+		ctx := contextForUser(normalUser, db)
 
-	// verify read-self
-	verifyListAPIKeys(t, false, ctx, db, "", APIKeyRon1, APIKeyRon2)
-	// verify read-self (alt)
-	verifyListAPIKeys(t, false, ctx, db, normalUser.Slug, APIKeyRon1, APIKeyRon2)
+		// verify read-self
+		verifyListAPIKeys(t, false, ctx, db, "", APIKeyRon1, APIKeyRon2)
+		// verify read-self (alt)
+		verifyListAPIKeys(t, false, ctx, db, normalUser.Slug, APIKeyRon1, APIKeyRon2)
 
-	// verify read-other (non-admin)
-	verifyListAPIKeys(t, true, ctx, db, targetUser.Slug)
+		// verify read-other (non-admin)
+		verifyListAPIKeys(t, true, ctx, db, targetUser.Slug)
 
-	// verify read-other (admin)
-	ctx = contextForUser(adminUser, db)
-	verifyListAPIKeys(t, false, ctx, db, targetUser.Slug, APIKeyHarry1, APIKeyHarry2)
+		// verify read-other (admin)
+		ctx = contextForUser(adminUser, db)
+		verifyListAPIKeys(t, false, ctx, db, targetUser.Slug, APIKeyHarry1, APIKeyHarry2)
+	})
 }
 
 func verifyListAPIKeys(t *testing.T, expectError bool, ctx context.Context, db *database.Connection, userSlug string, expectedAPIKeys ...models.APIKey) {

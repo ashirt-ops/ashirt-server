@@ -48,6 +48,11 @@ func (seed Seeder) AllInitialDefaultTagIds() []int64 {
 
 // ApplyTo takes the configured Seeder and writes these values to the database.
 func (seed Seeder) ApplyTo(db *database.Connection) error {
+	if (len(seed.Users) == 0) {
+		logging.GetSystemLogger().Log("msg", "Applying NO seed data")
+		return nil
+	}
+
 	systemLogger := logging.GetSystemLogger()
 	systemLogger.Log("msg", "Applying seed data", "firstUser", seed.Users[0].FirstName)
 	logging.SetSystemLogger(logging.NewNopLogger())
@@ -221,6 +226,14 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 	})
 
 	return err
+}
+
+func (seed Seeder) Reset(db *database.Connection) error {
+	err := ClearDB(db)
+	if err != nil {
+		return err
+	}
+	return seed.ApplyTo(db)
 }
 
 func (seed Seeder) CategoryForFinding(finding models.Finding) string {

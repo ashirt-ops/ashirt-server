@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 	"github.com/theparanoids/ashirt-server/backend/services"
@@ -33,29 +34,28 @@ func testParseRequestQueryUserFilter(t *testing.T, endpoint string, expectedCont
 }
 
 func TestAddWhere(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
+	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
+		filter := services.UserFilter{
+			NameParts:  []string{"Ron"},
+			UsersTable: "u",
+		}
 
-	filter := services.UserFilter{
-		NameParts:  []string{"Ron"},
-		UsersTable: "u",
-	}
+		query := sq.Select("count(*)").From("users AS u")
 
-	query := sq.Select("count(*)").From("users AS u")
+		// verify that the base db query works
+		var userCount int64
+		err := db.Get(&userCount, query)
+		require.NoError(t, err)
+		require.Equal(t, int64(len(seed.Users)), userCount)
 
-	// verify that the base db query works
-	var userCount int64
-	err := db.Get(&userCount, query)
-	require.NoError(t, err)
-	require.Equal(t, int64(len(HarryPotterSeedData.Users)), userCount)
-
-	// verify that we have a different count after applying the filter
-	expectedUserSet := filterUsersManually(filter.NameParts[0], HarryPotterSeedData.Users)
-	userCount = -1
-	filter.AddWhere(&query)
-	err = db.Get(&userCount, query)
-	require.NoError(t, err)
-	require.Equal(t, int64(len(expectedUserSet)), userCount)
+		// verify that we have a different count after applying the filter
+		expectedUserSet := filterUsersManually(filter.NameParts[0], seed.Users)
+		userCount = -1
+		filter.AddWhere(&query)
+		err = db.Get(&userCount, query)
+		require.NoError(t, err)
+		require.Equal(t, int64(len(expectedUserSet)), userCount)
+	})
 }
 
 func filterUsersManually(query string, userList []models.User) []models.User {
