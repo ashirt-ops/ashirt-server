@@ -5,12 +5,13 @@ package enhancementservices
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
@@ -33,7 +34,7 @@ func MkRIEURL(lambdaName string) string {
 
 // Invoke mimics the aws Lambda function of the same name. This is useful for development testing
 // without incurring AWS fees
-func (l LambdaRIEClient) Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error) {
+func (l LambdaRIEClient) Invoke(ctx context.Context, input *lambda.InvokeInput, optFns ...func(*lambda.Options)) (*lambda.InvokeOutput, error) {
 	if input.FunctionName == nil {
 		return nil, fmt.Errorf("missing a function name for RIE lambda client")
 	}
@@ -55,7 +56,7 @@ func (l LambdaRIEClient) Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput
 
 	out := lambda.InvokeOutput{
 		FunctionError: nil,
-		StatusCode:    helpers.Ptr(int64(resp.StatusCode)),
+		StatusCode:    int32(resp.StatusCode),
 	}
 	if len(respBody) == 0 {
 		return &out, nil

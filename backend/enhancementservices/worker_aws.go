@@ -4,11 +4,12 @@
 package enhancementservices
 
 import (
+	"context"
 	"encoding/json"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/lambda"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
@@ -29,18 +30,15 @@ type AWSConfigV1 struct {
 }
 
 func buildLambdaClient() error {
-	sess, err := session.NewSession()
+	cfg, err := awsConfig.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return backend.WrapError("unable to establish an aws lambda session", err)
 	}
 	if config.UseLambdaRIE() {
 		lambdaClient = newRIELambdaClient()
 	} else {
-		lambdaClient = lambda.New(sess, &aws.Config{
-			Region: helpers.Ptr(config.AWSRegion()),
-		})
+		lambdaClient = lambda.NewFromConfig(cfg)
 	}
-
 	return nil
 }
 
@@ -67,7 +65,7 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 		Payload:      []byte(`{"type": "test"}`),
 	}
 
-	out, err := lambdaClient.Invoke(&input)
+	out, err := lambdaClient.Invoke(context.Background(), &input)
 
 	if err != nil {
 		return errorTestResultWithMessage(err, "Unable to verify worker status")
@@ -115,10 +113,10 @@ func (w *awsConfigV1Worker) ProcessMetadata(evidenceID int64, payload *NewEviden
 		Payload:      body,
 	}
 	if w.Config.AsyncFn {
-		input.SetInvocationType("Event")
+		input.InvocationType = types.InvocationTypeEvent
 	}
 
-	out, err := lambdaClient.Invoke(&input)
+	out, err := lambdaClient.Invoke(context.Background(), &input)
 	if err != nil {
 		return nil, backend.WrapError("Unable to invoke lambda function", err)
 	}
@@ -147,10 +145,10 @@ func (w *awsConfigV1Worker) ProcessEvent(payload interface{}) error {
 		Payload:      body,
 	}
 	if w.Config.AsyncFn {
-		input.SetInvocationType("Event")
+		input.InvocationType = types.InvocationTypeEvent
 	}
 
-	if out, err := lambdaClient.Invoke(&input); err != nil {
+	if out, err := lambdaClient.Invoke(context.Background(), &input); err != nil {
 		return backend.WrapError("Unable to invoke lambda function", err)
 	} else if out.FunctionError != nil {
 		return backend.WrapError("Lambda invocation failed", err)
@@ -160,7 +158,7 @@ func (w *awsConfigV1Worker) ProcessEvent(payload interface{}) error {
 }
 
 func handleAWSProcessResponse(dbModel *models.EvidenceMetadata, output *lambda.InvokeOutput) {
-	statusCode := *output.StatusCode
+	statusCode := output.StatusCode
 	var parsedData ProcessResponse
 
 	if len(output.Payload) > 0 {

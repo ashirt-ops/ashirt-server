@@ -5,6 +5,7 @@ package enhancementservices_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/enhancementservices"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
@@ -55,7 +56,7 @@ func TestInvoke(t *testing.T) {
 	client := enhancementservices.NewTestRIELambdaClient(makeMockRequestHandler(mockInput))
 
 	// verify error
-	_, err := client.Invoke(&lambda.InvokeInput{
+	_, err := client.Invoke(context.TODO(), &lambda.InvokeInput{
 		FunctionName: nil,
 	})
 	require.Error(t, err)
@@ -64,7 +65,7 @@ func TestInvoke(t *testing.T) {
 	body.Body = expectedBody
 	bodyBytes, err := json.Marshal(body)
 	require.NoError(t, err)
-	out, err := client.Invoke(&lambda.InvokeInput{
+	out, err := client.Invoke(context.TODO(), &lambda.InvokeInput{
 		FunctionName: &lambdaName,
 		Payload:      bodyBytes,
 	})

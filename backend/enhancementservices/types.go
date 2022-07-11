@@ -4,10 +4,11 @@
 package enhancementservices
 
 import (
+	"context"
 	"io"
 	"net/http"
 
-	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 )
@@ -72,7 +73,8 @@ func testResultSuccess(message string) ServiceTestResult {
 }
 
 type LambdaInvokableClient interface {
-	Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error)
+	// Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error)
+	Invoke(ctx context.Context, params *lambda.InvokeInput, optFns ...func(*lambda.Options)) (*lambda.InvokeOutput, error)
 }
 
 type ProcessResponse struct {
