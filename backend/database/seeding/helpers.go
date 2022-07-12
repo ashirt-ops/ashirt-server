@@ -175,6 +175,19 @@ func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentTy
 	}
 }
 
+func newEvidenceMetadataGen(first int64) func(eviID int64, source, body string, clockDayOffset int) models.EvidenceMetadata {
+	id := iotaLike(first)
+	return func(eviID int64, source, body string, clockDayOffset int) models.EvidenceMetadata {
+		return models.EvidenceMetadata{
+			ID:         id(),
+			EvidenceID: eviID,
+			Source:     source,
+			Body:       body,
+			CreatedAt:  internalClock.Now(),
+		}
+	}
+}
+
 func newFindingCategoryGen(first int64) func(category string, deleted bool) models.FindingCategory {
 	id := iotaLike(first)
 	return func(category string, deleted bool) models.FindingCategory {

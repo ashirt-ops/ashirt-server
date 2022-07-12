@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -18,7 +18,12 @@ import { default as Menu, MenuItem } from 'src/components/menu'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-type Actions = { [name: string]: (e: Evidence) => void }
+type Action = {
+  label: string
+  act: (evi: Evidence) => void
+  canAct?: (evi: Evidence) => { disabled: boolean, title?: string }
+}
+type Actions = Array<Action>
 
 export default (props: {
   actions: Actions,
@@ -165,8 +170,15 @@ const TimelineRow = (props: {
         <TagList tags={props.evidence.tags} onTagClick={onTagClick} />
         <ButtonGroup>
           {
-            Object.keys(props.actions).map(actionName => (
-              <Button small key={actionName} onClick={() => props.actions[actionName](props.evidence)}>{actionName}</Button>
+            props.actions.map(action => (
+              <Button
+                small
+                key={action.label}
+                onClick={() => action.act(props.evidence)}
+                {...action.canAct?.(props.evidence)}
+              >
+                {action.label}
+              </Button>
             ))
           }
           <CopyTextButton small textToCopy={permalink}>Copy Permalink</CopyTextButton>
@@ -183,8 +195,14 @@ const renderExtraActions = (evidence: Evidence, extraActions?: Actions) => {
     return null
   }
 
-  const menuItems = Object.keys(extraActions).map(actionName => (
-    <MenuItem key={actionName} onClick={() => extraActions[actionName](evidence)}>{actionName}</MenuItem>
+  const menuItems = extraActions.map(action => (
+    <MenuItem
+      key={action.label}
+      onClick={() => action.act(evidence)}
+      {...action.canAct?.(evidence)}
+    >
+      {action.label}
+    </MenuItem>
   ))
 
   return (

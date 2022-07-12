@@ -168,6 +168,15 @@ func GetEvidenceByUUID(t *testing.T, db *database.Connection, uuid string) model
 	return GetFullEvidenceViaSelectBuilder(t, db, sq.Eq{"uuid": uuid})
 }
 
+func GetEvidenceMetadataByEvidenceID(t *testing.T, db *database.Connection, id int64) []models.EvidenceMetadata {
+	var evidenceMetadata []models.EvidenceMetadata
+	err := db.Select(&evidenceMetadata, sq.Select("*").
+		From("evidence_metadata").
+		Where(sq.Eq{"evidence_id": id}))
+	require.NoError(t, err)
+	return evidenceMetadata
+}
+
 func GetFullEvidenceViaSelectBuilder(t *testing.T, db *database.Connection, condition sq.Eq) models.Evidence {
 	var evidence models.Evidence
 	err := db.Get(&evidence, sq.Select("*").
@@ -408,10 +417,10 @@ type TestOptions struct {
 
 func (opts *TestOptions) useDefaults() {
 	if opts.DatabasePath == nil {
-		opts.DatabasePath = helpers.StringPtr("../migrations")
+		opts.DatabasePath = helpers.Ptr("../migrations")
 	}
 	if opts.DatabaseName == nil {
-		opts.DatabaseName = helpers.StringPtr("service-test-db")
+		opts.DatabaseName = helpers.Ptr("service-test-db")
 	}
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package dtos
@@ -17,12 +17,18 @@ type APIKey struct {
 }
 
 type Evidence struct {
-	UUID        string    `json:"uuid"`
-	Description string    `json:"description"`
-	OccurredAt  time.Time `json:"occurredAt"`
-	Operator    User      `json:"operator"`
-	Tags        []Tag     `json:"tags"`
-	ContentType string    `json:"contentType"`
+	UUID        string             `json:"uuid"`
+	Description string             `json:"description"`
+	OccurredAt  time.Time          `json:"occurredAt"`
+	Operator    User               `json:"operator"`
+	Tags        []Tag              `json:"tags"`
+	Metadata    []EvidenceMetadata `json:"metadata"`
+	ContentType string             `json:"contentType"`
+}
+
+type EvidenceMetadata struct {
+	Source string `json:"source"`
+	Body   string `json:"body"`
 }
 
 type Finding struct {

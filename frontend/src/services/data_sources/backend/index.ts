@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { DataSource, cacheBust } from '../data_source'
@@ -27,6 +27,8 @@ export const backendDataSource: DataSource = {
   deleteEvidence: (ids, payload) => req('DELETE', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, payload),
   getEvidenceMigrationDifference: (ids, fromOperationSlug) => req('GET', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),
   moveEvidence: (ids, fromOperationSlug) => req('PUT', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, { sourceOperationSlug: fromOperationSlug }),
+  createEvidenceMetadata: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`, payload),
+  updateEvidenceMetadata: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/metadata`, payload),
 
   listFindingCategories: (includeDeleted) => req('GET', `/findings/categories`, null, { includeDeleted }),
   createFindingCategory: (payload) => req('POST', `/findings/category`, payload),
