@@ -97,7 +97,7 @@ const QueryList = (props: {
     props.onSavedQueryChange()
   }
 
-  const saveQueryModal = useModal<void>(modalProps => (
+  const saveQueryModal = useModal<{}>(modalProps => (
     <SaveQueryModal
       query={props.currentQuery}
       onSaved={(queryName: string) => {
@@ -132,7 +132,7 @@ const QueryList = (props: {
           name={props.currentQuery}
           selected // If this is displayed it is always selected
           onSelect={() => {}}
-          onSave={() => saveQueryModal.show()}
+          onSave={() => saveQueryModal.show({})}
         />
       )}
 

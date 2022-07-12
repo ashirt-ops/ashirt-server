@@ -25,7 +25,7 @@ export const BatchRunWorker = (props: {
   const [selectedWorkers, setSelectedWorkers] = React.useState<Array<BulletProps>>([])
   const [selectedEvidence, setSelectedEvidence] = React.useState<Array<Evidence>>([])
 
-  const chooseEvidenceModal = useModal<void>(modalProps => (
+  const chooseEvidenceModal = useModal<{}>(modalProps => (
     <ChooseEvidenceModal
       initialEvidence={selectedEvidence}
       operationSlug={props.operationSlug}
@@ -48,7 +48,7 @@ export const BatchRunWorker = (props: {
     />
   ))
 
-  const startWOrkersModal = useModal<void>(modalProps => (
+  const startWOrkersModal = useModal<{}>(modalProps => (
     <StartWorkerModal
       onSubmit={ async() => {
         if (selectedEvidence.length == 0) {
@@ -96,7 +96,7 @@ export const BatchRunWorker = (props: {
             <div className={cx('multi-item-row')}>
               <Button
                 className={cx('choose-button')}
-                onClick={() => chooseEvidenceModal.show()}
+                onClick={() => chooseEvidenceModal.show({})}
               >
                 Browse
               </Button>
@@ -109,7 +109,7 @@ export const BatchRunWorker = (props: {
             primary
             disabled={!startButtonEnabled}
             title={startButtonEnabled ? "Start the workers" : "Choose some workers and evidence to start"}
-            onClick={() => startWOrkersModal.show()}
+            onClick={() => startWOrkersModal.show({})}
           >
             Start
           </Button>

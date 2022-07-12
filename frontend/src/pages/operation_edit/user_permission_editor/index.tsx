@@ -79,7 +79,7 @@ const PermissionTableRow = (props: {
   const isCurrentUser = currentUser ? currentUser.slug === props.user.slug : false
   const isAdmin = currentUser ? currentUser.admin : false
 
-  const removeWarningModal = useModal<void>(modalProps => (
+  const removeWarningModal = useModal<{}>(modalProps => (
     <RemoveWarningModal {...modalProps} removeUser={async () => {
       await props.updatePermissions(UserRole.NO_ACCESS)
       props.requestReload()
@@ -98,7 +98,7 @@ const PermissionTableRow = (props: {
           await props.updatePermissions(r)
           props.requestReload()
         }} /></td>
-        <td><Button danger small disabled={disabled} onClick={() => removeWarningModal.show()}>Remove</Button></td>
+        <td><Button danger small disabled={disabled} onClick={() => removeWarningModal.show({})}>Remove</Button></td>
       </tr>
       {renderModals(removeWarningModal)}
     </>

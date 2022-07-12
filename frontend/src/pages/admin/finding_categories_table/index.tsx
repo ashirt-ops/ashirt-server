@@ -30,10 +30,10 @@ const TableRow = (props: {
   onUpdate: () => void
 }) => {
 
-  const editModal = useModal<void>(modalProps => (
+  const editModal = useModal<{}>(modalProps => (
     <EditFindingCategoryModal {...modalProps} onEdited={props.onUpdate} category={props.category} />
   ))
-  const deleteModal = useModal<void>(modalProps => (
+  const deleteModal = useModal<{}>(modalProps => (
     <DeleteFindingCategoryModal {...modalProps} onDeleted={props.onUpdate} category={props.category} />
   ))
   const isDeleted = props.category.deleted
@@ -45,14 +45,14 @@ const TableRow = (props: {
       <td>{isDeleted ? 'deleted' : 'active'}</td>
       <td>
         <ButtonGroup>
-          <Button small onClick={() => editModal.show()}>Edit</Button>
+          <Button small onClick={() => editModal.show({})}>Edit</Button>
           {
             isDeleted
               ? <Button small onClick={() => deleteFindingCategory({
                 id: props.category.id,
                 delete: false
               }).then(props.onUpdate)}>Restore</Button>
-              : <Button small danger onClick={() => deleteModal.show()}>Delete</Button>
+              : <Button small danger onClick={() => deleteModal.show({})}>Delete</Button>
           }
 
         </ButtonGroup>
@@ -70,7 +70,7 @@ export default (props: {
     React.useCallback(() => getFindingCategories(true), [])
   )
 
-  const createModal = useModal<void>(modalProps => (
+  const createModal = useModal<{}>(modalProps => (
     <EditFindingCategoryModal {...modalProps} onEdited={wiredCategories.reload} />
   ))
 
@@ -93,7 +93,7 @@ export default (props: {
               <TableRow key={category.id} category={category} onUpdate={wiredCategories.reload} />
             ))}
           </Table>
-          <Button className={cx('create-button')} primary onClick={() => createModal.show()}>Add New Category</Button>
+          <Button className={cx('create-button')} primary onClick={() => createModal.show({})}>Add New Category</Button>
         </>
       ))}
       {renderModals(createModal)}

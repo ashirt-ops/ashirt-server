@@ -33,12 +33,12 @@ export default (props: {
   shortcuts?: Array<KeyboardShortcut>,
   className?: string,
 }) => {
-  const helpModal = useModal<void>(modalProps => <HelpModal preamble={props.preamble} shortcuts={props.shortcuts} {...modalProps} />)
+  const helpModal = useModal<{}>(modalProps => <HelpModal preamble={props.preamble} shortcuts={props.shortcuts} {...modalProps} />)
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.target == null || e.target !== document.body) return
 
-    if (e.key === '?') helpModal.show()
+    if (e.key === '?') helpModal.show({})
   }
 
   React.useEffect(() => {
@@ -48,7 +48,7 @@ export default (props: {
 
   return (
     <>
-      <a className={cx(props.className)} onClick={() => helpModal.show()}>
+      <a className={cx(props.className)} onClick={() => helpModal.show({})}>
         <img className={cx('help-icon')} src={require('./info-icon.svg')} />
       </a>
       {renderModals(helpModal)}

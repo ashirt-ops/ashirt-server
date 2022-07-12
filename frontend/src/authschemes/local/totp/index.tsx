@@ -69,7 +69,6 @@ const TotpDisabled = (props: {
 
     {showTotpSetupModal && (
       <TotpSetupModal
-        {...showTotpSetupModal}
         onSuccess={props.onSuccess}
         onRequestClose={() => setShowTotpSetupModal(false)}
       />

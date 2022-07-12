@@ -31,7 +31,7 @@ type UseModalOutput<ModalProps> = {
   show: (modalProps: ModalProps) => void,
 }
 
-type OnRequestClose = {
+export type OnRequestClose = {
   onRequestClose: () => void,
 }
 
