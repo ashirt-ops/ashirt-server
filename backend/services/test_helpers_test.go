@@ -35,8 +35,8 @@ func RunResettableDBTest(t *testing.T, fn func(*database.Connection, TestSeedDat
 func RunReusableDBTestWithSeed(t *testing.T, seed TestSeedData, fn func(*database.Connection, TestSeedData)) {
 	db := GetReusableTestDatabase(t)
 	seed.ApplyTo(t, db)
+	defer seeding.ClearDB(db)
 	fn(db, seed)
-	seeding.ClearDB(db)
 }
 
 // RunDisposableDBTestWithSeed creates a connection to a database server, creates a fresh database instance,
@@ -47,5 +47,6 @@ func RunDisposableDBTestWithSeed(t *testing.T, seed TestSeedData, fn func(*datab
 	db := initTest(t)
 	defer db.DB.Close()
 	seed.ApplyTo(t, db)
+	defer seeding.ClearDB(db)
 	fn(db, seed)
 }
