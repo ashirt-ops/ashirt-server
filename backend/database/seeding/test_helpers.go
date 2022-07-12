@@ -66,6 +66,39 @@ func InitTestWithOptions(t *testing.T, options TestOptions) *database.Connection
 	return database.NewTestConnectionFromNonStandardMigrationPath(t, *options.DatabaseName, *options.DatabasePath)
 }
 
+// ClearDB empties the database of all values. This leaves behind small residue: IDs are already taken,
+// so, auto-incremented values will use the next value, not re-use values. However, this is easily
+// overcome by specifying what the ID should be -- which is part of each seed anyway.
+//
+// Note: this should only be done in a testing environment.
+func ClearDB(db *database.Connection) error {
+	systemLogger := logging.GetSystemLogger()
+	systemLogger.Log("msg", "Clearing Database...")
+	logging.SetSystemLogger(logging.NewNopLogger())
+	defer logging.SetSystemLogger(systemLogger)
+
+	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+		tx.Delete(sq.Delete("sessions"))
+		tx.Delete(sq.Delete("user_operation_permissions"))
+		tx.Delete(sq.Delete("api_keys"))
+		tx.Delete(sq.Delete("auth_scheme_data"))
+		tx.Delete(sq.Delete("email_queue"))
+		tx.Delete(sq.Delete("tag_evidence_map"))
+		tx.Delete(sq.Delete("tags"))
+		tx.Delete(sq.Delete("default_tags"))
+		tx.Delete(sq.Delete("evidence_finding_map"))
+		tx.Delete(sq.Delete("evidence_metadata"))
+		tx.Delete(sq.Delete("evidence"))
+		tx.Delete(sq.Delete("findings"))
+		tx.Delete(sq.Delete("finding_categories"))
+		tx.Delete(sq.Delete("users"))
+		tx.Delete(sq.Delete("queries"))
+		tx.Delete(sq.Delete("operations"))
+		tx.Delete(sq.Delete("service_workers"))
+	})
+	return err
+}
+
 // SimpleFullContext returns back a context with a proper authenticated policy
 func SimpleFullContext(my models.User) context.Context {
 	ctx := context.Background()

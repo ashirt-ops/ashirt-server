@@ -7,133 +7,132 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
+	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestCreateQuery(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	op := OpChamberOfSecrets
-	i := services.CreateQueryInput{
-		OperationSlug: op.Slug,
-		Name:          "Evidence By author",
-		Query:         "<query goes here>",
-		Type:          "findings",
-	}
-	createdQuery, err := services.CreateQuery(ctx, db, i)
-	require.NoError(t, err)
-	fullQuery := getQueryByID(t, db, createdQuery.ID)
-	require.Equal(t, i.Name, fullQuery.Name)
-	require.Equal(t, i.Type, fullQuery.Type)
-	require.Equal(t, i.Query, fullQuery.Query)
+		op := OpChamberOfSecrets
+		i := services.CreateQueryInput{
+			OperationSlug: op.Slug,
+			Name:          "Evidence By author",
+			Query:         "<query goes here>",
+			Type:          "findings",
+		}
+		createdQuery, err := services.CreateQuery(ctx, db, i)
+		require.NoError(t, err)
+		fullQuery := getQueryByID(t, db, createdQuery.ID)
+		require.Equal(t, i.Name, fullQuery.Name)
+		require.Equal(t, i.Type, fullQuery.Type)
+		require.Equal(t, i.Query, fullQuery.Query)
+	})
 }
 
 func TestDeleteQuery(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	i := services.DeleteQueryInput{
-		OperationSlug: OpChamberOfSecrets.Slug,
-		ID:            QuerySalazarsHier.ID,
-	}
+		i := services.DeleteQueryInput{
+			OperationSlug: OpChamberOfSecrets.Slug,
+			ID:            QuerySalazarsHier.ID,
+		}
 
-	getQueryCount := makeDBRowCounter(t, db, "queries", "id=?", i.ID)
-	require.Equal(t, int64(1), getQueryCount(), "Database should have item to delete")
+		getQueryCount := makeDBRowCounter(t, db, "queries", "id=?", i.ID)
+		require.Equal(t, int64(1), getQueryCount(), "Database should have item to delete")
 
-	err := services.DeleteQuery(ctx, db, i)
-	require.NoError(t, err)
-	require.Equal(t, int64(0), getQueryCount(), "Database should have deleted the item")
+		err := services.DeleteQuery(ctx, db, i)
+		require.NoError(t, err)
+		require.Equal(t, int64(0), getQueryCount(), "Database should have deleted the item")
+	})
 }
 
 func TestListQueriesForOperation(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	masterOp := OpChamberOfSecrets
-	allQueries := getQueriesForOperationID(t, db, masterOp.ID)
-	require.NotEqual(t, len(allQueries), 0, "Some number of queries should exist")
+		masterOp := OpChamberOfSecrets
+		allQueries := getQueriesForOperationID(t, db, masterOp.ID)
+		require.NotEqual(t, len(allQueries), 0, "Some number of queries should exist")
 
-	foundQueries, err := services.ListQueriesForOperation(ctx, db, masterOp.Slug)
-	require.NoError(t, err)
-	require.Equal(t, len(foundQueries), len(allQueries))
-	validateQuerySets(t, foundQueries, allQueries, validateQuery)
+		foundQueries, err := services.ListQueriesForOperation(ctx, db, masterOp.Slug)
+		require.NoError(t, err)
+		require.Equal(t, len(foundQueries), len(allQueries))
+		validateQuerySets(t, foundQueries, allQueries, validateQuery)
+	})
 }
 
 func TestUpdateQuery(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	ctx := fullContext(UserRon.ID, &policy.FullAccess{})
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserRon, db)
 
-	masterOp := OpChamberOfSecrets
-	masterQuery := QuerySalazarsHier
-	input := services.UpdateQueryInput{
-		OperationSlug: masterOp.Slug,
-		ID:            masterQuery.ID,
-		Name:          "New Name",
-		Query:         "New Query",
-	}
+		masterOp := OpChamberOfSecrets
+		masterQuery := QuerySalazarsHier
+		input := services.UpdateQueryInput{
+			OperationSlug: masterOp.Slug,
+			ID:            masterQuery.ID,
+			Name:          "New Name",
+			Query:         "New Query",
+		}
 
-	err := services.UpdateQuery(ctx, db, input)
-	require.NoError(t, err)
+		err := services.UpdateQuery(ctx, db, input)
+		require.NoError(t, err)
 
-	updatedQuery := getQueryByID(t, db, masterQuery.ID)
+		updatedQuery := getQueryByID(t, db, masterQuery.ID)
 
-	require.NoError(t, err)
-	require.Equal(t, input.Name, updatedQuery.Name)
-	require.Equal(t, input.Query, updatedQuery.Query)
+		require.NoError(t, err)
+		require.Equal(t, input.Name, updatedQuery.Name)
+		require.Equal(t, input.Query, updatedQuery.Query)
+	})
 }
 
 func TestUpsertQuery(t *testing.T) {
-	db := initTest(t)
-	HarryPotterSeedData.ApplyTo(t, db)
-	user := UserRon
-	ctx := contextForUser(user, db)
-	op := OpChamberOfSecrets
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		user := UserRon
+		ctx := contextForUser(user, db)
+		op := OpChamberOfSecrets
 
-	checkQueryData := func(i services.UpsertQueryInput, dbModel models.Query) {
-		require.Equal(t, i.Name, dbModel.Name)
-		require.Equal(t, i.Type, dbModel.Type)
-		require.Equal(t, i.Query, dbModel.Query)
-	}
+		checkQueryData := func(i services.UpsertQueryInput, dbModel models.Query) {
+			require.Equal(t, i.Name, dbModel.Name)
+			require.Equal(t, i.Type, dbModel.Type)
+			require.Equal(t, i.Query, dbModel.Query)
+		}
 
-	i := services.UpsertQueryInput{
-		CreateQueryInput: services.CreateQueryInput{
-			OperationSlug: op.Slug,
-			Name:          "Ron's amazing query",
-			Query:         "I can sepll!",
-			Type:          "evidence",
-		},
-		ReplaceName: false, // initial value doesn't matter
-	}
-	createdQuery, err := services.UpsertQuery(ctx, db, i)
-	require.NoError(t, err)
-	fullQuery := getQueryByID(t, db, createdQuery.ID)
-	checkQueryData(i, fullQuery)
+		i := services.UpsertQueryInput{
+			CreateQueryInput: services.CreateQueryInput{
+				OperationSlug: op.Slug,
+				Name:          "Ron's amazing query",
+				Query:         "I can sepll!",
+				Type:          "evidence",
+			},
+			ReplaceName: false, // initial value doesn't matter
+		}
+		createdQuery, err := services.UpsertQuery(ctx, db, i)
+		require.NoError(t, err)
+		fullQuery := getQueryByID(t, db, createdQuery.ID)
+		checkQueryData(i, fullQuery)
 
-	// Update the query
-	i.CreateQueryInput.Query = "I can spell!"
-	updatedQuery, err := services.UpsertQuery(ctx, db, i)
-	require.Equal(t, createdQuery.ID, updatedQuery.ID)
-	require.NoError(t, err)
-	fullUpdatedQuery := getQueryByID(t, db, updatedQuery.ID)
-	checkQueryData(i, fullUpdatedQuery)
+		// Update the query
+		i.CreateQueryInput.Query = "I can spell!"
+		updatedQuery, err := services.UpsertQuery(ctx, db, i)
+		require.Equal(t, createdQuery.ID, updatedQuery.ID)
+		require.NoError(t, err)
+		fullUpdatedQuery := getQueryByID(t, db, updatedQuery.ID)
+		checkQueryData(i, fullUpdatedQuery)
 
-	// update the name
-	i.CreateQueryInput.Name = "Ron's pretty good query"
-	i.ReplaceName = true
-	updatedQuery, err = services.UpsertQuery(ctx, db, i)
-	require.Equal(t, createdQuery.ID, updatedQuery.ID)
-	require.NoError(t, err)
-	fullUpdatedQuery = getQueryByID(t, db, updatedQuery.ID)
-	checkQueryData(i, fullUpdatedQuery)
+		// update the name
+		i.CreateQueryInput.Name = "Ron's pretty good query"
+		i.ReplaceName = true
+		updatedQuery, err = services.UpsertQuery(ctx, db, i)
+		require.Equal(t, createdQuery.ID, updatedQuery.ID)
+		require.NoError(t, err)
+		fullUpdatedQuery = getQueryByID(t, db, updatedQuery.ID)
+		checkQueryData(i, fullUpdatedQuery)
+	})
 }
 
 type queryValidator func(*testing.T, models.Query, *dtos.Query)

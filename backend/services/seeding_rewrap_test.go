@@ -4,7 +4,6 @@
 package services_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 )
 
 // This file rewraps many of the database seeder helpers.
@@ -32,7 +30,6 @@ type FullEvidence = seeding.FullEvidence
 var initTest = seeding.InitTest
 var getUsersWithRoleForOperationByOperationID = seeding.GetUsersWithRoleForOperationByOperationID
 var contextForUser = seeding.ContextForUser
-var simpleFullContext = seeding.SimpleFullContext
 var GetInternalClock = seeding.GetInternalClock
 
 var getFullEvidenceByFindingID = seeding.GetFullEvidenceByFindingID
@@ -80,29 +77,11 @@ func createPopulatedMemStore(seed TestSeedData) *contentstore.MemStore {
 	return seeding.CreatePopulatedMemStore(seed.Seeder)
 }
 
-// to be replaced
-func fullContext(userid int64, p policy.Policy) context.Context {
-	ctx := context.Background()
-	return middleware.InjectIntoContext(ctx, middleware.InjectIntoContextInput{
-		UserID:       userid,
-		IsSuperAdmin: false,
-		UserPolicy:   p,
-	})
-}
-
-func fullContextAsAdmin(userid int64, p policy.Policy) context.Context {
-	ctx := context.Background()
-	return middleware.InjectIntoContext(ctx, middleware.InjectIntoContextInput{
-		UserID:       userid,
-		IsSuperAdmin: true,
-		UserPolicy:   p,
-	})
-}
-
 // Exported seed data
 var HarryPotterSeedData = TestSeedData{
 	seeding.HarryPotterSeedData,
 }
+var NoSeedData = TestSeedData{}
 
 var UserDumbledore = seeding.UserDumbledore
 var UserHarry = seeding.UserHarry
