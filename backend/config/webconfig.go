@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 // WebConfig is a namespaced app-specific configuration.
@@ -58,6 +59,9 @@ type AuthInstanceConfig struct {
 	ProfileEmailField     string `split_words:"true"`
 	ProfileSlugField      string `split_words:"true"`
 	RegistrationEnabled   bool   `ignored:"true"`
+
+	//webauthn
+	DisplayName string `split_words:"true"`
 }
 
 type ContentStoreConfig struct {
@@ -153,7 +157,7 @@ func loadAuthConfig() error {
 	for _, service := range servicesArr {
 		innerConfig := AuthInstanceConfig{}
 
-		if listContainsString(serviceRegistrationArr, service) > -1 {
+		if helpers.ContainsMatch(serviceRegistrationArr, service) {
 			innerConfig.RegistrationEnabled = true
 		}
 		err := envconfig.Process("auth_"+service, &innerConfig)
@@ -165,15 +169,6 @@ func loadAuthConfig() error {
 	auth = config
 
 	return nil
-}
-
-func listContainsString(haystack []string, needle string) int {
-	for i, v := range haystack {
-		if v == needle {
-			return i
-		}
-	}
-	return -1
 }
 
 // DBUri retrieves the environment variable DB_URI

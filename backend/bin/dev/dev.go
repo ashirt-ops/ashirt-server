@@ -15,6 +15,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/oidcauth"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
+	"github.com/theparanoids/ashirt-server/backend/authschemes/webauthn"
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
@@ -144,6 +145,9 @@ func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, erro
 			RegistrationEnabled: cfg.RegistrationEnabled,
 		}
 		return authScheme, nil
+	}
+	if cfg.Name == "webauthn" {
+		return webauthn.New(cfg, &appConfig)
 	}
 
 	return nil, fmt.Errorf("unknown auth type: %v", cfg.Type)
