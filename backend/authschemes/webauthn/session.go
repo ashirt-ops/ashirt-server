@@ -6,11 +6,19 @@ import (
 	auth "github.com/duo-labs/webauthn/webauthn"
 )
 
-type preRegistrationSessionData struct {
+type webAuthNSessionData struct {
 	UserData            webauthnUser
 	WebAuthNSessionData *auth.SessionData
 }
 
 func init() {
-	gob.Register(&preRegistrationSessionData{})
+	gob.Register(&webAuthNSessionData{})
+}
+
+func makeWebauthNSessionData(user webauthnUser, data *auth.SessionData) *webAuthNSessionData {
+	sessionData := webAuthNSessionData{
+		UserData:            user,
+		WebAuthNSessionData: data,
+	}
+	return &sessionData
 }

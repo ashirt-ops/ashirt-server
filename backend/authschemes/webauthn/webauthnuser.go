@@ -1,29 +1,54 @@
 package webauthn
 
 import (
+	"encoding/binary"
 	"strings"
 
 	auth "github.com/duo-labs/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
-
 type webauthnUser struct {
 	UserID      []byte
 	UserName    string
 	IconURL     string
 	Credentials []auth.Credential
-
-	firstName   string
-	lastName    string
-	email       string
+	FirstName   string
+	LastName    string
+	Email       string
 }
 
-func makeWebAuthnUser(firstName, lastName, email string) webauthnUser {
+func makeNewWebAuthnUser(firstName, lastName, email string) webauthnUser {
 	return webauthnUser{
-		UserID:      []byte(uuid.New().String()),
-		UserName:    email,
+		UserID:    []byte(uuid.New().String()),
+		UserName:  email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
 	}
+}
+
+func makeWebAuthnUser(firstName, lastName, slug, email string, userID int64, creds []auth.Credential) webauthnUser {
+	return webauthnUser{
+		UserID:      i64ToByteSlice(userID),
+		UserName:    slug,
+		Credentials: creds,
+		FirstName:   firstName,
+		LastName:    lastName,
+		Email:       email,
+	}
+}
+
+func i64ToByteSlice(i int64) []byte{
+	uInt := uint64(i)
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uInt)
+	return b
+}
+
+func byteSliceToI64(b []byte) int64 {
+	uInt := binary.LittleEndian.Uint64(b)
+	return int64(uInt)
 }
 
 func (u *webauthnUser) WebAuthnID() []byte {
@@ -35,7 +60,7 @@ func (u *webauthnUser) WebAuthnName() string {
 }
 
 func (u *webauthnUser) WebAuthnDisplayName() string {
-	return strings.Join([]string{u.firstName, u.lastName}, " ")
+	return strings.Join([]string{u.FirstName, u.LastName}, " ")
 }
 
 func (u *webauthnUser) WebAuthnIcon() string {
@@ -46,14 +71,6 @@ func (u *webauthnUser) WebAuthnCredentials() []auth.Credential {
 	return u.Credentials
 }
 
-func (u *webauthnUser) FirstName() string {
-	return u.firstName
-}
-
-func (u *webauthnUser) LastName() string {
-	return u.lastName
-}
-
-func (u *webauthnUser) Email() string {
-	return u.email
+func (u *webauthnUser) UserIDAsI64() int64 {
+	return byteSliceToI64(u.UserID)
 }
