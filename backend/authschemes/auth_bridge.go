@@ -134,6 +134,7 @@ type UserAuthData struct {
 	EncryptedPassword  []byte  `db:"encrypted_password"`
 	NeedsPasswordReset bool    `db:"must_reset_password"`
 	TOTPSecret         *string `db:"totp_secret"`
+	JSONData           *string `db:"json_data"`
 }
 
 // FindUserAuth retrieves the row (codified by UserAuthData) corresponding to the provided userKey(e.g. username, email, etc) and the
@@ -143,7 +144,9 @@ type UserAuthData struct {
 func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 	var authData UserAuthData
 
-	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
+	err := ah.db.Get(&authData, sq.Select(
+		"user_id", "user_key", "encrypted_password",
+		"must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data").
 		Where(sq.Eq{
 			"user_key":    userKey,
@@ -167,7 +170,7 @@ func (ah AShirtAuthBridge) FindUserAuthByContext(ctx context.Context) (UserAuthD
 func (ah AShirtAuthBridge) FindUserAuthByUserID(userID int64) (UserAuthData, error) {
 	var authData UserAuthData
 
-	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
+	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data").
 		Where(sq.Eq{
 			"user_id":     userID,
@@ -189,7 +192,7 @@ func (ah AShirtAuthBridge) findUserAuthsByUserEmail(email string, includeDeleted
 		whereClause["users.deleted_at"] = nil
 	}
 
-	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
+	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data").
 		LeftJoin("users ON users.id = auth_scheme_data.user_id").
 		Where(whereClause))
@@ -260,7 +263,7 @@ func (ah AShirtAuthBridge) FindUserAuthsByUserEmailIncludeDeleted(email string) 
 func (ah AShirtAuthBridge) FindUserAuthsByUserSlug(slug string) ([]UserAuthData, error) {
 	var authData []UserAuthData
 
-	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
+	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data").
 		LeftJoin("users ON users.id = auth_scheme_data.user_id").
 		Where(sq.Eq{

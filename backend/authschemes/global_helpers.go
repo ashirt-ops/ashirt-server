@@ -22,6 +22,7 @@ func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName, authSc
 		"encrypted_password":  data.EncryptedPassword,
 		"totp_secret":         data.TOTPSecret,
 		"must_reset_password": data.NeedsPasswordReset,
+		"json_data":           data.JSONData,
 	})
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {
