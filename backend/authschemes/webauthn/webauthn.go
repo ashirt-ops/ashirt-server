@@ -187,35 +187,34 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 }
 
 func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, email string) (interface{}, error) {
-
 	// todo switch these to ConnectionProxy (instead of direct db requests)
 	user, err := bridge.FindUserByEmail(email, false)
 	if err != nil {
-		return nil, backend.WrapError("Could not validate user", err)
+		return nil, backend.WebauthnLoginError(err, "Could not validate user", "No such user")
 	}
 
 	authData, err := bridge.FindUserAuth(email)
 	if err != nil {
-		return nil, backend.WrapError("Could not validate user", err)
+		return nil, backend.WebauthnLoginError(err, "Could not validate user", "No such auth")
 	}
 	if authData.JSONData == nil {
-		return nil, backend.WrapError("User lacks webauthn credentials", err)
+		return nil, backend.WebauthnLoginError(err, "User lacks webauthn credentials")
 	}
 
 	webauthRawCreds := []byte(*authData.JSONData)
 	var creds []auth.Credential
 	if err = json.Unmarshal(webauthRawCreds, &creds); err != nil {
-		return nil, backend.WrapError("Unable to parse webauthn credentials", err)
+		return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 	}
 
 	webauthnUser := makeWebAuthnUser(user.FirstName, user.LastName, user.Slug, user.Email, user.ID, creds)
 	options, sessionData, err := a.Web.BeginLogin(&webauthnUser)
 	if err != nil {
-		return nil, backend.WrapError("Unable to begin login process", err)
+		return nil, backend.WebauthnLoginError(err, "Unable to begin login process")
 	}
 
 	if err = bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(webauthnUser, sessionData)); err != nil {
-		return nil, backend.WrapError("Unable to begin login process", err)
+		return nil, backend.WebauthnLoginError(err, "Unable to begin login process", "Unable to set session")
 	}
 
 	return options, nil
