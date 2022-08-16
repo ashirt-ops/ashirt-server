@@ -6,29 +6,32 @@ import (
 
 	auth "github.com/duo-labs/webauthn/webauthn"
 	"github.com/google/uuid"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 type webauthnUser struct {
 	UserID      []byte
 	UserName    string
 	IconURL     string
-	Credentials []auth.Credential
+	Credentials []AShirtWebauthnCredential
 	FirstName   string
 	LastName    string
 	Email       string
+	KeyName     string
 }
 
-func makeNewWebAuthnUser(firstName, lastName, email string) webauthnUser {
+func makeNewWebAuthnUser(firstName, lastName, email, keyName string) webauthnUser {
 	return webauthnUser{
 		UserID:    []byte(uuid.New().String()),
 		UserName:  email,
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
+		KeyName:   keyName,
 	}
 }
 
-func makeWebAuthnUser(firstName, lastName, slug, email string, userID int64, creds []auth.Credential) webauthnUser {
+func makeWebAuthnUser(firstName, lastName, slug, email string, userID int64, creds []AShirtWebauthnCredential) webauthnUser {
 	return webauthnUser{
 		UserID:      i64ToByteSlice(userID),
 		UserName:    slug,
@@ -39,7 +42,7 @@ func makeWebAuthnUser(firstName, lastName, slug, email string, userID int64, cre
 	}
 }
 
-func i64ToByteSlice(i int64) []byte{
+func i64ToByteSlice(i int64) []byte {
 	uInt := uint64(i)
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, uInt)
@@ -68,7 +71,7 @@ func (u *webauthnUser) WebAuthnIcon() string {
 }
 
 func (u *webauthnUser) WebAuthnCredentials() []auth.Credential {
-	return u.Credentials
+	return helpers.Map(u.Credentials, unwrapCredential)
 }
 
 func (u *webauthnUser) UserIDAsI64() int64 {

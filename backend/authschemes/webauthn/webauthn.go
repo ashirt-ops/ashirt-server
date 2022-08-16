@@ -88,6 +88,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				Email:     dr.FromBody("email").Required().AsString(),
 				FirstName: dr.FromBody("firstName").Required().AsString(),
 				LastName:  dr.FromBody("lastName").Required().AsString(),
+				KeyName:   dr.FromBody("keyName").Required().AsString(),
 			}
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -116,7 +117,8 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			return nil, backend.WrapError("Unable to complete registration", err)
 		}
 
-		data.UserData.Credentials = append(data.UserData.Credentials, *cred)
+		data.UserData.Credentials = append(data.UserData.Credentials, wrapCredential(*cred, data.UserData.KeyName))
+
 		encodedCreds, err := json.Marshal(data.UserData.Credentials)
 		if err != nil {
 			return nil, backend.WrapError("Unable to create registration", err)
@@ -174,7 +176,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 }
 
 func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, info WebAuthnRegistrationInfo) (*protocol.CredentialCreation, error) {
-	user := makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email)
+	user := makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email, info.KeyName)
 
 	credData, sessionData, err := a.Web.BeginRegistration(&user) // TODO: do we want any options?
 	if err != nil {
@@ -202,7 +204,7 @@ func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge auth
 	}
 
 	webauthRawCreds := []byte(*authData.JSONData)
-	var creds []auth.Credential
+	var creds []AShirtWebauthnCredential
 	if err = json.Unmarshal(webauthRawCreds, &creds); err != nil {
 		return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 	}
