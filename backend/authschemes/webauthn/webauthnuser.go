@@ -31,6 +31,15 @@ func makeNewWebAuthnUser(firstName, lastName, email, keyName string) webauthnUse
 	}
 }
 
+func makeLinkingWebAuthnUser(userID int64, email, keyName string) webauthnUser {
+	return webauthnUser{
+		UserID:    i64ToByteSlice(userID),
+		UserName:  email,
+		Email:     email,
+		KeyName:   keyName,
+	}
+}
+
 func makeWebAuthnUser(firstName, lastName, slug, email string, userID int64, creds []AShirtWebauthnCredential) webauthnUser {
 	return webauthnUser{
 		UserID:      i64ToByteSlice(userID),

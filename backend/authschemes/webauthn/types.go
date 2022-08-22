@@ -9,6 +9,7 @@ type WebAuthnRegistrationInfo struct {
 	FirstName string
 	LastName  string
 	KeyName   string
+	UserID    int64
 }
 
 type AShirtWebauthnCredential struct {
