@@ -334,7 +334,18 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		user.Credentials = append(user.Credentials, creds...)
 	}
 
-	credData, sessionData, err := a.Web.BeginRegistration(&user) // TODO: do we want any options?
+	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
+	for i, cred := range user.Credentials {
+		credExcludeList[i] = protocol.CredentialDescriptor{
+			Type: protocol.PublicKeyCredentialType,
+			CredentialID: cred.ID,
+		}
+	}
+	registrationOptions := func(credCreationOpts *protocol.PublicKeyCredentialCreationOptions) {
+		credCreationOpts.CredentialExcludeList = credExcludeList
+	}
+
+	credData, sessionData, err := a.Web.BeginRegistration(&user, registrationOptions)
 	if err != nil {
 		return nil, err
 	}
