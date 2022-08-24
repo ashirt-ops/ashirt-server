@@ -48,7 +48,7 @@ func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (WebAuthn, 
 		RPID:          host,
 	}
 
-	if port != "" {
+	if host == "localhost" {
 		config.RPOrigin = "http://" + host + ":" + port
 	}
 
@@ -152,11 +152,16 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			}
 
 			user := &data.UserData
-			if _, err := a.Web.FinishLogin(user, *data.WebAuthNSessionData, r); err != nil {
+			cred, err := a.Web.FinishLogin(user, *data.WebAuthNSessionData, r)
+			if err != nil {
 				return nil, backend.BadAuthErr(err)
+			} else if cred.Authenticator.CloneWarning {
+				return nil, backend.WrapError("credential appears to be cloned", backend.BadAuthErr(err))
 			}
 
-			if err := bridge.LoginUser(w, r, user.UserIDAsI64(), nil); err != nil {
+			updateSignCount(data, cred, bridge)
+
+			if err := bridge.LoginUser(w, r, data.UserData.UserIDAsI64(), nil); err != nil {
 				return nil, backend.WrapError("Attempt to finish login failed", err)
 			}
 
@@ -337,7 +342,7 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
 	for i, cred := range user.Credentials {
 		credExcludeList[i] = protocol.CredentialDescriptor{
-			Type: protocol.PublicKeyCredentialType,
+			Type:         protocol.PublicKeyCredentialType,
 			CredentialID: cred.ID,
 		}
 	}
@@ -345,14 +350,14 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		credCreationOpts.CredentialExcludeList = credExcludeList
 	}
 
-	credData, sessionData, err := a.Web.BeginRegistration(&user, registrationOptions)
+	credOptions, sessionData, err := a.Web.BeginRegistration(&user, registrationOptions)
 	if err != nil {
 		return nil, err
 	}
 
 	err = bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(user, sessionData))
 
-	return credData, err
+	return credOptions, err
 }
 
 func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, email string) (interface{}, error) {
@@ -416,4 +421,29 @@ func (a WebAuthn) validateRegistrationComplete(r *http.Request, bridge authschem
 		return nil, nil, backend.WrapError("Unable to create registration", err)
 	}
 	return data, encodedCreds, nil
+}
+
+func updateSignCount(data *webAuthNSessionData, loginCred *auth.Credential, bridge authschemes.AShirtAuthBridge) error {
+	userID := data.UserData.UserIDAsI64()
+
+	userAuth, err := bridge.FindUserAuthByUserID(userID)
+	if err != nil {
+		return backend.WrapError("Unable to find user", err)
+	}
+	matchingIndex, _ := helpers.Find(data.UserData.Credentials, func(item AShirtWebauthnCredential) bool {
+		return string(item.ID) == string(loginCred.ID)
+	})
+	if matchingIndex == -1 {
+		return backend.WrapError("Could not find matching credential", err)
+	}
+	data.UserData.Credentials[matchingIndex].Authenticator.SignCount = loginCred.Authenticator.SignCount
+	encodedCreds, err := json.Marshal(data.UserData.Credentials)
+	if err != nil {
+		return backend.WrapError("Unable to encode credentials", err)
+	}
+	userAuth.JSONData = helpers.Ptr(string(encodedCreds))
+	if err = bridge.UpdateAuthForUser(userAuth); err != nil {
+		return backend.WrapError("Unable to update credential", err)
+	}
+	return nil
 }
