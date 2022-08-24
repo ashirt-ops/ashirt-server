@@ -5,14 +5,12 @@ import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
-import classnames from 'classnames/bind'
 import { beginLogin, beginRegistration, finishLogin, finishRegistration } from '../services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, OnRequestClose } from 'src/helpers'
-import { convertToCredentialCreationOptions, convertToPublicKeyCredentialRequestOptions, encodeAsB64, toByteArray } from '../helpers'
+import { convertToCredentialCreationOptions, convertToPublicKeyCredentialRequestOptions, encodeAsB64 } from '../helpers'
 import { getResultState } from 'src/helpers/is_success_result'
 
-const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   query: URLSearchParams,
