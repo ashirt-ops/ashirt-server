@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/duo-labs/webauthn/protocol"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
@@ -25,8 +26,11 @@ type AuthInstanceConfig struct {
 	Type                string
 	Name                string
 	RegistrationEnabled bool `ignored:"true"`
+	OIDCConfig
+	WebauthnConfig
+}
 
-	//generic oidc
+type OIDCConfig struct {
 	FriendlyName          string `split_words:"true"`
 	ProviderURL           string `split_words:"true"`
 	ClientID              string `split_words:"true"`
@@ -36,11 +40,76 @@ type AuthInstanceConfig struct {
 	ProfileLastNameField  string `split_words:"true"`
 	ProfileEmailField     string `split_words:"true"`
 	ProfileSlugField      string `split_words:"true"`
+}
 
-	//webauthn
+type WebauthnConfig struct {
 	DisplayName string `split_words:"true"`
-	Timeout     string
-	Conveyance  string
+	// All of the below have innate defaults, and so are effectively optional
+	Timeout                         int
+	AttestationPreference           string `split_words:"true"`
+	Debug                           bool
+	AuthenticatorAttachment         string `split_words:"true"`
+	AuthenticatorResidentKey        string `split_words:"true"`
+	AuthenticatorRequireResidentKey *bool  `split_words:"true"`
+	AuthenticatorUserVerification   string `split_words:"true"`
+}
+
+func (w WebauthnConfig) Conveyance() protocol.ConveyancePreference {
+	val := strings.TrimSpace(strings.ToLower(w.AttestationPreference))
+	if val == "indirect" {
+		return protocol.PreferIndirectAttestation
+	}
+	if val == "direct" {
+		return protocol.PreferDirectAttestation
+	}
+	// standard default
+	return protocol.PreferNoAttestation
+}
+
+func (w WebauthnConfig) AuthenticatorAttachmentPreference() protocol.AuthenticatorAttachment {
+	val := strings.TrimSpace((strings.ToLower((w.AuthenticatorAttachment))))
+	if val == "platform" {
+		return protocol.Platform
+	}
+	if val == "cross-platform" {
+		return protocol.Platform
+	}
+	if val == "" {
+		return "" // letting the library decide what the default is
+	}
+	// Warn here?
+	return ""
+}
+
+func (w WebauthnConfig) AuthenticatorResidentKeyPreference() protocol.ResidentKeyRequirement {
+	val := strings.TrimSpace(strings.ToLower(w.AttestationPreference))
+	if val == "preferred" {
+		return protocol.ResidentKeyRequirementPreferred
+	}
+	if val == "required" {
+		return protocol.ResidentKeyRequirementRequired
+	}
+	return protocol.ResidentKeyRequirementDiscouraged
+}
+
+func (w WebauthnConfig) AuthenticatorUserVerificationPreference() protocol.UserVerificationRequirement {
+	val := strings.TrimSpace(strings.ToLower(w.AttestationPreference))
+	if val == "required" {
+		return protocol.VerificationRequired
+	}
+	if val == "discouraged" {
+		return protocol.VerificationDiscouraged
+	}
+	return protocol.VerificationPreferred
+}
+
+func (w WebauthnConfig) BuildAuthenticatorSelection() protocol.AuthenticatorSelection {
+	return protocol.AuthenticatorSelection{
+			RequireResidentKey:      w.AuthenticatorRequireResidentKey,
+			UserVerification:        w.AuthenticatorUserVerificationPreference(),
+			ResidentKey:             w.AuthenticatorResidentKeyPreference(),
+			AuthenticatorAttachment: w.AuthenticatorAttachmentPreference(),
+		}
 }
 
 func loadAuthConfig() error {

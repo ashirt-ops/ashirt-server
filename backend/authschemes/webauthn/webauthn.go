@@ -41,13 +41,18 @@ func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (WebAuthn, 
 		host = parsedUrl.Host
 	}
 
-	// TODO: I don't understand how to correctly set the RPOrigin. the code works *specifically* for
-	// localhost, but may fail for proper deployments. We might need to make this an env var.
 	config := auth.Config{
-		RPDisplayName: cfg.DisplayName,
+		RPDisplayName: cfg.WebauthnConfig.DisplayName,
 		RPID:          host,
+		// the below are all optional
+		Debug:                  cfg.WebauthnConfig.Debug,
+		Timeout:                cfg.WebauthnConfig.Timeout,
+		AttestationPreference:  cfg.WebauthnConfig.Conveyance(),
+		AuthenticatorSelection: cfg.BuildAuthenticatorSelection(),
 	}
 
+	// TODO: I don't understand how to correctly set the RPOrigin. the code works *specifically* for
+	// localhost, but may fail for proper deployments. We might need to make this an env var.
 	if host == "localhost" {
 		config.RPOrigin = "http://" + host + ":" + port
 	}
