@@ -257,7 +257,7 @@ Each OIDC provider follows the same process:
 
 ##### Identity Provider - initated Login
 
-Technically, OIDC does not support IDP-initated login. The login request must coem from the source.
+Technically, OIDC does not support IDP-initated login. The login request must come from the source.
 However, some smart values can be provided to effectively provide an IDP-iniated login experience.
 
 If your service provides it, find the configuration for a "login URL" or "Initiate login URI". Then, provide the following value, dependent on your configuration:
