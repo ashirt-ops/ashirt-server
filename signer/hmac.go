@@ -8,6 +8,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -30,6 +31,7 @@ import (
 func BuildRequestHMAC(r *http.Request, requestBody io.Reader, key []byte) []byte {
 	requestBodySHA256 := sha256.New()
 	io.Copy(requestBodySHA256, requestBody)
+	shaDigest := requestBodySHA256.Sum(nil)
 
 	m := new(bytes.Buffer)
 	m.WriteString(r.Method)
@@ -38,11 +40,21 @@ func BuildRequestHMAC(r *http.Request, requestBody io.Reader, key []byte) []byte
 	m.WriteString("\n")
 	m.WriteString(r.Header.Get("Date"))
 	m.WriteString("\n")
-	m.Write(requestBodySHA256.Sum(nil))
+	m.Write(shaDigest)
 
 	mac := hmac.New(sha256.New, key)
 	mac.Write(m.Bytes())
-	return mac.Sum(nil)
+	hmacDigest := mac.Sum(nil)
+	
+	fmt.Println("<==================  Incoming Request  ====================>")
+	fmt.Printf("Method:         %v\n", r.Method)
+	fmt.Printf("URI:            %v\n", r.URL.RequestURI())
+	fmt.Printf("Date:           %v\n", r.Header.Get("Date"))
+	fmt.Printf("Body SHA (hex): %x\n", shaDigest)
+	fmt.Printf("HMAC (hex):     %x\n", hmacDigest)
+	fmt.Println("<==========================================================>")
+	
+	return hmacDigest
 }
 
 func BuildClientRequestAuthorization(r *http.Request, accessKey string, secretKey []byte) (string, error) {
