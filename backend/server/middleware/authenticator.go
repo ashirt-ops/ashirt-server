@@ -6,6 +6,7 @@ package middleware
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -86,6 +87,7 @@ func Policy(ctx context.Context) policy.Policy {
 func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println("Handling App Authentication")
 			body, cleanup, err := cloneBody(r)
 			if err != nil {
 				respondWithError(w, r, backend.WrapError("Unable to clone http body", err))
