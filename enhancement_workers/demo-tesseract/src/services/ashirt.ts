@@ -163,6 +163,18 @@ export class AShirtService {
       date: now,
       path: config.path,
     })
+    
+    const b64Data = auth.split(":")[1]
+    const shaDigest = createHash('sha256').update(sendBody).digest('hex')
+
+    console.log("<==================  Outgoing Request  ====================>")
+    console.log("Method:        ", config.method)
+    console.log("URI:           ", config.path)
+    console.log("Date:          ", now)
+    console.log("Body SHA (hex):", shaDigest)
+    console.log("HMAC (hex):    ", Buffer.from(b64Data, 'base64').toString('hex'))
+    console.log("<==========================================================>")
+
 
     const req: AxiosRequestConfig = {
       method: config.method,
