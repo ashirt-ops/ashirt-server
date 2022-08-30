@@ -1,11 +1,28 @@
 import { default as axios, AxiosRequestConfig } from 'axios'
 import { createHmac, createHash } from 'crypto'
+import { encodeForm } from './helpers'
+import {
+  CheckConnectionOutput,
+  CreateEvidenceInput,
+  CreateOperationInput,
+  CreateTagInput,
+  EvidenceOutput,
+  ListOperationsOutput,
+  ListOperationTagsOutput,
+  OperationOutputItem,
+  ReadEvidenceOutput,
+  ResponseWrapper,
+  TagOutputItem,
+  UpdateEvidenceInput,
+  UpsertMetadataInput,
+} from './types'
 
 export type RequestConfig = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   path: string
-  body?: string
+  body?: string | Buffer
   responseType?: 'arraybuffer' | 'document' | 'json' | 'text' | 'stream'
+  multipartFormBoundary?: string
 }
 
 export class AShirtService {
@@ -18,8 +35,30 @@ export class AShirtService {
     this.secretKey = Buffer.from(secretKeyB64, "base64")
   }
 
+  async getOperations() {
+    return this.makeRequest<ListOperationsOutput>({
+      method: 'GET',
+      path: `/api/operations`
+    })
+  }
+
+  async checkConnection() {
+    return this.makeRequest<CheckConnectionOutput>({
+      method: 'GET',
+      path: `/api/checkconnection`
+    })
+  }
+
+  async createOperation(body: CreateOperationInput) {
+    return this.makeRequest<OperationOutputItem>({
+      method: 'POST',
+      path: `/api/operations`,
+      body: JSON.stringify(body)
+    })
+  }
+
   async getEvidence(operationSlug: string, evidenceUuid: string) {
-    return this.makeRequest<EvidenceOutput>({
+    return this.makeRequest<ReadEvidenceOutput>({
       method: 'GET',
       path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`
     })
@@ -33,11 +72,64 @@ export class AShirtService {
     })
   }
 
-  async createOperation(body: CreateOperationInput) {
-    return this.makeRequest<Buffer>({
+  async createEvidence(operationSlug: string, body: CreateEvidenceInput) {
+    const { file } = body
+    const fields = {
+      notes: body.notes,
+      contentType: body.contentType,
+      occurred_at: body.occurred_at,
+      tagIds: JSON.stringify(body.tagIds)
+    }
+
+    const { boundary: boundary, data } = encodeForm(fields, { file })
+    return this.makeRequest<EvidenceOutput>({
       method: 'POST',
-      path: `/api/operations`,
+      path: `/api/operations/${operationSlug}/evidence`,
+      body: data,
+      multipartFormBoundary: boundary,
+    })
+  }
+
+  async updateEvidence(operationSlug: string, evidenceUuid: string, body: UpdateEvidenceInput) {
+    const { file } = body
+    const fields = {
+      notes: body.notes,
+      contentType: body.contentType,
+      occurred_at: body.occurred_at,
+      tagsToAdd: body.tagsToAdd ? JSON.stringify(body.tagsToAdd) : undefined,
+      tagsToRemove: body.tagsToRemove ? JSON.stringify(body.tagsToRemove) : undefined,
+    }
+
+    const { boundary: boundary, data } = encodeForm(fields, { file })
+
+    return this.makeRequest<void>({
+      method: 'PUT',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}`,
+      body: data,
+      multipartFormBoundary: boundary,
+    })
+  }
+
+  async upsertEvidenceMetadata(operationSlug: string, evidenceUuid: string, body: UpsertMetadataInput) {
+    return this.makeRequest<void>({
+      method: 'PUT',
+      path: `/api/operations/${operationSlug}/evidence/${evidenceUuid}/metadata`,
       body: JSON.stringify(body)
+    })
+  }
+
+  async getOperationTags(operationSlug: string) {
+    return this.makeRequest<ListOperationTagsOutput>({
+      method: 'GET',
+      path: `/api/operations/${operationSlug}/tags`
+    })
+  }
+
+  async createOperationTag(operationSlug: string, body: CreateTagInput) {
+    return this.makeRequest<TagOutputItem>({
+      method: 'POST',
+      path: `/api/operations/${operationSlug}/tags`,
+      body: JSON.stringify(body),
     })
   }
 
@@ -76,7 +168,9 @@ export class AShirtService {
       method: config.method,
       url: `${this.apiUrl}${config.path}`,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": config.multipartFormBoundary
+          ? `multipart/form-data; boundary=${config.multipartFormBoundary}`
+          : "application/json",
         "Date": now,
         "Authorization": auth,
       }
@@ -98,7 +192,7 @@ export class AShirtService {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' // more methods with a similar naming style are possible
     path: string
     date: string // in RFC1123 format
-    body: string
+    body: string | Buffer
   }) {
     const stringBuff = Buffer.from(
       data.method + "\n" +
@@ -115,22 +209,4 @@ export class AShirtService {
 
     return `${this.accessKey}:${hmacMessage}`
   }
-}
-
-type EvidenceOutput = {
-  uuid: string
-  description: string
-  contentType: string
-  occurredAt: Date
-}
-
-type ResponseWrapper<T> = {
-  responseCode: number,
-  contentType: string
-  data: T
-}
-
-type CreateOperationInput = {
-  slug: string
-  name: string
 }
