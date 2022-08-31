@@ -1,14 +1,14 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import AuthContext from 'src/auth_context'
-import {useAuthFrontendComponent} from 'src/authschemes'
-import { SupportedAuthenticationScheme } from 'src/global_types'
+import { useAuthFrontendComponent } from 'src/authschemes'
+import { SupportedAuthenticationScheme, UserOwnView } from 'src/global_types'
 
 export default (props: {
+  user: UserOwnView | null
 }) => {
-  const {user} = React.useContext(AuthContext)
+  const { user } = props
   if (user == null) return null
 
   return <>

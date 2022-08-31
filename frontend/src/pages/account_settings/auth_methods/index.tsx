@@ -108,7 +108,7 @@ const TableRow = (props: {
             userData={props.profile}
             onSuccess={() => {
               setLinking(false)
-              props.requestReload && props.requestReload()
+              props.requestReload?.()
             }}
             authFlags={props.supportedScheme.schemeFlags}
           />
