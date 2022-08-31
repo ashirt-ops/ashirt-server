@@ -4,12 +4,22 @@ import (
 	auth "github.com/duo-labs/webauthn/webauthn"
 )
 
+type RegistrationType int
+
+const (
+	// CreateOrLinkKey reflects the usecase where
+	CreateKey RegistrationType = iota
+	LinkKey
+	AddKey
+)
+
 type WebAuthnRegistrationInfo struct {
-	Email     string
-	FirstName string
-	LastName  string
-	KeyName   string
-	UserID    int64
+	Email            string
+	FirstName        string
+	LastName         string
+	KeyName          string
+	UserID           int64
+	RegistrationType RegistrationType
 }
 
 type AShirtWebauthnCredential struct {

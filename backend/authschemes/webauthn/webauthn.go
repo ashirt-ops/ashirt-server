@@ -94,10 +94,11 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 
 			dr := remux.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
-				Email:     dr.FromBody("email").Required().AsString(),
-				FirstName: dr.FromBody("firstName").Required().AsString(),
-				LastName:  dr.FromBody("lastName").Required().AsString(),
-				KeyName:   dr.FromBody("keyName").Required().AsString(),
+				Email:            dr.FromBody("email").Required().AsString(),
+				FirstName:        dr.FromBody("firstName").Required().AsString(),
+				LastName:         dr.FromBody("lastName").Required().AsString(),
+				KeyName:          dr.FromBody("keyName").Required().AsString(),
+				RegistrationType: CreateKey,
 			}
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -180,9 +181,10 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 
 			dr := remux.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
-				Email:   dr.FromBody("email").Required().AsString(),
-				KeyName: dr.FromBody("keyName").Required().AsString(),
-				UserID:  callingUserId,
+				Email:            dr.FromBody("email").Required().AsString(),
+				KeyName:          dr.FromBody("keyName").Required().AsString(),
+				UserID:           callingUserId,
+				RegistrationType: LinkKey,
 			}
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -239,9 +241,10 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 
 			dr := remux.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
-				Email:   auth.UserKey,
-				KeyName: dr.FromBody("keyName").Required().AsString(),
-				UserID:  callingUserId,
+				Email:            auth.UserKey,
+				KeyName:          dr.FromBody("keyName").Required().AsString(),
+				UserID:           callingUserId,
+				RegistrationType: AddKey,
 			}
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -329,10 +332,11 @@ func (a WebAuthn) deleteKey(userID int64, keyName string, bridge authschemes.ASh
 
 func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, info WebAuthnRegistrationInfo) (*protocol.CredentialCreation, error) {
 	var user webauthnUser
-	if info.UserID == 0 {
+	if info.RegistrationType == CreateKey {
 		user = makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email, info.KeyName)
-	} else {
+	} else if info.RegistrationType == LinkKey {
 		user = makeLinkingWebAuthnUser(info.UserID, info.Email, info.KeyName)
+	} else { // Add Key
 		authData, err := bridge.FindUserAuthByUserID(info.UserID)
 		if err != nil {
 			return nil, backend.WebauthnLoginError(err, "Unable to find existing user auth")
@@ -341,7 +345,7 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		if err != nil {
 			return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 		}
-		user.Credentials = append(user.Credentials, creds...)
+		user = makeAddKeyWebAuthnUser(info.UserID, info.Email, info.KeyName, creds)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
