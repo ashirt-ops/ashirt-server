@@ -57,7 +57,7 @@ export default (props: {
 
   return (
     <Form submitText="Link Account" {...formComponentProps}>
-      <Input label="Email" {...email} />
+      <Input label="Email" {...email} readOnly />
       <Input label="Key name" {...keyName} />
     </Form>
   )
