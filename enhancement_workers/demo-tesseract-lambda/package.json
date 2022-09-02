@@ -1,0 +1,23 @@
+{
+  "name": "ashirt-tesseract-lambda",
+  "version": "1.0.0",
+  "description": "Runs tesseract on image evidence for AShirt",
+  "author": "The Paranoids",
+  "license": "MIT",
+  "source": "app/app.js",
+  "main": "dist/main.js",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "parcel build",
+    "format": "prettier --write \"app/**/*.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "node-tesseract-ocr": "^2.2.1"
+  },
+  "devDependencies": {
+    "parcel": "^2.7.0",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2"
+  }
+}
