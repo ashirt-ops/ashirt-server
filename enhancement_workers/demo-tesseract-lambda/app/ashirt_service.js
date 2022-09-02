@@ -1,5 +1,6 @@
 const { createHmac, createHash, randomFillSync } = require("crypto");
 const http = require("http");
+const https = require("https")
 
 class AShirtService {
   constructor(config) {
@@ -122,7 +123,7 @@ class AShirtService {
 
   _reqPromise(config) {
     return new Promise((resolve, reject) => {
-      const req = http.request(config.httpsOptions, (res) => {
+      const req = https.request(config.httpsOptions, (res) => {
         let data = Buffer.from([]);
         res.on("data", (chunk) => (data = Buffer.concat([data, chunk])));
         res.on("close", () => {

@@ -5,6 +5,7 @@ package enhancementservices
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -77,8 +78,19 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 		return errorTestResultWithMessage(nil, "Service experienced an error: "+*out.FunctionError)
 	}
 
+	var lambdaResponse LambdaResponse
+	if err := json.Unmarshal(out.Payload, &lambdaResponse); err != nil {
+		return errorTestResultWithMessage(err, "Unable to parse response")
+	}
+
+	if lambdaResponse.StatusCode != 200 {
+		return errorTestResultWithMessage(err, "Lambda failed")
+	}
+
+	fmt.Println("??????????", string(out.Payload))
+
 	var parsedData TestResp
-	if err := json.Unmarshal(out.Payload, &parsedData); err != nil {
+	if err := json.Unmarshal([]byte(lambdaResponse.Body), &parsedData); err != nil {
 		return errorTestResultWithMessage(err, "Unable to parse response")
 	}
 
@@ -91,6 +103,10 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 		}
 		return errorTestResultWithMessage(nil, "Service reported an error")
 	}
+	// {}
+	// {"event": "test"}
+	fmt.Printf("!!!!!!!!!!!!!!!!!!!!!!!!!! ParsedData: %+v\n", parsedData)
+	fmt.Printf("!!!!!!!!!!!!!!!!!!!!!!!!!! Raw Json: %+v\n", out.Payload)
 
 	return errorTestResultWithMessage(nil, "Service did not reply with a supported status")
 }
@@ -154,8 +170,17 @@ func handleAWSProcessResponse(dbModel *models.EvidenceMetadata, output *lambda.I
 	statusCode := *output.StatusCode
 	var parsedData ProcessResponse
 
+	fmt.Printf("???????statuscode???? %+v\n", *output.StatusCode)
+
 	if len(output.Payload) > 0 {
-		if err := json.Unmarshal(output.Payload, &parsedData); err != nil {
+		var lambdaResponse LambdaResponse
+		if err := json.Unmarshal(output.Payload, &lambdaResponse); err != nil {
+			return
+		}
+
+		fmt.Printf("??????????? %+v\n", string(lambdaResponse.Body))
+		if err := json.Unmarshal([]byte(lambdaResponse.Body), &parsedData); err != nil {
+			fmt.Println("!?!?!?!?!??!")
 			recordError(dbModel, helpers.Ptr("Unable to parse response"))
 			return
 		}

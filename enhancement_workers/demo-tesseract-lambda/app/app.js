@@ -70,6 +70,6 @@ async function handleEvidenceCreated(requestData) {
     const result = await tesseract.recognize(resp.data, tesseractConfig);
     return processSuccess(result);
   } catch (err) {
-    return errorProcessing(err);
+    return errorProcessing(`${err}`);
   }
 }
