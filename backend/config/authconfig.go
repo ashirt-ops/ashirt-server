@@ -112,6 +112,14 @@ func (w WebauthnConfig) BuildAuthenticatorSelection() protocol.AuthenticatorSele
 		}
 }
 
+func splitNoSpaces(s, delimiter string) []string {
+	arr := strings.Split(s, delimiter)
+	for i, v := range arr {
+		arr[i] = strings.TrimSpace(v)
+	}
+	return arr
+}
+
 func loadAuthConfig() error {
 	config := AuthConfig{}
 	servicesStr := os.Getenv("AUTH_SERVICES")
@@ -119,13 +127,10 @@ func loadAuthConfig() error {
 		return errors.New("Auth services not defined")
 	}
 
-	servicesArr := strings.Split(servicesStr, ",")
-	for i, s := range servicesArr {
-		servicesArr[i] = strings.TrimSpace(s)
-	}
+	servicesArr := splitNoSpaces(servicesStr, ",")
 
 	serviceRegistrationStr := os.Getenv("AUTH_SERVICES_ALLOW_REGISTRATION")
-	serviceRegistrationArr := strings.Split(serviceRegistrationStr, ",")
+	serviceRegistrationArr := splitNoSpaces(serviceRegistrationStr, ",")
 
 	config.Services = servicesArr
 	config.AuthConfigs = make(map[string]AuthInstanceConfig)
