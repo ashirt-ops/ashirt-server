@@ -4,11 +4,13 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { useLocation, useParams } from 'react-router-dom'
+
+import { SupportedAuthenticationScheme } from 'src/global_types'
 import { getSupportedAuthentications } from 'src/services/auth'
 import { useAuthFrontendComponent } from 'src/authschemes'
 import { useWiredData } from 'src/helpers'
-import { SupportedAuthenticationScheme } from 'src/global_types'
 import Button from 'src/components/button'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 // This component renders a list of all enabled authscheme login components
@@ -23,31 +25,84 @@ export default () => {
   const [currentAuth, setCurrentAuth] = React.useState<SupportedAuthenticationScheme | null>(null)
 
   return wiredAuthSchemes.render(supportedAuthSchemes => {
+    if (supportedAuthSchemes.length === 0) {
+      return (
+        <div className={cx('login')}>
+          <NoAuthsWarning />
+        </div>
+      )
+    }
+
+    if (supportedAuthSchemes.length === 1) {
+      const scheme = supportedAuthSchemes[0]
+      return (
+        <div className={cx('login')}>
+          <AuthSchemeLogin
+            key={scheme.schemeCode}
+            authSchemeType={scheme.schemeType}
+            authScheme={scheme}
+            query={query}
+          />
+        </div>
+      )
+    }
+
     return (
       <div className={cx('login')}>
-        {currentAuth == null
-          ? <AuthButtons schemes={supportedAuthSchemes} onSelected={setCurrentAuth} renderOnlyScheme={renderOnlyScheme} />
-          : (
-            <div>
+        <LoginMenu selectedAuth={currentAuth} resetAuth={() => setCurrentAuth(null)} >
+          {currentAuth == null
+            ? <AuthButtons schemes={supportedAuthSchemes} onSelected={setCurrentAuth} renderOnlyScheme={renderOnlyScheme} />
+            : (
               <AuthSchemeLogin
                 key={currentAuth.schemeCode}
                 authSchemeType={currentAuth.schemeType}
                 authScheme={currentAuth}
                 query={query}
               />
-              <Button
-                icon={require('./back.svg')}
-                onClick={() => setCurrentAuth(null)}
-              >
-                Choose different method
-              </Button>
-            </div>
-          )
-        }
-      </div>
+            )
+          }
+        </LoginMenu>
+      </div >
     )
   })
 }
+
+const LoginMenu = (props: {
+  selectedAuth: SupportedAuthenticationScheme | null
+  resetAuth: () => void
+  children: React.ReactNode
+}) => {
+  return (
+    <div className={cx('login-wrapper')}>
+      {props.selectedAuth === null
+        ? (
+          <h1 className={cx('login-wrapper-title')}>How do you want to authenticate?</h1>
+        )
+        : (<>
+          <h1 className={cx('login-wrapper-title')}>{props.selectedAuth.schemeName}</h1>
+          <div>
+            <Button
+              className={cx('full-width-button')}
+              icon={require('./back.svg')}
+              onClick={props.resetAuth}
+            >
+              Choose different method
+            </Button>
+          </div>
+        </>)
+
+      }
+      <hr className={cx('login-wrapper-divider')} />
+      <div className={cx('login-wrapper-children')}>
+        {props.children}
+      </div>
+    </div>
+  )
+}
+
+const NoAuthsWarning = (props: {}) => (
+  <div className={cx('no-auths-warning')}>This instance of AShirt has no way to authenticate users.</div>
+)
 
 const AuthButtons = (props: {
   schemes: Array<SupportedAuthenticationScheme>
@@ -55,7 +110,7 @@ const AuthButtons = (props: {
   renderOnlyScheme?: string
 }) => {
   return (
-    <div>
+    <div className={cx('auth-buttons')}>
       {
         props.schemes.map(schemeDetails => {
           const { schemeCode, schemeName } = schemeDetails
@@ -64,7 +119,15 @@ const AuthButtons = (props: {
           }
 
           return (
-            <Button onClick={() => props.onSelected(schemeDetails)} >{schemeName}</Button>
+            // todo: fix direction of arrow
+            <Button
+              className={cx('full-width-button')}
+              key={schemeCode}
+              afterIcon={require('./forward.svg')}
+              onClick={() => props.onSelected(schemeDetails)}
+            >
+              {schemeName}
+            </Button>
           )
         })
       }
