@@ -86,7 +86,7 @@ const LoginMenu = (props: {
               icon={require('./back.svg')}
               onClick={props.resetAuth}
             >
-              Choose different method
+              Choose a different method
             </Button>
           </div>
         </>)
