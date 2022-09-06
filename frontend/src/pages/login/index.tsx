@@ -33,8 +33,8 @@ export default () => {
       )
     }
 
-    if (supportedAuthSchemes.length === 1) {
-      const scheme = supportedAuthSchemes[0]
+    if (supportedAuthSchemes.length === 1 || renderOnlyScheme != undefined) {
+      const scheme = supportedAuthSchemes.find(s => s.schemeCode == renderOnlyScheme) ?? supportedAuthSchemes[0]
       return (
         <div className={cx('login')}>
           <AuthSchemeLogin
