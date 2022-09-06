@@ -5,7 +5,6 @@ package enhancementservices
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -61,21 +60,6 @@ func (l LambdaRIEClient) Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput
 	if len(respBody) == 0 {
 		return &out, nil
 	}
-
-	var data map[string]any
-	if err = json.Unmarshal(respBody, &data); err != nil {
-		return nil, err
-	}
-	body, ok := data["body"]
-	if !ok {
-		return nil, fmt.Errorf("unable to read lambda body")
-	}
-	strBody, ok := body.(string)
-	if !ok {
-		return nil, fmt.Errorf("lambda response body is not a string")
-	}
-
-	out.Payload = []byte(strBody)
 
 	return &out, nil
 }
