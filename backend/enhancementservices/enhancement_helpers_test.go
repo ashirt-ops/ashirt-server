@@ -113,8 +113,9 @@ func verifyProcessBody(t *testing.T, req *http.Request, expectedPayload this.New
 func wrapInAwsResponse(t *testing.T, data interface{}) []byte {
 	body, err := json.Marshal(data)
 	require.NoError(t, err)
-	resp := awsResponseContainer{
-		Body: string(body),
+	resp := this.LambdaResponse{
+		Body:       string(body),
+		StatusCode: 200,
 	}
 	respondWith, _ := json.Marshal(resp)
 	return respondWith

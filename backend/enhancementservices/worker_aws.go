@@ -77,8 +77,17 @@ func (w *awsConfigV1Worker) Test() ServiceTestResult {
 		return errorTestResultWithMessage(nil, "Service experienced an error: "+*out.FunctionError)
 	}
 
+	var lambdaResponse LambdaResponse
+	if err := json.Unmarshal(out.Payload, &lambdaResponse); err != nil {
+		return errorTestResultWithMessage(err, "Unable to parse response")
+	}
+
+	if lambdaResponse.StatusCode != 200 {
+		return errorTestResultWithMessage(err, "Lambda failed")
+	}
+
 	var parsedData TestResp
-	if err := json.Unmarshal(out.Payload, &parsedData); err != nil {
+	if err := json.Unmarshal([]byte(lambdaResponse.Body), &parsedData); err != nil {
 		return errorTestResultWithMessage(err, "Unable to parse response")
 	}
 
@@ -155,7 +164,12 @@ func handleAWSProcessResponse(dbModel *models.EvidenceMetadata, output *lambda.I
 	var parsedData ProcessResponse
 
 	if len(output.Payload) > 0 {
-		if err := json.Unmarshal(output.Payload, &parsedData); err != nil {
+		var lambdaResponse LambdaResponse
+		if err := json.Unmarshal(output.Payload, &lambdaResponse); err != nil {
+			return
+		}
+
+		if err := json.Unmarshal([]byte(lambdaResponse.Body), &parsedData); err != nil {
 			recordError(dbModel, helpers.Ptr("Unable to parse response"))
 			return
 		}
