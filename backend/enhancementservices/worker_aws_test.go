@@ -149,7 +149,3 @@ type awsProcessResp struct {
 	Action  string  `json:"action,omitempty"`  // Rejected | Deferred | Processed | Error
 	Content *string `json:"content,omitempty"` // Error => reason, Processed => Result
 }
-
-type awsResponseContainer struct {
-	Body string `json:"body"`
-}
