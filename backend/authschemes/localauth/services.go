@@ -16,6 +16,7 @@ import (
 
 type RegistrationInfo struct {
 	Password           string
+	Username           string
 	Email              string
 	FirstName          string
 	LastName           string
@@ -79,7 +80,7 @@ func registerNewUser(ctx context.Context, bridge authschemes.AShirtAuthBridge, i
 	}
 	return bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 		UserID:             userResult.UserID,
-		UserKey:            info.Email,
+		UserKey:            info.Username,
 		EncryptedPassword:  encryptedPassword,
 		NeedsPasswordReset: info.ForceResetPassword,
 	})

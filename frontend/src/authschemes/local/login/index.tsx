@@ -52,13 +52,13 @@ export default (props: {
 const Login = (props: {
   authFlags?: Array<string>
 }) => {
-  const emailField = useFormField('')
+  const usernameField = useFormField('')
   const passwordField = useFormField('')
 
   const loginForm = useForm({
-    fields: [emailField, passwordField],
+    fields: [usernameField, passwordField],
     handleSubmit: () => (
-      handleLoginStepPromise(login(emailField.value, getValueAndClear(passwordField)))
+      handleLoginStepPromise(login(usernameField.value, getValueAndClear(passwordField)))
     ),
   })
 
@@ -72,7 +72,7 @@ const Login = (props: {
   return (
     <div style={{ minWidth: 300 }}>
       <Form submitText="Login" {...registerProps} {...loginForm}>
-        <Input label="Email" {...emailField} />
+        <Input label="Username" {...usernameField} />
         <Input label="Password" type="password" {...passwordField} />
       </Form>
       <div className={cx('recover-container')}>
@@ -88,6 +88,7 @@ const RegisterModal = (props: {
 }) => {
   const firstNameField = useFormField('')
   const lastNameField = useFormField('')
+  const usernameField = useFormField('')
   const emailField = useFormField('')
   const passwordField = useFormField('')
   const confirmPasswordField = useFormField('')
@@ -96,6 +97,7 @@ const RegisterModal = (props: {
     fields: [
       firstNameField,
       lastNameField,
+      usernameField,
       emailField,
       passwordField,
       confirmPasswordField,
@@ -104,6 +106,7 @@ const RegisterModal = (props: {
       await register({
         firstName: firstNameField.value,
         lastName: lastNameField.value,
+        username: usernameField.value,
         email: emailField.value,
         password: getValueAndClear(passwordField),
         confirmPassword: getValueAndClear(confirmPasswordField),
@@ -117,7 +120,8 @@ const RegisterModal = (props: {
       <Form submitText="Create Account" {...registerForm}>
         <Input label="First Name" {...firstNameField} />
         <Input label="Last Name" {...lastNameField} />
-        <Input label="Email" {...emailField} />
+        <Input label="Contact Email" {...emailField} />
+        <Input label="Desired Username" {...usernameField} />
         <Input label="Password" type="password" {...passwordField} />
         <Input label="Confirm Password" type="password" {...confirmPasswordField} />
       </Form>
@@ -185,7 +189,7 @@ const RecoverUserAccount = (props: {}) => {
   return (<>
     <h2 className={cx('title')}>Find Your Account</h2>
     <Form submitText="Submit" {...emailForm}>
-      <Input label="Email" {...emailField} />
+      <Input label="Contact Email" {...emailField} />
     </Form>
   </>)
 }

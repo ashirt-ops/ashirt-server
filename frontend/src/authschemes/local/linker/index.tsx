@@ -12,7 +12,7 @@ export default (props: {
   onSuccess: () => void,
   authFlags?: Array<string>,
 }) => {
-  const email = useFormField<string>('')
+  const username = useFormField<string>('')
   const password = useFormField<string>('')
   const confirmPassword = useFormField<string>('')
 
@@ -20,15 +20,15 @@ export default (props: {
     fields: [password, confirmPassword],
     onSuccess: () => props.onSuccess(),
     handleSubmit: () => {
-      if (email.value === '') {
-        return Promise.reject("Email must be populated")
+      if (username.value === '') {
+        return Promise.reject("Username must be populated")
       }
       if (password.value === '') {
         return Promise.reject("Password must be populated")
       }
 
       return linkLocalAccount({
-        email: email.value,
+        username: username.value,
         password: password.value,
         confirmPassword: confirmPassword.value
       })
@@ -37,7 +37,7 @@ export default (props: {
 
   return (
     <Form submitText="Link Account" {...formComponentProps}>
-      <Input label="Email" {...email} />
+      <Input label="Username" {...username} />
       <Input type="password" label="Password" {...password} />
       <Input type="password" label="Confirm Password" {...confirmPassword} />
     </Form>

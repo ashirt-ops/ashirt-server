@@ -85,6 +85,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 		dr := remux.DissectJSONRequest(r)
 		info := RegistrationInfo{
+			Username:  dr.FromBody("username").Required().AsString(),
 			Email:     dr.FromBody("email").Required().AsString(),
 			FirstName: dr.FromBody("firstName").Required().AsString(),
 			LastName:  dr.FromBody("lastName").Required().AsString(),
@@ -117,6 +118,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 		dr := remux.DissectJSONRequest(r)
 		info := RegistrationInfo{
+			Username:           dr.FromBody("username").Required().AsString(),
 			Email:              dr.FromBody("email").Required().AsString(),
 			FirstName:          dr.FromBody("firstName").Required().AsString(),
 			LastName:           dr.FromBody("lastName").AsString(),
@@ -144,7 +146,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 	remux.Route(r, "POST", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			dr := remux.DissectJSONRequest(r)
-			userKey := dr.FromBody("email").Required().AsString()
+			userKey := dr.FromBody("username").Required().AsString()
 			password := dr.FromBody("password").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -289,7 +291,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 	remux.Route(r, "POST", "/link", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		dr := remux.DissectJSONRequest(r)
-		email := dr.FromBody("email").Required().AsString()
+		username := dr.FromBody("username").Required().AsString()
 		password := dr.FromBody("password").Required().AsString()
 
 		if dr.Error != nil {
@@ -306,19 +308,26 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 		}
 
 		callingUserId := middleware.UserID(r.Context())
-
-		emailTaken, err := bridge.CheckIfUserEmailTaken(email, callingUserId, true)
-		if err != nil {
+		if user, err := bridge.FindAuthsForUsername(username); err != nil {
 			return nil, err
+		} else if user.UserKey != "" {
+			return nil, backend.BadInputErr(fmt.Errorf("error linking account: username taken"), "An account for this user already exists")
 		}
+		
 
-		if emailTaken {
-			return nil, backend.BadInputErr(fmt.Errorf("error linking account: email taken"), "An account for this user already exists")
-		}
+		// TODO: we don't really need this anymore. There is an error if the userkey is already taken though...
+		// emailTaken, err := bridge.CheckIfUserEmailTaken(username, callingUserId, true)
+		// if err != nil {
+		// 	return nil, err
+		// }
+
+		// if emailTaken {
+		// 	return nil, backend.BadInputErr(fmt.Errorf("error linking account: email taken"), "An account for this user already exists")
+		// }
 
 		err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:            callingUserId,
-			UserKey:           email,
+			UserKey:           username,
 			EncryptedPassword: encryptedPassword,
 		})
 

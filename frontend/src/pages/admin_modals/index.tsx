@@ -96,8 +96,8 @@ export const AddHeadlessUserModal = (props: {
       {...formComponentProps}
       disableSubmit={apiKey != null}
     >
-      <Input label="Headless name" {...headlessName} />
-      <Input type="email" label="Contact Email" {...contactEmail} />
+      <Input label="Headless name" {...headlessName} disabled={apiKey != null} />
+      <Input type="email" label="Contact Email" {...contactEmail} disabled={apiKey != null} />
       <Checkbox label="Also create API key" {...doCreateApiKey} />
       {
         apiKey && <NewApiKeyModalContents apiKey={apiKey} />
@@ -131,13 +131,12 @@ export const AddUserModal = (props: {
       if (contactEmail.value.length == 0) {
         return new Promise((_resolve, reject) => reject(Error("Users must have an email address")))
       }
-      // TODO: this should create the user, then update the form with the new user/password combo
-      // to share.
       const runSubmit = async () => {
         const result = await adminCreateLocalUser({
           firstName: firstName.value,
           lastName: lastName.value,
           email: contactEmail.value,
+          username: contactEmail.value,
         })
         setUsername(contactEmail.value)
         setPassword(result.temporaryPassword)
@@ -155,7 +154,7 @@ export const AddUserModal = (props: {
       >
         <Input label="First Name" {...firstName} disabled={isDisabled} />
         <Input label="Last Name" {...lastName} disabled={isDisabled} />
-        <Input label="Email" {...contactEmail} disabled={isDisabled} />
+        <Input type="email" label="Email" {...contactEmail} disabled={isDisabled} />
       </Form>
       {isDisabled && (<>
         <div className={cx('success-area')}>
@@ -296,7 +295,7 @@ export const InviteUserModal = (props: {
       >
         <Input label="First Name" {...firstName} disabled={isDisabled} />
         <Input label="Last Name" {...lastName} disabled={isDisabled} />
-        <Input label="Email" {...contactEmail} disabled={isDisabled} />
+        <Input type="email" label="Email" {...contactEmail} disabled={isDisabled} />
       </Form>
       {isDisabled && (<>
         <div className={cx('success-area')}>

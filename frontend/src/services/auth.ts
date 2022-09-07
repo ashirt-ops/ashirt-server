@@ -33,6 +33,7 @@ export async function adminCreateLocalUser(i: {
   firstName: string,
   lastName?: string,
   email: string,
+  username: string,
 }) {
   return await ds.adminCreateLocalUser(i)
 }

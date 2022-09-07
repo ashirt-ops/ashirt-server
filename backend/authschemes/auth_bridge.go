@@ -186,6 +186,21 @@ func (ah AShirtAuthBridge) FindUserAuthByUserID(userID int64) (UserAuthData, err
 	return authData, nil
 }
 
+func (ah AShirtAuthBridge) FindAuthsForUsername(userKey string) (UserAuthData, error) {
+	var authData UserAuthData
+
+	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret", "json_data").
+		From("auth_scheme_data").
+		Where(sq.Eq{
+			"user_key":    userKey,
+			"auth_scheme": ah.authSchemeName,
+		}))
+	if err != nil {
+		return UserAuthData{}, backend.DatabaseErr(err)
+	}
+	return authData, nil
+}
+
 func (ah AShirtAuthBridge) findUserAuthsByUserEmail(email string, includeDeleted bool) ([]UserAuthData, error) {
 	var authData []UserAuthData
 
