@@ -14,12 +14,14 @@ const (
 )
 
 type WebAuthnRegistrationInfo struct {
-	Email            string
-	FirstName        string
-	LastName         string
-	KeyName          string
-	UserID           int64
-	RegistrationType RegistrationType
+	Email               string
+	Username            string
+	FirstName           string
+	LastName            string
+	KeyName             string
+	UserID              int64
+	RegistrationType    RegistrationType
+	ExistingCredentials []AShirtWebauthnCredential
 }
 
 type AShirtWebauthnCredential struct {

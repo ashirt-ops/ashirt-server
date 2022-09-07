@@ -68,12 +68,12 @@ func (LocalAuthScheme) Type() string {
 // * POST   ${prefix}/link                 Adds local auth to a non-local user
 //
 // * TOTP-Related
-//   * POST   ${prefix}/login/totp     Completes login with totp passcode
-//   * GET    ${prefix}/totp           Returns boolean true if the user has totp enabled, false otherwise
-//   * GET    ${prefix}/totp/generate  Returns a new generated totp secret/uri/qrcode
-//   * POST   ${prefix}/totp           Enables totp on a user's account by accepting a secret and verifying
+//   - POST   ${prefix}/login/totp     Completes login with totp passcode
+//   - GET    ${prefix}/totp           Returns boolean true if the user has totp enabled, false otherwise
+//   - GET    ${prefix}/totp/generate  Returns a new generated totp secret/uri/qrcode
+//   - POST   ${prefix}/totp           Enables totp on a user's account by accepting a secret and verifying
 //     a corresponding one time passcode (errors if one already exists)
-//   * DELETE ${prefix}/totp           Removes a totp secret from a user's account
+//   - DELETE ${prefix}/totp           Removes a totp secret from a user's account
 //
 // In each case above, the actual action is deferred to the bridge connecting this auth scheme to
 // the underlying system/database
@@ -91,12 +91,14 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			LastName:  dr.FromBody("lastName").Required().AsString(),
 			Password:  dr.FromBody("password").Required().AsString(),
 		}
-
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
 
 		if err := checkPasswordComplexity(info.Password); err != nil {
+			return nil, err
+		}
+		if err := bridge.ValidateRegistrationInfo(info.Email, info.Username); err != nil {
 			return nil, err
 		}
 
@@ -307,23 +309,10 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			return nil, backend.WrapError("Unable to encrypt new password", err)
 		}
 
-		callingUserId := middleware.UserID(r.Context())
-		if user, err := bridge.FindAuthsForUsername(username); err != nil {
+		if err := bridge.ValidateLinkingInfo(username); err != nil {
 			return nil, err
-		} else if user.UserKey != "" {
-			return nil, backend.BadInputErr(fmt.Errorf("error linking account: username taken"), "An account for this user already exists")
 		}
-		
-
-		// TODO: we don't really need this anymore. There is an error if the userkey is already taken though...
-		// emailTaken, err := bridge.CheckIfUserEmailTaken(username, callingUserId, true)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// if emailTaken {
-		// 	return nil, backend.BadInputErr(fmt.Errorf("error linking account: email taken"), "An account for this user already exists")
-		// }
+		callingUserId := middleware.UserID(r.Context())
 
 		err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:            callingUserId,

@@ -24,12 +24,12 @@ export default (props: {
 const Login = (props: {
   authFlags?: Array<string>
 }) => {
-  const emailField = useFormField('')
+  const usernameField = useFormField('')
 
   const loginForm = useForm({
-    fields: [emailField],
+    fields: [usernameField],
     handleSubmit: async () => {
-      const protoOptions = await beginLogin({ email: emailField.value })
+      const protoOptions = await beginLogin({ username: usernameField.value })
       const credOptions = convertToPublicKeyCredentialRequestOptions(protoOptions)
 
       const cred = await navigator.credentials.get({
@@ -52,16 +52,13 @@ const Login = (props: {
           userHandle: pubKeyResponse.userHandle == null ? "" : encodeAsB64(pubKeyResponse.userHandle),
         }
       })
-      window.location.pathname = '/' // TODO: is this what we want to do?
+      window.location.pathname = '/'
     },
   })
 
   const registerModal = useModal<void>(modalProps => <RegisterModal {...(modalProps as OnRequestClose)} />)
 
-  const allowRegister = props.authFlags?.includes("open-registration")
-  // const registerProps = allowRegister
-  //   ? { cancelText: "Register", onCancel: () => registerModal.show() }
-  //   : {}
+  const allowRegister = props.authFlags?.includes("open-registration") // TODO: this isn't being used
 
   const registerProps = { cancelText: "Register", onCancel: () => registerModal.show() }
 
@@ -70,7 +67,7 @@ const Login = (props: {
       {window.PublicKeyCredential && (
         <div style={{ minWidth: 300 }}>
           <Form submitText="Login with WebAuthN" {...registerProps} {...loginForm}>
-            <Input label="Email" {...emailField} />
+            <Input label="Username" {...usernameField} />
           </Form>
           {renderModals(registerModal)}
         </div>
@@ -85,6 +82,7 @@ const RegisterModal = (props: {
   const firstNameField = useFormField('')
   const lastNameField = useFormField('')
   const emailField = useFormField('')
+  const usernameField = useFormField('')
   const keyNameField = useFormField('')
 
   const registerForm = useForm({
@@ -93,6 +91,7 @@ const RegisterModal = (props: {
       firstNameField,
       lastNameField,
       emailField,
+      usernameField,
       keyNameField,
     ],
     handleSubmit: async () => {
@@ -104,6 +103,7 @@ const RegisterModal = (props: {
         firstName: firstNameField.value,
         lastName: lastNameField.value,
         email: emailField.value,
+        username: usernameField.value,
         keyName: keyNameField.value,
       })
       const credOptions = convertToCredentialCreationOptions(reg)
@@ -137,6 +137,7 @@ const RegisterModal = (props: {
         <Input label="First Name" {...firstNameField} />
         <Input label="Last Name" {...lastNameField} />
         <Input label="Email" {...emailField} />
+        <Input label="Desired Username" {...usernameField} />
         <Input label="Key Name" {...keyNameField} />
       </Form>
     </Modal>

@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt-server/backend"
@@ -95,6 +96,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			dr := remux.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
 				Email:            dr.FromBody("email").Required().AsString(),
+				Username:         dr.FromBody("username").Required().AsString(),
 				FirstName:        dr.FromBody("firstName").Required().AsString(),
 				LastName:         dr.FromBody("lastName").Required().AsString(),
 				KeyName:          dr.FromBody("keyName").Required().AsString(),
@@ -104,10 +106,8 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				return nil, dr.Error
 			}
 
-			if taken, err := bridge.CheckIfUserEmailTaken(info.Email, -1, true); err != nil {
-				return nil, backend.BadAuthErr(errors.New("Unable to review user"))
-			} else if taken {
-				return nil, backend.BadAuthErr(errors.New("User has already been registered. If you are this user, please link your account instead"))
+			if err := bridge.ValidateRegistrationInfo(info.Email, info.Username); err != nil {
+				return nil, err
 			}
 
 			return a.beginRegistration(w, r, bridge, info)
@@ -123,7 +123,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 		userProfile := authschemes.UserProfile{
 			FirstName: data.UserData.FirstName,
 			LastName:  data.UserData.LastName,
-			Slug:      data.UserData.Email,
+			Slug:      strings.ToLower(data.UserData.FirstName + "." + data.UserData.LastName),
 			Email:     data.UserData.Email,
 		}
 		userResult, err := bridge.CreateNewUser(userProfile)
@@ -133,7 +133,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 
 		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:   userResult.UserID,
-			UserKey:  userProfile.Email,
+			UserKey:  data.UserData.UserName,
 			JSONData: helpers.Ptr(string(encodedCreds)),
 		})
 	}))
@@ -141,11 +141,11 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 	remux.Route(r, "POST", "/login/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			dr := remux.DissectJSONRequest(r)
-			email := dr.FromBody("email").Required().AsString()
+			username := dr.FromBody("username").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
 			}
-			return a.beginLogin(w, r, bridge, email)
+			return a.beginLogin(w, r, bridge, username)
 		}).ServeHTTP(w, r)
 	}))
 
@@ -181,7 +181,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 
 			dr := remux.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
-				Email:            dr.FromBody("email").Required().AsString(),
+				Username:         dr.FromBody("username").Required().AsString(),
 				KeyName:          dr.FromBody("keyName").Required().AsString(),
 				UserID:           callingUserId,
 				RegistrationType: LinkKey,
@@ -190,13 +190,8 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				return nil, dr.Error
 			}
 
-			if emailTaken, err := bridge.CheckIfUserEmailTaken(info.Email, callingUserId, true); err != nil {
+			if err := bridge.ValidateLinkingInfo(info.Username); err != nil {
 				return nil, err
-			} else if emailTaken {
-				return nil, backend.BadInputErr(
-					errors.New("error linking account: email taken"),
-					"An account for this user already exists",
-				)
 			}
 
 			return a.beginRegistration(w, r, bridge, info)
@@ -210,7 +205,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 		}
 		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:   byteSliceToI64(data.UserData.UserID),
-			UserKey:  data.UserData.Email,
+			UserKey:  data.UserData.UserName,
 			JSONData: helpers.Ptr(string(encodedCreds)),
 		})
 	}))
@@ -232,32 +227,29 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 
 	remux.Route(r, "POST", "/key/add/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-			callingUserId := middleware.UserID(r.Context())
-
-			auth, err := bridge.FindUserAuthByUserID(callingUserId)
+			auth, err := bridge.FindUserAuthByContext(r.Context())
 			if err != nil {
 				return nil, backend.DatabaseErr(err)
 			}
 
 			dr := remux.DissectJSONRequest(r)
-			info := WebAuthnRegistrationInfo{
-				Email:            auth.UserKey,
-				KeyName:          dr.FromBody("keyName").Required().AsString(),
-				UserID:           callingUserId,
-				RegistrationType: AddKey,
-			}
+			keyName := dr.FromBody("keyName").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
 			}
 
-			if emailTaken, err := bridge.CheckIfUserEmailTaken(info.Email, callingUserId, true); err != nil {
-				return nil, err
-			} else if emailTaken {
-				return nil, backend.BadInputErr(
-					errors.New("error linking account: email taken"),
-					"An account for this user already exists",
-				)
+			info := WebAuthnRegistrationInfo{
+				Username:         auth.UserKey,
+				KeyName:          keyName,
+				UserID:           auth.UserID,
+				RegistrationType: AddKey,
 			}
+
+			creds, err := a.getExistingCredentials(auth)
+			if err != nil {
+				return nil, err
+			}
+			info.ExistingCredentials = creds
 
 			return a.beginRegistration(w, r, bridge, info)
 		}).ServeHTTP(w, r)
@@ -269,8 +261,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			return nil, backend.WrapError("Unable to validate registration data", err)
 		}
 
-		callingUserID := middleware.UserID(r.Context())
-		userAuth, err := bridge.FindUserAuthByUserID(callingUserID)
+		userAuth, err := bridge.FindUserAuthByContext(r.Context())
 		if err != nil {
 			return nil, backend.WrapError("Unable to find user", err)
 		}
@@ -333,19 +324,11 @@ func (a WebAuthn) deleteKey(userID int64, keyName string, bridge authschemes.ASh
 func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, info WebAuthnRegistrationInfo) (*protocol.CredentialCreation, error) {
 	var user webauthnUser
 	if info.RegistrationType == CreateKey {
-		user = makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email, info.KeyName)
+		user = makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email, info.Username, info.KeyName)
 	} else if info.RegistrationType == LinkKey {
-		user = makeLinkingWebAuthnUser(info.UserID, info.Email, info.KeyName)
+		user = makeLinkingWebAuthnUser(info.UserID, info.Username, info.KeyName)
 	} else { // Add Key
-		authData, err := bridge.FindUserAuthByUserID(info.UserID)
-		if err != nil {
-			return nil, backend.WebauthnLoginError(err, "Unable to find existing user auth")
-		}
-		creds, err := a.getExistingCredentials(authData)
-		if err != nil {
-			return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
-		}
-		user = makeAddKeyWebAuthnUser(info.UserID, info.Email, info.KeyName, creds)
+		user = makeAddKeyWebAuthnUser(info.UserID, info.KeyName, info.Username, info.ExistingCredentials)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
@@ -369,8 +352,8 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 	return credOptions, err
 }
 
-func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, email string) (interface{}, error) {
-	authData, err := bridge.FindUserAuth(email)
+func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, username string) (interface{}, error) {
+	authData, err := bridge.FindUserAuth(username)
 	if err != nil {
 		return nil, backend.WebauthnLoginError(err, "Could not validate user", "No such auth")
 	}
@@ -388,7 +371,7 @@ func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge auth
 		return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 	}
 
-	webauthnUser := makeWebAuthnUser(user.FirstName, user.LastName, user.Slug, user.Email, user.ID, creds)
+	webauthnUser := makeWebAuthnUser(user.FirstName, user.LastName, username, user.Email, user.ID, creds)
 	options, sessionData, err := a.Web.BeginLogin(&webauthnUser)
 	if err != nil {
 		return nil, backend.WebauthnLoginError(err, "Unable to begin login process")
