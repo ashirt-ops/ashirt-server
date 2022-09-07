@@ -60,6 +60,7 @@ func (l LambdaRIEClient) Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput
 	if len(respBody) == 0 {
 		return &out, nil
 	}
+	out.Payload = respBody
 
 	return &out, nil
 }
