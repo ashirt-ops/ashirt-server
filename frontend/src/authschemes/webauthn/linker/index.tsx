@@ -15,7 +15,8 @@ export default (props: {
   userData: UserOwnView
   authFlags?: Array<string>,
 }) => {
-  const username = useFormField<string>(props.userData.email)
+  const initialUsername = props.userData.authSchemes.find(s => s.schemeType == 'local')?.userKey
+  const username = useFormField<string>(initialUsername ?? "")
   const keyName = useFormField<string>('')
 
   const formComponentProps = useForm({
@@ -55,9 +56,11 @@ export default (props: {
     }
   })
 
+  const readonlyUsername = initialUsername !== undefined
+
   return (
     <Form submitText="Link Account" {...formComponentProps}>
-      <Input label="Username" {...username} readOnly />
+      <Input label="Username" {...username} readOnly={readonlyUsername} />
       <Input label="Key name" {...keyName} />
     </Form>
   )
