@@ -396,6 +396,12 @@ func (ah AShirtAuthBridge) ValidateRegistrationInfo(email, username string) erro
 	return nil
 }
 
+// ValidateLinkingInfo checks if the user is linking with an unused username (for the auth scheme).
+// This is only intended for services that register locally and do not need to access another service.
+//
+// Note: this will leak info back to the user, to help indicate how to correct their
+// registration data. This should be less of an issue generally, as the user should have an
+// idea of who else is using ashirt
 func (ah AShirtAuthBridge) ValidateLinkingInfo(username string) error {
 	if taken, err := ah.IsUsernameTakenForAuth(username); err != nil {
 		return backend.DatabaseErr(err)
