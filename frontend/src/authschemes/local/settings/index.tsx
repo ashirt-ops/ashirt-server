@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -14,14 +14,15 @@ const cx = classnames.bind(require('./stylesheet'))
 export default (props: {
   username: string,
   authFlags?: Array<string>
-}) => <>
+}) => (
+  <>
     <h1 className={cx('header')}>Settings for local account <span className={cx('user-key')}>{props.username}</span></h1>
     <SettingsSection title="Change Password" width="narrow">
       <ResetPasswordForm username={props.username} />
     </SettingsSection>
     <Totp />
   </>
-
+)
 const ResetPasswordForm = (props: {
   username: string,
 }) => {
