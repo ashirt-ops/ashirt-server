@@ -155,6 +155,7 @@ type AuthSchemeData struct {
 	EncryptedPassword []byte     `db:"encrypted_password"`
 	MustResetPassword bool       `db:"must_reset_password"`
 	TOTPSecret        *string    `db:"totp_secret"`
+	JSONData          *string    `db:"json_data"`
 	LastLogin         *time.Time `db:"last_login"`
 	CreatedAt         time.Time  `db:"created_at"`
 	UpdatedAt         *time.Time `db:"updated_at"`
