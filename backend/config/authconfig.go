@@ -105,11 +105,11 @@ func (w WebauthnConfig) AuthenticatorUserVerificationPreference() protocol.UserV
 
 func (w WebauthnConfig) BuildAuthenticatorSelection() protocol.AuthenticatorSelection {
 	return protocol.AuthenticatorSelection{
-			RequireResidentKey:      w.AuthenticatorRequireResidentKey,
-			UserVerification:        w.AuthenticatorUserVerificationPreference(),
-			ResidentKey:             w.AuthenticatorResidentKeyPreference(),
-			AuthenticatorAttachment: w.AuthenticatorAttachmentPreference(),
-		}
+		RequireResidentKey:      w.AuthenticatorRequireResidentKey,
+		UserVerification:        w.AuthenticatorUserVerificationPreference(),
+		ResidentKey:             w.AuthenticatorResidentKeyPreference(),
+		AuthenticatorAttachment: w.AuthenticatorAttachmentPreference(),
+	}
 }
 
 func splitNoSpaces(s, delimiter string) []string {

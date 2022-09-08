@@ -327,7 +327,7 @@ func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, username str
 	var userID int64
 	err := ah.db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&userID, sq.Select("user_id").From("auth_scheme_data").
-			Where(sq.Eq{"username": username}).                                                  // The recovery code exists...
+			Where(sq.Eq{"username": username}).                                                 // The recovery code exists...
 			Where("TIMESTAMPDIFF(minute, created_at, ?) < ?", time.Now(), expirationInMinutes)) // and the record hasn't expired
 
 		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"username": username}))

@@ -211,7 +211,7 @@ func DeprecationWarning(message string) error {
 	return WrapError(message, ErrorDeprecated)
 }
 
-func WebauthnLoginError(err error, logMessage... string) error {
+func WebauthnLoginError(err error, logMessage ...string) error {
 	var fullErr error
 	if len(logMessage) > 0 {
 		fullErr = WrapError(strings.Join(logMessage, " ; "), err)
