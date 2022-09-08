@@ -78,7 +78,13 @@ func (a WebAuthn) FriendlyName() string {
 }
 
 func (a WebAuthn) Flags() []string {
-	return []string{}
+	flags := make([]string, 0)
+
+	if a.RegistrationEnabled {
+		flags = append(flags, "open-registration")
+	}
+
+	return flags
 }
 
 func (a WebAuthn) Type() string {

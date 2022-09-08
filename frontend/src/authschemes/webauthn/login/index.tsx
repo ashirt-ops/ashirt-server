@@ -60,7 +60,9 @@ const Login = (props: {
 
   const allowRegister = props.authFlags?.includes("open-registration") // TODO: this isn't being used
 
-  const registerProps = { cancelText: "Register", onCancel: () => registerModal.show() }
+  const registerProps = allowRegister
+    ? { cancelText: "Register", onCancel: () => registerModal.show() }
+    : {}
 
   return (
     <div>
