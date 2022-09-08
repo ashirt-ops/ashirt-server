@@ -135,7 +135,7 @@ func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request)
 // UserAuthData is a small structure capturing data relevant to a user for authentication purposes
 type UserAuthData struct {
 	UserID             int64   `db:"user_id"`
-	UserKey            string  `db:"user_key"`
+	UserKey            string  `db:"username"`
 	EncryptedPassword  []byte  `db:"encrypted_password"`
 	NeedsPasswordReset bool    `db:"must_reset_password"`
 	TOTPSecret         *string `db:"totp_secret"`
@@ -151,7 +151,7 @@ func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 
 	err := ah.db.Get(&authData, ah.buildFindUserAuthQuery().
 		Where(sq.Eq{
-			"user_key":    userKey,
+			"username":    userKey,
 			"auth_scheme": ah.authSchemeName,
 		}))
 	if err != nil {
@@ -239,11 +239,11 @@ func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, allowUserID int64
 func (ah AShirtAuthBridge) IsUserKeyTakenForAuth(username string) (bool, error) {
 	var userAuths []UserAuthData
 	err := ah.db.Select(&userAuths, sq.Select(
-		"user_id", "user_key", "encrypted_password",
+		"user_id", "username", "encrypted_password",
 		"must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data").
 		Where(sq.Eq{
-			"user_key":    username,
+			"username":    username,
 			"auth_scheme": ah.authSchemeName,
 		}),
 	)
@@ -307,7 +307,7 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(data UserAuthData) error {
 			"totp_secret":         data.TOTPSecret,
 			"json_data":           data.JSONData,
 		}).
-		Where(sq.Eq{"user_key": data.UserKey, "auth_scheme": ah.authSchemeName})
+		Where(sq.Eq{"username": data.UserKey, "auth_scheme": ah.authSchemeName})
 	err := ah.db.Update(ub)
 	if err != nil {
 		return backend.WrapError("Unable to update user authentication", backend.DatabaseErr(err))
@@ -316,7 +316,7 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(data UserAuthData) error {
 }
 
 // OneTimeVerification looks for a matching record in the auth_scheme_data table with the following conditions:
-// user_key matches && created_at less than <expirationInMinutes> minutes
+// username matches && created_at less than <expirationInMinutes> minutes
 // If this record exists, then the record is deleted. If there is no error _either_ for the lookup
 // OR the deletion, then (userID for the user, nil) is returned. At this point, the user has been validated
 // and LoginUser can be called.
@@ -327,10 +327,10 @@ func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, userKey stri
 	var userID int64
 	err := ah.db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&userID, sq.Select("user_id").From("auth_scheme_data").
-			Where(sq.Eq{"user_key": userKey}).                                                  // The recovery code exists...
+			Where(sq.Eq{"username": userKey}).                                                  // The recovery code exists...
 			Where("TIMESTAMPDIFF(minute, created_at, ?) < ?", time.Now(), expirationInMinutes)) // and the record hasn't expired
 
-		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"user_key": userKey}))
+		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"username": userKey}))
 	})
 	if err != nil {
 		return 0, backend.WrapError("Unable to validate one-time verification", err)
@@ -363,7 +363,7 @@ func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, userID int64, 
 // normal column names (i.e. no aliasing is happening)
 func (ah AShirtAuthBridge) buildFindUserAuthQuery() sq.SelectBuilder {
 	return sq.Select(
-		"user_id", "user_key", "encrypted_password",
+		"user_id", "username", "encrypted_password",
 		"must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data")
 }
