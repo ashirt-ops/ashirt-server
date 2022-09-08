@@ -430,7 +430,7 @@ func ReadUser(ctx context.Context, db *database.Connection, userSlug string, sup
 		index := getMatchingSchemeIndex(supportedAuthSchemes, v.AuthScheme)
 
 		auths[i] = dtos.AuthenticationInfo{
-			UserKey:        v.UserKey,
+			Username:       v.Username,
 			AuthSchemeCode: v.AuthScheme,
 			AuthSchemeType: v.AuthType,
 			AuthLogin:      v.LastLogin,

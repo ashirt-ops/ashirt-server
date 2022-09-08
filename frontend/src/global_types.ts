@@ -171,7 +171,7 @@ export type UserWithAuth = User & {
 }
 
 export type AuthenticationInfo = {
-  userKey: string,
+  username: string,
   schemeName: string | undefined,
   schemeCode: string,
   schemeType: string,

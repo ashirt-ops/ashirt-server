@@ -69,7 +69,7 @@ func TestAuthenticateAPI(t *testing.T) {
 	keyData := createAPIKey(t, db, userID)
 
 	disabledUser := createDummyUser(t, db, models.User{Slug: "snail", FirstName: "fn", LastName: "ln", Email: "disabledUser@example.com", Disabled: true})
-	disabledUserKeys := createAPIKey(t, db, disabledUser)
+	disabledUsernames := createAPIKey(t, db, disabledUser)
 
 	browser := testBrowser{}
 	newReq := func() (*http.Request, io.Reader) {
@@ -93,7 +93,7 @@ func TestAuthenticateAPI(t *testing.T) {
 	require.Error(t, badKeys)
 
 	req, reader = newReq()
-	addGoodHeaders(t, req, disabledUserKeys.AccessKey, disabledUserKeys.SecretKey)
+	addGoodHeaders(t, req, disabledUsernames.AccessKey, disabledUsernames.SecretKey)
 	_, disabledUserError := authenticateAPI(db, req, reader)
 	require.Equal(t, backend.DisabledUserError(), disabledUserError)
 

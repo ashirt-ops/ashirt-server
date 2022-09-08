@@ -56,10 +56,10 @@ export async function finishAddKey(i: WebAuthNRegisterConfirmation) {
   return await req('POST', '/auth/webauthn/key/add/finish', i)
 }
 
-export async function listUserKeys(): Promise<KeyList> {
+export async function listWebauthnKeys(): Promise<KeyList> {
   return await req('GET', '/auth/webauthn/keys')
 }
 
-export async function deleteUserKey(i: {keyName: string}): Promise<KeyList> {
+export async function deleteWebauthnKey(i: { keyName: string }): Promise<KeyList> {
   return await req('DELETE', `/auth/webauthn/key/${i.keyName}`)
 }

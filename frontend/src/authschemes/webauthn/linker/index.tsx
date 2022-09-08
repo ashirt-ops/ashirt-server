@@ -15,7 +15,7 @@ export default (props: {
   userData: UserOwnView
   authFlags?: Array<string>,
 }) => {
-  const initialUsername = props.userData.authSchemes.find(s => s.schemeType == 'local')?.userKey
+  const initialUsername = props.userData.authSchemes.find(s => s.schemeType == 'local')?.username
   const username = useFormField<string>(initialUsername ?? "")
   const keyName = useFormField<string>('')
 

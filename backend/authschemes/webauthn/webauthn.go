@@ -133,7 +133,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 
 		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:   userResult.UserID,
-			UserKey:  data.UserData.UserName,
+			Username: data.UserData.UserName,
 			JSONData: helpers.Ptr(string(encodedCreds)),
 		})
 	}))
@@ -205,7 +205,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 		}
 		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:   byteSliceToI64(data.UserData.UserID),
-			UserKey:  data.UserData.UserName,
+			Username: data.UserData.UserName,
 			JSONData: helpers.Ptr(string(encodedCreds)),
 		})
 	}))
@@ -239,7 +239,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			}
 
 			info := WebAuthnRegistrationInfo{
-				Username:         auth.UserKey,
+				Username:         auth.Username,
 				KeyName:          keyName,
 				UserID:           auth.UserID,
 				RegistrationType: AddKey,

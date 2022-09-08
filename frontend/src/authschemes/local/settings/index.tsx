@@ -12,18 +12,18 @@ import Totp from '../totp'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  userKey: string,
+  username: string,
   authFlags?: Array<string>
 }) => <>
-  <h1 className={cx('header')}>Settings for local account <span className={cx('user-key')}>{props.userKey}</span></h1>
-  <SettingsSection title="Change Password" width="narrow">
-    <ResetPasswordForm userKey={props.userKey} />
-  </SettingsSection>
-  <Totp />
-</>
+    <h1 className={cx('header')}>Settings for local account <span className={cx('user-key')}>{props.username}</span></h1>
+    <SettingsSection title="Change Password" width="narrow">
+      <ResetPasswordForm username={props.username} />
+    </SettingsSection>
+    <Totp />
+  </>
 
 const ResetPasswordForm = (props: {
-  userKey: string,
+  username: string,
 }) => {
   const oldPassword = useFormField('')
   const newPassword = useFormField('')
@@ -33,7 +33,7 @@ const ResetPasswordForm = (props: {
     fields: [oldPassword, newPassword, confirmPassword],
     handleSubmit: () => {
       return userChangePassword({
-        userKey: props.userKey,
+        username: props.username,
         oldPassword: oldPassword.value,
         newPassword: newPassword.value,
         confirmPassword: confirmPassword.value,

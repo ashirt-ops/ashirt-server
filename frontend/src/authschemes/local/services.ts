@@ -33,7 +33,7 @@ export async function userResetPassword(i: {
 }
 
 export async function userChangePassword(i: {
-  userKey: string,
+  username: string,
   oldPassword: string,
   newPassword: string,
   confirmPassword: string,

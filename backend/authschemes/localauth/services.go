@@ -80,7 +80,7 @@ func registerNewUser(ctx context.Context, bridge authschemes.AShirtAuthBridge, i
 	}
 	return bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 		UserID:             userResult.UserID,
-		UserKey:            info.Username,
+		Username:           info.Username,
 		EncryptedPassword:  encryptedPassword,
 		NeedsPasswordReset: info.ForceResetPassword,
 	})

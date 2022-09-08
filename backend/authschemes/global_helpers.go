@@ -17,7 +17,7 @@ func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName, authSc
 	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme":         authSchemeName,
 		"auth_type":           authSchemeType,
-		"username":            data.UserKey,
+		"username":            data.Username,
 		"user_id":             data.UserID,
 		"encrypted_password":  data.EncryptedPassword,
 		"totp_secret":         data.TOTPSecret,

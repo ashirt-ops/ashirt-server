@@ -135,23 +135,23 @@ func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request)
 // UserAuthData is a small structure capturing data relevant to a user for authentication purposes
 type UserAuthData struct {
 	UserID             int64   `db:"user_id"`
-	UserKey            string  `db:"username"`
+	Username           string  `db:"username"`
 	EncryptedPassword  []byte  `db:"encrypted_password"`
 	NeedsPasswordReset bool    `db:"must_reset_password"`
 	TOTPSecret         *string `db:"totp_secret"`
 	JSONData           *string `db:"json_data"`
 }
 
-// FindUserAuth retrieves the row (codified by UserAuthData) corresponding to the provided userKey(e.g. username, email, etc) and the
+// FindUserAuth retrieves the row (codified by UserAuthData) corresponding to the provided username and the
 // auth scheme name provided from the caller.
 //
 // Returns a fully populated UserAuthData object, or an error if no such row exists
-func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
+func (ah AShirtAuthBridge) FindUserAuth(username string) (UserAuthData, error) {
 	var authData UserAuthData
 
 	err := ah.db.Get(&authData, ah.buildFindUserAuthQuery().
 		Where(sq.Eq{
-			"username":    userKey,
+			"username":    username,
 			"auth_scheme": ah.authSchemeName,
 		}))
 	if err != nil {
@@ -236,7 +236,7 @@ func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, allowUserID int64
 	return false, err
 }
 
-func (ah AShirtAuthBridge) IsUserKeyTakenForAuth(username string) (bool, error) {
+func (ah AShirtAuthBridge) IsUsernameTakenForAuth(username string) (bool, error) {
 	var userAuths []UserAuthData
 	err := ah.db.Select(&userAuths, sq.Select(
 		"user_id", "username", "encrypted_password",
@@ -307,7 +307,7 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(data UserAuthData) error {
 			"totp_secret":         data.TOTPSecret,
 			"json_data":           data.JSONData,
 		}).
-		Where(sq.Eq{"username": data.UserKey, "auth_scheme": ah.authSchemeName})
+		Where(sq.Eq{"username": data.Username, "auth_scheme": ah.authSchemeName})
 	err := ah.db.Update(ub)
 	if err != nil {
 		return backend.WrapError("Unable to update user authentication", backend.DatabaseErr(err))
@@ -323,14 +323,14 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(data UserAuthData) error {
 //
 // If an error occurs, _either_ the record does not exist, or some database issue prevented deletion,
 // and in either event, the user cannot be approved. In this case (0, <error>) will be returned
-func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, userKey string, expirationInMinutes int64) (int64, error) {
+func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, username string, expirationInMinutes int64) (int64, error) {
 	var userID int64
 	err := ah.db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&userID, sq.Select("user_id").From("auth_scheme_data").
-			Where(sq.Eq{"username": userKey}).                                                  // The recovery code exists...
+			Where(sq.Eq{"username": username}).                                                  // The recovery code exists...
 			Where("TIMESTAMPDIFF(minute, created_at, ?) < ?", time.Now(), expirationInMinutes)) // and the record hasn't expired
 
-		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"username": userKey}))
+		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"username": username}))
 	})
 	if err != nil {
 		return 0, backend.WrapError("Unable to validate one-time verification", err)
@@ -384,7 +384,7 @@ func (ah AShirtAuthBridge) ValidateRegistrationInfo(email, username string) erro
 		)
 	}
 
-	if taken, err := ah.IsUserKeyTakenForAuth(username); err != nil {
+	if taken, err := ah.IsUsernameTakenForAuth(username); err != nil {
 		return backend.DatabaseErr(err)
 	} else if taken {
 		return backend.BadInputErr(
@@ -397,7 +397,7 @@ func (ah AShirtAuthBridge) ValidateRegistrationInfo(email, username string) erro
 }
 
 func (ah AShirtAuthBridge) ValidateLinkingInfo(username string) error {
-	if taken, err := ah.IsUserKeyTakenForAuth(username); err != nil {
+	if taken, err := ah.IsUsernameTakenForAuth(username); err != nil {
 		return backend.DatabaseErr(err)
 	} else if taken {
 		return backend.BadInputErr(

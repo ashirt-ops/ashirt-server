@@ -148,13 +148,13 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 	remux.Route(r, "POST", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			dr := remux.DissectJSONRequest(r)
-			userKey := dr.FromBody("username").Required().AsString()
+			username := dr.FromBody("username").Required().AsString()
 			password := dr.FromBody("password").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
 			}
 
-			authData, findUserErr := bridge.FindUserAuth(userKey)
+			authData, findUserErr := bridge.FindUserAuth(username)
 			checkPwErr := checkUserPassword(authData, password)
 			if firstErr := backend.FirstError(findUserErr, checkPwErr); firstErr != nil {
 				return nil, backend.WrapError("Could not validate user", backend.InvalidCredentialsErr(firstErr))
@@ -179,11 +179,11 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 					errors.New("User session is not a local auth needsPasswordResetAuthSession"))
 			}
 
-			if err := updateUserPassword(bridge, sess.UserKey, newPassword); err != nil {
+			if err := updateUserPassword(bridge, sess.Username, newPassword); err != nil {
 				return nil, backend.WrapError("Unable to reset user password", err)
 			}
 
-			authData, err := bridge.FindUserAuth(sess.UserKey)
+			authData, err := bridge.FindUserAuth(sess.Username)
 			if err != nil {
 				return nil, backend.WrapError("Unable to reset user password", err)
 			}
@@ -207,7 +207,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 					errors.New("User session does not require needsTotpAuthSession"))
 			}
 
-			authData, err := bridge.FindUserAuth(sess.UserKey)
+			authData, err := bridge.FindUserAuth(sess.Username)
 
 			if authData.TOTPSecret == nil {
 				return nil, backend.HTTPErr(http.StatusUnauthorized,
@@ -230,14 +230,14 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 	remux.Route(r, "PUT", "/password", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			dr := remux.DissectJSONRequest(r)
-			userKey := dr.FromBody("userKey").Required().AsString()
+			username := dr.FromBody("username").Required().AsString()
 			oldPassword := dr.FromBody("oldPassword").Required().AsString()
 			newPassword := dr.FromBody("newPassword").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
 			}
 
-			authData, findUserErr := bridge.FindUserAuth(userKey)
+			authData, findUserErr := bridge.FindUserAuth(username)
 			checkPwErr := checkUserPassword(authData, oldPassword)
 			if firstErr := backend.FirstError(findUserErr, checkPwErr); firstErr != nil {
 				return nil, backend.WrapError("Unable to set new password", backend.InvalidPasswordErr(firstErr))
@@ -246,7 +246,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 				return nil, backend.InvalidPasswordErr(errors.New("Cannot reset password for a different user than is currently logged in"))
 			}
 
-			return nil, updateUserPassword(bridge, userKey, newPassword)
+			return nil, updateUserPassword(bridge, username, newPassword)
 		}).ServeHTTP(w, r)
 	}))
 
@@ -263,7 +263,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			return nil, dr.Error
 		}
 
-		// TODO admin reset should be providing userKey instead of userSlug and this method should be deleted from auth bridge:
+		// TODO admin reset should be providing username instead of userSlug and this method should be deleted from auth bridge:
 		userAuths, err := bridge.FindUserAuthsByUserSlug(userSlug)
 		if err != nil {
 			return nil, err
@@ -273,7 +273,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 		}
 		userAuth := userAuths[0]
 
-		_, err = bridge.FindUserAuth(userAuth.UserKey)
+		_, err = bridge.FindUserAuth(userAuth.Username)
 
 		if err != nil {
 			return nil, backend.NotFoundErr(fmt.Errorf("User %v does not have %v authentication", userSlug, p.Name()))
@@ -316,7 +316,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 		err = bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:            callingUserId,
-			UserKey:           username,
+			Username:          username,
 			EncryptedPassword: encryptedPassword,
 		})
 
@@ -338,7 +338,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 			return nil, err
 		}
 
-		return generateTOTP(userAuth.UserKey)
+		return generateTOTP(userAuth.Username)
 	}))
 
 	remux.Route(r, "POST", "/totp", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
@@ -386,7 +386,7 @@ func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuth
 
 func attemptFinishLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, authData authschemes.UserAuthData) error {
 	sess := readLocalSession(r, bridge)
-	sess.UserKey = authData.UserKey
+	sess.Username = authData.Username
 
 	if authData.TOTPSecret != nil {
 		if !sess.SessionValid || !sess.TOTPValidated {
@@ -412,8 +412,8 @@ func attemptFinishLogin(w http.ResponseWriter, r *http.Request, bridge authschem
 	return nil
 }
 
-func updateUserPassword(bridge authschemes.AShirtAuthBridge, userKey string, newPassword string) error {
-	authData, err := bridge.FindUserAuth(userKey)
+func updateUserPassword(bridge authschemes.AShirtAuthBridge, username string, newPassword string) error {
+	authData, err := bridge.FindUserAuth(username)
 	if err != nil {
 		return backend.WrapError("Unable to update password", err)
 	}
