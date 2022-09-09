@@ -236,7 +236,7 @@ func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, allowUserID int64
 	return false, err
 }
 
-func (ah AShirtAuthBridge) IsUsernameTakenForAuth(username string) (bool, error) {
+func (ah AShirtAuthBridge) IsUsernameTaken(username string, allowUserID int64) (bool, error) {
 	var userAuths []UserAuthData
 	err := ah.db.Select(&userAuths, sq.Select(
 		"user_id", "username", "encrypted_password",
@@ -244,8 +244,8 @@ func (ah AShirtAuthBridge) IsUsernameTakenForAuth(username string) (bool, error)
 		From("auth_scheme_data").
 		Where(sq.Eq{
 			"username":    username,
-			"auth_scheme": ah.authSchemeName,
-		}),
+		}).
+		Where(sq.NotEq{"user_id": allowUserID}),
 	)
 	if err != nil {
 		return false, backend.WrapError("Unable to retrieve user auth records", backend.DatabaseErr(err))
@@ -384,7 +384,7 @@ func (ah AShirtAuthBridge) ValidateRegistrationInfo(email, username string) erro
 		)
 	}
 
-	if taken, err := ah.IsUsernameTakenForAuth(username); err != nil {
+	if taken, err := ah.IsUsernameTaken(username, -1); err != nil {
 		return backend.DatabaseErr(err)
 	} else if taken {
 		return backend.BadInputErr(
@@ -402,8 +402,8 @@ func (ah AShirtAuthBridge) ValidateRegistrationInfo(email, username string) erro
 // Note: this will leak info back to the user, to help indicate how to correct their
 // registration data. This should be less of an issue generally, as the user should have an
 // idea of who else is using ashirt
-func (ah AShirtAuthBridge) ValidateLinkingInfo(username string) error {
-	if taken, err := ah.IsUsernameTakenForAuth(username); err != nil {
+func (ah AShirtAuthBridge) ValidateLinkingInfo(username string, allowUserID int64) error {
+	if taken, err := ah.IsUsernameTaken(username, allowUserID); err != nil {
 		return backend.DatabaseErr(err)
 	} else if taken {
 		return backend.BadInputErr(

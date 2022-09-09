@@ -196,7 +196,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				return nil, dr.Error
 			}
 
-			if err := bridge.ValidateLinkingInfo(info.Username); err != nil {
+			if err := bridge.ValidateLinkingInfo(info.Username, callingUserId); err != nil {
 				return nil, err
 			}
 
