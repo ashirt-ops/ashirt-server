@@ -38,7 +38,7 @@
     "typescript": "^4.8.2",
     "webpack": "5.74",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "webpack-dev-server": "^4.11.0"
   },
   "dependencies": {
     "@types/har-format": "^1.2.8",
