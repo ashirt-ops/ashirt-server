@@ -15,7 +15,7 @@ import Table from 'src/components/table'
 import UserChooser from 'src/components/user_chooser'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { User, UserRole, userRoleToLabel } from 'src/global_types'
+import { User, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
 import { getUserPermissions, setUserPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
@@ -69,15 +69,15 @@ const NewUserForm = (props: {
 }
 
 const PermissionTableRow = (props: {
-  disabled?: boolean,
   role: UserRole,
   user: User,
+  currentUser: UserOwnView | null,
+  isAdmin: boolean,
   requestReload: () => void
   updatePermissions: (role: UserRole) => Promise<void>
 }) => {
-  const currentUser = React.useContext(AuthContext).user
+  const currentUser = props.currentUser
   const isCurrentUser = currentUser ? currentUser.slug === props.user.slug : false
-  const isAdmin = currentUser ? currentUser.admin : false
 
   const removeWarningModal = useModal<{}>(modalProps => (
     <RemoveWarningModal {...modalProps} removeUser={async () => {
@@ -86,7 +86,7 @@ const PermissionTableRow = (props: {
     }} />
   ))
 
-  const disabled = props.disabled || (isCurrentUser && !isAdmin)
+  const disabled = !props.isAdmin || (isCurrentUser && !props.isAdmin)
 
   return (
     <>
@@ -147,6 +147,9 @@ const PermissionTable = (props: {
     return () => { props.offReload(wiredPermissions.reload) }
   })
 
+  const currentUser = React.useContext(AuthContext).user
+  const isAdmin = currentUser ? currentUser?.admin : false
+
   return (
     <>
       {wiredPermissions.render(data => {
@@ -162,6 +165,8 @@ const PermissionTable = (props: {
             <Table columns={columns}>
               {renderableData.map(({ user, role }) => (
                 <PermissionTableRow
+                  currentUser={currentUser}
+                  isAdmin={isAdmin}
                   key={user.slug}
                   requestReload={props.requestReload}
                   updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: user.slug, role: r })}
