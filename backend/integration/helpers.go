@@ -110,7 +110,7 @@ func (a *Tester) NewUser(slug string, firstName string, lastName string) *UserSe
 		"password":  "password",
 	}).Do().ExpectSuccess()
 	a.Post("/web/auth/local/login").AsUser(session).WithMarshaledJSONBody(map[string]interface{}{
-		"username":    slug,
+		"username": slug,
 		"password": "password",
 	}).Do().ExpectSuccess()
 
