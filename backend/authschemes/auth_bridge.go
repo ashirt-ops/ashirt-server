@@ -243,7 +243,7 @@ func (ah AShirtAuthBridge) IsUsernameTaken(username string, allowUserID int64) (
 		"must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data").
 		Where(sq.Eq{
-			"username":    username,
+			"username": username,
 		}).
 		Where(sq.NotEq{"user_id": allowUserID}),
 	)
