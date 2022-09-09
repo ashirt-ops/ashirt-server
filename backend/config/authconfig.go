@@ -13,7 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
-// AuthConfig provides configuration details, namespaced to
+// AuthConfig provides configuration details for all authentication services
 type AuthConfig struct {
 	Services    []string
 	AuthConfigs map[string]AuthInstanceConfig
