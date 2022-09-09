@@ -78,3 +78,21 @@ func TestFindMatch(t *testing.T) {
 	require.Nil(t, foundValue)
 	require.Equal(t, -1, index)
 }
+
+func TestFilter(t *testing.T) {
+	values := []int{1, 4, 9, 16, 25}
+	expectedValues := []int{1, 9, 25}
+
+	oddNumberFn := func(i int) bool {
+		return i%2 == 1
+	}
+	greaterThan100Fn := func(i int) bool {
+		return i > 100
+	}
+
+	actualResult := helpers.Filter(values, oddNumberFn)
+	require.Equal(t, expectedValues, actualResult)
+
+	actualResult = helpers.Filter(values, greaterThan100Fn)
+	require.Equal(t, []int{}, actualResult)
+}
