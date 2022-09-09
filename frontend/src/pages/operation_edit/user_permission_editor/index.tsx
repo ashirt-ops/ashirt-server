@@ -69,10 +69,10 @@ const NewUserForm = (props: {
 }
 
 const PermissionTableRow = (props: {
+  disabled?: boolean,
   role: UserRole,
   user: User,
   currentUser: UserOwnView | null,
-  isAdmin: boolean,
   requestReload: () => void
   updatePermissions: (role: UserRole) => Promise<void>
 }) => {
@@ -86,7 +86,7 @@ const PermissionTableRow = (props: {
     }} />
   ))
 
-  const disabled = !props.isAdmin || (isCurrentUser && !props.isAdmin)
+  const disabled = props.disabled 
 
   return (
     <>
@@ -166,7 +166,7 @@ const PermissionTable = (props: {
               {renderableData.map(({ user, role }) => (
                 <PermissionTableRow
                   currentUser={currentUser}
-                  isAdmin={isAdmin}
+                  disabled={!isAdmin}
                   key={user.slug}
                   requestReload={props.requestReload}
                   updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: user.slug, role: r })}
