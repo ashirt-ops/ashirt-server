@@ -101,7 +101,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"id":                 seed.Users[i].ID,
 				"auth_scheme":        localConsts.Code,
 				"auth_type":          localConsts.Code,
-				"user_key":           seed.Users[i].FirstName,
+				"username":           seed.Users[i].FirstName,
 				"user_id":            seed.Users[i].ID,
 				"encrypted_password": encryptedPassword, //the user's first name, lowercased
 				"created_at":         seed.Users[i].CreatedAt,

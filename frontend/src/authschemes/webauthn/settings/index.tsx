@@ -7,7 +7,7 @@ import SettingsSection from 'src/components/settings_section'
 import classnames from 'classnames/bind'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { renderModals, useModal, useWiredData } from 'src/helpers'
-import { beginAddKey, deleteUserKey, finishAddKey, listUserKeys } from '../services'
+import { beginAddKey, deleteWebauthnKey, finishAddKey, listWebauthnKeys } from '../services'
 import Table from 'src/components/table'
 import Button from 'src/components/button'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
@@ -17,7 +17,7 @@ import ChallengeModalForm from 'src/components/challenge_modal_form'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  userKey: string,
+  username: string,
   authFlags?: Array<string>
 }) => {
   const bus = BuildReloadBus()
@@ -33,14 +33,14 @@ const KeyList = (props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
 }) => {
-  const wiredKeys = useWiredData(listUserKeys)
+  const wiredKeys = useWiredData(listWebauthnKeys)
 
   React.useEffect(() => {
     props.onReload(wiredKeys.reload)
     return () => { props.offReload(wiredKeys.reload) }
   })
 
-  const deleteModal = useModal<{keyName: string}>(mProps => <DeleteKeyModal {...mProps}/>, wiredKeys.reload)
+  const deleteModal = useModal<{ keyName: string }>(mProps => <DeleteKeyModal {...mProps} />, wiredKeys.reload)
 
   return (<>
     {wiredKeys.render(data => {
@@ -52,7 +52,7 @@ const KeyList = (props: {
                 <tr key={key}>
                   <td>{key}</td>
                   <td><Button small danger onClick={() => {
-                    deleteModal.show({keyName: key})
+                    deleteModal.show({ keyName: key })
                   }}>Delete</Button></td>
                 </tr>
               )
@@ -87,7 +87,7 @@ const AddKeyModal = (props: {
 
   const formComponentProps = useForm({
     fields: [keyName],
-    handleSubmit: async() => {
+    handleSubmit: async () => {
       if (keyName.value === '') {
         return Promise.reject(new Error("Key name must be populated"))
       }
@@ -139,7 +139,7 @@ const DeleteKeyModal = (props: {
     warningText="Are you sure you want to delete this security key?"
     submitText="Delete"
     challengeText={props.keyName}
-    handleSubmit={() => deleteUserKey({ keyName: props.keyName })}
+    handleSubmit={() => deleteWebauthnKey({ keyName: props.keyName })}
     onRequestClose={props.onRequestClose}
   />
 )

@@ -17,7 +17,7 @@ export default (props: {
         key={authScheme.schemeCode}
         authSchemeDetails={authScheme.authDetails}
         authSchemeType={authScheme.schemeType}
-        userKey={authScheme.userKey}
+        username={authScheme.username}
       />
     ))}
   </>
@@ -26,10 +26,10 @@ export default (props: {
 const AuthSchemeSettings = (props: {
   authSchemeDetails?: SupportedAuthenticationScheme
   authSchemeType: string,
-  userKey: string,
+  username: string,
 }) => {
   const Settings = useAuthFrontendComponent(props.authSchemeType, 'Settings', props.authSchemeDetails)
   return (
-    <Settings userKey={props.userKey} authFlags={props.authSchemeDetails?.schemeFlags || []} />
+    <Settings username={props.username} authFlags={props.authSchemeDetails?.schemeFlags || []} />
   )
 }

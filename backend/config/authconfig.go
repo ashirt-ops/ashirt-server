@@ -13,7 +13,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
-// AuthConfig provides configuration details, namespaced to
+// AuthConfig provides configuration details for all authentication services
 type AuthConfig struct {
 	Services    []string
 	AuthConfigs map[string]AuthInstanceConfig
@@ -105,11 +105,11 @@ func (w WebauthnConfig) AuthenticatorUserVerificationPreference() protocol.UserV
 
 func (w WebauthnConfig) BuildAuthenticatorSelection() protocol.AuthenticatorSelection {
 	return protocol.AuthenticatorSelection{
-			RequireResidentKey:      w.AuthenticatorRequireResidentKey,
-			UserVerification:        w.AuthenticatorUserVerificationPreference(),
-			ResidentKey:             w.AuthenticatorResidentKeyPreference(),
-			AuthenticatorAttachment: w.AuthenticatorAttachmentPreference(),
-		}
+		RequireResidentKey:      w.AuthenticatorRequireResidentKey,
+		UserVerification:        w.AuthenticatorUserVerificationPreference(),
+		ResidentKey:             w.AuthenticatorResidentKeyPreference(),
+		AuthenticatorAttachment: w.AuthenticatorAttachmentPreference(),
+	}
 }
 
 func splitNoSpaces(s, delimiter string) []string {

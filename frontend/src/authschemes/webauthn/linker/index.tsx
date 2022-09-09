@@ -15,22 +15,23 @@ export default (props: {
   userData: UserOwnView
   authFlags?: Array<string>,
 }) => {
-  const email = useFormField<string>(props.userData.email)
+  const initialUsername = props.userData.authSchemes.find(s => s.schemeType == 'local')?.username
+  const username = useFormField<string>(initialUsername ?? "")
   const keyName = useFormField<string>('')
 
   const formComponentProps = useForm({
-    fields: [email, keyName],
+    fields: [username, keyName],
     onSuccess: () => props.onSuccess(),
     handleSubmit: async () => {
-      if (email.value === '') {
-        return Promise.reject(new Error("Email must be populated"))
+      if (username.value === '') {
+        return Promise.reject(new Error("Username must be populated"))
       }
       if (keyName.value === '') {
         return Promise.reject(new Error("Key name must be populated"))
       }
 
       const reg = await beginLink({
-        email: email.value,
+        username: username.value,
         keyName: keyName.value,
       })
       const credOptions = convertToCredentialCreationOptions(reg)
@@ -55,9 +56,11 @@ export default (props: {
     }
   })
 
+  const readonlyUsername = initialUsername !== undefined
+
   return (
     <Form submitText="Link Account" {...formComponentProps}>
-      <Input label="Email" {...email} readOnly />
+      <Input label="Username" {...username} readOnly={readonlyUsername} />
       <Input label="Key name" {...keyName} />
     </Form>
   )
