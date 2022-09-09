@@ -32,6 +32,7 @@ const Button = (props: ButtonStyle & {
   className?: string,
   disabled?: boolean,
   icon?: string,
+  afterIcon?: string,
   loading?: boolean,
   onClick?: (e: React.MouseEvent) => void,
   title?: string,
@@ -52,6 +53,7 @@ const Button = (props: ButtonStyle & {
       <div className={cx('children')}>
         {props.icon && <img src={props.icon} />}
         <span>{props.children}</span>
+        {props.afterIcon && <img src={props.afterIcon} />}
       </div>
     </button>
   )

@@ -6,7 +6,6 @@ package enhancementservices_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -22,7 +21,7 @@ import (
 func TestInvoke(t *testing.T) {
 	// variables to tweak the response/tests
 	lambdaName := "magic"
-	body := LambdaResponseData{}
+	body := enhancementservices.LambdaResponse{}
 	expectError := false
 
 	mockInput := RequestMock{
@@ -42,9 +41,13 @@ func TestInvoke(t *testing.T) {
 		OnSendRequest: func(req *http.Request, err error) (*http.Response, error) {
 			require.NoError(t, err)
 			w := httptest.NewRecorder()
-			w.WriteHeader(http.StatusAccepted)
-			bodyBytes, _ := json.Marshal(body)
-			w.Write(bodyBytes)
+			w.WriteHeader(http.StatusOK)
+			wrappedBody := enhancementservices.LambdaResponse{
+				StatusCode: 200,
+				Body:       body.Body,
+			}
+			wrappedBodyBytes, _ := json.Marshal(wrappedBody)
+			w.Write(wrappedBodyBytes)
 			return w.Result(), nil
 		},
 	}
@@ -65,10 +68,12 @@ func TestInvoke(t *testing.T) {
 		FunctionName: &lambdaName,
 		Payload:      bodyBytes,
 	})
-	strPayload := string(out.Payload)
-	fmt.Println(strPayload)
 	require.NoError(t, err)
-	require.Equal(t, []byte(expectedBody), out.Payload)
+	var outputMessage enhancementservices.LambdaResponse
+	err = json.Unmarshal(out.Payload, &outputMessage)
+	require.NoError(t, err)
+
+	require.Equal(t, expectedBody, outputMessage.Body)
 }
 
 func makeMockRequestHandler(mock RequestMock) enhancementservices.RequestFn {
@@ -110,8 +115,4 @@ type RequestData struct {
 	Body    []byte
 	Request *http.Request
 	Error   error
-}
-
-type LambdaResponseData struct {
-	Body string `json:"body"`
 }

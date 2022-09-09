@@ -46,6 +46,11 @@ type TestResp struct {
 	Message *string `json:"message"`
 }
 
+type LambdaResponse struct {
+	StatusCode int    `json:"statusCode"`
+	Body       string `json:"body"`
+}
+
 func errorTestResult(err error) ServiceTestResult {
 	return ServiceTestResult{
 		Error: err,

@@ -228,7 +228,7 @@ func ListEvidenceCreatorsForOperation(ctx context.Context, db *database.Connecti
 		Distinct().
 		From("operations").
 		LeftJoin("evidence ON operations.id = evidence.operation_id").
-		LeftJoin("users ON evidence.operator_id = users.id").
+		InnerJoin("users ON evidence.operator_id = users.id").
 		Where(sq.Eq{"operations.slug": i.OperationSlug}).
 		OrderBy("users.first_name ASC")
 

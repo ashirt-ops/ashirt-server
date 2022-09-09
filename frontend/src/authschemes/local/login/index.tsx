@@ -72,7 +72,7 @@ const Login = (props: {
   return (
     <div style={{ minWidth: 300 }}>
       <Form submitText="Login" {...registerProps} {...loginForm}>
-        <Input label="Username" {...usernameField} />
+        <Input label="Username" autoFocus {...usernameField} />
         <Input label="Password" type="password" {...passwordField} />
       </Form>
       <div className={cx('recover-container')}>
