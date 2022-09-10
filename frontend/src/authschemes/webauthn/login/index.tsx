@@ -32,6 +32,7 @@ const Login = (props: {
       const protoOptions = await beginLogin({ username: usernameField.value })
       const credOptions = convertToPublicKeyCredentialRequestOptions(protoOptions)
 
+      console.log("Webauthn > Login > Credential Option:", JSON.stringify(credOptions))
       const cred = await navigator.credentials.get({
         publicKey: credOptions
       })
@@ -40,6 +41,8 @@ const Login = (props: {
       }
       const pubKeyCred = cred as PublicKeyCredential
       const pubKeyResponse = pubKeyCred.response as AuthenticatorAssertionResponse
+
+      console.log("Webauthn > Login > clientJSON: ", (new TextDecoder("utf-8")).decode(pubKeyResponse.clientDataJSON) )
 
       await finishLogin({
         id: pubKeyCred.id,
@@ -109,6 +112,7 @@ const RegisterModal = (props: {
         keyName: keyNameField.value,
       })
       const credOptions = convertToCredentialCreationOptions(reg)
+      console.log("Webauthn > Register > Credential Option:", JSON.stringify(credOptions))
 
       const signed = await navigator.credentials.create(credOptions)
 
@@ -117,6 +121,8 @@ const RegisterModal = (props: {
       }
       const pubKeyCred = signed as PublicKeyCredential
       const pubKeyResponse = pubKeyCred.response as AuthenticatorAttestationResponse
+
+      console.log("Webauthn > Register > clientJSON: ", (new TextDecoder("utf-8")).decode(pubKeyResponse.clientDataJSON))
 
       await finishRegistration({
         type: 'public-key',
