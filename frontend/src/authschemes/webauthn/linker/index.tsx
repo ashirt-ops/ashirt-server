@@ -10,6 +10,8 @@ import { beginLink, finishLinking } from '../services'
 import { convertToCredentialCreationOptions, encodeAsB64 } from '../helpers'
 import { UserOwnView } from 'src/global_types'
 
+const alreadyExistsErrorText = "An account for this user already exists"
+
 export default (props: {
   onSuccess: () => void,
   userData: UserOwnView
@@ -18,6 +20,7 @@ export default (props: {
   const initialUsername = props.userData.authSchemes.find(s => s.schemeType == 'local')?.username
   const username = useFormField<string>(initialUsername ?? "")
   const keyName = useFormField<string>('')
+  const [allowUsernameOverride, setOverride] = React.useState(false)
 
   const formComponentProps = useForm({
     fields: [username, keyName],
@@ -30,10 +33,21 @@ export default (props: {
         return Promise.reject(new Error("Key name must be populated"))
       }
 
-      const reg = await beginLink({
-        username: username.value,
-        keyName: keyName.value,
-      })
+      let reg = null
+      try {
+        reg = await beginLink({
+          username: username.value,
+          keyName: keyName.value,
+        })
+      }
+      catch (err) {
+        if ((err as Error)?.message === alreadyExistsErrorText) {
+          setOverride(true)
+          throw new Error("This username is taken. Please try another one.")
+        }
+        throw err
+      }
+
       const credOptions = convertToCredentialCreationOptions(reg)
 
       const signed = await navigator.credentials.create(credOptions)
@@ -56,11 +70,15 @@ export default (props: {
     }
   })
 
-  const readonlyUsername = initialUsername !== undefined
+  // yes, this could be rewritten as !allowUsernameOverride && (initialUsername !== undefined)
+  // but the variable naming becomes weird, so using a different solution
+  const readonlyUsername = allowUsernameOverride ?
+    false :
+    (initialUsername !== undefined)
 
   return (
     <Form submitText="Link Account" {...formComponentProps}>
-      <Input label="Username" {...username} readOnly={readonlyUsername} />
+      <Input label="Username" {...username} disabled={readonlyUsername} />
       <Input label="Key name" {...keyName} />
     </Form>
   )
