@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 var (
@@ -208,4 +209,15 @@ func FirstError(errs ...error) error {
 // ErrorDeprecated
 func DeprecationWarning(message string) error {
 	return WrapError(message, ErrorDeprecated)
+}
+
+func WebauthnLoginError(err error, logMessage ...string) error {
+	var fullErr error
+	if len(logMessage) > 0 {
+		fullErr = WrapError(strings.Join(logMessage, " ; "), err)
+	} else {
+		fullErr = err
+	}
+
+	return HTTPErr(http.StatusUnauthorized, "Unable to login. Verify your email", fullErr)
 }

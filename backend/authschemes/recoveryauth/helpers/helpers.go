@@ -24,8 +24,8 @@ func GenerateRecoveryCodeForUser(db *database.Connection, userID int64) (string,
 	authKeyStr := hex.EncodeToString(authKey)
 
 	err := GenerateNewRecoveryRecord(db, authschemes.UserAuthData{
-		UserID:  userID,
-		UserKey: authKeyStr,
+		UserID:   userID,
+		Username: authKeyStr,
 	})
 
 	return authKeyStr, err

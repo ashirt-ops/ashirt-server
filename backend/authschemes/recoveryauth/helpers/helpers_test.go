@@ -25,7 +25,7 @@ func TestGenerateRecoveryCodeForUser(t *testing.T) {
 		"auth_scheme": recoveryConsts.Code,
 		"user_id":     targetUserID,
 	}))
-	require.Equal(t, code, recoveryAuthEntry.UserKey)
+	require.Equal(t, code, recoveryAuthEntry.Username)
 }
 
 func setupDb(t *testing.T) *database.Connection {

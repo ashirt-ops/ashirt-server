@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 package authschemes
@@ -6,6 +6,7 @@ package authschemes
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"net/http"
 	"time"
 
@@ -121,6 +122,10 @@ func (ah AShirtAuthBridge) GetUserIDFromSlug(userSlug string) (int64, error) {
 	return ah.db.RetrieveUserIDBySlug(userSlug)
 }
 
+func (ah AShirtAuthBridge) GetUserFromID(userID int64) (models.User, error) {
+	return ah.db.RetrieveUserByID(userID)
+}
+
 // DeleteSession removes a user's session. Useful in situtations where authentication fails,
 // and we want to treat the user as not-logged-in
 func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request) error {
@@ -130,23 +135,23 @@ func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request)
 // UserAuthData is a small structure capturing data relevant to a user for authentication purposes
 type UserAuthData struct {
 	UserID             int64   `db:"user_id"`
-	UserKey            string  `db:"user_key"`
+	Username           string  `db:"username"`
 	EncryptedPassword  []byte  `db:"encrypted_password"`
 	NeedsPasswordReset bool    `db:"must_reset_password"`
 	TOTPSecret         *string `db:"totp_secret"`
+	JSONData           *string `db:"json_data"`
 }
 
-// FindUserAuth retrieves the row (codified by UserAuthData) corresponding to the provided userKey(e.g. username, email, etc) and the
+// FindUserAuth retrieves the row (codified by UserAuthData) corresponding to the provided username and the
 // auth scheme name provided from the caller.
 //
 // Returns a fully populated UserAuthData object, or an error if no such row exists
-func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
+func (ah AShirtAuthBridge) FindUserAuth(username string) (UserAuthData, error) {
 	var authData UserAuthData
 
-	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
-		From("auth_scheme_data").
+	err := ah.db.Get(&authData, ah.buildFindUserAuthQuery().
 		Where(sq.Eq{
-			"user_key":    userKey,
+			"username":    username,
 			"auth_scheme": ah.authSchemeName,
 		}))
 	if err != nil {
@@ -156,7 +161,8 @@ func (ah AShirtAuthBridge) FindUserAuth(userKey string) (UserAuthData, error) {
 }
 
 // FindUserAuthByContext acts as a proxy to calling FindUserByUserID with the userID extracted from the provided context
-//  see FindUserAuthByUserID
+//
+//	see FindUserAuthByUserID
 func (ah AShirtAuthBridge) FindUserAuthByContext(ctx context.Context) (UserAuthData, error) {
 	return ah.FindUserAuthByUserID(middleware.UserID(ctx))
 }
@@ -167,8 +173,7 @@ func (ah AShirtAuthBridge) FindUserAuthByContext(ctx context.Context) (UserAuthD
 func (ah AShirtAuthBridge) FindUserAuthByUserID(userID int64) (UserAuthData, error) {
 	var authData UserAuthData
 
-	err := ah.db.Get(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
-		From("auth_scheme_data").
+	err := ah.db.Get(&authData, ah.buildFindUserAuthQuery().
 		Where(sq.Eq{
 			"user_id":     userID,
 			"auth_scheme": ah.authSchemeName,
@@ -182,18 +187,15 @@ func (ah AShirtAuthBridge) FindUserAuthByUserID(userID int64) (UserAuthData, err
 func (ah AShirtAuthBridge) findUserAuthsByUserEmail(email string, includeDeleted bool) ([]UserAuthData, error) {
 	var authData []UserAuthData
 
-	whereClause := sq.Eq{
-		"users.email": email,
-	}
+	whereClause := sq.Eq{"users.email": email}
 	if !includeDeleted {
 		whereClause["users.deleted_at"] = nil
 	}
 
-	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
-		From("auth_scheme_data").
+	query := ah.buildFindUserAuthQuery().
 		LeftJoin("users ON users.id = auth_scheme_data.user_id").
-		Where(whereClause))
-	if err != nil {
+		Where(whereClause)
+	if err := ah.db.Select(&authData, query); err != nil {
 		return []UserAuthData{}, backend.DatabaseErr(err)
 	}
 	return authData, nil
@@ -204,15 +206,13 @@ func (ah AShirtAuthBridge) findUserAuthsByUserEmail(email string, includeDeleted
 func (ah AShirtAuthBridge) FindUserByEmail(email string, includeDeleted bool) (models.User, error) {
 	var userRecord models.User
 
-	whereClause := sq.Eq{
-		"email": email,
-	}
+	whereClause := sq.Eq{"email": email}
 	if !includeDeleted {
 		whereClause["deleted_at"] = nil
 	}
-	err := ah.db.Get(&userRecord,
-		sq.Select("*").From("users").Where(whereClause))
-	if err != nil {
+
+	query := sq.Select("*").From("users").Where(whereClause)
+	if err := ah.db.Get(&userRecord, query); err != nil {
 		return models.User{}, backend.DatabaseErr(err)
 	}
 	return userRecord, nil
@@ -234,6 +234,23 @@ func (ah AShirtAuthBridge) CheckIfUserEmailTaken(email string, allowUserID int64
 		return false, nil
 	}
 	return false, err
+}
+
+func (ah AShirtAuthBridge) IsUsernameTaken(username string, allowUserID int64) (bool, error) {
+	var userAuths []UserAuthData
+	err := ah.db.Select(&userAuths, sq.Select(
+		"user_id", "username", "encrypted_password",
+		"must_reset_password", "totp_secret", "json_data").
+		From("auth_scheme_data").
+		Where(sq.Eq{
+			"username": username,
+		}).
+		Where(sq.NotEq{"user_id": allowUserID}),
+	)
+	if err != nil {
+		return false, backend.WrapError("Unable to retrieve user auth records", backend.DatabaseErr(err))
+	}
+	return len(userAuths) > 0, nil
 }
 
 // FindUserAuthsByUserEmail retrieves the rows (codified by UserAuthData) corresponding to the provided userEmail for NON-DELETED accounts.
@@ -260,8 +277,7 @@ func (ah AShirtAuthBridge) FindUserAuthsByUserEmailIncludeDeleted(email string) 
 func (ah AShirtAuthBridge) FindUserAuthsByUserSlug(slug string) ([]UserAuthData, error) {
 	var authData []UserAuthData
 
-	err := ah.db.Select(&authData, sq.Select("user_id", "user_key", "encrypted_password", "must_reset_password", "totp_secret").
-		From("auth_scheme_data").
+	err := ah.db.Select(&authData, ah.buildFindUserAuthQuery().
 		LeftJoin("users ON users.id = auth_scheme_data.user_id").
 		Where(sq.Eq{
 			"users.slug":  slug,
@@ -289,8 +305,9 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(data UserAuthData) error {
 			"encrypted_password":  data.EncryptedPassword,
 			"must_reset_password": data.NeedsPasswordReset,
 			"totp_secret":         data.TOTPSecret,
+			"json_data":           data.JSONData,
 		}).
-		Where(sq.Eq{"user_key": data.UserKey, "auth_scheme": ah.authSchemeName})
+		Where(sq.Eq{"username": data.Username, "auth_scheme": ah.authSchemeName})
 	err := ah.db.Update(ub)
 	if err != nil {
 		return backend.WrapError("Unable to update user authentication", backend.DatabaseErr(err))
@@ -299,22 +316,21 @@ func (ah AShirtAuthBridge) UpdateAuthForUser(data UserAuthData) error {
 }
 
 // OneTimeVerification looks for a matching record in the auth_scheme_data table with the following conditions:
-// user_key matches && created_at less than <expirationInMinutes> minutes
+// username matches && created_at less than <expirationInMinutes> minutes
 // If this record exists, then the record is deleted. If there is no error _either_ for the lookup
 // OR the deletion, then (userID for the user, nil) is returned. At this point, the user has been validated
 // and LoginUser can be called.
 //
 // If an error occurs, _either_ the record does not exist, or some database issue prevented deletion,
 // and in either event, the user cannot be approved. In this case (0, <error>) will be returned
-func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, userKey string, expirationInMinutes int64) (int64, error) {
-
+func (ah AShirtAuthBridge) OneTimeVerification(ctx context.Context, username string, expirationInMinutes int64) (int64, error) {
 	var userID int64
 	err := ah.db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&userID, sq.Select("user_id").From("auth_scheme_data").
-			Where(sq.Eq{"user_key": userKey}).                                                  // The recovery code exists...
+			Where(sq.Eq{"username": username}).                                                 // The recovery code exists...
 			Where("TIMESTAMPDIFF(minute, created_at, ?) < ?", time.Now(), expirationInMinutes)) // and the record hasn't expired
 
-		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"user_key": userKey}))
+		tx.Delete(sq.Delete("auth_scheme_data").Where(sq.Eq{"username": username}))
 	})
 	if err != nil {
 		return 0, backend.WrapError("Unable to validate one-time verification", err)
@@ -339,5 +355,62 @@ func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, userID int64, 
 	if err != nil {
 		return backend.WrapError("Unable to schedule email", backend.DatabaseErr(err))
 	}
+	return nil
+}
+
+// buildFindUserAuthQuery creates the basic select builder that is used to find user auth data.
+// This does not apply a where clause or any join clauses, and all columns are retrieved by their
+// normal column names (i.e. no aliasing is happening)
+func (ah AShirtAuthBridge) buildFindUserAuthQuery() sq.SelectBuilder {
+	return sq.Select(
+		"user_id", "username", "encrypted_password",
+		"must_reset_password", "totp_secret", "json_data").
+		From("auth_scheme_data")
+}
+
+// ValidateRegistrationInfo checks if the user is registering with an unused email and an
+// unused username (for the auth scheme). This is only intended for services that register
+// locally and do not need to access another service
+//
+// Note: this will leak info back to the user, to help indicate how to correct their
+// registration data. TODO: should we actually specify why they can't register?
+func (ah AShirtAuthBridge) ValidateRegistrationInfo(email, username string) error {
+	if taken, err := ah.CheckIfUserEmailTaken(email, -1, true); err != nil {
+		return backend.DatabaseErr(err)
+	} else if taken {
+		return backend.BadInputErr(
+			errors.New("user trying to register with taken email"),
+			"An account with this email already exists",
+		)
+	}
+
+	if taken, err := ah.IsUsernameTaken(username, -1); err != nil {
+		return backend.DatabaseErr(err)
+	} else if taken {
+		return backend.BadInputErr(
+			errors.New("user trying to register with taken username"),
+			"This username has been taken",
+		)
+	}
+
+	return nil
+}
+
+// ValidateLinkingInfo checks if the user is linking with an unused username (for the auth scheme).
+// This is only intended for services that register locally and do not need to access another service.
+//
+// Note: this will leak info back to the user, to help indicate how to correct their
+// registration data. This should be less of an issue generally, as the user should have an
+// idea of who else is using ashirt
+func (ah AShirtAuthBridge) ValidateLinkingInfo(username string, allowUserID int64) error {
+	if taken, err := ah.IsUsernameTaken(username, allowUserID); err != nil {
+		return backend.DatabaseErr(err)
+	} else if taken {
+		return backend.BadInputErr(
+			errors.New("error linking account: username taken"),
+			"An account for this user already exists",
+		)
+	}
+
 	return nil
 }

@@ -187,12 +187,12 @@ func (o OIDCAuth) handleCallback(w http.ResponseWriter, r *http.Request, bridge 
 		}
 
 		authData = authschemes.UserAuthData{
-			UserID:  userID,
-			UserKey: userProfile.Slug,
+			UserID:   userID,
+			Username: userProfile.Slug,
 		}
 		err = bridge.CreateNewAuthForUser(authData)
 		if err != nil {
-			return o.authFailure(w, r, backend.WrapError("Unable to create auth scheme for new "+authName+" user ["+authData.UserKey+"]", err), "/autherror/incomplete")
+			return o.authFailure(w, r, backend.WrapError("Unable to create auth scheme for new "+authName+" user ["+authData.Username+"]", err), "/autherror/incomplete")
 		}
 	}
 	if linkingAccount {
@@ -205,9 +205,9 @@ func (o OIDCAuth) handleCallback(w http.ResponseWriter, r *http.Request, bridge 
 	})
 	if err != nil {
 		if backend.IsErrorAccountDisabled(err) {
-			return o.authFailure(w, r, backend.WrapError("Unable to log in "+authName+" user ["+authData.UserKey+"]", err), "/autherror/disabled")
+			return o.authFailure(w, r, backend.WrapError("Unable to log in "+authName+" user ["+authData.Username+"]", err), "/autherror/disabled")
 		}
-		return o.authFailure(w, r, backend.WrapError("Unable to log in "+authName+" user ["+authData.UserKey+"]", err), "/autherror/incomplete")
+		return o.authFailure(w, r, backend.WrapError("Unable to log in "+authName+" user ["+authData.Username+"]", err), "/autherror/incomplete")
 	}
 	return o.authSuccess(w, r, linkingAccount)
 }

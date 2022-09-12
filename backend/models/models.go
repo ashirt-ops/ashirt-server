@@ -150,11 +150,12 @@ type AuthSchemeData struct {
 	AuthScheme string `db:"auth_scheme"`
 	// AuthType defines how the scheme should work. e.g. "oidc" or "local"
 	AuthType          string     `db:"auth_type"`
-	UserKey           string     `db:"user_key"`
+	Username          string     `db:"username"`
 	UserID            int64      `db:"user_id"`
 	EncryptedPassword []byte     `db:"encrypted_password"`
 	MustResetPassword bool       `db:"must_reset_password"`
 	TOTPSecret        *string    `db:"totp_secret"`
+	JSONData          *string    `db:"json_data"`
 	LastLogin         *time.Time `db:"last_login"`
 	CreatedAt         time.Time  `db:"created_at"`
 	UpdatedAt         *time.Time `db:"updated_at"`

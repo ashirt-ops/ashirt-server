@@ -1,17 +1,18 @@
 import req from 'src/services/data_sources/backend/request_helper'
 
-export async function login(email: string, password: string) {
-  await req('POST', '/auth/local/login', { email, password })
+export async function login(username: string, password: string) {
+  await req('POST', '/auth/local/login', { username, password })
 }
 
-export async function requestRecovery(email:string) {
-  await req('POST', '/auth/recovery/generateemail', {userEmail: email})
+export async function requestRecovery(email: string) {
+  await req('POST', '/auth/recovery/generateemail', { userEmail: email })
 }
 
 export async function register(i: {
   firstName: string,
   lastName: string,
   email: string,
+  username: string,
   password: string,
   confirmPassword: string,
 }) {
@@ -32,7 +33,7 @@ export async function userResetPassword(i: {
 }
 
 export async function userChangePassword(i: {
-  userKey: string,
+  username: string,
   oldPassword: string,
   newPassword: string,
   confirmPassword: string,
@@ -44,7 +45,7 @@ export async function userChangePassword(i: {
 }
 
 export async function linkLocalAccount(i: {
-  email: string
+  username: string
   password: string,
   confirmPassword: string
 }) {

@@ -30,7 +30,7 @@ func TestDeleteAuthScheme(t *testing.T) {
 			return map[string]interface{}{
 				"auth_scheme": recoveryScheme,
 				"auth_type":   recoveryScheme,
-				"user_key":    users[i].FirstName,
+				"username":    users[i].FirstName,
 				"user_id":     users[i].ID,
 			}
 		})
@@ -50,7 +50,7 @@ func TestDeleteAuthScheme(t *testing.T) {
 		_, err = db.Insert("auth_scheme_data", map[string]interface{}{
 			"auth_scheme": schemeName,
 			"auth_type":   schemeName,
-			"user_key":    normalUser.FirstName,
+			"username":    normalUser.FirstName,
 			"user_id":     normalUser.ID,
 		})
 		require.NoError(t, err)
@@ -177,7 +177,7 @@ func TestListAuthDetailsKeys(t *testing.T) {
 		// Add in an unsupported scheme
 		_, err = db.Insert("auth_scheme_data", map[string]interface{}{
 			"auth_scheme": darkMarkScheme.SchemeCode,
-			"user_key":    "Half-Blood Prince",
+			"username":    "Half-Blood Prince",
 			"user_id":     UserSnape.ID,
 			"auth_type":   darkMarkScheme.SchemeType,
 		})

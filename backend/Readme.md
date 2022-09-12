@@ -257,7 +257,7 @@ Each OIDC provider follows the same process:
 
 ##### Identity Provider - initated Login
 
-Technically, OIDC does not support IDP-initated login. The login request must coem from the source.
+Technically, OIDC does not support IDP-initated login. The login request must come from the source.
 However, some smart values can be provided to effectively provide an IDP-iniated login experience.
 
 If your service provides it, find the configuration for a "login URL" or "Initiate login URI". Then, provide the following value, dependent on your configuration:
@@ -309,6 +309,50 @@ This guide assume that your okta authentication (located in `AUTH_SERVICES` is c
    * `AUTH_OKTA_FAILURE_REDIRECT_URL_PREFIX` => `APP_FAILURE_REDIRECT_URL_PREFIX`
 5. Finally, the `AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD` has been renamed to `AUTH_OIDC_OKTA_PROFILE_SLUG_FIELD`. Simply rename the field and keep the existing value.
 
+#### WebAuthn
+
+WebAuthn is a W3C specification for performing authentication specifically using hardware devices, like Yubico and Feitian keys, or built-in security on iOS, Android, macOS, and windows (via Windows Hello). Technically, any FIDO 2 device should work. Particular browsers support different devices. A guide on which browsers support which features can be found [here](https://webauthn.me/browser-support).
+
+Webauthn supports many configuration options to allow you to be as demanding of your users as you'd like.
+
+##### Webauthn Configuration
+
+Like all auth schemes, webauthn is configured via environment variables. Technically, AShirt allows you to name your webauthn service, which changes how each of the environment variables gets named. However, as a pratical matter, there is no need for multiple webauthn services, so, it is assumed that all webauthn configurations will do the following:
+
+* Denote `webauthn` as a value under the `AUTH_SERVICES` environment variable
+* Start each environment variable with `AUTH_WEBAUTHN`
+
+You do not need to follow this advice, however, and can name things as you wish.
+
+| Name                                             | Required | Value/Type                                 | Meaning                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------ | -------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| APP_FRONTEND_INDEX_URL                           | Yes      | URL                                        | Indicates where the frontend lives. For development, this typically looks like `http://localhost:8080`. This is needed for Webauthn to validate the login/register challenges.                                                                                                                                                                                                         |
+| AUTH_WEBAUTHN_NAME                               | Yes      | "webauthn"                                 | Provides a name to the service. This is used behind the scenes                                                                                                                                                                                                                                                                                                                         |
+| AUTH_WEBAUTHN_DISPLAY_NAME                       | Yes      | "AShirt"                                   | This is sent as part of the webauthn registration/login.                                                                                                                                                                                                                                                                                                                               |
+| AUTH_WEBAUTHN_TIMEOUT                            | No       | Integer                                    | Time in seconds to wait for the user to validate. Defaults to 0 (forever)                                                                                                                                                                                                                                                                                                              |
+| AUTH_WEBAUTHN_DEBUG                              | No       | Boolean                                    | Sets Webauthn in debug mode, which allows for more logging                                                                                                                                                                                                                                                                                                                             |
+| AUTH_WEBAUTHN_AUTHENTICATOR_ATTACHMENT           | No       | "platform" or "cross-platform"             | Indicates which kind of devices to support. Platform is typically a built-in/non-removable device, while cross-platform can be moved between systems                                                                                                                                                                                                                                   |
+| AUTH_WEBAUTHN_AUTHENTICATOR_RESIDENT_KEY         | No       | "preferred" or "required" or "discouraged" | Indicates if the server will require or accept a server-side credential or a client-side credential. Discouraged indicates server-side is preferred, but client-side is acceptable. Preferred indicates the opposite -- client-side is preferred, but server-side is acceptable. Required indicates that only the client-side credentials will be tolerated. Defaults to "discouraged" |
+| AUTH_WEBAUTHN_AUTHENTICATOR_REQUIRE_RESIDENT_KEY | No       | Boolean                                    | Indicates if the authenticator needs to create-side-resident public key credential. True means that the authenticator must do this.                                                                                                                                                                                                                                                    |
+| AUTH_WEBAUTHN_AUTHENTICATOR_USER_VERIFICATION    | No       | "preferred" or "required" or "discouraged" | Indicates what level of authentication is required from the authenticator. Required indicates that the authenticator must validate. Preferred indicates that the authenticator should validate if possible. Discouraged indicates that the authenticator should not perform verification. Defaults to "preferred"                                                                      |
+
+While Webauthn provides a number of possible configurations, the minimum is actually pretty small:
+
+```yaml
+  APP_FRONTEND_INDEX_URL: "http://localhost:8080"
+  AUTH_SERVICES: webauthn
+  # Optionally, allow registration
+  # AUTH_SERVICES_ALLOW_REGISTRATION: webauthn
+  AUTH_WEBAUTHN_TYPE: webauthn
+  AUTH_WEBAUTHN_NAME: webauthn
+  AUTH_WEBAUTHN_DISPLAY_NAME: AShirt
+
+```
+
+##### Webauthn as a second factor for local login
+
+Currently, AShirt does not support Webauthn as a second factor for multi-factor local login. If you'd like to see this, please [leave an issue](https://github.com/theparanoids/ashirt-server/issues?q=is%3Aissue+is%3Aopen+webauthn) requesting this feature.
+
 #### Custom Authentication
 
 Adding your own authentication is a 3 step process:
@@ -317,7 +361,7 @@ Adding your own authentication is a 3 step process:
    1. This is the bulk of the work. There are two interface methods to implement:
       1. `Name`: Every authentication needs a distinct name. The specific name does not really matter, but should be distinct from other utilized authentication scheme names.
          1. Note: Although the name does not matter, custom authentications **must not** use `,` in their names, as this is important for querying in some cases.
-      2. `BindRoutes`: This provides a namespaced router that can be used to implement any routes needed to statisfy the authentication routine. In addition to the namespaced router a set of callback functions, called an AuthBridge, is provided to interact with the underlying system. Specifically, 3 functions have been provided to help provide access into the database: `CreateNewUser`, which attempts to instantiate a new _AShirt_ user into the database. `LoginUser`, which provides a mechanism for the backend to record a new session, and `FindUserAuthsByUserSlug`, which provides a mechanism to lookup existing users belonging to a specific identity provider (i.e. backing authscheme) and a user key (similar to a shortname or email, but specific to an authscheme).
+      2. `BindRoutes`: This provides a namespaced router that can be used to implement any routes needed to statisfy the authentication routine. In addition to the namespaced router a set of callback functions, called an AuthBridge, is provided to interact with the underlying system. Specifically, 3 functions have been provided to help provide access into the database: `CreateNewUser`, which attempts to instantiate a new _AShirt_ user into the database. `LoginUser`, which provides a mechanism for the backend to record a new session, and `FindUserAuthsByUserSlug`, which provides a mechanism to lookup existing users belonging to a specific identity provider (i.e. backing authscheme) and a username (similar to a shortname or email, but specific to an authscheme).
 2. The new authscheme needs to be "registered" so that the webserver will know to use it.
    1. Inside `bin/web.go`, create a new instance of the authscheme, then provide this as an argument to the `server.WebConfig` structure. Note that multiple authentication schemes can be present at once
 3. The frontend needs to be updated to provide a way to login via your new authentication scheme, which is outside the scope of this miniguide.
@@ -503,7 +547,7 @@ Unit tests should follow these guidelines:
 Note that this list may become out of date. Users with flags should be considered constant with respect to the below
 fields, and Harry, Ronald, Hermione, Seamus, Ginny and Neville should be considered constant for the below fields as well.
 
-| User                         | User key | Password   | Flags       | SS Permissions | CoS Permissions |
+| User                         | Username | Password   | Flags       | SS Permissions | CoS Permissions |
 | ---------------------------- | -------- | ---------- | ----------- | -------------- | --------------- |
 | Albus Dumbledore             | Albus    | `albus`    | Super Admin | Admin          | Admin           |
 | Harry Potter                 | Harry    | `harry`    |             | Admin          | Write           |

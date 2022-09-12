@@ -105,11 +105,12 @@ func (a *Tester) NewUser(slug string, firstName string, lastName string) *UserSe
 	a.Post("/web/auth/local/register").AsUser(session).WithMarshaledJSONBody(map[string]interface{}{
 		"firstName": firstName,
 		"lastName":  lastName,
+		"username":  slug,
 		"email":     strings.ToLower(slug) + "@example.com",
 		"password":  "password",
 	}).Do().ExpectSuccess()
 	a.Post("/web/auth/local/login").AsUser(session).WithMarshaledJSONBody(map[string]interface{}{
-		"email":    strings.ToLower(slug) + "@example.com",
+		"username": slug,
 		"password": "password",
 	}).Do().ExpectSuccess()
 

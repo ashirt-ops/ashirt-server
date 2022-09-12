@@ -116,8 +116,8 @@ func TestUserAuthCreationAndLookup(t *testing.T) {
 
 	userID := createDummyUser(t, bridge, "")
 	err := bridge.CreateNewAuthForUser(authschemes.UserAuthData{
-		UserID:  userID,
-		UserKey: "dummy-user-key",
+		UserID:   userID,
+		Username: "dummy-user-key",
 	})
 	require.NoError(t, err)
 
@@ -125,7 +125,7 @@ func TestUserAuthCreationAndLookup(t *testing.T) {
 		auth, err := bridge.FindUserAuth("dummy-user-key")
 		require.NoError(t, err)
 		require.Equal(t, userID, auth.UserID)
-		require.Equal(t, "dummy-user-key", auth.UserKey)
+		require.Equal(t, "dummy-user-key", auth.Username)
 	})
 
 	t.Run("Test FindUserAuthsByUserSlug", func(t *testing.T) {
@@ -133,12 +133,12 @@ func TestUserAuthCreationAndLookup(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, auths, 1)
 		require.Equal(t, userID, auths[0].UserID)
-		require.Equal(t, "dummy-user-key", auths[0].UserKey)
+		require.Equal(t, "dummy-user-key", auths[0].Username)
 	})
 
 	t.Run("Test UpdateAuthForUser", func(t *testing.T) {
 		authData := authschemes.UserAuthData{
-			UserKey:            "dummy-user-key",
+			Username:           "dummy-user-key",
 			EncryptedPassword:  []byte("encrypted-password"),
 			NeedsPasswordReset: true,
 		}
@@ -218,8 +218,8 @@ func TestFindUserAuthsByEmail(t *testing.T) {
 
 	userID := createDummyUser(t, bridge, "normal-user")
 	err := bridge.CreateNewAuthForUser(authschemes.UserAuthData{
-		UserID:  userID,
-		UserKey: "dummy-user-key",
+		UserID:   userID,
+		Username: "dummy-user-key",
 	})
 	require.NoError(t, err)
 

@@ -35,7 +35,7 @@ export default (props: {
       <Form submitText="Update Profile" {...profileForm}>
         <Input name="firstName" label="First Name" {...firstNameField} />
         <Input name="lastName" label="Last Name" {...lastNameField} />
-        <Input name="contactEmail" label="Contact Email" {...emailField} />
+        <Input type="email" name="contactEmail" label="Contact Email" {...emailField} />
       </Form>
     </SettingsSection>
   )

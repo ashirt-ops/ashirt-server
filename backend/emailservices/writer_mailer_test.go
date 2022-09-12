@@ -9,7 +9,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/logging"
 )
 
-func TestAddToQueue(t *testing.T) {
+func TestAddPlainEmailToQueue(t *testing.T) {
 	writer := bytes.NewBuffer(make([]byte, 0, 1024))
 	servicer := emailservices.MakeWriterMailer(writer, logging.NewNopLogger())
 	onCompletedCalled := false

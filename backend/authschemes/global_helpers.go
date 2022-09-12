@@ -17,11 +17,12 @@ func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName, authSc
 	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme":         authSchemeName,
 		"auth_type":           authSchemeType,
-		"user_key":            data.UserKey,
+		"username":            data.Username,
 		"user_id":             data.UserID,
 		"encrypted_password":  data.EncryptedPassword,
 		"totp_secret":         data.TOTPSecret,
 		"must_reset_password": data.NeedsPasswordReset,
+		"json_data":           data.JSONData,
 	})
 	if err != nil {
 		if database.IsAlreadyExistsError(err) {

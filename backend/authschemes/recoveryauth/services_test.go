@@ -69,14 +69,14 @@ func TestDeleteExpiredRecoveryCodes(t *testing.T) {
 	recoveryRecords := getRecoveryRecords(t, db)
 
 	require.Equal(t, 1, len(recoveryRecords))
-	require.Equal(t, recoveryRecords[0].UserKey, validKeyName)
+	require.Equal(t, recoveryRecords[0].Username, validKeyName)
 }
 
 func createDummyRecoveryRecord(t *testing.T, db *database.Connection, key string, userID int64, age time.Duration) {
 	_, err := db.Insert("auth_scheme_data", map[string]interface{}{
 		"auth_scheme": recoveryConsts.Code,
 		"auth_type":   recoveryConsts.Code,
-		"user_key":    key,
+		"username":    key,
 		"user_id":     userID,
 		"created_at":  time.Now().Add(-1 * age), // add negative time to emulate subtraction
 	})
