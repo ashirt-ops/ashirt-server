@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/smtp"
 	"net/textproto"
+	"strings"
 
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -22,6 +23,8 @@ const (
 	PlainType SMTPEmailAuthType = "plain"
 	// CRAMMD5Type  indicates the CRAM-MD5 SMTP authentication flow
 	CRAMMD5Type SMTPEmailAuthType = "crammd5"
+
+	blankLine = "\r\n"
 )
 
 // SMTPMailer is the struct that holds an email servicer that sends emails over SMTP
@@ -108,7 +111,7 @@ func buildEmailBodyPart(partWriter *multipart.Writer, content string, contentTyp
 	if err != nil {
 		return err
 	}
-	_, err = childWriter.Write([]byte(content))
+	_, err = childWriter.Write([]byte(strings.Join([]string{content, blankLine}, "")))
 	return err
 }
 
@@ -122,6 +125,7 @@ func buildEmailHeader(job EmailJob, boundary string) string {
 	subject := fmt.Sprintf("Subject: %v\r\n", job.Subject)
 	mimeVersion := "MIME-Version: 1.0\r\n"
 	contentType := fmt.Sprintf("Content-Type: multipart/alternative; boundary=%v\r\n", boundary)
+	blankLine := "\r\n"
 
-	return to + from + subject + mimeVersion + contentType
+	return to + from + subject + mimeVersion + contentType + blankLine
 }
