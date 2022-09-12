@@ -49,7 +49,6 @@ export default (props: {
       }
 
       const credOptions = convertToCredentialCreationOptions(reg)
-      console.log("Webauthn > Link > Credential Option:", JSON.stringify(credOptions))
 
       const signed = await navigator.credentials.create(credOptions)
 
@@ -58,8 +57,6 @@ export default (props: {
       }
       const pubKeyCred = signed as PublicKeyCredential
       const pubKeyResponse = pubKeyCred.response as AuthenticatorAttestationResponse
-
-      console.log("Webauthn > Link > clientJSON: ", (new TextDecoder("utf-8")).decode(pubKeyResponse.clientDataJSON))
 
       await finishLinking({
         type: 'public-key',

@@ -6,7 +6,6 @@ package webauthn
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -56,7 +55,6 @@ func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (WebAuthn, 
 	// TODO: I don't understand how to correctly set the RPOrigin. the code works *specifically* for
 	// localhost, but may fail for proper deployments. We might need to make this an env var.
 	if cfg.WebauthnConfig.RPOrigin != "" {
-		fmt.Println("------------> Using RPOrigin: ", cfg.WebauthnConfig.RPOrigin)
 		config.RPOrigin = cfg.WebauthnConfig.RPOrigin
 	} else if host == "localhost" {
 		config.RPOrigin = "http://" + host + ":" + port
