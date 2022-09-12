@@ -20,6 +20,7 @@ import { getUserPermissions, setUserPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { StandardPager } from 'src/components/paging'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 const RoleSelect = (props: {
@@ -77,6 +78,7 @@ const PermissionTableRow = (props: {
   updatePermissions: (role: UserRole) => Promise<void>
 }) => {
   const currentUser = props.currentUser
+  const isAdmin = currentUser ? currentUser?.admin : false
   const isCurrentUser = currentUser ? currentUser.slug === props.user.slug : false
 
   const removeWarningModal = useModal<{}>(modalProps => (
@@ -86,7 +88,7 @@ const PermissionTableRow = (props: {
     }} />
   ))
 
-  const disabled = props.disabled 
+  const disabled = props.disabled || (isCurrentUser && !isAdmin)
 
   return (
     <>
@@ -125,6 +127,9 @@ const RemoveWarningModal = (props: {
 }
 
 const PermissionTable = (props: {
+  currentUser: UserOwnView | null,
+  isAdmin: boolean,
+  setIsOperationAdmin: (isOperationAdmin: boolean) => void,
   operationSlug: string,
   requestReload: () => void
   onReload: (listener: () => void) => void
@@ -135,6 +140,10 @@ const PermissionTable = (props: {
 
   const filterField = useFormField("")
   const [currentPage, setCurrentPage] = React.useState(1)
+  const [isOperationAdmin, setLocalOperationAdmin] = React.useState(false)
+
+  const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
+  const normalizedSearchTerm = filterField.value.toLowerCase()
 
   const wiredPermissions = useWiredData(
     React.useCallback(() => getUserPermissions({ slug: props.operationSlug, name: "" }), [props.operationSlug]),
@@ -144,20 +153,26 @@ const PermissionTable = (props: {
 
   React.useEffect(() => {
     props.onReload(wiredPermissions.reload)
+    wiredPermissions.expose(data => {
+      const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
+      const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
+
+      setLocalOperationAdmin(renderableData.find(datum => datum.user.slug === props.currentUser?.slug)?.role === UserRole.ADMIN)
+      props.setIsOperationAdmin(isOperationAdmin) 
+    })
     return () => { props.offReload(wiredPermissions.reload) }
   })
-
-  const currentUser = React.useContext(AuthContext).user
-  const isAdmin = currentUser ? currentUser?.admin : false
 
   return (
     <>
       {wiredPermissions.render(data => {
-        const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
-        const normalizedSearchTerm = filterField.value.toLowerCase()
         const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
+        // const isOperationAdmin = renderableData.find(datum => datum.user.slug === props.currentUser?.slug)?.role === UserRole.ADMIN
+        // props.setIsOperationAdmin(isOperationAdmin)
+        const notAdmin = !props.isAdmin && !isOperationAdmin
+        
         return (
           <>
             <Input label="User Filter" {...filterField} />
@@ -165,8 +180,8 @@ const PermissionTable = (props: {
             <Table columns={columns}>
               {renderableData.map(({ user, role }) => (
                 <PermissionTableRow
-                  currentUser={currentUser}
-                  disabled={!isAdmin}
+                  currentUser={props.currentUser}
+                  disabled={notAdmin}
                   key={user.slug}
                   requestReload={props.requestReload}
                   updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: user.slug, role: r })}
@@ -188,21 +203,36 @@ const PermissionTable = (props: {
   )
 }
 
+const editor = (props: {
+  operationSlug: string,
+}) => {
+    const bus = BuildReloadBus()
+
+   const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
+   const currentUser = React.useContext(AuthContext).user
+   const isSysAdmin = currentUser ? currentUser?.admin : false
+   const isAdmin = isSysAdmin || isOperationAdmin
+ 
+   return (
+     <SettingsSection title="Operation Users" width="wide">
+       {isAdmin && (<NewUserForm
+         {...bus}
+         operationSlug={props.operationSlug}
+       />)}
+       <PermissionTable
+         currentUser={currentUser}
+         isAdmin={isAdmin}
+         setIsOperationAdmin={setIsOperationAdmin}
+         operationSlug={props.operationSlug}
+         {...bus}
+       />
+     </SettingsSection>
+   )
+}
+
+
 export default (props: {
   operationSlug: string,
 }) => {
-  const bus = BuildReloadBus()
-
-  return (
-    <SettingsSection title="Operation Users" width="wide">
-      <NewUserForm
-        {...bus}
-        operationSlug={props.operationSlug}
-      />
-      <PermissionTable
-        operationSlug={props.operationSlug}
-        {...bus}
-      />
-    </SettingsSection>
-  )
+  return editor({ operationSlug: props.operationSlug})
 }

@@ -65,10 +65,12 @@ import { PaginationResult } from 'src/global_types'
 // without sending many intermediate requests
 
 type Renderer<T> = (data: T) => React.ReactElement
+type Exposer<T> = (data: T) => void
 export type WiredData<T> = {
   loading: boolean,
   reload: () => void,
   render: (renderer: Renderer<T>) => React.ReactElement
+  expose: (exposer: Exposer<T>) => void
 }
 
 export type PaginatedWiredData<T> = WiredData<Array<T>> & {
@@ -134,6 +136,10 @@ export function useWiredData<T>(
       if (loading || data == null) return loadingRenderer()
       return renderer(data.value)
     },
+    expose(exposer: Exposer<T>) {
+      if (data == null) return null
+      return exposer(data.value)
+    }
   }
 }
 
