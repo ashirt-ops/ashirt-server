@@ -169,8 +169,6 @@ const PermissionTable = (props: {
         const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
-        // const isOperationAdmin = renderableData.find(datum => datum.user.slug === props.currentUser?.slug)?.role === UserRole.ADMIN
-        // props.setIsOperationAdmin(isOperationAdmin)
         const notAdmin = !props.isAdmin && !isOperationAdmin
         
         return (
