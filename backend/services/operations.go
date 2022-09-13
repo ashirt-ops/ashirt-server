@@ -217,7 +217,15 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	err = db.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
 		Where(sq.Eq{"operation_id": operation.ID}))
 	if err != nil {
-		return nil, backend.WrapError("Cannot read operation", backend.DatabaseErr(err))
+		return nil, backend.WrapError("Cannot read count operation", backend.DatabaseErr(err))
+	}
+
+	var Favorite bool
+	err = db.Get(&Favorite, sq.Select("is_favorite").
+		From("user_operation_permissions").
+		Where(sq.Eq{"user_id": middleware.UserID(ctx), "operation_id": operation.ID}))
+	if err != nil {
+		return nil, backend.WrapError("Cannot read favorite operation", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Operation{
@@ -225,6 +233,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		Name:     operation.Name,
 		Status:   operation.Status,
 		NumUsers: numUsers,
+		Favorite: &Favorite,
 	}, nil
 }
 

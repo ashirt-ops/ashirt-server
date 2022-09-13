@@ -19,7 +19,7 @@ export default (props: {
   status: OperationStatus,
   favorite?: boolean,
 }) => {
-  const [isFavorite, setIsFavoriteState] = React.useState(props.favorite || false)
+  const [isFavorite, setIsFavorite] = React.useState(props.favorite || false)
 
   React.useEffect(() => {
     setFavorite(props.slug, isFavorite)
@@ -33,7 +33,7 @@ export default (props: {
       <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
       <Button 
         className={isFavorite ? cx('favorite'): cx('not-favorite')}
-        onClick={() => setIsFavoriteState(!isFavorite)}>
+        onClick={() => setIsFavorite(!isFavorite)}>
       </Button>
     </Card>
     )
