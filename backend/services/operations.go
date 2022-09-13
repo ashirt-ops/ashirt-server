@@ -332,7 +332,7 @@ func SetFavoriteOperation(ctx context.Context, db *database.Connection, i SetFav
 		SetMap(map[string]interface{}{
 			"is_favorite": i.IsFavorite,
 		}).
-		Where(sq.Eq{"operation_id": operation.ID}))
+		Where(sq.Eq{"operation_id": operation.ID, "user_id": middleware.UserID(ctx)}))
 	if err != nil {
 		return backend.WrapError("Cannot set operation as favorite", backend.DatabaseErr(err))
 	}
