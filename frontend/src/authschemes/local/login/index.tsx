@@ -1,13 +1,12 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
-import { NavLinkButton } from 'src/components/button'
 import classnames from 'classnames/bind'
-import { login, register, requestRecovery, userResetPassword, totpLogin } from '../services'
+import { login, register, userResetPassword, totpLogin } from '../services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, OnRequestClose } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
@@ -43,8 +42,6 @@ export default (props: {
   switch (props.query.get('step')) {
     case 'reset': return <ResetPassword />
     case 'totp': return <EnterTotp />
-    case 'recovery': return <RecoverUserAccount />
-    case 'recovery-sent': return <AccountRecoveryStarted />
     default: return <Login authFlags={props.authFlags} />
   }
 }
@@ -75,9 +72,6 @@ const Login = (props: {
         <Input label="Username" autoFocus {...usernameField} />
         <Input label="Password" type="password" {...passwordField} />
       </Form>
-      <div className={cx('recover-container')}>
-        <a className={cx('recover-link')} href="/login/local?step=recovery" title="Account Recovery">Forgot your password?</a>
-      </div>
       {renderModals(registerModal)}
     </div>
   )
@@ -172,37 +166,3 @@ const EnterTotp = (props: {}) => {
     </Form>
   </>)
 }
-
-const RecoverUserAccount = (props: {}) => {
-  const emailField = useFormField('')
-
-  const emailForm = useForm({
-    fields: [emailField],
-    handleSubmit: () => {
-      if (emailField.value.trim() == '') {
-        return Promise.reject(Error("Please supply a valid email address"))
-      }
-      return requestRecovery(emailField.value).then(() => window.location.href = '/login/local?step=recovery-sent')
-    }
-  })
-
-  return (<>
-    <h2 className={cx('title')}>Find Your Account</h2>
-    <Form submitText="Submit" {...emailForm}>
-      <Input label="Contact Email" {...emailField} />
-    </Form>
-  </>)
-}
-
-const AccountRecoveryStarted = (props: {
-
-}) => (
-  <div>
-    <div className={cx('messagebox')}>
-      You should receive an email shortly with a recovery link.
-    </div>
-    <NavLinkButton primary className={cx('centered-button')} to={'/login'}>
-      Return to Login
-    </NavLinkButton>
-  </div>
-)
