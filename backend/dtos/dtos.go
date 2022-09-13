@@ -52,6 +52,7 @@ type Operation struct {
 	Name     string                 `json:"name"`
 	NumUsers int                    `json:"numUsers"`
 	Status   models.OperationStatus `json:"status"`
+	Favorite *bool                  `json:"favorite"`
 }
 
 type Query struct {

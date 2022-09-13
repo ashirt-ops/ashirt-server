@@ -177,9 +177,26 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 		return nil, err
 	}
 
+	var operationPreference []models.UserOperationPermission
+
+	err = db.Select(&operationPreference, sq.Select("operation_id", "is_favorite").
+		From("user_operation_permissions").
+		Where(sq.Eq{"user_id": middleware.UserID(ctx)}))
+
+	if err != nil {
+		return nil, backend.WrapError("Cannot get users", backend.DatabaseErr(err))
+	}
+
+	operationPreferenceMap := make(map[int64]bool)
+	for _, op := range operationPreference {
+		operationPreferenceMap[op.OperationID] = op.IsFavorite
+	}
+
 	operationsDTO := make([]*dtos.Operation, 0, len(operations))
 	for _, operation := range operations {
 		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
+			fave, _ := operationPreferenceMap[operation.ID]
+			operation.Op.Favorite = &fave
 			operationsDTO = append(operationsDTO, operation.Op)
 		}
 	}
@@ -285,6 +302,33 @@ func listAllOperations(db *database.Connection) ([]operationListItem, error) {
 		})
 	}
 	return operationsDTO, nil
+}
+
+type SetFavoriteInput struct {
+	OperationSlug string
+	IsFavorite    bool
+}
+
+func SetFavoriteOperation(ctx context.Context, db *database.Connection, i SetFavoriteInput) error {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return backend.WrapError("Unable to read operation", backend.UnauthorizedReadErr(err))
+	}
+
+	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unwilling to read operatoin", backend.UnauthorizedReadErr(err))
+	}
+
+	err = db.Update(sq.Update("user_operation_permissions").
+		SetMap(map[string]interface{}{
+			"is_favorite": i.IsFavorite,
+		}).
+		Where(sq.Eq{"operation_id": operation.ID}))
+	if err != nil {
+		return backend.WrapError("Cannot set operation as favorite", backend.DatabaseErr(err))
+	}
+
+	return nil
 }
 
 var disallowedCharactersRegex = regexp.MustCompile(`[^A-Za-z0-9]+`)

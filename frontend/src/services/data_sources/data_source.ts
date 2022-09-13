@@ -84,6 +84,7 @@ export interface DataSource {
   listUserPermissions(ids: OpSlug, query: { name?: string }): Promise<Array<dtos.UserOperationRole>>
   updateUserPermissions(ids: OpSlug, payload: { userSlug: string, role: types.UserRole }): Promise<void>
   deleteOperation(ids: OpSlug): Promise<void>
+  setFavorite(ids: OpSlug, payload: { favorite: boolean }): Promise<void>
 
   listUsers(query: string, includeDeleted: boolean): Promise<Array<dtos.User>>
   readUser(ids: UserSlug): Promise<dtos.UserOwnView>

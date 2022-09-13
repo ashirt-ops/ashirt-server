@@ -55,6 +55,7 @@ export const backendDataSource: DataSource = {
   listUserPermissions: (ids, query) => req('GET', `/operations/${ids.operationSlug}/users`, null, query),
   updateUserPermissions: (ids, payload) => req('PATCH', `/operations/${ids.operationSlug}/users`, payload),
   deleteOperation: (ids) => req('DELETE', `/operations/${ids.operationSlug}`),
+  setFavorite: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/favorite`, payload),
 
   listUsers: (query, includeDeleted) => req('GET', '/users', null, { query, includeDeleted }),
   readUser: ids => req('GET', `/user`, null, ids),

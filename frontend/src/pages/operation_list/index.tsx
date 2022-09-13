@@ -44,16 +44,23 @@ export default () => {
           {
             ops
               .filter(op => normalizedInclude(op.name, filterText.value))
-              .map(op => (
+              .sort((a, b) => {
+                const aFav = a.favorite || false
+                const bFav = b.favorite || false
+                return aFav > bFav ? -1 : 1
+              })
+              .map(op => {
+                return (
                 <OperationCard
                   slug={op.slug}
                   status={op.status}
                   numUsers={op.numUsers}
                   key={op.slug}
                   name={op.name}
+                  favorite={op.favorite}
                   className={cx('card')}
                 />
-              ))
+              )})
           }
           <NewOperationButton onClick={() => newOperationModal.show({})} />
         </div>
