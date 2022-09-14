@@ -4,10 +4,6 @@ export async function login(username: string, password: string) {
   await req('POST', '/auth/local/login', { username, password })
 }
 
-export async function requestRecovery(email: string) {
-  await req('POST', '/auth/recovery/generateemail', { userEmail: email })
-}
-
 export async function register(i: {
   firstName: string,
   lastName: string,

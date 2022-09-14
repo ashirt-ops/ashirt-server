@@ -5,6 +5,8 @@ import * as React from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
 import { useAuthFrontendComponent } from 'src/authschemes'
+import Recovery from 'src/authschemes/recovery'
+import { RecoverySchemeName } from 'src/authschemes/recovery/constants'
 import Button from 'src/components/button'
 import { SupportedAuthenticationScheme } from 'src/global_types'
 import { useWiredData } from 'src/helpers'
@@ -41,10 +43,20 @@ export default () => {
 
     return (
       <div className={cx('login')}>
-        {oneScheme
-          ? <AuthSchemeLogin key={oneScheme.schemeCode} authScheme={oneScheme} query={query} />
-          : <LoginMenu authSchemes={supportedAuthSchemes} query={query} />
+        {(renderOnlyScheme === RecoverySchemeName)
+          ? <Recovery query={query} />
+          : (<>
+            {
+              oneScheme
+                ? <AuthSchemeLogin key={oneScheme.schemeCode} authScheme={oneScheme} query={query} />
+                : <LoginMenu authSchemes={supportedAuthSchemes} query={query} />
+            }
+            <div className={cx('recover-container')}>
+              <a className={cx('recover-link')} href="/login/recover" title="Account Recovery">Forgot how to log in?</a>
+            </div>
+          </>)
         }
+
       </div>
     )
   })
