@@ -125,6 +125,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"role":         seed.UserOpMap[i].Role,
 				"created_at":   seed.UserOpMap[i].CreatedAt,
 				"updated_at":   seed.UserOpMap[i].UpdatedAt,
+				"is_favorite":  seed.UserOpMap[i].IsFavorite,
 			}
 		})
 		tx.BatchInsert("default_tags", len(seed.DefaultTags), func(i int) map[string]interface{} {

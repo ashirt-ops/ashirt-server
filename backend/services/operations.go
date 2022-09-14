@@ -184,7 +184,7 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 		Where(sq.Eq{"user_id": middleware.UserID(ctx)}))
 
 	if err != nil {
-		return nil, backend.WrapError("Cannot get users", backend.DatabaseErr(err))
+		return nil, backend.WrapError("Cannot get user operation permissions", backend.DatabaseErr(err))
 	}
 
 	operationPreferenceMap := make(map[int64]bool)
@@ -210,20 +210,21 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	}
 
 	if err := policyRequireWithAdminBypass(ctx, policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.WrapError("Unwilling to read operatoin", backend.UnauthorizedReadErr(err))
+		return nil, backend.WrapError("Unwilling to read operation", backend.UnauthorizedReadErr(err))
 	}
 
 	var numUsers int
-	err = db.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
-		Where(sq.Eq{"operation_id": operation.ID}))
-	if err != nil {
-		return nil, backend.WrapError("Cannot read count operation", backend.DatabaseErr(err))
-	}
+	var favorite bool
 
-	var Favorite bool
-	err = db.Get(&Favorite, sq.Select("is_favorite").
-		From("user_operation_permissions").
-		Where(sq.Eq{"user_id": middleware.UserID(ctx), "operation_id": operation.ID}))
+	err = db.WithTx(ctx, func(tx *database.Transactable) {
+		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
+			Where(sq.Eq{"operation_id": operation.ID}))
+
+		tx.Get(&favorite, sq.Select("is_favorite").
+			From("user_operation_permissions").
+			Where(sq.Eq{"user_id": middleware.UserID(ctx), "operation_id": operation.ID}))
+	})
+
 	if err != nil {
 		return nil, backend.WrapError("Cannot read favorite operation", backend.DatabaseErr(err))
 	}
@@ -233,7 +234,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		Name:     operation.Name,
 		Status:   operation.Status,
 		NumUsers: numUsers,
-		Favorite: &Favorite,
+		Favorite: &favorite,
 	}, nil
 }
 

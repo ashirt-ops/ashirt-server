@@ -57,7 +57,7 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserHermione, OpSorcerersStone, policy.OperationRoleRead),
 		newUserOpPermission(UserNeville, OpSorcerersStone, policy.OperationRoleWrite),
 
-		newUserOpPermission(UserRon, OpChamberOfSecrets, policy.OperationRoleAdmin),
+		newUserOpPermission(UserRon, OpChamberOfSecrets, policy.OperationRoleAdmin, true),
 		newUserOpPermission(UserHarry, OpChamberOfSecrets, policy.OperationRoleWrite),
 		newUserOpPermission(UserHermione, OpChamberOfSecrets, policy.OperationRoleWrite),
 		newUserOpPermission(UserSeamus, OpChamberOfSecrets, policy.OperationRoleRead),
@@ -88,9 +88,9 @@ var HarryPotterSeedData = Seeder{
 
 		newUserOpPermission(UserDumbledore, OpSorcerersStone, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
-		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin),
+		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin, true),
 
-		newUserOpPermission(UserDumbledore, OpGanttChart, policy.OperationRoleAdmin),
+		newUserOpPermission(UserDumbledore, OpGanttChart, policy.OperationRoleAdmin, true),
 		newUserOpPermission(UserHarry, OpGanttChart, policy.OperationRoleWrite),
 		newUserOpPermission(UserGinny, OpGanttChart, policy.OperationRoleRead),
 	},

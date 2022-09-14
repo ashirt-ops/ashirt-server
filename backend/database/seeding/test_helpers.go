@@ -464,6 +464,37 @@ func GetUsersWithRoleForOperationByOperationID(t *testing.T, db *database.Connec
 	return allUserOpRoles
 }
 
+type PermissionsOperations struct {
+	models.UserOperationPermission
+	Slug string `db:"slug"`
+}
+
+func GetFavoritesByUserID(t *testing.T, db *database.Connection, id int64) []PermissionsOperations {
+	var permissionsOperations []PermissionsOperations
+	err := db.Select(&permissionsOperations, sq.Select("user_operation_permissions.*", "operations.slug").
+		From("user_operation_permissions").
+		Join("operations on user_operation_permissions.operation_id = operations.id").
+		Where(sq.Eq{"user_id": id, "is_favorite": true}))
+	require.NoError(t, err)
+	return permissionsOperations
+}
+
+func GetFavoriteForOperation(t *testing.T, db *database.Connection, slug string, id int64) bool {
+	var operationID int64
+	err := db.Get(&operationID, sq.Select("id").
+		From("operations").
+		Where(sq.Eq{"slug": slug}))
+	require.NoError(t, err)
+
+	var isFavorite bool
+	err = db.Get(&isFavorite, sq.Select("is_favorite").
+		From("user_operation_permissions").
+		Where(sq.Eq{"operation_id": operationID, "user_id": id}))
+	require.NoError(t, err)
+
+	return isFavorite
+}
+
 type TestOptions struct {
 	DatabasePath *string
 	DatabaseName *string
