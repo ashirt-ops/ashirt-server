@@ -10,7 +10,7 @@ import { subDays, startOfMonth, endOfMonth } from 'date-fns'
 import Button from 'src/components/button'
 import Popover from 'src/components/popover'
 
-import { 
+import {
   DateRange,
   MaybeDateRange,
   stringifyRange,

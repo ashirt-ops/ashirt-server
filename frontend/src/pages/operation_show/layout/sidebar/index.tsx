@@ -34,7 +34,7 @@ export default (props: {
 
   React.useEffect(() => {
     setFavorite(operation.slug, isFavorite)
-  }, [isFavorite])
+  }, [operation.slug, isFavorite])
 
   return (
     <div className={cx('root')}>
@@ -42,7 +42,7 @@ export default (props: {
         <h1 title={operation.name}>{operation.name}</h1>
         <Link className={cx('edit')} to={`/operations/${operation.slug}/edit`} title="Edit this operation" />
         <Link className={cx('overview')} to={`/operations/${operation.slug}/overview`} title="View evidence overview" />
-        <Button 
+        <Button
           className={isFavorite ? cx('favorite'): cx('not-favorite')}
           onClick={() => setIsFavorite(!isFavorite)}>
         </Button>

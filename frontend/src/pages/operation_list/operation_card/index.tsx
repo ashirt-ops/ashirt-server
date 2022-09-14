@@ -23,7 +23,7 @@ export default (props: {
 
   React.useEffect(() => {
     setFavorite(props.slug, isFavorite)
-  }, [isFavorite])
+  }, [isFavorite, props.slug])
 
   return (
     <Card className={cx('root', props.className)}>
@@ -31,7 +31,7 @@ export default (props: {
       <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} />
       <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
       <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
-      <Button 
+      <Button
         className={isFavorite ? cx('favorite'): cx('not-favorite')}
         onClick={() => setIsFavorite(!isFavorite)}>
       </Button>

@@ -231,7 +231,7 @@ const HelpText: Array<FilterDetail> = [
         <p>
           Filters the result by requiring that some metadata contains the provided value. Multiple
           values can be specified. When multiples are specified, the metadata must contain <em>all</em>{" "}
-          of the values. 
+          of the values.
         </p>
       </>
   },
