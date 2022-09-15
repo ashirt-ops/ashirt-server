@@ -7,11 +7,11 @@ import { escapeRegExp } from 'lodash'
 /**
  * highlightSubstring breaks a given string into words that match the given regex, joined with
  * the rest of the string. This should preserve case.
- * 
+ *
  * Note: this probably isn't close to the speediest solution. Use caution (and minLength option) when
  * using this with a large piece of text.
- * 
- * @example 
+ *
+ * @example
  * const result = highlightSubstring("The quick brown fox jumps over the lazy dog.", /the/gi, "highlight")
  * assert( result, [
  *   <span className="highlight">The</span>,
@@ -19,7 +19,7 @@ import { escapeRegExp } from 'lodash'
  *   <span className="highlight">the</span>,
  *   <span> lazy dog.</span>,
  * ])
- * 
+ *
  * @param s The string with a substring to highlight
  * @param regex What part of the string to match. Must be a global match (/.../g)
  * @param className What class name to apply to the highlighted word
