@@ -229,17 +229,12 @@ func newFindingGen(first int64) func(opID int64, uuid string, category *int64, t
 }
 
 func newUserOpPermission(user models.User, op models.Operation, role policy.OperationRole, favorite ...bool) models.UserOperationPermission {
-	isFavorite := false
-	if len(favorite) > 0 {
-		isFavorite = true
-	}
-
 	return models.UserOperationPermission{
 		UserID:      user.ID,
 		OperationID: op.ID,
 		Role:        role,
 		CreatedAt:   internalClock.Now(),
-		IsFavorite:  isFavorite,
+		IsFavorite:  len(favorite) > 0,
 	}
 }
 

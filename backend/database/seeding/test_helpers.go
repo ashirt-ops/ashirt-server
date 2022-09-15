@@ -480,16 +480,11 @@ func GetFavoritesByUserID(t *testing.T, db *database.Connection, id int64) []Per
 }
 
 func GetFavoriteForOperation(t *testing.T, db *database.Connection, slug string, id int64) bool {
-	var operationID int64
-	err := db.Get(&operationID, sq.Select("id").
-		From("operations").
-		Where(sq.Eq{"slug": slug}))
-	require.NoError(t, err)
-
 	var isFavorite bool
-	err = db.Get(&isFavorite, sq.Select("is_favorite").
+	err := db.Get(&isFavorite, sq.Select("is_favorite").
 		From("user_operation_permissions").
-		Where(sq.Eq{"operation_id": operationID, "user_id": id}))
+		Join("operations on user_operation_permissions.operation_id = operations.id").
+		Where(sq.Eq{"slug": slug, "user_id": id}))
 	require.NoError(t, err)
 
 	return isFavorite

@@ -32,7 +32,7 @@ export default (props: {
       <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
       <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
       <Button
-        className={isFavorite ? cx('favorite'): cx('not-favorite')}
+        className={cx('favorite-button', isFavorite && 'filled')}
         onClick={() => setIsFavorite(!isFavorite)}>
       </Button>
     </Card>

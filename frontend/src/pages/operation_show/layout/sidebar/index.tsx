@@ -43,8 +43,9 @@ export default (props: {
         <Link className={cx('edit')} to={`/operations/${operation.slug}/edit`} title="Edit this operation" />
         <Link className={cx('overview')} to={`/operations/${operation.slug}/overview`} title="View evidence overview" />
         <Button
-          className={isFavorite ? cx('favorite'): cx('not-favorite')}
-          onClick={() => setIsFavorite(!isFavorite)}>
+          className={cx('favorite-button', isFavorite && 'filled')}
+          onClick={() => setIsFavorite(!isFavorite)}
+        >
         </Button>
         <OperationBadges {...operation} />
       </header>
