@@ -6,9 +6,8 @@ import AuthContext from 'src/auth_context'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
-import NewOperationButton from './new_operation_button'
-import OperationCard from './operation_card'
 import classnames from 'classnames/bind'
+import IndividualList from './individual_list'
 import { getOperations, createOperation, hasFlag } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
@@ -40,42 +39,14 @@ export default () => {
     })
   }, [wiredData])
 
-  type Header = "Other" | "Favorites" | null
-  const showOperationList = (ops: Operation[], header: Header) => (
-    <>
-      {header && <h1 className={cx('opTitle')}>
-          {header}
-      </h1>}
-      <div className={cx('operationList')}>
-      {
-        ops
-          .filter(op => normalizedInclude(op.name, filterText.value))
-          .map(op => {
-            return (
-            <OperationCard
-              slug={op.slug}
-              status={op.status}
-              numUsers={op.numUsers}
-              key={op.slug}
-              name={op.name}
-              favorite={op.favorite}
-              className={cx('card')}
-            />
-          )})
-      }
-      {header !== "Other" && <NewOperationButton onClick={() => newOperationModal.show({})} />}
-    </div>
-    </>
-  )
-
   const favoriteOps = ops?.filter(op => op.favorite)
   const otherOps = ops?.filter(op => !op.favorite)
 
   const favOpsExist = favoriteOps?.length > 0
   const bothOpsExist = favOpsExist && otherOps.length > 0
 
-  const returnBothOpTypes = [showOperationList(favoriteOps, "Favorites"), showOperationList(otherOps, "Other")].map(oplist => oplist)
-  const returnOneCateogry = favOpsExist ? showOperationList(favoriteOps, null) : showOperationList(otherOps, null)
+  const returnBothOpTypes = [IndividualList({ops: favoriteOps, header: "Favorites", newOperationModal, filterText}), IndividualList({ops: otherOps, header: "Other", newOperationModal, filterText})].map(oplist => oplist)
+  const returnOneCateogry = favOpsExist ? IndividualList({ops: otherOps, header: null, newOperationModal, filterText}) : IndividualList({ops: favoriteOps, header: null, newOperationModal, filterText})
 
   const renderBoth = bothOpsExist
     ? returnBothOpTypes
@@ -102,9 +73,6 @@ export default () => {
   )
 }
 
-const normalizedInclude = (baseString: string, term: string) => {
-  return baseString.toLowerCase().includes(term.toLowerCase())
-}
 
 const NewOperationModal = (props: {
   onRequestClose: () => void,
