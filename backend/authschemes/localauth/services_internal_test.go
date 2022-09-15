@@ -59,7 +59,7 @@ func TestReadUserTotpStatus(t *testing.T) {
 	// give target user totp -- note: this will remove existing encrypted_password and must_reset_password values
 	err = bridge.UpdateAuthForUser(authschemes.UserAuthData{
 		TOTPSecret: helpers.Ptr("abc123"),
-		UserKey:    targetUser.FirstName,
+		Username:   targetUser.FirstName,
 	})
 	require.NoError(t, err)
 
@@ -89,7 +89,7 @@ func TestDeleteUserTotp(t *testing.T) {
 	// give target user TOTP
 	err = bridge.UpdateAuthForUser(authschemes.UserAuthData{
 		TOTPSecret: helpers.Ptr("abc123"),
-		UserKey:    targetUser.FirstName,
+		Username:   targetUser.FirstName,
 	})
 	require.NoError(t, err)
 
@@ -111,7 +111,7 @@ func TestDeleteUserTotp(t *testing.T) {
 	// re-give user totp
 	err = bridge.UpdateAuthForUser(authschemes.UserAuthData{
 		TOTPSecret: helpers.Ptr("abc123"),
-		UserKey:    targetUser.FirstName,
+		Username:   targetUser.FirstName,
 	})
 	require.NoError(t, err)
 

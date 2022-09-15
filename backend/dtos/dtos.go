@@ -90,7 +90,7 @@ type UserOwnView struct {
 }
 
 type AuthenticationInfo struct {
-	UserKey        string               `json:"userKey"`
+	Username       string               `json:"username"`
 	AuthSchemeName *string              `json:"schemeName,omitempty"`
 	AuthSchemeCode string               `json:"schemeCode"`
 	AuthSchemeType string               `json:"schemeType"`

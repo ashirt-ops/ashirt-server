@@ -13,15 +13,18 @@ Adversary Simulators High-Fidelity Intelligence and Reporting Toolkit. This repo
 
 ## Background
 
-Documenting and reporting is a key part of our jobs and generally the part we all look forward to the least. Compared to the rest of the work we do it's not the most fun and by the time we get around to it, it's not always clear exactly what happened or we don't have the evidence to prove it. Teams generally solve this with ad hoc solutions for note taking, recording and sharing screenshots, and collecting other evidence but these solutions rarely scale, are not always easily shared, and typically require manual steps to manage. Having to dig through a pile of evidence after an operation to find the one screenshot you need, if you even have it, can be cumbersome especially as evidence starts to span multiple operators and computers. ASHIRT attempts to solve this by serving as a non-intrusive, automatic when possible, way to capture, index, and provide search over a centralized synchronization point of high fidelity data from all your evidence sources during an operation.
+Documenting and reporting is a key part of our jobs and generally the part we all look forward to the least. Compared to the rest of the work we do it's not the most fun and by the time we get around to it, it's not always clear exactly what happened or we don't have the evidence to prove it. Teams generally solve this with ad hoc solutions for note taking, recording and sharing screenshots, and collecting other evidence but these solutions rarely scale, are not always easily shared, and typically require manual steps to manage. Having to dig through a pile of evidence after an operation to find the one screenshot you need, if you even have it, can be cumbersome especially as evidence starts to span multiple operators and computers. ASHIRT attempts to solve this by serving as a non-intrusive, automatic when possible, way to capture, index, and provide search over a centralized synchronization point of high fidelity data from all your evidence sources during an operation. You can learn more in our 2020 presentation linked below. 
+
+[![2020 presentation](https://img.youtube.com/vi/NNPsfTbDPG0/0.jpg)](https://youtu.be/NNPsfTbDPG0)
 
 ## Install
+If you just want to try ashirt out locally, check out the [quickstart docs](https://github.com/theparanoids/ashirt-server/wiki/quickstart). If you're looking for a production-ready deployment reference, check out [ashirt-deployments](https://github.com/theparanoids/ashirt-deployments/tree/main/ecs).
 
-Instructions for building and installation are available for the [frontend](frontend/Readme.md) and [backend](backend/Readme.md). These cover the various components and configuration options necessary for deployment and outlines how the components interact. Due to the current build process and our internal deployment artifacts are not currently available but will be as we transition to more public tooling.
+Detailed instructions for building and installation are available for the [frontend](frontend/Readme.md) and [backend](backend/Readme.md).
 
 ## Configuration
 
-All configuration options for the backend are described [here](bakend/Readme.md).
+All configuration options for the backend are described [here](bakend/Readme.md). These cover the various components and configuration options necessary for deployment and outlines how the components interact.
 
 ## Contribute
 
@@ -29,7 +32,8 @@ Please refer to [the contributing.md file](Contributing.md) for information abou
 
 ## Maintainers
 
-- Joe Rozner: joe.rozner@verizonmedia.com
+- John Kennedy: john.kennedy@yahooinc.com
+- Joe Rozner: joe.rozner@yahooinc.com
 
 ## License
 

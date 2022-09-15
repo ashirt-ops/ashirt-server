@@ -15,8 +15,8 @@ func TestCreateNewAuthForUserGeneric(t *testing.T) {
 	userID := createDummyUser(t, bridge, "normalUser")
 
 	err := authschemes.CreateNewAuthForUserGeneric(db, "someauth", "someauth-type", authschemes.UserAuthData{
-		UserID:  userID,
-		UserKey: "dummy-user-key",
+		UserID:   userID,
+		Username: "dummy-user-key",
 	})
 
 	require.NoError(t, err)

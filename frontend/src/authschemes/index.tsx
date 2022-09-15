@@ -3,12 +3,12 @@
 
 import * as React from 'react'
 import { useAsyncComponent } from 'src/helpers'
-import { SupportedAuthenticationScheme } from "src/global_types"
+import { SupportedAuthenticationScheme, UserOwnView } from "src/global_types"
 
 export type AuthFrontend = {
-  Linker: React.FunctionComponent<{ onSuccess: () => void, authFlags?: Array<string> }>,
+  Linker: React.FunctionComponent<{ onSuccess: () => void, authFlags?: Array<string>, userData: UserOwnView }>,
   Login: React.FunctionComponent<{ query: URLSearchParams, authFlags?: Array<string> }>,
-  Settings: React.FunctionComponent<{ userKey: string, authFlags?: Array<string> }>,
+  Settings: React.FunctionComponent<{ username: string, authFlags?: Array<string> }>,
 }
 
 // @ts-ignore - this is a webpack compile-time include of src/authschemes/*/index.ts

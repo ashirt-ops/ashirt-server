@@ -63,7 +63,7 @@ export const AccountSettings = () => {
               <Route path="profile" element={<Profile {...bus} profile={p} />} />
               <Route path="authmethods" element={<AuthMethods {...bus} profile={p} allowLinking={!userSlug} />} />
               {
-                !userSlug && (<Route path="security" element={<Security />} />)
+                !userSlug && (<Route path="security" element={<Security user={p} />} />)
               }
               <Route path="apikeys" element={<ApiKeys profile={p} />} />
             </Routes>

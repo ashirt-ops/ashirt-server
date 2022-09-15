@@ -16,6 +16,19 @@ func Map[T any, U any](slice []T, mapFn func(T) U) []U {
 	return result
 }
 
+// Find is a generic function that searches through a list searching for all items that match
+// the given predicate. This returns the elements that matched the predicate in the order they were
+// encountered.
+func Filter[T any](slice []T, predicate func(T) bool) []T {
+	filteredData := make([]T, 0, len(slice))
+	for _, v := range slice {
+		if predicate(v) {
+			filteredData = append(filteredData, v)
+		}
+	}
+	return filteredData
+}
+
 // Find is a generic function that searches through a list searching for an item that matches
 // the given predicate. If found, returns the index where it was found, and a pointer to the
 // actual data. If not found, return (-1, nil)

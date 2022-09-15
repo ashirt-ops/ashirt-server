@@ -1,9 +1,9 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { UserOwnView, SupportedAuthenticationScheme, AuthenticationInfo } from 'src/global_types'
+import { UserOwnView, SupportedAuthenticationScheme } from 'src/global_types'
 import { useWiredData } from 'src/helpers'
 import { getSupportedAuthentications } from 'src/services'
 import { format } from 'date-fns'
@@ -41,7 +41,7 @@ export default (props: {
               allowLinking={props.allowLinking}
               key={scheme.schemeCode}
               supportedScheme={scheme}
-              authInfo={props.profile.authSchemes}
+              profile={props.profile}
               removeAuth={() => setRemovingAuth(scheme.schemeCode)}
               requestReload={props.requestReload}
             />
@@ -60,7 +60,7 @@ export default (props: {
 
 const TableRow = (props: {
   supportedScheme: SupportedAuthenticationScheme,
-  authInfo: Array<AuthenticationInfo>,
+  profile: UserOwnView,
   removeAuth: () => void,
   allowLinking: boolean,
   requestReload?: () => void,
@@ -68,7 +68,7 @@ const TableRow = (props: {
   const [linking, setLinking] = React.useState<boolean>(false)
   const Linker = useAuthFrontendComponent(props.supportedScheme.schemeType, 'Linker', props.supportedScheme)
 
-  const userScheme = props.authInfo.find(x => x.schemeCode === props.supportedScheme.schemeCode)
+  const userScheme = props.profile.authSchemes.find(x => x.schemeCode === props.supportedScheme.schemeCode)
   const canDeleteAuth = () => {
     switch (true) {
       case (!userScheme): return { disabled: true, title: "Auth scheme has not been linked" }
@@ -76,10 +76,17 @@ const TableRow = (props: {
     }
   }
   const canLink = () => {
-    switch (true) {
-      case (userScheme != undefined): return { disabled: true, title: "Auth scheme has already been linked" }
-      default: return {}
+    if (userScheme != undefined) {
+      let title = "Auth scheme has already been linked"
+      if (props.supportedScheme.schemeCode == 'webauthn') {
+        title += ", add new keys in the security tab"
+      }
+      return {
+        disabled: true,
+        title,
+      }
     }
+    return {}
   }
 
   return (
@@ -98,9 +105,10 @@ const TableRow = (props: {
       {linking && (
         <Modal onRequestClose={() => setLinking(false)} title={"Link Account"}>
           <Linker
+            userData={props.profile}
             onSuccess={() => {
               setLinking(false)
-              props.requestReload && props.requestReload()
+              props.requestReload?.()
             }}
             authFlags={props.supportedScheme.schemeFlags}
           />
