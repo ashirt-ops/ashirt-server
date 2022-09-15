@@ -15,7 +15,7 @@ import Table from 'src/components/table'
 import UserChooser from 'src/components/user_chooser'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { User, UserRole, userRoleToLabel } from 'src/global_types'
+import { User, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
 import { getUserPermissions, setUserPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
@@ -72,12 +72,13 @@ const PermissionTableRow = (props: {
   disabled?: boolean,
   role: UserRole,
   user: User,
+  currentUser?: UserOwnView,
   requestReload: () => void
   updatePermissions: (role: UserRole) => Promise<void>
 }) => {
-  const currentUser = React.useContext(AuthContext).user
+  const currentUser = props?.currentUser
   const isCurrentUser = currentUser ? currentUser.slug === props.user.slug : false
-  const isAdmin = currentUser ? currentUser.admin : false
+  const isAdmin = currentUser ? currentUser?.admin : false
 
   const removeWarningModal = useModal<{}>(modalProps => (
     <RemoveWarningModal {...modalProps} removeUser={async () => {
@@ -125,6 +126,9 @@ const RemoveWarningModal = (props: {
 }
 
 const PermissionTable = (props: {
+  currentUser?: UserOwnView,
+  isAdmin: boolean,
+  setIsOperationAdmin: (isOperationAdmin: boolean) => void,
   operationSlug: string,
   requestReload: () => void
   onReload: (listener: () => void) => void
@@ -135,6 +139,10 @@ const PermissionTable = (props: {
 
   const filterField = useFormField("")
   const [currentPage, setCurrentPage] = React.useState(1)
+  const [isOperationAdmin, setLocalOperationAdmin] = React.useState(false)
+
+  const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
+  const normalizedSearchTerm = filterField.value.toLowerCase()
 
   const wiredPermissions = useWiredData(
     React.useCallback(() => getUserPermissions({ slug: props.operationSlug, name: "" }), [props.operationSlug]),
@@ -144,16 +152,23 @@ const PermissionTable = (props: {
 
   React.useEffect(() => {
     props.onReload(wiredPermissions.reload)
+    wiredPermissions.expose(data => {
+      const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
+      const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
+
+      setLocalOperationAdmin(renderableData.find(datum => datum.user.slug === props.currentUser?.slug)?.role === UserRole.ADMIN)
+      props.setIsOperationAdmin(isOperationAdmin)
+    })
     return () => { props.offReload(wiredPermissions.reload) }
   })
 
   return (
     <>
       {wiredPermissions.render(data => {
-        const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
-        const normalizedSearchTerm = filterField.value.toLowerCase()
         const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
+
+        const notAdmin = !props.isAdmin && !isOperationAdmin
 
         return (
           <>
@@ -162,6 +177,8 @@ const PermissionTable = (props: {
             <Table columns={columns}>
               {renderableData.map(({ user, role }) => (
                 <PermissionTableRow
+                  currentUser={props?.currentUser}
+                  disabled={notAdmin}
                   key={user.slug}
                   requestReload={props.requestReload}
                   updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: user.slug, role: r })}
@@ -188,13 +205,21 @@ export default (props: {
 }) => {
   const bus = BuildReloadBus()
 
+  const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
+  const currentUser = React.useContext(AuthContext)?.user
+  const isSysAdmin = currentUser ? currentUser?.admin : false
+  const isAdmin = isSysAdmin || isOperationAdmin
+
   return (
     <SettingsSection title="Operation Users" width="wide">
-      <NewUserForm
+      {isAdmin && (<NewUserForm
         {...bus}
         operationSlug={props.operationSlug}
-      />
+      />)}
       <PermissionTable
+        currentUser={currentUser || undefined}
+        isAdmin={isAdmin}
+        setIsOperationAdmin={setIsOperationAdmin}
         operationSlug={props.operationSlug}
         {...bus}
       />
