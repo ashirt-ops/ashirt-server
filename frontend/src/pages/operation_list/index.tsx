@@ -12,6 +12,7 @@ import classnames from 'classnames/bind'
 import { getOperations, createOperation, hasFlag } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
+import { Operation } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
@@ -26,9 +27,63 @@ export default () => {
   ))
   const filterText = useFormField<string>('')
 
+  const [ops, setOps] = React.useState<Operation[]>([])
+  const [welcomeFlag, setWelcomeFlag] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    wiredData.expose(data => {
+      if (data) {
+        const [ops, welcomeFlag] = data
+        setOps(ops)
+        setWelcomeFlag(welcomeFlag)
+      }
+    })
+  }, [wiredData])
+
+  type Header = "Other" | "Favorites" | null
+  const showOperationList = (ops: Operation[], header: Header) => (
+    <>
+      {header && <h1 className={cx('opTitle')}>
+          {header}
+      </h1>}
+      <div className={cx('operationList')}>
+      {
+        ops
+          .filter(op => normalizedInclude(op.name, filterText.value))
+          .map(op => {
+            return (
+            <OperationCard
+              slug={op.slug}
+              status={op.status}
+              numUsers={op.numUsers}
+              key={op.slug}
+              name={op.name}
+              favorite={op.favorite}
+              className={cx('card')}
+            />
+          )})
+      }
+      {header !== "Other" && <NewOperationButton onClick={() => newOperationModal.show({})} />}
+    </div>
+    </>
+  )
+
+  const favoriteOps = ops?.filter(op => op.favorite)
+  const otherOps = ops?.filter(op => !op.favorite)
+
+  const favOpsExist = favoriteOps?.length > 0
+  const bothOpsExist = favOpsExist && otherOps.length > 0
+
+  const returnBothOpTypes = [showOperationList(favoriteOps, "Favorites"), showOperationList(otherOps, "Other")].map(oplist => oplist)
+  const returnOneCateogry = favOpsExist ? showOperationList(favoriteOps, null) : showOperationList(otherOps, null)
+
+  const renderBoth = bothOpsExist
+    ? returnBothOpTypes
+    : returnOneCateogry
+
   return (
     <div className={cx('root')}>
-      {wiredData.render(([ops, welcomeFlag]) => <>
+      {wiredData.render(() => <>
         {welcomeFlag && (
           <h1 className={cx('welcomeMessage')}>
             Welcome Back, {user ? `${user.firstName} ${user.lastName}` : "Kotter"}!
@@ -40,33 +95,9 @@ export default () => {
           icon={require('./search.svg')}
           {...filterText}
         />
-        <div className={cx('operationList')}>
-          {
-            ops
-              .filter(op => normalizedInclude(op.name, filterText.value))
-              .sort((a, b) => {
-                const aFav = a.favorite || false
-                const bFav = b.favorite || false
-                return aFav > bFav ? -1 : 1
-              })
-              .map(op => {
-                return (
-                <OperationCard
-                  slug={op.slug}
-                  status={op.status}
-                  numUsers={op.numUsers}
-                  key={op.slug}
-                  name={op.name}
-                  favorite={op.favorite}
-                  className={cx('card')}
-                />
-              )})
-          }
-          <NewOperationButton onClick={() => newOperationModal.show({})} />
-        </div>
-      </>)}
-
-      {renderModals(newOperationModal)}
+        {renderBoth}
+        {renderModals(newOperationModal)}
+        </>)}
     </div>
   )
 }
