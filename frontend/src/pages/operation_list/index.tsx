@@ -45,9 +45,38 @@ export default () => {
   const favOpsExist = favoriteOps?.length > 0
   const bothOpsExist = favOpsExist && otherOps.length > 0
 
-  const returnBothOpTypes = [IndividualList({ops: favoriteOps, header: "Favorites", newOperationModal, filterText}), IndividualList({ops: otherOps, header: "Other", newOperationModal, filterText})].map(oplist => oplist)
-  const returnOneCateogry = favOpsExist ? IndividualList({ops: otherOps, header: null, newOperationModal, filterText}) : IndividualList({ops: favoriteOps, header: null, newOperationModal, filterText})
-
+  const returnBothOpTypes = (
+    <>
+      <IndividualList 
+        ops={favoriteOps}
+        header={"Favorites"}
+        newOperationModal={newOperationModal}
+        filterText={filterText} 
+      />
+      <IndividualList 
+        ops={otherOps}
+        header={"Other"}
+        newOperationModal={newOperationModal}
+        filterText={filterText} 
+      />
+    </>
+  )
+  const returnOneCateogry = favOpsExist ? (
+    <IndividualList 
+      ops={favoriteOps}
+      header={null}
+      newOperationModal={newOperationModal}
+      filterText={filterText} 
+    /> 
+  ) : (
+    <IndividualList 
+      ops={otherOps}
+      header={null}
+      newOperationModal={newOperationModal}
+      filterText={filterText} 
+    />  
+  )
+  
   const renderBoth = bothOpsExist
     ? returnBothOpTypes
     : returnOneCateogry
