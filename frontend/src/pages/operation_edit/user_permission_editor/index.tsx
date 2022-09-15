@@ -20,7 +20,6 @@ import { getUserPermissions, setUserPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { StandardPager } from 'src/components/paging'
-
 const cx = classnames.bind(require('./stylesheet'))
 
 const RoleSelect = (props: {
@@ -73,13 +72,13 @@ const PermissionTableRow = (props: {
   disabled?: boolean,
   role: UserRole,
   user: User,
-  currentUser: UserOwnView | null,
+  currentUser?: UserOwnView,
   requestReload: () => void
   updatePermissions: (role: UserRole) => Promise<void>
 }) => {
-  const currentUser = props.currentUser
-  const isAdmin = currentUser ? currentUser?.admin : false
+  const currentUser = props?.currentUser
   const isCurrentUser = currentUser ? currentUser.slug === props.user.slug : false
+  const isAdmin = currentUser ? currentUser?.admin : false
 
   const removeWarningModal = useModal<{}>(modalProps => (
     <RemoveWarningModal {...modalProps} removeUser={async () => {
@@ -127,7 +126,7 @@ const RemoveWarningModal = (props: {
 }
 
 const PermissionTable = (props: {
-  currentUser: UserOwnView | null,
+  currentUser?: UserOwnView,
   isAdmin: boolean,
   setIsOperationAdmin: (isOperationAdmin: boolean) => void,
   operationSlug: string,
@@ -158,7 +157,7 @@ const PermissionTable = (props: {
       const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
       setLocalOperationAdmin(renderableData.find(datum => datum.user.slug === props.currentUser?.slug)?.role === UserRole.ADMIN)
-      props.setIsOperationAdmin(isOperationAdmin) 
+      props.setIsOperationAdmin(isOperationAdmin)
     })
     return () => { props.offReload(wiredPermissions.reload) }
   })
@@ -170,7 +169,7 @@ const PermissionTable = (props: {
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
         const notAdmin = !props.isAdmin && !isOperationAdmin
-        
+
         return (
           <>
             <Input label="User Filter" {...filterField} />
@@ -178,7 +177,7 @@ const PermissionTable = (props: {
             <Table columns={columns}>
               {renderableData.map(({ user, role }) => (
                 <PermissionTableRow
-                  currentUser={props.currentUser}
+                  currentUser={props?.currentUser}
                   disabled={notAdmin}
                   key={user.slug}
                   requestReload={props.requestReload}
@@ -201,36 +200,29 @@ const PermissionTable = (props: {
   )
 }
 
-const editor = (props: {
-  operationSlug: string,
-}) => {
-    const bus = BuildReloadBus()
-
-   const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
-   const currentUser = React.useContext(AuthContext).user
-   const isSysAdmin = currentUser ? currentUser?.admin : false
-   const isAdmin = isSysAdmin || isOperationAdmin
- 
-   return (
-     <SettingsSection title="Operation Users" width="wide">
-       {isAdmin && (<NewUserForm
-         {...bus}
-         operationSlug={props.operationSlug}
-       />)}
-       <PermissionTable
-         currentUser={currentUser}
-         isAdmin={isAdmin}
-         setIsOperationAdmin={setIsOperationAdmin}
-         operationSlug={props.operationSlug}
-         {...bus}
-       />
-     </SettingsSection>
-   )
-}
-
-
 export default (props: {
   operationSlug: string,
 }) => {
-  return editor({ operationSlug: props.operationSlug})
+  const bus = BuildReloadBus()
+
+  const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
+  const currentUser = React.useContext(AuthContext)?.user
+  const isSysAdmin = currentUser ? currentUser?.admin : false
+  const isAdmin = isSysAdmin || isOperationAdmin
+
+  return (
+    <SettingsSection title="Operation Users" width="wide">
+      {isAdmin && (<NewUserForm
+        {...bus}
+        operationSlug={props.operationSlug}
+      />)}
+      <PermissionTable
+        currentUser={currentUser || undefined}
+        isAdmin={isAdmin}
+        setIsOperationAdmin={setIsOperationAdmin}
+        operationSlug={props.operationSlug}
+        {...bus}
+      />
+    </SettingsSection>
+  )
 }
