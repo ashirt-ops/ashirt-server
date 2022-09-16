@@ -7,7 +7,7 @@ import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import classnames from 'classnames/bind'
-import IndividualList from './individual_list'
+import List from './list'
 import { getOperations, createOperation, hasFlag, setFavorite } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
@@ -39,64 +39,6 @@ export default () => {
     })
   }, [wiredData])
 
-  const favoriteOps = ops?.filter(op => op.favorite)
-  const otherOps = ops?.filter(op => !op.favorite)
-
-  const favOpsExist = favoriteOps?.length > 0
-  const bothOpsExist = favOpsExist && otherOps.length > 0
-
-  const returnBothOpTypes = (
-    <>
-      <IndividualList
-        ops={favoriteOps}
-        header={null}
-        newOperationModal={newOperationModal}
-        filterText={filterText}
-        onFavoriteToggled={async (slug, isFav) => {
-          await setFavorite(slug, isFav)
-          wiredData.reload()
-        }}
-      />
-      <IndividualList
-        ops={otherOps}
-        header={null}
-        newOperationModal={newOperationModal}
-        filterText={filterText}
-        onFavoriteToggled={async (slug, isFav) => {
-          await setFavorite(slug, isFav)
-          wiredData.reload()
-        }}
-      />
-    </>
-  )
-  const returnOneCateogry = favOpsExist ? (
-    <IndividualList
-      ops={favoriteOps}
-      header={null}
-      newOperationModal={newOperationModal}
-      filterText={filterText}
-      onFavoriteToggled={async (slug, isFav) => {
-          await setFavorite(slug, isFav)
-          wiredData.reload()
-        }}
-    />
-  ) : (
-    <IndividualList
-      ops={otherOps}
-      header={null}
-      newOperationModal={newOperationModal}
-      filterText={filterText}
-      onFavoriteToggled={async (slug, isFav) => {
-          await setFavorite(slug, isFav)
-          wiredData.reload()
-        }}
-    />
-  )
-
-  const renderBoth = bothOpsExist
-    ? returnBothOpTypes
-    : returnOneCateogry
-
   return (
     <div className={cx('root')}>
       {wiredData.render(() => <>
@@ -111,7 +53,15 @@ export default () => {
           icon={require('./search.svg')}
           {...filterText}
         />
-        {renderBoth}
+        <List
+          ops={ops}
+          newOperationModal={newOperationModal}
+          filterText={filterText}
+          onFavoriteToggled={async (slug, isFav) => {
+            await setFavorite(slug, isFav)
+            wiredData.reload()
+          }}
+        />
         {renderModals(newOperationModal)}
       </>)}
     </div>

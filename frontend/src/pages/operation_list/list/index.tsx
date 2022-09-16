@@ -9,29 +9,24 @@ import { FilterText, Operation } from 'src/global_types'
 import { UseModalOutput } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-type Header = "Other" | "Favorites" | null
-
 const normalizedInclude = (baseString: string, term: string) => {
   return baseString.toLowerCase().includes(term.toLowerCase())
 }
 
 export default (props: {
   ops: Operation[],
-  header: Header,
   newOperationModal: UseModalOutput<{}>,
   filterText: FilterText,
   onFavoriteToggled: (slug: string, isFavorite: boolean) => void
 }) => {
-  const header = props.header
+  const favoriteOps = props.ops?.filter(op => op.favorite)
+  const otherOps = props.ops?.filter(op => !op.favorite)
 
   return (
-    <div key={header}>
-      {header && <h1 className={cx('opTitle')}>
-        {header}
-      </h1>}
+    <div>
       <div className={cx('operationList')}>
         {
-          props.ops
+          favoriteOps
             .filter(op => normalizedInclude(op.name, props.filterText.value))
             .map(op => {
               return (
@@ -48,7 +43,28 @@ export default (props: {
               )
             })
         }
-        {header !== "Other" && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
+        {favoriteOps?.length && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
+      </div>
+      <div className={cx('operationList')}>
+        {
+          otherOps
+            .filter(op => normalizedInclude(op.name, props.filterText.value))
+            .map(op => {
+              return (
+                <OperationCard
+                  slug={op.slug}
+                  status={op.status}
+                  numUsers={op.numUsers}
+                  key={op.slug}
+                  name={op.name}
+                  favorite={op.favorite || false}
+                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite || false))}
+                  className={cx('card')}
+                />
+              )
+            })
+        }
+        {!favoriteOps?.length && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
       </div>
       <br />
     </div>
