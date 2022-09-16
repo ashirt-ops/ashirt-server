@@ -196,7 +196,7 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 	for _, operation := range operations {
 		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
 			fave, _ := operationPreferenceMap[operation.ID]
-			operation.Op.Favorite = &fave
+			operation.Op.Favorite = fave
 			operationsDTO = append(operationsDTO, operation.Op)
 		}
 	}
@@ -234,7 +234,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		Name:     operation.Name,
 		Status:   operation.Status,
 		NumUsers: numUsers,
-		Favorite: &favorite,
+		Favorite: favorite,
 	}, nil
 }
 

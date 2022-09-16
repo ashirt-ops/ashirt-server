@@ -135,7 +135,7 @@ func TestListOperations(t *testing.T) {
 			})
 			require.NotNil(t, found)
 			fav := (**found).Favorite
-			require.Equal(t, *fav, opAndPerm.IsFavorite)
+			require.Equal(t, fav, opAndPerm.IsFavorite)
 		}
 
 		// validate headless users
