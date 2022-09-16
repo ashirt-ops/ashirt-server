@@ -20,34 +20,37 @@ export default (props: {
   header: Header,
   newOperationModal: UseModalOutput<{}>,
   filterText: FilterText,
+  onFavoriteToggled: (slug: string, isFavorite: boolean) => void
 }) => {
   const header = props.header
 
   return (
-      <div key={header}>
-        {header && <h1 className={cx('opTitle')}>
-            {header}
-        </h1>}
-        <div className={cx('operationList')}>
+    <div key={header}>
+      {header && <h1 className={cx('opTitle')}>
+        {header}
+      </h1>}
+      <div className={cx('operationList')}>
         {
           props.ops
             .filter(op => normalizedInclude(op.name, props.filterText.value))
             .map(op => {
               return (
-              <OperationCard
-                slug={op.slug}
-                status={op.status}
-                numUsers={op.numUsers}
-                key={op.slug}
-                name={op.name}
-                favorite={op.favorite}
-                className={cx('card')}
-              />
-            )})
+                <OperationCard
+                  slug={op.slug}
+                  status={op.status}
+                  numUsers={op.numUsers}
+                  key={op.slug}
+                  name={op.name}
+                  favorite={op.favorite || false}
+                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite || false))}
+                  className={cx('card')}
+                />
+              )
+            })
         }
         {header !== "Other" && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
       </div>
-      <br/>
-      </div>
-    )
-  }
+      <br />
+    </div>
+  )
+}

@@ -8,7 +8,7 @@ import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import classnames from 'classnames/bind'
 import IndividualList from './individual_list'
-import { getOperations, createOperation, hasFlag } from 'src/services'
+import { getOperations, createOperation, hasFlag, setFavorite } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { Operation } from 'src/global_types'
@@ -47,36 +47,52 @@ export default () => {
 
   const returnBothOpTypes = (
     <>
-      <IndividualList 
+      <IndividualList
         ops={favoriteOps}
-        header={"Favorites"}
+        header={null}
         newOperationModal={newOperationModal}
-        filterText={filterText} 
+        filterText={filterText}
+        onFavoriteToggled={async (slug, isFav) => {
+          await setFavorite(slug, isFav)
+          wiredData.reload()
+        }}
       />
-      <IndividualList 
+      <IndividualList
         ops={otherOps}
-        header={"Other"}
+        header={null}
         newOperationModal={newOperationModal}
-        filterText={filterText} 
+        filterText={filterText}
+        onFavoriteToggled={async (slug, isFav) => {
+          await setFavorite(slug, isFav)
+          wiredData.reload()
+        }}
       />
     </>
   )
   const returnOneCateogry = favOpsExist ? (
-    <IndividualList 
+    <IndividualList
       ops={favoriteOps}
       header={null}
       newOperationModal={newOperationModal}
-      filterText={filterText} 
-    /> 
+      filterText={filterText}
+      onFavoriteToggled={async (slug, isFav) => {
+          await setFavorite(slug, isFav)
+          wiredData.reload()
+        }}
+    />
   ) : (
-    <IndividualList 
+    <IndividualList
       ops={otherOps}
       header={null}
       newOperationModal={newOperationModal}
-      filterText={filterText} 
-    />  
+      filterText={filterText}
+      onFavoriteToggled={async (slug, isFav) => {
+          await setFavorite(slug, isFav)
+          wiredData.reload()
+        }}
+    />
   )
-  
+
   const renderBoth = bothOpsExist
     ? returnBothOpTypes
     : returnOneCateogry
@@ -97,7 +113,7 @@ export default () => {
         />
         {renderBoth}
         {renderModals(newOperationModal)}
-        </>)}
+      </>)}
     </div>
   )
 }

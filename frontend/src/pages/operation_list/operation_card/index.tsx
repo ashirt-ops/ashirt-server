@@ -8,7 +8,6 @@ import classnames from 'classnames/bind'
 import { Link } from 'react-router-dom'
 import { OperationStatus } from 'src/global_types'
 import Button from 'src/components/button'
-import { setFavorite } from 'src/services'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
@@ -17,14 +16,10 @@ export default (props: {
   name: string,
   numUsers: number,
   status: OperationStatus,
-  favorite?: boolean,
+  favorite: boolean,
+  onFavoriteClick: () => void,
 }) => {
-  const [isFavorite, setIsFavorite] = React.useState(props.favorite || false)
-
-  React.useEffect(() => {
-    setFavorite(props.slug, isFavorite)
-  }, [isFavorite, props.slug])
-
+  const { favorite } = props
   return (
     <Card className={cx('root', props.className)}>
       <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
@@ -32,9 +27,9 @@ export default (props: {
       <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
       <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
       <Button
-        className={cx('favorite-button', isFavorite && 'filled')}
-        onClick={() => setIsFavorite(!isFavorite)}>
+        className={cx('favorite-button', favorite && 'filled')}
+        onClick={props.onFavoriteClick}>
       </Button>
     </Card>
-    )
-  }
+  )
+}
