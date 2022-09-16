@@ -99,7 +99,7 @@ export type Operation = {
   name: string,
   status: OperationStatus,
   numUsers: number,
-  favorite?: boolean,
+  favorite: boolean,
 }
 
 export type Evidence = {

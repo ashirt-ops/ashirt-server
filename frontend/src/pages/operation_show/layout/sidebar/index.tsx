@@ -30,7 +30,7 @@ export default (props: {
   requestQueriesReload?: () => void
 }) => {
   const {operation, queries} = props
-  const [isFavorite, setIsFavorite] = React.useState(operation.favorite || false)
+  const [isFavorite, setIsFavorite] = React.useState(operation.favorite)
 
   React.useEffect(() => {
     setFavorite(operation.slug, isFavorite)

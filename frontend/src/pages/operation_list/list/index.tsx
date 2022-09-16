@@ -36,8 +36,8 @@ export default (props: {
                   numUsers={op.numUsers}
                   key={op.slug}
                   name={op.name}
-                  favorite={op.favorite || false}
-                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite || false))}
+                  favorite={op.favorite}
+                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
                   className={cx('card')}
                 />
               )
@@ -57,8 +57,8 @@ export default (props: {
                   numUsers={op.numUsers}
                   key={op.slug}
                   name={op.name}
-                  favorite={op.favorite || false}
-                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite || false))}
+                  favorite={op.favorite}
+                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
                   className={cx('card')}
                 />
               )
