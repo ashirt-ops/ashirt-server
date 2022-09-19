@@ -933,4 +933,16 @@ func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
 		}
 		return nil, services.BatchRunServiceWorker(r.Context(), db, i)
 	}))
+
+	route(r, "POST", "/operations/{operation_slug}/favorite", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.SetFavoriteInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			IsFavorite:    dr.FromBody("favorite").Required().AsBool(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.SetFavoriteOperation(r.Context(), db, i)
+	}))
 }

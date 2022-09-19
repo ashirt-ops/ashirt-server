@@ -14,6 +14,8 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 import { CreateButtonPosition } from '..'
 import { NavToFunction } from 'src/helpers/navigate-to-query'
 import { SaveQueryModal } from 'src/components/filter_fields/filter-field-grid'
+import { setFavorite } from 'src/services'
+
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
@@ -28,12 +30,23 @@ export default (props: {
   requestQueriesReload?: () => void
 }) => {
   const {operation, queries} = props
+  const [isFavorite, setIsFavorite] = React.useState(operation.favorite)
+
+  React.useEffect(() => {
+    setFavorite(operation.slug, isFavorite)
+  }, [operation.slug, isFavorite])
+
   return (
     <div className={cx('root')}>
       <header>
         <h1 title={operation.name}>{operation.name}</h1>
         <Link className={cx('edit')} to={`/operations/${operation.slug}/edit`} title="Edit this operation" />
         <Link className={cx('overview')} to={`/operations/${operation.slug}/overview`} title="View evidence overview" />
+        <Button
+          className={cx('favorite-button', isFavorite && 'filled')}
+          onClick={() => setIsFavorite(!isFavorite)}
+        >
+        </Button>
         <OperationBadges {...operation} />
       </header>
       {props.showCreateButtons == 'sidebar-above' && (

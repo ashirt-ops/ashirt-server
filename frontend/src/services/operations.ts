@@ -57,3 +57,7 @@ export async function setUserPermission(i: { operationSlug: string, userSlug: st
     { userSlug: i.userSlug, role: i.role },
   )
 }
+
+export async function setFavorite(slug: string, favorite: boolean) {
+  return await ds.setFavorite({ operationSlug: slug }, {favorite: favorite} )
+}

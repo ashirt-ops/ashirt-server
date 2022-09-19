@@ -99,6 +99,7 @@ export type Operation = {
   name: string,
   status: OperationStatus,
   numUsers: number,
+  favorite: boolean,
 }
 
 export type Evidence = {
@@ -272,4 +273,11 @@ export type ServiceWorkerTestOutput = {
   name: string,
   live: boolean,
   message: string,
+}
+
+export type FilterText = {
+  value: string;
+  onChange: React.Dispatch<React.SetStateAction<string>>;
+  disabled: boolean;
+  setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }

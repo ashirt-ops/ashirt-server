@@ -6,12 +6,12 @@ import AuthContext from 'src/auth_context'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
-import NewOperationButton from './new_operation_button'
-import OperationCard from './operation_card'
 import classnames from 'classnames/bind'
-import { getOperations, createOperation, hasFlag } from 'src/services'
+import List from './list'
+import { getOperations, createOperation, hasFlag, setFavorite } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
+import { Operation } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
@@ -26,9 +26,22 @@ export default () => {
   ))
   const filterText = useFormField<string>('')
 
+  const [ops, setOps] = React.useState<Operation[]>([])
+  const [welcomeFlag, setWelcomeFlag] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    wiredData.expose(data => {
+      if (data) {
+        const [ops, welcomeFlag] = data
+        setOps(ops)
+        setWelcomeFlag(welcomeFlag)
+      }
+    })
+  }, [wiredData])
+
   return (
     <div className={cx('root')}>
-      {wiredData.render(([ops, welcomeFlag]) => <>
+      {wiredData.render(() => <>
         {welcomeFlag && (
           <h1 className={cx('welcomeMessage')}>
             Welcome Back, {user ? `${user.firstName} ${user.lastName}` : "Kotter"}!
@@ -40,33 +53,21 @@ export default () => {
           icon={require('./search.svg')}
           {...filterText}
         />
-        <div className={cx('operationList')}>
-          {
-            ops
-              .filter(op => normalizedInclude(op.name, filterText.value))
-              .map(op => (
-                <OperationCard
-                  slug={op.slug}
-                  status={op.status}
-                  numUsers={op.numUsers}
-                  key={op.slug}
-                  name={op.name}
-                  className={cx('card')}
-                />
-              ))
-          }
-          <NewOperationButton onClick={() => newOperationModal.show({})} />
-        </div>
+        <List
+          ops={ops}
+          newOperationModal={newOperationModal}
+          filterText={filterText}
+          onFavoriteToggled={async (slug, isFav) => {
+            await setFavorite(slug, isFav)
+            wiredData.reload()
+          }}
+        />
+        {renderModals(newOperationModal)}
       </>)}
-
-      {renderModals(newOperationModal)}
     </div>
   )
 }
 
-const normalizedInclude = (baseString: string, term: string) => {
-  return baseString.toLowerCase().includes(term.toLowerCase())
-}
 
 const NewOperationModal = (props: {
   onRequestClose: () => void,

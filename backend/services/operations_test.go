@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/services"
@@ -127,6 +128,16 @@ func TestListOperations(t *testing.T) {
 		require.Equal(t, len(ops), len(expectedOps))
 		validateOperationList(ops, expectedOps)
 
+		opsAndPermissions := getFavoritesByUserID(t, db, normalUser.ID)
+		for _, opAndPerm := range opsAndPermissions {
+			_, found := helpers.Find(ops, func(expectedOp *dtos.Operation) bool {
+				return (*expectedOp).Slug == opAndPerm.Slug
+			})
+			require.NotNil(t, found)
+			fav := (**found).Favorite
+			require.Equal(t, fav, opAndPerm.IsFavorite)
+		}
+
 		// validate headless users
 		headlessUser := UserHeadlessNick
 		fullOps := getOperations(t, db)
@@ -135,6 +146,23 @@ func TestListOperations(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(ops), len(fullOps))
 		validateOperationList(ops, fullOps)
+	})
+}
+
+func TestSetFavoriteOperation(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		normalUser := UserRon
+		slug := "HPGoF"
+
+		isFavorite := getFavoriteForOperation(t, db, slug, normalUser.ID)
+		require.Equal(t, isFavorite, false)
+
+		i := services.SetFavoriteInput{slug, true}
+		err := services.SetFavoriteOperation(contextForUser(normalUser, db), db, i)
+		require.NoError(t, err)
+
+		isFavorite = getFavoriteForOperation(t, db, slug, normalUser.ID)
+		require.Equal(t, isFavorite, true)
 	})
 }
 

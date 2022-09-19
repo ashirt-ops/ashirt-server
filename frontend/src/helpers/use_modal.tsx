@@ -26,7 +26,7 @@ import * as React from 'react'
 //   {renderModals(editUserModal)}
 // </>
 
-type UseModalOutput<ModalProps> = {
+export type UseModalOutput<ModalProps> = {
   node: React.ReactNode,
   show: (modalProps: ModalProps) => void,
 }
