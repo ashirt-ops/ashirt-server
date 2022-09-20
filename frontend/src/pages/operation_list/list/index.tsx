@@ -22,55 +22,38 @@ export default (props: {
   const favoriteOps = props.ops?.filter(op => op.favorite)
   const otherOps = props.ops?.filter(op => !op.favorite)
 
+  const returnOps = (ops: Operation[], displayButtonCriteria: boolean) => (
+    <div className={cx('operationList')}>
+      {
+        ops
+          .filter(op => normalizedInclude(op.name, props.filterText.value))
+          .map(op => {
+            return (
+              <OperationCard
+                slug={op.slug}
+                status={op.status}
+                numUsers={op.numUsers}
+                key={op.slug}
+                name={op.name}
+                favorite={op.favorite}
+                numTags={op.numTags}
+                numEvidence={op.numEvidence}
+                onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
+                className={cx('card')}
+              />
+            )
+          })
+      }
+      {displayButtonCriteria && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
+    </div>
+  )
+
+  const favOpsExists = favoriteOps.length > 0
+  
   return (
     <div>
-      <div className={cx('operationList')}>
-        {
-          favoriteOps
-            .filter(op => normalizedInclude(op.name, props.filterText.value))
-            .map(op => {
-              return (
-                <OperationCard
-                  slug={op.slug}
-                  status={op.status}
-                  numUsers={op.numUsers}
-                  key={op.slug}
-                  name={op.name}
-                  favorite={op.favorite}
-                  numTags={op.numTags}
-                  numEvidence={op.numEvidence}
-                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
-                  className={cx('card')}
-                />
-              )
-            })
-        }
-        {favoriteOps?.length && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
-      </div>
-      <div className={cx('operationList')}>
-        {
-          otherOps
-            .filter(op => normalizedInclude(op.name, props.filterText.value))
-            .map(op => {
-              return (
-                <OperationCard
-                  slug={op.slug}
-                  status={op.status}
-                  numUsers={op.numUsers}
-                  key={op.slug}
-                  name={op.name}
-                  favorite={op.favorite}
-                  numTags={op.numTags}
-                  numEvidence={op.numEvidence}
-                  onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
-                  className={cx('card')}
-                />
-              )
-            })
-        }
-        {!favoriteOps?.length && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
-      </div>
-      <br />
+        {returnOps(favoriteOps, favOpsExists)}
+        {returnOps(otherOps, !favOpsExists)}
     </div>
   )
 }
