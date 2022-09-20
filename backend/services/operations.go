@@ -204,7 +204,7 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 }
 
 func ReadOperation(ctx context.Context, db *database.Connection, operationSlug string) (*dtos.Operation, error) {
-	operation, err := lookupOperation(db, operationSlug)
+	operation, err := lookupOperationWithCounts(db, operationSlug)
 	if err != nil {
 		return nil, backend.WrapError("Unable to read operation", backend.UnauthorizedReadErr(err))
 	}
@@ -230,11 +230,13 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	}
 
 	return &dtos.Operation{
-		Slug:     operationSlug,
-		Name:     operation.Name,
-		Status:   operation.Status,
-		NumUsers: numUsers,
-		Favorite: favorite,
+		Slug:        operationSlug,
+		Name:        operation.Name,
+		Status:      operation.Status,
+		NumUsers:    numUsers,
+		Favorite:    favorite,
+		NumEvidence: operation.NumEvidence,
+		NumTags:     operation.NumTags,
 	}, nil
 }
 
@@ -281,18 +283,29 @@ func ListOperationsForAdmin(ctx context.Context, db *database.Connection) ([]*dt
 	return fixedOps, nil
 }
 
-// listAllOperations is a helper function for both ListOperations and ListOpperationsForAdmin.
-// This retrieves all operations, then relies on the caller to sort which operations are visible
-// to the enduser
 func listAllOperations(db *database.Connection) ([]operationListItem, error) {
 	var operations []struct {
 		models.Operation
-		NumUsers int `db:"num_users"`
+		NumUsers    int `db:"num_users"`
+		NumEvidence int `db:"num_evidence"`
+		NumTags     int `db:"num_tags"`
 	}
 
-	err := db.Select(&operations, sq.Select("id", "slug", "name", "status", "count(user_id) AS num_users").
+	// what will I want?
+	// do as separate query
+	// amount of evidence by type: iterate through the evidence endpoint and count for diff contentTypes
+	// separate query
+	// most active contributor: iterate through the evidence endpoint and count number of times an operator was mentioned
+
+	// What to change?
+	// struct above
+	// DTO (make command)
+	// frontend
+	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 		From("operations").
 		LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
+		Join("evidence ON evidence.operation_id = operations.id").
+		Join("tags ON tags.operation_id = operations.id").
 		GroupBy("operations.id").
 		OrderBy("operations.created_at DESC"))
 	if err != nil {
@@ -304,10 +317,12 @@ func listAllOperations(db *database.Connection) ([]operationListItem, error) {
 		operationsDTO = append(operationsDTO, operationListItem{
 			ID: operation.ID,
 			Op: &dtos.Operation{
-				Slug:     operation.Slug,
-				Name:     operation.Name,
-				Status:   operation.Status,
-				NumUsers: operation.NumUsers,
+				Slug:        operation.Slug,
+				Name:        operation.Name,
+				Status:      operation.Status,
+				NumUsers:    operation.NumUsers,
+				NumEvidence: operation.NumEvidence,
+				NumTags:     operation.NumTags,
 			},
 		})
 	}

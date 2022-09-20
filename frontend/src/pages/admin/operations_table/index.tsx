@@ -23,13 +23,14 @@ const TableRow = (props: {
   op: Operation,
 }) => {
   const navigate = useNavigate()
+  const { op } = props
 
   return (
     <tr>
-      <td>{props.op.slug}</td>
-      <td>{props.op.name}</td>
-      <td><OperationBadge numUsers={props.op.numUsers} status={props.op.status} /></td>
-      <td><Button small onClick={() => navigate(`/operations/${props.op.slug}/edit/settings`)} >Settings</Button></td>
+      <td>{op.slug}</td>
+      <td>{op.name}</td>
+      <td><OperationBadge numEvidence={op.numEvidence} numTags={op.numTags} numUsers={op.numUsers} status={op.status} /></td>
+      <td><Button small onClick={() => navigate(`/operations/${op.slug}/edit/settings`)} >Settings</Button></td>
     </tr>
   )
 }

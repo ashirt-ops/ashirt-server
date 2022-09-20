@@ -99,6 +99,8 @@ export type Operation = {
   name: string,
   status: OperationStatus,
   numUsers: number,
+  numEvidence: number,
+  numTags: number,
   favorite: boolean,
 }
 

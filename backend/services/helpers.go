@@ -104,6 +104,27 @@ func lookupOperation(db *database.Connection, operationSlug string) (*models.Ope
 	return &operation, nil
 }
 
+type operationWithCounts struct {
+	models.Operation
+	NumEvidence int `db:"num_evidence"`
+	NumTags     int `db:"num_tags"`
+}
+
+// lookupOperation returns an operation model for the given slug
+func lookupOperationWithCounts(db *database.Connection, operationSlug string) (*operationWithCounts, error) {
+	var opAndData operationWithCounts
+	err := db.Get(&opAndData, sq.Select("operations.id", "operations.name", "status", "count(distinct(tags.id)) AS num_tags", "count(distinct(evidence.id)) AS num_evidence").
+		Join("evidence ON evidence.operation_id = operations.id").
+		Join("tags ON tags.operation_id = operations.id").
+		From("operations").
+		GroupBy("operations.id").
+		Where(sq.Eq{"slug": operationSlug}))
+	if err != nil {
+		return &opAndData, backend.WrapError("Unable to lookup operation by slug", err)
+	}
+	return &opAndData, nil
+}
+
 // lookupOperationFinding returns an operation & finding model for the given operation slug / finding uuid
 // and ensures that the finding belongs to the specified operation
 func lookupOperationFinding(db *database.Connection, operationSlug string, findingUUID string) (*models.Operation, *models.Finding, error) {

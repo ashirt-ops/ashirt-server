@@ -48,11 +48,13 @@ type Finding struct {
 }
 
 type Operation struct {
-	Slug     string                 `json:"slug"`
-	Name     string                 `json:"name"`
-	NumUsers int                    `json:"numUsers"`
-	Status   models.OperationStatus `json:"status"`
-	Favorite bool                   `json:"favorite"`
+	Slug        string                 `json:"slug"`
+	Name        string                 `json:"name"`
+	NumUsers    int                    `json:"numUsers"`
+	NumEvidence int                    `json:"numEvidence"`
+	NumTags     int                    `json:"numTags"`
+	Status      models.OperationStatus `json:"status"`
+	Favorite    bool                   `json:"favorite"`
 }
 
 type Query struct {

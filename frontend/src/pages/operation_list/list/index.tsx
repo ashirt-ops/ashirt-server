@@ -37,6 +37,8 @@ export default (props: {
                   key={op.slug}
                   name={op.name}
                   favorite={op.favorite}
+                  numTags={op.numTags}
+                  numEvidence={op.numEvidence}
                   onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
                   className={cx('card')}
                 />
@@ -58,6 +60,8 @@ export default (props: {
                   key={op.slug}
                   name={op.name}
                   favorite={op.favorite}
+                  numTags={op.numTags}
+                  numEvidence={op.numEvidence}
                   onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
                   className={cx('card')}
                 />

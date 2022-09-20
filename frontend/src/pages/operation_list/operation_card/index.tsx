@@ -14,6 +14,8 @@ export default (props: {
   className?: string,
   slug: string,
   name: string,
+  numEvidence: number,
+  numTags: number,
   numUsers: number,
   status: OperationStatus,
   favorite: boolean,
@@ -23,7 +25,7 @@ export default (props: {
   return (
     <Card className={cx('root', props.className)}>
       <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
-      <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} />
+      <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} numTags={props.numTags} numEvidence={props.numEvidence} />
       <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
       <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
       <Button
