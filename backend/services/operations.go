@@ -171,7 +171,7 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 
 // ListOperations retrieves a list of all operations that the contextual user can see
 func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Operation, error) {
-	operations, err := listAllOperations(db)
+	operations, err := listAllOperations(ctx, db)
 
 	if err != nil {
 		return nil, err
@@ -215,6 +215,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 
 	var numUsers int
 	var favorite bool
+	var topContribs []dtos.TopContrib
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
@@ -223,10 +224,17 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		tx.Get(&favorite, sq.Select("is_favorite").
 			From("user_operation_permissions").
 			Where(sq.Eq{"user_id": middleware.UserID(ctx), "operation_id": operation.ID}))
+
+		// TODO TN - there's no operation_id present right now
+		tx.Select(&topContribs, sq.Select("slug", "count(evidence.id) AS count").
+			From("evidence").
+			LeftJoin("users ON evidence.operator_id = users.id").
+			Where(sq.Eq{"operation_id": operation.ID}).
+			GroupBy("users.id"))
 	})
 
 	if err != nil {
-		return nil, backend.WrapError("Cannot read favorite operation", backend.DatabaseErr(err))
+		return nil, backend.WrapError("Cannot read operation", backend.DatabaseErr(err))
 	}
 
 	return &dtos.Operation{
@@ -237,6 +245,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		Favorite:    favorite,
 		NumEvidence: operation.NumEvidence,
 		NumTags:     operation.NumTags,
+		TopContribs: topContribs,
 	}, nil
 }
 
@@ -268,7 +277,7 @@ func ListOperationsForAdmin(ctx context.Context, db *database.Connection) ([]*dt
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.UnauthorizedReadErr(err)
 	}
-	ops, err := listAllOperations(db)
+	ops, err := listAllOperations(ctx, db)
 
 	if err != nil {
 		return nil, err
@@ -283,7 +292,7 @@ func ListOperationsForAdmin(ctx context.Context, db *database.Connection) ([]*dt
 	return fixedOps, nil
 }
 
-func listAllOperations(db *database.Connection) ([]operationListItem, error) {
+func listAllOperations(ctx context.Context, db *database.Connection) ([]operationListItem, error) {
 	var operations []struct {
 		models.Operation
 		NumUsers    int `db:"num_users"`
@@ -291,29 +300,72 @@ func listAllOperations(db *database.Connection) ([]operationListItem, error) {
 		NumTags     int `db:"num_tags"`
 	}
 
+	var topContribs []dtos.TopContrib
+
+	getTopContributorsForEachOperation := `
+		SELECT
+			t1.*
+		FROM (
+			SELECT
+				slug,
+				operation_id,
+				count(evidence.id) AS count
+			FROM
+				evidence
+			LEFT JOIN users ON evidence.operator_id = users.id
+		GROUP BY
+			operation_id,
+			users.id) t1
+			LEFT JOIN (
+				SELECT
+					slug,
+					operation_id,
+					count(evidence.id) AS count
+				FROM
+					evidence
+					LEFT JOIN users ON evidence.operator_id = users.id
+				GROUP BY
+					operation_id,
+					users.id) t2 ON t1.operation_id = t2.operation_id
+			AND t1.count < t2.count
+		WHERE
+			t2.count IS NULL`
+
 	// what will I want?
 	// do as separate query
 	// amount of evidence by type: iterate through the evidence endpoint and count for diff contentTypes
-	// separate query
-	// most active contributor: iterate through the evidence endpoint and count number of times an operator was mentioned
 
 	// What to change?
 	// struct above
 	// DTO (make command)
 	// frontend
-	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
-		From("operations").
-		LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
-		Join("evidence ON evidence.operation_id = operations.id").
-		Join("tags ON tags.operation_id = operations.id").
-		GroupBy("operations.id").
-		OrderBy("operations.created_at DESC"))
+
+	err := db.WithTx(ctx, func(tx *database.Transactable) {
+		tx.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
+			From("operations").
+			LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
+			Join("evidence ON evidence.operation_id = operations.id").
+			Join("tags ON tags.operation_id = operations.id").
+			GroupBy("operations.id").
+			OrderBy("operations.created_at DESC"))
+
+		tx.SelectRaw(&topContribs, getTopContributorsForEachOperation)
+	})
+
 	if err != nil {
 		return nil, backend.WrapError("Cannot list all operations", backend.DatabaseErr(err))
 	}
 
 	operationsDTO := []operationListItem{}
 	for _, operation := range operations {
+
+		var topContribsForOp []dtos.TopContrib
+		for i := range topContribs {
+			if topContribs[i].OperationID == operation.ID {
+				topContribsForOp = append(topContribsForOp, topContribs[i])
+			}
+		}
+
 		operationsDTO = append(operationsDTO, operationListItem{
 			ID: operation.ID,
 			Op: &dtos.Operation{
@@ -323,6 +375,7 @@ func listAllOperations(db *database.Connection) ([]operationListItem, error) {
 				NumUsers:    operation.NumUsers,
 				NumEvidence: operation.NumEvidence,
 				NumTags:     operation.NumTags,
+				TopContribs: topContribsForOp,
 			},
 		})
 	}

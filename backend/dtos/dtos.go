@@ -47,6 +47,12 @@ type Finding struct {
 	OccurredTo    *time.Time `json:"occurredTo"`
 }
 
+type TopContrib struct {
+	Slug        string `db:"slug" json:"slug"`
+	OperationID int64  `db:"operation_id" json:"operationId"`
+	Count       int64  `db:"count" json:"count"`
+}
+
 type Operation struct {
 	Slug        string                 `json:"slug"`
 	Name        string                 `json:"name"`
@@ -55,6 +61,7 @@ type Operation struct {
 	NumTags     int                    `json:"numTags"`
 	Status      models.OperationStatus `json:"status"`
 	Favorite    bool                   `json:"favorite"`
+	TopContribs []TopContrib           `json:"topContribs"`
 }
 
 type Query struct {

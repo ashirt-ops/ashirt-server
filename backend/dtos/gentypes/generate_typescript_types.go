@@ -21,6 +21,7 @@ func main() {
 	gen(dtos.Evidence{})
 	gen(dtos.EvidenceMetadata{})
 	gen(dtos.Finding{})
+	gen(dtos.TopContrib{})
 	gen(dtos.Operation{})
 	gen(dtos.Query{})
 	gen(dtos.Tag{})
