@@ -216,6 +216,17 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	var numUsers int
 	var favorite bool
 	var topContribs []dtos.TopContrib
+	var evidenceCount []dtos.EvidenceTypes
+
+	getEvidencCounts := `SELECT operation_id,
+  COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
+  COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
+  COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
+  COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
+  COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
+FROM 
+  evidence
+ Where operation_id = 1`
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
@@ -231,6 +242,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 			LeftJoin("users ON evidence.operator_id = users.id").
 			Where(sq.Eq{"operation_id": operation.ID}).
 			GroupBy("users.id"))
+
+		tx.SelectRaw(&evidenceCount, getEvidencCounts)
 	})
 
 	if err != nil {
@@ -238,14 +251,15 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	}
 
 	return &dtos.Operation{
-		Slug:        operationSlug,
-		Name:        operation.Name,
-		Status:      operation.Status,
-		NumUsers:    numUsers,
-		Favorite:    favorite,
-		NumEvidence: operation.NumEvidence,
-		NumTags:     operation.NumTags,
-		TopContribs: topContribs,
+		Slug:          operationSlug,
+		Name:          operation.Name,
+		Status:        operation.Status,
+		NumUsers:      numUsers,
+		Favorite:      favorite,
+		NumEvidence:   operation.NumEvidence,
+		NumTags:       operation.NumTags,
+		TopContribs:   topContribs,
+		EvidenceTypes: evidenceCount[0],
 	}, nil
 }
 
@@ -302,6 +316,9 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 
 	var topContribs []dtos.TopContrib
 
+	var evidenceTypes []dtos.EvidenceTypes
+
+	// TODO TN rewrite this op with base select as separate string
 	getTopContributorsForEachOperation := `
 		SELECT
 			t1.*
@@ -331,14 +348,20 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 		WHERE
 			t2.count IS NULL`
 
-	// what will I want?
-	// do as separate query
-	// amount of evidence by type: iterate through the evidence endpoint and count for diff contentTypes
-
-	// What to change?
-	// struct above
-	// DTO (make command)
-	// frontend
+	// Rename Evidence Types to Evidence
+	// TODO TN rewrite this to use squirrel
+	// if don't do that, maybe move these queries  elsehwere in the module
+	evidenceTypesForEachOperation := `
+		SELECT operation_id,
+			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
+			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
+			COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
+			COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
+			COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
+		FROM 
+			evidence
+		GROUP BY 
+			operation_id`
 
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
@@ -350,6 +373,8 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 			OrderBy("operations.created_at DESC"))
 
 		tx.SelectRaw(&topContribs, getTopContributorsForEachOperation)
+
+		tx.SelectRaw(&evidenceTypes, evidenceTypesForEachOperation)
 	})
 
 	if err != nil {
@@ -359,6 +384,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 	operationsDTO := []operationListItem{}
 	for _, operation := range operations {
 
+		// TODO I don't need to be doing this loop I don't think
 		var topContribsForOp []dtos.TopContrib
 		for i := range topContribs {
 			if topContribs[i].OperationID == operation.ID {
@@ -366,16 +392,24 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 			}
 		}
 
+		var evidenceTypesForOp dtos.EvidenceTypes
+		for i := range evidenceTypes {
+			if evidenceTypes[i].OperationID == operation.ID {
+				evidenceTypesForOp = evidenceTypes[i]
+			}
+		}
+
 		operationsDTO = append(operationsDTO, operationListItem{
 			ID: operation.ID,
 			Op: &dtos.Operation{
-				Slug:        operation.Slug,
-				Name:        operation.Name,
-				Status:      operation.Status,
-				NumUsers:    operation.NumUsers,
-				NumEvidence: operation.NumEvidence,
-				NumTags:     operation.NumTags,
-				TopContribs: topContribsForOp,
+				Slug:          operation.Slug,
+				Name:          operation.Name,
+				Status:        operation.Status,
+				NumUsers:      operation.NumUsers,
+				NumEvidence:   operation.NumEvidence,
+				NumTags:       operation.NumTags,
+				TopContribs:   topContribsForOp,
+				EvidenceTypes: evidenceTypesForOp,
 			},
 		})
 	}

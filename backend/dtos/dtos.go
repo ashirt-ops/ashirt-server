@@ -53,15 +53,25 @@ type TopContrib struct {
 	Count       int64  `db:"count" json:"count"`
 }
 
+type EvidenceTypes struct {
+	OperationID    int64 `db:"operation_id" json:"operationId"`
+	ImageCount     int64 `db:"image_count" json:"imageCount"`
+	CodeblockCount int64 `db:"codeblock_count" json:"codeblockCount"`
+	RecordingCount int64 `db:"recording_count" json:"recordingCount"`
+	EventCount     int64 `db:"event_count" json:"eventCount"`
+	HarCount       int64 `db:"har_count" json:"harCount"`
+}
+
 type Operation struct {
-	Slug        string                 `json:"slug"`
-	Name        string                 `json:"name"`
-	NumUsers    int                    `json:"numUsers"`
-	NumEvidence int                    `json:"numEvidence"`
-	NumTags     int                    `json:"numTags"`
-	Status      models.OperationStatus `json:"status"`
-	Favorite    bool                   `json:"favorite"`
-	TopContribs []TopContrib           `json:"topContribs"`
+	Slug          string                 `json:"slug"`
+	Name          string                 `json:"name"`
+	NumUsers      int                    `json:"numUsers"`
+	NumEvidence   int                    `json:"numEvidence"`
+	NumTags       int                    `json:"numTags"`
+	Status        models.OperationStatus `json:"status"`
+	Favorite      bool                   `json:"favorite"`
+	TopContribs   []TopContrib           `json:"topContribs"`
+	EvidenceTypes EvidenceTypes          `json:"evidenceTypes"`
 }
 
 type Query struct {
