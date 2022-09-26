@@ -3,6 +3,7 @@ package webauthn
 import (
 	"encoding/binary"
 	"strings"
+	"time"
 
 	auth "github.com/duo-labs/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -10,32 +11,35 @@ import (
 )
 
 type webauthnUser struct {
-	UserID      []byte
-	UserName    string
-	IconURL     string
-	Credentials []AShirtWebauthnCredential
-	FirstName   string
-	LastName    string
-	Email       string
-	KeyName     string
+	UserID         []byte
+	UserName       string
+	IconURL        string
+	Credentials    []AShirtWebauthnCredential
+	FirstName      string
+	LastName       string
+	Email          string
+	KeyName        string
+	KeyCreatedDate time.Time
 }
 
 func makeNewWebAuthnUser(firstName, lastName, email, username, keyName string) webauthnUser {
 	return webauthnUser{
-		UserID:    []byte(uuid.New().String()),
-		UserName:  username,
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
-		KeyName:   keyName,
+		UserID:         []byte(uuid.New().String()),
+		UserName:       username,
+		FirstName:      firstName,
+		LastName:       lastName,
+		Email:          email,
+		KeyName:        keyName,
+		KeyCreatedDate: time.Now(),
 	}
 }
 
 func makeLinkingWebAuthnUser(userID int64, username, keyName string) webauthnUser {
 	return webauthnUser{
-		UserID:   i64ToByteSlice(userID),
-		UserName: username,
-		KeyName:  keyName,
+		UserID:         i64ToByteSlice(userID),
+		UserName:       username,
+		KeyName:        keyName,
+		KeyCreatedDate: time.Now(),
 	}
 }
 

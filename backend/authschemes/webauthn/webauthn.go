@@ -414,7 +414,10 @@ func (a WebAuthn) validateRegistrationComplete(r *http.Request, bridge authschem
 		return nil, nil, backend.WrapError("Unable to complete registration", err)
 	}
 
-	data.UserData.Credentials = append(data.UserData.Credentials, wrapCredential(*cred, data.UserData.KeyName))
+	data.UserData.Credentials = append(data.UserData.Credentials, wrapCredential(*cred, AShirtWebauthnExtension{
+		KeyName:        data.UserData.KeyName,
+		KeyCreatedDate: data.UserData.KeyCreatedDate,
+	}))
 
 	encodedCreds, err := json.Marshal(data.UserData.Credentials)
 	if err != nil {

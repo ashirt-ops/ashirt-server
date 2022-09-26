@@ -1,6 +1,8 @@
 package webauthn
 
 import (
+	"time"
+
 	auth "github.com/duo-labs/webauthn/webauthn"
 )
 
@@ -22,20 +24,26 @@ type WebAuthnRegistrationInfo struct {
 	UserID              int64
 	RegistrationType    RegistrationType
 	ExistingCredentials []AShirtWebauthnCredential
+	KeyCreatedDate      time.Time
+}
+
+type AShirtWebauthnExtension struct {
+	KeyName        string    `json:"keyName"`
+	KeyCreatedDate time.Time `json:"keyCreatedDate"`
 }
 
 type AShirtWebauthnCredential struct {
 	auth.Credential
-	KeyName string `json:"keyName"`
+	AShirtWebauthnExtension
 }
 
 func unwrapCredential(cred AShirtWebauthnCredential) auth.Credential {
 	return cred.Credential
 }
 
-func wrapCredential(cred auth.Credential, keyName string) AShirtWebauthnCredential {
+func wrapCredential(cred auth.Credential, extra AShirtWebauthnExtension) AShirtWebauthnCredential {
 	return AShirtWebauthnCredential{
 		Credential: cred,
-		KeyName:    keyName,
+		AShirtWebauthnExtension: extra,
 	}
 }
