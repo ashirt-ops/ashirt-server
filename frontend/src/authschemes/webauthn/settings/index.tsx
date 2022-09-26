@@ -2,6 +2,8 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import * as dateFns from 'date-fns'
+
 import Input from 'src/components/input'
 import SettingsSection from 'src/components/settings_section'
 import classnames from 'classnames/bind'
@@ -15,6 +17,8 @@ import ModalForm from 'src/components/modal_form'
 import { convertToCredentialCreationOptions, encodeAsB64 } from '../helpers'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
 const cx = classnames.bind(require('./stylesheet'))
+
+const toEnUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")
 
 export default (props: {
   username: string,
@@ -46,14 +50,20 @@ const KeyList = (props: {
     {wiredKeys.render(data => {
       return (
         <div>
-          <Table columns={['Key Name', 'Actions']}>
-            {data.keys.map(key => {
+          <Table columns={['Key Name', 'Date Created', 'Actions']}>
+            {data.keys.map(keyEntry => {
+              const { keyName, dateCreated } = keyEntry
               return (
-                <tr key={key}>
-                  <td>{key}</td>
-                  <td><Button small danger onClick={() => {
-                    deleteModal.show({ keyName: key })
-                  }}>Delete</Button></td>
+                <tr key={keyName}>
+                  <td>{keyName}</td>
+                  <td>{toEnUSDate(dateCreated)}</td>
+                  <td>
+                    <Button small danger onClick={() => {
+                      deleteModal.show({ keyName })
+                    }}>
+                      Delete
+                    </Button>
+                  </td>
                 </tr>
               )
             })}

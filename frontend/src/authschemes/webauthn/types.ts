@@ -57,5 +57,10 @@ export type CompletedLoginChallenge = {
 }
 
 export type KeyList = {
-  keys: Array<string>
+  keys: Array<KeyEntry>
+}
+
+export type KeyEntry = {
+  keyName: string
+  dateCreated: Date
 }
