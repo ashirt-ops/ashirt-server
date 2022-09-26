@@ -43,7 +43,7 @@ func unwrapCredential(cred AShirtWebauthnCredential) auth.Credential {
 
 func wrapCredential(cred auth.Credential, extra AShirtWebauthnExtension) AShirtWebauthnCredential {
 	return AShirtWebauthnCredential{
-		Credential: cred,
+		Credential:              cred,
 		AShirtWebauthnExtension: extra,
 	}
 }
