@@ -39,6 +39,8 @@ export default (props: {
                 numTags={op.numTags}
                 numEvidence={op.numEvidence}
                 onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
+                topContribs={op.topContribs}
+                evidenceTypes={op.evidenceTypes}
                 className={cx('card')}
               />
             )

@@ -218,15 +218,16 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	var topContribs []dtos.TopContrib
 	var evidenceCount []dtos.EvidenceTypes
 
-	getEvidencCounts := `SELECT operation_id,
-  COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
-  COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
-  COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
-  COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
-  COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
-FROM 
-  evidence
- Where operation_id = 1`
+	getEvidenceCounts := `SELECT operation_id,
+	  COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
+	  COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
+	  COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
+	  COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
+	  COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
+	FROM
+	  evidence
+	 Where operation_id = 1`
+	// TODO TN change this to be a dynamic values
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
@@ -243,7 +244,13 @@ FROM
 			Where(sq.Eq{"operation_id": operation.ID}).
 			GroupBy("users.id"))
 
-		tx.SelectRaw(&evidenceCount, getEvidencCounts)
+		// tx.Select(&evidenceCount, sq.Select("operation_id", "COUNT(CASE WHEN content_type = 'image' THEN 1 END) image_count", "COUNT(CASE WHEN content_type = 'codeblock' THEN 1 END) codeblock_count",
+		// 	"COUNT(CASE WHEN content_type = 'terminal-recording' THEN 1 END) recording_count", "COUNT(CASE WHEN content_type = 'event' THEN 1 END) event_count",
+		// 	"COUNT(CASE WHEN content_type = 'http-request-cycle' THEN 1 END) har_count").
+		// 	From("evidence").
+		// 	Where(sq.Eq{"operation_id": operation.ID}))
+
+		tx.SelectRaw(&evidenceCount, getEvidenceCounts)
 	})
 
 	if err != nil {
@@ -392,6 +399,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 			}
 		}
 
+		// TODO Break out of this after I find the thign
 		var evidenceTypesForOp dtos.EvidenceTypes
 		for i := range evidenceTypes {
 			if evidenceTypes[i].OperationID == operation.ID {

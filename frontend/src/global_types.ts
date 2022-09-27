@@ -94,6 +94,21 @@ export type SubmittableEvidence =
   | ContentFreeEvidence
   | Event
 
+export type TopContrib = {
+  slug: string,
+  operationId: number,
+  count: number,
+}
+
+export type EvidenceTypes = {
+  operationId?: number,
+  imageCount: number,
+  codeblockCount: number,
+  recordingCount: number,
+  eventCount: number,
+  harCount: number,
+}
+
 export type Operation = {
   slug: string,
   name: string,
@@ -102,6 +117,8 @@ export type Operation = {
   numEvidence: number,
   numTags: number,
   favorite: boolean,
+  topContribs: Array<TopContrib>,
+  evidenceTypes: EvidenceTypes,
 }
 
 export type Evidence = {
