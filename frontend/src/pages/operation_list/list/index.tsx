@@ -27,9 +27,8 @@ export default (props: {
       {
         ops
           .filter(op => normalizedInclude(op.name, props.filterText.value))
-          .map(op => {
-            // TODO TN remove return
-            return (
+          .map(op => 
+            (
               <OperationCard
                 slug={op.slug}
                 status={op.status}
@@ -45,7 +44,7 @@ export default (props: {
                 className={cx('card')}
               />
             )
-          })
+          )
       }
       {displayButtonCriteria && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
     </div>

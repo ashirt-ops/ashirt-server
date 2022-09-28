@@ -218,16 +218,16 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	var topContribs []dtos.TopContrib
 	var evidenceCount []dtos.EvidenceCount
 
-	getEvidenceCounts := `SELECT operation_id,
-	  COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
-	  COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
-	  COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
-	  COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
-	  COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
-	FROM
-	  evidence
-	 Where operation_id = 1`
-	// TODO TN change this to be a dynamic values
+	getEvidenceCounts := fmt.Sprintf(`
+		SELECT operation_id,
+			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
+			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
+			COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
+			COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
+			COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
+		FROM
+			evidence
+		Where operation_id = %d`, operation.ID)
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
@@ -237,18 +237,11 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 			From("user_operation_permissions").
 			Where(sq.Eq{"user_id": middleware.UserID(ctx), "operation_id": operation.ID}))
 
-		// TODO TN - there's no operation_id present right now
 		tx.Select(&topContribs, sq.Select("slug", "count(evidence.id) AS count").
 			From("evidence").
 			LeftJoin("users ON evidence.operator_id = users.id").
 			Where(sq.Eq{"operation_id": operation.ID}).
 			GroupBy("users.id"))
-
-		// tx.Select(&evidenceCount, sq.Select("operation_id", "COUNT(CASE WHEN content_type = 'image' THEN 1 END) image_count", "COUNT(CASE WHEN content_type = 'codeblock' THEN 1 END) codeblock_count",
-		// 	"COUNT(CASE WHEN content_type = 'terminal-recording' THEN 1 END) recording_count", "COUNT(CASE WHEN content_type = 'event' THEN 1 END) event_count",
-		// 	"COUNT(CASE WHEN content_type = 'http-request-cycle' THEN 1 END) har_count").
-		// 	From("evidence").
-		// 	Where(sq.Eq{"operation_id": operation.ID}))
 
 		tx.SelectRaw(&evidenceCount, getEvidenceCounts)
 	})
@@ -325,39 +318,31 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 
 	var evidenceCount []dtos.EvidenceCount
 
-	// TODO TN rewrite this op with base select as separate string
-	getTopContributorsForEachOperation := `
+	getDataFromEvidence := `
+		SELECT
+			slug,
+			operation_id,
+			count(evidence.id) AS count
+		FROM
+			evidence
+			LEFT JOIN users ON evidence.operator_id = users.id`
+
+	getTopContributorsForEachOperation := fmt.Sprintf(`
 		SELECT
 			t1.*
-		FROM (
-			SELECT
-				slug,
-				operation_id,
-				count(evidence.id) AS count
-			FROM
-				evidence
-			LEFT JOIN users ON evidence.operator_id = users.id
+		FROM (%s
 		GROUP BY
 			operation_id,
 			users.id) t1
 			LEFT JOIN (
-				SELECT
-					slug,
-					operation_id,
-					count(evidence.id) AS count
-				FROM
-					evidence
-					LEFT JOIN users ON evidence.operator_id = users.id
+				%s	
 				GROUP BY
 					operation_id,
 					users.id) t2 ON t1.operation_id = t2.operation_id
 			AND t1.count < t2.count
 		WHERE
-			t2.count IS NULL`
+			t2.count IS NULL`, getDataFromEvidence, getDataFromEvidence)
 
-	// Rename Evidence Types to Evidence
-	// TODO TN rewrite this to use squirrel
-	// if don't do that, maybe move these queries  elsehwere in the module
 	evidenceCountForEachOperation := `
 		SELECT operation_id,
 			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
@@ -391,7 +376,6 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 	operationsDTO := []operationListItem{}
 	for _, operation := range operations {
 
-		// TODO I don't need to be doing this loop I don't think
 		var topContribsForOp []dtos.TopContrib
 		for i := range topContribs {
 			if topContribs[i].OperationID == operation.ID {
@@ -399,11 +383,11 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 			}
 		}
 
-		// TODO Break out of this after I find the thign
 		var evidenceCountForOp dtos.EvidenceCount
 		for i := range evidenceCount {
 			if evidenceCount[i].OperationID == operation.ID {
 				evidenceCountForOp = evidenceCount[i]
+				break
 			}
 		}
 
