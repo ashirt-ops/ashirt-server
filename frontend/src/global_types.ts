@@ -100,7 +100,7 @@ export type TopContrib = {
   count: number,
 }
 
-export type EvidenceTypes = {
+export type EvidenceCount = {
   operationId?: number,
   imageCount: number,
   codeblockCount: number,
@@ -118,7 +118,7 @@ export type Operation = {
   numTags: number,
   favorite: boolean,
   topContribs: Array<TopContrib>,
-  evidenceTypes: EvidenceTypes,
+  evidenceCount: EvidenceCount,
 }
 
 export type Evidence = {

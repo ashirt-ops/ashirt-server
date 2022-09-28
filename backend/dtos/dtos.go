@@ -53,7 +53,7 @@ type TopContrib struct {
 	Count       int64  `db:"count" json:"count"`
 }
 
-type EvidenceTypes struct {
+type EvidenceCount struct {
 	OperationID    int64 `db:"operation_id" json:"operationId"`
 	ImageCount     int64 `db:"image_count" json:"imageCount"`
 	CodeblockCount int64 `db:"codeblock_count" json:"codeblockCount"`
@@ -71,7 +71,7 @@ type Operation struct {
 	Status        models.OperationStatus `json:"status"`
 	Favorite      bool                   `json:"favorite"`
 	TopContribs   []TopContrib           `json:"topContribs"`
-	EvidenceTypes EvidenceTypes          `json:"evidenceTypes"`
+	EvidenceCount EvidenceCount          `json:"evidenceCount"`
 }
 
 type Query struct {

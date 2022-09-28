@@ -7,7 +7,7 @@ import OperationBadges from 'src/components/operation_badges'
 import OperationBadgesModal from 'src/components/operation_badges_modal'
 import classnames from 'classnames/bind'
 import { Link } from 'react-router-dom'
-import { EvidenceTypes, OperationStatus, TopContrib } from 'src/global_types'
+import { EvidenceCount, OperationStatus, TopContrib } from 'src/global_types'
 import Button from 'src/components/button'
 import { renderModals, useModal, UseModalOutput } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
@@ -23,11 +23,11 @@ export default (props: {
   favorite: boolean,
   onFavoriteClick: () => void,
   topContribs: Array<TopContrib>,
-  evidenceTypes: EvidenceTypes,
+  evidenceCount: EvidenceCount,
 }) => {
   const { favorite } = props
   const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={props.topContribs} evidenceTypes={props.evidenceTypes} status={props.status} />
+    <OperationBadgesModal {...modalProps} topContribs={props.topContribs} evidenceCount={props.evidenceCount} status={props.status} />
   ))
   return (
     <Card className={cx('root', props.className)}>

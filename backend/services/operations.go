@@ -216,7 +216,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	var numUsers int
 	var favorite bool
 	var topContribs []dtos.TopContrib
-	var evidenceCount []dtos.EvidenceTypes
+	var evidenceCount []dtos.EvidenceCount
 
 	getEvidenceCounts := `SELECT operation_id,
 	  COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
@@ -266,7 +266,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		NumEvidence:   operation.NumEvidence,
 		NumTags:       operation.NumTags,
 		TopContribs:   topContribs,
-		EvidenceTypes: evidenceCount[0],
+		EvidenceCount: evidenceCount[0],
 	}, nil
 }
 
@@ -323,7 +323,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 
 	var topContribs []dtos.TopContrib
 
-	var evidenceTypes []dtos.EvidenceTypes
+	var evidenceCount []dtos.EvidenceCount
 
 	// TODO TN rewrite this op with base select as separate string
 	getTopContributorsForEachOperation := `
@@ -358,7 +358,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 	// Rename Evidence Types to Evidence
 	// TODO TN rewrite this to use squirrel
 	// if don't do that, maybe move these queries  elsehwere in the module
-	evidenceTypesForEachOperation := `
+	evidenceCountForEachOperation := `
 		SELECT operation_id,
 			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
 			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
@@ -381,7 +381,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 
 		tx.SelectRaw(&topContribs, getTopContributorsForEachOperation)
 
-		tx.SelectRaw(&evidenceTypes, evidenceTypesForEachOperation)
+		tx.SelectRaw(&evidenceCount, evidenceCountForEachOperation)
 	})
 
 	if err != nil {
@@ -400,10 +400,10 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 		}
 
 		// TODO Break out of this after I find the thign
-		var evidenceTypesForOp dtos.EvidenceTypes
-		for i := range evidenceTypes {
-			if evidenceTypes[i].OperationID == operation.ID {
-				evidenceTypesForOp = evidenceTypes[i]
+		var evidenceCountForOp dtos.EvidenceCount
+		for i := range evidenceCount {
+			if evidenceCount[i].OperationID == operation.ID {
+				evidenceCountForOp = evidenceCount[i]
 			}
 		}
 
@@ -417,7 +417,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 				NumEvidence:   operation.NumEvidence,
 				NumTags:       operation.NumTags,
 				TopContribs:   topContribsForOp,
-				EvidenceTypes: evidenceTypesForOp,
+				EvidenceCount: evidenceCountForOp,
 			},
 		})
 	}

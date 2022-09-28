@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { EvidenceTypes, OperationStatus, operationStatusToLabel, TopContrib } from 'src/global_types'
+import { EvidenceCount, OperationStatus, operationStatusToLabel, TopContrib } from 'src/global_types'
 import Modal from '../modal'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -11,7 +11,7 @@ const cx = classnames.bind(require('./stylesheet'))
 export default (props: {
   onRequestClose: () => void,
   topContribs?: Array<TopContrib>,
-  evidenceTypes?: EvidenceTypes,
+  evidenceCount?: EvidenceCount,
   status?: OperationStatus,
 }) => {
 
@@ -24,8 +24,7 @@ export default (props: {
   }
 
   type ObjectKey = keyof typeof evidenceNameMap;
-  // TODO remove operationID from API call?
-  delete props?.evidenceTypes?.operationId
+  delete props?.evidenceCount?.operationId
 
   return (
     <Modal title="More Details" onRequestClose={props.onRequestClose}>
@@ -56,10 +55,10 @@ export default (props: {
           )}
           </div>
           <div className={cx("column")}>
-            {props?.evidenceTypes && (
+            {props?.evidenceCount && (
               <>
                 <h1 className={cx('modal-heading')}>Evidence by Category</h1>
-                {Object.entries(props?.evidenceTypes).map(ebc => ebc[1] > 0 && ( 
+                {Object.entries(props?.evidenceCount).map(ebc => ebc[1] > 0 && ( 
                   <div key={`${ebc[0]}`} className={cx("inner-div")}>
                     <p className={cx("row-item")} >{evidenceNameMap[ebc[0] as ObjectKey]}: </p>
                     <p className={cx("row-item", "right")}>{ebc[1]}</p>

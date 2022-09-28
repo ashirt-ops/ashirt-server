@@ -27,7 +27,7 @@ const TableRow = (props: {
   const { op } = props
 
   const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={op?.topContribs} evidenceTypes={op?.evidenceTypes} status={op?.status} />
+    <OperationBadgesModal {...modalProps} topContribs={op?.topContribs} evidenceCount={op?.evidenceCount} status={op?.status} />
   ))
 
   return (

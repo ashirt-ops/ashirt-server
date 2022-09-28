@@ -28,6 +28,7 @@ export default (props: {
         ops
           .filter(op => normalizedInclude(op.name, props.filterText.value))
           .map(op => {
+            // TODO TN remove return
             return (
               <OperationCard
                 slug={op.slug}
@@ -40,7 +41,7 @@ export default (props: {
                 numEvidence={op.numEvidence}
                 onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
                 topContribs={op.topContribs}
-                evidenceTypes={op.evidenceTypes}
+                evidenceCount={op.evidenceCount}
                 className={cx('card')}
               />
             )

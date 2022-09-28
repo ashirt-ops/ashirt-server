@@ -22,7 +22,7 @@ func main() {
 	gen(dtos.EvidenceMetadata{})
 	gen(dtos.Finding{})
 	gen(dtos.TopContrib{})
-	gen(dtos.EvidenceTypes{})
+	gen(dtos.EvidenceCount{})
 	gen(dtos.Operation{})
 	gen(dtos.Query{})
 	gen(dtos.Tag{})
