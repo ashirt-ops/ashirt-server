@@ -306,6 +306,9 @@ func ListOperationsForAdmin(ctx context.Context, db *database.Connection) ([]*dt
 	return fixedOps, nil
 }
 
+// listAllOperations is a helper function for both ListOperations and ListOpperationsForAdmin.
+// This retrieves all operations, then relies on the caller to sort which operations are visible
+// to the enduser
 func listAllOperations(ctx context.Context, db *database.Connection) ([]operationListItem, error) {
 	var operations []struct {
 		models.Operation
