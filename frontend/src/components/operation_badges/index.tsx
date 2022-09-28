@@ -13,9 +13,9 @@ export default (props: {
   numTags?: number,
   numUsers: number,
   status: OperationStatus,
-  moreDetailsModal?: UseModalOutput<{}>,
+  showDetailsModal: () => void,
 }) => (
-  <button className={cx('root', props.className)} onClick={() => { console.log("CLICKED_____"); props?.moreDetailsModal?.show({})}}>
+  <button className={cx('root', props.className)} onClick={() => props.showDetailsModal()}>
      <div
       className={cx('status', `status-${props.status}`)}
       title={`Operation status: ${operationStatusToLabel[props.status]}`}

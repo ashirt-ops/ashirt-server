@@ -10,9 +10,9 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   onRequestClose: () => void,
-  topContribs: Array<TopContrib>,
-  evidenceTypes: EvidenceTypes,
-  status: OperationStatus,
+  topContribs?: Array<TopContrib>,
+  evidenceTypes?: EvidenceTypes,
+  status?: OperationStatus,
 }) => {
 
   const evidenceNameMap = {
@@ -24,38 +24,48 @@ export default (props: {
   }
 
   type ObjectKey = keyof typeof evidenceNameMap;
-  const evidenceTypesNoId = props.evidenceTypes
   // TODO remove operationID from API call?
-  delete props.evidenceTypes?.operationId
-  console.log("LOADED")
+  delete props?.evidenceTypes?.operationId
 
   return (
     <Modal title="More Details" onRequestClose={props.onRequestClose}>
       <div className={cx("root")}>
           <div>
-          <h1 className={cx('modal-heading')}>Status</h1>
-            <div
-              className={cx('status', `status-${props.status}`)}
-              title={`Operation status: ${operationStatusToLabel[props.status]}`}
-              children={operationStatusToLabel[props.status]}
-            />
-            <br/>
-            <h1 className={cx('modal-heading')}>Top Contributor{props.topContribs.length > 1 && "s"}</h1>
-            {props.topContribs.map(contrib => (
-            <div className={cx("inner-div")} key={`${contrib.slug}`}>
-              <p className={cx("row-item")}>{contrib.slug}: </p>
-              <p className={cx("row-item", "right")}>{contrib.count}</p>
-            </div>)
-            )}
+          {props?.status !== undefined && (
+            <>
+              <h1 className={cx('modal-heading')}>Status</h1>
+              <div
+                className={cx('status', `status-${props.status}`)}
+                title={`Operation status: ${operationStatusToLabel[props?.status]}`}
+                children={operationStatusToLabel[props?.status]}
+              />
+              <br/>
+            </>
+            )
+          }
+          {props?.topContribs?.length && (
+            <>
+              <h1 className={cx('modal-heading')}>Top Contributor{props?.topContribs?.length > 1 && "s"}</h1>
+              {props?.topContribs?.map(contrib => (
+              <div className={cx("inner-div")} key={`${contrib.slug}`}>
+                <p className={cx("row-item")}>{contrib.slug}: </p>
+                <p className={cx("row-item", "right")}>{contrib.count}</p>
+              </div>)
+              )}
+            </>
+          )}
           </div>
           <div className={cx("column")}>
-            <h1 className={cx('modal-heading')}>Evidence by Category</h1>
-            {Object.entries(evidenceTypesNoId).map(ebc => ebc[1] > 0 && ( 
-              <div key={`${ebc[0]}`} className={cx("inner-div")}>
-                <p className={cx("row-item")} >{evidenceNameMap[ebc[0] as ObjectKey]}: </p>
-                <p className={cx("row-item", "right")}>{ebc[1]}</p>
-              </div>)
-            )}
+            {props?.evidenceTypes && (
+              <>
+                <h1 className={cx('modal-heading')}>Evidence by Category</h1>
+                {Object.entries(props?.evidenceTypes).map(ebc => ebc[1] > 0 && ( 
+                  <div key={`${ebc[0]}`} className={cx("inner-div")}>
+                    <p className={cx("row-item")} >{evidenceNameMap[ebc[0] as ObjectKey]}: </p>
+                    <p className={cx("row-item", "right")}>{ebc[1]}</p>
+                  </div>)
+                )}
+            </>)}
           </div>
       </div>
     </Modal>
