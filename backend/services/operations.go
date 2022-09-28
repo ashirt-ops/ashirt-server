@@ -362,8 +362,8 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 		tx.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 			From("operations").
 			LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
-			Join("evidence ON evidence.operation_id = operations.id").
-			Join("tags ON tags.operation_id = operations.id").
+			LeftJoin("evidence ON evidence.operation_id = operations.id").
+			LeftJoin("tags ON tags.operation_id = operations.id").
 			GroupBy("operations.id").
 			OrderBy("operations.created_at DESC"))
 
