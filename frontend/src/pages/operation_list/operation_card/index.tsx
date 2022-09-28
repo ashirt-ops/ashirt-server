@@ -9,7 +9,7 @@ import classnames from 'classnames/bind'
 import { Link } from 'react-router-dom'
 import { EvidenceCount, OperationStatus, TopContrib } from 'src/global_types'
 import Button from 'src/components/button'
-import { renderModals, useModal, UseModalOutput } from 'src/helpers'
+import { renderModals, useModal } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {

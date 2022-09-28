@@ -4,7 +4,6 @@
 import * as React from 'react'
 import {OperationStatus, operationStatusToLabel} from 'src/global_types'
 import classnames from 'classnames/bind'
-import { UseModalOutput } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {

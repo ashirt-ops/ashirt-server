@@ -27,7 +27,7 @@ export default (props: {
       {
         ops
           .filter(op => normalizedInclude(op.name, props.filterText.value))
-          .map(op => 
+          .map(op =>
             (
               <OperationCard
                 slug={op.slug}
@@ -51,7 +51,7 @@ export default (props: {
   )
 
   const favOpsExists = favoriteOps.length > 0
-  
+
   return (
     <div>
         {returnOps(favoriteOps, favOpsExists)}

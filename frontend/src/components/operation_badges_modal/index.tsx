@@ -58,7 +58,7 @@ export default (props: {
             {props?.evidenceCount && (
               <>
                 <h1 className={cx('modal-heading')}>Evidence by Category</h1>
-                {Object.entries(props?.evidenceCount).map(ebc => ebc[1] > 0 && ( 
+                {Object.entries(props?.evidenceCount).map(ebc => ebc[1] > 0 && (
                   <div key={`${ebc[0]}`} className={cx("inner-div")}>
                     <p className={cx("row-item")} >{evidenceNameMap[ebc[0] as ObjectKey]}: </p>
                     <p className={cx("row-item", "right")}>{ebc[1]}</p>
