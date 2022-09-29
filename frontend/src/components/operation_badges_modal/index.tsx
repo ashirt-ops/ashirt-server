@@ -11,8 +11,8 @@ const cx = classnames.bind(require('./stylesheet'))
 export default (props: {
   onRequestClose: () => void,
   topContribs?: Array<TopContrib>,
-  evidenceCount?: EvidenceCount,
-  status?: OperationStatus,
+  evidenceCount: EvidenceCount,
+  status: OperationStatus,
 }) => {
 
   const evidenceNameMap = {
@@ -24,24 +24,21 @@ export default (props: {
   }
 
   type ObjectKey = keyof typeof evidenceNameMap;
-  delete props?.evidenceCount?.operationId
+  delete props.evidenceCount?.operationId
+
+  const evidencePresent = Object.values(props.evidenceCount).reduce((p, c) => p + c, 0) > 0 
 
   return (
     <Modal title="More Details" onRequestClose={props.onRequestClose}>
       <div className={cx("root")}>
           <div>
-          {props?.status !== undefined && (
-            <>
-              <h1 className={cx('modal-heading')}>Status</h1>
-              <div
-                className={cx('status', `status-${props.status}`)}
-                title={`Operation status: ${operationStatusToLabel[props?.status]}`}
-                children={operationStatusToLabel[props?.status]}
-              />
-              <br/>
-            </>
-            )
-          }
+            <h1 className={cx('modal-heading')}>Status</h1>
+            <div
+              className={cx('status', `status-${props.status}`)}
+              title={`Operation status: ${operationStatusToLabel[props?.status]}`}
+              children={operationStatusToLabel[props?.status]}
+            />
+            <br/>
           {props?.topContribs?.length && (
             <>
               <h1 className={cx('modal-heading')}>Top Contributor{props?.topContribs?.length > 1 && "s"}</h1>
@@ -55,7 +52,7 @@ export default (props: {
           )}
           </div>
           <div className={cx("column")}>
-            {props?.evidenceCount && (
+            {evidencePresent && (
               <>
                 <h1 className={cx('modal-heading')}>Evidence by Category</h1>
                 {Object.entries(props?.evidenceCount).map(ebc => ebc[1] > 0 && (
