@@ -22,7 +22,7 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pquerna/otp v1.3.0
 	github.com/prometheus/client_golang v1.13.0
-	github.com/rubenv/sql-migrate v1.1.2
+	github.com/rubenv/sql-migrate v1.2.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
