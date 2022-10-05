@@ -75,7 +75,9 @@ func (c *Connection) Insert(tableName string, valueMap map[string]interface{}, o
 // tableName: the name of the target table
 // count: the number of items needed to insert
 // mapFn: A function that produces a single set of values for a new database row.
-//	       Note that this will be called <count> times
+//
+//	Note that this will be called <count> times
+//
 // Returns: an error if the insert fails
 func (c *Connection) BatchInsert(tableName string, count int, mapFn func(int) map[string]interface{}, onDuplicates ...interface{}) error {
 	if count == 0 {

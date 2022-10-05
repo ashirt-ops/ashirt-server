@@ -47,11 +47,12 @@ func makeErrCoercable(backref *DissectedRequest) *Coercable {
 // will itself be coerced into the target type. If the type cannot be coerced into the target type
 // then the appropriate zero value will be returned.
 //
-// This is a non-terminal Coercable action
+// # This is a non-terminal Coercable action
 //
 // Examples:
-//		assert(parsedJSON.FromBody("anInt").OrDefault(12).AsInt64(), int64(12))
-// 		assert(parsedJSON.FromBody("anInt").OrDefault("twelve").AsInt64(), 0)
+//
+//	assert(parsedJSON.FromBody("anInt").OrDefault(12).AsInt64(), int64(12))
+//	assert(parsedJSON.FromBody("anInt").OrDefault("twelve").AsInt64(), 0)
 func (c *Coercable) OrDefault(defaultValue interface{}) *Coercable {
 	c.defaultValue = defaultValue
 	return c

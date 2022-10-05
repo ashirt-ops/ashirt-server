@@ -27,6 +27,7 @@ type ConnectionProxy interface {
 
 // _verifyConnectionProxyInterface is a "canary" function that ensures that the expected concrete
 // types to the ConnectionProxy interface properly implement the interface.
+//
 //lint:ignore U1000 This is just to verify the interface -- it should never be called directly anyway
 func _verifyConnectionProxyInterface() {
 	var conn *Connection

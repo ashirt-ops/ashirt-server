@@ -2,8 +2,8 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 /*
-	This file provides a rewrap of the relevant remux package. This is done to make migration easier,
-	and to minimize the impact of this refactor
+This file provides a rewrap of the relevant remux package. This is done to make migration easier,
+and to minimize the impact of this refactor
 */
 package server
 
