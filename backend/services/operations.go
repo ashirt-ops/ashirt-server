@@ -218,7 +218,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	var topContribs []dtos.TopContrib
 	var evidenceCount []dtos.EvidenceCount
 
-	getEvidenceCounts := fmt.Sprintf(`
+	getEvidenceCounts := `
 		SELECT operation_id,
 			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
 			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
@@ -227,7 +227,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 			COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
 		FROM
 			evidence
-		Where operation_id = %d`, operation.ID)
+		Where operation_id = ?
+		GROUP BY operation_id`
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
@@ -243,11 +244,19 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 			Where(sq.Eq{"operation_id": operation.ID}).
 			GroupBy("users.id"))
 
-		tx.SelectRaw(&evidenceCount, getEvidenceCounts)
+		tx.SelectRawWithIntArg(&evidenceCount, getEvidenceCounts, operation.ID)
 	})
 
 	if err != nil {
 		return nil, backend.WrapError("Cannot read operation", backend.DatabaseErr(err))
+	}
+
+	evidenceExists := len(evidenceCount) > 0
+	var evidence dtos.EvidenceCount
+	if evidenceExists {
+		evidence = evidenceCount[0]
+	} else {
+		evidence = dtos.EvidenceCount{}
 	}
 
 	return &dtos.Operation{
@@ -259,7 +268,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		NumEvidence:   operation.NumEvidence,
 		NumTags:       operation.NumTags,
 		TopContribs:   topContribs,
-		EvidenceCount: evidenceCount[0],
+		EvidenceCount: evidence,
 	}, nil
 }
 

@@ -114,8 +114,8 @@ type operationWithCounts struct {
 func lookupOperationWithCounts(db *database.Connection, operationSlug string) (*operationWithCounts, error) {
 	var opAndData operationWithCounts
 	err := db.Get(&opAndData, sq.Select("operations.id", "operations.name", "status", "count(distinct(tags.id)) AS num_tags", "count(distinct(evidence.id)) AS num_evidence").
-		Join("evidence ON evidence.operation_id = operations.id").
-		Join("tags ON tags.operation_id = operations.id").
+		LeftJoin("evidence ON evidence.operation_id = operations.id").
+		LeftJoin("tags ON tags.operation_id = operations.id").
 		From("operations").
 		GroupBy("operations.id").
 		Where(sq.Eq{"slug": operationSlug}))

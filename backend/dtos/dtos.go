@@ -71,7 +71,7 @@ type Operation struct {
 	Status        models.OperationStatus `json:"status"`
 	Favorite      bool                   `json:"favorite"`
 	TopContribs   []TopContrib           `json:"topContribs"`
-	EvidenceCount EvidenceCount          `json:"evidenceCount"`
+	EvidenceCount EvidenceCount          `json:"evidenceCount,omitempty"`
 }
 
 type Query struct {
