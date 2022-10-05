@@ -238,6 +238,18 @@ func TestReadOperation(t *testing.T) {
 		require.Equal(t, masterOp.Slug, retrievedOp.Slug)
 		require.Equal(t, masterOp.Name, retrievedOp.Name)
 		require.Equal(t, masterOp.Status, retrievedOp.Status)
+		require.Equal(t, 6, retrievedOp.NumUsers)
+		require.Equal(t, true, retrievedOp.Favorite)
+		require.Equal(t, 8, retrievedOp.NumEvidence)
+		require.Equal(t, 12, retrievedOp.NumTags)
+		require.Equal(t, 3, len(retrievedOp.TopContribs))
+		require.Equal(t, "harry.potter", retrievedOp.TopContribs[0].Slug)
+		require.Equal(t, int64(2), retrievedOp.EvidenceCount.CodeblockCount)
+		require.Equal(t, int64(6), retrievedOp.EvidenceCount.ImageCount)
+		require.Equal(t, int64(0), retrievedOp.EvidenceCount.RecordingCount)
+		require.Equal(t, int64(0), retrievedOp.EvidenceCount.EventCount)
+		require.Equal(t, int64(0), retrievedOp.EvidenceCount.HarCount)
+
 		require.Equal(t, len(seed.UsersForOp(masterOp)), retrievedOp.NumUsers)
 	})
 }
