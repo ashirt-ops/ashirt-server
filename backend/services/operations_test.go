@@ -242,7 +242,7 @@ func TestReadOperation(t *testing.T) {
 		require.Equal(t, true, retrievedOp.Favorite)
 		require.Equal(t, 8, retrievedOp.NumEvidence)
 		require.Equal(t, 12, retrievedOp.NumTags)
-		require.Equal(t, 3, len(retrievedOp.TopContribs))
+		require.Equal(t, 1, len(retrievedOp.TopContribs))
 		require.Equal(t, "harry.potter", retrievedOp.TopContribs[0].Slug)
 		require.Equal(t, int64(2), retrievedOp.EvidenceCount.CodeblockCount)
 		require.Equal(t, int64(6), retrievedOp.EvidenceCount.ImageCount)

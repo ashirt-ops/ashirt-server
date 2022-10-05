@@ -230,6 +230,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		Where operation_id = ?
 		GROUP BY operation_id`
 
+	getTopContributorsForOperation := getTopContributorsForEachOperation + ` AND t1.operation_id = ?`
+
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
 			Where(sq.Eq{"operation_id": operation.ID}))
@@ -244,6 +246,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 			Where(sq.Eq{"operation_id": operation.ID}).
 			GroupBy("users.id"))
 
+		tx.SelectRawWithIntArg(&topContribs, getTopContributorsForOperation, operation.ID)
 		tx.SelectRawWithIntArg(&evidenceCount, getEvidenceCounts, operation.ID)
 	})
 
@@ -330,31 +333,6 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 
 	var evidenceCount []dtos.EvidenceCount
 
-	getDataFromEvidence := `
-		SELECT
-			slug,
-			operation_id,
-			count(evidence.id) AS count
-		FROM
-			evidence
-			LEFT JOIN users ON evidence.operator_id = users.id`
-
-	getTopContributorsForEachOperation := fmt.Sprintf(`
-		SELECT
-			t1.*
-		FROM (%s
-		GROUP BY
-			operation_id,
-			users.id) t1
-			LEFT JOIN (
-				%s	
-				GROUP BY
-					operation_id,
-					users.id) t2 ON t1.operation_id = t2.operation_id
-			AND t1.count < t2.count
-		WHERE
-			t2.count IS NULL`, getDataFromEvidence, getDataFromEvidence)
-
 	evidenceCountForEachOperation := `
 		SELECT operation_id,
 			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
@@ -432,7 +410,7 @@ func SetFavoriteOperation(ctx context.Context, db *database.Connection, i SetFav
 	}
 
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return backend.WrapError("Unwilling to read operatoin", backend.UnauthorizedReadErr(err))
+		return backend.WrapError("Unwilling to read operation", backend.UnauthorizedReadErr(err))
 	}
 
 	err = db.Update(sq.Update("user_operation_permissions").
@@ -458,3 +436,28 @@ func SanitizeOperationSlug(slug string) string {
 		"-",
 	)
 }
+
+var getDataFromEvidence string = `
+	SELECT
+		slug,
+		operation_id,
+		count(evidence.id) AS count
+	FROM
+		evidence
+		LEFT JOIN users ON evidence.operator_id = users.id`
+
+var getTopContributorsForEachOperation string = fmt.Sprintf(`
+	SELECT
+		t1.*
+	FROM (%s
+	GROUP BY
+		operation_id,
+		users.id) t1
+		LEFT JOIN (
+			%s	
+			GROUP BY
+				operation_id,
+				users.id) t2 ON t1.operation_id = t2.operation_id
+		AND t1.count < t2.count
+	WHERE
+		t2.count IS NULL`, getDataFromEvidence, getDataFromEvidence)
