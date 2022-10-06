@@ -105,12 +105,6 @@ func TestDeleteOperation(t *testing.T) {
 	})
 }
 
-// TODO TN Get rid of this duplication
-type OperationListItem struct {
-	Op *dtos.Operation
-	ID int64
-}
-
 func TestListOperations(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		validateOperationList := func(receivedOps []*dtos.Operation, expectedOps []*dtos.Operation) {

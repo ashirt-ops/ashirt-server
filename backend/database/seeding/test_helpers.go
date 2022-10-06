@@ -16,33 +16,8 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/theparanoids/ashirt-server/backend/services"
 )
-
-// TODO TN FIGURE out what to do with these duplicated strings
-var getDataFromEvidence string = `
-	SELECT
-		slug,
-		operation_id,
-		count(evidence.id) AS count
-	FROM
-		evidence
-		LEFT JOIN users ON evidence.operator_id = users.id`
-
-var GetTopContributorsForEachOperation string = fmt.Sprintf(`
-	SELECT
-		t1.*
-	FROM (%s
-	GROUP BY
-		operation_id,
-		users.id) t1
-		LEFT JOIN (
-			%s	
-			GROUP BY
-				operation_id,
-				users.id) t2 ON t1.operation_id = t2.operation_id
-		AND t1.count < t2.count
-	WHERE
-		t2.count IS NULL`, getDataFromEvidence, getDataFromEvidence)
 
 // TinyImg is the smallest png. Used for testing. Reference: https://github.com/mathiasbynens/small
 var TinyImg []byte = []byte{
@@ -256,7 +231,7 @@ func GetOperationFromSlug(t *testing.T, db *database.Connection, slug string) mo
 	return fullOp
 }
 
-func GetOperations(t *testing.T, db *database.Connection) []OperationListItem {
+func GetOperations(t *testing.T, db *database.Connection) []services.OperationWithID {
 	var operations []struct {
 		models.Operation
 		NumUsers    int `db:"num_users"`
@@ -280,7 +255,6 @@ func GetOperations(t *testing.T, db *database.Connection) []OperationListItem {
 		GROUP BY 
 			operation_id`
 
-	// TODO TN change this to be a transaction now that I'm getting the context
 	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 		From("operations").
 		LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
@@ -291,7 +265,7 @@ func GetOperations(t *testing.T, db *database.Connection) []OperationListItem {
 
 	require.NoError(t, err)
 
-	err = db.SelectRaw(&topContribs, GetTopContributorsForEachOperation)
+	err = db.SelectRaw(&topContribs, services.GetTopContributorsForEachOperation)
 
 	require.NoError(t, err)
 
@@ -299,7 +273,7 @@ func GetOperations(t *testing.T, db *database.Connection) []OperationListItem {
 
 	require.NoError(t, err)
 
-	operationsDTO := []OperationListItem{}
+	operationsWithID := []services.OperationWithID{}
 	for _, operation := range operations {
 
 		var topContribsForOp []dtos.TopContrib
@@ -317,7 +291,7 @@ func GetOperations(t *testing.T, db *database.Connection) []OperationListItem {
 			}
 		}
 
-		operationsDTO = append(operationsDTO, OperationListItem{
+		operationsWithID = append(operationsWithID, services.OperationWithID{
 			ID: operation.ID,
 			Op: &dtos.Operation{
 				Slug:          operation.Slug,
@@ -331,18 +305,11 @@ func GetOperations(t *testing.T, db *database.Connection) []OperationListItem {
 			},
 		})
 	}
-	return operationsDTO
-}
-
-// TODO TN Figure out what to do with this duplicated code
-type OperationListItem struct {
-	Op *dtos.Operation
-	ID int64
+	return operationsWithID
 }
 
 func GetOperationsForUser(t *testing.T, db *database.Connection, user models.User) []*dtos.Operation {
-
-	var operations []OperationListItem
+	var operations []services.OperationWithID
 	operations = GetOperations(t, db)
 
 	ctx := ContextForUser(user, db)

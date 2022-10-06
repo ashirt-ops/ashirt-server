@@ -35,7 +35,7 @@ type UpdateOperationInput struct {
 	Status        models.OperationStatus
 }
 
-type operationListItem struct {
+type OperationWithID struct {
 	Op *dtos.Operation
 	ID int64
 }
@@ -230,7 +230,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		Where operation_id = ?
 		GROUP BY operation_id`
 
-	getTopContributorsForOperation := getTopContributorsForEachOperation + ` AND t1.operation_id = ?`
+	getTopContributorsForOperation := GetTopContributorsForEachOperation + ` AND t1.operation_id = ?`
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
@@ -321,7 +321,7 @@ func ListOperationsForAdmin(ctx context.Context, db *database.Connection) ([]*dt
 // listAllOperations is a helper function for both ListOperations and ListOpperationsForAdmin.
 // This retrieves all operations, then relies on the caller to sort which operations are visible
 // to the enduser
-func listAllOperations(ctx context.Context, db *database.Connection) ([]operationListItem, error) {
+func listAllOperations(ctx context.Context, db *database.Connection) ([]OperationWithID, error) {
 	var operations []struct {
 		models.Operation
 		NumUsers    int `db:"num_users"`
@@ -354,7 +354,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 			GroupBy("operations.id").
 			OrderBy("operations.created_at DESC"))
 
-		tx.SelectRaw(&topContribs, getTopContributorsForEachOperation)
+		tx.SelectRaw(&topContribs, GetTopContributorsForEachOperation)
 
 		tx.SelectRaw(&evidenceCount, evidenceCountForEachOperation)
 	})
@@ -363,7 +363,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 		return nil, backend.WrapError("Cannot list all operations", backend.DatabaseErr(err))
 	}
 
-	operationsDTO := []operationListItem{}
+	operationsDTO := []OperationWithID{}
 	for _, operation := range operations {
 
 		var topContribsForOp []dtos.TopContrib
@@ -381,7 +381,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]operatio
 			}
 		}
 
-		operationsDTO = append(operationsDTO, operationListItem{
+		operationsDTO = append(operationsDTO, OperationWithID{
 			ID: operation.ID,
 			Op: &dtos.Operation{
 				Slug:          operation.Slug,
@@ -446,7 +446,7 @@ var getDataFromEvidence string = `
 		evidence
 		LEFT JOIN users ON evidence.operator_id = users.id`
 
-var getTopContributorsForEachOperation string = fmt.Sprintf(`
+var GetTopContributorsForEachOperation string = fmt.Sprintf(`
 	SELECT
 		t1.*
 	FROM (%s
