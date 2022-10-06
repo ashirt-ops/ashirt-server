@@ -242,18 +242,6 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 
 	var evidenceCount []dtos.EvidenceCount
 
-	evidenceCountForEachOperation := `
-		SELECT operation_id,
-			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
-			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
-			COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
-			COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
-			COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
-		FROM 
-			evidence
-		GROUP BY 
-			operation_id`
-
 	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 		From("operations").
 		LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
@@ -268,7 +256,7 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 
 	require.NoError(t, err)
 
-	err = db.SelectRaw(&evidenceCount, evidenceCountForEachOperation)
+	err = db.SelectRaw(&evidenceCount, services.EvidenceCountForEachOperation)
 
 	require.NoError(t, err)
 

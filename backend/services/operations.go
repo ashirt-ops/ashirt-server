@@ -333,18 +333,6 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 
 	var evidenceCount []dtos.EvidenceCount
 
-	evidenceCountForEachOperation := `
-		SELECT operation_id,
-			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
-			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
-			COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
-			COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
-			COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
-		FROM 
-			evidence
-		GROUP BY 
-			operation_id`
-
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 			From("operations").
@@ -356,7 +344,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 
 		tx.SelectRaw(&topContribs, GetTopContributorsForEachOperation)
 
-		tx.SelectRaw(&evidenceCount, evidenceCountForEachOperation)
+		tx.SelectRaw(&evidenceCount, EvidenceCountForEachOperation)
 	})
 
 	if err != nil {
@@ -461,3 +449,15 @@ var GetTopContributorsForEachOperation string = fmt.Sprintf(`
 		AND t1.count < t2.count
 	WHERE
 		t2.count IS NULL`, getDataFromEvidence, getDataFromEvidence)
+
+var EvidenceCountForEachOperation string = `
+	SELECT operation_id,
+		COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
+		COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
+		COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
+		COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
+		COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
+	FROM 
+		evidence
+	GROUP BY 
+		operation_id`
