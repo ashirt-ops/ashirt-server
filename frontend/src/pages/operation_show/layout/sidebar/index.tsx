@@ -41,6 +41,8 @@ export default (props: {
     <OperationBadgesModal {...modalProps} topContribs={operation?.topContribs} evidenceCount={operation?.evidenceCount} status={operation?.status} />
   ))
 
+  const handleDetailsModal = () => moreDetailsModal?.show({})
+
   return (
     <div className={cx('root')}>
       <header>
@@ -52,7 +54,7 @@ export default (props: {
           onClick={() => setIsFavorite(!isFavorite)}
         >
         </Button>
-        <OperationBadges {...operation} showDetailsModal={() => moreDetailsModal?.show({})} />
+        <OperationBadges {...operation} showDetailsModal={handleDetailsModal} />
       </header>
       {props.showCreateButtons == 'sidebar-above' && (
         <ButtonGroup className={cx('create-evi-finding-group')}>
