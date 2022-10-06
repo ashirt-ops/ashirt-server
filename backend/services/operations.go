@@ -218,17 +218,10 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	var topContribs []dtos.TopContrib
 	var evidenceCount []dtos.EvidenceCount
 
-	getEvidenceCounts := `
-		SELECT operation_id,
-			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
-			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
-			COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
-			COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
-			COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
-		FROM
-			evidence
-		Where operation_id = ?
-		GROUP BY operation_id`
+	var evidenceCountForOneOperation string = fmt.Sprintf(`
+	%s
+	WHERE operation_id = ?
+		GROUP BY operation_id`, getCountsFromEvidence)
 
 	getTopContributorsForOperation := GetTopContributorsForEachOperation + ` AND t1.operation_id = ?`
 
@@ -247,7 +240,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 			GroupBy("users.id"))
 
 		tx.SelectRawWithIntArg(&topContribs, getTopContributorsForOperation, operation.ID)
-		tx.SelectRawWithIntArg(&evidenceCount, getEvidenceCounts, operation.ID)
+		tx.SelectRawWithIntArg(&evidenceCount, evidenceCountForOneOperation, operation.ID)
 	})
 
 	if err != nil {
@@ -344,7 +337,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 
 		tx.SelectRaw(&topContribs, GetTopContributorsForEachOperation)
 
-		tx.SelectRaw(&evidenceCount, EvidenceCountForEachOperation)
+		tx.SelectRaw(&evidenceCount, EvidenceCountForAllOperations)
 	})
 
 	if err != nil {
@@ -450,14 +443,18 @@ var GetTopContributorsForEachOperation string = fmt.Sprintf(`
 	WHERE
 		t2.count IS NULL`, getDataFromEvidence, getDataFromEvidence)
 
-var EvidenceCountForEachOperation string = `
-	SELECT operation_id,
-		COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
-		COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
-		COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
-		COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
-		COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
-	FROM 
-		evidence
+var getCountsFromEvidence string = `
+SELECT operation_id,
+	COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
+	COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
+	COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
+	COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
+	COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
+FROM
+	evidence
+`
+
+var EvidenceCountForAllOperations string = fmt.Sprintf(`
+	%s
 	GROUP BY 
-		operation_id`
+		operation_id`, getCountsFromEvidence)

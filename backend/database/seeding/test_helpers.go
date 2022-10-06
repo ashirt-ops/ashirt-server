@@ -256,7 +256,7 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 
 	require.NoError(t, err)
 
-	err = db.SelectRaw(&evidenceCount, services.EvidenceCountForEachOperation)
+	err = db.SelectRaw(&evidenceCount, services.EvidenceCountForAllOperations)
 
 	require.NoError(t, err)
 
