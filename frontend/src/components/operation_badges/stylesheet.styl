@@ -35,23 +35,18 @@
 for $id, $color in $operation-status-colors
   .status-{$id}:before { background: $color }
 
-.num-users
+.icon
   margin-left: 5px
-  background-image: url(./user.svg)
-  background-size: 8px
-  background-position: 9px center
-  background-repeat: no-repeat
-
-.num-tags
-  margin-left: 5px
-  background-image: url(./tag.svg)
   background-size: 11px
   background-position: 9px center
   background-repeat: no-repeat
 
-.num-evidence
-  margin-left: 5px
-  background-image: url(./magnifyingGlass.svg)
-  background-size: 11px
-  background-position: 9px center
-  background-repeat: no-repeat
+  &.tags
+    background-image: url(./tag.svg)
+
+  &.users
+    background-image: url('./user.svg')
+    background-size: 8px
+
+  &.evidence
+    background-image: url(./magnifyingGlass.svg)
