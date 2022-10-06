@@ -27,6 +27,12 @@ func (c *Connection) Select(modelSlice interface{}, sb squirrel.SelectBuilder) e
 	return c.Sqlx.Select(modelSlice, query, values...)
 }
 
+// SelectRaw executes a raw SQL string
+// Note: this is for retriving multiple results, or "rows"
+func (c *Connection) SelectRaw(modelSlice interface{}, query string) error {
+	return c.Sqlx.Select(modelSlice, query)
+}
+
 // Get executes the provided SelectBuilder query, and marshals the response into the provided structure.
 // Note: this is for retriving a single value -- i.e. not a row, but a cell
 func (c *Connection) Get(model interface{}, sb squirrel.SelectBuilder) error {

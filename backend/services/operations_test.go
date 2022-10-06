@@ -4,6 +4,7 @@
 package services_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -104,28 +105,34 @@ func TestDeleteOperation(t *testing.T) {
 	})
 }
 
+// TODO TN Get rid of this duplication
+type OperationListItem struct {
+	Op *dtos.Operation
+	ID int64
+}
+
 func TestListOperations(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		validateOperationList := func(receivedOps []*dtos.Operation, expectedOps []models.Operation) {
+		validateOperationList := func(receivedOps []*dtos.Operation, expectedOps []*dtos.Operation) {
 			for _, op := range receivedOps {
-				var expected *models.Operation = nil
+				var expected *dtos.Operation = nil
 				for _, fOp := range expectedOps {
 					if fOp.Slug == op.Slug {
-						expected = &fOp
+						expected = fOp
 						break
 					}
 				}
 				require.NotNil(t, expected, "Result should have matching value")
-				validateOp(t, *expected, op)
+				validateOp(t, expected, op)
 			}
 		}
 
 		normalUser := UserRon
-		expectedOps := getOperationsForUser(t, db, normalUser.ID)
+		expectedOps := getOperationsForUser(t, db, normalUser)
 
 		ops, err := services.ListOperations(contextForUser(normalUser, db), db)
 		require.NoError(t, err)
-		require.Equal(t, len(ops), len(expectedOps))
+		require.Equal(t, len(expectedOps), len(ops))
 		validateOperationList(ops, expectedOps)
 
 		opsAndPermissions := getFavoritesByUserID(t, db, normalUser.ID)
@@ -140,12 +147,43 @@ func TestListOperations(t *testing.T) {
 
 		// validate headless users
 		headlessUser := UserHeadlessNick
-		fullOps := getOperations(t, db)
+		fullOps := getOperationsForUser(t, db, headlessUser)
 
 		ops, err = services.ListOperations(contextForUser(headlessUser, db), db)
+		fmt.Print("ops for headless user: ", ops[0])
 		require.NoError(t, err)
 		require.Equal(t, len(ops), len(fullOps))
 		validateOperationList(ops, fullOps)
+	})
+}
+
+func TestListOperationsForAdmin(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserDumbledore, db)
+
+		fullOps := getOperations(t, db)
+		require.NotEqual(t, len(fullOps), 0, "Some number of operations should exist")
+
+		ops, err := services.ListOperationsForAdmin(ctx, db)
+		require.NoError(t, err)
+		require.Equal(t, len(ops), len(fullOps))
+		for _, op := range ops {
+			var expected *dtos.Operation = nil
+			for _, fOp := range ops {
+				if fOp.Slug == op.Slug {
+					expected = fOp
+					break
+				}
+			}
+			require.NotNil(t, expected, "Result should have matching value")
+			validateOp(t, expected, op)
+		}
+
+		// verify non admins don't have access
+		ctx = contextForUser(UserDraco, db)
+		_, err = services.ListOperationsForAdmin(ctx, db)
+		require.Error(t, err)
+		require.Equal(t, "Requesting user is not an admin", err.Error())
 	})
 }
 
@@ -163,36 +201,6 @@ func TestSetFavoriteOperation(t *testing.T) {
 
 		isFavorite = getFavoriteForOperation(t, db, slug, normalUser.ID)
 		require.Equal(t, isFavorite, true)
-	})
-}
-
-func TestListOperationsForAdmin(t *testing.T) {
-	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		ctx := contextForUser(UserDumbledore, db)
-
-		fullOps := getOperations(t, db)
-		require.NotEqual(t, len(fullOps), 0, "Some number of operations should exist")
-
-		ops, err := services.ListOperationsForAdmin(ctx, db)
-		require.NoError(t, err)
-		require.Equal(t, len(ops), len(fullOps))
-		for _, op := range ops {
-			var expected *models.Operation = nil
-			for _, fOp := range fullOps {
-				if fOp.Slug == op.Slug {
-					expected = &fOp
-					break
-				}
-			}
-			require.NotNil(t, expected, "Result should have matching value")
-			validateOp(t, *expected, op)
-		}
-
-		// verify non admins don't have access
-		ctx = contextForUser(UserDraco, db)
-		_, err = services.ListOperationsForAdmin(ctx, db)
-		require.Error(t, err)
-		require.Equal(t, "Requesting user is not an admin", err.Error())
 	})
 }
 
@@ -254,8 +262,14 @@ func TestReadOperation(t *testing.T) {
 	})
 }
 
-func validateOp(t *testing.T, expected models.Operation, actual *dtos.Operation) {
+func validateOp(t *testing.T, expected *dtos.Operation, actual *dtos.Operation) {
 	require.Equal(t, expected.Slug, actual.Slug, "Slugs should match")
 	require.Equal(t, expected.Name, actual.Name, "Names should match")
 	require.Equal(t, expected.Status, actual.Status, "Status should match")
+	require.Equal(t, expected.Favorite, actual.Favorite, "Favorite should match")
+	require.Equal(t, expected.NumUsers, actual.NumUsers, "NumUsers should match")
+	require.Equal(t, expected.NumEvidence, actual.NumEvidence, "NumEvidence should match")
+	require.Equal(t, expected.EvidenceCount, actual.EvidenceCount, "EvidenceCount should match")
+	require.Equal(t, expected.TopContribs, actual.TopContribs, "TopContribs should match")
+	require.Equal(t, expected.NumTags, actual.NumTags, "NumTags should match")
 }

@@ -3,18 +3,46 @@ package seeding
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 )
+
+// TODO TN FIGURE out what to do with these duplicated strings
+var getDataFromEvidence string = `
+	SELECT
+		slug,
+		operation_id,
+		count(evidence.id) AS count
+	FROM
+		evidence
+		LEFT JOIN users ON evidence.operator_id = users.id`
+
+var GetTopContributorsForEachOperation string = fmt.Sprintf(`
+	SELECT
+		t1.*
+	FROM (%s
+	GROUP BY
+		operation_id,
+		users.id) t1
+		LEFT JOIN (
+			%s	
+			GROUP BY
+				operation_id,
+				users.id) t2 ON t1.operation_id = t2.operation_id
+		AND t1.count < t2.count
+	WHERE
+		t2.count IS NULL`, getDataFromEvidence, getDataFromEvidence)
 
 // TinyImg is the smallest png. Used for testing. Reference: https://github.com/mathiasbynens/small
 var TinyImg []byte = []byte{
@@ -228,22 +256,122 @@ func GetOperationFromSlug(t *testing.T, db *database.Connection, slug string) mo
 	return fullOp
 }
 
-func GetOperations(t *testing.T, db *database.Connection) []models.Operation {
-	var fullOps []models.Operation
-	err := db.Select(&fullOps, sq.Select("id", "slug", "name", "status").
-		From("operations"))
+func GetOperations(t *testing.T, db *database.Connection) []OperationListItem {
+	var operations []struct {
+		models.Operation
+		NumUsers    int `db:"num_users"`
+		NumEvidence int `db:"num_evidence"`
+		NumTags     int `db:"num_tags"`
+	}
+
+	var topContribs []dtos.TopContrib
+
+	var evidenceCount []dtos.EvidenceCount
+
+	evidenceCountForEachOperation := `
+		SELECT operation_id,
+			COUNT(CASE WHEN content_type = "image" THEN 1 END) image_count,
+			COUNT(CASE WHEN content_type = "codeblock" THEN 1 END) codeblock_count,
+			COUNT(CASE WHEN content_type = "terminal-recording" THEN 1 END) recording_count,
+			COUNT(CASE WHEN content_type = "event" THEN 1 END) event_count,
+			COUNT(CASE WHEN content_type = "http-request-cycle" THEN 1 END) har_count
+		FROM 
+			evidence
+		GROUP BY 
+			operation_id`
+
+	// TODO TN change this to be a transaction now that I'm getting the context
+	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
+		From("operations").
+		LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
+		LeftJoin("evidence ON evidence.operation_id = operations.id").
+		LeftJoin("tags ON tags.operation_id = operations.id").
+		GroupBy("operations.id").
+		OrderBy("operations.created_at DESC"))
+
 	require.NoError(t, err)
-	return fullOps
+
+	err = db.SelectRaw(&topContribs, GetTopContributorsForEachOperation)
+
+	require.NoError(t, err)
+
+	err = db.SelectRaw(&evidenceCount, evidenceCountForEachOperation)
+
+	require.NoError(t, err)
+
+	operationsDTO := []OperationListItem{}
+	for _, operation := range operations {
+
+		var topContribsForOp []dtos.TopContrib
+		for i := range topContribs {
+			if topContribs[i].OperationID == operation.ID {
+				topContribsForOp = append(topContribsForOp, topContribs[i])
+			}
+		}
+
+		var evidenceCountForOp dtos.EvidenceCount
+		for i := range evidenceCount {
+			if evidenceCount[i].OperationID == operation.ID {
+				evidenceCountForOp = evidenceCount[i]
+				break
+			}
+		}
+
+		operationsDTO = append(operationsDTO, OperationListItem{
+			ID: operation.ID,
+			Op: &dtos.Operation{
+				Slug:          operation.Slug,
+				Name:          operation.Name,
+				Status:        operation.Status,
+				NumUsers:      operation.NumUsers,
+				NumEvidence:   operation.NumEvidence,
+				NumTags:       operation.NumTags,
+				TopContribs:   topContribsForOp,
+				EvidenceCount: evidenceCountForOp,
+			},
+		})
+	}
+	return operationsDTO
 }
 
-func GetOperationsForUser(t *testing.T, db *database.Connection, userId int64) []models.Operation {
-	var fullOps []models.Operation
-	err := db.Select(&fullOps, sq.Select("id", "slug", "name", "status").
-		From("operations").
-		LeftJoin("user_operation_permissions on operation_id = operations.id").
-		Where(sq.Eq{"user_operation_permissions.user_id": userId}))
+// TODO TN Figure out what to do with this duplicated code
+type OperationListItem struct {
+	Op *dtos.Operation
+	ID int64
+}
+
+func GetOperationsForUser(t *testing.T, db *database.Connection, user models.User) []*dtos.Operation {
+
+	var operations []OperationListItem
+	operations = GetOperations(t, db)
+
+	ctx := ContextForUser(user, db)
+
+	var operationPreference []models.UserOperationPermission
+
+	err := db.Select(&operationPreference, sq.Select("operation_id", "is_favorite").
+		From("user_operation_permissions").
+		Where(sq.Eq{"user_id": middleware.UserID(ctx)}))
+
 	require.NoError(t, err)
-	return fullOps
+
+	operationPreferenceMap := make(map[int64]bool)
+	for _, op := range operationPreference {
+		operationPreferenceMap[op.OperationID] = op.IsFavorite
+	}
+
+	filteredOperationsDTO := make([]*dtos.Operation, 0, len(operations))
+	count := 0
+	for _, operation := range operations {
+		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
+			fmt.Print("count: ", count)
+			count++
+			fave, _ := operationPreferenceMap[operation.ID]
+			operation.Op.Favorite = fave
+			filteredOperationsDTO = append(filteredOperationsDTO, operation.Op)
+		}
+	}
+	return filteredOperationsDTO
 }
 
 func GetUserRolesForOperationByOperationID(t *testing.T, db *database.Connection, id int64) []models.UserOperationPermission {
