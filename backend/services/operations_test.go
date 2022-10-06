@@ -4,7 +4,6 @@
 package services_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -144,7 +143,6 @@ func TestListOperations(t *testing.T) {
 		fullOps := getOperationsForUser(t, db, headlessUser)
 
 		ops, err = services.ListOperations(contextForUser(headlessUser, db), db)
-		fmt.Print("ops for headless user: ", ops[0])
 		require.NoError(t, err)
 		require.Equal(t, len(ops), len(fullOps))
 		validateOperationList(ops, fullOps)
