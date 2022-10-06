@@ -3,7 +3,6 @@ package seeding
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
@@ -328,11 +327,8 @@ func GetOperationsForUser(t *testing.T, db *database.Connection, user models.Use
 	}
 
 	filteredOperationsDTO := make([]*dtos.Operation, 0, len(operations))
-	count := 0
 	for _, operation := range operations {
 		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
-			fmt.Print("count: ", count)
-			count++
 			fave, _ := operationPreferenceMap[operation.ID]
 			operation.Op.Favorite = fave
 			filteredOperationsDTO = append(filteredOperationsDTO, operation.Op)
