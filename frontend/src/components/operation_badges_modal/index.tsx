@@ -24,7 +24,6 @@ export default (props: {
   }
 
   type ObjectKey = keyof typeof evidenceNameMap;
-  delete props.evidenceCount?.operationId
 
   const evidencePresent = Object.values(props.evidenceCount).reduce((p, c) => p + c, 0) > 0 
 

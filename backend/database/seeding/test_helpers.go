@@ -238,9 +238,9 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 		NumTags     int `db:"num_tags"`
 	}
 
-	var topContribs []dtos.TopContrib
+	var topContribs []services.TopContribWithID
 
-	var evidenceCount []dtos.EvidenceCount
+	var evidenceCount []services.EvidenceCountWithID
 
 	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 		From("operations").
@@ -266,14 +266,21 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 		var topContribsForOp []dtos.TopContrib
 		for i := range topContribs {
 			if topContribs[i].OperationID == operation.ID {
-				topContribsForOp = append(topContribsForOp, topContribs[i])
+				var topContrib dtos.TopContrib
+				topContrib.Slug = topContribs[i].Slug
+				topContrib.Count = topContribs[i].Count
+				topContribsForOp = append(topContribsForOp, topContrib)
 			}
 		}
 
 		var evidenceCountForOp dtos.EvidenceCount
 		for i := range evidenceCount {
 			if evidenceCount[i].OperationID == operation.ID {
-				evidenceCountForOp = evidenceCount[i]
+				evidenceCountForOp.CodeblockCount = evidenceCount[i].CodeblockCount
+				evidenceCountForOp.ImageCount = evidenceCount[i].ImageCount
+				evidenceCountForOp.HarCount = evidenceCount[i].HarCount
+				evidenceCountForOp.EventCount = evidenceCount[i].EventCount
+				evidenceCountForOp.RecordingCount = evidenceCount[i].RecordingCount
 				break
 			}
 		}

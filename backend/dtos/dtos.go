@@ -48,13 +48,11 @@ type Finding struct {
 }
 
 type TopContrib struct {
-	Slug        string `db:"slug" json:"slug"`
-	OperationID int64  `db:"operation_id" json:"operationId"`
-	Count       int64  `db:"count" json:"count"`
+	Slug  string `db:"slug" json:"slug"`
+	Count int64  `db:"count" json:"count"`
 }
 
 type EvidenceCount struct {
-	OperationID    int64 `db:"operation_id" json:"operationId"`
 	ImageCount     int64 `db:"image_count" json:"imageCount"`
 	CodeblockCount int64 `db:"codeblock_count" json:"codeblockCount"`
 	RecordingCount int64 `db:"recording_count" json:"recordingCount"`

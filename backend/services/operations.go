@@ -40,6 +40,16 @@ type OperationWithID struct {
 	ID int64
 }
 
+type TopContribWithID struct {
+	dtos.TopContrib
+	OperationID int64 `db:"operation_id" json:"operationId"`
+}
+
+type EvidenceCountWithID struct {
+	dtos.EvidenceCount
+	OperationID int64 `db:"operation_id" json:"operationId"`
+}
+
 func CreateOperation(ctx context.Context, db *database.Connection, i CreateOperationInput) (*dtos.Operation, error) {
 	if err := policy.Require(middleware.Policy(ctx), policy.CanCreateOperations{}); err != nil {
 		return nil, backend.WrapError("Unable to create operation", backend.UnauthorizedWriteErr(err))
@@ -215,8 +225,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 
 	var numUsers int
 	var favorite bool
-	var topContribs []dtos.TopContrib
-	var evidenceCount []dtos.EvidenceCount
+	var topContribs []TopContribWithID
+	var evidenceCount []EvidenceCountWithID
 
 	var evidenceCountForOneOperation string = fmt.Sprintf(`
 	%s
@@ -242,12 +252,27 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		return nil, backend.WrapError("Cannot read operation", backend.DatabaseErr(err))
 	}
 
-	evidenceExists := len(evidenceCount) > 0
-	var evidence dtos.EvidenceCount
-	if evidenceExists {
-		evidence = evidenceCount[0]
+	var evidenceCountForOp dtos.EvidenceCount
+	if len(evidenceCount) > 0 {
+		evidenceCountForOp.CodeblockCount = evidenceCount[0].CodeblockCount
+		evidenceCountForOp.ImageCount = evidenceCount[0].ImageCount
+		evidenceCountForOp.HarCount = evidenceCount[0].HarCount
+		evidenceCountForOp.EventCount = evidenceCount[0].EventCount
+		evidenceCountForOp.RecordingCount = evidenceCount[0].RecordingCount
 	} else {
-		evidence = dtos.EvidenceCount{}
+		evidenceCountForOp = dtos.EvidenceCount{}
+	}
+
+	var topContribsForOp []dtos.TopContrib
+	if len(topContribs) > 0 {
+		for i := range topContribs {
+			var topContrib dtos.TopContrib
+			topContrib.Slug = topContribs[i].Slug
+			topContrib.Count = topContribs[i].Count
+			topContribsForOp = append(topContribsForOp, topContrib)
+		}
+	} else {
+		topContribsForOp = []dtos.TopContrib{}
 	}
 
 	return &dtos.Operation{
@@ -258,8 +283,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		Favorite:      favorite,
 		NumEvidence:   operation.NumEvidence,
 		NumTags:       operation.NumTags,
-		TopContribs:   topContribs,
-		EvidenceCount: evidence,
+		TopContribs:   topContribsForOp,
+		EvidenceCount: evidenceCountForOp,
 	}, nil
 }
 
@@ -317,9 +342,9 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 		NumTags     int `db:"num_tags"`
 	}
 
-	var topContribs []dtos.TopContrib
+	var topContribs []TopContribWithID
 
-	var evidenceCount []dtos.EvidenceCount
+	var evidenceCount []EvidenceCountWithID
 
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
@@ -345,14 +370,21 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 		var topContribsForOp []dtos.TopContrib
 		for i := range topContribs {
 			if topContribs[i].OperationID == operation.ID {
-				topContribsForOp = append(topContribsForOp, topContribs[i])
+				var topContrib dtos.TopContrib
+				topContrib.Slug = topContribs[i].Slug
+				topContrib.Count = topContribs[i].Count
+				topContribsForOp = append(topContribsForOp, topContrib)
 			}
 		}
 
 		var evidenceCountForOp dtos.EvidenceCount
 		for i := range evidenceCount {
 			if evidenceCount[i].OperationID == operation.ID {
-				evidenceCountForOp = evidenceCount[i]
+				evidenceCountForOp.CodeblockCount = evidenceCount[i].CodeblockCount
+				evidenceCountForOp.ImageCount = evidenceCount[i].ImageCount
+				evidenceCountForOp.HarCount = evidenceCount[i].HarCount
+				evidenceCountForOp.EventCount = evidenceCount[i].EventCount
+				evidenceCountForOp.RecordingCount = evidenceCount[i].RecordingCount
 				break
 			}
 		}

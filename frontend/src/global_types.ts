@@ -96,12 +96,10 @@ export type SubmittableEvidence =
 
 export type TopContrib = {
   slug: string,
-  operationId: number,
   count: number,
 }
 
 export type EvidenceCount = {
-  operationId?: number,
   imageCount: number,
   codeblockCount: number,
   recordingCount: number,
