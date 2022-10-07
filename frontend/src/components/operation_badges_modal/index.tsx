@@ -10,7 +10,7 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   onRequestClose: () => void,
-  topContribs?: Array<TopContrib>,
+  topContribs: Array<TopContrib>,
   evidenceCount: EvidenceCount,
   status: OperationStatus,
 }) => {
@@ -39,9 +39,9 @@ export default (props: {
               children={operationStatusToLabel[props?.status]}
             />
             <br/>
-          {props?.topContribs?.length && (
+          {props.topContribs?.length && (
             <>
-              <h1 className={cx('modal-heading')}>Top Contributor{props?.topContribs?.length > 1 && "s"}</h1>
+              <h1 className={cx('modal-heading')}>Top Contributor{props.topContribs?.length > 1 && "s"}</h1>
               {props?.topContribs?.map(contrib => (
               <div className={cx("inner-div")} key={`${contrib.slug}`}>
                 <p className={cx("row-item")}>{contrib.slug}: </p>
@@ -55,7 +55,7 @@ export default (props: {
             {evidencePresent && (
               <>
                 <h1 className={cx('modal-heading')}>Evidence by Category</h1>
-                {Object.entries(props?.evidenceCount).map(ebc => ebc[1] > 0 && (
+                {Object.entries(props.evidenceCount).map(ebc => ebc[1] > 0 && (
                   <div key={`${ebc[0]}`} className={cx("inner-div")}>
                     <p className={cx("row-item")} >{evidenceNameMap[ebc[0] as ObjectKey]}: </p>
                     <p className={cx("row-item", "right")}>{ebc[1]}</p>

@@ -38,7 +38,7 @@ export default (props: {
   }, [operation.slug, isFavorite])
 
   const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={operation?.topContribs} evidenceCount={operation?.evidenceCount} status={operation?.status} />
+    <OperationBadgesModal {...modalProps} topContribs={operation.topContribs} evidenceCount={operation.evidenceCount} status={operation.status} />
   ))
 
   const handleDetailsModal = () => moreDetailsModal?.show({})
