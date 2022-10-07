@@ -26,7 +26,7 @@ export default (props: {
     />
     <div
       className={cx('icon', 'evidence')}
-      title={`${props.numEvidence} pieces of evidence${props.numEvidence === 1 ? ' belongs' : 's belong'} to this operation`}
+      title={`${props.numEvidence} ${props.numEvidence === 1 ? ' piece' : 'pieces'} of evidence belong to this operation`}
       children={props.numEvidence}
     />
     <div
