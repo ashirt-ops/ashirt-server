@@ -233,13 +233,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 			From("user_operation_permissions").
 			Where(sq.Eq{"user_id": middleware.UserID(ctx), "operation_id": operation.ID}))
 
-		tx.Select(&topContribs, sq.Select("slug", "count(evidence.id) AS count").
-			From("evidence").
-			LeftJoin("users ON evidence.operator_id = users.id").
-			Where(sq.Eq{"operation_id": operation.ID}).
-			GroupBy("users.id"))
-
 		tx.SelectRawWithIntArg(&topContribs, getTopContributorsForOperation, operation.ID)
+
 		tx.SelectRawWithIntArg(&evidenceCount, evidenceCountForOneOperation, operation.ID)
 	})
 
