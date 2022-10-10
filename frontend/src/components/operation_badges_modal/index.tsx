@@ -38,9 +38,9 @@ export default (props: {
               children={operationStatusToLabel[props?.status]}
             />
             <br/>
-          {props.topContribs?.length && (
+          {!!props.topContribs?.length && (
             <>
-              <h1 className={cx('modal-heading')}>Top Contributor{props.topContribs?.length > 1 && "s"}</h1>
+              <h1 className={cx('modal-heading')}>Top Contributor{props?.topContribs?.length > 1 && "s"}</h1>
               {props?.topContribs?.map(contrib => (
               <div className={cx("inner-div")} key={`${contrib.slug}`}>
                 <p className={cx("row-item")}>{contrib.slug}: </p>
