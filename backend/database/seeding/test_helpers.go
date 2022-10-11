@@ -263,14 +263,16 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 	operationsWithID := []services.OperationWithID{}
 	for _, operation := range operations {
 
-		var topContribsForOp []dtos.TopContrib
-		for i := range topContribs {
-			if topContribs[i].OperationID == operation.ID {
-				var topContrib dtos.TopContrib
-				topContrib.Slug = topContribs[i].Slug
-				topContrib.Count = topContribs[i].Count
-				topContribsForOp = append(topContribsForOp, topContrib)
-			}
+		filteredTopContribs := helpers.Filter(topContribs, func(contributor services.TopContribWithID) bool {
+			return contributor.OperationID == operation.ID
+		})
+
+		topContribsForOp := make([]dtos.TopContrib, 0, len(filteredTopContribs))
+		for i := range filteredTopContribs {
+			var topContrib dtos.TopContrib
+			topContrib.Slug = filteredTopContribs[i].Slug
+			topContrib.Count = filteredTopContribs[i].Count
+			topContribsForOp = append(topContribsForOp, topContrib)
 		}
 
 		var evidenceCountForOp dtos.EvidenceCount

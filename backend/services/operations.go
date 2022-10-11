@@ -14,6 +14,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
@@ -367,14 +368,16 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 	operationsDTO := []OperationWithID{}
 	for _, operation := range operations {
 
-		var topContribsForOp []dtos.TopContrib
-		for i := range topContribs {
-			if topContribs[i].OperationID == operation.ID {
-				var topContrib dtos.TopContrib
-				topContrib.Slug = topContribs[i].Slug
-				topContrib.Count = topContribs[i].Count
-				topContribsForOp = append(topContribsForOp, topContrib)
-			}
+		filteredTopContribs := helpers.Filter(topContribs, func(contributor TopContribWithID) bool {
+			return contributor.OperationID == operation.ID
+		})
+
+		topContribsForOp := make([]dtos.TopContrib, 0, len(filteredTopContribs))
+		for i := range filteredTopContribs {
+			var topContrib dtos.TopContrib
+			topContrib.Slug = filteredTopContribs[i].Slug
+			topContrib.Count = filteredTopContribs[i].Count
+			topContribsForOp = append(topContribsForOp, topContrib)
 		}
 
 		var evidenceCountForOp dtos.EvidenceCount
