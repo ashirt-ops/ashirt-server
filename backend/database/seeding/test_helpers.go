@@ -276,15 +276,15 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 		}
 
 		var evidenceCountForOp dtos.EvidenceCount
-		for i := range evidenceCount {
-			if evidenceCount[i].OperationID == operation.ID {
-				evidenceCountForOp.CodeblockCount = evidenceCount[i].CodeblockCount
-				evidenceCountForOp.ImageCount = evidenceCount[i].ImageCount
-				evidenceCountForOp.HarCount = evidenceCount[i].HarCount
-				evidenceCountForOp.EventCount = evidenceCount[i].EventCount
-				evidenceCountForOp.RecordingCount = evidenceCount[i].RecordingCount
-				break
-			}
+		idx, _ := helpers.Find(evidenceCount, func(item services.EvidenceCountWithID) bool {
+			return item.OperationID == operation.ID
+		})
+		if idx > -1 {
+			evidenceCountForOp.CodeblockCount = evidenceCount[idx].CodeblockCount
+			evidenceCountForOp.ImageCount = evidenceCount[idx].ImageCount
+			evidenceCountForOp.HarCount = evidenceCount[idx].HarCount
+			evidenceCountForOp.EventCount = evidenceCount[idx].EventCount
+			evidenceCountForOp.RecordingCount = evidenceCount[idx].RecordingCount
 		}
 
 		operationsWithID = append(operationsWithID, services.OperationWithID{
