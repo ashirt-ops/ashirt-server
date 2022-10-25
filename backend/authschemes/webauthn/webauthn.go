@@ -296,8 +296,11 @@ func (a WebAuthn) getKeys(userID int64, bridge authschemes.AShirtAuthBridge) (*L
 		return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 	}
 
-	results := helpers.Map(creds, func(cred AShirtWebauthnCredential) string {
-		return cred.KeyName
+	results := helpers.Map(creds, func(cred AShirtWebauthnCredential) KeyEntry {
+		return KeyEntry{
+			KeyName:     cred.KeyName,
+			DateCreated: cred.KeyCreatedDate,
+		}
 	})
 	output := ListKeysOutput{results}
 	return &output, nil
@@ -414,7 +417,10 @@ func (a WebAuthn) validateRegistrationComplete(r *http.Request, bridge authschem
 		return nil, nil, backend.WrapError("Unable to complete registration", err)
 	}
 
-	data.UserData.Credentials = append(data.UserData.Credentials, wrapCredential(*cred, data.UserData.KeyName))
+	data.UserData.Credentials = append(data.UserData.Credentials, wrapCredential(*cred, AShirtWebauthnExtension{
+		KeyName:        data.UserData.KeyName,
+		KeyCreatedDate: data.UserData.KeyCreatedDate,
+	}))
 
 	encodedCreds, err := json.Marshal(data.UserData.Credentials)
 	if err != nil {

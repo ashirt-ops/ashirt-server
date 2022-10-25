@@ -5,6 +5,7 @@ import req from 'src/services/data_sources/backend/request_helper'
 
 import {
   CompletedLoginChallenge,
+  KeyEntry,
   KeyList,
   ProvidedCredentialCreationOptions,
   ProvidedCredentialRequestOptions,
@@ -57,7 +58,15 @@ export async function finishAddKey(i: WebAuthNRegisterConfirmation) {
 }
 
 export async function listWebauthnKeys(): Promise<KeyList> {
-  return await req('GET', '/auth/webauthn/keys')
+  const data: KeyList = await req('GET', '/auth/webauthn/keys')
+
+  return {
+    keys: data.keys.map((key: KeyEntry) => ({
+      ...key,
+      dateCreated: new Date(key.dateCreated)
+    }))
+  }
+
 }
 
 export async function deleteWebauthnKey(i: { keyName: string }): Promise<KeyList> {

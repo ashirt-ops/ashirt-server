@@ -3,6 +3,13 @@
 
 package webauthn
 
+import "time"
+
 type ListKeysOutput struct {
-	Keys []string `json:"keys"`
+	Keys []KeyEntry `json:"keys"`
+}
+
+type KeyEntry struct {
+	KeyName     string    `json:"keyName"`
+	DateCreated time.Time `json:"dateCreated"`
 }
