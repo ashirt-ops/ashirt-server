@@ -18,6 +18,7 @@ export default (props: {
      <div
       className={cx('status', `status-${props.status}`)}
       title={`Operation status: ${operationStatusToLabel[props.status]}`}
+      children={operationStatusToLabel[props.status]}
     />
     <div
       className={cx('icon', 'users')}
