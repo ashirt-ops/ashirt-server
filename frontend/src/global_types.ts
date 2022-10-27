@@ -110,7 +110,6 @@ export type EvidenceCount = {
 export type Operation = {
   slug: string,
   name: string,
-  status: OperationStatus,
   numUsers: number,
   numEvidence: number,
   numTags: number,

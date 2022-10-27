@@ -32,19 +32,3 @@
   grid-template-columns: 1fr 1fr
   padding: 0px 75px 0px 5px
 
-.status
-  position: relative
-  padding: 5px 7px 5px 20px
-
-.status:before
-  content: ""
-  position: absolute
-  left: 5px
-  top: 9px
-  width: 8px
-  height: @width
-  border-radius: @width
-
-for $id, $color in $operation-status-colors
-  .status-{$id}:before { background: $color }
-

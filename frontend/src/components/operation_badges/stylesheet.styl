@@ -20,18 +20,6 @@
     border-radius: 3px
     box-shadow: inset 0 0 0 1px $darker-background
 
-.status:before
-  content: ""
-  position: absolute
-  left: 10px
-  top: 9px
-  width: 8px
-  height: @width
-  border-radius: @width
-
-for $id, $color in $operation-status-colors
-  .status-{$id}:before { background: $color }
-
 .icon
   margin-left: 5px
   background-size: 11px
