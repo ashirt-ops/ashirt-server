@@ -4,4 +4,4 @@ ALTER TABLE operations
 
 -- +migrate Down
 ALTER TABLE operations
-  ADD COLUMN status INT NOT NULL;
+  ADD COLUMN status INT NOT NULL DEFAULT 0;
