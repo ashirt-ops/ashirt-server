@@ -24,7 +24,7 @@ func TestUserAuthorization(t *testing.T) {
 	a.Post("/web/operations/alice/evidence").WithMultipartBody(map[string]string{"description": "evi"}, nil).AsUser(bob).Do().ExpectUnauthorized()
 
 	// Create findings as bob and ensure alice can't see them
-	a.Post("/web/operations").WithJSONBody(`{"name": "Bob's Operation", "slug": "bob"}`).AsUser(bob).Do().ExpectSubsetJSON(`{"name": "Bob's Operation", "status": 0}`)
+	a.Post("/web/operations").WithJSONBody(`{"name": "Bob's Operation", "slug": "bob"}`).AsUser(bob).Do().ExpectSubsetJSON(`{"name": "Bob's Operation"}`)
 	findingUUID1 := a.Post("/web/operations/bob/findings").WithJSONBody(`{"title": "f1", "category": "Detection Gap", "description": ""}`).AsUser(bob).Do().ExpectSuccess().ResponseUUID()
 	a.Post("/web/operations/bob/findings").WithJSONBody(`{"title": "e2", "category": "Detection Gap", "description": ""}`).AsUser(bob).Do().ExpectSuccess()
 	a.Get("/web/operations/bob/findings").AsUser(alice).Do().ExpectNotFound()
@@ -76,5 +76,5 @@ func TestUserAuthorization(t *testing.T) {
 		CSRFToken: "some-invalid-token",
 	}
 	a.Post("/web/operations").WithJSONBody(`{"name": "Alice's Operation"}`).AsUser(eve).Do().ExpectResponse(403, []byte(`{"error":"CSRF Failure"}`))
-	a.Get("/web/operations").AsUser(alice).Do().ExpectSubsetJSONArray([]string{`{"slug": "alice", "name": "Alice's Operation", "status": 0, "numUsers": 1}`})
+	a.Get("/web/operations").AsUser(alice).Do().ExpectSubsetJSONArray([]string{`{"slug": "alice", "name": "Alice's Operation", "numUsers": 1}`})
 }

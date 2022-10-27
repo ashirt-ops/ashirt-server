@@ -19,20 +19,20 @@ func TestOperations(t *testing.T) {
 	// Create an operation from web and ensure it's queryable
 	a.Post("/web/operations").
 		WithJSONBody(`{"name": "My operation", "slug": "my-op"}`).Do().
-		ExpectSubsetJSON(`{"slug": "my-op", "name": "My operation", "numUsers": 1, "status": 0}`)
-	a.Get("/web/operations").Do().ExpectSubsetJSONArray([]string{`{"name": "My operation", "status": 0, "numUsers": 1}`})
+		ExpectSubsetJSON(`{"slug": "my-op", "name": "My operation", "numUsers": 1}`)
+	a.Get("/web/operations").Do().ExpectSubsetJSONArray([]string{`{"name": "My operation", "numUsers": 1}`})
 
 	// Updating operations
 	bob := a.NewUser("bsnooper", "Bob", "Snooper")
 	a.Post("/web/operations").
 		WithJSONBody(`{"name": "Original Name", "slug": "other-op"}`).Do().
-		ExpectSubsetJSON(`{"slug": "other-op", "name": "Original Name", "numUsers": 1, "status": 0}`)
-	a.Put("/web/operations/other-op").WithJSONBody(`{"name": "New Name", "status": 2}`).Do().ExpectSuccess()
-	a.Get("/web/operations/other-op").Do().ExpectSubsetJSON(`{"name": "New Name", "status": 2}`)
+		ExpectSubsetJSON(`{"slug": "other-op", "name": "Original Name", "numUsers": 1 }`)
+	a.Put("/web/operations/other-op").WithJSONBody(`{"name": "New Name"}`).Do().ExpectSuccess()
+	a.Get("/web/operations/other-op").Do().ExpectSubsetJSON(`{"name": "New Name"}`)
 
 	// Ensure other users cannot update your operations
 	a.Put("/web/operations/other-op").WithJSONBody(`{"name": "Bob's operation"}`).AsUser(bob).Do().ExpectUnauthorized()
-	a.Get("/web/operations/other-op").Do().ExpectSubsetJSON(`{"name": "New Name", "status": 2}`)
+	a.Get("/web/operations/other-op").Do().ExpectSubsetJSON(`{"name": "New Name"}`)
 }
 
 func TestRequestingNonexistentOperations(t *testing.T) {

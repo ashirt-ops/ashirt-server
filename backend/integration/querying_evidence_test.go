@@ -35,7 +35,7 @@ func TestSavedQueries(t *testing.T) {
 	a.DefaultUser = a.NewUser("adefaultuser", "Alice", "DefaultUser")
 
 	// Setup
-	a.Post("/web/operations").WithJSONBody(`{"name": "Operation", "slug": "op"}`).Do().ExpectSubsetJSON(`{"name": "Operation", "status": 0}`)
+	a.Post("/web/operations").WithJSONBody(`{"name": "Operation", "slug": "op"}`).Do().ExpectSubsetJSON(`{"name": "Operation"}`)
 
 	// Test "starts empty"
 	a.Get("/web/operations/op/queries").Do().ExpectSuccess().ExpectJSON(`[]`)

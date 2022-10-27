@@ -95,7 +95,7 @@ func tagsForEvidenceByID(db *database.Connection, evidenceIDs []int64) (tagsByEv
 func lookupOperation(db *database.Connection, operationSlug string) (*models.Operation, error) {
 	var operation models.Operation
 
-	err := db.Get(&operation, sq.Select("id", "name", "status").
+	err := db.Get(&operation, sq.Select("id", "name").
 		From("operations").
 		Where(sq.Eq{"slug": operationSlug}))
 	if err != nil {
@@ -113,7 +113,7 @@ type operationWithCounts struct {
 // lookupOperation returns an operation model for the given slug
 func lookupOperationWithCounts(db *database.Connection, operationSlug string) (*operationWithCounts, error) {
 	var opAndData operationWithCounts
-	err := db.Get(&opAndData, sq.Select("operations.id", "operations.name", "status", "count(distinct(tags.id)) AS num_tags", "count(distinct(evidence.id)) AS num_evidence").
+	err := db.Get(&opAndData, sq.Select("operations.id", "operations.name", "count(distinct(tags.id)) AS num_tags", "count(distinct(evidence.id)) AS num_evidence").
 		LeftJoin("evidence ON evidence.operation_id = operations.id").
 		LeftJoin("tags ON tags.operation_id = operations.id").
 		From("operations").

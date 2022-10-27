@@ -6,7 +6,6 @@ package dtos
 import (
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
@@ -61,15 +60,14 @@ type EvidenceCount struct {
 }
 
 type Operation struct {
-	Slug          string                 `json:"slug"`
-	Name          string                 `json:"name"`
-	NumUsers      int                    `json:"numUsers"`
-	NumEvidence   int                    `json:"numEvidence"`
-	NumTags       int                    `json:"numTags"`
-	Status        models.OperationStatus `json:"status"`
-	Favorite      bool                   `json:"favorite"`
-	TopContribs   []TopContrib           `json:"topContribs"`
-	EvidenceCount EvidenceCount          `json:"evidenceCount,omitempty"`
+	Slug          string        `json:"slug"`
+	Name          string        `json:"name"`
+	NumUsers      int           `json:"numUsers"`
+	NumEvidence   int           `json:"numEvidence"`
+	NumTags       int           `json:"numTags"`
+	Favorite      bool          `json:"favorite"`
+	TopContribs   []TopContrib  `json:"topContribs"`
+	EvidenceCount EvidenceCount `json:"evidenceCount,omitempty"`
 }
 
 type Query struct {

@@ -104,7 +104,7 @@ func TestAssociatingEvidenceWithFindings(t *testing.T) {
 
 	// Ensure evidence cannot be added to findings in a different operation
 	a.Post("/web/operations").WithJSONBody(`{"name": "op", "slug": "op2"}`).Do().ExpectSubsetJSON(
-		`{"slug": "op2", "name": "op", "status": 0}`,
+		`{"slug": "op2", "name": "op"}`,
 	)
 	findingUUID2 := a.Post("/web/operations/op2/findings").WithJSONBody(`{"title": "other finding", "category": "Product", "description": ""}`).Do().ResponseUUID()
 	a.Put("/web/operations/op2/findings/" + findingUUID2 + "/evidence").WithJSONBody(`{"evidenceToAdd": ["` + evidenceUUID1 + `"], "evidenceToRemove": []}`).Do().ExpectUnauthorized()
