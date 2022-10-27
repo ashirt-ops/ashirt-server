@@ -19,16 +19,6 @@ export default (props: {
       className={cx('status', `status-${props.status}`)}
       title={`Operation status: ${operationStatusToLabel[props.status]}`}
     />
-     <div
-      className={cx('icon', 'tags')}
-      title={`${props.numTags} tag${props.numTags === 1 ? ' belongs' : 's belong'} to this operation`}
-      children={props.numTags}
-    />
-    <div
-      className={cx('icon', 'evidence')}
-      title={`${props.numEvidence} ${props.numEvidence === 1 ? ' piece' : 'pieces'} of evidence belong to this operation`}
-      children={props.numEvidence}
-    />
     <div
       className={cx('icon', 'users')}
       title={`${props.numUsers} user${props.numUsers === 1 ? ' belongs' : 's belong'} to this operation`}
