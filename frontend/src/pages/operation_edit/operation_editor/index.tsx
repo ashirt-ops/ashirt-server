@@ -4,7 +4,6 @@
 import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
-import RadioGroup from 'src/components/radio_group'
 import SettingsSection from 'src/components/settings_section'
 import {getOperation, saveOperation} from 'src/services'
 import {useForm, useFormField} from 'src/helpers/use_form'

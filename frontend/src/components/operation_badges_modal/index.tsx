@@ -24,7 +24,7 @@ export default (props: {
 
   type ObjectKey = keyof typeof evidenceNameMap;
 
-  const evidencePresent = Object.values(props.evidenceCount).reduce((p, c) => p + c, 0) > 0 
+  const evidencePresent = Object.values(props.evidenceCount).reduce((p, c) => p + c, 0) > 0
 
   return (
     <Modal title="More Details" onRequestClose={props.onRequestClose}>
