@@ -213,15 +213,12 @@ func TestUpdateOperation(t *testing.T) {
 			OperationSlug: masterOp.Slug,
 			Name:          "New Name",
 		}
-		// TODO TN - look into this?
-		// require.NotEqual(t, masterOp.Status, input.Status)
 
 		err := services.UpdateOperation(ctx, db, input)
 		require.NoError(t, err)
 		updatedOperation, err := services.ReadOperation(ctx, db, masterOp.Slug)
 		require.NoError(t, err)
 		require.Equal(t, input.Name, updatedOperation.Name)
-		// require.Equal(t, input.Status, updatedOperation.Status)
 	})
 }
 
@@ -236,7 +233,6 @@ func TestReadOperation(t *testing.T) {
 
 		require.Equal(t, masterOp.Slug, retrievedOp.Slug)
 		require.Equal(t, masterOp.Name, retrievedOp.Name)
-		// require.Equal(t, masterOp.Status, retrievedOp.Status)
 		require.Equal(t, 6, retrievedOp.NumUsers)
 		require.Equal(t, true, retrievedOp.Favorite)
 		require.Equal(t, 8, retrievedOp.NumEvidence)
@@ -256,7 +252,6 @@ func TestReadOperation(t *testing.T) {
 func validateOp(t *testing.T, expected *dtos.Operation, actual *dtos.Operation) {
 	require.Equal(t, expected.Slug, actual.Slug, "Slugs should match")
 	require.Equal(t, expected.Name, actual.Name, "Names should match")
-	// require.Equal(t, expected.Status, actual.Status, "Status should match")
 	require.Equal(t, expected.Favorite, actual.Favorite, "Favorite should match")
 	require.Equal(t, expected.NumUsers, actual.NumUsers, "NumUsers should match")
 	require.Equal(t, expected.NumEvidence, actual.NumEvidence, "NumEvidence should match")

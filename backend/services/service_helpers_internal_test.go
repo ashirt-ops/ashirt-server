@@ -70,7 +70,6 @@ func TestLookupOperation(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, goodOp.Op.Name, lookedUp.Name)
 	require.Equal(t, goodOp.ID, lookedUp.ID)
-	// require.Equal(t, goodOp.Op.Status, lookedUp.Status)
 
 	lookedUp, err = lookupOperation(db, "not-a-slug")
 	require.Error(t, err)
@@ -85,7 +84,6 @@ func TestLookupOperationFinding(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, goodOp.Op.Name, foundOp.Name)
 	require.Equal(t, goodOp.ID, foundOp.ID)
-	// require.Equal(t, goodOp.Op.Status, foundOp.Status)
 
 	require.Equal(t, goodOp.Findings[0].ID, foundFinding.ID)
 	require.Equal(t, goodOp.Findings[0].UUID, foundFinding.UUID)
@@ -112,7 +110,6 @@ func TestLookupOperationEvidence(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, goodOp.Op.Name, foundOp.Name)
 	require.Equal(t, goodOp.ID, foundOp.ID)
-	// require.Equal(t, goodOp.Op.Status, foundOp.Status)
 
 	require.Equal(t, goodOp.Evidence[0].ID, foundEvidence.ID)
 	require.Equal(t, goodOp.Evidence[0].UUID, foundEvidence.UUID)
