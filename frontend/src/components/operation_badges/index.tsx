@@ -8,8 +8,6 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   className?: string,
-  numEvidence?: number,
-  numTags?: number,
   numUsers: number,
   status: OperationStatus,
   showDetailsModal: () => void,
