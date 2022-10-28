@@ -122,7 +122,6 @@ var OpGobletOfFire = seeding.OpGobletOfFire
 var OpOrderOfThePhoenix = seeding.OpOrderOfThePhoenix
 var OpHalfBloodPrince = seeding.OpHalfBloodPrince
 var OpDeathlyHallows = seeding.OpDeathlyHallows
-var OpGanttChart = seeding.OpGanttChart
 
 var DefaultTagWho = seeding.DefaultTagWho
 var DefaultTagWhat = seeding.DefaultTagWhat
@@ -158,12 +157,6 @@ var CommonTagWhereCoS = seeding.CommonTagWhereCoS
 var CommonTagWhenCoS = seeding.CommonTagWhenCoS
 var CommonTagWhyCoS = seeding.CommonTagWhyCoS
 
-var CommonTagWhoGantt = seeding.CommonTagWhoGantt
-var CommonTagWhatGantt = seeding.CommonTagWhatGantt
-var CommonTagWhereGantt = seeding.CommonTagWhereGantt
-var CommonTagWhenGantt = seeding.CommonTagWhenGantt
-var CommonTagWhyGantt = seeding.CommonTagWhyGantt
-
 var EviDursleys = seeding.EviDursleys
 var EviMirrorOfErised = seeding.EviMirrorOfErised
 
@@ -175,28 +168,6 @@ var EviWhompingWillow = seeding.EviWhompingWillow
 var EviTomRiddlesDiary = seeding.EviTomRiddlesDiary
 
 var EviPetrifiedHermione = seeding.EviPetrifiedHermione
-
-var EviGantt01 = seeding.EviGantt01
-var EviGantt02 = seeding.EviGantt02
-var EviGantt03 = seeding.EviGantt03
-var EviGantt04 = seeding.EviGantt04
-var EviGantt05 = seeding.EviGantt05
-var EviGantt06 = seeding.EviGantt06
-var EviGantt07 = seeding.EviGantt07
-var EviGantt08 = seeding.EviGantt08
-var EviGantt09 = seeding.EviGantt09
-var EviGantt10 = seeding.EviGantt10
-var EviGantt11 = seeding.EviGantt11
-var EviGantt12 = seeding.EviGantt12
-var EviGantt13 = seeding.EviGantt13
-var EviGantt14 = seeding.EviGantt14
-var EviGantt15 = seeding.EviGantt15
-var EviGantt16 = seeding.EviGantt16
-var EviGantt17 = seeding.EviGantt17
-var EviGantt18 = seeding.EviGantt18
-var EviGantt19 = seeding.EviGantt19
-var EviGantt20 = seeding.EviGantt20
-var EviGanttExtra = seeding.EviGanttExtra
 
 var QuerySalazarsHier = seeding.QuerySalazarsHier
 var QueryWhereIsTheChamberOfSecrets = seeding.QueryWhereIsTheChamberOfSecrets

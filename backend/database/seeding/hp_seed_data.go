@@ -20,7 +20,7 @@ var HarryPotterSeedData = Seeder{
 	Users: []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick,
 		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
 	},
-	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows, OpGanttChart},
+	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows},
 	Tags: []models.Tag{
 		TagFamily, TagFriendship, TagHome, TagLoyalty, TagCourage, TagGoodVsEvil, TagSupernatural,
 		TagMercury, TagVenus, TagEarth, TagMars, TagJupiter, TagSaturn, TagNeptune,
@@ -29,7 +29,6 @@ var HarryPotterSeedData = Seeder{
 		CommonTagWhoSS, CommonTagWhatSS, CommonTagWhereSS, CommonTagWhenSS, CommonTagWhySS,
 		CommonTagWhoCoS, CommonTagWhatCoS, CommonTagWhereCoS, CommonTagWhenCoS, CommonTagWhyCoS,
 		CommonTagWhoGoF, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF, CommonTagWhyGoF,
-		CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk, TagHowGantt,
 	},
 	DefaultTags: []models.DefaultTag{
 		DefaultTagWho, DefaultTagWhat, DefaultTagWhere, DefaultTagWhen, DefaultTagWhy,
@@ -89,10 +88,6 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserDumbledore, OpSorcerersStone, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin, true),
-
-		newUserOpPermission(UserDumbledore, OpGanttChart, policy.OperationRoleAdmin, true),
-		newUserOpPermission(UserHarry, OpGanttChart, policy.OperationRoleWrite),
-		newUserOpPermission(UserGinny, OpGanttChart, policy.OperationRoleRead),
 	},
 	Findings: []models.Finding{
 		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear, FindingBook2Robes,
@@ -101,15 +96,6 @@ var HarryPotterSeedData = Seeder{
 		EviDursleys, EviMirrorOfErised, EviLevitateSpell, EviRulesForQuidditch,
 		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione, EviHeadlessHuntApplication,
 		EviTristateTrophy, EviEntryForm, EviWizardDance, EviPolyjuice, EviWarewolf,
-		EviGantt01, EviGantt02, EviGantt03, EviGantt04, EviGantt05, EviGantt06, EviGantt07, EviGantt08, EviGantt09, EviGantt10,
-		EviGantt11, EviGantt12, EviGantt13, EviGantt14, EviGantt15, EviGantt16, EviGantt17, EviGantt18, EviGantt19, EviGantt20, EviGanttExtra,
-
-		EviGanttLong00, EviGanttLong01, EviGanttLong02, EviGanttLong03, EviGanttLong04, EviGanttLong05, EviGanttLong06, EviGanttLong07, EviGanttLong08, EviGanttLong09,
-		EviGanttLong10, EviGanttLong11, EviGanttLong12, EviGanttLong13, EviGanttLong14, EviGanttLong15, EviGanttLong16, EviGanttLong17, EviGanttLong18, EviGanttLong19,
-		EviGanttLong20, EviGanttLong21, EviGanttLong22, EviGanttLong23, EviGanttLong24, EviGanttLong25, EviGanttLong26, EviGanttLong27, EviGanttLong28, EviGanttLong29,
-		EviGanttLong30, EviGanttLong31, EviGanttLong32, EviGanttLong33, EviGanttLong34, EviGanttLong35, EviGanttLong36, EviGanttLong37, EviGanttLong38, EviGanttLong39,
-		EviGanttLong40, EviGanttLong41, EviGanttLong42, EviGanttLong43, EviGanttLong44, EviGanttLong45, EviGanttLong46, EviGanttLong47, EviGanttLong48, EviGanttLong49,
-		EviGanttLong50, EviGanttLong51, EviGanttLong52, EviGanttLong53, EviGanttLong54, EviGanttLong55, EviGanttLong56, EviGanttLong57, EviGanttLong58, EviGanttLong59,
 	},
 	EvidenceMetadatas: []models.EvidenceMetadata{
 		EviMetaDursleys, EviMetaMirrorOfErised, EviMetaLevitateSpell, EviMetaRulesForQuidditch, EviMetaRulesForQuidditchTwo,
@@ -127,51 +113,6 @@ var HarryPotterSeedData = Seeder{
 		associateTagsToEvidence(EviWizardDance, CommonTagWhereGoF, CommonTagWhenGoF),
 		associateTagsToEvidence(EviPolyjuice, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF, CommonTagWhyGoF),
 		associateTagsToEvidence(EviWarewolf, CommonTagWhoGoF, CommonTagWhereGoF, CommonTagWhyGoF),
-
-		// tags are in a pattern: the first 10 columns are dedicated to a pineapple, the second to an apple
-		// -- pineapple      apple
-		//    1234567890     1234567890
-		//  1 .###.###..     ......##..
-		//  2 #########.     .....##...
-		//  3 #..###..#.     ..##.#.##.
-		//  4 ..#####...     .####.####
-		//  5 .#.#.#.#..     .#.#######
-		//  6 .#######..     .#.#######
-		//  7 .#.#.#.#..     .#.#######
-		//  8 .#######..     .##.######
-		//  9 .#.#.#.#..     ..#######.
-		// 10 ..#####...     ...##.##..
-		//  Note: EviGanttExtra is present to check multiple-tag-usage on same-day
-		associateTagsToEvidence(EviGantt01, CommonTagWhatGantt, CommonTagWhereGantt),
-		associateTagsToEvidence(EviGantt02, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
-		associateTagsToEvidence(EviGantt03, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhenGantt, TagGanttBroom, TagGanttAparate, TagGanttWalk),
-		associateTagsToEvidence(EviGantt04, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
-		associateTagsToEvidence(EviGantt05, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, TagGanttBroom, TagGanttAparate, TagGanttWalk),
-		associateTagsToEvidence(EviGantt06, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
-		associateTagsToEvidence(EviGantt07, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhenGantt, TagGanttBroom, TagGanttAparate, TagGanttWalk),
-		associateTagsToEvidence(EviGantt08, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
-		associateTagsToEvidence(EviGantt09, CommonTagWhatGantt, CommonTagWhereGantt),
-		associateTagsToEvidence(EviGantt10),
-		associateTagsToEvidence(EviGantt11),
-		associateTagsToEvidence(EviGantt12, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate),
-		associateTagsToEvidence(EviGantt13, CommonTagWhereGantt, CommonTagWhenGantt, TagGanttAparate, TagGanttFlooNetwork),
-		associateTagsToEvidence(EviGantt14, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttFlooNetwork, TagGanttWalk),
-		associateTagsToEvidence(EviGantt15, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
-		associateTagsToEvidence(EviGantt16, CommonTagWhatGantt, CommonTagWhereGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
-		associateTagsToEvidence(EviGantt17, CommonTagWhoGantt, CommonTagWhatGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
-		associateTagsToEvidence(EviGantt18, CommonTagWhoGantt, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork, TagGanttWalk),
-		associateTagsToEvidence(EviGantt19, CommonTagWhereGantt, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate, TagGanttFlooNetwork),
-		associateTagsToEvidence(EviGantt20, CommonTagWhenGantt, CommonTagWhyGantt, TagGanttBroom, TagGanttHippogriff, TagGanttAparate),
-		associateTagsToEvidence(EviGanttExtra, CommonTagWhoGantt),
-
-		associateEvidenceToTag(TagHowGantt,
-			EviGanttLong00, EviGanttLong01, EviGanttLong02, EviGanttLong03, EviGanttLong04, EviGanttLong05, EviGanttLong06, EviGanttLong07, EviGanttLong08, EviGanttLong09,
-			EviGanttLong10, EviGanttLong11, EviGanttLong12, EviGanttLong13, EviGanttLong14, EviGanttLong15, EviGanttLong16, EviGanttLong17, EviGanttLong18, EviGanttLong19,
-			EviGanttLong20, EviGanttLong21, EviGanttLong22, EviGanttLong23, EviGanttLong24, EviGanttLong25, EviGanttLong26, EviGanttLong27, EviGanttLong28, EviGanttLong29,
-			EviGanttLong30, EviGanttLong31, EviGanttLong32, EviGanttLong33, EviGanttLong34, EviGanttLong35, EviGanttLong36, EviGanttLong37, EviGanttLong38, EviGanttLong39,
-			EviGanttLong40, EviGanttLong41, EviGanttLong42, EviGanttLong43, EviGanttLong44, EviGanttLong45, EviGanttLong46, EviGanttLong47, EviGanttLong48, EviGanttLong49,
-			EviGanttLong50, EviGanttLong51, EviGanttLong52, EviGanttLong53, EviGanttLong54, EviGanttLong55, EviGanttLong56, EviGanttLong57, EviGanttLong58, EviGanttLong59,
-		),
 	),
 	EviFindingsMap: unionEviFindingMap(
 		associateEvidenceToFinding(FindingBook2Magic, EviDobby, EviFlyingCar, EviWhompingWillow),
@@ -258,9 +199,6 @@ var OpHalfBloodPrince = newHPOp("HPHBP", "Harry Potter and The Half Blood Prince
 // OpDeathlyHallows is a vailable for use
 var OpDeathlyHallows = newHPOp("HPDH", "Harry Potter and The Deathly Hallows")
 
-// OpGanttChart is reserved to verify the Overview feature
-var OpGanttChart = newHPOp("HPGantt", "Harry Potter and The Curse of Admin Oversight")
-
 var newDefaultHPTag = newDefaultTagGen(1)
 var DefaultTagWho = newDefaultHPTag("Who", "lightRed")
 var DefaultTagWhat = newDefaultHPTag("What", "lightBlue")
@@ -303,18 +241,6 @@ var CommonTagWhatGoF = newHPTag(OpGobletOfFire.ID, "What", "lightBlue")
 var CommonTagWhereGoF = newHPTag(OpGobletOfFire.ID, "Where", "lightGreen")
 var CommonTagWhenGoF = newHPTag(OpGobletOfFire.ID, "When", "lightIndigo")
 var CommonTagWhyGoF = newHPTag(OpGobletOfFire.ID, "Why", "lightYellow")
-
-var CommonTagWhoGantt = newHPTag(OpGanttChart.ID, "Who", "lightRed")
-var CommonTagWhatGantt = newHPTag(OpGanttChart.ID, "What", "lightBlue")
-var CommonTagWhereGantt = newHPTag(OpGanttChart.ID, "Where", "lightGreen")
-var CommonTagWhenGantt = newHPTag(OpGanttChart.ID, "When", "lightIndigo")
-var CommonTagWhyGantt = newHPTag(OpGanttChart.ID, "Why", "lightYellow")
-var TagGanttBroom = newHPTag(OpGanttChart.ID, "Broom", "red")
-var TagGanttHippogriff = newHPTag(OpGanttChart.ID, "Hippogriff", "blue")
-var TagGanttAparate = newHPTag(OpGanttChart.ID, "Aparate", "green")
-var TagGanttFlooNetwork = newHPTag(OpGanttChart.ID, "Floo", "indigo")
-var TagGanttWalk = newHPTag(OpGanttChart.ID, "Walk", "yellow")
-var TagHowGantt = newHPTag(OpGanttChart.ID, "How", "lightTeal")
 
 var newHPEvidence = newEvidenceGen(1)
 var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_dursleys", "Family of self-centered muggles + Harry", "image", 0)
@@ -361,90 +287,6 @@ var EviMetaWizardDance = newHPEviMetadata(EviWizardDance.ID, "color-averager", "
 var EviMetaPolyjuice = newHPEviMetadata(EviPolyjuice.ID, "wc -l", "13 seed_juice", nil, helpers.PTrue(), 0)
 var EviMetaWarewolf = newHPEviMetadata(EviWarewolf.ID, "duration", "348.163058815", nil, helpers.PTrue(), 0)
 var EviMetaWarewolfOther = newHPEviMetadata(EviWarewolf.ID, "color-averager", "Yo, I can't process this", nil, helpers.PFalse(), 0)
-
-var EviGantt01 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_01", "", "none", -19)
-var EviGantt02 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_02", "", "none", -18)
-var EviGantt03 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_03", "", "none", -17)
-var EviGantt04 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_04", "", "none", -16)
-var EviGantt05 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_05", "", "none", -15)
-var EviGantt06 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_06", "", "none", -14)
-var EviGantt07 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_07", "", "none", -13)
-var EviGantt08 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_08", "", "none", -12)
-var EviGantt09 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_09", "", "none", -11)
-var EviGantt10 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_10", "", "none", -10)
-var EviGantt11 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_11", "", "none", -9)
-var EviGantt12 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_12", "", "none", -8)
-var EviGantt13 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_13", "", "none", -7)
-var EviGantt14 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_14", "", "none", -6)
-var EviGantt15 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_15", "", "none", -5)
-var EviGantt16 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_16", "", "none", -4)
-var EviGantt17 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_17", "", "none", -3)
-var EviGantt18 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_18", "", "none", -2)
-var EviGantt19 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_19", "", "none", -1)
-var EviGantt20 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_20", "", "none", 0)
-var EviGanttExtra = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "seed_gantt_extra", "", "none", -19)
-
-// These "long" pieces of evidence test a sql issue experienced using group_concat (no longer used)
-var EviGanttLong00 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-00", "", "none", 0)
-var EviGanttLong01 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-01", "", "none", -1)
-var EviGanttLong02 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-02", "", "none", -2)
-var EviGanttLong03 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-03", "", "none", -3)
-var EviGanttLong04 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-04", "", "none", -4)
-var EviGanttLong05 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-05", "", "none", -5)
-var EviGanttLong06 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-06", "", "none", -6)
-var EviGanttLong07 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-07", "", "none", -7)
-var EviGanttLong08 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-08", "", "none", -8)
-var EviGanttLong09 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-09", "", "none", -9)
-var EviGanttLong10 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-10", "", "none", -10)
-var EviGanttLong11 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-11", "", "none", -11)
-var EviGanttLong12 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-12", "", "none", -12)
-var EviGanttLong13 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-13", "", "none", -13)
-var EviGanttLong14 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-14", "", "none", -14)
-var EviGanttLong15 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-15", "", "none", -15)
-var EviGanttLong16 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-16", "", "none", -16)
-var EviGanttLong17 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-17", "", "none", -17)
-var EviGanttLong18 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-18", "", "none", -18)
-var EviGanttLong19 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-19", "", "none", -19)
-var EviGanttLong20 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-20", "", "none", -20)
-var EviGanttLong21 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-21", "", "none", -21)
-var EviGanttLong22 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-22", "", "none", -22)
-var EviGanttLong23 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-23", "", "none", -23)
-var EviGanttLong24 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-24", "", "none", -24)
-var EviGanttLong25 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-25", "", "none", -25)
-var EviGanttLong26 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-26", "", "none", -26)
-var EviGanttLong27 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-27", "", "none", -27)
-var EviGanttLong28 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-28", "", "none", -28)
-var EviGanttLong29 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-29", "", "none", -29)
-var EviGanttLong30 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-30", "", "none", -30)
-var EviGanttLong31 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-31", "", "none", -31)
-var EviGanttLong32 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-32", "", "none", -32)
-var EviGanttLong33 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-33", "", "none", -33)
-var EviGanttLong34 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-34", "", "none", -34)
-var EviGanttLong35 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-35", "", "none", -35)
-var EviGanttLong36 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-36", "", "none", -36)
-var EviGanttLong37 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-37", "", "none", -37)
-var EviGanttLong38 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-38", "", "none", -38)
-var EviGanttLong39 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-39", "", "none", -39)
-var EviGanttLong40 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-40", "", "none", -40)
-var EviGanttLong41 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-41", "", "none", -41)
-var EviGanttLong42 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-42", "", "none", -42)
-var EviGanttLong43 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-43", "", "none", -43)
-var EviGanttLong44 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-44", "", "none", -44)
-var EviGanttLong45 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-45", "", "none", -45)
-var EviGanttLong46 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-46", "", "none", -46)
-var EviGanttLong47 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-47", "", "none", -47)
-var EviGanttLong48 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-48", "", "none", -48)
-var EviGanttLong49 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-49", "", "none", -49)
-var EviGanttLong50 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-50", "", "none", -50)
-var EviGanttLong51 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-51", "", "none", -51)
-var EviGanttLong52 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-52", "", "none", -52)
-var EviGanttLong53 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-53", "", "none", -53)
-var EviGanttLong54 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-54", "", "none", -54)
-var EviGanttLong55 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-55", "", "none", -55)
-var EviGanttLong56 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-56", "", "none", -56)
-var EviGanttLong57 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-57", "", "none", -57)
-var EviGanttLong58 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-58", "", "none", -58)
-var EviGanttLong59 = newHPEvidence(OpGanttChart.ID, UserHarry.ID, "evi-gantt-59", "", "none", -59)
 
 var newHPQuery = newQueryGen(1)
 var QuerySalazarsHier = newHPQuery(OpChamberOfSecrets.ID, "Find Heir", "Magic Query String", "findings")

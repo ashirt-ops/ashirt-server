@@ -153,36 +153,6 @@ func TestListTagDifferencesForEvidence(t *testing.T) {
 	})
 }
 
-func TestListTagsByEvidenceDate(t *testing.T) {
-	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
-		masterOp := OpGanttChart
-		input := services.ListTagsByEvidenceDateInput{
-			OperationSlug: masterOp.Slug,
-		}
-
-		expectedData := seed.TagIDsUsageByDate(masterOp.ID)
-
-		// test no-access
-		_, err := services.ListTagsByEvidenceDate(contextForUser(UserDraco, db), db, input)
-		require.Error(t, err)
-
-		// test read
-		actualData, err := services.ListTagsByEvidenceDate(contextForUser(UserGinny, db), db, input)
-		require.NoError(t, err)
-		validateTagUsageData(t, seed, expectedData, actualData)
-
-		// test write
-		actualData, err = services.ListTagsByEvidenceDate(contextForUser(UserHarry, db), db, input)
-		require.NoError(t, err)
-		validateTagUsageData(t, seed, expectedData, actualData)
-
-		// test admin
-		actualData, err = services.ListTagsByEvidenceDate(contextForUser(UserDumbledore, db), db, input)
-		require.NoError(t, err)
-		validateTagUsageData(t, seed, expectedData, actualData)
-	})
-}
-
 func TestListTagsForOperation(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		ctx := contextForUser(UserRon, db)

@@ -513,7 +513,6 @@ Both unit tests and developer tests / manual tests use the same seed data to qui
   * Rubeus (Hagrid) -- disabled user
 * Users log in via their first name for their username and password. The password is always lowercase-only. e.g. Ron Weasley's login is `ron`/`ron`
 * All users (except Tom Riddle) should see the Goblet of Fire operation
-* The "Harry Potter and the Curse of Admin Oversight" operation provides no real evidence, but enough evidence to render a pattern on the operation overview page
 * There is nuanced permission data for Sorcerer's Stone and Chamber of Secrets
 
 #### Using seed data for unit testing
