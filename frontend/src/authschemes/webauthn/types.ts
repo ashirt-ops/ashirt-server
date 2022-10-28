@@ -5,7 +5,7 @@
 /**
  * ProvidedCredentialCreationOptions tries to be a mirror of CredentialCreationOptions, but
  * with all base64 encoded fields marked as string
- * 
+ *
  * This seems to be the cleanest version that extends CredentialCreationOptions that typescript
  * supports. The definition amounts to "copy this defintion, but exclude this bit", then
  * "tack on this new bit", which ultimately replaces the type from the original type
