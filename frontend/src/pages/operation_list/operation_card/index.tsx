@@ -34,7 +34,6 @@ export default (props: {
       <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
       <OperationBadges className={cx('badges')} numUsers={props.numUsers} showDetailsModal={handleDetailsModal} />
       <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
-      <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
       <Button
         className={cx('favorite-button', favorite && 'filled')}
         onClick={props.onFavoriteClick}>
