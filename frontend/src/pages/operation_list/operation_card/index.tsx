@@ -27,13 +27,13 @@ export default (props: {
 }) => {
   const { favorite } = props
   const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={props.topContribs} evidenceCount={props.evidenceCount} status={props.status} />
+    <OperationBadgesModal {...modalProps} topContribs={props.topContribs} evidenceCount={props.evidenceCount} status={props.status} numTags={props.numTags} />
   ))
   const handleDetailsModal = () => moreDetailsModal?.show({})
   return (
     <Card className={cx('root', props.className)}>
       <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
-      <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} numTags={props.numTags} numEvidence={props.numEvidence} showDetailsModal={handleDetailsModal} />
+      <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} showDetailsModal={handleDetailsModal} />
       <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
       <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
       <Button

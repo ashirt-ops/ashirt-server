@@ -13,6 +13,7 @@ export default (props: {
   topContribs: Array<TopContrib>,
   evidenceCount: EvidenceCount,
   status: OperationStatus,
+  numTags: number;
 }) => {
 
   const evidenceNameMap = {
@@ -25,8 +26,8 @@ export default (props: {
 
   type ObjectKey = keyof typeof evidenceNameMap;
 
-  const evidencePresent = Object.values(props.evidenceCount).reduce((p, c) => p + c, 0) > 0 
-
+  const evidencePresent = Object.values(props.evidenceCount).reduce((prev, curr) => prev + curr, 0) > 0 
+  const numTags = props.numTags
   return (
     <Modal title="More Details" onRequestClose={props.onRequestClose}>
       <div className={cx("root")}>
@@ -61,6 +62,13 @@ export default (props: {
                   </div>)
                 )}
             </>)}
+            {evidencePresent && numTags && <br/>}
+            {numTags && (
+              <>
+                <h1 className={cx('modal-heading')}>Tag Count</h1>
+                <p className={cx("tag-count-text")}>{numTags} tags</p>
+              </>
+            )}
           </div>
       </div>
     </Modal>
