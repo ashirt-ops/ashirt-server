@@ -11,6 +11,7 @@ export default (props: {
   children: React.ReactNode,
   onRequestClose: () => void,
   title: string,
+  smallerWidth?: boolean,
 }) => {
   const rootRef = React.useRef(null)
   useFocusFirstFocusableChild(rootRef)
@@ -25,7 +26,7 @@ export default (props: {
   return (
     createPortal((
       <div className={cx('root')} onMouseDown={props.onRequestClose} ref={rootRef}>
-        <div className={cx('modal')} onMouseDown={e => e.stopPropagation()}>
+        <div className={cx('modal', props.smallerWidth ? "smaller-width" : "")} onMouseDown={e => e.stopPropagation()}>
           <h1 className={cx('title')}>{props.title}</h1>
           <div className={cx('content')}>
             {props.children}
