@@ -27,7 +27,7 @@ const TableRow = (props: {
   const { op } = props
 
   const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={op.topContribs} evidenceCount={op.evidenceCount} />
+    <OperationBadgesModal {...modalProps} topContribs={op.topContribs} evidenceCount={op.evidenceCount} numTags={op.numTags} />
   ))
 
   const handleDetailsModal = () => moreDetailsModal?.show({})
@@ -36,7 +36,7 @@ const TableRow = (props: {
     <tr>
       <td>{op.slug}</td>
       <td>{op.name}</td>
-      <td><OperationBadge numEvidence={op.numEvidence} numTags={op.numTags} numUsers={op.numUsers} showDetailsModal={handleDetailsModal} /></td>
+      <td><OperationBadge numUsers={op.numUsers} showDetailsModal={handleDetailsModal} /></td>
       <td><Button small onClick={() => navigate(`/operations/${op.slug}/edit/settings`)} >Settings</Button></td>
       {renderModals(moreDetailsModal)}
     </tr>

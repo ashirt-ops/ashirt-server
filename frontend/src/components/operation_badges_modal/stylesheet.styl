@@ -1,34 +1,27 @@
 @import '~src/vars'
 
 .root
-  display: flex
-  background:none;
-  border:none;
-  padding:0px
-  margin:0px
   cursor: default
   color: #f5f8fa
   display: grid
   grid-template-columns: 1fr 1fr 
 
-.modal-heading
-  font-size: 1.15rem
+.grouping
+  margin-bottom: 8px
+
+.large-text
+  font-size: 1.5rem
   font-weight: bold
 
-.row-item
-  margin-top: 5px
-  margin-bottom: 0px
+  &.group
+    display: inline-block;
 
-  &.right
-    text-align: right
-    font-weight: bold
+.small-supporting-text
+  font-size: 0.6125rem
+  letter-spacing: 0.05em
 
-.outer-div
-  display: grid
-  grid-template-columns: 1fr 1fr
-
-.inner-div
-  display: grid
-  grid-template-columns: 1fr 1fr
-  padding: 0px 75px 0px 5px
-
+.supporting-text
+  font-size: 0.75rem
+  display: inline-block;
+  margin-left: 4px
+  letter-spacing: 0.05em
