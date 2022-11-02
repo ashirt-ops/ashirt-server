@@ -195,7 +195,8 @@ func InvalidTOTPErr(err error) error {
 
 // FirstError returns the first non-nil error, or nil if all errors are nil.
 // equivalement to:
-//  if errs[0] != nil {return errs[0]} else if errs[1] != nil {return errs[1]} /*...*/ else { return nil }
+//
+//	if errs[0] != nil {return errs[0]} else if errs[1] != nil {return errs[1]} /*...*/ else { return nil }
 func FirstError(errs ...error) error {
 	for _, e := range errs {
 		if e != nil {

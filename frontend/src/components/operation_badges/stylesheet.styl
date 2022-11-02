@@ -2,6 +2,12 @@
 
 .root
   display: flex
+  background:none;
+  border:none;
+  padding:0px
+  margin:0px
+  cursor: pointer
+  color: #f5f8fa
 
   > *
     position: relative
@@ -13,23 +19,14 @@
     background: $background
     border-radius: 3px
     box-shadow: inset 0 0 0 1px $darker-background
-    cursor: default
 
-.status:before
-  content: ""
-  position: absolute
-  left: 10px
-  top: 9px
-  width: 8px
-  height: @width
-  border-radius: @width
-
-for $id, $color in $operation-status-colors
-  .status-{$id}:before { background: $color }
-
-.num-users
+.icon
   margin-left: 5px
-  background-image: url(./user.svg)
-  background-size: 8px
+  background-size: 11px
   background-position: 9px center
   background-repeat: no-repeat
+
+  &.users
+    background-image: url('./user.svg')
+    background-size: 8px
+

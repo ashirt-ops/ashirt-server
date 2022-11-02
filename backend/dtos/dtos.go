@@ -6,7 +6,6 @@ package dtos
 import (
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
@@ -47,12 +46,28 @@ type Finding struct {
 	OccurredTo    *time.Time `json:"occurredTo"`
 }
 
+type TopContrib struct {
+	Slug  string `db:"slug" json:"slug"`
+	Count int64  `db:"count" json:"count"`
+}
+
+type EvidenceCount struct {
+	ImageCount     int64 `db:"image_count" json:"imageCount"`
+	CodeblockCount int64 `db:"codeblock_count" json:"codeblockCount"`
+	RecordingCount int64 `db:"recording_count" json:"recordingCount"`
+	EventCount     int64 `db:"event_count" json:"eventCount"`
+	HarCount       int64 `db:"har_count" json:"harCount"`
+}
+
 type Operation struct {
-	Slug     string                 `json:"slug"`
-	Name     string                 `json:"name"`
-	NumUsers int                    `json:"numUsers"`
-	Status   models.OperationStatus `json:"status"`
-	Favorite bool                   `json:"favorite"`
+	Slug          string        `json:"slug"`
+	Name          string        `json:"name"`
+	NumUsers      int           `json:"numUsers"`
+	NumEvidence   int           `json:"numEvidence"`
+	NumTags       int           `json:"numTags"`
+	Favorite      bool          `json:"favorite"`
+	TopContribs   []TopContrib  `json:"topContribs"`
+	EvidenceCount EvidenceCount `json:"evidenceCount,omitempty"`
 }
 
 type Query struct {

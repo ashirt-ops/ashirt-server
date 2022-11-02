@@ -152,7 +152,6 @@ func newOperationGen(first int64) func(slug, fullName string) models.Operation {
 			ID:        id(),
 			Slug:      slug,
 			Name:      fullName,
-			Status:    models.OperationStatusPlanning,
 			CreatedAt: internalClock.Now(),
 		}
 	}

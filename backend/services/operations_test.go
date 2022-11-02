@@ -42,7 +42,6 @@ func TestCreateOperation(t *testing.T) {
 
 		require.NotEqual(t, 0, fullOp.ID)
 		require.Equal(t, i.Name, fullOp.Name)
-		require.Equal(t, models.OperationStatusPlanning, fullOp.Status, "status should default to 'Planning'")
 
 		attachedUsers := getUserRolesForOperationByOperationID(t, db, fullOp.ID)
 		require.Equal(t, 1, len(attachedUsers))
@@ -106,26 +105,26 @@ func TestDeleteOperation(t *testing.T) {
 
 func TestListOperations(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		validateOperationList := func(receivedOps []*dtos.Operation, expectedOps []models.Operation) {
+		validateOperationList := func(receivedOps []*dtos.Operation, expectedOps []*dtos.Operation) {
 			for _, op := range receivedOps {
-				var expected *models.Operation = nil
+				var expected *dtos.Operation = nil
 				for _, fOp := range expectedOps {
 					if fOp.Slug == op.Slug {
-						expected = &fOp
+						expected = fOp
 						break
 					}
 				}
 				require.NotNil(t, expected, "Result should have matching value")
-				validateOp(t, *expected, op)
+				validateOp(t, expected, op)
 			}
 		}
 
 		normalUser := UserRon
-		expectedOps := getOperationsForUser(t, db, normalUser.ID)
+		expectedOps := getOperationsForUser(t, db, normalUser)
 
 		ops, err := services.ListOperations(contextForUser(normalUser, db), db)
 		require.NoError(t, err)
-		require.Equal(t, len(ops), len(expectedOps))
+		require.Equal(t, len(expectedOps), len(ops))
 		validateOperationList(ops, expectedOps)
 
 		opsAndPermissions := getFavoritesByUserID(t, db, normalUser.ID)
@@ -140,12 +139,42 @@ func TestListOperations(t *testing.T) {
 
 		// validate headless users
 		headlessUser := UserHeadlessNick
-		fullOps := getOperations(t, db)
+		fullOps := getOperationsForUser(t, db, headlessUser)
 
 		ops, err = services.ListOperations(contextForUser(headlessUser, db), db)
 		require.NoError(t, err)
 		require.Equal(t, len(ops), len(fullOps))
 		validateOperationList(ops, fullOps)
+	})
+}
+
+func TestListOperationsForAdmin(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		ctx := contextForUser(UserDumbledore, db)
+
+		fullOps := getOperations(t, db)
+		require.NotEqual(t, len(fullOps), 0, "Some number of operations should exist")
+
+		ops, err := services.ListOperationsForAdmin(ctx, db)
+		require.NoError(t, err)
+		require.Equal(t, len(ops), len(fullOps))
+		for _, op := range ops {
+			var expected *dtos.Operation = nil
+			for _, fOp := range ops {
+				if fOp.Slug == op.Slug {
+					expected = fOp
+					break
+				}
+			}
+			require.NotNil(t, expected, "Result should have matching value")
+			validateOp(t, expected, op)
+		}
+
+		// verify non admins don't have access
+		ctx = contextForUser(UserDraco, db)
+		_, err = services.ListOperationsForAdmin(ctx, db)
+		require.Error(t, err)
+		require.Equal(t, "Requesting user is not an admin", err.Error())
 	})
 }
 
@@ -166,36 +195,6 @@ func TestSetFavoriteOperation(t *testing.T) {
 	})
 }
 
-func TestListOperationsForAdmin(t *testing.T) {
-	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		ctx := contextForUser(UserDumbledore, db)
-
-		fullOps := getOperations(t, db)
-		require.NotEqual(t, len(fullOps), 0, "Some number of operations should exist")
-
-		ops, err := services.ListOperationsForAdmin(ctx, db)
-		require.NoError(t, err)
-		require.Equal(t, len(ops), len(fullOps))
-		for _, op := range ops {
-			var expected *models.Operation = nil
-			for _, fOp := range fullOps {
-				if fOp.Slug == op.Slug {
-					expected = &fOp
-					break
-				}
-			}
-			require.NotNil(t, expected, "Result should have matching value")
-			validateOp(t, *expected, op)
-		}
-
-		// verify non admins don't have access
-		ctx = contextForUser(UserDraco, db)
-		_, err = services.ListOperationsForAdmin(ctx, db)
-		require.Error(t, err)
-		require.Equal(t, "Requesting user is not an admin", err.Error())
-	})
-}
-
 func TestSanitizeOperationSlug(t *testing.T) {
 	require.Equal(t, services.SanitizeOperationSlug("?One?Two?Three?"), "one-two-three")
 	require.Equal(t, services.SanitizeOperationSlug("Harry"), "harry")
@@ -213,16 +212,13 @@ func TestUpdateOperation(t *testing.T) {
 		input := services.UpdateOperationInput{
 			OperationSlug: masterOp.Slug,
 			Name:          "New Name",
-			Status:        models.OperationStatusComplete,
 		}
-		require.NotEqual(t, masterOp.Status, input.Status)
 
 		err := services.UpdateOperation(ctx, db, input)
 		require.NoError(t, err)
 		updatedOperation, err := services.ReadOperation(ctx, db, masterOp.Slug)
 		require.NoError(t, err)
 		require.Equal(t, input.Name, updatedOperation.Name)
-		require.Equal(t, input.Status, updatedOperation.Status)
 	})
 }
 
@@ -237,13 +233,29 @@ func TestReadOperation(t *testing.T) {
 
 		require.Equal(t, masterOp.Slug, retrievedOp.Slug)
 		require.Equal(t, masterOp.Name, retrievedOp.Name)
-		require.Equal(t, masterOp.Status, retrievedOp.Status)
+		require.Equal(t, 6, retrievedOp.NumUsers)
+		require.Equal(t, true, retrievedOp.Favorite)
+		require.Equal(t, 8, retrievedOp.NumEvidence)
+		require.Equal(t, 12, retrievedOp.NumTags)
+		require.Equal(t, 1, len(retrievedOp.TopContribs))
+		require.Equal(t, "harry.potter", retrievedOp.TopContribs[0].Slug)
+		require.Equal(t, int64(2), retrievedOp.EvidenceCount.CodeblockCount)
+		require.Equal(t, int64(6), retrievedOp.EvidenceCount.ImageCount)
+		require.Equal(t, int64(0), retrievedOp.EvidenceCount.RecordingCount)
+		require.Equal(t, int64(0), retrievedOp.EvidenceCount.EventCount)
+		require.Equal(t, int64(0), retrievedOp.EvidenceCount.HarCount)
+
 		require.Equal(t, len(seed.UsersForOp(masterOp)), retrievedOp.NumUsers)
 	})
 }
 
-func validateOp(t *testing.T, expected models.Operation, actual *dtos.Operation) {
+func validateOp(t *testing.T, expected *dtos.Operation, actual *dtos.Operation) {
 	require.Equal(t, expected.Slug, actual.Slug, "Slugs should match")
 	require.Equal(t, expected.Name, actual.Name, "Names should match")
-	require.Equal(t, expected.Status, actual.Status, "Status should match")
+	require.Equal(t, expected.Favorite, actual.Favorite, "Favorite should match")
+	require.Equal(t, expected.NumUsers, actual.NumUsers, "NumUsers should match")
+	require.Equal(t, expected.NumEvidence, actual.NumEvidence, "NumEvidence should match")
+	require.Equal(t, expected.EvidenceCount, actual.EvidenceCount, "EvidenceCount should match")
+	require.Equal(t, expected.TopContribs, actual.TopContribs, "TopContribs should match")
+	require.Equal(t, expected.NumTags, actual.NumTags, "NumTags should match")
 }

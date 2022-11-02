@@ -4,6 +4,7 @@
 import * as React from 'react'
 import ActionMenu from './action_menu'
 import OperationBadges from 'src/components/operation_badges'
+import OperationBadgesModal from 'src/components/operation_badges_modal'
 import classnames from 'classnames/bind'
 import { Link } from 'react-router-dom'
 import { DeleteQueryModal } from './query_modal'
@@ -36,6 +37,12 @@ export default (props: {
     setFavorite(operation.slug, isFavorite)
   }, [operation.slug, isFavorite])
 
+  const moreDetailsModal = useModal<{}>(modalProps => (
+    <OperationBadgesModal {...modalProps} topContribs={operation.topContribs} evidenceCount={operation.evidenceCount} numTags={operation.numTags} />
+  ))
+
+  const handleDetailsModal = () => moreDetailsModal?.show({})
+
   return (
     <div className={cx('root')}>
       <header>
@@ -47,7 +54,7 @@ export default (props: {
           onClick={() => setIsFavorite(!isFavorite)}
         >
         </Button>
-        <OperationBadges {...operation} />
+        <OperationBadges {...operation} showDetailsModal={handleDetailsModal} />
       </header>
       {props.showCreateButtons == 'sidebar-above' && (
         <ButtonGroup className={cx('create-evi-finding-group')}>
@@ -75,6 +82,7 @@ export default (props: {
         operationSlug={operation.slug}
         {...props}
       />
+      {renderModals(moreDetailsModal)}
     </div>
   )
 }

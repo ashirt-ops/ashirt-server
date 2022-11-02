@@ -8,18 +8,6 @@ export type Result<T> =
   | ErrorResult
   | SuccessfulResult<T>
 
-export enum OperationStatus {
-  // Values here are the backend representations of OperationStatus defined in backend/models
-  PLANNING = 0,
-  ACTIVE = 1,
-  COMPLETE = 2,
-}
-export const operationStatusToLabel = {
-  [OperationStatus.PLANNING]: "Planning",
-  [OperationStatus.ACTIVE]: "Active",
-  [OperationStatus.COMPLETE]: "Complete",
-}
-
 export type EvidenceViewHint = 'small' | 'medium' | 'large'
 export type InteractionHint = 'active' | 'inactive'
 
@@ -94,12 +82,28 @@ export type SubmittableEvidence =
   | ContentFreeEvidence
   | Event
 
+export type TopContrib = {
+  slug: string,
+  count: number,
+}
+
+export type EvidenceCount = {
+  imageCount: number,
+  codeblockCount: number,
+  recordingCount: number,
+  eventCount: number,
+  harCount: number,
+}
+
 export type Operation = {
   slug: string,
   name: string,
-  status: OperationStatus,
   numUsers: number,
+  numEvidence: number,
+  numTags: number,
   favorite: boolean,
+  topContribs: Array<TopContrib>,
+  evidenceCount: EvidenceCount,
 }
 
 export type Evidence = {

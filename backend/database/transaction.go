@@ -117,6 +117,19 @@ func (tx *Transactable) Select(modelSlice interface{}, sb squirrel.SelectBuilder
 	return tx.sel(tx.tx.Select, modelSlice, sb)
 }
 
+// SelectRaw executes a raw SQL string
+// Note: this is for retriving multiple results, or "rows"
+func (tx *Transactable) SelectRaw(modelSlice interface{}, query string) error {
+	return tx.selRaw(tx.tx.Select, modelSlice, query)
+}
+
+// SelectRaw executes a raw SQL string with args
+// Note: this is for retriving multiple results, or "rows"
+func (tx *Transactable) SelectRawWithIntArg(modelSlice interface{}, query string, intVal int64) error {
+	// using tx.tx.Select here instead of tx.tx.Get, because there's a chance I might not get any rows back
+	return tx.selRawWithIntArg(tx.tx.Select, modelSlice, query, intVal)
+}
+
 // Get executes a SQL SELECT query given a reference to the database model and the squirrel SelectBuilder
 // that returns a single row. If no rows are returned, or multiple rows are returned from the SQL
 // query, an error is returned from this method.
@@ -281,6 +294,28 @@ func (tx *Transactable) sel(execFn func(interface{}, string, ...interface{}) err
 		return err
 	}
 	err = execFn(model, query, values...)
+	tx.transactionError = err
+	return err
+}
+
+// sel actually performs a select query, given the select method (either Sqlx.Select or Sqlx.Get)
+func (tx *Transactable) selRaw(execFn func(interface{}, string, ...interface{}) error, model interface{}, query string) error {
+	if tx.Error() != nil {
+		return tx.Error()
+	}
+
+	err := execFn(model, query)
+	tx.transactionError = err
+	return err
+}
+
+// sel actually performs a select query, given the select method (either Sqlx.Select or Sqlx.Get)
+func (tx *Transactable) selRawWithIntArg(execFn func(interface{}, string, ...interface{}) error, model interface{}, query string, values ...interface{}) error {
+	if tx.Error() != nil {
+		return tx.Error()
+	}
+
+	err := execFn(model, query, values...)
 	tx.transactionError = err
 	return err
 }

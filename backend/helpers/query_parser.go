@@ -96,19 +96,21 @@ func ParseTimelineQuery(query string) (TimelineFilters, error) {
 // Examples:
 // tokenizeTimelineQuery(`hello world tag:foo tag:bar is:event`)
 // becomes
-// map[string][]string{
-//   "": []string{"hello", "world"},
-//   "tag": []string{"foo", "bar", "fizz buzz"},
-//   "is": []string{"event"},
-// }
+//
+//	map[string][]string{
+//	  "": []string{"hello", "world"},
+//	  "tag": []string{"foo", "bar", "fizz buzz"},
+//	  "is": []string{"event"},
+//	}
 //
 // Quotes act like they do in most shells (quotes prevent spaces from becoming splits):
 // tokenizeTimelineQuery(`foo "bar baz" tag:"fizz buzz"`)
 // becomes
-// map[string][]string{
-//   "": []string{"foo", "bar baz"},
-//   "tag": []string{"fizz buzz"},
-// }
+//
+//	map[string][]string{
+//	  "": []string{"foo", "bar baz"},
+//	  "tag": []string{"fizz buzz"},
+//	}
 func tokenizeTimelineQuery(query string) map[string]filter.Values {
 	parsed := map[string]filter.Values{}
 	modifier := filter.Normal

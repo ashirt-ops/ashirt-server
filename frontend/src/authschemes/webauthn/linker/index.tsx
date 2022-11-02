@@ -2,7 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import { useForm, useFormField, useWiredData } from 'src/helpers'
+import { useForm, useFormField } from 'src/helpers'
 
 import Form from 'src/components/form'
 import Input from 'src/components/input'

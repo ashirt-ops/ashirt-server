@@ -10,7 +10,7 @@ export type EvidenceTypeOption = BulletProps & {
   id: SupportedEvidenceType
 }
 
-export const supportedEvidenceTypes: Array<EvidenceTypeOption> = [
+export const supportedEvidenceCount: Array<EvidenceTypeOption> = [
   { name: 'Screenshot', id: 'image' },
   { name: 'Code Block', id: 'codeblock' },
   { name: 'Terminal Recording', id: 'terminal-recording' },
@@ -30,7 +30,7 @@ export const EvidenceTypeChooser = (props: {
   return (
     <BulletChooser
       label={props.label}
-      options={supportedEvidenceTypes}
+      options={supportedEvidenceCount}
       value={props.value}
       onChange={props.onChange}
       enableNot={props.enableNot}

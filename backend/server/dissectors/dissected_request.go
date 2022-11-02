@@ -18,17 +18,18 @@ import (
 // Usage Example:
 //
 // // Gorilla Mux
-// func(w http.ResponseWriter, r *http.Request) {
-//   parsedRequest := DissectJSONRequest(r, mux.Vars(r))
-//   input := service.RepeatWordInput{
-//		SomeString: parsedRequest.FromURL("someString").Required(true).AsString()
-//      Times: parsedRequest.FromQuery("times").OrDefault(2).AsInt64()
-//   }
-//   if parsedRequest.Error != nil {
-//      // process error
-//   }
-//   service.RepeatWord( input )
-// }
+//
+//	func(w http.ResponseWriter, r *http.Request) {
+//	  parsedRequest := DissectJSONRequest(r, mux.Vars(r))
+//	  input := service.RepeatWordInput{
+//			SomeString: parsedRequest.FromURL("someString").Required(true).AsString()
+//	     Times: parsedRequest.FromQuery("times").OrDefault(2).AsInt64()
+//	  }
+//	  if parsedRequest.Error != nil {
+//	     // process error
+//	  }
+//	  service.RepeatWord( input )
+//	}
 type DissectedRequest struct {
 	Request     *http.Request
 	bodyValues  map[string]interface{}

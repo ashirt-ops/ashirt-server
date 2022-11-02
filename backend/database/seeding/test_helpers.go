@@ -9,11 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 // TinyImg is the smallest png. Used for testing. Reference: https://github.com/mathiasbynens/small
@@ -221,29 +223,114 @@ func GetFullEvidenceViaSelectBuilder(t *testing.T, db *database.Connection, cond
 
 func GetOperationFromSlug(t *testing.T, db *database.Connection, slug string) models.Operation {
 	var fullOp models.Operation
-	err := db.Get(&fullOp, sq.Select("id", "slug", "name", "status").
+	err := db.Get(&fullOp, sq.Select("id", "slug", "name").
 		From("operations").
 		Where(sq.Eq{"slug": slug}))
 	require.NoError(t, err)
 	return fullOp
 }
 
-func GetOperations(t *testing.T, db *database.Connection) []models.Operation {
-	var fullOps []models.Operation
-	err := db.Select(&fullOps, sq.Select("id", "slug", "name", "status").
-		From("operations"))
+func GetOperations(t *testing.T, db *database.Connection) []services.OperationWithID {
+	var operations []struct {
+		models.Operation
+		NumUsers    int `db:"num_users"`
+		NumEvidence int `db:"num_evidence"`
+		NumTags     int `db:"num_tags"`
+	}
+
+	var topContribs []services.TopContribWithID
+
+	var evidenceCount []services.EvidenceCountWithID
+
+	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
+		From("operations").
+		LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
+		LeftJoin("evidence ON evidence.operation_id = operations.id").
+		LeftJoin("tags ON tags.operation_id = operations.id").
+		GroupBy("operations.id").
+		OrderBy("operations.created_at DESC"))
+
 	require.NoError(t, err)
-	return fullOps
+
+	err = db.SelectRaw(&topContribs, services.GetTopContributorsForEachOperation)
+
+	require.NoError(t, err)
+
+	err = db.SelectRaw(&evidenceCount, services.EvidenceCountForAllOperations)
+
+	require.NoError(t, err)
+
+	operationsWithID := []services.OperationWithID{}
+	for _, operation := range operations {
+
+		filteredTopContribs := helpers.Filter(topContribs, func(contributor services.TopContribWithID) bool {
+			return contributor.OperationID == operation.ID
+		})
+
+		topContribsForOp := make([]dtos.TopContrib, 0, len(filteredTopContribs))
+		for i := range filteredTopContribs {
+			var topContrib dtos.TopContrib
+			topContrib.Slug = filteredTopContribs[i].Slug
+			topContrib.Count = filteredTopContribs[i].Count
+			topContribsForOp = append(topContribsForOp, topContrib)
+		}
+
+		var evidenceCountForOp dtos.EvidenceCount
+		idx, _ := helpers.Find(evidenceCount, func(item services.EvidenceCountWithID) bool {
+			return item.OperationID == operation.ID
+		})
+		if idx > -1 {
+			evidenceCountForOp.CodeblockCount = evidenceCount[idx].CodeblockCount
+			evidenceCountForOp.ImageCount = evidenceCount[idx].ImageCount
+			evidenceCountForOp.HarCount = evidenceCount[idx].HarCount
+			evidenceCountForOp.EventCount = evidenceCount[idx].EventCount
+			evidenceCountForOp.RecordingCount = evidenceCount[idx].RecordingCount
+		}
+
+		operationsWithID = append(operationsWithID, services.OperationWithID{
+			ID: operation.ID,
+			Op: &dtos.Operation{
+				Slug:          operation.Slug,
+				Name:          operation.Name,
+				NumUsers:      operation.NumUsers,
+				NumEvidence:   operation.NumEvidence,
+				NumTags:       operation.NumTags,
+				TopContribs:   topContribsForOp,
+				EvidenceCount: evidenceCountForOp,
+			},
+		})
+	}
+	return operationsWithID
 }
 
-func GetOperationsForUser(t *testing.T, db *database.Connection, userId int64) []models.Operation {
-	var fullOps []models.Operation
-	err := db.Select(&fullOps, sq.Select("id", "slug", "name", "status").
-		From("operations").
-		LeftJoin("user_operation_permissions on operation_id = operations.id").
-		Where(sq.Eq{"user_operation_permissions.user_id": userId}))
+func GetOperationsForUser(t *testing.T, db *database.Connection, user models.User) []*dtos.Operation {
+	var operations []services.OperationWithID
+	operations = GetOperations(t, db)
+
+	ctx := ContextForUser(user, db)
+
+	var operationPreference []models.UserOperationPermission
+
+	err := db.Select(&operationPreference, sq.Select("operation_id", "is_favorite").
+		From("user_operation_permissions").
+		Where(sq.Eq{"user_id": middleware.UserID(ctx)}))
+
 	require.NoError(t, err)
-	return fullOps
+
+	operationPreferenceMap := make(map[int64]bool)
+	for _, op := range operationPreference {
+		operationPreferenceMap[op.OperationID] = op.IsFavorite
+	}
+
+	filteredOperationsDTO := make([]*dtos.Operation, 0, len(operations))
+	for _, operation := range operations {
+		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
+			fave, _ := operationPreferenceMap[operation.ID]
+			operation.Op.Favorite = fave
+			filteredOperationsDTO = append(filteredOperationsDTO, operation.Op)
+		}
+	}
+	return filteredOperationsDTO
 }
 
 func GetUserRolesForOperationByOperationID(t *testing.T, db *database.Connection, id int64) []models.UserOperationPermission {

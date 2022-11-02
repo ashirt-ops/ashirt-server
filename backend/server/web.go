@@ -20,7 +20,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
@@ -262,7 +261,6 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		i := services.UpdateOperationInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 			Name:          dr.FromBody("name").Required().AsString(),
-			Status:        models.OperationStatus(dr.FromBody("status").OrDefault(int64(models.OperationStatusPlanning)).AsInt64()),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error

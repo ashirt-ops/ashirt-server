@@ -9,7 +9,7 @@ export const isErrorResult = <T>(v: Result<T>): v is ErrorResult => {
   return ('err' in v)
 }
 
-type ResultState = 
+type ResultState =
   | "success"
   | "unresolved"
   | "error"

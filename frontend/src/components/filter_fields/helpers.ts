@@ -5,7 +5,7 @@ import * as dateFns from 'date-fns'
 
 import { parseQuery, parseDateRangeString, ParsedQuery, FilterModifier, FilterModified } from 'src/helpers'
 import { Tag, User } from 'src/global_types'
-import { BulletProps, creatorToBulletProps, supportedEvidenceTypes, tagToBulletProps, textToBulletProps } from 'src/components/bullet_chooser'
+import { BulletProps, creatorToBulletProps, supportedEvidenceCount, tagToBulletProps, textToBulletProps } from 'src/components/bullet_chooser'
 import { isNotUndefined } from 'src/helpers/is_not_undefined'
 
 export type SearchOptions = {
@@ -117,7 +117,7 @@ export const stringToSearch = (
     }
     else if (key == 'type') {
       opts.type = filterValues
-        .map(fVal => findAndModify(supportedEvidenceTypes, (t => t.id == fVal.value), fVal.modifier))
+        .map(fVal => findAndModify(supportedEvidenceCount, (t => t.id == fVal.value), fVal.modifier))
         .filter(isNotUndefined)
     }
     else if (key == 'linked') {

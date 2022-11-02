@@ -82,21 +82,12 @@ type TagEvidenceMap struct {
 
 // Operation reflects the structure of the database table 'operations'
 type Operation struct {
-	ID        int64           `db:"id"`
-	Slug      string          `db:"slug"`
-	Name      string          `db:"name"`
-	Status    OperationStatus `db:"status"`
-	CreatedAt time.Time       `db:"created_at"`
-	UpdatedAt *time.Time      `db:"updated_at"`
+	ID        int64      `db:"id"`
+	Slug      string     `db:"slug"`
+	Name      string     `db:"name"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
 }
-
-type OperationStatus = int
-
-const (
-	OperationStatusPlanning OperationStatus = 0
-	OperationStatusAcitve   OperationStatus = 1
-	OperationStatusComplete OperationStatus = 2
-)
 
 // Tag reflects the structure of the database table 'tags'
 type Tag struct {
