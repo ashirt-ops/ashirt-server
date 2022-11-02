@@ -31,7 +31,6 @@ export default (props: {
             (
               <OperationCard
                 slug={op.slug}
-                status={op.status}
                 numUsers={op.numUsers}
                 key={op.slug}
                 name={op.name}

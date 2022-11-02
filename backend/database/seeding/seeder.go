@@ -113,7 +113,6 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"id":         seed.Operations[i].ID,
 				"slug":       seed.Operations[i].Slug,
 				"name":       seed.Operations[i].Name,
-				"status":     seed.Operations[i].Status,
 				"created_at": seed.Operations[i].CreatedAt,
 				"updated_at": seed.Operations[i].UpdatedAt,
 			}

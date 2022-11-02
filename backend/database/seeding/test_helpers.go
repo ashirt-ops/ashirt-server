@@ -223,7 +223,7 @@ func GetFullEvidenceViaSelectBuilder(t *testing.T, db *database.Connection, cond
 
 func GetOperationFromSlug(t *testing.T, db *database.Connection, slug string) models.Operation {
 	var fullOp models.Operation
-	err := db.Get(&fullOp, sq.Select("id", "slug", "name", "status").
+	err := db.Get(&fullOp, sq.Select("id", "slug", "name").
 		From("operations").
 		Where(sq.Eq{"slug": slug}))
 	require.NoError(t, err)
@@ -242,7 +242,7 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 
 	var evidenceCount []services.EvidenceCountWithID
 
-	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
+	err := db.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 		From("operations").
 		LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
 		LeftJoin("evidence ON evidence.operation_id = operations.id").
@@ -292,7 +292,6 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 			Op: &dtos.Operation{
 				Slug:          operation.Slug,
 				Name:          operation.Name,
-				Status:        operation.Status,
 				NumUsers:      operation.NumUsers,
 				NumEvidence:   operation.NumEvidence,
 				NumTags:       operation.NumTags,

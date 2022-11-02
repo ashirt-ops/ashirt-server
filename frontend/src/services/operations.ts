@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { Operation, OperationStatus, UserRole, UserOperationRole, UserFilter } from 'src/global_types'
+import { Operation, UserRole, UserOperationRole, UserFilter } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { userOperationRoleFromDto } from './data_sources/converters'
 
@@ -40,7 +40,7 @@ export async function getOperation(slug: string): Promise<Operation> {
   return await ds.readOperation({ operationSlug: slug })
 }
 
-export async function saveOperation(slug: string, i: { name: string, status: OperationStatus }) {
+export async function saveOperation(slug: string, i: { name: string  }) {
   return await ds.updateOperation({ operationSlug: slug }, i)
 }
 

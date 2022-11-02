@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { EvidenceCount, OperationStatus, TopContrib } from 'src/global_types'
+import { EvidenceCount, TopContrib } from 'src/global_types'
 import Modal from '../modal'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -12,7 +12,6 @@ export default (props: {
   onRequestClose: () => void,
   topContribs: Array<TopContrib>,
   evidenceCount: EvidenceCount,
-  status: OperationStatus,
   numTags: number;
 }) => {
 

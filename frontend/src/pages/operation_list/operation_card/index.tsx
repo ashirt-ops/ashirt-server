@@ -7,7 +7,7 @@ import OperationBadges from 'src/components/operation_badges'
 import OperationBadgesModal from 'src/components/operation_badges_modal'
 import classnames from 'classnames/bind'
 import { Link } from 'react-router-dom'
-import { EvidenceCount, OperationStatus, TopContrib } from 'src/global_types'
+import { EvidenceCount, TopContrib } from 'src/global_types'
 import Button from 'src/components/button'
 import { renderModals, useModal } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
@@ -19,7 +19,6 @@ export default (props: {
   numEvidence: number,
   numTags: number,
   numUsers: number,
-  status: OperationStatus,
   favorite: boolean,
   onFavoriteClick: () => void,
   topContribs: Array<TopContrib>,
@@ -27,13 +26,13 @@ export default (props: {
 }) => {
   const { favorite } = props
   const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={props.topContribs} evidenceCount={props.evidenceCount} status={props.status} numTags={props.numTags} />
+    <OperationBadgesModal {...modalProps} topContribs={props.topContribs} evidenceCount={props.evidenceCount} numTags={props.numTags} />
   ))
   const handleDetailsModal = () => moreDetailsModal?.show({})
   return (
     <Card className={cx('root', props.className)}>
       <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
-      <OperationBadges className={cx('badges')} numUsers={props.numUsers} status={props.status} showDetailsModal={handleDetailsModal} />
+      <OperationBadges className={cx('badges')} numUsers={props.numUsers} showDetailsModal={handleDetailsModal} />
       <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
       <Link className={cx('overview')} to={`/operations/${props.slug}/overview`} title="Evidence Overview" />
       <Button

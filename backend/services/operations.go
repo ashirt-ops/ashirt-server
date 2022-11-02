@@ -33,7 +33,6 @@ type CreateOperationInput struct {
 type UpdateOperationInput struct {
 	OperationSlug string
 	Name          string
-	Status        models.OperationStatus
 }
 
 type OperationWithID struct {
@@ -71,9 +70,8 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
 		operationID, _ := tx.Insert("operations", map[string]interface{}{
-			"name":   i.Name,
-			"status": models.OperationStatusPlanning,
-			"slug":   cleanSlug,
+			"name": i.Name,
+			"slug": cleanSlug,
 		})
 		tx.Insert("user_operation_permissions", map[string]interface{}{
 			"user_id":      i.OwnerID,
@@ -104,7 +102,6 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 		Slug:     cleanSlug,
 		Name:     i.Name,
 		NumUsers: 1,
-		Status:   models.OperationStatusPlanning,
 	}, nil
 }
 
@@ -279,7 +276,6 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	return &dtos.Operation{
 		Slug:          operationSlug,
 		Name:          operation.Name,
-		Status:        operation.Status,
 		NumUsers:      numUsers,
 		Favorite:      favorite,
 		NumEvidence:   operation.NumEvidence,
@@ -301,8 +297,7 @@ func UpdateOperation(ctx context.Context, db *database.Connection, i UpdateOpera
 
 	err = db.Update(sq.Update("operations").
 		SetMap(map[string]interface{}{
-			"name":   i.Name,
-			"status": i.Status,
+			"name": i.Name,
 		}).
 		Where(sq.Eq{"id": operation.ID}))
 	if err != nil {
@@ -348,7 +343,7 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 	var evidenceCount []EvidenceCountWithID
 
 	err := db.WithTx(ctx, func(tx *database.Transactable) {
-		tx.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "status", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
+		tx.Select(&operations, sq.Select("operations.id", "slug", "operations.name", "count(distinct(user_operation_permissions.user_id)) AS num_users", "count(distinct(evidence.id)) AS num_evidence", "count(distinct(tags.id)) AS num_tags").
 			From("operations").
 			LeftJoin("user_operation_permissions ON user_operation_permissions.operation_id = operations.id").
 			LeftJoin("evidence ON evidence.operation_id = operations.id").
@@ -396,7 +391,6 @@ func listAllOperations(ctx context.Context, db *database.Connection) ([]Operatio
 			Op: &dtos.Operation{
 				Slug:          operation.Slug,
 				Name:          operation.Name,
-				Status:        operation.Status,
 				NumUsers:      operation.NumUsers,
 				NumEvidence:   operation.NumEvidence,
 				NumTags:       operation.NumTags,
