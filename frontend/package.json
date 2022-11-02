@@ -52,7 +52,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.2",
     "react-markdown": "^8.0.3",
-    "react-router-dom": "^6.3.0",
+    "react-router-dom": "^6.4.3",
     "xterm": "^4.19.0"
   }
 }
