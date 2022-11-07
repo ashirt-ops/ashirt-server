@@ -14,7 +14,6 @@ const cx = classnames.bind(require('./stylesheet'))
 const AsyncLogin = makeAsyncPage(() => import('src/pages/login'))
 const AsyncOperationList = makeAsyncPage(() => import('src/pages/operation_list'))
 const AsyncOperationEdit = makeAsyncPage(() => import('src/pages/operation_edit'))
-const AsyncOperationOverview = makeAsyncPage(() => import('src/pages/operation_overview'))
 const AsyncFindingShow = makeAsyncPage(() => import('src/pages/operation_show/finding_show'))
 const AsyncEvidenceList = makeAsyncPage(() => import('src/pages/operation_show/evidence_list'))
 const AsyncFindingList = makeAsyncPage(() => import('src/pages/operation_show/finding_list'))
@@ -68,7 +67,6 @@ export default () => {
             <Route index element={<Redirect to={`settings`} />} />
             <Route path="*" element={<AsyncOperationEdit />} />
           </Route>
-          <Route path="overview" element={<AsyncOperationOverview />} />
         </Route>
       </Route>
 

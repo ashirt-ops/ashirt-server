@@ -41,13 +41,6 @@ export async function updateTag(i: {
   )
 }
 
-export async function getTagsByEvidenceUsage(i: {
-  operationSlug: string,
-}): Promise<Array<TagByEvidenceDate>> {
-  const data = await ds.listTagsByEvidenceDate(i)
-  return data.map(tagEvidenceDateFromDto)
-}
-
 export async function getDefaultTags(): Promise<Array<DefaultTag>> {
   return await ds.listDefaultTags()
 }

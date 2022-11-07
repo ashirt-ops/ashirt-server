@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@types/har-format": "^1.2.8",
-    "@types/react-calendar-timeline": "^0.26.5",
     "ace-builds": "^1.10.1",
     "classnames": "^2.3.1",
     "date-fns": "^2.29.3",
@@ -47,7 +46,6 @@
     "query-string": "^7.1.1",
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
-    "react-calendar-timeline": "^0.27.0",
     "react-day-picker": "^8.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.2",

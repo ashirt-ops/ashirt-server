@@ -48,7 +48,6 @@ export default (props: {
       <header>
         <h1 title={operation.name}>{operation.name}</h1>
         <Link className={cx('edit')} to={`/operations/${operation.slug}/edit`} title="Edit this operation" />
-        <Link className={cx('overview')} to={`/operations/${operation.slug}/overview`} title="View evidence overview" />
         <Button
           className={cx('favorite-button', isFavorite && 'filled')}
           onClick={() => setIsFavorite(!isFavorite)}
