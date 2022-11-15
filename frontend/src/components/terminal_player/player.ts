@@ -44,7 +44,6 @@ export default class extends EventEmitter {
       rows: Math.max(this.content.header.height, 30),
       disableStdin: true,
       fontFamily: "monospace",
-      bellStyle: "none",
       scrollback: 0, // scrollback presents some odd UI, so disabling it for now.
     })
     this.currentIndex = 0
