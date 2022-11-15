@@ -16,11 +16,12 @@ import (
 // This function is shared by both client code to authenticate requests, and server to validate requests
 //
 // The return value is
-//   base64(hmac-sha-256(VERB + "\n" +
-//                       REQUEST_PATH + "\n" +
-//                       DATE + "\n" +
-//                       sha256(REQUEST_BODY)
-//   ))
+//
+//	base64(hmac-sha-256(VERB + "\n" +
+//	                    REQUEST_PATH + "\n" +
+//	                    DATE + "\n" +
+//	                    sha256(REQUEST_BODY)
+//	))
 //
 // It uses a separate requestBody argument instead of r.Body since reading from r.Body
 // in both client & server will prevent reading the body again.
