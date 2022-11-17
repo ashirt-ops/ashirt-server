@@ -29,7 +29,10 @@ func NewS3Store(bucketName string, region string) (*S3Store, error) {
 	}
 	return &S3Store{
 		bucketName: bucketName,
-		s3Client:   s3.NewFromConfig(cfg),
+		// https://aws.github.io/aws-sdk-go-v2/docs/migrating/#example-2-overriding-client-settings
+		s3Client: s3.NewFromConfig(cfg, func(o *s3.Options) {
+			o.Region = region
+		}),
 	}, nil
 }
 

@@ -37,7 +37,9 @@ func buildLambdaClient() error {
 	if config.UseLambdaRIE() {
 		lambdaClient = newRIELambdaClient()
 	} else {
-		lambdaClient = lambda.NewFromConfig(cfg)
+		lambdaClient = lambda.NewFromConfig(cfg, func(o *lambda.Options) {
+			o.Region = config.AWSRegion()
+		})
 	}
 	return nil
 }
