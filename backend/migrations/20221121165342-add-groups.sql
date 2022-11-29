@@ -1,6 +1,7 @@
 -- +migrate Up
 CREATE TABLE user_groups (
   id INT AUTO_INCREMENT,
+  slug VARCHAR(255) NOT NULL UNIQUE
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP,
   PRIMARY KEY (id)
