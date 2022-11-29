@@ -219,6 +219,16 @@ func userSlugToUserID(db *database.Connection, slug string) (int64, error) {
 	return userID, err
 }
 
+// TODO TN - add a test for this?
+func userGroupSlugToUserGroupID(db *database.Connection, slug string) (int64, error) {
+	var userGroupID int64
+	err := db.Get(&userGroupID, sq.Select("id").From("user_groups").Where(sq.Eq{"slug": slug}))
+	if err != nil {
+		return userGroupID, backend.WrapError("Unable to look up user group by slug", err)
+	}
+	return userGroupID, err
+}
+
 func SelfOrSlugToUserID(ctx context.Context, db *database.Connection, slug string) (int64, error) {
 	if slug == "" {
 		return middleware.UserID(ctx), nil
