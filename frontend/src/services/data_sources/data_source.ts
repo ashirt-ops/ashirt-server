@@ -94,6 +94,9 @@ export interface DataSource {
   adminListUsers(query: { deleted: boolean, name?: string }): Promise<types.PaginationResult<dtos.UserAdminView>>
   adminCreateHeadlessUser(payload: UserPayload): Promise<dtos.CreateUserOutput>
 
+  createUserGroup(name: string): Promise<dtos.UserGroup>
+  adminListUserGroups(query: { deleted: boolean }): Promise<types.PaginationResult<dtos.UserGroup>>
+
   listQueries(ids: OpSlug): Promise<Array<dtos.Query>>
   createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings' }): Promise<void>
   upsertQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings', replaceName?: boolean }): Promise<void>

@@ -65,6 +65,9 @@ export const backendDataSource: DataSource = {
   adminListUsers: query => req('GET', '/admin/users', null, query),
   adminCreateHeadlessUser: payload => req('POST', "/admin/user/headless", payload),
 
+  createUserGroup: payload => req('POST', '/usergroups', payload),
+  adminListUserGroups: query => req('GET', '/admin/usergroups', null, query),
+
   listQueries: ids => req('GET', `/operations/${ids.operationSlug}/queries`),
   createQuery: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/queries`, payload),
   upsertQuery: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/queries`, payload),

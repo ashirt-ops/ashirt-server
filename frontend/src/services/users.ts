@@ -2,7 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import { backendDataSource as ds } from './data_sources/backend'
-import { PaginationResult, User, UserAdminView, ListUsersForAdminQuery, UserFilter } from 'src/global_types'
+import { PaginationResult, User, UserAdminView, ListObjectForAdminQuery, UserFilter } from 'src/global_types'
 
 export async function listUsers(i: {
   query: string,
@@ -11,7 +11,7 @@ export async function listUsers(i: {
   return await ds.listUsers(i.query, i.includeDeleted || false)
 }
 
-export async function listUsersAdminView(i: ListUsersForAdminQuery & UserFilter): Promise<PaginationResult<UserAdminView>> {
+export async function listUsersAdminView(i: ListObjectForAdminQuery & UserFilter): Promise<PaginationResult<UserAdminView>> {
   return await ds.adminListUsers(i)
 }
 

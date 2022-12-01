@@ -9,7 +9,8 @@ import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
   adminInviteUser,
-  createApiKey
+  createApiKey,
+  createUserGroup
 } from 'src/services'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
@@ -161,6 +162,48 @@ export const AddUserModal = (props: {
           <p>Below is the new user's initial login credentials:</p>
           <InputWithCopyButton label="Username" value={username} />
           <InputWithCopyButton label="Password" value={password} />
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      }
+    </Modal>
+  )
+}
+
+export const AddUserGroupModal = (props: {
+  onRequestClose: () => void,
+}) => {
+  const groupName = useFormField<string>("")
+
+  const [isDisabled, setDisabled] = React.useState<boolean>(false)
+
+  const formComponentProps = useForm({
+    fields: [groupName],
+    handleSubmit: () => {
+      if (groupName.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Group should have a name")))
+      }
+      // figure out how to actually create a group
+      const runSubmit = async () => {
+        // Do something with result TODO TN
+        await createUserGroup(groupName.value)
+        setDisabled(true) // lock the form -- we don't need to allow submits at this time.
+      }
+
+      return runSubmit()
+    },
+  })
+
+  return (
+    <Modal title="Create New Group" onRequestClose={props.onRequestClose}>
+      <Form {...formComponentProps} loading={isDisabled}
+        submitText={isDisabled ? undefined : "Submit"}
+      >
+        <Input label="Group Name" {...groupName} disabled={isDisabled} />
+      </Form>
+      {isDisabled && (<>
+        <div className={cx('success-area')}>
+          <p>Group has been created successfully!</p>
           <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
         </div>
       </>)

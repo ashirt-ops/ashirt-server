@@ -33,16 +33,14 @@ func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	return nil
 }
 
+// TODO TN: how does a group get set up with an operation?
 func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64) error {
 	fmt.Println("Adding users to group", userSlugs)
 	for _, userSlug := range userSlugs {
 		userID, err := userSlugToUserID(db, userSlug)
-		// fmt.Println("before err", userSlug, userID, err)
 		if err != nil {
-			// fmt.Println("err")
 			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
 		}
-		// fmt.Println("after err")
 
 		var userGroupMap models.UserGroupMap
 		err = db.Get(&userGroupMap, sq.Select("*").

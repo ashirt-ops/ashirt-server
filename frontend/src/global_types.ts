@@ -211,7 +211,7 @@ export type UserFilter = {
   name?: string
 }
 
-export type ListUsersForAdminQuery = PaginationQuery & {
+export type ListObjectForAdminQuery = PaginationQuery & {
   deleted: boolean,
 }
 
