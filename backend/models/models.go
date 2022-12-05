@@ -118,10 +118,17 @@ type User struct {
 type UserOperationPermission struct {
 	UserID      int64                `db:"user_id"`
 	OperationID int64                `db:"operation_id"`
-	IsFavorite  bool                 `db:"is_favorite"`
 	Role        policy.OperationRole `db:"role"`
 	CreatedAt   time.Time            `db:"created_at"`
 	UpdatedAt   *time.Time           `db:"updated_at"`
+}
+
+type UserOperationPreferences struct {
+	UserID      int64      `db:"user_id"`
+	OperationID int64      `db:"operation_id"`
+	IsFavorite  bool       `db:"is_favorite"`
+	CreatedAt   time.Time  `db:"created_at"`
+	UpdatedAt   *time.Time `db:"updated_at"`
 }
 
 // Query reflects the structure of the database table 'queries'
