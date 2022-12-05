@@ -82,6 +82,7 @@ func ClearDB(db *database.Connection) error {
 	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
 		tx.Delete(sq.Delete("sessions"))
 		tx.Delete(sq.Delete("user_operation_permissions"))
+		tx.Delete(sq.Delete("user_operation_preferences"))
 		tx.Delete(sq.Delete("api_keys"))
 		tx.Delete(sq.Delete("auth_scheme_data"))
 		tx.Delete(sq.Delete("email_queue"))
@@ -303,16 +304,15 @@ func GetOperations(t *testing.T, db *database.Connection) []services.OperationWi
 	return operationsWithID
 }
 
+// TODO this is too close to what ListOperations does. We can leave it like this, but should have a
+// a test to verify the intial case (matches the seed data), plus a minor addition
 func GetOperationsForUser(t *testing.T, db *database.Connection, user models.User) []*dtos.Operation {
-	var operations []services.OperationWithID
-	operations = GetOperations(t, db)
-
+	operations := GetOperations(t, db)
 	ctx := ContextForUser(user, db)
 
-	var operationPreference []models.UserOperationPermission
-
+	var operationPreference []models.UserOperationPreferences
 	err := db.Select(&operationPreference, sq.Select("operation_id", "is_favorite").
-		From("user_operation_permissions").
+		From("user_operation_preferences").
 		Where(sq.Eq{"user_id": middleware.UserID(ctx)}))
 
 	require.NoError(t, err)
@@ -325,8 +325,7 @@ func GetOperationsForUser(t *testing.T, db *database.Connection, user models.Use
 	filteredOperationsDTO := make([]*dtos.Operation, 0, len(operations))
 	for _, operation := range operations {
 		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
-			fave, _ := operationPreferenceMap[operation.ID]
-			operation.Op.Favorite = fave
+			operation.Op.Favorite = operationPreferenceMap[operation.ID]
 			filteredOperationsDTO = append(filteredOperationsDTO, operation.Op)
 		}
 	}
@@ -551,28 +550,30 @@ func GetUsersWithRoleForOperationByOperationID(t *testing.T, db *database.Connec
 	return allUserOpRoles
 }
 
-type PermissionsOperations struct {
-	models.UserOperationPermission
+type PreferencesOperations struct {
+	models.UserOperationPreferences
 	Slug string `db:"slug"`
 }
 
-func GetFavoritesByUserID(t *testing.T, db *database.Connection, id int64) []PermissionsOperations {
-	var permissionsOperations []PermissionsOperations
-	err := db.Select(&permissionsOperations, sq.Select("user_operation_permissions.*", "operations.slug").
-		From("user_operation_permissions").
-		Join("operations on user_operation_permissions.operation_id = operations.id").
+func GetFavoritesByUserID(t *testing.T, db *database.Connection, id int64) []PreferencesOperations {
+	var preferencesOperations []PreferencesOperations
+	err := db.Select(&preferencesOperations, sq.Select("user_operation_preferences.*", "operations.slug").
+		From("user_operation_preferences").
+		Join("operations on user_operation_preferences.operation_id = operations.id").
 		Where(sq.Eq{"user_id": id, "is_favorite": true}))
 	require.NoError(t, err)
-	return permissionsOperations
+	return preferencesOperations
 }
 
 func GetFavoriteForOperation(t *testing.T, db *database.Connection, slug string, id int64) bool {
-	var isFavorite bool
-	err := db.Get(&isFavorite, sq.Select("is_favorite").
-		From("user_operation_permissions").
-		Join("operations on user_operation_permissions.operation_id = operations.id").
+	var favorites []bool
+	err := db.Select(&favorites, sq.Select("is_favorite").
+		From("user_operation_preferences").
+		Join("operations on user_operation_preferences.operation_id = operations.id").
 		Where(sq.Eq{"slug": slug, "user_id": id}))
 	require.NoError(t, err)
+
+	isFavorite := len(favorites) > 0 && favorites[0]
 
 	return isFavorite
 }

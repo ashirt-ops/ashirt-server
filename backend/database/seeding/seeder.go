@@ -30,6 +30,7 @@ type Seeder struct {
 	DefaultTags       []models.DefaultTag
 	Tags              []models.Tag
 	UserOpMap         []models.UserOperationPermission
+	UserOpPrefMap     []models.UserOperationPreferences
 	TagEviMap         []models.TagEvidenceMap
 	EviFindingsMap    []models.EvidenceFindingMap
 	Queries           []models.Query
@@ -124,7 +125,15 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"role":         seed.UserOpMap[i].Role,
 				"created_at":   seed.UserOpMap[i].CreatedAt,
 				"updated_at":   seed.UserOpMap[i].UpdatedAt,
-				"is_favorite":  seed.UserOpMap[i].IsFavorite,
+			}
+		})
+		tx.BatchInsert("user_operation_preferences", len(seed.UserOpPrefMap), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"user_id":      seed.UserOpPrefMap[i].UserID,
+				"operation_id": seed.UserOpPrefMap[i].OperationID,
+				"created_at":   seed.UserOpPrefMap[i].CreatedAt,
+				"updated_at":   seed.UserOpPrefMap[i].UpdatedAt,
+				"is_favorite":  seed.UserOpPrefMap[i].IsFavorite,
 			}
 		})
 		tx.BatchInsert("default_tags", len(seed.DefaultTags), func(i int) map[string]interface{} {
