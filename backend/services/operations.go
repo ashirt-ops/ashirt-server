@@ -163,6 +163,8 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 
 			// remove user/operations map
 			tx.Delete(sq.Delete("user_operation_permissions").Where(sq.Eq{"operation_id": operation.ID}))
+			// remove user preferences for operation
+			tx.Delete(sq.Delete("user_operation_preferences").Where(sq.Eq{"operation_id": operation.ID}))
 
 			tx.Delete(sq.Delete("operations").Where(sq.Eq{"id": operation.ID}))
 		})
@@ -185,14 +187,14 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 		return nil, err
 	}
 
-	var operationPreference []models.UserOperationPermission
+	var operationPreference []models.UserOperationPreferences
 
 	err = db.Select(&operationPreference, sq.Select("operation_id", "is_favorite").
-		From("user_operation_permissions").
+		From("user_operation_preferences").
 		Where(sq.Eq{"user_id": middleware.UserID(ctx)}))
 
 	if err != nil {
-		return nil, backend.WrapError("Cannot get user operation permissions", backend.DatabaseErr(err))
+		return nil, backend.WrapError("Cannot get user operation preferences", backend.DatabaseErr(err))
 	}
 
 	operationPreferenceMap := make(map[int64]bool)
@@ -203,8 +205,7 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 	operationsDTO := make([]*dtos.Operation, 0, len(operations))
 	for _, operation := range operations {
 		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
-			fave, _ := operationPreferenceMap[operation.ID]
-			operation.Op.Favorite = fave
+			operation.Op.Favorite = operationPreferenceMap[operation.ID]
 			operationsDTO = append(operationsDTO, operation.Op)
 		}
 	}
@@ -222,11 +223,11 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 	}
 
 	var numUsers int
-	var favorite bool
+	favorite := false
 	var topContribs []TopContribWithID
 	var evidenceCount []EvidenceCountWithID
 
-	var evidenceCountForOneOperation string = fmt.Sprintf(`
+	evidenceCountForOneOperation := fmt.Sprintf(`
 	%s
 	WHERE operation_id = ?
 		GROUP BY operation_id`, getCountsFromEvidence)
@@ -237,9 +238,13 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		tx.Get(&numUsers, sq.Select("count(*)").From("user_operation_permissions").
 			Where(sq.Eq{"operation_id": operation.ID}))
 
-		tx.Get(&favorite, sq.Select("is_favorite").
-			From("user_operation_permissions").
+		var favorites []bool
+		tx.Select(&favorites, sq.Select("is_favorite").
+			From("user_operation_preferences").
 			Where(sq.Eq{"user_id": middleware.UserID(ctx), "operation_id": operation.ID}))
+		if len(favorites) > 0 {
+			favorite = favorites[0]
+		}
 
 		tx.SelectRawWithIntArg(&topContribs, getTopContributorsForOperation, operation.ID)
 
@@ -417,11 +422,12 @@ func SetFavoriteOperation(ctx context.Context, db *database.Connection, i SetFav
 		return backend.WrapError("Unwilling to read operation", backend.UnauthorizedReadErr(err))
 	}
 
-	err = db.Update(sq.Update("user_operation_permissions").
-		SetMap(map[string]interface{}{
-			"is_favorite": i.IsFavorite,
-		}).
-		Where(sq.Eq{"operation_id": operation.ID, "user_id": middleware.UserID(ctx)}))
+	_, err = db.Insert("user_operation_preferences", map[string]interface{}{
+		"user_id": middleware.UserID(ctx),
+		"operation_id": operation.ID,
+		"is_favorite": i.IsFavorite,
+	}, "ON DUPLICATE KEY UPDATE is_favorite=VALUES(is_favorite)")
+
 	if err != nil {
 		return backend.WrapError("Cannot set operation as favorite", backend.DatabaseErr(err))
 	}
