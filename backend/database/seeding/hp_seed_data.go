@@ -43,7 +43,7 @@ var HarryPotterSeedData = Seeder{
 		newUserOperationPreferences(UserDumbledore, OpGobletOfFire, true),
 		// This user doesn't have permission to view this operation. This helps check that it's okay
 		// to not clean this data up. (and other checks should verify the users don't need to have
-	    // not-a-favorite set up.)
+		// not-a-favorite set up.)
 		newUserOperationPreferences(UserDraco, OpChamberOfSecrets, true),
 	},
 	UserOpMap: []models.UserOperationPermission{

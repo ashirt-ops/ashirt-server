@@ -423,9 +423,9 @@ func SetFavoriteOperation(ctx context.Context, db *database.Connection, i SetFav
 	}
 
 	_, err = db.Insert("user_operation_preferences", map[string]interface{}{
-		"user_id": middleware.UserID(ctx),
+		"user_id":      middleware.UserID(ctx),
 		"operation_id": operation.ID,
-		"is_favorite": i.IsFavorite,
+		"is_favorite":  i.IsFavorite,
 	}, "ON DUPLICATE KEY UPDATE is_favorite=VALUES(is_favorite)")
 
 	if err != nil {
