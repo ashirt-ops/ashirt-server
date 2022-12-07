@@ -127,14 +127,14 @@ func TestListOperations(t *testing.T) {
 		require.Equal(t, len(expectedOps), len(ops))
 		validateOperationList(ops, expectedOps)
 
-		opsAndPermissions := getFavoritesByUserID(t, db, normalUser.ID)
-		for _, opAndPerm := range opsAndPermissions {
+		opsAndPrefs := getFavoritesByUserID(t, db, normalUser.ID)
+		for _, opPrefs := range opsAndPrefs {
 			_, found := helpers.Find(ops, func(expectedOp *dtos.Operation) bool {
-				return (*expectedOp).Slug == opAndPerm.Slug
+				return (*expectedOp).Slug == opPrefs.Slug
 			})
 			require.NotNil(t, found)
 			fav := (**found).Favorite
-			require.Equal(t, fav, opAndPerm.IsFavorite)
+			require.Equal(t, fav, opPrefs.IsFavorite)
 		}
 
 		// validate headless users
@@ -181,7 +181,7 @@ func TestListOperationsForAdmin(t *testing.T) {
 func TestSetFavoriteOperation(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		normalUser := UserRon
-		slug := "HPGoF"
+		slug := OpGobletOfFire.Slug
 
 		isFavorite := getFavoriteForOperation(t, db, slug, normalUser.ID)
 		require.Equal(t, isFavorite, false)

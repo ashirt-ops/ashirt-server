@@ -38,6 +38,14 @@ var HarryPotterSeedData = Seeder{
 		APIKeyRon1, APIKeyRon2,
 		APIKeyNick,
 	},
+	UserOpPrefMap: []models.UserOperationPreferences{
+		newUserOperationPreferences(UserRon, OpChamberOfSecrets, true),
+		newUserOperationPreferences(UserDumbledore, OpGobletOfFire, true),
+		// This user doesn't have permission to view this operation. This helps check that it's okay
+		// to not clean this data up. (and other checks should verify the users don't need to have
+		// not-a-favorite set up.)
+		newUserOperationPreferences(UserDraco, OpChamberOfSecrets, true),
+	},
 	UserOpMap: []models.UserOperationPermission{
 		// OpSorcerersStone and OpChamberOfSecrets are used to check read/write permissions
 		// The following should always remain true:
@@ -56,7 +64,7 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserHermione, OpSorcerersStone, policy.OperationRoleRead),
 		newUserOpPermission(UserNeville, OpSorcerersStone, policy.OperationRoleWrite),
 
-		newUserOpPermission(UserRon, OpChamberOfSecrets, policy.OperationRoleAdmin, true),
+		newUserOpPermission(UserRon, OpChamberOfSecrets, policy.OperationRoleAdmin),
 		newUserOpPermission(UserHarry, OpChamberOfSecrets, policy.OperationRoleWrite),
 		newUserOpPermission(UserHermione, OpChamberOfSecrets, policy.OperationRoleWrite),
 		newUserOpPermission(UserSeamus, OpChamberOfSecrets, policy.OperationRoleRead),
@@ -87,7 +95,7 @@ var HarryPotterSeedData = Seeder{
 
 		newUserOpPermission(UserDumbledore, OpSorcerersStone, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
-		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin, true),
+		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin),
 	},
 	Findings: []models.Finding{
 		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear, FindingBook2Robes,
