@@ -3,18 +3,14 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useNavigate } from 'react-router-dom'
-import { PaginatedWiredData, usePaginatedWiredData } from 'src/helpers'
+import { PaginatedWiredData, usePaginatedWiredData} from 'src/helpers'
 
-import { UserAdminView } from 'src/global_types'
-import { listUsersAdminView, createRecoveryCode } from 'src/services'
+import { UserGroupAdminView } from 'src/global_types'
+import { listUserGroupsAdminView } from 'src/services'
 import AuthContext from 'src/auth_context'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
-import {
-  ResetPasswordModal, UpdateUserFlagsModal, DeleteUserModal, RecoverAccountModal,
-  RemoveTotpModal
-} from 'src/pages/admin_modals'
+import { RecoverAccountModal } from 'src/pages/admin_modals'
 import {
   default as Table,
   ErrorRow,
@@ -24,7 +20,7 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 import Checkbox from 'src/components/checkbox'
 import { StandardPager } from 'src/components/paging'
 import SettingsSection from 'src/components/settings_section'
-import { default as Menu, MenuItem } from 'src/components/menu'
+import { default as Menu } from 'src/components/menu'
 import { ClickPopover } from 'src/components/popover'
 import Input from 'src/components/input'
 
@@ -34,32 +30,29 @@ export default (props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
 }) => {
-  const [resettingPassword, setResettingPassword] = React.useState<null | UserAdminView>(null)
-  const [editingUserFlags, setEditingUserFlags] = React.useState<null | UserAdminView>(null)
-  const [deletingUser, setDeletingUser] = React.useState<null | UserAdminView>(null)
-  const [deletingTotp, setDeletingTotp] = React.useState<null | UserAdminView>(null)
+  // TODO TN - do we want to be able to delete user groups or users from this page? 
+  // const [resettingPassword, setResettingPassword] = React.useState<null | UserAdminView>(null)
+  // const [editingUserFlags, setEditingUserFlags] = React.useState<null | UserAdminView>(null)
+  // const [deletingUser, setDeletingUser] = React.useState<null | UserAdminView>(null)
+  // const [deletingTotp, setDeletingTotp] = React.useState<null | UserAdminView>(null)
   const [recoveryCode, setRecoveryCode] = React.useState<null | string>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
   const self = React.useContext(AuthContext).user
-  const navigate = useNavigate()
 
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
-  const editUserFn = (u: UserAdminView) => navigate(`/account/profile?user=${u.slug}`)
-  const recoverFn = (u: UserAdminView) => createRecoveryCode({ userSlug: u.slug }).then(setRecoveryCode)
   const columns = Object.keys(rowBuilder(null, <span />))
 
-  const wiredUsers = usePaginatedWiredData<UserAdminView>(
-    React.useCallback(page => listUsersAdminView({ page, pageSize: 10, deleted: withDeleted, name: usernameFilterValue }), [usernameFilterValue, withDeleted]),
+  const wiredUserGroups = usePaginatedWiredData<UserGroupAdminView>(
+    React.useCallback(page => listUserGroupsAdminView({ page, pageSize: 10, deleted: withDeleted }), [usernameFilterValue, withDeleted]),
     (err) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />
   )
-  const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", wiredUsers) 
-
+  const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", wiredUserGroups)
 
   React.useEffect(() => {
-    props.onReload(wiredUsers.reload)
-    return () => { props.offReload(wiredUsers.reload) }
+    props.onReload(wiredUserGroups.reload)
+    return () => { props.offReload(wiredUserGroups.reload) }
   })
   React.useEffect(() => { setIncludeDeletedUsers(withDeleted) }, [withDeleted])
 
@@ -69,26 +62,26 @@ export default (props: {
         <Input
           label="Group Filter"
           value={usernameFilterValue}
-          onChange={v => { setUsernameFilterValue(v); wiredUsers.pagerProps.onPageChange(1) }}
-          loading={usernameFilterValue.length > 0 && wiredUsers.loading}
+          onChange={v => { setUsernameFilterValue(v); wiredUserGroups.pagerProps.onPageChange(1) }}
+          loading={usernameFilterValue.length > 0 && wiredUserGroups.loading}
         />
         <Checkbox
-          label="Include Deleted Users"
+          label="Include Deleted Groups"
           className={cx('checkbox')}
           value={withDeleted}
           onChange={setWithDeleted} />
       </div>
       <Table className={cx('table')} columns={columns}>
-        {wiredUsers.render(data => <>
-          {data.map(user => <TableRow key={user.slug} data={rowBuilder(user, actionsBuilder(user))} />)}
+        {wiredUserGroups.render(data => <>
+          {data.map(group => <TableRow key={group.slug} data={rowBuilder(group, actionsBuilder(group))} />)}
         </>)}
       </Table>
-      <StandardPager className={cx('user-table-pager')} {...wiredUsers.pagerProps} />
+      <StandardPager className={cx('user-table-pager')} {...wiredUserGroups.pagerProps} />
 
-      {resettingPassword && <ResetPasswordModal user={resettingPassword} onRequestClose={() => setResettingPassword(null)} />}
-      {editingUserFlags && <UpdateUserFlagsModal user={editingUserFlags} onRequestClose={() => { setEditingUserFlags(null); wiredUsers.reload() }} />}
-      {deletingUser && <DeleteUserModal user={deletingUser} onRequestClose={() => { setDeletingUser(null); wiredUsers.reload() }} />}
-      {deletingTotp && <RemoveTotpModal user={deletingTotp} onRequestClose={() => { setDeletingTotp(null); wiredUsers.reload() }} />}
+      {/* {resettingPassword && <ResetPasswordModal user={resettingPassword} onRequestClose={() => setResettingPassword(null)} />}
+      {editingUserFlags && <UpdateUserFlagsModal user={editingUserFlags} onRequestClose={() => { setEditingUserFlags(null); wiredUserGroups.reload() }} />}
+      {deletingUser && <DeleteUserModal user={deletingUser} onRequestClose={() => { setDeletingUser(null); wiredUserGroups.reload() }} />}
+      {deletingTotp && <RemoveTotpModal user={deletingTotp} onRequestClose={() => { setDeletingTotp(null); wiredUserGroups.reload() }} />} */}
       {recoveryCode && <RecoverAccountModal recoveryCode={recoveryCode} onRequestClose={() => setRecoveryCode(null)} />}
     </SettingsSection>
   )
@@ -108,61 +101,31 @@ type Rowdata = {
   "Users": JSX.Element,
 }
 
-const rowBuilder = (u: UserAdminView | null, actions: JSX.Element): Rowdata => ({
-  "Name": u ? u.firstName : "",
+const rowBuilder = (u: UserGroupAdminView | null, actions: JSX.Element): Rowdata => ({
+  "Name": u ? u.slug : "",
   "Users": actions,
 })
 
 const actionsForUserBuilder = (selfSlug: string,
-  wiredUsers: PaginatedWiredData<UserAdminView>
+  wiredUserGroups: PaginatedWiredData<UserGroupAdminView>,
 ) => (
-  u: UserAdminView
+  u: UserGroupAdminView
 ) => {
-    const deletedAttrs = { disabled: true, title: "User has been deleted" }
-    const notDeletedOrSelf = (msg?: string) => {
-      switch (true) {
-        case u.deleted: return deletedAttrs
-        case (u.slug === selfSlug): return { disabled: true, title: msg }
-        default: return {}
-      }
-    }
-
-    const canReset = () => {
-      if (u.deleted) return deletedAttrs
-      return {
-        disabled: (u.authSchemes && !u.authSchemes.includes('local'))
-      }
-    }
-    const canEditFlags = notDeletedOrSelf()
-    const canDelete = notDeletedOrSelf("Admins cannot delete themselves")
-
-    const canRecover = u.deleted ? deletedAttrs : {}
-    const canRemoveTotp = () => {
-      if (u.deleted) return deletedAttrs
-      if (!u.hasLocalTotp) {
-        return { disabled: true, title: "User does not have multi-factor Authentication enabled" }
-      }
-      return {}
-    }
-
-    const userCount = wiredUsers.render(data => <span>{data.reduce((a, c) => 1 + a, 0)}</span>)
-
-
+  const userCount = wiredUserGroups.render(data => <span>{data.find(group => group.slug === u.slug)?.userSlugs?.length}</span>)
     return (
       <ButtonGroup>
         <ClickPopover className={cx('popover')} closeOnContentClick content={
           <Menu>
-            {/* TODO TN use that thing I made so I can load the data without rendering it */}
-            {wiredUsers.render(data => <>
+            {wiredUserGroups.render(data => {
+              const group = data.find(group => u.slug === group.slug)
+              const userList = group?.userSlugs.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
+              return <>{userList}</>
             {/* TODO TN should we allow a user to be removed from this interface? */}
-          {data.map(user =>  <p className={cx('user')}>{user.slug}</p>)}
-        </>)}
+        })}
           </Menu>
         }>
           <Button small className={cx('arrow')}><p className={cx('button-text')}>{userCount} Users</p></Button>
         </ClickPopover>
-        {/* TODO TN make count dynamic */}
-        {/* <Button small disabled onClick={() => deleteUserFn(u)} {...canDelete}>8 Users</Button> */}
       </ButtonGroup>
     )
   }

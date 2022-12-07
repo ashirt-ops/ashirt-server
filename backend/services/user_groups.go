@@ -5,22 +5,32 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	"math/rand"
+	"math"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
 
 	sq "github.com/Masterminds/squirrel"
 )
 
+type CreateUserGroupInput struct {
+	Name string
+}
+
 type ModifyUserGroupInput struct {
 	Slug      string
 	UserSlugs []string
+}
+
+type ListUserGroupsForAdminInput struct {
+	UserFilter
+	Pagination
+	IncludeDeleted bool
 }
 
 func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
@@ -91,51 +101,33 @@ func RemoveUsersFromGroup(db *database.Connection, userSlugs []string, groupID i
 	return nil
 }
 
-func CreateUserGroup(db *database.Connection, i ModifyUserGroupInput) (*dtos.CreateUserGroupOutput, error) {
-	validationErr := i.validateUserGroupInput()
-	if validationErr != nil {
-		return nil, backend.WrapError("Unable to create new user group", validationErr)
+func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserGroupInput) (*dtos.CreateUserGroupOutput, error) {
+	// TODO TN add validation?
+	if err := isAdmin(ctx); err != nil {
+		return nil, backend.WrapError("Unwilling to create a user group", backend.UnauthorizedReadErr(err))
 	}
 
-	var userGroupID int64
-	var err error
-	slugSuffix := ""
-	var attemptedSlug string
-	attemptNumber := 1
+	// TODO TN: how to ensure operations without users are shown?
 	for {
-		attemptedSlug = i.Slug + slugSuffix
-		userGroupID, err = db.Insert("user_groups", map[string]interface{}{
-			"slug": attemptedSlug,
+		_, err := db.Insert("user_groups", map[string]interface{}{
+			"slug": i.Name,
 		})
 		if err != nil {
 			if database.IsAlreadyExistsError(err) {
-				if attemptNumber > 5 {
-					return nil, backend.WrapError("Unable to create new user group after many attempts", backend.DatabaseErr(err))
-				}
-
-				logging.GetSystemLogger().Log(
-					"msg", "Unable to create user group with slug; trying alternative",
-					"slug", attemptedSlug,
-					"attempt", attemptNumber,
-					"error", err.Error(),
-				)
-				attemptNumber++
-
-				// an account with this slug already exists, attempt creating it again with a suffix
-				// TODO: There's a possible, but impractical infinite loop here. We need some way to escape this
-				slugSuffix = fmt.Sprintf("-%d", rand.Intn(99999))
-				continue
+				return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this name already exists; please choose another name"))
 			}
-			return nil, backend.WrapError("Unable to insert new user group", backend.DatabaseErr(err))
 		}
 		break
 	}
 
-	AddUsersToGroup(db, i.UserSlugs, userGroupID)
-	return &dtos.CreateUserGroupOutput{
-		RealSlug:    attemptedSlug,
-		UserGroupID: userGroupID,
-	}, nil
+	// TODO TN - add support to add users to group
+	// AddUsersToGroup(db, i.UserSlugs, userGroupID)
+	// return &dtos.CreateUserGroupOutput{
+	// 	RealSlug:    attemptedSlug,
+	// 	UserGroupID: userGroupID,
+	// }, nil
+	fmt.Println("returning from CreateUserGroup")
+	return nil, nil
 }
 
 func DeleteUserGroup(db *database.Connection, slug string) error {
@@ -155,6 +147,7 @@ func DeleteUserGroup(db *database.Connection, slug string) error {
 	return nil
 }
 
+// TODO TN - where does this get used?
 func GetUserIDsFromGroup(db *database.Connection, groupID int64) ([]int64, error) {
 	var userGroupMap []int64
 	err := db.Select(&userGroupMap, sq.Select("user_id").
@@ -184,3 +177,94 @@ func GetUserIDsFromGroup(db *database.Connection, groupID int64) ([]int64, error
 // 	}
 // 	return userGroupMap, nil
 // }
+
+func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
+	if err := isAdmin(ctx); err != nil {
+		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
+	}
+
+	var slugMap []struct {
+		UserSlug  string         `db:"user_slug"`
+		GroupSlug string         `db:"group_slug"`
+		Deleted   sql.NullString `db:"deleted"`
+	}
+
+	sb := sq.Select("user_groups.slug AS group_slug, users.slug AS user_slug, user_groups.deleted_at AS deleted").
+		From("group_user_map").
+		LeftJoin("user_groups ON group_user_map.group_id = user_groups.id").
+		Join("users ON group_user_map.user_id = users.id")
+
+	i.AddWhere(&sb)
+
+	// write test data for this TODO TN
+	if !i.IncludeDeleted {
+		sb = sb.Where(sq.Eq{"user_groups.deleted_at": nil})
+	}
+
+	// err := i.Pagination.Select(ctx, db, &slugMap, sb)
+
+	err := db.Select(&slugMap, sb)
+
+	if err != nil {
+		return nil, backend.WrapError("unable to get map of user IDs to group IDs from database", backend.DatabaseErr(err))
+	}
+
+	if err != nil {
+		return nil, backend.WrapError("Cannot list user groups for admin", backend.DatabaseErr(err))
+	}
+
+	type tempGroup struct {
+		Slug      string
+		UserSlugs []string
+		Deleted   bool
+	}
+
+	userGroupsDTO := []dtos.UserGroupAdminView{}
+	tempGroupMap := dtos.UserGroupAdminView{}
+
+	for j := 0; j < len(slugMap); j++ {
+		if j == 0 {
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug: slugMap[j].GroupSlug,
+				UserSlugs: []string{
+					slugMap[j].UserSlug,
+				},
+				Deleted: &slugMap[j].Deleted != nil,
+			}
+		} else if slugMap[j].GroupSlug == slugMap[j-1].GroupSlug {
+			tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug)
+			// TODO TN - make this into a part of the main clause
+			if j == len(slugMap)-1 {
+				userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+			}
+		} else {
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug: slugMap[j].GroupSlug,
+				UserSlugs: []string{
+					slugMap[j].UserSlug,
+				},
+			}
+		}
+	}
+
+	p := i.Pagination
+
+	prevLastIndex := (p.Page - 1) * p.PageSize
+	remainingItems := (len(userGroupsDTO) - int(prevLastIndex)) % int(p.PageSize)
+	currLastIndex := int(math.Min(float64(p.Page*p.PageSize), float64(remainingItems)))
+	paginatedResults := userGroupsDTO[prevLastIndex:currLastIndex]
+
+	numPages := len(userGroupsDTO) / int(p.PageSize)
+	totalPages := math.Ceil(float64(numPages))
+	// TODO TN test that this loads user groups with no users
+	paginatedData := &dtos.PaginationWrapper{
+		PageNumber: p.Page,
+		PageSize:   p.PageSize,
+		Content:    paginatedResults,
+		TotalCount: p.TotalCount,
+		TotalPages: int64(totalPages),
+	}
+
+	return paginatedData, nil
+}

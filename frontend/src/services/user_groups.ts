@@ -1,11 +1,10 @@
-import { ListObjectForAdminQuery, PaginationResult } from 'src/global_types'
+import { ListObjectForAdminQuery, PaginationResult, UserGroupAdminView } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
-import { UserGroup } from './data_sources/dtos/dtos'
 
 export async function createUserGroup(name: string) {
-  return await ds.createUserGroup(name)
+  return await ds.createUserGroup({name: name.trim()})
 }
 
-export async function listUserGroupsAdminView(i: ListObjectForAdminQuery): Promise<PaginationResult<UserGroup>> {
+export async function listUserGroupsAdminView(i: ListObjectForAdminQuery): Promise<PaginationResult<UserGroupAdminView>> {
   return await ds.adminListUserGroups(i)
 }

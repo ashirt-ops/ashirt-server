@@ -190,9 +190,10 @@ type CreateUserOutput struct {
 	UserID   int64  `json:"-"` // don't transmit the userid
 }
 
-// TODO TN: DO I need this struct?
-type UserGroup struct {
-	Slug string `json:"slug"`
+type UserGroupAdminView struct {
+	Slug      string   `json:"slug"`
+	UserSlugs []string `json:"userSlugs"`
+	Deleted   bool     `json:"deleted"`
 }
 
 type CreateUserGroupOutput struct {

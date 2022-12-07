@@ -197,6 +197,15 @@ export type UserAdminView = UserWithAuth & {
   authSchemes: Array<string>,
 }
 
+export type UserGroup = {
+  slug: string,
+  userSlugs: Array<string>,
+}
+
+export type UserGroupAdminView = UserGroup &{
+  deleted: boolean,
+}
+
 export type UserOperationRole = {
   user: User,
   role: UserRole,

@@ -117,6 +117,7 @@ type User struct {
 // Group reflects the structure of the database table 'user_groups'
 type UserGroup struct {
 	ID        int64      `db:"id"`
+	slug      string     `db:"slug"`
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 	DeletedAt *time.Time `db:"deleted_at"`
