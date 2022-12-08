@@ -1,7 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import * as React from 'react'
+import * as React  from 'react'
 import classnames from 'classnames/bind'
 
 import { ApiKey, User, UserAdminView } from 'src/global_types'
@@ -10,8 +10,9 @@ import {
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
   adminInviteUser,
   createApiKey,
-  createUserGroup
+  adminCreateUserGroup
 } from 'src/services'
+import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
@@ -23,6 +24,8 @@ import ModalForm from 'src/components/modal_form'
 import { InputWithCopyButton } from 'src/components/text_copiers'
 import { useForm, useFormField } from 'src/helpers'
 import { NewApiKeyModalContents } from 'src/pages/account_settings/api_keys/modals'
+import { BuildReloadBus } from 'src/helpers/reload_bus'
+import { useResolvedPath } from 'react-router-dom'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -173,39 +176,47 @@ export const AddUserModal = (props: {
 export const AddUserGroupModal = (props: {
   onRequestClose: () => void,
 }) => {
-  const groupName = useFormField<string>("")
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+  const [includedUsers, setIncludedUsers] = React.useState(() => new Set());
 
-  const [isDisabled, setDisabled] = React.useState<boolean>(false)
-
+  const name = useFormField<string>("")
+  const userSlugs = Array.from(includedUsers as Set<string>)
   const formComponentProps = useForm({
-    fields: [groupName],
+    fields: [name],
     handleSubmit: () => {
-      if (groupName.value.length == 0) {
-        return new Promise((_resolve, reject) => reject(Error("Group should have a name")))
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Users should have at least a first name")))
       }
-      // figure out how to actually create a group
       const runSubmit = async () => {
-        // Do something with result TODO TN
-        await createUserGroup(groupName.value)
-        setDisabled(true) // lock the form -- we don't need to allow submits at this time.
+        await adminCreateUserGroup({
+          name: name.value,
+          userSlugs: userSlugs
+        })
+        setIsCompleted(true) 
       }
-
       return runSubmit()
     },
   })
 
+  const bus = BuildReloadBus()
   return (
     <Modal title="Create New Group" onRequestClose={props.onRequestClose}>
-      <Form {...formComponentProps} loading={isDisabled}
-        submitText={isDisabled ? undefined : "Submit"}
-      >
-        <Input label="Group Name" {...groupName} disabled={isDisabled} />
-      </Form>
-      {isDisabled && (<>
+     
+      {isCompleted ? (<>
         <div className={cx('success-area')}>
           <p>Group has been created successfully!</p>
           <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
         </div>
+      </>)
+      :
+      (<>
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <Input label="Group Name" {...name} disabled={isCompleted} />
+      </Form>
+      {/* TODO TN get rid of the flash that occurs wehn going to different pages */}
+      <SimpleUserTable {...bus} setIncludedUsers={setIncludedUsers} includedUsers={includedUsers as Set<string>} />
       </>)
       }
     </Modal>

@@ -1,0 +1,52 @@
+@import '~src/vars'
+
+.table-row
+  .scheme-list
+    display: inline
+    padding-right: 10px
+
+  .checkbox
+    display: initial
+
+  .column-button
+    float: right
+
+.user-table-pager
+  display: inline
+  float: right
+  margin-top: 5px
+
+.deleted-user
+  font-style: italic
+
+.arrow
+  $arrow-size = 5px
+  &:after
+    content: ""
+    position: absolute
+    top: 15px - $arrow-size
+    left: 15px - $arrow-size
+    border: $arrow-size solid transparent
+    border-top-color: $foreground
+
+.popover
+  display: flex
+
+.inline-form
+  display: flex
+  align-items: center
+
+  & > *
+    margin-right: 20px
+    align-self flex-end
+
+
+.checkboxx
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  background: #30404d linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
+  box-shadow: 0 0 0 1px rgb(31 42 50);
+  border-radius: 3px;

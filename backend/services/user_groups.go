@@ -19,7 +19,8 @@ import (
 )
 
 type CreateUserGroupInput struct {
-	Name string
+	Name      string
+	UserSlugs []string
 }
 
 type ModifyUserGroupInput struct {
@@ -109,7 +110,7 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 
 	// TODO TN: how to ensure operations without users are shown?
 	for {
-		_, err := db.Insert("user_groups", map[string]interface{}{
+		id, err := db.Insert("user_groups", map[string]interface{}{
 			"slug": i.Name,
 		})
 		if err != nil {
@@ -117,16 +118,10 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 				return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this name already exists; please choose another name"))
 			}
 		}
+		AddUsersToGroup(db, i.UserSlugs, id)
 		break
 	}
 
-	// TODO TN - add support to add users to group
-	// AddUsersToGroup(db, i.UserSlugs, userGroupID)
-	// return &dtos.CreateUserGroupOutput{
-	// 	RealSlug:    attemptedSlug,
-	// 	UserGroupID: userGroupID,
-	// }, nil
-	fmt.Println("returning from CreateUserGroup")
 	return nil, nil
 }
 

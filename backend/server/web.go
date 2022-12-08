@@ -210,7 +210,8 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 	route(r, "POST", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateUserGroupInput{
-			Name: dr.FromBody("name").Required().AsString(),
+			Name:      dr.FromBody("name").Required().AsString(),
+			UserSlugs: dr.FromBody("userSlugs").Required().AsStringSlice(),
 		}
 
 		if dr.Error != nil {
