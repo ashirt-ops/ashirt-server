@@ -201,7 +201,6 @@ export const AddUserGroupModal = (props: {
   const bus = BuildReloadBus()
   return (
     <Modal title="Create New Group" onRequestClose={props.onRequestClose}>
-     
       {isCompleted ? (<>
         <div className={cx('success-area')}>
           <p>Group has been created successfully!</p>
@@ -210,13 +209,15 @@ export const AddUserGroupModal = (props: {
       </>)
       :
       (<>
+      <h1 className={cx('header')}>Users</h1>
+      <SimpleUserTable {...bus} setIncludedUsers={setIncludedUsers} includedUsers={includedUsers as Set<string>} />
       <Form {...formComponentProps} loading={isCompleted}
         submitText={isCompleted ? undefined : "Submit"}
       >
-        <Input label="Group Name" {...name} disabled={isCompleted} />
+        <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...name} disabled={isCompleted} />
       </Form>
       {/* TODO TN get rid of the flash that occurs wehn going to different pages */}
-      <SimpleUserTable {...bus} setIncludedUsers={setIncludedUsers} includedUsers={includedUsers as Set<string>} />
       </>)
       }
     </Modal>
