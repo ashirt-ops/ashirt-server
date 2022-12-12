@@ -21,7 +21,7 @@ var HarryPotterSeedData = Seeder{
 		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
 	},
 	UserGroups: []models.UserGroup{
-		UserGroupGryffindor, UserGroupHufflepuff, UserGroupRavenclaw, UserGroupSlytherin,
+		UserGroupGryffindor, UserGroupHufflepuff, UserGroupRavenclaw, UserGroupSlytherin, UserGroupOtherHouse,
 	},
 	UserGroupMaps: []models.UserGroupMap{
 		AddHarryToGryffindor, AddRonToGryffindor, AddGinnyToGryffindor, AddHermioneToGryffindor,
@@ -186,6 +186,7 @@ var UserGroupGryffindor = newUserGroup("Gryffindor")
 var UserGroupHufflepuff = newUserGroup("Hufflepuff")
 var UserGroupRavenclaw = newUserGroup("Ravenclaw")
 var UserGroupSlytherin = newUserGroup("Slytherin")
+var UserGroupOtherHouse = newUserGroup("Other House")
 
 var AddHarryToGryffindor = newUserGroupMapping(UserHarry.ID, UserGroupGryffindor.ID)
 var AddRonToGryffindor = newUserGroupMapping(UserRon.ID, UserGroupGryffindor.ID)

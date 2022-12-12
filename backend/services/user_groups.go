@@ -136,7 +136,7 @@ func DeleteUserGroup(db *database.Connection, slug string) error {
 }
 
 var slugMap []struct {
-	UserSlug  string         `db:"user_slug"`
+	UserSlug  sql.NullString `db:"user_slug"`
 	GroupSlug string         `db:"group_slug"`
 	Deleted   sql.NullString `db:"deleted"`
 }
@@ -153,6 +153,10 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
 	}
 
+	// 	UNION ALL
+	// select user_groups.slug AS group_slug, NULL as user_slug, user_groups.deleted_at
+	// from user_groups
+	// ORDER BY group_slug
 	sb := sq.Select("user_groups.slug AS group_slug, users.slug AS user_slug, user_groups.deleted_at AS deleted").
 		From("group_user_map").
 		LeftJoin("user_groups ON group_user_map.group_id = user_groups.id").
@@ -160,12 +164,21 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 
 	i.AddWhere(&sb)
 
+	secondSelect := sq.Select("user_groups.slug AS group_slug, NULL as user_slug, user_groups.deleted_at AS deleted").
+		From("user_groups").
+		OrderBy("group_slug")
+
+	sql, args, _ := secondSelect.ToSql()
+	unionSelect := sb.Suffix("UNION "+sql, args...)
+
 	// write test data for this TODO TN
+	// TODO TN is the right place for this given the SQL above?
+	// TODO TN not currently being used
 	if !i.IncludeDeleted {
 		sb = sb.Where(sq.Eq{"user_groups.deleted_at": nil})
 	}
 
-	err := db.Select(&slugMap, sb)
+	err := db.Select(&slugMap, unionSelect)
 
 	if err != nil {
 		return nil, backend.WrapError("unable to get map of user IDs to group IDs from database", backend.DatabaseErr(err))
@@ -176,26 +189,41 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 
 	for j := 0; j < len(slugMap); j++ {
 		if j == 0 {
-			tempGroupMap = dtos.UserGroupAdminView{
-				Slug: slugMap[j].GroupSlug,
-				UserSlugs: []string{
-					slugMap[j].UserSlug,
-				},
-				Deleted: &slugMap[j].Deleted != nil,
+			if slugMap[j].UserSlug.Valid {
+				tempGroupMap = dtos.UserGroupAdminView{
+					Slug: slugMap[j].GroupSlug,
+					UserSlugs: []string{
+						slugMap[j].UserSlug.String,
+					},
+					Deleted: &slugMap[j].Deleted != nil,
+				}
+			} else {
+				tempGroupMap = dtos.UserGroupAdminView{
+					Slug:    slugMap[j].GroupSlug,
+					Deleted: &slugMap[j].Deleted != nil,
+				}
 			}
 		} else if slugMap[j].GroupSlug == slugMap[j-1].GroupSlug {
-			tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug)
+			if slugMap[j].UserSlug.Valid {
+				tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug.String)
+			}
 			// TODO TN - make this into a part of the main clause
 			if j == len(slugMap)-1 {
 				userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			}
 		} else {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
-			tempGroupMap = dtos.UserGroupAdminView{
-				Slug: slugMap[j].GroupSlug,
-				UserSlugs: []string{
-					slugMap[j].UserSlug,
-				},
+			if slugMap[j].UserSlug.Valid {
+				tempGroupMap = dtos.UserGroupAdminView{
+					Slug: slugMap[j].GroupSlug,
+					UserSlugs: []string{
+						slugMap[j].UserSlug.String,
+					},
+				}
+			} else {
+				tempGroupMap = dtos.UserGroupAdminView{
+					Slug: slugMap[j].GroupSlug,
+				}
 			}
 		}
 	}

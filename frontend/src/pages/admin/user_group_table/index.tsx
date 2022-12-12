@@ -111,14 +111,15 @@ const actionsForUserBuilder = (selfSlug: string,
 ) => (
   u: UserGroupAdminView
 ) => {
-  const userCount = wiredUserGroups.render(data => <span>{data.find(group => group.slug === u.slug)?.userSlugs?.length}</span>)
+  const userCount = wiredUserGroups.render(data => <span>{data.find(group => group.slug === u.slug)?.userSlugs?.length ?? 0}</span>)
     return (
       <ButtonGroup>
         <ClickPopover className={cx('popover')} closeOnContentClick content={
           <Menu>
+            {/* TODO TN figure out how to disable the button if there are no users in the group */}
             {wiredUserGroups.render(data => {
               const group = data.find(group => u.slug === group.slug)
-              const userList = group?.userSlugs.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
+              const userList = group?.userSlugs?.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
               return <>{userList}</>
             {/* TODO TN should we allow a user to be removed from this interface? */}
         })}
