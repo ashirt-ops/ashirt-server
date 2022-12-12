@@ -147,7 +147,6 @@ type tempGroup struct {
 	Deleted   bool
 }
 
-// TODO TN: how to ensure operations without users are shown?
 func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
@@ -237,7 +236,6 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 
 	numPages := len(userGroupsDTO) / int(p.PageSize)
 	totalPages := math.Ceil(float64(numPages))
-	// TODO TN test that this loads user groups with no users
 	paginatedData := &dtos.PaginationWrapper{
 		PageNumber: p.Page,
 		PageSize:   p.PageSize,

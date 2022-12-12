@@ -30,11 +30,6 @@ export default (props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
 }) => {
-  // TODO TN - do we want to be able to delete user groups or users from this page? 
-  // const [resettingPassword, setResettingPassword] = React.useState<null | UserAdminView>(null)
-  // const [editingUserFlags, setEditingUserFlags] = React.useState<null | UserAdminView>(null)
-  // const [deletingUser, setDeletingUser] = React.useState<null | UserAdminView>(null)
-  // const [deletingTotp, setDeletingTotp] = React.useState<null | UserAdminView>(null)
   const [recoveryCode, setRecoveryCode] = React.useState<null | string>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
   const self = React.useContext(AuthContext).user
@@ -121,7 +116,6 @@ const actionsForUserBuilder = (selfSlug: string,
               const group = data.find(group => u.slug === group.slug)
               const userList = group?.userSlugs?.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
               return <>{userList}</>
-            {/* TODO TN should we allow a user to be removed from this interface? */}
         })}
           </Menu>
         }>
