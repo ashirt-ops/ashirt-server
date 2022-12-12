@@ -38,15 +38,11 @@ func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	if cugi.Slug == "" {
 		return backend.MissingValueErr("Slug")
 	}
-	if len(cugi.UserSlugs) < 1 {
-		return backend.MissingValueErr("User Slugs")
-	}
 	return nil
 }
 
 // TODO TN: how does a group get set up with an operation?
 func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64) error {
-	fmt.Println("Adding users to group", userSlugs)
 	for _, userSlug := range userSlugs {
 		userID, err := userSlugToUserID(db, userSlug)
 		if err != nil {
@@ -103,12 +99,9 @@ func RemoveUsersFromGroup(db *database.Connection, userSlugs []string, groupID i
 }
 
 func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserGroupInput) (*dtos.CreateUserGroupOutput, error) {
-	// TODO TN add validation?
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to create a user group", backend.UnauthorizedReadErr(err))
 	}
-
-	// TODO TN: how to ensure operations without users are shown?
 	for {
 		id, err := db.Insert("user_groups", map[string]interface{}{
 			"slug": i.Name,
@@ -142,46 +135,22 @@ func DeleteUserGroup(db *database.Connection, slug string) error {
 	return nil
 }
 
-// TODO TN - where does this get used?
-func GetUserIDsFromGroup(db *database.Connection, groupID int64) ([]int64, error) {
-	var userGroupMap []int64
-	err := db.Select(&userGroupMap, sq.Select("user_id").
-		From("group_user_map").
-		Where(sq.Eq{
-			"group_id": groupID,
-		}))
-	if err != nil {
-		s := fmt.Sprintf("Cannot get user group map for group %d", groupID)
-		return userGroupMap, backend.WrapError(s, backend.DatabaseErr(err))
-	}
-	return userGroupMap, nil
+var slugMap []struct {
+	UserSlug  string         `db:"user_slug"`
+	GroupSlug string         `db:"group_slug"`
+	Deleted   sql.NullString `db:"deleted"`
 }
 
-// TODO TN - remove this?
-// func GetUserIDsFromGroup(db *database.Connection, groupID int64) ([]models.UserGroupMap, error) {
-// 	var userGroupMap []models.UserGroupMap
-// 	// TODO TN should I return all here, or just the user IDs?
-// 	err := db.Select(&userGroupMap, sq.Select("*").
-// 		From("group_user_map").
-// 		Where(sq.Eq{
-// 			"group_id": groupID,
-// 		}))
-// 	if err != nil {
-// 		s := fmt.Sprintf("Cannot get user group map for group %d", groupID)
-// 		return userGroupMap, backend.WrapError(s, backend.DatabaseErr(err))
-// 	}
-// 	return userGroupMap, nil
-// }
+type tempGroup struct {
+	Slug      string
+	UserSlugs []string
+	Deleted   bool
+}
 
+// TODO TN: how to ensure operations without users are shown?
 func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
-	}
-
-	var slugMap []struct {
-		UserSlug  string         `db:"user_slug"`
-		GroupSlug string         `db:"group_slug"`
-		Deleted   sql.NullString `db:"deleted"`
 	}
 
 	sb := sq.Select("user_groups.slug AS group_slug, users.slug AS user_slug, user_groups.deleted_at AS deleted").
@@ -196,22 +165,10 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		sb = sb.Where(sq.Eq{"user_groups.deleted_at": nil})
 	}
 
-	// err := i.Pagination.Select(ctx, db, &slugMap, sb)
-
 	err := db.Select(&slugMap, sb)
 
 	if err != nil {
 		return nil, backend.WrapError("unable to get map of user IDs to group IDs from database", backend.DatabaseErr(err))
-	}
-
-	if err != nil {
-		return nil, backend.WrapError("Cannot list user groups for admin", backend.DatabaseErr(err))
-	}
-
-	type tempGroup struct {
-		Slug      string
-		UserSlugs []string
-		Deleted   bool
 	}
 
 	userGroupsDTO := []dtos.UserGroupAdminView{}

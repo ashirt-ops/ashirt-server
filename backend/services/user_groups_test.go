@@ -4,9 +4,13 @@
 package services_test
 
 import (
+	"fmt"
 	"testing"
 
+	sq "github.com/Masterminds/squirrel"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/services"
@@ -14,12 +18,36 @@ import (
 
 type userGroupValidator func(*testing.T, UserOpPermJoinUser, *dtos.UserOperationRole)
 
-// TODO TN
-// ADD SEEDING and make specific tests instead of one big one
+func GetUserIDsFromGroup(db *database.Connection, groupName string) ([]int64, error) {
+	var userGroupId int64
+	err := db.Get(&userGroupId, sq.Select("id").
+		From("user_groups").
+		Where(sq.Eq{
+			"slug": groupName,
+		}))
+	if err != nil {
+		s := fmt.Sprintf("Cannot get user group id for group %q", groupName)
+		return nil, backend.WrapError(s, backend.DatabaseErr(err))
+	}
+
+	var userGroupMap []int64
+	err = db.Select(&userGroupMap, sq.Select("user_id").
+		From("group_user_map").
+		Where(sq.Eq{
+			"group_id": userGroupId,
+		}))
+	if err != nil {
+		s := fmt.Sprintf("Cannot get user group map for group %q", userGroupId)
+		return userGroupMap, backend.WrapError(s, backend.DatabaseErr(err))
+	}
+	return userGroupMap, nil
+}
+
 func TestCreateAndDeleteUserGroup(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		i := services.ModifyUserGroupInput{
-			Slug: "testGroup",
+		name := "testGroup"
+		i := services.CreateUserGroupInput{
+			Name: name,
 			UserSlugs: []string{
 				UserRon.Slug,
 				UserAlastor.Slug,
@@ -27,41 +55,28 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 			},
 		}
 
-		createUserGroupOutput, err := services.CreateUserGroup(db, i)
+		adminUser := UserDumbledore
+		ctx := contextForUser(adminUser, db)
+		_, err := services.CreateUserGroup(ctx, db, i)
 		require.NoError(t, err)
-		require.Equal(t, createUserGroupOutput.RealSlug, i.Slug)
-		userIDs, err := services.GetUserIDsFromGroup(db, createUserGroupOutput.UserGroupID)
+		userIDs, err := GetUserIDsFromGroup(db, name)
 		require.NoError(t, err)
-
 		require.Equal(t, 3, len(userIDs))
 		for _, userID := range userIDs {
 			require.Contains(t, []int64{UserRon.ID, UserAlastor.ID, UserHagrid.ID}, userID)
 		}
 
-		createUserGroupOutput, err = services.CreateUserGroup(db, i)
-		require.NoError(t, err)
-		// Since a user group with that name already exists, a new slug should be created
-		require.NotEqual(t, i.Slug, createUserGroupOutput.RealSlug)
-		require.Contains(t, createUserGroupOutput.RealSlug, i.Slug)
-		newUserIDs, _ := services.GetUserIDsFromGroup(db, createUserGroupOutput.UserGroupID)
+		_, err = services.CreateUserGroup(ctx, db, i)
+		assert.ErrorContains(t, err, "Unable to create user group. User group slug already exists")
 
-		require.Equal(t, 3, len(newUserIDs))
-		for _, userID := range newUserIDs {
-			require.Contains(t, []int64{UserRon.ID, UserAlastor.ID, UserHagrid.ID}, userID)
-		}
-
-		err = services.DeleteUserGroup(db, createUserGroupOutput.RealSlug)
+		err = services.DeleteUserGroup(db, name)
 		require.NoError(t, err)
-		userIDs, err = services.GetUserIDsFromGroup(db, createUserGroupOutput.UserGroupID)
+		userIDs, err = GetUserIDsFromGroup(db, name)
 		require.NoError(t, err)
 
 		require.Equal(t, 0, len(userIDs))
 	})
 }
 
-// func validateUserGroup(t *testing.T, expected UserOpPermJoinUser, actual *dtos.UserOperationRole) {
-// 	require.Equal(t, expected.Slug, actual.User.Slug)
-// 	require.Equal(t, expected.FirstName, actual.User.FirstName)
-// 	require.Equal(t, expected.LastName, actual.User.LastName)
-// 	require.Equal(t, expected.Role, actual.Role)
-// }
+// TODO TN add test for AddUsersToGroup?
+// TODO TN add test ListUserGroupsForAdmin
