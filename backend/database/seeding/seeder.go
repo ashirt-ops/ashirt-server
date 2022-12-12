@@ -26,6 +26,8 @@ type Seeder struct {
 	Evidences         []models.Evidence
 	EvidenceMetadatas []models.EvidenceMetadata
 	Users             []models.User
+	UserGroups        []models.UserGroup
+	UserGroupMaps     []models.UserGroupMap
 	Operations        []models.Operation
 	DefaultTags       []models.DefaultTag
 	Tags              []models.Tag
@@ -81,6 +83,23 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"created_at": seed.Users[i].CreatedAt,
 				"updated_at": seed.Users[i].UpdatedAt,
 				"deleted_at": seed.Users[i].DeletedAt,
+			}
+		})
+		tx.BatchInsert("user_groups", len(seed.UserGroups), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.UserGroups[i].ID,
+				"slug":       seed.UserGroups[i].Slug,
+				"created_at": seed.UserGroups[i].CreatedAt,
+				"updated_at": seed.UserGroups[i].UpdatedAt,
+				"deleted_at": seed.UserGroups[i].DeletedAt,
+			}
+		})
+		tx.BatchInsert("group_user_map", len(seed.UserGroupMaps), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"group_id":   seed.UserGroupMaps[i].GroupID,
+				"user_id":    seed.UserGroupMaps[i].UserID,
+				"created_at": seed.UserGroupMaps[i].CreatedAt,
+				"updated_at": seed.UserGroupMaps[i].UpdatedAt,
 			}
 		})
 		tx.BatchInsert("api_keys", len(seed.APIKeys), func(i int) map[string]interface{} {

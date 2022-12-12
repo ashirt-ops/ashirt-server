@@ -20,6 +20,15 @@ var HarryPotterSeedData = Seeder{
 	Users: []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick,
 		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
 	},
+	UserGroups: []models.UserGroup{
+		UserGroupGryffindor, UserGroupHufflepuff, UserGroupRavenclaw, UserGroupSlytherin,
+	},
+	UserGroupMaps: []models.UserGroupMap{
+		AddHarryToGryffindor, AddRonToGryffindor, AddGinnyToGryffindor, AddHermioneToGryffindor,
+		AddMalfoyToSlytherin, AddSnapeToSlytherin, AddLuciusToSlytherin,
+		AddCedricToHufflepuff, AddFleurToHufflepuff,
+		AddChoToRavenclaw, AddViktorToRavenclaw,
+	},
 	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows},
 	Tags: []models.Tag{
 		TagFamily, TagFriendship, TagHome, TagLoyalty, TagCourage, TagGoodVsEvil, TagSupernatural,
@@ -170,6 +179,28 @@ var UserTomRiddle = newHPUser(newUserInput{FirstName: "Tom", LastName: "Riddle",
 var UserHeadlessNick = newHPUser(newUserInput{FirstName: "Nicholas", LastName: "de Mimsy-Porpington", Birthday: date(1980, 1, 1), SetLastUpdated: true, Headless: true})
 
 // Reserved users: Luna Lovegood (Create user test)
+
+var newUserGroup = newUserGroupGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
+
+var UserGroupGryffindor = newUserGroup("Gryffindor")
+var UserGroupHufflepuff = newUserGroup("Hufflepuff")
+var UserGroupRavenclaw = newUserGroup("Ravenclaw")
+var UserGroupSlytherin = newUserGroup("Slytherin")
+
+var AddHarryToGryffindor = newUserGroupMapping(UserHarry.ID, UserGroupGryffindor.ID)
+var AddRonToGryffindor = newUserGroupMapping(UserRon.ID, UserGroupGryffindor.ID)
+var AddGinnyToGryffindor = newUserGroupMapping(UserGinny.ID, UserGroupGryffindor.ID)
+var AddHermioneToGryffindor = newUserGroupMapping(UserHermione.ID, UserGroupGryffindor.ID)
+
+var AddMalfoyToSlytherin = newUserGroupMapping(UserDraco.ID, UserGroupSlytherin.ID)
+var AddLuciusToSlytherin = newUserGroupMapping(UserLucius.ID, UserGroupSlytherin.ID)
+var AddSnapeToSlytherin = newUserGroupMapping(UserSnape.ID, UserGroupSlytherin.ID)
+
+var AddCedricToHufflepuff = newUserGroupMapping(UserCedric.ID, UserGroupHufflepuff.ID)
+var AddFleurToHufflepuff = newUserGroupMapping(UserFleur.ID, UserGroupHufflepuff.ID)
+
+var AddViktorToRavenclaw = newUserGroupMapping(UserViktor.ID, UserGroupRavenclaw.ID)
+var AddChoToRavenclaw = newUserGroupMapping(UserCho.ID, UserGroupRavenclaw.ID)
 
 var newAPIKey = newAPIKeyGen(1)
 var APIKeyHarry1 = newAPIKey(UserHarry.ID, "harry-abc", []byte{0x01, 0x02, 0x03})

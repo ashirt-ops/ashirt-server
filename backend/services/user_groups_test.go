@@ -59,6 +59,7 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 		ctx := contextForUser(adminUser, db)
 		_, err := services.CreateUserGroup(ctx, db, i)
 		require.NoError(t, err)
+
 		userIDs, err := GetUserIDsFromGroup(db, name)
 		require.NoError(t, err)
 		require.Equal(t, 3, len(userIDs))
@@ -71,9 +72,9 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 
 		err = services.DeleteUserGroup(db, name)
 		require.NoError(t, err)
+
 		userIDs, err = GetUserIDsFromGroup(db, name)
 		require.NoError(t, err)
-
 		require.Equal(t, 0, len(userIDs))
 	})
 }

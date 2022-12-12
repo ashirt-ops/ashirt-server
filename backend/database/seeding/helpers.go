@@ -245,6 +245,26 @@ func newUserOperationPreferences(user models.User, op models.Operation, isFavori
 	}
 }
 
+func newUserGroupGen(first int64, toSlug func(f, l string) string) func(name string) models.UserGroup {
+	id := iotaLike(first)
+	return func(name string) models.UserGroup {
+		userGroup := models.UserGroup{
+			ID:        id(),
+			Slug:      name,
+			CreatedAt: internalClock.Now(),
+		}
+		return userGroup
+	}
+}
+
+func newUserGroupMapping(userID int64, groupID int64) models.UserGroupMap {
+	return models.UserGroupMap{
+		GroupID:   groupID,
+		UserID:    userID,
+		CreatedAt: internalClock.Now(),
+	}
+}
+
 func newQueryGen(first int64) func(opID int64, name, query, qType string) models.Query {
 	id := iotaLike(first)
 	return func(opID int64, name, query, qType string) models.Query {
