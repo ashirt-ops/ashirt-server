@@ -79,5 +79,32 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 	})
 }
 
+func TestListUserGroups(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		adminUser := UserDumbledore
+		ctx := contextForUser(adminUser, db)
+
+		i := services.ListUserGroupsForAdminInput{
+			Pagination: services.Pagination{
+				TotalCount: 4,
+				PageSize:   10,
+				Page:       1,
+			},
+			IncludeDeleted: false,
+		}
+
+		result, err := services.ListUserGroupsForAdmin(ctx, db, i)
+		require.Equal(t, result.PageNumber, int64(1))
+		require.Equal(t, result.PageSize, int64(10))
+		require.Equal(t, result.TotalCount, int64(4))
+
+		// fmt.Println(result.Content)
+		//	TODO TN figure out how to correctly type this
+		// for paginatedData, _ := range result.Content {
+		// 	require.Contains(t, []int64{UserRon.ID, UserAlastor.ID, UserHagrid.ID}, userID)
+		// }
+		require.NoError(t, err)
+	})
+}
+
 // TODO TN add test for AddUsersToGroup?
-// TODO TN add test ListUserGroupsForAdmin
