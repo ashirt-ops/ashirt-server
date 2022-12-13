@@ -94,17 +94,11 @@ func TestListUserGroups(t *testing.T) {
 		}
 
 		result, err := services.ListUserGroupsForAdmin(ctx, db, i)
+		var usergroups = result.Content.([]dtos.UserGroupAdminView)
 		require.Equal(t, result.PageNumber, int64(1))
 		require.Equal(t, result.PageSize, int64(10))
 		require.Equal(t, result.TotalCount, int64(4))
-
-		// fmt.Println(result.Content)
-		//	TODO TN figure out how to correctly type this
-		// for paginatedData, _ := range result.Content {
-		// 	require.Contains(t, []int64{UserRon.ID, UserAlastor.ID, UserHagrid.ID}, userID)
-		// }
+		require.Equal(t, len(usergroups), 5)
 		require.NoError(t, err)
 	})
 }
-
-// TODO TN add test for AddUsersToGroup?

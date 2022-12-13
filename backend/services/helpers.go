@@ -219,7 +219,6 @@ func userSlugToUserID(db *database.Connection, slug string) (int64, error) {
 	return userID, err
 }
 
-// TODO TN - add a test for this?
 func userGroupSlugToUserGroupID(db *database.Connection, slug string) (int64, error) {
 	var userGroupID int64
 	err := db.Get(&userGroupID, sq.Select("id").From("user_groups").Where(sq.Eq{"slug": slug}))
