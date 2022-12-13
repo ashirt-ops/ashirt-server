@@ -217,7 +217,6 @@ export const AddUserGroupModal = (props: {
         <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
         <Input label="" {...name} disabled={isCompleted} />
       </Form>
-      {/* TODO TN get rid of the flash that occurs wehn going to different pages */}
       </>)
       }
     </Modal>

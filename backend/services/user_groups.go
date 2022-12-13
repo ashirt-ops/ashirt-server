@@ -41,7 +41,6 @@ func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	return nil
 }
 
-// TODO TN: how does a group get set up with an operation?
 func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64) error {
 	for _, userSlug := range userSlugs {
 		userID, err := userSlugToUserID(db, userSlug)

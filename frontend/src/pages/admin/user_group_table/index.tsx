@@ -83,7 +83,6 @@ export default (props: {
 }
 
 const TableRow = (props: { data: Rowdata }) => (
-  // TODO TN how to ensure the columns are closer together?
   <tr>
     <td>{props.data["Name"]}</td>
     <td>{props.data["Users"]}</td>
@@ -111,7 +110,6 @@ const actionsForUserBuilder = (selfSlug: string,
       <ButtonGroup>
         <ClickPopover className={cx('popover')} closeOnContentClick content={
           <Menu>
-            {/* TODO TN figure out how to disable the button if there are no users in the group */}
             {wiredUserGroups.render(data => {
               const group = data.find(group => u.slug === group.slug)
               const userList = group?.userSlugs?.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
