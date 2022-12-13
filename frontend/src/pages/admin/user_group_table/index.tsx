@@ -86,7 +86,7 @@ const TableRow = (props: { data: Rowdata }) => (
   <tr>
     <td>{props.data["Name"]}</td>
     <td>{props.data["Users"]}</td>
-    {/* TODO TN where to add modify button? */}
+    {/* TODO TN add modify button in next PR */}
   </tr>
 )
 

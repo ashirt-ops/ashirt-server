@@ -151,10 +151,6 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
 	}
 
-	// 	UNION ALL
-	// select user_groups.slug AS group_slug, NULL as user_slug, user_groups.deleted_at
-	// from user_groups
-	// ORDER BY group_slug
 	sb := sq.Select("user_groups.slug AS group_slug, users.slug AS user_slug, user_groups.deleted_at AS deleted").
 		From("group_user_map").
 		LeftJoin("user_groups ON group_user_map.group_id = user_groups.id").
@@ -188,43 +184,65 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	tempGroupMap := dtos.UserGroupAdminView{}
 
 	for j := 0; j < len(slugMap); j++ {
-		if j == 0 {
-			if slugMap[j].UserSlug.Valid {
-				tempGroupMap = dtos.UserGroupAdminView{
-					Slug: slugMap[j].GroupSlug,
-					UserSlugs: []string{
-						slugMap[j].UserSlug.String,
-					},
-					Deleted: &slugMap[j].Deleted != nil,
-				}
-			} else {
-				tempGroupMap = dtos.UserGroupAdminView{
-					Slug:    slugMap[j].GroupSlug,
-					Deleted: &slugMap[j].Deleted != nil,
-				}
+		firstItem := j == 0
+		isLastItem := j == len(slugMap)-1
+		otherItem := j > 0 && j < len(slugMap)-1
+		hasUserSlug := slugMap[j].UserSlug.Valid
+		noUserSlug := !hasUserSlug
+		sameGroupAsPrev := false
+		if j > 0 {
+			sameGroupAsPrev = slugMap[j].GroupSlug == slugMap[j-1].GroupSlug
+		}
+		diffGroup := !sameGroupAsPrev
+
+		if firstItem && hasUserSlug {
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug: slugMap[j].GroupSlug,
+				UserSlugs: []string{
+					slugMap[j].UserSlug.String,
+				},
+				Deleted: &slugMap[j].Deleted != nil,
 			}
-		} else if slugMap[j].GroupSlug == slugMap[j-1].GroupSlug {
-			if slugMap[j].UserSlug.Valid {
-				tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug.String)
+		} else if firstItem && noUserSlug {
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug:    slugMap[j].GroupSlug,
+				Deleted: &slugMap[j].Deleted != nil,
 			}
-			// TODO TN - make this into a part of the main clause
-			if j == len(slugMap)-1 {
-				userGroupsDTO = append(userGroupsDTO, tempGroupMap)
-			}
-		} else {
+		} else if otherItem && sameGroupAsPrev && hasUserSlug {
+			tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug.String)
+		} else if otherItem && diffGroup && hasUserSlug {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
-			if slugMap[j].UserSlug.Valid {
-				tempGroupMap = dtos.UserGroupAdminView{
-					Slug: slugMap[j].GroupSlug,
-					UserSlugs: []string{
-						slugMap[j].UserSlug.String,
-					},
-				}
-			} else {
-				tempGroupMap = dtos.UserGroupAdminView{
-					Slug: slugMap[j].GroupSlug,
-				}
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug: slugMap[j].GroupSlug,
+				UserSlugs: []string{
+					slugMap[j].UserSlug.String,
+				},
 			}
+		} else if otherItem && diffGroup && noUserSlug {
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug: slugMap[j].GroupSlug,
+			}
+		} else if isLastItem && sameGroupAsPrev && hasUserSlug {
+			tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug.String)
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+		} else if isLastItem && sameGroupAsPrev && noUserSlug {
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+		} else if isLastItem && diffGroup && hasUserSlug {
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug: slugMap[j].GroupSlug,
+				UserSlugs: []string{
+					slugMap[j].UserSlug.String,
+				},
+			}
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+		} else if isLastItem && diffGroup && noUserSlug {
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
+			tempGroupMap = dtos.UserGroupAdminView{
+				Slug: slugMap[j].GroupSlug,
+			}
+			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 		}
 	}
 
