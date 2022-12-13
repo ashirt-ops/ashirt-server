@@ -162,19 +162,21 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 
 	i.AddWhere(&sb)
 
-	secondSelect := sq.Select("user_groups.slug AS group_slug, NULL as user_slug, user_groups.deleted_at AS deleted").
-		From("user_groups").
-		OrderBy("group_slug")
-
-	sql, args, _ := secondSelect.ToSql()
-	unionSelect := sb.Suffix("UNION "+sql, args...)
-
-	// write test data for this TODO TN
-	// TODO TN is the right place for this given the SQL above?
-	// TODO TN not currently being used
 	if !i.IncludeDeleted {
 		sb = sb.Where(sq.Eq{"user_groups.deleted_at": nil})
 	}
+
+	sb2 := sq.Select("user_groups.slug AS group_slug, NULL as user_slug, user_groups.deleted_at AS deleted").
+		From("user_groups")
+
+	if !i.IncludeDeleted {
+		sb2 = sb2.Where(sq.Eq{"deleted_at": nil})
+	}
+
+	sb2 = sb2.OrderBy("group_slug")
+
+	sql, args, _ := sb2.ToSql()
+	unionSelect := sb.Suffix("UNION "+sql, args...)
 
 	err := db.Select(&slugMap, unionSelect)
 
