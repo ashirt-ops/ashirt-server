@@ -249,17 +249,23 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	p := i.Pagination
 
 	prevLastIndex := (p.Page - 1) * p.PageSize
-	remainingItems := (len(userGroupsDTO) - int(prevLastIndex)) % int(p.PageSize)
-	currLastIndex := int(math.Min(float64(p.Page*p.PageSize), float64(remainingItems)))
-	paginatedResults := userGroupsDTO[prevLastIndex:currLastIndex]
+	groupLength := len(userGroupsDTO)
+	totalPages := math.Ceil(float64(groupLength) / float64(p.PageSize))
+	remainingItemsCount := (groupLength - int(prevLastIndex)) % int(p.PageSize)
 
-	numPages := len(userGroupsDTO) / int(p.PageSize)
-	totalPages := math.Ceil(float64(numPages))
+	currLastIndex := int(p.Page * p.PageSize)
+	pageSize := p.PageSize
+	if p.Page == int64(totalPages) {
+		currLastIndex = int(prevLastIndex) + remainingItemsCount
+		pageSize = int64(remainingItemsCount)
+	}
+
+	paginatedResults := userGroupsDTO[prevLastIndex:currLastIndex]
 	paginatedData := &dtos.PaginationWrapper{
 		PageNumber: p.Page,
-		PageSize:   p.PageSize,
+		PageSize:   pageSize,
 		Content:    paginatedResults,
-		TotalCount: p.TotalCount,
+		TotalCount: int64(groupLength),
 		TotalPages: int64(totalPages),
 	}
 
