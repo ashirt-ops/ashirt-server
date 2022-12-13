@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import { usePaginatedWiredData } from 'src/helpers'
 
 import { UserAdminView } from 'src/global_types'
-import { listUsersAdminView, createRecoveryCode } from 'src/services'
+import { listUsersAdminView } from 'src/services'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
 import {
@@ -56,7 +56,7 @@ export default (props: {
     return () => { props.offReload(wiredUsers.reload) }
   })
   React.useEffect(() => { setIncludeDeletedUsers(withDeleted) }, [withDeleted])
-  
+
   return (
     <SettingsSection title="" width="wide">
       <div className={cx('inline-form')}>
@@ -74,7 +74,7 @@ export default (props: {
       </div>
       <Table className={cx('table')} columns={columns}>
         {wiredUsers.render(data => <>
-          {data.map(user => 
+          {data.map(user =>
             (<tr>
               <td>{`${user.firstName} ${user.lastName}`}</td>
               <td><input

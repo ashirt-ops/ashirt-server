@@ -25,7 +25,6 @@ import { InputWithCopyButton } from 'src/components/text_copiers'
 import { useForm, useFormField } from 'src/helpers'
 import { NewApiKeyModalContents } from 'src/pages/account_settings/api_keys/modals'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { useResolvedPath } from 'react-router-dom'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -192,7 +191,7 @@ export const AddUserGroupModal = (props: {
           name: name.value,
           userSlugs: userSlugs
         })
-        setIsCompleted(true) 
+        setIsCompleted(true)
       }
       return runSubmit()
     },
