@@ -70,7 +70,7 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 		_, err = services.CreateUserGroup(ctx, db, i)
 		assert.ErrorContains(t, err, "Unable to create user group. User group slug already exists")
 
-		err = services.DeleteUserGroup(db, name)
+		err = services.DeleteUserGroup(ctx, db, name)
 		require.NoError(t, err)
 
 		userIDs, err = GetUserIDsFromGroup(db, name)
