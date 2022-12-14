@@ -117,14 +117,19 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	return nil, nil
 }
 
-func DeleteUserGroup(db *database.Connection, slug string) error {
-	userGroupID, err := userGroupSlugToUserGroupID(db, slug)
+func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) error {
+	userGroup, err := lookupUserGroup(db, slug)
 	if err != nil {
-		return backend.WrapError("User group does not exist and therefore cannot be deleted", backend.DatabaseErr(err))
+		return backend.WrapError("Unable to delete user group", backend.UnauthorizedWriteErr(err))
 	}
 
+	// if err := policyRequireWithAdminBypass(ctx, policy.CanDeleteOperation{UsergroupID: userGroup.ID}); err != nil {
+	// 	return backend.WrapError("Unwilling to delete user group", backend.UnauthorizedWriteErr(err))
+	// }
+	// TODO ADd this in later
+
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
-		tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"group_id": userGroupID}))
+		tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"group_id": userGroup.ID}))
 		tx.Update(sq.Update("user_groups").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
 	})
 	if err != nil {
@@ -201,12 +206,12 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 				UserSlugs: []string{
 					slugMap[j].UserSlug.String,
 				},
-				Deleted: &slugMap[j].Deleted != nil,
+				Deleted: slugMap[j].Deleted.Valid,
 			}
 		} else if firstItem && noUserSlug {
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug:    slugMap[j].GroupSlug,
-				Deleted: &slugMap[j].Deleted != nil,
+				Deleted: slugMap[j].Deleted.Valid,
 			}
 		} else if otherItem && sameGroupAsPrev && hasUserSlug {
 			tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug.String)
@@ -221,7 +226,8 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		} else if otherItem && diffGroup && noUserSlug {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
-				Slug: slugMap[j].GroupSlug,
+				Slug:    slugMap[j].GroupSlug,
+				Deleted: slugMap[j].Deleted.Valid,
 			}
 		} else if isLastItem && sameGroupAsPrev && hasUserSlug {
 			tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug.String)
@@ -235,12 +241,14 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 				UserSlugs: []string{
 					slugMap[j].UserSlug.String,
 				},
+				Deleted: slugMap[j].Deleted.Valid,
 			}
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 		} else if isLastItem && diffGroup && noUserSlug {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
-				Slug: slugMap[j].GroupSlug,
+				Slug:    slugMap[j].GroupSlug,
+				Deleted: slugMap[j].Deleted.Valid,
 			}
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 		}

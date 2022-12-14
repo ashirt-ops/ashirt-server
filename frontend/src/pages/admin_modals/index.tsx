@@ -4,13 +4,14 @@
 import * as React  from 'react'
 import classnames from 'classnames/bind'
 
-import { ApiKey, User, UserAdminView } from 'src/global_types'
+import { ApiKey, User, UserAdminView, UserGroupAdminView } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
   adminInviteUser,
   createApiKey,
-  adminCreateUserGroup
+  adminCreateUserGroup,
+  adminDeleteUserGroup
 } from 'src/services'
 import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
@@ -172,6 +173,7 @@ export const AddUserModal = (props: {
   )
 }
 
+// TODO TN move modals into another file?
 export const AddUserGroupModal = (props: {
   onRequestClose: () => void,
 }) => {
@@ -221,6 +223,18 @@ export const AddUserGroupModal = (props: {
     </Modal>
   )
 }
+
+export const DeleteUserGroupModal = (props: {
+  userGroup: UserGroupAdminView,
+  onRequestClose: () => void,
+}) => <ChallengeModalForm
+    modalTitle="Delete User"
+    warningText="This will remove the user group from the system. All user group information will be lost."
+    submitText="Delete"
+    challengeText={props.userGroup.slug}
+    handleSubmit={() => adminDeleteUserGroup({ userGroupSlug: props.userGroup.slug })}
+    onRequestClose={props.onRequestClose}
+  />
 
 export const UpdateUserFlagsModal = (props: {
   user: UserAdminView,

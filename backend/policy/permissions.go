@@ -27,6 +27,7 @@ type CanDeleteAuthScheme struct {
 }
 type CanDeleteAuthForAllUsers struct{ SchemeCode string }
 
+// TODO TN set these up for user gruops
 type CanListUsersOfOperation struct{ OperationID int64 }
 type CanModifyFindingsOfOperation struct{ OperationID int64 }
 type CanModifyEvidenceOfOperation struct{ OperationID int64 }

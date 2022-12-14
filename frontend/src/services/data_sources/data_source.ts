@@ -8,6 +8,7 @@ type EvidenceUuid = { evidenceUuid: string }
 type FindingUuid = { findingUuid: string }
 type OpSlug = { operationSlug: string }
 type UserSlug = { userSlug: string }
+type UserGroupSlug = { userGroupSlug: string }
 type QueryId = { queryId: number }
 type TagId = { tagId: number }
 type FindingCategoryId = { findingCategoryId: number }
@@ -96,6 +97,7 @@ export interface DataSource {
 
   adminListUserGroups(query: { deleted: boolean }): Promise<types.PaginationResult<dtos.UserGroupAdminView>>
   adminCreateUserGroup(payload: { name: string, userSlugs: string[] }): Promise<void>
+  adminDeleteUserGroup(ids: UserGroupSlug): Promise<void>
 
   listQueries(ids: OpSlug): Promise<Array<dtos.Query>>
   createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings' }): Promise<void>

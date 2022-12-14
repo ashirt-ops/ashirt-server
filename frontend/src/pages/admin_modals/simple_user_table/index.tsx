@@ -43,7 +43,6 @@ export default (props: {
     }
   }
 
-  // does this effect it? TODO TN get rid of the flash that occurs wehn going to different pages
   const columns = Object.keys({})
 
   const wiredUsers = usePaginatedWiredData<UserAdminView>(

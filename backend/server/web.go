@@ -207,6 +207,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ListUserGroupsForAdmin(r.Context(), db, i)
 	}))
 
+	// TODO TN sometimes we use name vs slug - how do users handle that? copy to be same way
 	route(r, "POST", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateUserGroupInput{
@@ -218,6 +219,16 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		return services.CreateUserGroup(r.Context(), db, i)
+	}))
+
+	route(r, "DELETE", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		groupSlug := dr.FromURL("group_slug").AsString()
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteUserGroup(r.Context(), db, groupSlug)
 	}))
 
 	route(r, "GET", "/auths", jsonHandler(func(r *http.Request) (interface{}, error) {

@@ -10,7 +10,6 @@ import { listUserGroupsAdminView } from 'src/services'
 import AuthContext from 'src/auth_context'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
-import { RecoverAccountModal } from 'src/pages/admin_modals'
 import {
   default as Table,
   ErrorRow,
@@ -23,6 +22,7 @@ import SettingsSection from 'src/components/settings_section'
 import { default as Menu } from 'src/components/menu'
 import { ClickPopover } from 'src/components/popover'
 import Input from 'src/components/input'
+import { DeleteUserGroupModal } from 'src/pages/admin_modals'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -30,20 +30,21 @@ export default (props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
 }) => {
-  const [recoveryCode, setRecoveryCode] = React.useState<null | string>(null)
+  const [deletingUserGroup, setDeletingUserGroup] = React.useState<null | UserGroupAdminView>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
-  const self = React.useContext(AuthContext).user
 
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
-  const columns = Object.keys(rowBuilder(null, <span />))
+  const columns = Object.keys(rowBuilder(null, <span />, <span />))
 
   const wiredUserGroups = usePaginatedWiredData<UserGroupAdminView>(
     React.useCallback(page => listUserGroupsAdminView({ page, pageSize: 10, deleted: withDeleted }), [usernameFilterValue, withDeleted]),
     (err) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />
   )
-  const actionsBuilder = actionsForUserBuilder(self ? self.slug : "", wiredUserGroups)
+
+  // TODO build this out
+  const modifyOperation = (userGroup: UserGroupAdminView) => console.log();
 
   React.useEffect(() => {
     props.onReload(wiredUserGroups.reload)
@@ -68,57 +69,73 @@ export default (props: {
       </div>
       <Table className={cx('table')} columns={columns}>
         {wiredUserGroups.render(data => <>
-          {data.map(group => <TableRow key={group.slug} data={rowBuilder(group, actionsBuilder(group))} />)}
+          {data.map(group => <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, modifyOperation))} />)}
         </>)}
       </Table>
       <StandardPager className={cx('user-table-pager')} {...wiredUserGroups.pagerProps} />
 
-      {/* {resettingPassword && <ResetPasswordModal user={resettingPassword} onRequestClose={() => setResettingPassword(null)} />}
-      {editingUserFlags && <UpdateUserFlagsModal user={editingUserFlags} onRequestClose={() => { setEditingUserFlags(null); wiredUserGroups.reload() }} />}
-      {deletingUser && <DeleteUserModal user={deletingUser} onRequestClose={() => { setDeletingUser(null); wiredUserGroups.reload() }} />}
-      {deletingTotp && <RemoveTotpModal user={deletingTotp} onRequestClose={() => { setDeletingTotp(null); wiredUserGroups.reload() }} />} */}
-      {recoveryCode && <RecoverAccountModal recoveryCode={recoveryCode} onRequestClose={() => setRecoveryCode(null)} />}
+      {/* {editingUserFlags && <UpdateUserFlagsModal user={editingUserFlags} onRequestClose={() => { setEditingUserFlags(null); wiredUserGroups.reload() }} />} */}
+      {deletingUserGroup && <DeleteUserGroupModal userGroup={deletingUserGroup} onRequestClose={() => { setDeletingUserGroup(null); wiredUserGroups.reload() }} />}
     </SettingsSection>
   )
 }
+
+// TODO TN fix render unique key issue
 
 const TableRow = (props: { data: Rowdata }) => (
   <tr>
     <td>{props.data["Name"]}</td>
     <td>{props.data["Users"]}</td>
-    {/* TODO TN add modify button in next PR */}
+    <td>{props.data["Flags"]}</td>
+    <td>{props.data["Actions"]}</td>
   </tr>
 )
 
 type Rowdata = {
   "Name": string,
   "Users": JSX.Element,
+  "Flags": JSX.Element,
+  "Actions": JSX.Element,
 }
 
-const rowBuilder = (u: UserGroupAdminView | null, actions: JSX.Element): Rowdata => ({
+const rowBuilder = (u: UserGroupAdminView | null, users: JSX.Element, actions: JSX.Element): Rowdata => ({
   "Name": u ? u.slug : "",
-  "Users": actions,
+  "Users": users,
+  "Flags": (u && u.deleted) ? <span className={cx('deleted-user')}>Deleted</span> : <span />,
+  "Actions": actions,
 })
 
-const actionsForUserBuilder = (selfSlug: string,
+const usersInGroup = (
   wiredUserGroups: PaginatedWiredData<UserGroupAdminView>,
-) => (
   u: UserGroupAdminView
 ) => {
   const userCount = wiredUserGroups.render(data => <span>{data.find(group => group.slug === u.slug)?.userSlugs?.length ?? 0}</span>)
-    return (
-      <ButtonGroup>
-        <ClickPopover className={cx('popover')} closeOnContentClick content={
-          <Menu>
-            {wiredUserGroups.render(data => {
-              const group = data.find(group => u.slug === group.slug)
-              const userList = group?.userSlugs?.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
-              return <>{userList}</>
-        })}
-          </Menu>
-        }>
-          <Button small className={cx('arrow')}><p className={cx('button-text')}>{userCount} Users</p></Button>
-        </ClickPopover>
-      </ButtonGroup>
-    )
-  }
+  return (
+    <ButtonGroup>
+      <ClickPopover className={cx('popover')} closeOnContentClick content={
+        <Menu>
+          {wiredUserGroups.render(data => {
+            const group = data.find(group => u.slug === group.slug)
+            const userList = group?.userSlugs?.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
+            return <>{userList}</>
+      })}
+        </Menu>
+      }>
+        <Button small className={cx('arrow')}><p className={cx('button-text')}>{userCount} Users</p></Button>
+      </ClickPopover>
+    </ButtonGroup>
+  )
+}
+
+const modifyActions = (
+  u: UserGroupAdminView, 
+  onDeleteClick: (u: UserGroupAdminView) => void,
+  onEditClick: (u: UserGroupAdminView) => void
+) => {
+  return (
+    <ButtonGroup className={cx('row-buttons')}>
+      <Button small onClick={() => onEditClick(u)}>Edit</Button> 
+      <Button small disabled={u.deleted} onClick={() => onDeleteClick(u)}>Delete</Button>
+    </ButtonGroup>
+  )
+}
