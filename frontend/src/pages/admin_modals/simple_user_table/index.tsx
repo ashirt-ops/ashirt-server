@@ -14,6 +14,7 @@ import {
   ErrorRow,
   LoadingRow,
 } from 'src/components/table'
+import ComplexCheckbox from 'src/components/checkbox_complex'
 import Checkbox from 'src/components/checkbox'
 import { StandardPager } from 'src/components/paging'
 import SettingsSection from 'src/components/settings_section'
@@ -77,9 +78,13 @@ export default (props: {
           {data.map(user =>
             (<tr>
               <td>{`${user.firstName} ${user.lastName}`}</td>
-              <td><input
-              // TODO FIGURE OUT HOW TO GET THE STYLIHG TO WRK?
-                type="checkbox" className={cx('checkbox')} checked={props.includedUsers.has(user.slug)} onChange={(e) => toggleItem(e, user.slug)}/></td>
+              <td>
+                <ComplexCheckbox
+                  className={cx('checkbox')}
+                  value={props.includedUsers.has(user.slug)}
+                  onChange={(e) => toggleItem(e, user.slug)}
+                  />
+              </td>
             </tr>)
           )}
         </>)}
