@@ -48,6 +48,8 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 		name := "testGroup"
 		i := services.CreateUserGroupInput{
 			Name: name,
+			// TODO TN is using name in both cases okay for this test?
+			Slug: name,
 			UserSlugs: []string{
 				UserRon.Slug,
 				UserAlastor.Slug,

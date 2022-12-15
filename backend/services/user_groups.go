@@ -20,10 +20,12 @@ import (
 
 type CreateUserGroupInput struct {
 	Name      string
+	Slug      string
 	UserSlugs []string
 }
 
 type ModifyUserGroupInput struct {
+	Name      string
 	Slug      string
 	UserSlugs []string
 }
@@ -38,6 +40,9 @@ func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	if cugi.Slug == "" {
 		return backend.MissingValueErr("Slug")
 	}
+	if cugi.Slug == "" {
+		return backend.MissingValueErr("Name")
+	}
 	return nil
 }
 
@@ -45,6 +50,7 @@ func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64)
 	for _, userSlug := range userSlugs {
 		userID, err := userSlugToUserID(db, userSlug)
 		if err != nil {
+			fmt.Println(err)
 			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
 		}
 
@@ -56,11 +62,13 @@ func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64)
 				"group_id": groupID,
 			}))
 		if err != nil {
+			fmt.Println(err)
 			_, err = db.Insert("group_user_map", map[string]interface{}{
 				"user_id":  userID,
 				"group_id": groupID,
 			})
 			if err != nil {
+				fmt.Println(err)
 				return backend.WrapError("Unable to connect user to group", backend.DatabaseErr(err))
 			}
 		}
@@ -103,14 +111,20 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	}
 	for {
 		id, err := db.Insert("user_groups", map[string]interface{}{
-			"slug": i.Name,
+			"slug": i.Slug,
+			"name": i.Name,
 		})
 		if err != nil {
 			if database.IsAlreadyExistsError(err) {
-				return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this name already exists; please choose another name"))
+				return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this slug already exists; please choose another name"))
 			}
 		}
-		AddUsersToGroup(db, i.UserSlugs, id)
+		err = AddUsersToGroup(db, i.UserSlugs, id)
+		if err != nil {
+			// TODO TN fix wrapped error
+			// rollback creatation of user group TODO TN
+			return nil, backend.WrapError("Unable to add users to user group.", backend.BadInputErr(err, "Unable to create add users to user group."))
+		}
 		break
 	}
 
@@ -142,6 +156,7 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 var slugMap []struct {
 	UserSlug  sql.NullString `db:"user_slug"`
 	GroupSlug string         `db:"group_slug"`
+	GroupName string         `db:"group_name"`
 	Deleted   sql.NullString `db:"deleted"`
 }
 
@@ -156,7 +171,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
 	}
 
-	sb := sq.Select("user_groups.slug AS group_slug, users.slug AS user_slug, user_groups.deleted_at AS deleted").
+	sb := sq.Select("user_groups.slug AS group_slug, user_groups.name AS group_name, users.slug AS user_slug, user_groups.deleted_at AS deleted").
 		From("group_user_map").
 		LeftJoin("user_groups ON group_user_map.group_id = user_groups.id").
 		Join("users ON group_user_map.user_id = users.id")
@@ -167,14 +182,14 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		sb = sb.Where(sq.Eq{"user_groups.deleted_at": nil})
 	}
 
-	sb2 := sq.Select("user_groups.slug AS group_slug, NULL as user_slug, user_groups.deleted_at AS deleted").
+	sb2 := sq.Select("user_groups.slug AS group_slug, user_groups.name AS group_name, NULL as user_slug, user_groups.deleted_at AS deleted").
 		From("user_groups")
 
 	if !i.IncludeDeleted {
 		sb2 = sb2.Where(sq.Eq{"deleted_at": nil})
 	}
 
-	sb2 = sb2.OrderBy("group_slug")
+	sb2 = sb2.OrderBy("group_name")
 
 	sql, args, _ := sb2.ToSql()
 	unionSelect := sb.Suffix("UNION "+sql, args...)
@@ -196,13 +211,14 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		noUserSlug := !hasUserSlug
 		sameGroupAsPrev := false
 		if j > 0 {
-			sameGroupAsPrev = slugMap[j].GroupSlug == slugMap[j-1].GroupSlug
+			sameGroupAsPrev = slugMap[j].GroupName == slugMap[j-1].GroupName
 		}
 		diffGroup := !sameGroupAsPrev
 
 		if firstItem && hasUserSlug {
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug: slugMap[j].GroupSlug,
+				Name: slugMap[j].GroupName,
 				UserSlugs: []string{
 					slugMap[j].UserSlug.String,
 				},
@@ -211,6 +227,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		} else if firstItem && noUserSlug {
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug:    slugMap[j].GroupSlug,
+				Name:    slugMap[j].GroupName,
 				Deleted: slugMap[j].Deleted.Valid,
 			}
 		} else if otherItem && sameGroupAsPrev && hasUserSlug {
@@ -219,6 +236,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug: slugMap[j].GroupSlug,
+				Name: slugMap[j].GroupName,
 				UserSlugs: []string{
 					slugMap[j].UserSlug.String,
 				},
@@ -227,6 +245,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug:    slugMap[j].GroupSlug,
+				Name:    slugMap[j].GroupName,
 				Deleted: slugMap[j].Deleted.Valid,
 			}
 		} else if isLastItem && sameGroupAsPrev && hasUserSlug {
@@ -238,6 +257,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug: slugMap[j].GroupSlug,
+				Name: slugMap[j].GroupName,
 				UserSlugs: []string{
 					slugMap[j].UserSlug.String,
 				},
@@ -248,6 +268,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug:    slugMap[j].GroupSlug,
+				Name:    slugMap[j].GroupName,
 				Deleted: slugMap[j].Deleted.Valid,
 			}
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)

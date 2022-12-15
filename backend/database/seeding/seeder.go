@@ -89,6 +89,7 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 			return map[string]interface{}{
 				"id":         seed.UserGroups[i].ID,
 				"slug":       seed.UserGroups[i].Slug,
+				"name":       seed.UserGroups[i].Name,
 				"created_at": seed.UserGroups[i].CreatedAt,
 				"updated_at": seed.UserGroups[i].UpdatedAt,
 				"deleted_at": seed.UserGroups[i].DeletedAt,

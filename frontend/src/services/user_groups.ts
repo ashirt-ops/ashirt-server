@@ -1,4 +1,4 @@
-import { ListObjectForAdminQuery, PaginationResult, UserGroupAdminView } from 'src/global_types'
+import { ListObjectForAdminQuery, PaginationResult, UserGroup, UserGroupAdminView } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 // TODO TN do these naming conventions line up with other examples?
@@ -10,7 +10,22 @@ export async function adminCreateUserGroup(i: {
   name: string,
   userSlugs: string[],
 }): Promise<void> {
-  return await ds.adminCreateUserGroup(i)
+  let slug = i.name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  if (slug === "") {
+    return (i.name === ""
+      ? Promise.reject(Error("User group name must not be empty"))
+      : Promise.reject(Error("User group name must include letters or numbers"))
+    )
+  }
+  try {
+    return await ds.adminCreateUserGroup({...i, slug})
+  } catch (err) {
+    if (err.message.match(/slug already exists/g)) {
+      slug += '-' + Date.now()
+      return await ds.adminCreateUserGroup({...i, slug})
+    }
+    throw err
+  }
 }
 
 export async function adminDeleteUserGroup(i : { userGroupSlug:string}): Promise<void> {

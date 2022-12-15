@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.31, for Linux (aarch64)
 --
 -- Host: localhost    Database: migrate_db
 -- ------------------------------------------------------
--- Server version	8.0.22
+-- Server version	8.0.31
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -34,7 +34,7 @@ CREATE TABLE `api_keys` (
   UNIQUE KEY `access_key` (`access_key`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `api_keys_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -61,7 +61,7 @@ CREATE TABLE `auth_scheme_data` (
   UNIQUE KEY `auth_scheme_user_key` (`auth_scheme`,`username`),
   KEY `fk_user_id__users_id` (`user_id`),
   CONSTRAINT `fk_user_id__users_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,7 +79,7 @@ CREATE TABLE `default_tags` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,7 +102,7 @@ CREATE TABLE `email_queue` (
   PRIMARY KEY (`id`),
   KEY `email_queue__email_status` (`email_status`),
   KEY `email_queue__email_to` (`to_email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -130,7 +130,7 @@ CREATE TABLE `evidence` (
   KEY `operator_id` (`operator_id`),
   CONSTRAINT `evidence_ibfk_1` FOREIGN KEY (`operation_id`) REFERENCES `operations` (`id`),
   CONSTRAINT `evidence_ibfk_2` FOREIGN KEY (`operator_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -149,7 +149,7 @@ CREATE TABLE `evidence_finding_map` (
   KEY `event_id` (`finding_id`),
   CONSTRAINT `evidence_finding_map_ibfk_1` FOREIGN KEY (`evidence_id`) REFERENCES `evidence` (`id`) ON DELETE CASCADE,
   CONSTRAINT `evidence_finding_map_ibfk_2` FOREIGN KEY (`finding_id`) REFERENCES `findings` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -174,7 +174,7 @@ CREATE TABLE `evidence_metadata` (
   UNIQUE KEY `evidence_id` (`evidence_id`,`source`),
   KEY `evidence_id_2` (`evidence_id`),
   CONSTRAINT `evidence_metadata_ibfk_1` FOREIGN KEY (`evidence_id`) REFERENCES `evidence` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -192,7 +192,7 @@ CREATE TABLE `finding_categories` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `category` (`category`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -219,7 +219,7 @@ CREATE TABLE `findings` (
   KEY `fk_category_id__finding_categories_id` (`category_id`),
   CONSTRAINT `findings_ibfk_1` FOREIGN KEY (`operation_id`) REFERENCES `operations` (`id`),
   CONSTRAINT `fk_category_id__finding_categories_id` FOREIGN KEY (`category_id`) REFERENCES `finding_categories` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -233,7 +233,7 @@ CREATE TABLE `gorp_migrations` (
   `id` varchar(255) NOT NULL,
   `applied_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,7 +272,7 @@ CREATE TABLE `operations` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -294,7 +294,7 @@ CREATE TABLE `queries` (
   UNIQUE KEY `name` (`name`,`operation_id`,`type`),
   UNIQUE KEY `query` (`query`,`operation_id`,`type`),
   KEY `operation_id` (`operation_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -313,7 +313,7 @@ CREATE TABLE `service_workers` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -352,7 +352,7 @@ CREATE TABLE `tag_evidence_map` (
   KEY `evidence_id` (`evidence_id`),
   CONSTRAINT `tag_evidence_map_ibfk_1` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`),
   CONSTRAINT `tag_evidence_map_ibfk_2` FOREIGN KEY (`evidence_id`) REFERENCES `evidence` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -372,7 +372,7 @@ CREATE TABLE `tags` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`,`operation_id`),
   KEY `operation_id` (`operation_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -385,6 +385,7 @@ DROP TABLE IF EXISTS `user_groups`;
 CREATE TABLE `user_groups` (
   `id` int NOT NULL AUTO_INCREMENT,
   `slug` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -410,7 +411,7 @@ CREATE TABLE `user_operation_permissions` (
   KEY `operation_id` (`operation_id`),
   CONSTRAINT `user_operation_permissions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `user_operation_permissions_ibfk_2` FOREIGN KEY (`operation_id`) REFERENCES `operations` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -430,7 +431,7 @@ CREATE TABLE `user_operation_preferences` (
   KEY `operation_id` (`operation_id`),
   CONSTRAINT `user_operation_preferences_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `user_operation_preferences_ibfk_2` FOREIGN KEY (`operation_id`) REFERENCES `operations` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -455,7 +456,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
   UNIQUE KEY `unique_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -467,12 +468,12 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-29 12:42:49
--- MySQL dump 10.13  Distrib 8.0.30, for Linux (aarch64)
+-- Dump completed on 2022-12-15 20:45:19
+-- MySQL dump 10.13  Distrib 8.0.31, for Linux (aarch64)
 --
 -- Host: localhost    Database: migrate_db
 -- ------------------------------------------------------
--- Server version	8.0.22
+-- Server version	8.0.31
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -491,7 +492,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `gorp_migrations` WRITE;
 /*!40000 ALTER TABLE `gorp_migrations` DISABLE KEYS */;
-INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2022-11-29 12:42:48'),('20190708185420-create-operations-table.sql','2022-11-29 12:42:48'),('20190708185427-create-events-table.sql','2022-11-29 12:42:48'),('20190708185432-create-evidence-table.sql','2022-11-29 12:42:48'),('20190708185441-create-evidence-event-map-table.sql','2022-11-29 12:42:48'),('20190716190100-create-user-operation-map-table.sql','2022-11-29 12:42:48'),('20190722193434-create-tags-table.sql','2022-11-29 12:42:48'),('20190722193937-create-tag-event-map.sql','2022-11-29 12:42:48'),('20190909183500-add-short-name-to-users-table.sql','2022-11-29 12:42:48'),('20190909190416-add-short-name-index.sql','2022-11-29 12:42:48'),('20190926205116-evidence-name.sql','2022-11-29 12:42:48'),('20190930173342-add-saved-searches.sql','2022-11-29 12:42:48'),('20191001182541-evidence-tags.sql','2022-11-29 12:42:48'),('20191008005212-add-uuid-to-events-evidence.sql','2022-11-29 12:42:48'),('20191015235306-add-slug-to-operations.sql','2022-11-29 12:42:48'),('20191018172105-modular-auth.sql','2022-11-29 12:42:48'),('20191023170906-codeblock.sql','2022-11-29 12:42:48'),('20191101185207-replace-events-with-findings.sql','2022-11-29 12:42:48'),('20191114211948-add-operation-to-tags.sql','2022-11-29 12:42:48'),('20191205182830-create-api-keys-table.sql','2022-11-29 12:42:48'),('20191213222629-users-with-email.sql','2022-11-29 12:42:48'),('20200103194053-rename-short-name-to-slug.sql','2022-11-29 12:42:49'),('20200104013804-rework-ashirt-auth.sql','2022-11-29 12:42:49'),('20200116070736-add-admin-flag.sql','2022-11-29 12:42:49'),('20200130175541-fix-color-truncation.sql','2022-11-29 12:42:49'),('20200205200208-disable-user-support.sql','2022-11-29 12:42:49'),('20200215015330-optional-user-id.sql','2022-11-29 12:42:49'),('20200221195107-deletable-user.sql','2022-11-29 12:42:49'),('20200303215004-move-last-login.sql','2022-11-29 12:42:49'),('20200306221628-add-explicit-headless.sql','2022-11-29 12:42:49'),('20200331155258-finding-status.sql','2022-11-29 12:42:49'),('20200617193248-case-senitive-apikey.sql','2022-11-29 12:42:49'),('20200928160958-add-totp-secret-to-auth-table.sql','2022-11-29 12:42:49'),('20210120205510-create-email-queue-table.sql','2022-11-29 12:42:49'),('20210401220807-dynamic-categories.sql','2022-11-29 12:42:49'),('20210408212206-remove-findings-category.sql','2022-11-29 12:42:49'),('20210730170543-add-auth-type.sql','2022-11-29 12:42:49'),('20220211181557-add-default-tags.sql','2022-11-29 12:42:49'),('20220512174013-evidence-metadata.sql','2022-11-29 12:42:49'),('20220516163424-add-worker-services.sql','2022-11-29 12:42:49'),('20220811153414-webauthn-credentials.sql','2022-11-29 12:42:49'),('20220908193523-switch-to-username.sql','2022-11-29 12:42:49'),('20220912185024-add-is_favorite.sql','2022-11-29 12:42:49'),('20220916190855-remove-null-as-value-for-is_favorite.sql','2022-11-29 12:42:49'),('20221027152757-remove-operation-status.sql','2022-11-29 12:42:49'),('20221111221242-create-user-operation-preferences.sql','2022-11-11 22:48:03'),('20221121165342-add-groups.sql','2022-11-29 12:42:49');
+INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2022-12-15 20:45:18'),('20190708185420-create-operations-table.sql','2022-12-15 20:45:18'),('20190708185427-create-events-table.sql','2022-12-15 20:45:18'),('20190708185432-create-evidence-table.sql','2022-12-15 20:45:18'),('20190708185441-create-evidence-event-map-table.sql','2022-12-15 20:45:18'),('20190716190100-create-user-operation-map-table.sql','2022-12-15 20:45:18'),('20190722193434-create-tags-table.sql','2022-12-15 20:45:18'),('20190722193937-create-tag-event-map.sql','2022-12-15 20:45:18'),('20190909183500-add-short-name-to-users-table.sql','2022-12-15 20:45:18'),('20190909190416-add-short-name-index.sql','2022-12-15 20:45:18'),('20190926205116-evidence-name.sql','2022-12-15 20:45:18'),('20190930173342-add-saved-searches.sql','2022-12-15 20:45:18'),('20191001182541-evidence-tags.sql','2022-12-15 20:45:18'),('20191008005212-add-uuid-to-events-evidence.sql','2022-12-15 20:45:18'),('20191015235306-add-slug-to-operations.sql','2022-12-15 20:45:18'),('20191018172105-modular-auth.sql','2022-12-15 20:45:18'),('20191023170906-codeblock.sql','2022-12-15 20:45:18'),('20191101185207-replace-events-with-findings.sql','2022-12-15 20:45:18'),('20191114211948-add-operation-to-tags.sql','2022-12-15 20:45:19'),('20191205182830-create-api-keys-table.sql','2022-12-15 20:45:19'),('20191213222629-users-with-email.sql','2022-12-15 20:45:19'),('20200103194053-rename-short-name-to-slug.sql','2022-12-15 20:45:19'),('20200104013804-rework-ashirt-auth.sql','2022-12-15 20:45:19'),('20200116070736-add-admin-flag.sql','2022-12-15 20:45:19'),('20200130175541-fix-color-truncation.sql','2022-12-15 20:45:19'),('20200205200208-disable-user-support.sql','2022-12-15 20:45:19'),('20200215015330-optional-user-id.sql','2022-12-15 20:45:19'),('20200221195107-deletable-user.sql','2022-12-15 20:45:19'),('20200303215004-move-last-login.sql','2022-12-15 20:45:19'),('20200306221628-add-explicit-headless.sql','2022-12-15 20:45:19'),('20200331155258-finding-status.sql','2022-12-15 20:45:19'),('20200617193248-case-senitive-apikey.sql','2022-12-15 20:45:19'),('20200928160958-add-totp-secret-to-auth-table.sql','2022-12-15 20:45:19'),('20210120205510-create-email-queue-table.sql','2022-12-15 20:45:19'),('20210401220807-dynamic-categories.sql','2022-12-15 20:45:19'),('20210408212206-remove-findings-category.sql','2022-12-15 20:45:19'),('20210730170543-add-auth-type.sql','2022-12-15 20:45:19'),('20220211181557-add-default-tags.sql','2022-12-15 20:45:19'),('20220512174013-evidence-metadata.sql','2022-12-15 20:45:19'),('20220516163424-add-worker-services.sql','2022-12-15 20:45:19'),('20220811153414-webauthn-credentials.sql','2022-12-15 20:45:19'),('20220908193523-switch-to-username.sql','2022-12-15 20:45:19'),('20220912185024-add-is_favorite.sql','2022-12-15 20:45:19'),('20220916190855-remove-null-as-value-for-is_favorite.sql','2022-12-15 20:45:19'),('20221027152757-remove-operation-status.sql','2022-12-15 20:45:19'),('20221111221242-create-user-operation-preferences.sql','2022-12-15 20:45:19'),('20221121165342-add-groups.sql','2022-12-15 20:45:19');
 /*!40000 ALTER TABLE `gorp_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -504,4 +505,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-29 12:42:49
+-- Dump completed on 2022-12-15 20:45:19

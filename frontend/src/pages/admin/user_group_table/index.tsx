@@ -99,7 +99,7 @@ type Rowdata = {
 }
 
 const rowBuilder = (u: UserGroupAdminView | null, users: JSX.Element, actions: JSX.Element): Rowdata => ({
-  "Name": u ? u.slug : "",
+  "Name": u ? u.name : "",
   "Users": users,
   "Flags": (u && u.deleted) ? <span className={cx('deleted-user')}>Deleted</span> : <span />,
   "Actions": actions,

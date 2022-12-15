@@ -251,6 +251,7 @@ func newUserGroupGen(first int64) func(name string) models.UserGroup {
 		return models.UserGroup{
 			ID:        id(),
 			Slug:      name,
+			Name:      name,
 			CreatedAt: internalClock.Now(),
 		}
 	}

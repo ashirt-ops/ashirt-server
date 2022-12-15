@@ -199,6 +199,7 @@ export type UserAdminView = UserWithAuth & {
 
 export type UserGroup = {
   slug: string,
+  name: string,
   userSlugs: Array<string>,
 }
 

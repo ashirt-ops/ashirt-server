@@ -223,7 +223,7 @@ func userSlugToUserID(db *database.Connection, slug string) (int64, error) {
 func lookupUserGroup(db *database.Connection, userGroupSlug string) (*models.UserGroup, error) {
 	var userGroup models.UserGroup
 
-	err := db.Get(&userGroup, sq.Select("id", "slug").
+	err := db.Get(&userGroup, sq.Select("id", "name", "slug").
 		From("user_groups").
 		Where(sq.Eq{"slug": userGroupSlug}))
 	if err != nil {
