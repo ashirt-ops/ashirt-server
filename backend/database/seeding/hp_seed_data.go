@@ -180,7 +180,7 @@ var UserHeadlessNick = newHPUser(newUserInput{FirstName: "Nicholas", LastName: "
 
 // Reserved users: Luna Lovegood (Create user test)
 
-var newUserGroup = newUserGroupGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
+var newUserGroup = newUserGroupGen(1)
 
 var UserGroupGryffindor = newUserGroup("Gryffindor")
 var UserGroupHufflepuff = newUserGroup("Hufflepuff")

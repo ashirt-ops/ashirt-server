@@ -245,15 +245,14 @@ func newUserOperationPreferences(user models.User, op models.Operation, isFavori
 	}
 }
 
-func newUserGroupGen(first int64, toSlug func(f, l string) string) func(name string) models.UserGroup {
+func newUserGroupGen(first int64) func(name string) models.UserGroup {
 	id := iotaLike(first)
 	return func(name string) models.UserGroup {
-		userGroup := models.UserGroup{
+		return models.UserGroup{
 			ID:        id(),
 			Slug:      name,
 			CreatedAt: internalClock.Now(),
 		}
-		return userGroup
 	}
 }
 
