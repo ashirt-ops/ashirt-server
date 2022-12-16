@@ -78,8 +78,6 @@ export default (props: {
   )
 }
 
-// TODO TN fix render unique key issue
-
 const TableRow = (props: { data: Rowdata }) => (
   <tr>
     <td>{props.data["Name"]}</td>
@@ -114,7 +112,7 @@ const usersInGroup = (
         <Menu>
           {wiredUserGroups.render(data => {
             const group = data.find(group => u.slug === group.slug)
-            const userList = group?.userSlugs?.map(userSlug => <p className={cx('user')}>{userSlug}</p>)
+            const userList = group?.userSlugs?.map(userSlug => <p key={userSlug} className={cx('user')}>{userSlug}</p>)
             return <>{userList}</>
       })}
         </Menu>
