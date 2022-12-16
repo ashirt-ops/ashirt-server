@@ -197,15 +197,9 @@ type UserGroupAdminView struct {
 	Deleted   bool     `json:"deleted"`
 }
 
-// TODO TN make these into the same struct?
-type CreateUserGroupOutput struct {
+type UserGroupOutput struct {
 	RealSlug    string `json:"slug"`
 	Name        string `json:"name"`
-	UserGroupID int64  `json:"-"` // don't transmit the userid
-}
-
-type ModifyUserGroupOutput struct {
-	RealSlug    string `json:"slug"`
 	UserGroupID int64  `json:"-"` // don't transmit the userid
 }
 
