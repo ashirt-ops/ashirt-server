@@ -45,16 +45,15 @@ func GetUserIDsFromGroup(db *database.Connection, groupSlug string) ([]int64, er
 
 func TestCreateUserGroup(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		name := "testGroup"
+		slug := "testGroup"
 		userSlugs := []string{
 			UserRon.Slug,
 			UserAlastor.Slug,
 			UserHagrid.Slug,
 		}
 		i := services.CreateUserGroupInput{
-			Name: name,
-			// TODO TN is using name in both cases okay for this test?
-			Slug:      name,
+			Name:      slug,
+			Slug:      slug,
 			UserSlugs: userSlugs,
 		}
 
@@ -63,7 +62,7 @@ func TestCreateUserGroup(t *testing.T) {
 		_, err := services.CreateUserGroup(ctx, db, i)
 		require.NoError(t, err)
 
-		userIDs, err := GetUserIDsFromGroup(db, name)
+		userIDs, err := GetUserIDsFromGroup(db, slug)
 		require.NoError(t, err)
 		require.Equal(t, len(userSlugs), len(userIDs))
 		for _, userID := range userIDs {
