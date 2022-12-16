@@ -129,6 +129,11 @@ type UserOperationRole struct {
 	Role policy.OperationRole `json:"role"`
 }
 
+type UserGroupOperationRole struct {
+	UserGroup UserGroupAdminView   `json:"userGroup"`
+	Role      policy.OperationRole `json:"role"`
+}
+
 type PaginationWrapper struct {
 	Content    interface{} `json:"content"`
 	PageNumber int64       `json:"page"`

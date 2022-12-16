@@ -83,7 +83,9 @@ export interface DataSource {
   readOperation(ids: OpSlug): Promise<dtos.Operation>
   updateOperation(ids: OpSlug, payload: { name: string }): Promise<void>
   listUserPermissions(ids: OpSlug, query: { name?: string }): Promise<Array<dtos.UserOperationRole>>
+  listUserGroupPermissions(ids: OpSlug, query: { name?: string }): Promise<Array<dtos.UserGroupOperationRole>>
   updateUserPermissions(ids: OpSlug, payload: { userSlug: string, role: types.UserRole }): Promise<void>
+  updateUserGroupPermissions(ids: OpSlug, payload: { userGroupSlug: string, role: types.UserRole }): Promise<void>
   deleteOperation(ids: OpSlug): Promise<void>
   setFavorite(ids: OpSlug, payload: { favorite: boolean }): Promise<void>
 
@@ -95,6 +97,7 @@ export interface DataSource {
   adminListUsers(query: { deleted: boolean, name?: string }): Promise<types.PaginationResult<dtos.UserAdminView>>
   adminCreateHeadlessUser(payload: UserPayload): Promise<dtos.CreateUserOutput>
 
+  listUserGroups(query: string, includeDeleted: boolean): Promise<Array<dtos.UserGroupAdminView>>
   adminListUserGroups(query: { deleted: boolean }): Promise<types.PaginationResult<dtos.UserGroupAdminView>>
   adminCreateUserGroup(payload: { slug: string, name: string, userSlugs: string[] }): Promise<void>
   adminDeleteUserGroup(ids: UserGroupSlug): Promise<void>

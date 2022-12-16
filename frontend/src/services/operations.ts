@@ -1,9 +1,9 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import { Operation, UserRole, UserOperationRole, UserFilter } from 'src/global_types'
+import { Operation, UserRole, UserOperationRole, UserFilter, UserGroupOperationRole } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
-import { userOperationRoleFromDto } from './data_sources/converters'
+import { userGroupOperationRoleFromDto, userOperationRoleFromDto } from './data_sources/converters'
 
 export async function createOperation(name: string): Promise<Operation> {
   let slug = name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -51,12 +51,27 @@ export async function getUserPermissions(i: UserFilter & {
   return roles.map(userOperationRoleFromDto)
 }
 
+export async function getUserGroupPermissions(i: UserFilter & {
+  slug: string,
+}): Promise<Array<UserGroupOperationRole>> {
+  const roles = await ds.listUserGroupPermissions({ operationSlug: i.slug }, { name: i.name })
+  return roles.map(userGroupOperationRoleFromDto)
+}
+
 export async function setUserPermission(i: { operationSlug: string, userSlug: string, role: UserRole }) {
   await ds.updateUserPermissions(
     { operationSlug: i.operationSlug },
     { userSlug: i.userSlug, role: i.role },
   )
 }
+
+export async function setUserGroupPermission(i: { operationSlug: string, userGroupSlug: string, role: UserRole }) {
+  await ds.updateUserGroupPermissions(
+    { operationSlug: i.operationSlug },
+    { userGroupSlug: i.userGroupSlug, role: i.role },
+  )
+}
+
 
 export async function setFavorite(slug: string, favorite: boolean) {
   return await ds.setFavorite({ operationSlug: slug }, {favorite: favorite} )

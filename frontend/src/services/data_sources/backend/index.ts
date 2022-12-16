@@ -53,7 +53,9 @@ export const backendDataSource: DataSource = {
   readOperation: ids => req('GET', `/operations/${ids.operationSlug}`),
   updateOperation: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}`, payload),
   listUserPermissions: (ids, query) => req('GET', `/operations/${ids.operationSlug}/users`, null, query),
+  listUserGroupPermissions: (ids, query) => req('GET', `/operations/${ids.operationSlug}/usergroups`, null, query),
   updateUserPermissions: (ids, payload) => req('PATCH', `/operations/${ids.operationSlug}/users`, payload),
+  updateUserGroupPermissions: (ids, payload) => req('PATCH', `/operations/${ids.operationSlug}/usergroups`, payload),
   deleteOperation: (ids) => req('DELETE', `/operations/${ids.operationSlug}`),
   setFavorite: (ids, payload) => req('POST', `/operations/${ids.operationSlug}/favorite`, payload),
 
@@ -65,6 +67,8 @@ export const backendDataSource: DataSource = {
   adminListUsers: query => req('GET', '/admin/users', null, query),
   adminCreateHeadlessUser: payload => req('POST', "/admin/user/headless", payload),
 
+  // TODO TN change this route naming - all of these should be admin routes
+  listUserGroups: (query, includeDeleted) => req('GET', '/usergroups', null, { query, includeDeleted }),
   adminCreateUserGroup: payload => req('POST', '/admin/usergroups', payload),
   adminListUserGroups: query => req('GET', '/admin/usergroups', null, query),
   adminDeleteUserGroup: ids => req('DELETE', `/admin/usergroups/${ids.userGroupSlug}`),

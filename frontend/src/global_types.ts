@@ -212,6 +212,11 @@ export type UserOperationRole = {
   role: UserRole,
 }
 
+export type UserGroupOperationRole = {
+  userGroup: UserGroupAdminView,
+  role: UserRole,
+}
+
 export type PaginationQuery = {
   page: number,
   pageSize: number,

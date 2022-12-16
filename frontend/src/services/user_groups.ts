@@ -1,6 +1,14 @@
 import { ListObjectForAdminQuery, PaginationResult, UserGroup, UserGroupAdminView } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
+// TODO TN rename these later?
+export async function listUserGroups(i: {
+  query: string,
+  includeDeleted?: boolean,
+}): Promise<Array<UserGroup>> {
+  return await ds.listUserGroups(i.query, i.includeDeleted || false)
+}
+
 export async function listUserGroupsAdminView(i: ListObjectForAdminQuery): Promise<PaginationResult<UserGroupAdminView>> {
   return await ds.adminListUserGroups(i)
 }
