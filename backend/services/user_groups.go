@@ -167,20 +167,22 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 }
 
 func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) error {
-	userGroup, err := lookupUserGroup(db, slug)
-	if err != nil {
-		return backend.WrapError("Unable to delete user group", backend.UnauthorizedWriteErr(err))
-	}
+	// userGroup, err := lookupUserGroup(db, slug)
+	// if err != nil {
+	// 	return backend.WrapError("Unable to delete user group", backend.UnauthorizedWriteErr(err))
+	// }
 
 	// if err := policyRequireWithAdminBypass(ctx, policy.CanDeleteOperation{UsergroupID: userGroup.ID}); err != nil {
 	// 	return backend.WrapError("Unwilling to delete user group", backend.UnauthorizedWriteErr(err))
 	// }
 	// TODO TN ADd this in later
 
-	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
-		tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"group_id": userGroup.ID}))
-		tx.Update(sq.Update("user_groups").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
-	})
+	// TODO TN get rid of trnasactoins?
+	// err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+	// 	// tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"group_id": userGroup.ID}))
+	// 	tx.Update(sq.Update("user_groups").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
+	// })
+	err := db.Update(sq.Update("user_groups").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
 	if err != nil {
 		return backend.WrapError("Cannot delete user group", backend.DatabaseErr(err))
 	}
@@ -201,6 +203,8 @@ type tempGroup struct {
 	Deleted   bool
 }
 
+// TODO TN How to handle if no groups?
+// TODO TN how to to more thoroughly test this?
 func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
@@ -275,6 +279,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 				UserSlugs: []string{
 					slugMap[j].UserSlug.String,
 				},
+				Deleted: slugMap[j].Deleted.Valid,
 			}
 		} else if otherItem && diffGroup && noUserSlug {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
