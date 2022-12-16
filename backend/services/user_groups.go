@@ -104,6 +104,8 @@ func RemoveUsersFromGroup(db *database.Connection, userSlugs []string, groupID i
 	return nil
 }
 
+// TODO TN ask Joel about return values
+// TODO TN look it up
 func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserGroupInput) (*dtos.CreateUserGroupOutput, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to create a user group", backend.UnauthorizedReadErr(err))

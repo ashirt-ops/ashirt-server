@@ -109,6 +109,8 @@ var UserParvati = seeding.UserParvati
 var UserPadma = seeding.UserPadma
 var UserCho = seeding.UserCho
 
+var UserGroupGryffindor = seeding.UserGroupGryffindor
+
 var APIKeyHarry1 = seeding.APIKeyHarry1
 var APIKeyHarry2 = seeding.APIKeyHarry2
 var APIKeyRon1 = seeding.APIKeyRon1
