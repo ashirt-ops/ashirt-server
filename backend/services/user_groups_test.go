@@ -18,15 +18,15 @@ import (
 
 type userGroupValidator func(*testing.T, UserOpPermJoinUser, *dtos.UserOperationRole)
 
-func GetUserIDsFromGroup(db *database.Connection, groupName string) ([]int64, error) {
+func GetUserIDsFromGroup(db *database.Connection, groupSlug string) ([]int64, error) {
 	var userGroupId int64
 	err := db.Get(&userGroupId, sq.Select("id").
 		From("user_groups").
 		Where(sq.Eq{
-			"slug": groupName,
+			"slug": groupSlug,
 		}))
 	if err != nil {
-		s := fmt.Sprintf("Cannot get user group id for group %q", groupName)
+		s := fmt.Sprintf("Cannot get user group id for group %q", groupSlug)
 		return nil, backend.WrapError(s, backend.DatabaseErr(err))
 	}
 
@@ -43,19 +43,19 @@ func GetUserIDsFromGroup(db *database.Connection, groupName string) ([]int64, er
 	return userGroupMap, nil
 }
 
-// TODO TN Break this into two tests
-func TestCreateAndDeleteUserGroup(t *testing.T) {
+func TestCreateUserGroup(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		name := "testGroup"
+		userSlugs := []string{
+			UserRon.Slug,
+			UserAlastor.Slug,
+			UserHagrid.Slug,
+		}
 		i := services.CreateUserGroupInput{
 			Name: name,
 			// TODO TN is using name in both cases okay for this test?
-			Slug: name,
-			UserSlugs: []string{
-				UserRon.Slug,
-				UserAlastor.Slug,
-				UserHagrid.Slug,
-			},
+			Slug:      name,
+			UserSlugs: userSlugs,
 		}
 
 		adminUser := UserDumbledore
@@ -65,23 +65,30 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 
 		userIDs, err := GetUserIDsFromGroup(db, name)
 		require.NoError(t, err)
-		require.Equal(t, 3, len(userIDs))
+		require.Equal(t, len(userSlugs), len(userIDs))
 		for _, userID := range userIDs {
 			require.Contains(t, []int64{UserRon.ID, UserAlastor.ID, UserHagrid.ID}, userID)
 		}
 		_, err = services.CreateUserGroup(ctx, db, i)
 		assert.ErrorContains(t, err, "Unable to create user group. User group slug already exists")
-
-		err = services.DeleteUserGroup(ctx, db, name)
-		require.NoError(t, err)
-
-		userIDs, err = GetUserIDsFromGroup(db, name)
-		require.NoError(t, err)
-		require.Equal(t, 0, len(userIDs))
 	})
 }
 
-// TODO TN add test for modifying
+func TestDeleteUserGroup(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		adminUser := UserDumbledore
+		ctx := contextForUser(adminUser, db)
+		userGroup := UserGroupGryffindor
+
+		err := services.DeleteUserGroup(ctx, db, userGroup.Slug)
+		require.NoError(t, err)
+
+		userIDs, err := GetUserIDsFromGroup(db, userGroup.Slug)
+		require.NoError(t, err)
+		// 4 users in UserGroupGryffindor
+		require.Equal(t, 4, len(userIDs))
+	})
+}
 
 func TestListUserGroups(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
@@ -99,10 +106,10 @@ func TestListUserGroups(t *testing.T) {
 
 		result, err := services.ListUserGroupsForAdmin(ctx, db, i)
 		var usergroups = result.Content.([]dtos.UserGroupAdminView)
-		require.Equal(t, result.PageNumber, int64(1))
-		require.Equal(t, result.PageSize, int64(10))
-		require.Equal(t, result.TotalCount, int64(4))
-		require.Equal(t, len(usergroups), 5)
+		require.Equal(t, int64(1), result.PageNumber)
+		require.Equal(t, int64(5), result.PageSize)
+		require.Equal(t, int64(5), result.TotalCount)
+		require.Equal(t, 5, len(usergroups))
 		require.NoError(t, err)
 	})
 }
