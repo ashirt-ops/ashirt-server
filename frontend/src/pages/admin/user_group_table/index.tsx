@@ -67,7 +67,7 @@ export default (props: {
       </div>
       <Table className={cx('table')} columns={columns}>
         {wiredUserGroups.render(data => <>
-          {data.map(group => <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, setModifyingUserGroup))} />)}
+          {data?.map(group => <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, setModifyingUserGroup))} />)}
         </>)}
       </Table>
       <StandardPager className={cx('user-table-pager')} {...wiredUserGroups.pagerProps} />

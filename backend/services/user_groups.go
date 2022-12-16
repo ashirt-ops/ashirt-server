@@ -203,7 +203,6 @@ type tempGroup struct {
 	Deleted   bool
 }
 
-// TODO TN How to handle if no groups?
 // TODO TN how to to more thoroughly test this?
 func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
@@ -241,6 +240,15 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 
 	userGroupsDTO := []dtos.UserGroupAdminView{}
 	tempGroupMap := dtos.UserGroupAdminView{}
+
+	if len(slugMap) == 0 {
+		return &dtos.PaginationWrapper{
+			PageNumber: 1,
+			PageSize:   0,
+			TotalCount: int64(0),
+			TotalPages: int64(1),
+		}, nil
+	}
 
 	for j := 0; j < len(slugMap); j++ {
 		firstItem := j == 0
