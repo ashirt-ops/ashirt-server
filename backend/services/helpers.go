@@ -6,6 +6,8 @@ package services
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
@@ -264,4 +266,16 @@ func ListActiveServices(ctx context.Context, db *database.Connection) ([]*dtos.A
 		}
 	})
 	return servicesDTO, nil
+}
+
+var disallowedCharactersRegex = regexp.MustCompile(`[^A-Za-z0-9]+`)
+
+// SanitizeOperationSlug removes objectionable characters from a slug and returns the new slug.
+// Current logic: only allow alphanumeric characters and hyphen, with hypen excluded at the start
+// and end
+func SanitizeSlug(slug string) string {
+	return strings.Trim(
+		disallowedCharactersRegex.ReplaceAllString(strings.ToLower(slug), "-"),
+		"-",
+	)
 }

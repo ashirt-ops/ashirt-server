@@ -195,14 +195,6 @@ func TestSetFavoriteOperation(t *testing.T) {
 	})
 }
 
-func TestSanitizeOperationSlug(t *testing.T) {
-	require.Equal(t, services.SanitizeOperationSlug("?One?Two?Three?"), "one-two-three")
-	require.Equal(t, services.SanitizeOperationSlug("Harry"), "harry")
-	require.Equal(t, services.SanitizeOperationSlug("Harry Potter"), "harry-potter")
-	require.Equal(t, services.SanitizeOperationSlug("fancy_name"), "fancy-name")
-	require.Equal(t, services.SanitizeOperationSlug("Lots_Of-Fancy! Characters"), "lots-of-fancy-characters")
-}
-
 func TestUpdateOperation(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		ctx := contextForUser(UserRon, db)

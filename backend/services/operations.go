@@ -7,8 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
-	"strings"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
@@ -63,8 +61,7 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 		return nil, backend.MissingValueErr("Slug")
 	}
 
-	// TODO TN - add something like this for user group slug?
-	cleanSlug := SanitizeOperationSlug(i.Slug)
+	cleanSlug := SanitizeSlug(i.Slug)
 	if cleanSlug == "" {
 		return nil, backend.BadInputErr(errors.New("Unable to create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
 	}
@@ -434,18 +431,6 @@ func SetFavoriteOperation(ctx context.Context, db *database.Connection, i SetFav
 	}
 
 	return nil
-}
-
-var disallowedCharactersRegex = regexp.MustCompile(`[^A-Za-z0-9]+`)
-
-// SanitizeOperationSlug removes objectionable characters from a slug and returns the new slug.
-// Current logic: only allow alphanumeric characters and hyphen, with hypen excluded at the start
-// and end
-func SanitizeOperationSlug(slug string) string {
-	return strings.Trim(
-		disallowedCharactersRegex.ReplaceAllString(strings.ToLower(slug), "-"),
-		"-",
-	)
 }
 
 var getDataFromEvidence string = `

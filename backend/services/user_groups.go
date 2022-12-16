@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -110,9 +111,15 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to create a user group", backend.UnauthorizedReadErr(err))
 	}
+
+	cleanSlug := SanitizeSlug(i.Slug)
+	if cleanSlug == "" {
+		return nil, backend.BadInputErr(errors.New("Unable to create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
+	}
+
 	for {
 		id, err := db.Insert("user_groups", map[string]interface{}{
-			"slug": i.Slug,
+			"slug": cleanSlug,
 			"name": i.Name,
 		})
 		if err != nil {
