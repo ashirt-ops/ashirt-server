@@ -26,7 +26,6 @@ type CreateUserGroupInput struct {
 }
 
 type ModifyUserGroupInput struct {
-	// TODO TN name might be null/nil
 	Name          string
 	Slug          string
 	UsersToAdd    []string
@@ -39,7 +38,7 @@ type ListUserGroupsForAdminInput struct {
 	IncludeDeleted bool
 }
 
-func (cugi ModifyUserGroupInput) validateModifyUserGroupInput() error {
+func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	if cugi.Slug == "" {
 		return backend.MissingValueErr("Slug")
 	}
@@ -49,7 +48,6 @@ func (cugi ModifyUserGroupInput) validateModifyUserGroupInput() error {
 	return nil
 }
 
-// should these be the same thing? TODO TN
 func (cugi CreateUserGroupInput) validateUserGroupInput() error {
 	if cugi.Slug == "" {
 		return backend.MissingValueErr("Slug")
@@ -145,7 +143,7 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		return nil, backend.WrapError("Unwilling to modify a user group", backend.UnauthorizedReadErr(err))
 	}
 
-	if err := i.validateModifyUserGroupInput(); err != nil {
+	if err := i.validateUserGroupInput(); err != nil {
 		return nil, backend.WrapError("Unable to modify user group", backend.BadInputErr(err, "Unable to modify user group due to bad input"))
 	}
 
