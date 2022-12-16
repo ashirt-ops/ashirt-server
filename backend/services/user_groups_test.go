@@ -114,6 +114,7 @@ func TestModifyUserGroup(t *testing.T) {
 			UsersToAdd:    usersToAdd,
 			UsersToRemove: usersToRemove,
 		}
+		// TODO TN check that name actually changed by grabbing record
 
 		_, err := services.ModifyUserGroup(ctx, db, i)
 		require.NoError(t, err)
