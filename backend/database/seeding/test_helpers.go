@@ -334,6 +334,7 @@ func GetOperationsForUser(t *testing.T, db *database.Connection, user models.Use
 	return filteredOperationsDTO
 }
 
+// TODO TN use similar to user group?
 func GetUserRolesForOperationByOperationID(t *testing.T, db *database.Connection, id int64) []models.UserOperationPermission {
 	var userRoles []models.UserOperationPermission
 	err := db.Select(&userRoles, sq.Select("*").

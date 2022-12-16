@@ -221,6 +221,15 @@ func userSlugToUserID(db *database.Connection, slug string) (int64, error) {
 	return userID, err
 }
 
+func userGroupSlugToUserGroupID(db *database.Connection, slug string) (int64, error) {
+	var userGroupID int64
+	err := db.Get(&userGroupID, sq.Select("id").From("user_groups").Where(sq.Eq{"slug": slug}))
+	if err != nil {
+		return userGroupID, backend.WrapError("Unable to look up user group by slug", err)
+	}
+	return userGroupID, err
+}
+
 // lookupUserGroup returns an user group model for the given slug
 func lookupUserGroup(db *database.Connection, userGroupSlug string) (*models.UserGroup, error) {
 	var userGroup models.UserGroup

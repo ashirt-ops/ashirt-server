@@ -9,12 +9,16 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/theparanoids/ashirt-server/backend/policy"
+	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -36,6 +40,12 @@ type ListUserGroupsForAdminInput struct {
 	UserFilter
 	Pagination
 	IncludeDeleted bool
+}
+
+type ListUserGroupsForOperationInput struct {
+	Pagination
+	UserGroupFilter
+	OperationSlug string
 }
 
 func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
@@ -135,6 +145,21 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	}
 
 	return nil, nil
+}
+
+func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserOperationRole, error) {
+	query, err := prepListUserGroupsForOperation(ctx, db, i)
+	if err != nil {
+		return nil, err
+	}
+
+	var userGroups []userAndRole
+	err = db.Select(&userGroups, *query)
+	if err != nil {
+		return nil, backend.WrapError("Cannot list user groups for operation", backend.DatabaseErr(err))
+	}
+	userGroupsDTO := wrapListUsersForOperationResponse(userGroups)
+	return userGroupsDTO, nil
 }
 
 // write a function that modifies a user group
@@ -354,4 +379,58 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	}
 
 	return paginatedData, nil
+}
+
+func ListUserGroups(ctx context.Context, db *database.Connection, i ListUsersInput) ([]*dtos.UserGroupAdminView, error) {
+	if strings.ContainsAny(i.Query, "%_") || strings.TrimFunc(i.Query, unicode.IsSpace) == "" {
+		return []*dtos.UserGroupAdminView{}, nil
+	}
+
+	// TODO TN add admin policy check
+
+	var userGroups []models.User
+	query := sq.Select("slug", "name").
+		From("user_groups").
+		OrderBy("name").
+		Limit(10)
+	if !i.IncludeDeleted {
+		query = query.Where(sq.Eq{"deleted_at": nil})
+	}
+	err := db.Select(&userGroups, query)
+	if err != nil {
+		return nil, backend.WrapError("Cannot list user groups", backend.DatabaseErr(err))
+	}
+
+	userGroupsDTO := []*dtos.UserGroupAdminView{}
+	for _, userGroup := range userGroups {
+		if middleware.Policy(ctx).Check(policy.CanReadUser{UserID: userGroup.ID}) {
+			userGroupsDTO = append(userGroupsDTO, &dtos.UserGroupAdminView{
+				Slug: userGroup.Slug,
+				Name: userGroup.FirstName,
+			})
+		}
+	}
+	return userGroupsDTO, nil
+}
+
+func prepListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) (*sq.SelectBuilder, error) {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to list user groups for operation", backend.UnauthorizedReadErr(err))
+	}
+
+	if err := policyRequireWithAdminBypass(ctx, policy.CanListUsersOfOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unwilling to list user groups for operation", backend.UnauthorizedReadErr(err))
+	}
+
+	// TODO TN create table for this
+	query := sq.Select("slug", "name", "role").
+		From("user_group_operation_permissions").
+		LeftJoin("user_groups ON user_group_operation_permissions.user_group_id = user_groups.id").
+		Where(sq.Eq{"operation_id": operation.ID, "user_groups.deleted_at": nil}).
+		OrderBy("user_group_operation_permissions.created_at ASC")
+
+	i.UserGroupFilter.AddWhere(&query)
+
+	return &query, nil
 }

@@ -58,6 +58,11 @@ type ListUsersInput struct {
 	IncludeDeleted bool
 }
 
+type ListUserGroupsInput struct {
+	Query          string
+	IncludeDeleted bool
+}
+
 type UpdateUserProfileInput struct {
 	UserSlug  string
 	FirstName string

@@ -131,6 +131,7 @@ func buildContextForUser(ctx context.Context, db *database.Connection, userID in
 	})
 }
 
+// TODO TN how will this interact with user groups?
 func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin, isHeadless bool) policy.Policy {
 	var roles []models.UserOperationPermission
 	err := db.Select(&roles, sq.Select("operation_id", "role").
