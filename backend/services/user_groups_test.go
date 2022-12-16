@@ -43,6 +43,7 @@ func GetUserIDsFromGroup(db *database.Connection, groupName string) ([]int64, er
 	return userGroupMap, nil
 }
 
+// TODO TN Break this into two tests
 func TestCreateAndDeleteUserGroup(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		name := "testGroup"
@@ -68,7 +69,6 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 		for _, userID := range userIDs {
 			require.Contains(t, []int64{UserRon.ID, UserAlastor.ID, UserHagrid.ID}, userID)
 		}
-
 		_, err = services.CreateUserGroup(ctx, db, i)
 		assert.ErrorContains(t, err, "Unable to create user group. User group slug already exists")
 
@@ -80,6 +80,8 @@ func TestCreateAndDeleteUserGroup(t *testing.T) {
 		require.Equal(t, 0, len(userIDs))
 	})
 }
+
+// TODO TN add test for modifying
 
 func TestListUserGroups(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {

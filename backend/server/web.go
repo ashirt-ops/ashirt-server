@@ -221,6 +221,21 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.CreateUserGroup(r.Context(), db, i)
 	}))
 
+	route(r, "PUT", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ModifyUserGroupInput{
+			Name:          dr.FromBody("newName").AsString(),
+			UsersToAdd:    dr.FromBody("userSlugsToAdd").AsStringSlice(),
+			UsersToRemove: dr.FromBody("userSlugsToRemove").AsStringSlice(),
+			Slug:          dr.FromURL("group_slug").Required().AsString(),
+		}
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ModifyUserGroup(r.Context(), db, i)
+	}))
+
 	route(r, "DELETE", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		groupSlug := dr.FromURL("group_slug").AsString()

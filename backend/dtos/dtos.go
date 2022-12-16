@@ -204,6 +204,11 @@ type CreateUserGroupOutput struct {
 	UserGroupID int64  `json:"-"` // don't transmit the userid
 }
 
+type ModifyUserGroupOutput struct {
+	RealSlug    string `json:"slug"`
+	UserGroupID int64  `json:"-"` // don't transmit the userid
+}
+
 type ServiceWorker struct {
 	ID      int64  `json:"id"`
 	Name    string `json:"name"`

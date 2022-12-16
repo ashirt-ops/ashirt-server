@@ -5,6 +5,7 @@ import { Operation, UserRole, UserOperationRole, UserFilter } from 'src/global_t
 import { backendDataSource as ds } from './data_sources/backend'
 import { userOperationRoleFromDto } from './data_sources/converters'
 
+// TODO TN do the same for group
 export async function createOperation(name: string): Promise<Operation> {
   let slug = name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '')
   if (slug === "") {

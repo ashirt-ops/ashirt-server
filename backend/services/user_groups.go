@@ -25,9 +25,11 @@ type CreateUserGroupInput struct {
 }
 
 type ModifyUserGroupInput struct {
-	Name      string
-	Slug      string
-	UserSlugs []string
+	// TODO TN name might be null/nil
+	Name          string
+	Slug          string
+	UsersToAdd    []string
+	UsersToRemove []string
 }
 
 type ListUserGroupsForAdminInput struct {
@@ -36,7 +38,7 @@ type ListUserGroupsForAdminInput struct {
 	IncludeDeleted bool
 }
 
-func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
+func (cugi ModifyUserGroupInput) validateModifyUserGroupInput() error {
 	if cugi.Slug == "" {
 		return backend.MissingValueErr("Slug")
 	}
@@ -46,11 +48,21 @@ func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	return nil
 }
 
+// should these be the same thing? TODO TN
+func (cugi CreateUserGroupInput) validateUserGroupInput() error {
+	if cugi.Slug == "" {
+		return backend.MissingValueErr("Slug")
+	}
+	if cugi.Name == "" {
+		return backend.MissingValueErr("Name")
+	}
+	return nil
+}
+
 func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64) error {
 	for _, userSlug := range userSlugs {
 		userID, err := userSlugToUserID(db, userSlug)
 		if err != nil {
-			fmt.Println(err)
 			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
 		}
 
@@ -62,13 +74,11 @@ func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64)
 				"group_id": groupID,
 			}))
 		if err != nil {
-			fmt.Println(err)
 			_, err = db.Insert("group_user_map", map[string]interface{}{
 				"user_id":  userID,
 				"group_id": groupID,
 			})
 			if err != nil {
-				fmt.Println(err)
 				return backend.WrapError("Unable to connect user to group", backend.DatabaseErr(err))
 			}
 		}
@@ -79,26 +89,15 @@ func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64)
 
 func RemoveUsersFromGroup(db *database.Connection, userSlugs []string, groupID int64) error {
 	for _, userSlug := range userSlugs {
-
 		userID, err := userSlugToUserID(db, userSlug)
 		if err != nil {
 			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
 		}
 
-		var userGroupMap models.UserGroupMap
-		err = db.Get(&userGroupMap, sq.Select("*").
-			From("group_user_map").
-			Where(sq.Eq{
-				"user_id":  userID,
-				"group_id": groupID,
-			}))
-		if err == nil {
-			err := db.Delete(sq.Delete("group_user_map").Where(sq.Eq{"user_id": userID, "group_id": groupID}))
+		err = db.Delete(sq.Delete("group_user_map").Where(sq.Eq{"user_id": userID, "group_id": groupID}))
 
-			if err != nil {
-				return backend.WrapError("Cannot delete user role", backend.DatabaseErr(err))
-			}
-			return nil
+		if err != nil {
+			return backend.WrapError("Cannot delete user role", backend.DatabaseErr(err))
 		}
 	}
 
@@ -131,6 +130,42 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	return nil, nil
 }
 
+// write a function that modifies a user group
+func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserGroupInput) (*dtos.ModifyUserGroupOutput, error) {
+	if err := isAdmin(ctx); err != nil {
+		return nil, backend.WrapError("Unwilling to modify a user group", backend.UnauthorizedReadErr(err))
+	}
+
+	if err := i.validateModifyUserGroupInput(); err != nil {
+		return nil, backend.WrapError("Unable to modify user group", backend.BadInputErr(err, "Unable to modify user group due to bad input"))
+	}
+
+	userGroup, err := lookupUserGroup(db, i.Slug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to modify user group", backend.UnauthorizedWriteErr(err))
+	}
+
+	// TODO TN Add this in later
+	// if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserGroup{UsergroupID: userGroup.ID}); err != nil {
+	// 	return backend.WrapError("Unwilling to modify user group", backend.UnauthorizedWriteErr(err))
+	// }
+
+	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
+		if i.Name != "" {
+			tx.Update(sq.Update("user_groups").Set("name", i.Name).Where(sq.Eq{"id": userGroup.ID}))
+		}
+		// TODO TN figure out how to make these transactions work
+		RemoveUsersFromGroup(db, i.UsersToRemove, userGroup.ID)
+		AddUsersToGroup(db, i.UsersToAdd, userGroup.ID)
+	})
+	if err != nil {
+		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
+	}
+
+	return nil, nil
+
+}
+
 func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) error {
 	userGroup, err := lookupUserGroup(db, slug)
 	if err != nil {
@@ -140,7 +175,7 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	// if err := policyRequireWithAdminBypass(ctx, policy.CanDeleteOperation{UsergroupID: userGroup.ID}); err != nil {
 	// 	return backend.WrapError("Unwilling to delete user group", backend.UnauthorizedWriteErr(err))
 	// }
-	// TODO ADd this in later
+	// TODO TN ADd this in later
 
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
 		tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"group_id": userGroup.ID}))

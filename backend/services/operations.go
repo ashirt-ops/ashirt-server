@@ -63,6 +63,7 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 		return nil, backend.MissingValueErr("Slug")
 	}
 
+	// TODO TN - add something like this for user group slug?
 	cleanSlug := SanitizeOperationSlug(i.Slug)
 	if cleanSlug == "" {
 		return nil, backend.BadInputErr(errors.New("Unable to create operation. Invalid operation slug"), "Slug must contain english letters or numbers")

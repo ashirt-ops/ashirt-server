@@ -98,6 +98,7 @@ export interface DataSource {
   adminListUserGroups(query: { deleted: boolean }): Promise<types.PaginationResult<dtos.UserGroupAdminView>>
   adminCreateUserGroup(payload: { slug: string, name: string, userSlugs: string[] }): Promise<void>
   adminDeleteUserGroup(ids: UserGroupSlug): Promise<void>
+  adminModifyUserGroup(ids: UserGroupSlug, payload: { newName: string | null, userSlugsToAdd: string[], userSlugsToRemove: string[], }): Promise<void>
 
   listQueries(ids: OpSlug): Promise<Array<dtos.Query>>
   createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings' }): Promise<void>

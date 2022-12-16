@@ -22,7 +22,7 @@ import SettingsSection from 'src/components/settings_section'
 import { default as Menu } from 'src/components/menu'
 import { ClickPopover } from 'src/components/popover'
 import Input from 'src/components/input'
-import { DeleteUserGroupModal } from 'src/pages/admin_modals'
+import { DeleteUserGroupModal, ModifyUserGroupModal } from 'src/pages/admin_modals'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -31,6 +31,7 @@ export default (props: {
   offReload: (listener: () => void) => void
 }) => {
   const [deletingUserGroup, setDeletingUserGroup] = React.useState<null | UserGroupAdminView>(null)
+  const [modifyingUserGroup, setModifyingUserGroup] = React.useState<null | UserGroupAdminView>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
 
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
@@ -42,9 +43,6 @@ export default (props: {
     (err) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />
   )
-
-  // TODO build this out
-  const modifyOperation = (userGroup: UserGroupAdminView) => console.log();
 
   React.useEffect(() => {
     props.onReload(wiredUserGroups.reload)
@@ -69,13 +67,13 @@ export default (props: {
       </div>
       <Table className={cx('table')} columns={columns}>
         {wiredUserGroups.render(data => <>
-          {data.map(group => <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, modifyOperation))} />)}
+          {data.map(group => <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, setModifyingUserGroup))} />)}
         </>)}
       </Table>
       <StandardPager className={cx('user-table-pager')} {...wiredUserGroups.pagerProps} />
 
-      {/* {editingUserFlags && <UpdateUserFlagsModal user={editingUserFlags} onRequestClose={() => { setEditingUserFlags(null); wiredUserGroups.reload() }} />} */}
       {deletingUserGroup && <DeleteUserGroupModal userGroup={deletingUserGroup} onRequestClose={() => { setDeletingUserGroup(null); wiredUserGroups.reload() }} />}
+      {modifyingUserGroup && <ModifyUserGroupModal userGroup={modifyingUserGroup} onRequestClose={() => { setModifyingUserGroup(null); wiredUserGroups.reload() }} />}
     </SettingsSection>
   )
 }
@@ -134,7 +132,7 @@ const modifyActions = (
 ) => {
   return (
     <ButtonGroup className={cx('row-buttons')}>
-      <Button small onClick={() => onEditClick(u)}>Edit</Button> 
+      <Button small disabled={u.deleted} onClick={() => onEditClick(u)}>Edit</Button> 
       <Button small disabled={u.deleted} onClick={() => onDeleteClick(u)}>Delete</Button>
     </ButtonGroup>
   )

@@ -31,3 +31,12 @@ export async function adminCreateUserGroup(i: {
 export async function adminDeleteUserGroup(i : { userGroupSlug:string}): Promise<void> {
   return await ds.adminDeleteUserGroup(i)
 }
+
+export async function adminModifyUserGroup(i : {
+  slug: string,
+  newName: string | null,
+  userSlugsToAdd: string[],
+  userSlugsToRemove: string[],
+}): Promise<void> {
+  return await ds.adminModifyUserGroup({ userGroupSlug: i.slug }, i)
+}

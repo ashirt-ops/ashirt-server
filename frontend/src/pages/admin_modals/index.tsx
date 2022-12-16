@@ -11,7 +11,8 @@ import {
   adminInviteUser,
   createApiKey,
   adminCreateUserGroup,
-  adminDeleteUserGroup
+  adminDeleteUserGroup,
+  adminModifyUserGroup
 } from 'src/services'
 import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
@@ -186,7 +187,7 @@ export const AddUserGroupModal = (props: {
     fields: [name],
     handleSubmit: () => {
       if (name.value.length == 0) {
-        return new Promise((_resolve, reject) => reject(Error("Users should have at least a first name")))
+        return new Promise((_resolve, reject) => reject(Error("User group should have a name")))
       }
       const runSubmit = async () => {
         await adminCreateUserGroup({
@@ -205,6 +206,68 @@ export const AddUserGroupModal = (props: {
       {isCompleted ? (<>
         <div className={cx('success-area')}>
           <p>Group has been created successfully!</p>
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      :
+      (<>
+      <h1 className={cx('header')}>Users</h1>
+      <SimpleUserTable {...bus} setIncludedUsers={setIncludedUsers} includedUsers={includedUsers as Set<string>} />
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...name} disabled={isCompleted} />
+      </Form>
+      </>)
+      }
+    </Modal>
+  )
+}
+
+export const ModifyUserGroupModal = (props: {
+  userGroup: UserGroupAdminView,
+  onRequestClose: () => void,
+}) => {
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+  const slugs = props.userGroup?.userSlugs ? props.userGroup.userSlugs : []
+  const [includedUsers, setIncludedUsers] = React.useState(() => new Set([...slugs]));
+
+  const name = useFormField<string>(props.userGroup.name)
+  const formComponentProps = useForm({
+    fields: [name],
+    handleSubmit: () => {
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("User goup should have a name")))
+      }
+
+      const slugsToAdd: Array<string> = []
+      const slugsToRemove: Array<string> = []
+      const initialSlugs = new Set([...slugs])
+      const newSlugs = includedUsers as Set<string>
+      initialSlugs.forEach((slug) => !newSlugs.has(slug) && slugsToRemove.push(slug))
+      newSlugs.forEach((slug) => !initialSlugs.has(slug) && slugsToAdd.push(slug))
+
+      const newName = name.value.toLowerCase() !== props.userGroup.name.toLowerCase() ? name.value.toLowerCase() : null
+      const runSubmit = async () => {
+        await adminModifyUserGroup({
+          slug: props.userGroup.slug,
+          newName,
+          userSlugsToAdd: slugsToAdd,
+          userSlugsToRemove: slugsToRemove,
+        })
+        setIsCompleted(true)
+      }
+      return runSubmit()
+    },
+  })
+
+  const bus = BuildReloadBus()
+  return (
+    <Modal title="Modify Group" onRequestClose={props.onRequestClose}>
+      {isCompleted ? (<>
+        <div className={cx('success-area')}>
+          <p>Group has been modified successfully!</p>
           <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
         </div>
       </>)
