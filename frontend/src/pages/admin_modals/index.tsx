@@ -10,9 +10,9 @@ import {
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
   adminInviteUser,
   createApiKey,
-  adminCreateUserGroup,
-  adminDeleteUserGroup,
-  adminModifyUserGroup
+  createUserGroup,
+  deleteUserGroup,
+  modifyUserGroup
 } from 'src/services'
 import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
@@ -174,7 +174,6 @@ export const AddUserModal = (props: {
   )
 }
 
-// TODO TN move modals into another file?
 export const AddUserGroupModal = (props: {
   onRequestClose: () => void,
 }) => {
@@ -190,7 +189,7 @@ export const AddUserGroupModal = (props: {
         return new Promise((_resolve, reject) => reject(Error("User group should have a name")))
       }
       const runSubmit = async () => {
-        await adminCreateUserGroup({
+        await createUserGroup({
           name: name.value,
           userSlugs: userSlugs
         })
@@ -250,7 +249,7 @@ export const ModifyUserGroupModal = (props: {
 
       const newName = name.value.toLowerCase() !== props.userGroup.name.toLowerCase() ? name.value.toLowerCase() : null
       const runSubmit = async () => {
-        await adminModifyUserGroup({
+        await modifyUserGroup({
           slug: props.userGroup.slug,
           newName,
           userSlugsToAdd: slugsToAdd,
@@ -295,7 +294,7 @@ export const DeleteUserGroupModal = (props: {
     warningText="This will remove the user group from the system. All user group information will be lost."
     submitText="Delete"
     challengeText={props.userGroup.slug}
-    handleSubmit={() => adminDeleteUserGroup({ userGroupSlug: props.userGroup.slug })}
+    handleSubmit={() => deleteUserGroup({ userGroupSlug: props.userGroup.slug })}
     onRequestClose={props.onRequestClose}
   />
 

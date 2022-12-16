@@ -1,12 +1,11 @@
 import { ListObjectForAdminQuery, PaginationResult, UserGroup, UserGroupAdminView } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
-// TODO TN do these naming conventions line up with other examples?
 export async function listUserGroupsAdminView(i: ListObjectForAdminQuery): Promise<PaginationResult<UserGroupAdminView>> {
   return await ds.adminListUserGroups(i)
 }
 
-export async function adminCreateUserGroup(i: {
+export async function createUserGroup(i: {
   name: string,
   userSlugs: string[],
 }): Promise<void> {
@@ -28,11 +27,11 @@ export async function adminCreateUserGroup(i: {
   }
 }
 
-export async function adminDeleteUserGroup(i : { userGroupSlug:string}): Promise<void> {
+export async function deleteUserGroup(i : { userGroupSlug:string}): Promise<void> {
   return await ds.adminDeleteUserGroup(i)
 }
 
-export async function adminModifyUserGroup(i : {
+export async function modifyUserGroup(i : {
   slug: string,
   newName: string | null,
   userSlugsToAdd: string[],
