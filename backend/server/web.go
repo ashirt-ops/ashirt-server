@@ -279,7 +279,6 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return nil, services.DeleteAuthSchemeUsers(r.Context(), db, schemeCode)
 	}))
 
-	// Where are all of the places a user can get an operation? TODO TN
 	route(r, "GET", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListOperations(r.Context(), db)
 	}))

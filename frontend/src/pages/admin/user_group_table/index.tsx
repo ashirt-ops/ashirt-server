@@ -7,7 +7,6 @@ import { PaginatedWiredData, usePaginatedWiredData} from 'src/helpers'
 
 import { UserGroupAdminView } from 'src/global_types'
 import { listUserGroupsAdminView } from 'src/services'
-import AuthContext from 'src/auth_context'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
 import {

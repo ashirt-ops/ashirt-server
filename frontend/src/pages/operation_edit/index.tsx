@@ -2,7 +2,6 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import AuthContext from 'src/auth_context'
 import classnames from 'classnames/bind'
 import { useParams, useNavigate, Routes, Route } from 'react-router-dom'
 
