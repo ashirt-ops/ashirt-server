@@ -149,8 +149,6 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 		// TODO TN should this be group_id?
 		Where(sq.Eq{"user_group_id": userGroupIds}))
 
-	// TODO TN if Ron has admin access through a group, he can't edit users
-
 	if err != nil {
 		logging.Log(ctx, "msg", "Unable to build user policy", "error", err.Error())
 		return &policy.Deny{}
@@ -178,7 +176,7 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 		}
 	}
 	// TODO TN get rid o thise
-	fmt.Println("roleMap", roleMap)
+	// fmt.Println("roleMap", roleMap)
 	return &policy.Union{
 		P1: policy.NewAuthenticatedPolicy(userID, isSuperAdmin),
 		P2: &policy.Operation{

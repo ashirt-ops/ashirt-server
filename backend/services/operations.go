@@ -202,7 +202,6 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 
 	operationsDTO := make([]*dtos.Operation, 0, len(operations))
 	for _, operation := range operations {
-		// TODO TN how do we assign policy stuff?
 		if middleware.Policy(ctx).Check(policy.CanReadOperation{OperationID: operation.ID}) {
 			operation.Op.Favorite = operationPreferenceMap[operation.ID]
 			operationsDTO = append(operationsDTO, operation.Op)
