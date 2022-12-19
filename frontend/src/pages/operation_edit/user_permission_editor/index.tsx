@@ -156,6 +156,7 @@ const PermissionTable = (props: {
       const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
       const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
+      // TODO TN how to best communicate to frontend that a group admin is an operation admin?
       setLocalOperationAdmin(renderableData.find(datum => datum.user.slug === props.currentUser?.slug)?.role === UserRole.ADMIN)
       props.setIsOperationAdmin(isOperationAdmin)
     })
@@ -209,6 +210,8 @@ export default (props: {
   const currentUser = React.useContext(AuthContext)?.user
   const isSysAdmin = currentUser ? currentUser?.admin : false
   const isAdmin = isSysAdmin || isOperationAdmin
+  console.log("isAdmin - user table", isAdmin, isSysAdmin, isOperationAdmin)
+
 
   return (
     <SettingsSection title="Operation Users" width="wide">

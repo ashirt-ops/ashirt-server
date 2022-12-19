@@ -219,10 +219,13 @@ export default (props: {
   const currentUser = React.useContext(AuthContext)?.user
   const isSysAdmin = currentUser ? currentUser?.admin : false
   const isAdmin = isSysAdmin || isOperationAdmin
+  console.log("isAdmin - group table", isAdmin, isSysAdmin, isOperationAdmin)
   // const isAdmin = props.isAdmin || isOperationAdmin
 
+  // TODO TN Ron isn't a op admin here - why not? Because it's looking through userGroups, not users
+  // TODO TN also need to notate that user admins and group admins are admins here!
+
   // TODO TN allow op admin to edit group membership
-  // TODO TN - this will mean that we'll need to change those endpoints to not be '/admin/' etc
 
   return (
     <SettingsSection title="Operation User Groups" width="wide">

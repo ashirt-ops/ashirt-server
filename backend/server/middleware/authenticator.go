@@ -176,7 +176,7 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 		}
 	}
 	// TODO TN get rid o thise
-	// fmt.Println("roleMap", roleMap)
+	fmt.Println("roleMap", roleMap)
 	return &policy.Union{
 		P1: policy.NewAuthenticatedPolicy(userID, isSuperAdmin),
 		P2: &policy.Operation{

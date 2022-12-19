@@ -141,7 +141,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ListUsers(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/admin/usergroups/lolz", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(r, "GET", "/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUsersInput{
 			Query:          dr.FromQuery("query").Required().AsString(),
@@ -345,7 +345,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ListUsersForOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/admin/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(r, "GET", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUserGroupsForOperationInput{
 			OperationSlug:   dr.FromURL("operation_slug").Required().AsString(),
@@ -371,7 +371,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return nil, services.SetUserOperationRole(r.Context(), db, i)
 	}))
 
-	route(r, "PATCH", "/admin/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(r, "PATCH", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetUserGroupOperationRoleInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
