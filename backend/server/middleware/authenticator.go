@@ -6,6 +6,7 @@ package middleware
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -131,7 +132,6 @@ func buildContextForUser(ctx context.Context, db *database.Connection, userID in
 	})
 }
 
-// TODO TN how will this interact with user groups?
 func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin, isHeadless bool) policy.Policy {
 	var roles []models.UserOperationPermission
 	err := db.Select(&roles, sq.Select("operation_id", "role").
@@ -144,14 +144,12 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 		Where(sq.Eq{"user_id": userID}))
 
 	var groupRoles []models.UserGroupOperationPermission
-	// TODO TN is select correct here?
 	err = db.Select(&groupRoles, sq.Select("operation_id", "role").
 		From("user_group_operation_permissions").
 		// TODO TN should this be group_id?
 		Where(sq.Eq{"user_group_id": userGroupIds}))
 
-	// TODO TN remove ron and see if when added as a normal user he can edit the users and stuff
-	// TODO TN TEST the difference between read, write, and admin access
+	// TODO TN if Ron has admin access through a group, he can't edit users
 
 	if err != nil {
 		logging.Log(ctx, "msg", "Unable to build user policy", "error", err.Error())
@@ -161,6 +159,8 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	for _, role := range roles {
 		roleMap[role.OperationID] = role.Role
 	}
+	// TODO TN remove margin bottom on last child of user list from from group list
+	fmt.Println("roleMap 1", roleMap)
 	for _, role := range groupRoles {
 		// TODO TN how to test this?
 		if val, ok := roleMap[role.OperationID]; ok {
@@ -173,9 +173,12 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 			if val == policy.OperationRoleRead && (role.Role == policy.OperationRoleAdmin || role.Role == policy.OperationRoleWrite) {
 				roleMap[role.OperationID] = role.Role
 			}
+		} else {
+			roleMap[role.OperationID] = role.Role
 		}
 	}
-	// fmt.Println("roleMap", roleMap)
+	// TODO TN get rid o thise
+	fmt.Println("roleMap", roleMap)
 	return &policy.Union{
 		P1: policy.NewAuthenticatedPolicy(userID, isSuperAdmin),
 		P2: &policy.Operation{
