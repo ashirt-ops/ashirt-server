@@ -195,11 +195,6 @@ func ListOperations(ctx context.Context, db *database.Connection) ([]*dtos.Opera
 		return nil, backend.WrapError("Cannot get user operation preferences", backend.DatabaseErr(err))
 	}
 
-	// TODO TN add ability for users in groups to favorite ops
-	// or maybe just uses existing funcitionality???
-	// does this become a problem if a user is added and is in a group?
-	// I don't think so, but not sure
-
 	operationPreferenceMap := make(map[int64]bool)
 	for _, op := range operationPreference {
 		operationPreferenceMap[op.OperationID] = op.IsFavorite

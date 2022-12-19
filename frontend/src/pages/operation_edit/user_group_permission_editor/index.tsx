@@ -181,7 +181,7 @@ const PermissionTable = (props: {
                   disabled={notAdmin}
                   key={userGroup.slug}
                   requestReload={props.requestReload}
-                  updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: userGroup.slug, role: r })}
+                  updatePermissions={(r: UserRole) => setUserGroupPermission({ operationSlug: props.operationSlug, userGroupSlug: userGroup.slug, role: r })}
                   userGroup={userGroup}
                   role={role}
                 />
