@@ -15,6 +15,7 @@ export default (props: {
   numTags: number;
 }) => {
 
+  // TODO TN get these to not have an 's' at the end when there's only one
   const evidenceNameMap = {
     imageCount: 'Images',
     codeblockCount: 'Codeblocks',

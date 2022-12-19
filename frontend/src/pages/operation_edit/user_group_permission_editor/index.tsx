@@ -210,6 +210,8 @@ export default (props: {
   //   return <Navigate to="/operations" replace />;
   // }
 
+  // TODO TN - ask if non sys admins should even be able to see this?
+
   const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
   const currentUser = React.useContext(AuthContext)?.user
   const isSysAdmin = currentUser ? currentUser?.admin : false
