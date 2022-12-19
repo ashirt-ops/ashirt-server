@@ -137,6 +137,22 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	err := db.Select(&roles, sq.Select("operation_id", "role").
 		From("user_operation_permissions").
 		Where(sq.Eq{"user_id": userID}))
+
+	var userGroupIds []int64
+	err = db.Select(&userGroupIds, sq.Select("group_id").
+		From("group_user_map").
+		Where(sq.Eq{"user_id": userID}))
+
+	var groupRoles []models.UserGroupOperationPermission
+	// TODO TN is select correct here?
+	err = db.Select(&groupRoles, sq.Select("operation_id", "role").
+		From("user_group_operation_permissions").
+		// TODO TN should this be group_id?
+		Where(sq.Eq{"user_group_id": userGroupIds}))
+
+	// TODO TN remove ron and see if when added as a normal user he can edit the users and stuff
+	// TODO TN TEST the difference between read, write, and admin access
+
 	if err != nil {
 		logging.Log(ctx, "msg", "Unable to build user policy", "error", err.Error())
 		return &policy.Deny{}
@@ -145,6 +161,21 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	for _, role := range roles {
 		roleMap[role.OperationID] = role.Role
 	}
+	for _, role := range groupRoles {
+		// TODO TN how to test this?
+		if val, ok := roleMap[role.OperationID]; ok {
+			if val == policy.OperationRoleAdmin {
+				continue
+			}
+			if val == policy.OperationRoleWrite && role.Role == policy.OperationRoleAdmin {
+				roleMap[role.OperationID] = role.Role
+			}
+			if val == policy.OperationRoleRead && (role.Role == policy.OperationRoleAdmin || role.Role == policy.OperationRoleWrite) {
+				roleMap[role.OperationID] = role.Role
+			}
+		}
+	}
+	// fmt.Println("roleMap", roleMap)
 	return &policy.Union{
 		P1: policy.NewAuthenticatedPolicy(userID, isSuperAdmin),
 		P2: &policy.Operation{

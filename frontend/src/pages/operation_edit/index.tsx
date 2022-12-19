@@ -2,6 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import AuthContext from 'src/auth_context'
 import classnames from 'classnames/bind'
 import { useParams, useNavigate, Routes, Route } from 'react-router-dom'
 
@@ -20,6 +21,20 @@ export const OperationEdit = () => {
   const { slug } = useParams<{ slug: string }>()
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const navigate = useNavigate()
+  // const currentUser = React.useContext(AuthContext)?.user
+  // const isSysAdmin = currentUser ? currentUser?.admin : false
+
+  // const tabs = [
+  //   { id: "settings", label: "Settings" },
+  //   { id: "users", label: "Users" },
+  //   { id: "group", label: "Groups" },
+  //   { id: "tags", label: "Tags" },
+  //   { id: "tasks", label: "Tasks" },
+  // ]
+
+  // if (isSysAdmin) {
+  //   tabs.push({ id: "group", label: "Groups" })
+  // }
 
   return (
     <>

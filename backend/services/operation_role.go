@@ -89,7 +89,7 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 func SetUserGroupOperationRole(ctx context.Context, db *database.Connection, i SetUserGroupOperationRoleInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
-		return backend.WrapError("Unable to set user role", backend.UnauthorizedWriteErr(err))
+		return backend.WrapError("Unable to set user group role", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.UserGroupSlug == "" {

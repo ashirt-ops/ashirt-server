@@ -202,13 +202,19 @@ const PermissionTable = (props: {
 
 export default (props: {
   operationSlug: string,
+  // isAdmin: boolean,
 }) => {
   const bus = BuildReloadBus()
+
+  // if (!props.isAdmin) {
+  //   return <Navigate to="/operations" replace />;
+  // }
 
   const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
   const currentUser = React.useContext(AuthContext)?.user
   const isSysAdmin = currentUser ? currentUser?.admin : false
   const isAdmin = isSysAdmin || isOperationAdmin
+  // const isAdmin = props.isAdmin || isOperationAdmin
 
   return (
     <SettingsSection title="Operation User Groups" width="wide">
