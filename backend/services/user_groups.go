@@ -147,19 +147,33 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	return nil, nil
 }
 
-func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserOperationRole, error) {
+func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserGroupOperationRole, error) {
 	query, err := prepListUserGroupsForOperation(ctx, db, i)
 	if err != nil {
 		return nil, err
 	}
 
-	var userGroups []userAndRole
+	var userGroups []userGroupAndRole
 	err = db.Select(&userGroups, *query)
 	if err != nil {
 		return nil, backend.WrapError("Cannot list user groups for operation", backend.DatabaseErr(err))
 	}
-	userGroupsDTO := wrapListUsersForOperationResponse(userGroups)
+	userGroupsDTO := wrapListUserGroupsForOperationResponse(userGroups)
 	return userGroupsDTO, nil
+}
+
+func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dtos.UserGroupOperationRole {
+	userGroupsDTO := make([]*dtos.UserGroupOperationRole, len(userGroups))
+	for idx, userGroup := range userGroups {
+		userGroupsDTO[idx] = &dtos.UserGroupOperationRole{
+			UserGroup: dtos.UserGroupAdminView{
+				Slug: userGroup.Slug,
+				Name: userGroup.Name,
+			},
+			Role: userGroup.Role,
+		}
+	}
+	return userGroupsDTO
 }
 
 // write a function that modifies a user group
@@ -388,9 +402,10 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUsersInp
 
 	// TODO TN add admin policy check
 
-	var userGroups []models.User
+	var userGroups []models.UserGroup
 	query := sq.Select("slug", "name").
 		From("user_groups").
+		Where(sq.Like{"name": "%" + strings.ReplaceAll(i.Query, " ", "%") + "%"}).
 		OrderBy("name").
 		Limit(10)
 	if !i.IncludeDeleted {
@@ -406,7 +421,7 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUsersInp
 		if middleware.Policy(ctx).Check(policy.CanReadUser{UserID: userGroup.ID}) {
 			userGroupsDTO = append(userGroupsDTO, &dtos.UserGroupAdminView{
 				Slug: userGroup.Slug,
-				Name: userGroup.FirstName,
+				Name: userGroup.Name,
 			})
 		}
 	}

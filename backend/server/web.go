@@ -371,7 +371,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return nil, services.SetUserOperationRole(r.Context(), db, i)
 	}))
 
-	route(r, "PATCH", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(r, "PATCH", "/admin/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetUserGroupOperationRoleInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),

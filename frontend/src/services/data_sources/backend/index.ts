@@ -47,6 +47,7 @@ export const backendDataSource: DataSource = {
   readFindingEvidence: ids => req('GET', `/operations/${ids.operationSlug}/findings/${ids.findingUuid}/evidence`),
   updateFindingEvidence: (ids, payload) => req('PUT', `/operations/${ids.operationSlug}/findings/${ids.findingUuid}/evidence`, payload),
 
+  // TODO TN make sure groups tab is only visible to admins
   listOperations: () => req('GET', '/operations'),
   adminListOperations: () => req('GET', '/admin/operations'),
   createOperation: payload => req('POST', '/operations', payload),
