@@ -80,7 +80,7 @@ const PermissionTableRow = (props: {
   const isCurrentUser = currentUserGroup ? currentUserGroup.slug === props.userGroup.slug : false
 
   const removeWarningModal = useModal<{}>(modalProps => (
-    <RemoveWarningModal {...modalProps} removeUser={async () => {
+    <RemoveWarningModal {...modalProps} removeUserGroup={async () => {
       await props.updatePermissions(UserRole.NO_ACCESS)
       props.requestReload()
     }} />
@@ -107,12 +107,12 @@ const PermissionTableRow = (props: {
 
 const RemoveWarningModal = (props: {
   onRequestClose: () => void,
-  removeUser: () => Promise<void>
+  removeUserGroup: () => Promise<void>
 }) => {
   const warningForm = useForm({
     fields: [],
     handleSubmit: async () => {
-      props.removeUser()
+      props.removeUserGroup()
     }
   })
   return (
@@ -205,6 +205,9 @@ export default (props: {
   // isAdmin: boolean,
 }) => {
   const bus = BuildReloadBus()
+  
+
+  // TODO TN admins (and group l evel admins) can see grouip stuff, but other users sholdn't be able to.
 
   // if (!props.isAdmin) {
   //   return <Navigate to="/operations" replace />;
@@ -217,6 +220,9 @@ export default (props: {
   const isSysAdmin = currentUser ? currentUser?.admin : false
   const isAdmin = isSysAdmin || isOperationAdmin
   // const isAdmin = props.isAdmin || isOperationAdmin
+
+  // TODO TN allow op admin to edit group membership
+  // TODO TN - this will mean that we'll need to change those endpoints to not be '/admin/' etc
 
   return (
     <SettingsSection title="Operation User Groups" width="wide">
