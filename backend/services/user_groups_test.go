@@ -132,19 +132,19 @@ func TestModifyUserGroup(t *testing.T) {
 
 		gryffindorUserGroup := UserGroupGryffindor
 		newName := "Glyssintor"
-		// usersToAdd := []string{
-		// 	UserAlastor.Slug,
-		// 	UserHagrid.Slug,
-		// }
-		// usersToRemove := []string{
-		// 	UserRon.Slug,
-		// 	UserHermione.Slug,
-		// }
+		usersToAdd := []string{
+			UserAlastor.Slug,
+			UserHagrid.Slug,
+		}
+		usersToRemove := []string{
+			UserRon.Slug,
+			UserHermione.Slug,
+		}
 		i := services.ModifyUserGroupInput{
-			Name: newName,
-			Slug: gryffindorUserGroup.Slug,
-			// UsersToAdd:    usersToAdd,
-			// UsersToRemove: usersToRemove,
+			Name:          newName,
+			Slug:          gryffindorUserGroup.Slug,
+			UsersToAdd:    usersToAdd,
+			UsersToRemove: usersToRemove,
 		}
 		// TODO TN check that name actually changed by grabbing record
 
@@ -158,13 +158,12 @@ func TestModifyUserGroup(t *testing.T) {
 		_, err = services.ModifyUserGroup(ctx, db, i)
 		require.NoError(t, err)
 
-		// userIDs, err := getUserIDsFromGroup(db, gryffindorUserGroup.Slug)
-		// require.NoError(t, err)
-		// // TODO TN figure out why this is incorrect?
-		// require.Equal(t, 4, len(userIDs))
-		// for _, userID := range userIDs {
-		// 	require.Contains(t, []int64{UserHarry.ID, UserAlastor.ID, UserHagrid.ID, UserGinny.ID}, userID)
-		// }
+		userIDs, err := getUserIDsFromGroup(db, gryffindorUserGroup.Slug)
+		require.NoError(t, err)
+		require.Equal(t, 4, len(userIDs))
+		for _, userID := range userIDs {
+			require.Contains(t, []int64{UserHarry.ID, UserAlastor.ID, UserHagrid.ID, UserGinny.ID}, userID)
+		}
 	})
 }
 

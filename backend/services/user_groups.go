@@ -177,10 +177,19 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		if i.Name != "" {
 			tx.Update(sq.Update("user_groups").Set("name", i.Name).Where(sq.Eq{"id": userGroup.ID}))
 		}
-		// TODO TN figure out how to make these transactions work
-		RemoveUsersFromGroup(db, i.UsersToRemove, userGroup.ID)
-		AddUsersToGroup(db, i.UsersToAdd, userGroup.ID)
 	})
+	if err != nil {
+		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
+	}
+	if len(i.UsersToRemove) > 0 {
+		err = RemoveUsersFromGroup(db, i.UsersToRemove, userGroup.ID)
+	}
+	if err != nil {
+		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
+	}
+	if len(i.UsersToAdd) > 0 {
+		err = AddUsersToGroup(db, i.UsersToAdd, userGroup.ID)
+	}
 	if err != nil {
 		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
 	}
