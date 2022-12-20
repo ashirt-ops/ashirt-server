@@ -199,11 +199,6 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 		return backend.WrapError("Unable to delete user group", backend.UnauthorizedWriteErr(err))
 	}
 
-	// if err := policyRequireWithAdminBypass(ctx, policy.CanDeleteOperation{UsergroupID: userGroup.ID}); err != nil {
-	// 	return backend.WrapError("Unwilling to delete user group", backend.UnauthorizedWriteErr(err))
-	// }
-	// TODO TN ADd this in later
-
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
 		tx.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"group_id": userGroup.ID}))
 		tx.Update(sq.Update("user_groups").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
@@ -368,7 +363,6 @@ var slugMap []struct {
 	Deleted   sql.NullString `db:"deleted"`
 }
 
-// TODO TN add test
 func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserGroupOperationRole, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
@@ -408,7 +402,6 @@ func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dt
 
 // TODO TN hide groups label from non-admins
 
-// TODO TN add test
 func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGroupsInput) ([]*dtos.UserGroupAdminView, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {

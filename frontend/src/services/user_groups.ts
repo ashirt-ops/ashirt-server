@@ -9,7 +9,6 @@ export async function listUserGroups(i: {
   return await ds.listUserGroups(i.query, i.includeDeleted || false, i.operationSlug)
 }
 
-// TODO TN add tests for newly added functions
 // TODO TN editing group doesn't seem to work
 
 export async function listUserGroupsAdminView(i: ListObjectForAdminQuery): Promise<PaginationResult<UserGroupAdminView>> {
