@@ -1,7 +1,6 @@
 import { ListObjectForAdminQuery, PaginationResult, UserGroup, UserGroupAdminView } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
-// TODO TN rename these later?
 export async function listUserGroups(i: {
   query: string,
   includeDeleted?: boolean,
@@ -10,7 +9,6 @@ export async function listUserGroups(i: {
   return await ds.listUserGroups(i.query, i.includeDeleted || false, i.operationSlug)
 }
 
-// TODO TN removing group from op doesn't work
 // TODO TN add tests for newly added functions
 // TODO TN editing group doesn't seem to work
 

@@ -89,8 +89,6 @@ func TestDeleteUserGroup(t *testing.T) {
 	})
 }
 
-// TODO TN add tests for adding/removing users
-
 // TODO TN figure out why this test is so slow?
 func TestModifyUserGroup(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
@@ -149,5 +147,49 @@ func TestListUserGroups(t *testing.T) {
 		require.Equal(t, int64(5), result.TotalCount)
 		require.Equal(t, 5, len(usergroups))
 		require.NoError(t, err)
+	})
+}
+
+// write a test to test AddUsersToGroup and RemoveUsersFromGroup
+
+func TestAddUsersToGroup(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		gryffindorUserGroup := UserGroupGryffindor
+
+		usersToAdd := []string{
+			UserAlastor.Slug,
+			UserHagrid.Slug,
+		}
+
+		err := services.AddUsersToGroup(db, usersToAdd, gryffindorUserGroup.ID)
+		require.NoError(t, err)
+
+		userIDs, err := GetUserIDsFromGroup(db, gryffindorUserGroup.Slug)
+		require.NoError(t, err)
+		require.Equal(t, 6, len(userIDs))
+		for _, userID := range userIDs {
+			require.Contains(t, []int64{UserHarry.ID, UserRon.ID, UserHermione.ID, UserAlastor.ID, UserHagrid.ID, UserGinny.ID}, userID)
+		}
+	})
+}
+
+func TestRemoveUsersFromGroup(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		gryffindorUserGroup := UserGroupGryffindor
+
+		usersToRemove := []string{
+			UserRon.Slug,
+			UserHermione.Slug,
+		}
+
+		err := services.RemoveUsersFromGroup(db, usersToRemove, gryffindorUserGroup.ID)
+		require.NoError(t, err)
+
+		userIDs, err := GetUserIDsFromGroup(db, gryffindorUserGroup.Slug)
+		require.NoError(t, err)
+		require.Equal(t, 2, len(userIDs))
+		for _, userID := range userIDs {
+			require.Contains(t, []int64{UserHarry.ID, UserGinny.ID}, userID)
+		}
 	})
 }
