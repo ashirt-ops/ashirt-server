@@ -55,7 +55,7 @@ var HarryPotterSeedData = Seeder{
 		// not-a-favorite set up.)
 		newUserOperationPreferences(UserDraco, OpChamberOfSecrets, true),
 	},
-	// TODO TN create same thing for groups?
+	// TODO TN LP create same thing for groups?
 	UserOpMap: []models.UserOperationPermission{
 		// OpSorcerersStone and OpChamberOfSecrets are used to check read/write permissions
 		// The following should always remain true:

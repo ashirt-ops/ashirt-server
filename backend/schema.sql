@@ -383,14 +383,14 @@ DROP TABLE IF EXISTS `user_group_operation_permissions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_group_operation_permissions` (
-  `user_group_id` int NOT NULL,
+  `group_id` int NOT NULL,
   `operation_id` int NOT NULL,
   `role` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`user_group_id`,`operation_id`),
+  PRIMARY KEY (`group_id`,`operation_id`),
   KEY `operation_id` (`operation_id`),
-  CONSTRAINT `user_group_operation_permissions_ibfk_1` FOREIGN KEY (`user_group_id`) REFERENCES `user_groups` (`id`),
+  CONSTRAINT `user_group_operation_permissions_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `user_groups` (`id`),
   CONSTRAINT `user_group_operation_permissions_ibfk_2` FOREIGN KEY (`operation_id`) REFERENCES `operations` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -488,7 +488,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-16 20:02:00
+-- Dump completed on 2022-12-20 14:32:52
 -- MySQL dump 10.13  Distrib 8.0.31, for Linux (aarch64)
 --
 -- Host: localhost    Database: migrate_db
@@ -512,7 +512,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `gorp_migrations` WRITE;
 /*!40000 ALTER TABLE `gorp_migrations` DISABLE KEYS */;
-INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2022-12-16 20:01:59'),('20190708185420-create-operations-table.sql','2022-12-16 20:01:59'),('20190708185427-create-events-table.sql','2022-12-16 20:01:59'),('20190708185432-create-evidence-table.sql','2022-12-16 20:01:59'),('20190708185441-create-evidence-event-map-table.sql','2022-12-16 20:01:59'),('20190716190100-create-user-operation-map-table.sql','2022-12-16 20:01:59'),('20190722193434-create-tags-table.sql','2022-12-16 20:01:59'),('20190722193937-create-tag-event-map.sql','2022-12-16 20:01:59'),('20190909183500-add-short-name-to-users-table.sql','2022-12-16 20:01:59'),('20190909190416-add-short-name-index.sql','2022-12-16 20:01:59'),('20190926205116-evidence-name.sql','2022-12-16 20:01:59'),('20190930173342-add-saved-searches.sql','2022-12-16 20:01:59'),('20191001182541-evidence-tags.sql','2022-12-16 20:01:59'),('20191008005212-add-uuid-to-events-evidence.sql','2022-12-16 20:01:59'),('20191015235306-add-slug-to-operations.sql','2022-12-16 20:01:59'),('20191018172105-modular-auth.sql','2022-12-16 20:01:59'),('20191023170906-codeblock.sql','2022-12-16 20:01:59'),('20191101185207-replace-events-with-findings.sql','2022-12-16 20:01:59'),('20191114211948-add-operation-to-tags.sql','2022-12-16 20:01:59'),('20191205182830-create-api-keys-table.sql','2022-12-16 20:01:59'),('20191213222629-users-with-email.sql','2022-12-16 20:01:59'),('20200103194053-rename-short-name-to-slug.sql','2022-12-16 20:01:59'),('20200104013804-rework-ashirt-auth.sql','2022-12-16 20:01:59'),('20200116070736-add-admin-flag.sql','2022-12-16 20:01:59'),('20200130175541-fix-color-truncation.sql','2022-12-16 20:01:59'),('20200205200208-disable-user-support.sql','2022-12-16 20:01:59'),('20200215015330-optional-user-id.sql','2022-12-16 20:01:59'),('20200221195107-deletable-user.sql','2022-12-16 20:02:00'),('20200303215004-move-last-login.sql','2022-12-16 20:02:00'),('20200306221628-add-explicit-headless.sql','2022-12-16 20:02:00'),('20200331155258-finding-status.sql','2022-12-16 20:02:00'),('20200617193248-case-senitive-apikey.sql','2022-12-16 20:02:00'),('20200928160958-add-totp-secret-to-auth-table.sql','2022-12-16 20:02:00'),('20210120205510-create-email-queue-table.sql','2022-12-16 20:02:00'),('20210401220807-dynamic-categories.sql','2022-12-16 20:02:00'),('20210408212206-remove-findings-category.sql','2022-12-16 20:02:00'),('20210730170543-add-auth-type.sql','2022-12-16 20:02:00'),('20220211181557-add-default-tags.sql','2022-12-16 20:02:00'),('20220512174013-evidence-metadata.sql','2022-12-16 20:02:00'),('20220516163424-add-worker-services.sql','2022-12-16 20:02:00'),('20220811153414-webauthn-credentials.sql','2022-12-16 20:02:00'),('20220908193523-switch-to-username.sql','2022-12-16 20:02:00'),('20220912185024-add-is_favorite.sql','2022-12-16 20:02:00'),('20220916190855-remove-null-as-value-for-is_favorite.sql','2022-12-16 20:02:00'),('20221027152757-remove-operation-status.sql','2022-12-16 20:02:00'),('20221111221242-create-user-operation-preferences.sql','2022-12-16 20:02:00'),('20221121165342-add-groups.sql','2022-12-16 20:02:00'),('20221216195811-add-user-group-permissions-table.sql','2022-12-16 20:02:00');
+INSERT INTO `gorp_migrations` VALUES ('20190705190058-create-users-table.sql','2022-12-20 14:32:51'),('20190708185420-create-operations-table.sql','2022-12-20 14:32:51'),('20190708185427-create-events-table.sql','2022-12-20 14:32:51'),('20190708185432-create-evidence-table.sql','2022-12-20 14:32:51'),('20190708185441-create-evidence-event-map-table.sql','2022-12-20 14:32:51'),('20190716190100-create-user-operation-map-table.sql','2022-12-20 14:32:51'),('20190722193434-create-tags-table.sql','2022-12-20 14:32:51'),('20190722193937-create-tag-event-map.sql','2022-12-20 14:32:51'),('20190909183500-add-short-name-to-users-table.sql','2022-12-20 14:32:51'),('20190909190416-add-short-name-index.sql','2022-12-20 14:32:51'),('20190926205116-evidence-name.sql','2022-12-20 14:32:51'),('20190930173342-add-saved-searches.sql','2022-12-20 14:32:51'),('20191001182541-evidence-tags.sql','2022-12-20 14:32:51'),('20191008005212-add-uuid-to-events-evidence.sql','2022-12-20 14:32:52'),('20191015235306-add-slug-to-operations.sql','2022-12-20 14:32:52'),('20191018172105-modular-auth.sql','2022-12-20 14:32:52'),('20191023170906-codeblock.sql','2022-12-20 14:32:52'),('20191101185207-replace-events-with-findings.sql','2022-12-20 14:32:52'),('20191114211948-add-operation-to-tags.sql','2022-12-20 14:32:52'),('20191205182830-create-api-keys-table.sql','2022-12-20 14:32:52'),('20191213222629-users-with-email.sql','2022-12-20 14:32:52'),('20200103194053-rename-short-name-to-slug.sql','2022-12-20 14:32:52'),('20200104013804-rework-ashirt-auth.sql','2022-12-20 14:32:52'),('20200116070736-add-admin-flag.sql','2022-12-20 14:32:52'),('20200130175541-fix-color-truncation.sql','2022-12-20 14:32:52'),('20200205200208-disable-user-support.sql','2022-12-20 14:32:52'),('20200215015330-optional-user-id.sql','2022-12-20 14:32:52'),('20200221195107-deletable-user.sql','2022-12-20 14:32:52'),('20200303215004-move-last-login.sql','2022-12-20 14:32:52'),('20200306221628-add-explicit-headless.sql','2022-12-20 14:32:52'),('20200331155258-finding-status.sql','2022-12-20 14:32:52'),('20200617193248-case-senitive-apikey.sql','2022-12-20 14:32:52'),('20200928160958-add-totp-secret-to-auth-table.sql','2022-12-20 14:32:52'),('20210120205510-create-email-queue-table.sql','2022-12-20 14:32:52'),('20210401220807-dynamic-categories.sql','2022-12-20 14:32:52'),('20210408212206-remove-findings-category.sql','2022-12-20 14:32:52'),('20210730170543-add-auth-type.sql','2022-12-20 14:32:52'),('20220211181557-add-default-tags.sql','2022-12-20 14:32:52'),('20220512174013-evidence-metadata.sql','2022-12-20 14:32:52'),('20220516163424-add-worker-services.sql','2022-12-20 14:32:52'),('20220811153414-webauthn-credentials.sql','2022-12-20 14:32:52'),('20220908193523-switch-to-username.sql','2022-12-20 14:32:53'),('20220912185024-add-is_favorite.sql','2022-12-20 14:32:53'),('20220916190855-remove-null-as-value-for-is_favorite.sql','2022-12-20 14:32:53'),('20221027152757-remove-operation-status.sql','2022-12-20 14:32:53'),('20221111221242-create-user-operation-preferences.sql','2022-12-20 14:32:53'),('20221121165342-add-groups.sql','2022-12-20 14:32:53'),('20221216195811-add-user-group-permissions-table.sql','2022-12-20 14:32:53');
 /*!40000 ALTER TABLE `gorp_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -525,4 +525,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-16 20:02:00
+-- Dump completed on 2022-12-20 14:32:53

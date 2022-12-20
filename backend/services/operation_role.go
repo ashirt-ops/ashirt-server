@@ -107,7 +107,7 @@ func SetUserGroupOperationRole(ctx context.Context, db *database.Connection, i S
 	// }
 
 	if i.Role == "" {
-		err := db.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"user_group_id": userGroupID, "operation_id": operation.ID}))
+		err := db.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"group_id": userGroupID, "operation_id": operation.ID}))
 
 		if err != nil {
 			return backend.WrapError("Cannot delete user group role", backend.DatabaseErr(err))
@@ -119,14 +119,14 @@ func SetUserGroupOperationRole(ctx context.Context, db *database.Connection, i S
 	err = db.Get(&permission, sq.Select("*").
 		From("user_group_operation_permissions").
 		Where(sq.Eq{
-			"user_group_id": userGroupID,
-			"operation_id":  operation.ID,
+			"group_id":     userGroupID,
+			"operation_id": operation.ID,
 		}))
 	if err != nil {
 		_, err = db.Insert("user_group_operation_permissions", map[string]interface{}{
-			"user_group_id": userGroupID,
-			"operation_id":  operation.ID,
-			"role":          i.Role,
+			"group_id":     userGroupID,
+			"operation_id": operation.ID,
+			"role":         i.Role,
 		})
 		if err != nil {
 			return backend.WrapError("Unable to add user role", backend.DatabaseErr(err))
@@ -137,7 +137,7 @@ func SetUserGroupOperationRole(ctx context.Context, db *database.Connection, i S
 	if permission.Role != i.Role {
 		err = db.Update(sq.Update("user_group_operation_permissions").
 			Set("role", i.Role).
-			Where(sq.Eq{"user_group_id": userGroupID, "operation_id": operation.ID}))
+			Where(sq.Eq{"group_id": userGroupID, "operation_id": operation.ID}))
 
 		if err != nil {
 			return backend.WrapError("Unable to alter user role", backend.DatabaseErr(err))

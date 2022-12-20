@@ -147,7 +147,7 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	err = db.Select(&groupRoles, sq.Select("operation_id", "role").
 		From("user_group_operation_permissions").
 		// TODO TN should this be group_id?
-		Where(sq.Eq{"user_group_id": userGroupIds}))
+		Where(sq.Eq{"group_id": userGroupIds}))
 
 	if err != nil {
 		logging.Log(ctx, "msg", "Unable to build user policy", "error", err.Error())

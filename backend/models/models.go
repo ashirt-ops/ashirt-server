@@ -143,7 +143,7 @@ type UserOperationPermission struct {
 
 // UserOperationPermission reflects the structure of the database table 'user_group_operation_permissions'
 type UserGroupOperationPermission struct {
-	UserGroupID int64                `db:"user_group_id"`
+	UserGroupID int64                `db:"group_id"`
 	OperationID int64                `db:"operation_id"`
 	Role        policy.OperationRole `db:"role"`
 	CreatedAt   time.Time            `db:"created_at"`

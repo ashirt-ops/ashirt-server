@@ -238,7 +238,7 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	// TODO TN ADd this in later
 
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
-		tx.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"user_group_id": userGroup.ID}))
+		tx.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"group_id": userGroup.ID}))
 		tx.Update(sq.Update("user_groups").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
 	})
 	if err != nil {
@@ -444,12 +444,14 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 		}
 	}
 	return userGroupsDTO, nil
+	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
+	// TODO TN - editing a group and changing the slug and the users, it doesn't work
 }
 
 func prepListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput, operationID int64) (*sq.SelectBuilder, error) {
 	query := sq.Select("slug", "name", "role").
 		From("user_group_operation_permissions").
-		LeftJoin("user_groups ON user_group_operation_permissions.user_group_id = user_groups.id").
+		LeftJoin("user_groups ON user_group_operation_permissions.group_id = user_groups.id").
 		Where(sq.Eq{"operation_id": operationID, "user_groups.deleted_at": nil}).
 		OrderBy("user_group_operation_permissions.created_at ASC")
 
