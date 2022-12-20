@@ -146,7 +146,6 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	var groupRoles []models.UserGroupOperationPermission
 	err = db.Select(&groupRoles, sq.Select("operation_id", "role").
 		From("user_group_operation_permissions").
-		// TODO TN should this be group_id?
 		Where(sq.Eq{"group_id": userGroupIds}))
 
 	if err != nil {
@@ -157,7 +156,6 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	for _, role := range roles {
 		roleMap[role.OperationID] = role.Role
 	}
-	// TODO TN remove margin bottom on last child of user list from from group list
 	fmt.Println("roleMap 1", roleMap)
 	for _, role := range groupRoles {
 		// TODO TN how to test this?

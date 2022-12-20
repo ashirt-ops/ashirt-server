@@ -37,17 +37,17 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 		return backend.MissingValueErr("User Slug")
 	}
 
-	userGroupID, err := userSlugToUserID(db, i.UserSlug)
+	userID, err := userSlugToUserID(db, i.UserSlug)
 	if err != nil {
 		return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug "%s" was found`, i.UserSlug)))
 	}
 
-	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserOfOperation{UserID: userGroupID, OperationID: operation.ID}); err != nil {
+	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserOfOperation{UserID: userID, OperationID: operation.ID}); err != nil {
 		return backend.WrapError("Unwilling to set user role", backend.UnauthorizedWriteErr(err))
 	}
 
 	if i.Role == "" {
-		err := db.Delete(sq.Delete("user_operation_permissions").Where(sq.Eq{"user_id": userGroupID, "operation_id": operation.ID}))
+		err := db.Delete(sq.Delete("user_operation_permissions").Where(sq.Eq{"user_id": userID, "operation_id": operation.ID}))
 
 		if err != nil {
 			return backend.WrapError("Cannot delete user role", backend.DatabaseErr(err))
@@ -59,12 +59,12 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 	err = db.Get(&permission, sq.Select("*").
 		From("user_operation_permissions").
 		Where(sq.Eq{
-			"user_id":      userGroupID,
+			"user_id":      userID,
 			"operation_id": operation.ID,
 		}))
 	if err != nil {
 		_, err = db.Insert("user_operation_permissions", map[string]interface{}{
-			"user_id":      userGroupID,
+			"user_id":      userID,
 			"operation_id": operation.ID,
 			"role":         i.Role,
 		})
@@ -77,7 +77,7 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 	if permission.Role != i.Role {
 		err = db.Update(sq.Update("user_operation_permissions").
 			Set("role", i.Role).
-			Where(sq.Eq{"user_id": userGroupID, "operation_id": operation.ID}))
+			Where(sq.Eq{"user_id": userID, "operation_id": operation.ID}))
 
 		if err != nil {
 			return backend.WrapError("Unable to alter user role", backend.DatabaseErr(err))
@@ -101,10 +101,9 @@ func SetUserGroupOperationRole(ctx context.Context, db *database.Connection, i S
 		return backend.WrapError("Unable to get user group id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug "%s" was found`, i.UserGroupSlug)))
 	}
 
-	// TODO TN create policy
-	// if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserOfOperation{UserID: userGroupID, OperationID: operation.ID}); err != nil {
-	// 	return backend.WrapError("Unwilling to set user group role", backend.UnauthorizedWriteErr(err))
-	// }
+	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserGroupOfOperation{UserGroupID: userGroupID, OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unwilling to set user group role", backend.UnauthorizedWriteErr(err))
+	}
 
 	if i.Role == "" {
 		err := db.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"group_id": userGroupID, "operation_id": operation.ID}))
