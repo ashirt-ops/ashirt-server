@@ -82,6 +82,7 @@ func ClearDB(db *database.Connection) error {
 	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
 		tx.Delete(sq.Delete("sessions"))
 		tx.Delete(sq.Delete("user_operation_permissions"))
+		tx.Delete(sq.Delete("user_group_operation_permissions"))
 		tx.Delete(sq.Delete("user_operation_preferences"))
 		tx.Delete(sq.Delete("api_keys"))
 		tx.Delete(sq.Delete("auth_scheme_data"))

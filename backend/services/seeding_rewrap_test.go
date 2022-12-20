@@ -110,6 +110,7 @@ var UserPadma = seeding.UserPadma
 var UserCho = seeding.UserCho
 
 var UserGroupGryffindor = seeding.UserGroupGryffindor
+var UserGroupSlytherin = seeding.UserGroupSlytherin
 
 var APIKeyHarry1 = seeding.APIKeyHarry1
 var APIKeyHarry2 = seeding.APIKeyHarry2
@@ -227,6 +228,10 @@ func (seed TestSeedData) UsersForOp(op models.Operation) []models.User {
 
 func (seed TestSeedData) UserRoleForOp(user models.User, op models.Operation) policy.OperationRole {
 	return seed.Seeder.UserRoleForOp(user, op)
+}
+
+func (seed TestSeedData) UserGroupRoleForOp(userGroup models.UserGroup, op models.Operation) policy.OperationRole {
+	return seed.Seeder.UserGroupRoleForOp(userGroup, op)
 }
 
 func (seed TestSeedData) EvidenceForOperation(opID int64) []models.Evidence {

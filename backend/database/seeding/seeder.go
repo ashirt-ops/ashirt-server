@@ -32,6 +32,7 @@ type Seeder struct {
 	DefaultTags       []models.DefaultTag
 	Tags              []models.Tag
 	UserOpMap         []models.UserOperationPermission
+	UserGroupOpMap    []models.UserGroupOperationPermission
 	UserOpPrefMap     []models.UserOperationPreferences
 	TagEviMap         []models.TagEvidenceMap
 	EviFindingsMap    []models.EvidenceFindingMap
@@ -145,6 +146,15 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"role":         seed.UserOpMap[i].Role,
 				"created_at":   seed.UserOpMap[i].CreatedAt,
 				"updated_at":   seed.UserOpMap[i].UpdatedAt,
+			}
+		})
+		tx.BatchInsert("user_group_operation_permissions", len(seed.UserGroupOpMap), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"group_id":     seed.UserGroupOpMap[i].UserGroupID,
+				"operation_id": seed.UserGroupOpMap[i].OperationID,
+				"role":         seed.UserGroupOpMap[i].Role,
+				"created_at":   seed.UserGroupOpMap[i].CreatedAt,
+				"updated_at":   seed.UserGroupOpMap[i].UpdatedAt,
 			}
 		})
 		tx.BatchInsert("user_operation_preferences", len(seed.UserOpPrefMap), func(i int) map[string]interface{} {
@@ -329,6 +339,15 @@ func (seed Seeder) GetUserFromID(id int64) models.User {
 	return models.User{}
 }
 
+func (seed Seeder) GetUserGroupFromID(id int64) models.UserGroup {
+	for _, item := range seed.UserGroups {
+		if item.ID == id {
+			return item
+		}
+	}
+	return models.UserGroup{}
+}
+
 func (seed Seeder) UsersForOp(op models.Operation) []models.User {
 	rtn := make([]models.User, 0)
 
@@ -340,9 +359,29 @@ func (seed Seeder) UsersForOp(op models.Operation) []models.User {
 	return rtn
 }
 
+func (seed Seeder) UserGroupsForOp(op models.Operation) []models.UserGroup {
+	rtn := make([]models.UserGroup, 0)
+
+	for _, row := range seed.UserGroupOpMap {
+		if row.OperationID == op.ID {
+			rtn = append(rtn, seed.GetUserGroupFromID(row.UserGroupID))
+		}
+	}
+	return rtn
+}
+
 func (seed Seeder) UserRoleForOp(user models.User, op models.Operation) policy.OperationRole {
 	for _, row := range seed.UserOpMap {
 		if row.OperationID == op.ID && row.UserID == user.ID {
+			return row.Role
+		}
+	}
+	return ""
+}
+
+func (seed Seeder) UserGroupRoleForOp(userGroup models.UserGroup, op models.Operation) policy.OperationRole {
+	for _, row := range seed.UserGroupOpMap {
+		if row.OperationID == op.ID && row.UserGroupID == userGroup.ID {
 			return row.Role
 		}
 	}

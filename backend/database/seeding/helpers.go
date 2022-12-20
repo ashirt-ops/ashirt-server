@@ -236,6 +236,15 @@ func newUserOpPermission(user models.User, op models.Operation, role policy.Oper
 	}
 }
 
+func newUserGroupOpPermission(userGroup models.UserGroup, op models.Operation, role policy.OperationRole) models.UserGroupOperationPermission {
+	return models.UserGroupOperationPermission{
+		UserGroupID: userGroup.ID,
+		OperationID: op.ID,
+		Role:        role,
+		CreatedAt:   internalClock.Now(),
+	}
+}
+
 func newUserOperationPreferences(user models.User, op models.Operation, isFavorite bool) models.UserOperationPreferences {
 	return models.UserOperationPreferences{
 		UserID:      user.ID,

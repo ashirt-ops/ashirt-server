@@ -55,7 +55,6 @@ var HarryPotterSeedData = Seeder{
 		// not-a-favorite set up.)
 		newUserOperationPreferences(UserDraco, OpChamberOfSecrets, true),
 	},
-	// TODO TN LP create same thing for groups?
 	UserOpMap: []models.UserOperationPermission{
 		// OpSorcerersStone and OpChamberOfSecrets are used to check read/write permissions
 		// The following should always remain true:
@@ -106,6 +105,11 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserDumbledore, OpSorcerersStone, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin),
+	},
+	UserGroupOpMap: []models.UserGroupOperationPermission{
+		newUserGroupOpPermission(UserGroupGryffindor, OpSorcerersStone, policy.OperationRoleRead),
+		newUserGroupOpPermission(UserGroupHufflepuff, OpSorcerersStone, policy.OperationRoleWrite),
+		newUserGroupOpPermission(UserGroupSlytherin, OpSorcerersStone, policy.OperationRoleAdmin),
 	},
 	Findings: []models.Finding{
 		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear, FindingBook2Robes,
