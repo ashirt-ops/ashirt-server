@@ -553,6 +553,21 @@ func GetUsersWithRoleForOperationByOperationID(t *testing.T, db *database.Connec
 	return allUserOpRoles
 }
 
+type UserGroupOpPermJoinUser struct {
+	models.UserGroup
+	Role policy.OperationRole `db:"role"`
+}
+
+func GetUserGroupsWithRoleForOperationByOperationID(t *testing.T, db *database.Connection, id int64) []UserGroupOpPermJoinUser {
+	var allUserGroupOpRoles []UserGroupOpPermJoinUser
+	err := db.Select(&allUserGroupOpRoles, sq.Select("user_group_operation_permissions.role", "user_groups.name", "user_groups.slug").
+		From("user_group_operation_permissions").
+		LeftJoin("user_groups ON user_groups.id = user_group_operation_permissions.group_id").
+		Where(sq.Eq{"operation_id": id}))
+	require.NoError(t, err)
+	return allUserGroupOpRoles
+}
+
 type PreferencesOperations struct {
 	models.UserOperationPreferences
 	Slug string `db:"slug"`

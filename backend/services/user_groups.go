@@ -158,39 +158,6 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	return nil, nil
 }
 
-func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserGroupOperationRole, error) {
-	operation, err := lookupOperation(db, i.OperationSlug)
-	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.WrapError("Unwilling to list usergroups", backend.UnauthorizedReadErr(err))
-	}
-	query, err := prepListUserGroupsForOperation(ctx, db, i, operation.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	var userGroups []userGroupAndRole
-	err = db.Select(&userGroups, *query)
-	if err != nil {
-		return nil, backend.WrapError("Cannot list user groups for operation", backend.DatabaseErr(err))
-	}
-	userGroupsDTO := wrapListUserGroupsForOperationResponse(userGroups)
-	return userGroupsDTO, nil
-}
-
-func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dtos.UserGroupOperationRole {
-	userGroupsDTO := make([]*dtos.UserGroupOperationRole, len(userGroups))
-	for idx, userGroup := range userGroups {
-		userGroupsDTO[idx] = &dtos.UserGroupOperationRole{
-			UserGroup: dtos.UserGroupAdminView{
-				Slug: userGroup.Slug,
-				Name: userGroup.Name,
-			},
-			Role: userGroup.Role,
-		}
-	}
-	return userGroupsDTO
-}
-
 // write a function that modifies a user group
 func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserGroupInput) (*dtos.UserGroupOutput, error) {
 	if err := isAdmin(ctx); err != nil {
@@ -246,19 +213,6 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	}
 
 	return nil
-}
-
-var slugMap []struct {
-	UserSlug  sql.NullString `db:"user_slug"`
-	GroupSlug string         `db:"group_slug"`
-	GroupName string         `db:"group_name"`
-	Deleted   sql.NullString `db:"deleted"`
-}
-
-type tempGroup struct {
-	Slug      string
-	UserSlugs []string
-	Deleted   bool
 }
 
 // TODO TN how to to more thoroughly test this?
@@ -407,9 +361,54 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	return paginatedData, nil
 }
 
-// TODO TN add tests for new functions
+var slugMap []struct {
+	UserSlug  sql.NullString `db:"user_slug"`
+	GroupSlug string         `db:"group_slug"`
+	GroupName string         `db:"group_name"`
+	Deleted   sql.NullString `db:"deleted"`
+}
+
+// TODO TN add test
+func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserGroupOperationRole, error) {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unwilling to list usergroups", backend.UnauthorizedReadErr(err))
+	}
+
+	query := sq.Select("slug", "name", "role").
+		From("user_group_operation_permissions").
+		LeftJoin("user_groups ON user_group_operation_permissions.group_id = user_groups.id").
+		Where(sq.Eq{"operation_id": operation.ID, "user_groups.deleted_at": nil}).
+		OrderBy("user_group_operation_permissions.created_at ASC")
+
+	i.UserGroupFilter.AddWhere(&query)
+
+	var userGroups []userGroupAndRole
+	err = db.Select(&userGroups, query)
+	if err != nil {
+		return nil, backend.WrapError("Cannot list user groups for operation", backend.DatabaseErr(err))
+	}
+	userGroupsDTO := wrapListUserGroupsForOperationResponse(userGroups)
+	return userGroupsDTO, nil
+}
+
+func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dtos.UserGroupOperationRole {
+	userGroupsDTO := make([]*dtos.UserGroupOperationRole, len(userGroups))
+	for idx, userGroup := range userGroups {
+		userGroupsDTO[idx] = &dtos.UserGroupOperationRole{
+			UserGroup: dtos.UserGroupAdminView{
+				Slug: userGroup.Slug,
+				Name: userGroup.Name,
+			},
+			Role: userGroup.Role,
+		}
+	}
+	return userGroupsDTO
+}
+
 // TODO TN hide groups label from non-admins
 
+// TODO TN add test
 func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGroupsInput) ([]*dtos.UserGroupAdminView, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
@@ -446,16 +445,4 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
 	// TODO TN - editing a group and changing the slug and the users, it doesn't work
-}
-
-func prepListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput, operationID int64) (*sq.SelectBuilder, error) {
-	query := sq.Select("slug", "name", "role").
-		From("user_group_operation_permissions").
-		LeftJoin("user_groups ON user_group_operation_permissions.group_id = user_groups.id").
-		Where(sq.Eq{"operation_id": operationID, "user_groups.deleted_at": nil}).
-		OrderBy("user_group_operation_permissions.created_at ASC")
-
-	i.UserGroupFilter.AddWhere(&query)
-
-	return &query, nil
 }

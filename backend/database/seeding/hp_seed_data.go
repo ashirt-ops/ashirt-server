@@ -187,11 +187,13 @@ var UserHeadlessNick = newHPUser(newUserInput{FirstName: "Nicholas", LastName: "
 
 var newUserGroup = newUserGroupGen(1)
 
-var UserGroupGryffindor = newUserGroup("Gryffindor")
-var UserGroupHufflepuff = newUserGroup("Hufflepuff")
-var UserGroupRavenclaw = newUserGroup("Ravenclaw")
-var UserGroupSlytherin = newUserGroup("Slytherin")
-var UserGroupOtherHouse = newUserGroup("Other House")
+var UserGroupGryffindor = newUserGroup("Gryffindor", false)
+var UserGroupHufflepuff = newUserGroup("Hufflepuff", false)
+var UserGroupRavenclaw = newUserGroup("Ravenclaw", false)
+var UserGroupSlytherin = newUserGroup("Slytherin", false)
+
+// UserGroupOtherHouse is reserved to test deleted user groups
+var UserGroupOtherHouse = newUserGroup("Other House", true)
 
 var AddHarryToGryffindor = newUserGroupMapping(UserHarry.ID, UserGroupGryffindor.ID)
 var AddRonToGryffindor = newUserGroupMapping(UserRon.ID, UserGroupGryffindor.ID)

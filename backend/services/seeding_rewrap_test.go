@@ -24,11 +24,13 @@ var TinyCodeblock = seeding.TinyCodeblock
 var TinyTermRec = seeding.TinyTermRec
 
 type UserOpPermJoinUser = seeding.UserOpPermJoinUser
+type UserGroupOpPermJoinUser = seeding.UserGroupOpPermJoinUser
 type FullEvidence = seeding.FullEvidence
 
 // Exported functions/helpers
 var initTest = seeding.InitTest
 var getUsersWithRoleForOperationByOperationID = seeding.GetUsersWithRoleForOperationByOperationID
+var getUserGroupsWithRoleForOperationByOperationID = seeding.GetUserGroupsWithRoleForOperationByOperationID
 var contextForUser = seeding.ContextForUser
 var GetInternalClock = seeding.GetInternalClock
 
@@ -111,6 +113,9 @@ var UserCho = seeding.UserCho
 
 var UserGroupGryffindor = seeding.UserGroupGryffindor
 var UserGroupSlytherin = seeding.UserGroupSlytherin
+var UserGroupHufflepuff = seeding.UserGroupHufflepuff
+var UserGroupRavenclaw = seeding.UserGroupRavenclaw
+var UserGroupOtherHouse = seeding.UserGroupOtherHouse
 
 var APIKeyHarry1 = seeding.APIKeyHarry1
 var APIKeyHarry2 = seeding.APIKeyHarry2

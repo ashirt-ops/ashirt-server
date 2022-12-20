@@ -254,15 +254,27 @@ func newUserOperationPreferences(user models.User, op models.Operation, isFavori
 	}
 }
 
-func newUserGroupGen(first int64) func(name string) models.UserGroup {
+func newUserGroupGen(first int64) func(name string, deleted bool) models.UserGroup {
 	id := iotaLike(first)
-	return func(name string) models.UserGroup {
-		return models.UserGroup{
-			ID:        id(),
-			Slug:      name,
-			Name:      name,
-			CreatedAt: internalClock.Now(),
+	return func(name string, deleted bool) models.UserGroup {
+		if deleted {
+			now := internalClock.Now()
+			return models.UserGroup{
+				ID:        id(),
+				Slug:      name,
+				Name:      name,
+				CreatedAt: internalClock.Now(),
+				DeletedAt: &now,
+			}
+		} else {
+			return models.UserGroup{
+				ID:        id(),
+				Slug:      name,
+				Name:      name,
+				CreatedAt: internalClock.Now(),
+			}
 		}
+
 	}
 }
 
