@@ -60,7 +60,7 @@ const NewUserGroupForm = (props: {
   return (
     <Form {...formProps}>
       <div className={cx('inline-form')}>
-        <UserGroupChooser {...userGroupField} />
+        <UserGroupChooser operationSlug={props.operationSlug} {...userGroupField} />
         <RoleSelect label="Role" {...roleField} />
         <Button primary loading={formProps.loading}>Add</Button>
       </div>

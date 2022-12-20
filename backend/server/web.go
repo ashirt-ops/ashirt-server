@@ -143,9 +143,10 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 
 	route(r, "GET", "/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
-		i := services.ListUsersInput{
+		i := services.ListUserGroupsInput{
 			Query:          dr.FromQuery("query").Required().AsString(),
 			IncludeDeleted: dr.FromQuery("includeDeleted").OrDefault(false).AsBool(),
+			OperationSlug:  dr.FromQuery("operationSlug").Required().AsString(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error

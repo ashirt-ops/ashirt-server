@@ -49,6 +49,9 @@ func (o *Operation) Check(permission Permission) bool {
 		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite, OperationRoleRead) || o.IsHeadless
 	case CanReadOperation:
 		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite, OperationRoleRead) || o.IsHeadless
+
+	case CanListUserGroupsOfOperation:
+		return o.hasRole(p.OperationID, OperationRoleAdmin) || o.IsHeadless
 	}
 	return false
 }

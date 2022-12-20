@@ -16,6 +16,7 @@ const userGroupToName = (u: UserGroup) => `${u.name}`
 export default (props: {
   value: UserGroup|null,
   onChange: (userGroup: UserGroup|null) => void,
+  operationSlug: string,
 }) => {
   const [inputValue, setInputValue] = React.useState('')
   const [dropdownVisible, setDropdownVisible] = React.useState(false)
@@ -29,7 +30,7 @@ export default (props: {
   React.useEffect(() => {
     if (inputValue === '') return
     const reload = () => {
-      listUserGroups({query: inputValue})
+      listUserGroups({query: inputValue, operationSlug: props.operationSlug})
         .then(setSearchResults)
         .then(() => setLoading(false))
     }

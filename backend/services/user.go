@@ -53,17 +53,7 @@ type userAndRole struct {
 	Role policy.OperationRole `db:"role"`
 }
 
-type userGroupAndRole struct {
-	models.UserGroup
-	Role policy.OperationRole `db:"role"`
-}
-
 type ListUsersInput struct {
-	Query          string
-	IncludeDeleted bool
-}
-
-type ListUserGroupsInput struct {
 	Query          string
 	IncludeDeleted bool
 }

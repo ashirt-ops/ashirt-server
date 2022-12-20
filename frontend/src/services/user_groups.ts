@@ -5,8 +5,9 @@ import { backendDataSource as ds } from './data_sources/backend'
 export async function listUserGroups(i: {
   query: string,
   includeDeleted?: boolean,
+  operationSlug: string
 }): Promise<Array<UserGroup>> {
-  return await ds.listUserGroups(i.query, i.includeDeleted || false)
+  return await ds.listUserGroups(i.query, i.includeDeleted || false, i.operationSlug)
 }
 
 // TODO TN removing group from op doesn't work

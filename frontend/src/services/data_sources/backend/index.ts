@@ -67,7 +67,7 @@ export const backendDataSource: DataSource = {
   adminListUsers: query => req('GET', '/admin/users', null, query),
   adminCreateHeadlessUser: payload => req('POST', "/admin/user/headless", payload),
 
-  listUserGroups: (query, includeDeleted) => req('GET', '/usergroups', null, { query, includeDeleted }),
+  listUserGroups: (query, includeDeleted, operationSlug) => req('GET', '/usergroups', null, { query, includeDeleted, operationSlug }),
   adminCreateUserGroup: payload => req('POST', '/admin/usergroups', payload),
   adminListUserGroups: query => req('GET', '/admin/usergroups', null, query),
   adminDeleteUserGroup: ids => req('DELETE', `/admin/usergroups/${ids.userGroupSlug}`),

@@ -48,6 +48,17 @@ type ListUserGroupsForOperationInput struct {
 	OperationSlug string
 }
 
+type userGroupAndRole struct {
+	models.UserGroup
+	Role policy.OperationRole `db:"role"`
+}
+
+type ListUserGroupsInput struct {
+	Query          string
+	IncludeDeleted bool
+	OperationSlug  string
+}
+
 func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	if cugi.Slug == "" {
 		return backend.MissingValueErr("Slug")
@@ -148,7 +159,11 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 }
 
 func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserGroupOperationRole, error) {
-	query, err := prepListUserGroupsForOperation(ctx, db, i)
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unwilling to list usergroups", backend.UnauthorizedReadErr(err))
+	}
+	query, err := prepListUserGroupsForOperation(ctx, db, i, operation.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -191,11 +206,6 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		return nil, backend.WrapError("Unable to modify user group", backend.UnauthorizedWriteErr(err))
 	}
 
-	// TODO TN Add this in later
-	// if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserGroup{UsergroupID: userGroup.ID}); err != nil {
-	// 	return backend.WrapError("Unwilling to modify user group", backend.UnauthorizedWriteErr(err))
-	// }
-
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
 		if i.Name != "" {
 			tx.Update(sq.Update("user_groups").Set("name", i.Name).Where(sq.Eq{"id": userGroup.ID}))
@@ -212,7 +222,11 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 
 }
 
+// TODO TN are these return values similar to other functions?
 func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) error {
+	if err := isAdmin(ctx); err != nil {
+		return backend.WrapError("Unwilling to delete a user group", backend.UnauthorizedReadErr(err))
+	}
 	userGroup, err := lookupUserGroup(db, slug)
 	if err != nil {
 		return backend.WrapError("Unable to delete user group", backend.UnauthorizedWriteErr(err))
@@ -223,7 +237,6 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	// }
 	// TODO TN ADd this in later
 
-	// TODO TN get rid of trnasactoins?
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
 		tx.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"user_group_id": userGroup.ID}))
 		tx.Update(sq.Update("user_groups").Set("deleted_at", time.Now()).Where(sq.Eq{"slug": slug}))
@@ -394,12 +407,18 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	return paginatedData, nil
 }
 
-func ListUserGroups(ctx context.Context, db *database.Connection, i ListUsersInput) ([]*dtos.UserGroupAdminView, error) {
+// TODO TN add tests for new functions
+// TODO TN hide groups label from non-admins
+
+func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGroupsInput) ([]*dtos.UserGroupAdminView, error) {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unwilling to list usergroups", backend.UnauthorizedReadErr(err))
+	}
+
 	if strings.ContainsAny(i.Query, "%_") || strings.TrimFunc(i.Query, unicode.IsSpace) == "" {
 		return []*dtos.UserGroupAdminView{}, nil
 	}
-
-	// TODO TN add admin policy check
 
 	var userGroups []models.UserGroup
 	query := sq.Select("slug", "name").
@@ -410,7 +429,7 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUsersInp
 	if !i.IncludeDeleted {
 		query = query.Where(sq.Eq{"deleted_at": nil})
 	}
-	err := db.Select(&userGroups, query)
+	err = db.Select(&userGroups, query)
 	if err != nil {
 		return nil, backend.WrapError("Cannot list user groups", backend.DatabaseErr(err))
 	}
@@ -427,21 +446,11 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUsersInp
 	return userGroupsDTO, nil
 }
 
-func prepListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) (*sq.SelectBuilder, error) {
-	operation, err := lookupOperation(db, i.OperationSlug)
-	if err != nil {
-		return nil, backend.WrapError("Unable to list user groups for operation", backend.UnauthorizedReadErr(err))
-	}
-
-	if err := policyRequireWithAdminBypass(ctx, policy.CanListUsersOfOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.WrapError("Unwilling to list user groups for operation", backend.UnauthorizedReadErr(err))
-	}
-
-	// TODO TN create table for this
+func prepListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput, operationID int64) (*sq.SelectBuilder, error) {
 	query := sq.Select("slug", "name", "role").
 		From("user_group_operation_permissions").
 		LeftJoin("user_groups ON user_group_operation_permissions.user_group_id = user_groups.id").
-		Where(sq.Eq{"operation_id": operation.ID, "user_groups.deleted_at": nil}).
+		Where(sq.Eq{"operation_id": operationID, "user_groups.deleted_at": nil}).
 		OrderBy("user_group_operation_permissions.created_at ASC")
 
 	i.UserGroupFilter.AddWhere(&query)
