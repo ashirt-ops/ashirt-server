@@ -291,6 +291,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		NumEvidence:       operation.NumEvidence,
 		NumTags:           operation.NumTags,
 		TopContribs:       topContribsForOp,
+		EvidenceCount:     evidenceCountForOp,
 		UserCanViewGroups: &userCanViewGroups,
 	}, nil
 }
