@@ -568,6 +568,15 @@ func GetUserGroupsWithRoleForOperationByOperationID(t *testing.T, db *database.C
 	return allUserGroupOpRoles
 }
 
+func GetUserGroupFromSlug(t *testing.T, db *database.Connection, slug string) models.UserGroup {
+	var fullUserGroup models.UserGroup
+	err := db.Get(&fullUserGroup, sq.Select("id", "slug", "name").
+		From("user_groups").
+		Where(sq.Eq{"slug": slug}))
+	require.NoError(t, err)
+	return fullUserGroup
+}
+
 type PreferencesOperations struct {
 	models.UserOperationPreferences
 	Slug string `db:"slug"`

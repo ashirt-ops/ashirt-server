@@ -67,6 +67,7 @@ var getAuthsForUser = seeding.GetAuthsForUser
 var getUsersForAuth = seeding.GetUsersForAuth
 var getRealUsers = seeding.GetRealUsers
 var getTagUsage = seeding.GetTagUsage
+var getUserGroupFromSlug = seeding.GetUserGroupFromSlug
 
 var getServiceWorkerByName = seeding.GetServiceWorkerByName
 var getServiceWorkerByID = seeding.GetServiceWorkerByID

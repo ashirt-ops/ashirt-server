@@ -203,10 +203,9 @@ type UserGroupAdminView struct {
 	Deleted   bool     `json:"deleted"`
 }
 
-type UserGroupOutput struct {
-	RealSlug    string `json:"slug"`
-	Name        string `json:"name"`
-	UserGroupID int64  `json:"-"` // don't transmit the userid
+type UserGroup struct {
+	Slug string `json:"slug"`
+	Name string `json:"name"`
 }
 
 type ServiceWorker struct {

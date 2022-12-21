@@ -144,7 +144,6 @@ func TestModifyUserGroup(t *testing.T) {
 			UsersToAdd:    usersToAdd,
 			UsersToRemove: usersToRemove,
 		}
-		// TODO TN check that name actually changed by grabbing record
 
 		_, err := services.ModifyUserGroup(ctx, db, i)
 		// verify that non-admin user cannot modify a user group
@@ -153,8 +152,10 @@ func TestModifyUserGroup(t *testing.T) {
 		adminUser := UserDumbledore
 		ctx = contextForUser(adminUser, db)
 
-		_, err = services.ModifyUserGroup(ctx, db, i)
+		result, err := services.ModifyUserGroup(ctx, db, i)
 		require.NoError(t, err)
+		fullUserGroup := getUserGroupFromSlug(t, db, result.Slug)
+		require.Equal(t, newName, fullUserGroup.Name)
 
 		userIDs, err := getUserIDsFromGroup(db, gryffindorUserGroup.Slug)
 		require.NoError(t, err)

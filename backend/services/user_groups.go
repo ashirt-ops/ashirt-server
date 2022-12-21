@@ -124,9 +124,7 @@ func RemoveUsersFromGroup(db *database.Connection, userSlugs []string, groupID i
 	return nil
 }
 
-// TODO TN ask Joel about return values
-// TODO TN look it up
-func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserGroupInput) (*dtos.UserGroupOutput, error) {
+func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserGroupInput) (*dtos.UserGroup, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to create a user group", backend.UnauthorizedReadErr(err))
 	}
@@ -155,11 +153,13 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 		break
 	}
 
-	return nil, nil
+	return &dtos.UserGroup{
+		Slug: cleanSlug,
+		Name: i.Name,
+	}, nil
 }
 
-// write a function that modifies a user group
-func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserGroupInput) (*dtos.UserGroupOutput, error) {
+func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserGroupInput) (*dtos.UserGroup, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to modify a user group", backend.UnauthorizedReadErr(err))
 	}
@@ -194,11 +194,12 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
 	}
 
-	return nil, nil
-
+	return &dtos.UserGroup{
+		Slug: i.Slug,
+		Name: i.Name,
+	}, nil
 }
 
-// TODO TN are these return values similar to other functions?
 func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) error {
 	if err := isAdmin(ctx); err != nil {
 		return backend.WrapError("Unwilling to delete a user group", backend.UnauthorizedReadErr(err))
