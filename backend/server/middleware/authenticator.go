@@ -6,7 +6,6 @@ package middleware
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -156,25 +155,16 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	for _, role := range roles {
 		roleMap[role.OperationID] = role.Role
 	}
-	fmt.Println("roleMap 1", roleMap)
 	for _, role := range groupRoles {
-		// TODO TN how to test this?
-		if val, ok := roleMap[role.OperationID]; ok {
-			if val == policy.OperationRoleAdmin {
-				continue
-			}
-			if val == policy.OperationRoleWrite && role.Role == policy.OperationRoleAdmin {
-				roleMap[role.OperationID] = role.Role
-			}
-			if val == policy.OperationRoleRead && (role.Role == policy.OperationRoleAdmin || role.Role == policy.OperationRoleWrite) {
-				roleMap[role.OperationID] = role.Role
-			}
-		} else {
+		val, ok := roleMap[role.OperationID]
+		noRole := !ok
+		assignedRoleIsLowest := ok && val == policy.OperationRoleRead
+		groupRoleIsHigher := ok && val == policy.OperationRoleWrite && role.Role == policy.OperationRoleAdmin
+
+		if noRole || assignedRoleIsLowest || groupRoleIsHigher {
 			roleMap[role.OperationID] = role.Role
 		}
 	}
-	// TODO TN get rid o thise
-	fmt.Println("roleMap", roleMap)
 	return &policy.Union{
 		P1: policy.NewAuthenticatedPolicy(userID, isSuperAdmin),
 		P2: &policy.Operation{
