@@ -409,8 +409,6 @@ func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dt
 	return userGroupsDTO
 }
 
-// TODO TN hide groups label from non-admins
-
 func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGroupsInput) ([]*dtos.UserGroupAdminView, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
@@ -446,5 +444,4 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	}
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
-	// TODO TN - editing a group and changing the slug and the users, it doesn't work
 }

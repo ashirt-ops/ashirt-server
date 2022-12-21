@@ -127,7 +127,6 @@ const RemoveWarningModal = (props: {
 const PermissionTable = (props: {
   currentUser?: UserOwnView,
   isAdmin: boolean,
-  setIsOperationAdmin: (isOperationAdmin: boolean) => void,
   operationSlug: string,
   requestReload: () => void
   onReload: (listener: () => void) => void
@@ -138,7 +137,6 @@ const PermissionTable = (props: {
 
   const filterField = useFormField("")
   const [currentPage, setCurrentPage] = React.useState(1)
-  const [isOperationAdmin, setLocalOperationAdmin] = React.useState(false)
 
   const normalizeName = (userGroup: UserGroup) => `${userGroup.name}`.toLowerCase()
   const normalizedSearchTerm = filterField.value.toLowerCase()
@@ -151,24 +149,16 @@ const PermissionTable = (props: {
 
   React.useEffect(() => {
     props.onReload(wiredPermissions.reload)
-    wiredPermissions.expose(data => {
-      const matchingUsers = data.filter(({ userGroup }) => normalizeName(userGroup).includes(normalizedSearchTerm))
-      const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
-
-      setLocalOperationAdmin(renderableData.find(datum => datum.userGroup.slug === props.currentUser?.slug)?.role === UserRole.ADMIN)
-      props.setIsOperationAdmin(isOperationAdmin)
-    })
     return () => { props.offReload(wiredPermissions.reload) }
   })
 
-  // TODO TN add something so there's not an error message when there are not user groups
   return (
     <>
       {wiredPermissions.render(data => {
         const matchingUsers = data.filter(({ userGroup }) => normalizeName(userGroup).includes(normalizedSearchTerm))
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
-        const notAdmin = !props.isAdmin && !isOperationAdmin
+        const notAdmin = !props.isAdmin 
 
         return (
           <>
@@ -202,41 +192,20 @@ const PermissionTable = (props: {
 
 export default (props: {
   operationSlug: string,
-  // isAdmin: boolean,
+  isAdmin: boolean,
 }) => {
   const bus = BuildReloadBus()
-  
-
-  // TODO TN admins (and group l evel admins) can see grouip stuff, but other users sholdn't be able to.
-
-  // if (!props.isAdmin) {
-  //   return <Navigate to="/operations" replace />;
-  // }
-
-  // TODO TN - ask if non sys admins should even be able to see this?
-
-  const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
   const currentUser = React.useContext(AuthContext)?.user
-  const isSysAdmin = currentUser ? currentUser?.admin : false
-  const isAdmin = isSysAdmin || isOperationAdmin
-  console.log("isAdmin - group table", isAdmin, isSysAdmin, isOperationAdmin)
-  // const isAdmin = props.isAdmin || isOperationAdmin
-
-  // TODO TN Ron isn't a op admin here - why not? Because it's looking through userGroups, not users
-  // TODO TN also need to notate that user admins and group admins are admins here!
-
-  // TODO TN allow op admin to edit group membership
 
   return (
     <SettingsSection title="Operation User Groups" width="wide">
-      {isAdmin && (<NewUserGroupForm
+      {props.isAdmin && (<NewUserGroupForm
         {...bus}
         operationSlug={props.operationSlug}
       />)}
       <PermissionTable
         currentUser={currentUser || undefined}
-        isAdmin={isAdmin}
-        setIsOperationAdmin={setIsOperationAdmin}
+        isAdmin={props.isAdmin}
         operationSlug={props.operationSlug}
         {...bus}
       />

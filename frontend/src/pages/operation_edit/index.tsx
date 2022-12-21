@@ -20,20 +20,18 @@ export const OperationEdit = () => {
   const { slug } = useParams<{ slug: string }>()
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const navigate = useNavigate()
-  // const currentUser = React.useContext(AuthContext)?.user
-  // const isSysAdmin = currentUser ? currentUser?.admin : false
+  const [canViewGroups, setCanViewGroups] = React.useState(false)
 
-  // const tabs = [
-  //   { id: "settings", label: "Settings" },
-  //   { id: "users", label: "Users" },
-  //   { id: "group", label: "Groups" },
-  //   { id: "tags", label: "Tags" },
-  //   { id: "tasks", label: "Tasks" },
-  // ]
+  const tabs =[
+    { id: "settings", label: "Settings" },
+    { id: "users", label: "Users" },
+    { id: "tags", label: "Tags" },
+    { id: "tasks", label: "Tasks" },
+  ]
 
-  // if (isSysAdmin) {
-  //   tabs.push({ id: "group", label: "Groups" })
-  // }
+  if (canViewGroups) {
+    tabs.push({ id: "groups", label: "Groups" })
+  }
 
   return (
     <>
@@ -45,19 +43,13 @@ export const OperationEdit = () => {
       </Button>
       <NavVerticalTabMenu
         title="Edit Operation"
-        tabs={[
-          { id: "settings", label: "Settings" },
-          { id: "users", label: "Users" },
-          { id: "groups", label: "Groups"},
-          { id: "tags", label: "Tags" },
-          { id: "tasks", label: "Tasks" },
-        ]} >
+        tabs={tabs} >
         <Routes>
-          <Route path="settings" element={<SettingManagement operationSlug={operationSlug} />} />
-          <Route path="users" element={<UserPermissionEditor operationSlug={operationSlug} />} />
-          <Route path="groups" element={<UserGroupPermissionEditor operationSlug={operationSlug} />} />
+          <Route path="settings" element={<SettingManagement setCanViewGroups={setCanViewGroups} operationSlug={operationSlug} />} />
+          <Route path="users" element={<UserPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />} />
           <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
           <Route path="tasks" element={<BatchRunWorker operationSlug={operationSlug} />} />
+          <Route path="groups" element={<UserGroupPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />} />
         </Routes>
       </NavVerticalTabMenu>
     </>
@@ -66,7 +58,8 @@ export const OperationEdit = () => {
 export default OperationEdit
 
 const SettingManagement = (props: {
-  operationSlug: string
+  operationSlug: string,
+  setCanViewGroups: (canViewGroups: boolean) => void, 
 }) => {
   return (<>
     <OperationEditor {...props} />

@@ -60,14 +60,15 @@ type EvidenceCount struct {
 }
 
 type Operation struct {
-	Slug          string        `json:"slug"`
-	Name          string        `json:"name"`
-	NumUsers      int           `json:"numUsers"`
-	NumEvidence   int           `json:"numEvidence"`
-	NumTags       int           `json:"numTags"`
-	Favorite      bool          `json:"favorite"`
-	TopContribs   []TopContrib  `json:"topContribs"`
-	EvidenceCount EvidenceCount `json:"evidenceCount,omitempty"`
+	Slug              string        `json:"slug"`
+	Name              string        `json:"name"`
+	NumUsers          int           `json:"numUsers"`
+	NumEvidence       int           `json:"numEvidence"`
+	NumTags           int           `json:"numTags"`
+	Favorite          bool          `json:"favorite"`
+	TopContribs       []TopContrib  `json:"topContribs"`
+	EvidenceCount     EvidenceCount `json:"evidenceCount,omitempty"`
+	UserCanViewGroups *bool         `json:"userCanViewGroups,omitempty"`
 }
 
 type Query struct {

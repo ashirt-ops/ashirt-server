@@ -28,17 +28,22 @@ const EditForm = (props: {
 
 export default (props: {
   operationSlug: string,
+  setCanViewGroups: (canViewGroups: boolean) => void,
 }) => {
   const wiredOperation = useWiredData(React.useCallback(() => getOperation(props.operationSlug), [props.operationSlug]))
 
+  wiredOperation.expose(operation => props.setCanViewGroups(!!operation?.userCanViewGroups))
   return (
     <SettingsSection title="Operation Settings">
-      {wiredOperation.render(operation => (
-        <EditForm
-          name={operation.name}
-          onSave={({name}) => saveOperation(props.operationSlug, {name})}
-        />
-      ))}
+      {wiredOperation.render(operation => {
+        props.setCanViewGroups(!!operation?.userCanViewGroups)
+        return (
+          <EditForm
+            name={operation.name}
+            onSave={({name}) => saveOperation(props.operationSlug, {name})}
+          />
+        )
+      })}
     </SettingsSection>
   )
 }

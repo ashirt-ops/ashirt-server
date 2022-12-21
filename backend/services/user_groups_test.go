@@ -123,8 +123,6 @@ func TestCreateUserGroup(t *testing.T) {
 	})
 }
 
-// TODO TN figure out why this test is so slow?
-// probably the same reason why editing boht users and name at once doesn't work!!
 func TestModifyUserGroup(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		nonAdminUser := UserRon

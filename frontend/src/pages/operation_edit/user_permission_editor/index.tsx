@@ -128,7 +128,6 @@ const RemoveWarningModal = (props: {
 const PermissionTable = (props: {
   currentUser?: UserOwnView,
   isAdmin: boolean,
-  setIsOperationAdmin: (isOperationAdmin: boolean) => void,
   operationSlug: string,
   requestReload: () => void
   onReload: (listener: () => void) => void
@@ -139,7 +138,6 @@ const PermissionTable = (props: {
 
   const filterField = useFormField("")
   const [currentPage, setCurrentPage] = React.useState(1)
-  const [isOperationAdmin, setLocalOperationAdmin] = React.useState(false)
 
   const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
   const normalizedSearchTerm = filterField.value.toLowerCase()
@@ -152,14 +150,6 @@ const PermissionTable = (props: {
 
   React.useEffect(() => {
     props.onReload(wiredPermissions.reload)
-    wiredPermissions.expose(data => {
-      const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
-      const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
-
-      // TODO TN how to best communicate to frontend that a group admin is an operation admin?
-      setLocalOperationAdmin(renderableData.find(datum => datum.user.slug === props.currentUser?.slug)?.role === UserRole.ADMIN)
-      props.setIsOperationAdmin(isOperationAdmin)
-    })
     return () => { props.offReload(wiredPermissions.reload) }
   })
 
@@ -169,7 +159,7 @@ const PermissionTable = (props: {
         const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
-        const notAdmin = !props.isAdmin && !isOperationAdmin
+        const notAdmin = !props.isAdmin
 
         return (
           <>
@@ -203,26 +193,20 @@ const PermissionTable = (props: {
 
 export default (props: {
   operationSlug: string,
+  isAdmin: boolean
 }) => {
   const bus = BuildReloadBus()
 
-  const [isOperationAdmin, setIsOperationAdmin] = React.useState(false)
   const currentUser = React.useContext(AuthContext)?.user
-  const isSysAdmin = currentUser ? currentUser?.admin : false
-  const isAdmin = isSysAdmin || isOperationAdmin
-  console.log("isAdmin - user table", isAdmin, isSysAdmin, isOperationAdmin)
-
-
   return (
     <SettingsSection title="Operation Users" width="wide">
-      {isAdmin && (<NewUserForm
+      {props.isAdmin && (<NewUserForm
         {...bus}
         operationSlug={props.operationSlug}
       />)}
       <PermissionTable
         currentUser={currentUser || undefined}
-        isAdmin={isAdmin}
-        setIsOperationAdmin={setIsOperationAdmin}
+        isAdmin={props.isAdmin}
         operationSlug={props.operationSlug}
         {...bus}
       />

@@ -276,15 +276,22 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		topContribsForOp = []dtos.TopContrib{}
 	}
 
+	var userCanViewGroups bool
+	if middleware.IsAdmin(ctx) {
+		userCanViewGroups = true
+	} else if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err == nil {
+		userCanViewGroups = true
+	}
+
 	return &dtos.Operation{
-		Slug:          operationSlug,
-		Name:          operation.Name,
-		NumUsers:      numUsers,
-		Favorite:      favorite,
-		NumEvidence:   operation.NumEvidence,
-		NumTags:       operation.NumTags,
-		TopContribs:   topContribsForOp,
-		EvidenceCount: evidenceCountForOp,
+		Slug:              operationSlug,
+		Name:              operation.Name,
+		NumUsers:          numUsers,
+		Favorite:          favorite,
+		NumEvidence:       operation.NumEvidence,
+		NumTags:           operation.NumTags,
+		TopContribs:       topContribsForOp,
+		UserCanViewGroups: &userCanViewGroups,
 	}, nil
 }
 

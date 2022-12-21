@@ -104,6 +104,7 @@ export type Operation = {
   favorite: boolean,
   topContribs: Array<TopContrib>,
   evidenceCount: EvidenceCount,
+  userCanViewGroups?: boolean,
 }
 
 export type Evidence = {
