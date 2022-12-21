@@ -37,7 +37,7 @@ type ModifyUserGroupInput struct {
 }
 
 type ListUserGroupsForAdminInput struct {
-	UserFilter
+	UserGroupFilter
 	Pagination
 	IncludeDeleted bool
 }

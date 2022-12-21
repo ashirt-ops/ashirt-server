@@ -26,12 +26,9 @@ func ParseRequestQueryUserGroupFilter(dr dissectors.DissectedRequest) UserGroupF
 	}
 }
 
-// TODO TN figure out if I need this
 // AddWhere adds to the given SelectBuilder a Where clause that will apply the filtering
 func (uf *UserGroupFilter) AddWhere(sb *sq.SelectBuilder) {
 	if len(uf.NameParts) > 0 {
-		baseQuery := "concat(" + uf.UserGroupsTable + ".first_name, ' ', " + uf.UserGroupsTable + ".last_name)"
-		*sb = sb.Where(sq.Like{baseQuery: "%" + strings.Join(uf.NameParts, "%") + "%"})
+		*sb = sb.Where(sq.Like{"name": "%" + strings.Join(uf.NameParts, "%") + "%"})
 	}
-
 }
