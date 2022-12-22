@@ -117,26 +117,22 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 		return nil, backend.BadInputErr(errors.New("Unable to create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
 	}
 
-	for {
-		id, err := db.Insert("user_groups", map[string]interface{}{
-			"slug": cleanSlug,
-			"name": i.Name,
-		})
-		// TODO TN how do operations handle transactions vs not?
-		if err != nil {
-			if database.IsAlreadyExistsError(err) {
-				return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this slug already exists; please choose another name"))
-			}
+	id, err := db.Insert("user_groups", map[string]interface{}{
+		"slug": cleanSlug, // TODO TN - make name unique?
+		"name": i.Name,
+	})
+	// TODO TN how do operations handle transactions vs not?
+	if err != nil {
+		if database.IsAlreadyExistsError(err) {
+			return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this slug already exists; please choose another name"))
 		}
-		err = AddUsersToGroup(db, i.UserSlugs, id)
-		if err != nil {
-			return nil, backend.WrapError("Unable to add users to user group.", err)
-		}
-		break
 	}
-
+	err = AddUsersToGroup(db, i.UserSlugs, id)
+	if err != nil {
+		return nil, backend.WrapError("Unable to add users to user group.", err)
+	}
 	return &dtos.UserGroup{
-		Slug: cleanSlug,
+		Slug: i.Slug,
 		Name: i.Name,
 	}, nil
 }
@@ -201,7 +197,6 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 }
 
 // Lists all usergroups for an admin, with pagination
-// TODO TN how to to more thoroughly test this?
 func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
@@ -249,6 +244,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		}, nil
 	}
 
+	// TODO TN - there's some sort of bug, try adding groups with same names
 	for j := 0; j < len(slugMap); j++ {
 		firstItem := j == 0
 		isLastItem := j == len(slugMap)-1
@@ -257,7 +253,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		noUserSlug := !hasUserSlug
 		sameGroupAsPrev := false
 		if j > 0 {
-			sameGroupAsPrev = slugMap[j].GroupName == slugMap[j-1].GroupName
+			sameGroupAsPrev = slugMap[j].GroupSlug == slugMap[j-1].GroupSlug
 		}
 		diffGroup := !sameGroupAsPrev
 

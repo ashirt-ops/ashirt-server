@@ -27,10 +27,6 @@ export async function createUserGroup(i: {
   try {
     return await ds.adminCreateUserGroup({...i, slug})
   } catch (err) {
-    if (err.message.match(/slug already exists/g)) {
-      slug += '-' + Date.now()
-      return await ds.adminCreateUserGroup({...i, slug})
-    }
     throw err
   }
 }
