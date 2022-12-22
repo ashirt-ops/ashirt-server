@@ -5,9 +5,8 @@ import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import SettingsSection from 'src/components/settings_section'
-import {getOperation, saveOperation} from 'src/services'
+import { saveOperation } from 'src/services'
 import {useForm, useFormField} from 'src/helpers/use_form'
-import {useWiredData} from 'src/helpers'
 
 const EditForm = (props: {
   name: string,
@@ -29,18 +28,14 @@ const EditForm = (props: {
 export default (props: {
   operationSlug: string,
   setCanViewGroups: (canViewGroups: boolean) => void,
+  operationName: string,
 }) => {
-  const wiredOperation = useWiredData(React.useCallback(() => getOperation(props.operationSlug), [props.operationSlug]))
-
-  wiredOperation.expose(operation => props.setCanViewGroups(!!operation?.userCanViewGroups))
   return (
     <SettingsSection title="Operation Settings">
-      {wiredOperation.render(operation => (
-          <EditForm
-            name={operation.name}
-            onSave={({name}) => saveOperation(props.operationSlug, {name})}
-          />
-      ))}
+      <EditForm
+        name={props.operationName}
+        onSave={({name}) => saveOperation(props.operationSlug, {name})}
+      />
     </SettingsSection>
   )
 }

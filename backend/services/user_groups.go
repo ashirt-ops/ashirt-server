@@ -433,5 +433,6 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	}
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
-	// TODO TN fix frontend bug
+	// TODO TN make name unique
+	// TODO TN - right now a user admin can lock themselves out by changing their personal group admin permissions - how would I go about preventign that?
 }

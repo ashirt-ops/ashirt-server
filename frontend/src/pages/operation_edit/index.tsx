@@ -13,6 +13,8 @@ import UserPermissionEditor from './user_permission_editor'
 import UserGroupPermissionEditor from './user_group_permission_editor'
 import DeleteOperationButton from './delete_operation_button'
 import BatchRunWorker from './batch_run_worker'
+import { useWiredData } from 'src/helpers'
+import { getOperation } from 'src/services/operations'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -21,7 +23,19 @@ export const OperationEdit = () => {
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const navigate = useNavigate()
   const [canViewGroups, setCanViewGroups] = React.useState(false)
+  const [operationName, setOperationName] = React.useState('')
+  
+  const wiredOperation = useWiredData(React.useCallback(() => getOperation(operationSlug), [operationSlug]))
+  // const wiredOperation = useWiredData(() => getOperation(operationSlug))
 
+  React.useEffect(() => {
+    wiredOperation.expose(operation => {
+      setCanViewGroups(!!operation?.userCanViewGroups)
+      console.log("operation?.name", operation?.name) 
+      setOperationName(operation?.name)
+    })
+  }, [wiredOperation])
+  
   const tabs =[
     { id: "settings", label: "Settings" },
     { id: "users", label: "Users" },
@@ -45,7 +59,7 @@ export const OperationEdit = () => {
         title="Edit Operation"
         tabs={tabs} >
         <Routes>
-          <Route path="settings" element={<SettingManagement setCanViewGroups={setCanViewGroups} operationSlug={operationSlug} />} />
+          <Route path="settings" element={<SettingManagement operationName={operationName} setCanViewGroups={setCanViewGroups} operationSlug={operationSlug} />} />
           <Route path="users" element={<UserPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />} />
           <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
           <Route path="tasks" element={<BatchRunWorker operationSlug={operationSlug} />} />
@@ -60,6 +74,7 @@ export default OperationEdit
 const SettingManagement = (props: {
   operationSlug: string,
   setCanViewGroups: (canViewGroups: boolean) => void, 
+  operationName: string,
 }) => {
   return (<>
     <OperationEditor {...props} />
