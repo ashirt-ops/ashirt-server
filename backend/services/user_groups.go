@@ -107,23 +107,6 @@ func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64)
 	return nil
 }
 
-func RemoveUsersFromGroup(db *database.Connection, userSlugs []string, groupID int64) error {
-	for _, userSlug := range userSlugs {
-		userID, err := userSlugToUserID(db, userSlug)
-		if err != nil {
-			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
-		}
-
-		err = db.Delete(sq.Delete("group_user_map").Where(sq.Eq{"user_id": userID, "group_id": groupID}))
-
-		if err != nil {
-			return backend.WrapError("Cannot delete user role", backend.DatabaseErr(err))
-		}
-	}
-
-	return nil
-}
-
 func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserGroupInput) (*dtos.UserGroup, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to create a user group", backend.UnauthorizedReadErr(err))
@@ -139,6 +122,7 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 			"slug": cleanSlug,
 			"name": i.Name,
 		})
+		// TODO TN how do operations handle transactions vs not?
 		if err != nil {
 			if database.IsAlreadyExistsError(err) {
 				return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this slug already exists; please choose another name"))
@@ -146,9 +130,7 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 		}
 		err = AddUsersToGroup(db, i.UserSlugs, id)
 		if err != nil {
-			// TODO TN fix wrapped error
-			// rollback creatation of user group TODO TN
-			return nil, backend.WrapError("Unable to add users to user group.", backend.BadInputErr(err, "Unable to create add users to user group."))
+			return nil, backend.WrapError("Unable to add users to user group.", err)
 		}
 		break
 	}
@@ -177,21 +159,19 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		if i.Name != "" {
 			tx.Update(sq.Update("user_groups").Set("name", i.Name).Where(sq.Eq{"id": userGroup.ID}))
 		}
+		if len(i.UsersToRemove) > 0 {
+			for _, userSlug := range i.UsersToRemove {
+				var userID int64
+				tx.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": userSlug}))
+				tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"user_id": userID, "group_id": userGroup.ID}))
+			}
+		}
 	})
-	if err != nil {
-		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
-	}
-	if len(i.UsersToRemove) > 0 {
-		err = RemoveUsersFromGroup(db, i.UsersToRemove, userGroup.ID)
-	}
 	if err != nil {
 		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
 	}
 	if len(i.UsersToAdd) > 0 {
 		err = AddUsersToGroup(db, i.UsersToAdd, userGroup.ID)
-	}
-	if err != nil {
-		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
 	}
 
 	return &dtos.UserGroup{
@@ -220,6 +200,7 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	return nil
 }
 
+// Lists all usergroups for an admin, with pagination
 // TODO TN how to to more thoroughly test this?
 func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
@@ -257,6 +238,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 
 	userGroupsDTO := []dtos.UserGroupAdminView{}
 	tempGroupMap := dtos.UserGroupAdminView{}
+	// TODO TN extract to be own function, for easier testing
 
 	if len(slugMap) == 0 {
 		return &dtos.PaginationWrapper{
@@ -373,6 +355,7 @@ var slugMap []struct {
 	Deleted   sql.NullString `db:"deleted"`
 }
 
+// Lists all user groups for an operation; op admins and sys admins can view
 func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserGroupOperationRole, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
@@ -410,6 +393,8 @@ func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dt
 	return userGroupsDTO
 }
 
+// lists all user groups that can be added to an operation
+// no pagination, because this is used for the search bar
 func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGroupsInput) ([]*dtos.UserGroupAdminView, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
@@ -445,4 +430,5 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	}
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
+	// TODO TN fix frontend bug
 }

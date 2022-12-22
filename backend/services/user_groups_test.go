@@ -65,27 +65,6 @@ func TestAddUsersToGroup(t *testing.T) {
 	})
 }
 
-func TestRemoveUsersFromGroup(t *testing.T) {
-	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		gryffindorUserGroup := UserGroupGryffindor
-
-		usersToRemove := []string{
-			UserRon.Slug,
-			UserHermione.Slug,
-		}
-
-		err := services.RemoveUsersFromGroup(db, usersToRemove, gryffindorUserGroup.ID)
-		require.NoError(t, err)
-
-		userIDs, err := getUserIDsFromGroup(db, gryffindorUserGroup.Slug)
-		require.NoError(t, err)
-		require.Equal(t, 2, len(userIDs))
-		for _, userID := range userIDs {
-			require.Contains(t, []int64{UserHarry.ID, UserGinny.ID}, userID)
-		}
-	})
-}
-
 func TestCreateUserGroup(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		slug := "testGroup"
