@@ -198,6 +198,13 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	return nil
 }
 
+type slugMap []struct {
+	UserSlug  sql.NullString `db:"user_slug"`
+	GroupSlug string         `db:"group_slug"`
+	GroupName string         `db:"group_name"`
+	Deleted   sql.NullString `db:"deleted"`
+}
+
 // Lists all usergroups for an admin, with pagination
 func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
 	if err := isAdmin(ctx); err != nil {
@@ -227,15 +234,22 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	sql, args, _ := sb2.ToSql()
 	unionSelect := sb.Suffix("UNION "+sql, args...)
 
+	var slugMap slugMap
+
 	err := db.Select(&slugMap, unionSelect)
 
 	if err != nil {
 		return nil, backend.WrapError("unable to get map of user IDs to group IDs from database", backend.DatabaseErr(err))
 	}
 
+	paginatedSortedUser, err := sortUsersInToGroups(slugMap, i.Pagination)
+
+	return paginatedSortedUser, nil
+}
+
+func sortUsersInToGroups(slugMap slugMap, pagination Pagination) (*dtos.PaginationWrapper, error) {
 	userGroupsDTO := []dtos.UserGroupAdminView{}
 	tempGroupMap := dtos.UserGroupAdminView{}
-	// TODO TN extract to be own function, for easier testing
 
 	if len(slugMap) == 0 {
 		return &dtos.PaginationWrapper{
@@ -320,37 +334,27 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		}
 	}
 
-	p := i.Pagination
-
-	prevLastIndex := (p.Page - 1) * p.PageSize
+	prevLastIndex := (pagination.Page - 1) * pagination.PageSize
 	groupLength := len(userGroupsDTO)
-	totalPages := math.Ceil(float64(groupLength) / float64(p.PageSize))
-	remainingItemsCount := (groupLength - int(prevLastIndex)) % int(p.PageSize)
+	totalPages := math.Ceil(float64(groupLength) / float64(pagination.PageSize))
+	remainingItemsCount := (groupLength - int(prevLastIndex)) % int(pagination.PageSize)
 
-	currLastIndex := int(p.Page * p.PageSize)
-	pageSize := p.PageSize
-	if p.Page == int64(totalPages) {
+	currLastIndex := int(pagination.Page * pagination.PageSize)
+	pageSize := pagination.PageSize
+	if pagination.Page == int64(totalPages) {
 		currLastIndex = int(prevLastIndex) + remainingItemsCount
 		pageSize = int64(remainingItemsCount)
 	}
 
 	paginatedResults := userGroupsDTO[prevLastIndex:currLastIndex]
 	paginatedData := &dtos.PaginationWrapper{
-		PageNumber: p.Page,
+		PageNumber: pagination.Page,
 		PageSize:   pageSize,
 		Content:    paginatedResults,
 		TotalCount: int64(groupLength),
 		TotalPages: int64(totalPages),
 	}
-
 	return paginatedData, nil
-}
-
-var slugMap []struct {
-	UserSlug  sql.NullString `db:"user_slug"`
-	GroupSlug string         `db:"group_slug"`
-	GroupName string         `db:"group_name"`
-	Deleted   sql.NullString `db:"deleted"`
 }
 
 // Lists all user groups for an operation; op admins and sys admins can view
