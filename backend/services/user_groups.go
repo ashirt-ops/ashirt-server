@@ -63,9 +63,6 @@ func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
 	if cugi.Slug == "" {
 		return backend.MissingValueErr("Slug")
 	}
-	if cugi.Slug == "" {
-		return backend.MissingValueErr("Name")
-	}
 	return nil
 }
 
@@ -155,6 +152,7 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
 		if i.Name != "" {
+			// TODO TN why is name lowercase after editing?
 			tx.Update(sq.Update("user_groups").Set("name", i.Name).Where(sq.Eq{"id": userGroup.ID}))
 		}
 		if len(i.UsersToRemove) > 0 {
@@ -169,7 +167,8 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		}
 	})
 	if err != nil {
-		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
+		// TODO TN - ask Joel about this error?
+		return nil, backend.WrapError("Error creating user group", backend.BadInputErr(err, "A user group with this name already exists; please choose another name"))
 	}
 
 	return &dtos.UserGroup{
@@ -247,6 +246,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	return paginatedSortedUser, nil
 }
 
+// TODO TN write tests
 func sortUsersInToGroups(slugMap slugMap, pagination Pagination) (*dtos.PaginationWrapper, error) {
 	userGroupsDTO := []dtos.UserGroupAdminView{}
 	tempGroupMap := dtos.UserGroupAdminView{}
@@ -260,8 +260,6 @@ func sortUsersInToGroups(slugMap slugMap, pagination Pagination) (*dtos.Paginati
 		}, nil
 	}
 
-	// TODO TN - there's some sort of bug, try adding groups with same names
-	// It returns a blank screen after editing a group to have the same name as another
 	for j := 0; j < len(slugMap); j++ {
 		firstItem := j == 0
 		isLastItem := j == len(slugMap)-1
@@ -433,6 +431,6 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	}
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
-	// TODO TN make name unique
+	// TODO TN react.development.js:209 Warning: Each child in a list should have a unique "key" prop.
 	// TODO TN - right now a user admin can lock themselves out by changing their personal group admin permissions - how would I go about preventign that?
 }
