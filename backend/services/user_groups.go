@@ -431,6 +431,5 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	}
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
-	// TODO TN react.development.js:209 Warning: Each child in a list should have a unique "key" prop.
 	// TODO TN - right now a user admin can lock themselves out by changing their personal group admin permissions - how would I go about preventign that?
 }

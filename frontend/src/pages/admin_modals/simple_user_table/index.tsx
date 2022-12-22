@@ -75,7 +75,7 @@ export default (props: {
       <Table className={cx('table')} columns={columns}>
         {wiredUsers.render(data => <>
           {data.map(user =>
-            (<tr>
+            (<tr key={user.slug}>
               <td>{`${user.firstName} ${user.lastName}`}</td>
               <td>
                 <ComplexCheckbox
