@@ -47,7 +47,7 @@ const NewUserGroupForm = (props: {
   const formProps = useForm({
     fields: [userGroupField, roleField],
     handleSubmit: async () => {
-      if (userGroupField.value == null) throw Error("A user must be selected")
+      if (userGroupField.value == null) throw Error("A user group must be selected")
       await setUserGroupPermission({
         operationSlug: props.operationSlug,
         userGroupSlug: userGroupField.value.slug,
