@@ -79,21 +79,23 @@ func (cugi CreateUserGroupInput) validateUserGroupInput() error {
 	return nil
 }
 
-func AddUsersToGroup(db *database.Connection, userSlugs []string, groupID int64) error {
+func AddUsersToGroup(db database.ConnectionProxy, userSlugs []string, groupID int64) error {
 	for _, userSlug := range userSlugs {
-		userID, err := userSlugToUserID(db, userSlug)
+		var userID int64
+		err := db.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": userSlug}))
 		if err != nil {
 			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
 		}
 
-		var userGroupMap models.UserGroupMap
-		err = db.Get(&userGroupMap, sq.Select("*").
+		var userGroupMap []models.UserGroupMap
+		// TODO TN - ask Joel about this
+		err = db.Select(&userGroupMap, sq.Select("*").
 			From("group_user_map").
 			Where(sq.Eq{
 				"user_id":  userID,
 				"group_id": groupID,
 			}))
-		if err != nil {
+		if len(userGroupMap) == 0 {
 			_, err = db.Insert("group_user_map", map[string]interface{}{
 				"user_id":  userID,
 				"group_id": groupID,
@@ -117,19 +119,19 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 		return nil, backend.BadInputErr(errors.New("Unable to create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
 	}
 
-	id, err := db.Insert("user_groups", map[string]interface{}{
-		"slug": cleanSlug, // TODO TN - make name unique?
-		"name": i.Name,
-	})
-	// TODO TN how do operations handle transactions vs not?
-	if err != nil {
-		if database.IsAlreadyExistsError(err) {
-			return nil, backend.WrapError("Unable to create user group. User group slug already exists.", backend.BadInputErr(err, "A user group with this slug already exists; please choose another name"))
+	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+		id, _ := tx.Insert("user_groups", map[string]interface{}{
+			"slug": cleanSlug,
+			"name": i.Name,
+		})
+		if len(i.UserSlugs) > 0 {
+			AddUsersToGroup(tx, i.UserSlugs, id)
 		}
-	}
-	err = AddUsersToGroup(db, i.UserSlugs, id)
+	})
+
 	if err != nil {
-		return nil, backend.WrapError("Unable to add users to user group.", err)
+		// TODO TN - ask Joel about this error?
+		return nil, backend.WrapError("Error creating user group", backend.BadInputErr(err, "A user group with this slug already exists; please choose another name"))
 	}
 	return &dtos.UserGroup{
 		Slug: i.Slug,
@@ -162,12 +164,12 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 				tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"user_id": userID, "group_id": userGroup.ID}))
 			}
 		}
+		if len(i.UsersToAdd) > 0 {
+			AddUsersToGroup(tx, i.UsersToAdd, userGroup.ID)
+		}
 	})
 	if err != nil {
 		return nil, backend.WrapError("Unable to modify user group", backend.DatabaseErr(err))
-	}
-	if len(i.UsersToAdd) > 0 {
-		err = AddUsersToGroup(db, i.UsersToAdd, userGroup.ID)
 	}
 
 	return &dtos.UserGroup{
@@ -427,4 +429,5 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
 	// TODO TN fix frontend bug
+	// TODO TN Why is frontend crashing when popping git stash/changing branches?
 }

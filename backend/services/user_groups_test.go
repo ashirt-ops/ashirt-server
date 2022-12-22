@@ -4,6 +4,7 @@
 package services_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -53,7 +54,10 @@ func TestAddUsersToGroup(t *testing.T) {
 			UserHagrid.Slug,
 		}
 
-		err := services.AddUsersToGroup(db, usersToAdd, gryffindorUserGroup.ID)
+		err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+			services.AddUsersToGroup(tx, usersToAdd, gryffindorUserGroup.ID)
+		})
+
 		require.NoError(t, err)
 
 		userIDs, err := getUserIDsFromGroup(db, gryffindorUserGroup.Slug)
@@ -98,7 +102,7 @@ func TestCreateUserGroup(t *testing.T) {
 			require.Contains(t, []int64{UserRon.ID, UserAlastor.ID, UserHagrid.ID}, userID)
 		}
 		_, err = services.CreateUserGroup(ctx, db, i)
-		assert.ErrorContains(t, err, "Unable to create user group. User group slug already exists")
+		assert.Error(t, err)
 	})
 }
 
