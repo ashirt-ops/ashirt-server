@@ -261,6 +261,7 @@ func sortUsersInToGroups(slugMap slugMap, pagination Pagination) (*dtos.Paginati
 	}
 
 	// TODO TN - there's some sort of bug, try adding groups with same names
+	// It returns a blank screen after editing a group to have the same name as another
 	for j := 0; j < len(slugMap); j++ {
 		firstItem := j == 0
 		isLastItem := j == len(slugMap)-1
@@ -433,5 +434,4 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
 	// TODO TN fix frontend bug
-	// TODO TN Why is frontend crashing when popping git stash/changing branches?
 }
