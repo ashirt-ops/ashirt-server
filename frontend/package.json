@@ -40,7 +40,7 @@
   "dependencies": {
     "@types/har-format": "^1.2.8",
     "ace-builds": "^1.13.2",
-    "classnames": "^2.3.1",
+    "classnames": "^2.3.2",
     "date-fns": "^2.29.3",
     "lodash": "^4.17.21",
     "query-string": "^7.1.1",
