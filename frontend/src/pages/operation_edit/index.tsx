@@ -26,12 +26,10 @@ export const OperationEdit = () => {
   const [operationName, setOperationName] = React.useState('')
   
   const wiredOperation = useWiredData(React.useCallback(() => getOperation(operationSlug), [operationSlug]))
-  // const wiredOperation = useWiredData(() => getOperation(operationSlug))
 
   React.useEffect(() => {
     wiredOperation.expose(operation => {
       setCanViewGroups(!!operation?.userCanViewGroups)
-      console.log("operation?.name", operation?.name) 
       setOperationName(operation?.name)
     })
   }, [wiredOperation])

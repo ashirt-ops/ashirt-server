@@ -152,7 +152,6 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 
 	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
 		if i.Name != "" {
-			// TODO TN why is name lowercase after editing?
 			tx.Update(sq.Update("user_groups").Set("name", i.Name).Where(sq.Eq{"id": userGroup.ID}))
 		}
 		if len(i.UsersToRemove) > 0 {
@@ -431,5 +430,5 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 	}
 	return userGroupsDTO, nil
 	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
-	// TODO TN - right now a user admin can lock themselves out by changing their personal group admin permissions - how would I go about preventign that?
+	// TODO TN - awaiting response from guys. right now a user admin can lock themselves out by changing their personal group admin permissions - how would I go about preventign that?
 }

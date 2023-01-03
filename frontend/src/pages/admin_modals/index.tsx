@@ -247,7 +247,7 @@ export const ModifyUserGroupModal = (props: {
       initialSlugs.forEach((slug) => !newSlugs.has(slug) && slugsToRemove.push(slug))
       newSlugs.forEach((slug) => !initialSlugs.has(slug) && slugsToAdd.push(slug))
 
-      const newName = name.value.toLowerCase() !== props.userGroup.name.toLowerCase() ? name.value.toLowerCase() : null
+      const newName = name.value.toLowerCase() !== props.userGroup.name.toLowerCase() ? name.value : null
       const runSubmit = async () => {
         await modifyUserGroup({
           slug: props.userGroup.slug,
