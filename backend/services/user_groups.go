@@ -85,13 +85,15 @@ func AddUsersToGroup(db database.ConnectionProxy, userSlugs []string, groupID in
 		}
 
 		var userGroupMap []models.UserGroupMap
-		// TODO TN - ask Joel about this
 		err = db.Select(&userGroupMap, sq.Select("*").
 			From("group_user_map").
 			Where(sq.Eq{
 				"user_id":  userID,
 				"group_id": groupID,
 			}))
+		if err != nil {
+			return backend.WrapError("Unable to group from group id", backend.DatabaseErr(err))
+		}
 		if len(userGroupMap) == 0 {
 			_, err = db.Insert("group_user_map", map[string]interface{}{
 				"user_id":  userID,
@@ -438,6 +440,4 @@ func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGrou
 		}
 	}
 	return userGroupsDTO, nil
-	// TODO TN should I call user gruops - groups? Doesn't work in DB, but could work elsewhere
-	// TODO TN - awaiting response from guys. right now a user admin can lock themselves out by changing their personal group admin permissions - how would I go about preventign that?
 }
