@@ -196,7 +196,9 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	return nil
 }
 
-type slugMap []struct {
+// TODO TN - shouold I be using arrays and stuff when creating user groups?
+// Look at Joel's comments on the other PRs
+type SlugMap []struct {
 	UserSlug  sql.NullString `db:"user_slug"`
 	GroupSlug string         `db:"group_slug"`
 	GroupName string         `db:"group_name"`
@@ -209,6 +211,18 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
 	}
 
+	slugMap, _ := GetSlugMap(db, i)
+
+	paginatedSortedUser, err := SortUsersInToGroups(slugMap, i.Pagination)
+
+	if err != nil {
+		return nil, backend.WrapError("Unable to list user groups", backend.DatabaseErr(err))
+	}
+
+	return paginatedSortedUser, nil
+}
+
+func GetSlugMap(db *database.Connection, i ListUserGroupsForAdminInput) (SlugMap, error) {
 	sb := sq.Select("user_groups.slug AS group_slug, user_groups.name AS group_name, users.slug AS user_slug, user_groups.deleted_at AS deleted").
 		From("group_user_map").
 		LeftJoin("user_groups ON group_user_map.group_id = user_groups.id").
@@ -232,7 +246,7 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 	sql, args, _ := sb2.ToSql()
 	unionSelect := sb.Suffix("UNION "+sql, args...)
 
-	var slugMap slugMap
+	var slugMap SlugMap
 
 	err := db.Select(&slugMap, unionSelect)
 
@@ -240,13 +254,10 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 		return nil, backend.WrapError("unable to get map of user IDs to group IDs from database", backend.DatabaseErr(err))
 	}
 
-	paginatedSortedUser, err := sortUsersInToGroups(slugMap, i.Pagination)
-
-	return paginatedSortedUser, nil
+	return slugMap, nil
 }
 
-// TODO TN write tests
-func sortUsersInToGroups(slugMap slugMap, pagination Pagination) (*dtos.PaginationWrapper, error) {
+func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.PaginationWrapper, error) {
 	userGroupsDTO := []dtos.UserGroupAdminView{}
 	tempGroupMap := dtos.UserGroupAdminView{}
 

@@ -5,6 +5,7 @@ package services_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -186,19 +187,298 @@ func TestListUserGroupsForAdmin(t *testing.T) {
 			IncludeDeleted: false,
 		}
 
-		result, err := services.ListUserGroupsForAdmin(ctx, db, i)
+		_, err := services.ListUserGroupsForAdmin(ctx, db, i)
 		// verify that non-admin user cannot list user groups
 		require.Error(t, err)
 
 		adminUser := UserDumbledore
 		ctx = contextForUser(adminUser, db)
 
-		result, err = services.ListUserGroupsForAdmin(ctx, db, i)
-		var usergroups = result.Content.([]dtos.UserGroupAdminView)
+		_, err = services.ListUserGroupsForAdmin(ctx, db, i)
+		require.NoError(t, err)
+	})
+}
+
+func TestGetSlugMap(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		i := services.ListUserGroupsForAdminInput{
+			Pagination: services.Pagination{
+				TotalCount: 4,
+				PageSize:   10,
+				Page:       1,
+			},
+			IncludeDeleted: true,
+		}
+
+		slugMap, err := services.GetSlugMap(db, i)
+		require.NoError(t, err)
+		require.Equal(t, 16, len(slugMap))
+		for _, slugMapEntry := range slugMap {
+			userName := slugMapEntry.UserSlug.String
+			if userName != "" {
+				require.Contains(t, []string{UserHarry.Slug, UserGinny.Slug, UserRon.Slug, UserHermione.Slug, UserCedric.Slug, UserCho.Slug, UserFleur.Slug, UserViktor.Slug, UserSnape.Slug, UserLucius.Slug, UserDraco.Slug}, userName)
+			}
+			if slugMapEntry.Deleted.Valid == true {
+				require.Equal(t, UserGroupOtherHouse.Slug, slugMapEntry.GroupSlug)
+			}
+		}
+	})
+}
+
+func TestSortUsersInToGroups(t *testing.T) {
+	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
+		slugMap := services.SlugMap{
+			{
+				UserSlug: sql.NullString{
+					String: UserHarry.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupGryffindor.Slug,
+				GroupName: UserGroupGryffindor.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserRon.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupGryffindor.Slug,
+				GroupName: UserGroupGryffindor.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserGinny.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupGryffindor.Slug,
+				GroupName: UserGroupGryffindor.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserHermione.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupGryffindor.Slug,
+				GroupName: UserGroupGryffindor.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+				GroupSlug: UserGroupGryffindor.Slug,
+				GroupName: UserGroupGryffindor.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserCedric.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupHufflepuff.Slug,
+				GroupName: UserGroupHufflepuff.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserFleur.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupHufflepuff.Slug,
+				GroupName: UserGroupHufflepuff.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+				GroupSlug: UserGroupHufflepuff.Slug,
+				GroupName: UserGroupHufflepuff.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			// Includes groups without a user, we need to return those groups as well
+			{
+				UserSlug: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+				GroupSlug: UserGroupOtherHouse.Slug,
+				GroupName: UserGroupOtherHouse.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserViktor.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupRavenclaw.Slug,
+				GroupName: UserGroupRavenclaw.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserCho.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupRavenclaw.Slug,
+				GroupName: UserGroupRavenclaw.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+				GroupSlug: UserGroupRavenclaw.Slug,
+				GroupName: UserGroupRavenclaw.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserDraco.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupSlytherin.Slug,
+				GroupName: UserGroupSlytherin.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserSnape.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupSlytherin.Slug,
+				GroupName: UserGroupSlytherin.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: UserLucius.Slug,
+					Valid:  true,
+				},
+				GroupSlug: UserGroupSlytherin.Slug,
+				GroupName: UserGroupSlytherin.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+			{
+				UserSlug: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+				GroupSlug: UserGroupSlytherin.Slug,
+				GroupName: UserGroupSlytherin.Name,
+				Deleted: sql.NullString{
+					String: "",
+					Valid:  false,
+				},
+			},
+		}
+
+		p := services.Pagination{
+			PageSize:   10,
+			Page:       1,
+			TotalCount: 1,
+		}
+
+		result, err := services.SortUsersInToGroups(slugMap, p)
+		require.NoError(t, err)
+		var content = result.Content.([]dtos.UserGroupAdminView)
 		require.Equal(t, int64(1), result.PageNumber)
-		require.Equal(t, int64(4), result.PageSize)
-		require.Equal(t, int64(4), result.TotalCount)
-		require.Equal(t, 4, len(usergroups))
+		require.Equal(t, int64(5), result.PageSize)
+		require.Equal(t, int64(5), result.TotalCount)
+		require.Equal(t, int64(1), result.TotalPages)
+
+		require.Equal(t, UserGroupGryffindor.Name, content[0].Name)
+		require.Equal(t, UserGroupGryffindor.Slug, content[0].Slug)
+		require.Equal(t, false, content[0].Deleted)
+		for _, userSlug := range content[0].UserSlugs {
+			require.Contains(t, []string{UserHarry.Slug, UserGinny.Slug, UserRon.Slug, UserHermione.Slug}, userSlug)
+		}
+
+		require.Equal(t, UserGroupHufflepuff.Name, content[1].Name)
+		require.Equal(t, UserGroupHufflepuff.Slug, content[1].Slug)
+		require.Equal(t, false, content[1].Deleted)
+		for _, userSlug := range content[1].UserSlugs {
+			require.Contains(t, []string{UserFleur.Slug, UserCedric.Slug}, userSlug)
+		}
+
+		require.Equal(t, UserGroupOtherHouse.Name, content[2].Name)
+		require.Equal(t, UserGroupOtherHouse.Slug, content[2].Slug)
+		require.Equal(t, false, content[2].Deleted)
+		for _, userSlug := range content[2].UserSlugs {
+			require.Contains(t, []string{UserViktor.Slug, UserCho.Slug}, userSlug)
+		}
+
+		require.Equal(t, UserGroupRavenclaw.Name, content[3].Name)
+		require.Equal(t, UserGroupRavenclaw.Slug, content[3].Slug)
+		require.Equal(t, false, content[3].Deleted)
+		for _, userSlug := range content[3].UserSlugs {
+			require.Contains(t, []string{UserViktor.Slug, UserCho.Slug}, userSlug)
+		}
+
+		require.Equal(t, UserGroupSlytherin.Name, content[4].Name)
+		require.Equal(t, UserGroupSlytherin.Name, content[4].Slug)
+		require.Equal(t, false, content[4].Deleted)
+		for _, userSlug := range content[4].UserSlugs {
+			require.Contains(t, []string{UserDraco.Slug, UserSnape.Slug, UserLucius.Slug}, userSlug)
+		}
+
+		// if len(slugMap) == 0
+		result, err = services.SortUsersInToGroups(services.SlugMap{}, p)
+		require.Equal(t, int64(1), result.PageNumber)
+		require.Equal(t, int64(0), result.PageSize)
+		require.Equal(t, int64(0), result.TotalCount)
+		require.Equal(t, int64(1), result.TotalPages)
+
 		require.NoError(t, err)
 	})
 }
