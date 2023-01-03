@@ -196,8 +196,6 @@ func DeleteUserGroup(ctx context.Context, db *database.Connection, slug string) 
 	return nil
 }
 
-// TODO TN - shouold I be using arrays and stuff when creating user groups?
-// Look at Joel's comments on the other PRs
 type SlugMap []struct {
 	UserSlug  sql.NullString `db:"user_slug"`
 	GroupSlug string         `db:"group_slug"`
