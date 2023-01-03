@@ -46,6 +46,7 @@ func main() {
 	gen(dtos.ServiceWorkerTestOutput{})
 	gen(dtos.ActiveServiceWorker{})
 	gen(dtos.Flags{})
+	gen(dtos.UserGroup{})
 	gen(dtos.UserGroupAdminView{})
 	gen(dtos.UserGroupOperationRole{})
 
