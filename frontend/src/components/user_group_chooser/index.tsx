@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2022, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -9,10 +9,6 @@ import {listUserGroups} from 'src/services'
 
 const userGroupToName = (u: UserGroup) => `${u.name}`
 
-// TODO - REMOVE THIS COMPONENT
-// Right now this component is only being used on the operation edit page as a `user group search` field.
-// However the user group edit page should probably combine this component and the user group filter into  a single
-// component, thus removing the need for the hacks here.
 export default (props: {
   value: UserGroup|null,
   onChange: (userGroup: UserGroup|null) => void,
@@ -35,7 +31,6 @@ export default (props: {
         .then(() => setLoading(false))
     }
 
-    // Manually debounce for now since this component is going away
     const timeout = setTimeout(reload, 250)
     return () => { clearTimeout(timeout) }
   }, [inputValue])
