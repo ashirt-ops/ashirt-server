@@ -123,13 +123,13 @@ const usersInGroup = (
 }
 
 const modifyActions = (
-  u: UserGroupAdminView, 
+  u: UserGroupAdminView,
   onDeleteClick: (u: UserGroupAdminView) => void,
   onEditClick: (u: UserGroupAdminView) => void
 ) => {
   return (
     <ButtonGroup className={cx('row-buttons')}>
-      <Button small disabled={u.deleted} onClick={() => onEditClick(u)}>Edit</Button> 
+      <Button small disabled={u.deleted} onClick={() => onEditClick(u)}>Edit</Button>
       <Button small disabled={u.deleted} onClick={() => onDeleteClick(u)}>Delete</Button>
     </ButtonGroup>
   )

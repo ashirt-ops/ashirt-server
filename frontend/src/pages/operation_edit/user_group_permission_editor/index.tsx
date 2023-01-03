@@ -16,7 +16,7 @@ import UserGroupChooser from 'src/components/user_group_chooser'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import { UserGroup, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
-import { getUserGroupPermissions, setUserGroupPermission, setUserPermission } from 'src/services'
+import { getUserGroupPermissions, setUserGroupPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { StandardPager } from 'src/components/paging'
@@ -158,7 +158,7 @@ const PermissionTable = (props: {
         const matchingUsers = data.filter(({ userGroup }) => normalizeName(userGroup).includes(normalizedSearchTerm))
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
-        const notAdmin = !props.isAdmin 
+        const notAdmin = !props.isAdmin
 
         return (
           <>
