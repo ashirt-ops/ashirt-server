@@ -222,6 +222,20 @@ func TestGetSlugMap(t *testing.T) {
 				require.Equal(t, UserGroupOtherHouse.Slug, slugMapEntry.GroupSlug)
 			}
 		}
+
+		// test for non-deleted user groups
+		i = services.ListUserGroupsForAdminInput{
+			Pagination: services.Pagination{
+				TotalCount: 4,
+				PageSize:   10,
+				Page:       1,
+			},
+			IncludeDeleted: false,
+		}
+
+		slugMap, err = services.GetSlugMap(db, i)
+		require.NoError(t, err)
+		require.Equal(t, 15, len(slugMap))
 	})
 }
 
