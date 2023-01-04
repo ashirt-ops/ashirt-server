@@ -129,7 +129,6 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 	})
 
 	if err != nil {
-		// TODO TN - ask Joel about this error?
 		return nil, backend.WrapError("Error creating user group", backend.BadInputErr(err, "A user group with this slug already exists; please choose another name"))
 	}
 	return &dtos.UserGroup{
@@ -168,7 +167,6 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		}
 	})
 	if err != nil {
-		// TODO TN - ask Joel about this error?
 		return nil, backend.WrapError("Error creating user group", backend.BadInputErr(err, "A user group with this name already exists; please choose another name"))
 	}
 

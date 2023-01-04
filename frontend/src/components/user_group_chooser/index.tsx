@@ -33,7 +33,7 @@ export default (props: {
 
     const timeout = setTimeout(reload, 250)
     return () => { clearTimeout(timeout) }
-  }, [inputValue])
+  }, [inputValue, props.operationSlug])
 
   const onRequestClose = () => {
     setDropdownVisible(false)

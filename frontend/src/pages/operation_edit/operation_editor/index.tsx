@@ -12,11 +12,11 @@ const EditForm = (props: {
   name: string,
   onSave: (op: {name: string }) => Promise<void>,
 }) => {
- 
+
   const nameField = useFormField(props.name)
   React.useEffect(() => {
     nameField.onChange(props.name)
-  }, [props.name])
+  }, [props.name, nameField])
 
   const formComponentProps = useForm({
     fields: [nameField],

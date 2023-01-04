@@ -24,7 +24,7 @@ export const OperationEdit = () => {
   const navigate = useNavigate()
   const [canViewGroups, setCanViewGroups] = React.useState(false)
   const [operationName, setOperationName] = React.useState('')
- 
+
   const wiredOperation = useWiredData(React.useCallback(() => getOperation(operationSlug), [operationSlug]))
 
   React.useEffect(() => {
@@ -33,7 +33,7 @@ export const OperationEdit = () => {
       setOperationName(operation?.name)
     })
   }, [wiredOperation])
- 
+
   const tabs =[
     { id: "settings", label: "Settings" },
     { id: "users", label: "Users" },
