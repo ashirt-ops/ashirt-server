@@ -78,6 +78,7 @@ func LoadAPIConfig() error {
 	return loadConfig([]func() error{
 		loadAppConfig,
 		loadDBConfig,
+		loadStoreConfig,
 	})
 }
 
