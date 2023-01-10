@@ -16,4 +16,5 @@ func TestSanitizeSlug(t *testing.T) {
 	require.Equal(t, services.SanitizeSlug("Harry Potter"), "harry-potter")
 	require.Equal(t, services.SanitizeSlug("fancy_name"), "fancy-name")
 	require.Equal(t, services.SanitizeSlug("Lots_Of-Fancy! Characters"), "lots-of-fancy-characters")
+	require.Equal(t, services.SanitizeSlug("$$prefixed_and_postfixed$$"), "prefixed-and-postfixed") 
 }
