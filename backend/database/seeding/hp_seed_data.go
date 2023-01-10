@@ -195,20 +195,20 @@ var UserGroupSlytherin = newUserGroup("Slytherin", false)
 // UserGroupOtherHouse is reserved to test deleted user groups
 var UserGroupOtherHouse = newUserGroup("Other House", true)
 
-var AddHarryToGryffindor = newUserGroupMapping(UserHarry.ID, UserGroupGryffindor.ID)
-var AddRonToGryffindor = newUserGroupMapping(UserRon.ID, UserGroupGryffindor.ID)
-var AddGinnyToGryffindor = newUserGroupMapping(UserGinny.ID, UserGroupGryffindor.ID)
-var AddHermioneToGryffindor = newUserGroupMapping(UserHermione.ID, UserGroupGryffindor.ID)
+var AddHarryToGryffindor = newUserGroupMapping(UserHarry, UserGroupGryffindor)
+var AddRonToGryffindor = newUserGroupMapping(UserRon, UserGroupGryffindor)
+var AddGinnyToGryffindor = newUserGroupMapping(UserGinny, UserGroupGryffindor)
+var AddHermioneToGryffindor = newUserGroupMapping(UserHermione, UserGroupGryffindor)
 
-var AddMalfoyToSlytherin = newUserGroupMapping(UserDraco.ID, UserGroupSlytherin.ID)
-var AddLuciusToSlytherin = newUserGroupMapping(UserLucius.ID, UserGroupSlytherin.ID)
-var AddSnapeToSlytherin = newUserGroupMapping(UserSnape.ID, UserGroupSlytherin.ID)
+var AddMalfoyToSlytherin = newUserGroupMapping(UserDraco, UserGroupSlytherin)
+var AddLuciusToSlytherin = newUserGroupMapping(UserLucius, UserGroupSlytherin)
+var AddSnapeToSlytherin = newUserGroupMapping(UserSnape, UserGroupSlytherin)
 
-var AddCedricToHufflepuff = newUserGroupMapping(UserCedric.ID, UserGroupHufflepuff.ID)
-var AddFleurToHufflepuff = newUserGroupMapping(UserFleur.ID, UserGroupHufflepuff.ID)
+var AddCedricToHufflepuff = newUserGroupMapping(UserCedric, UserGroupHufflepuff)
+var AddFleurToHufflepuff = newUserGroupMapping(UserFleur, UserGroupHufflepuff)
 
-var AddViktorToRavenclaw = newUserGroupMapping(UserViktor.ID, UserGroupRavenclaw.ID)
-var AddChoToRavenclaw = newUserGroupMapping(UserCho.ID, UserGroupRavenclaw.ID)
+var AddViktorToRavenclaw = newUserGroupMapping(UserViktor, UserGroupRavenclaw)
+var AddChoToRavenclaw = newUserGroupMapping(UserCho, UserGroupRavenclaw)
 
 var newAPIKey = newAPIKeyGen(1)
 var APIKeyHarry1 = newAPIKey(UserHarry.ID, "harry-abc", []byte{0x01, 0x02, 0x03})

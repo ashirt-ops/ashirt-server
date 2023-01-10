@@ -278,10 +278,10 @@ func newUserGroupGen(first int64) func(name string, deleted bool) models.UserGro
 	}
 }
 
-func newUserGroupMapping(userID int64, groupID int64) models.UserGroupMap {
+func newUserGroupMapping(user models.User, group models.UserGroup) models.UserGroupMap {
 	return models.UserGroupMap{
-		GroupID:   groupID,
-		UserID:    userID,
+		GroupID:   group.ID,
+		UserID:    user.ID,
 		CreatedAt: internalClock.Now(),
 	}
 }

@@ -6,7 +6,7 @@ import { backendDataSource as ds } from './data_sources/backend'
 import { userGroupOperationRoleFromDto, userOperationRoleFromDto } from './data_sources/converters'
 
 export async function createOperation(name: string): Promise<Operation> {
-  let slug = name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  let slug = name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
   if (slug === "") {
     return (name === ""
       ? Promise.reject(Error("Operation Name must not be empty"))

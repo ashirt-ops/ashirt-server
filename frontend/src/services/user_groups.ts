@@ -17,7 +17,7 @@ export async function createUserGroup(i: {
   name: string,
   userSlugs: string[],
 }): Promise<void> {
-  let slug = i.name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  let slug = i.name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
   if (slug === "") {
     return (i.name === ""
       ? Promise.reject(Error("User group name must not be empty"))
