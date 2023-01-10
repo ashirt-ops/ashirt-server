@@ -133,19 +133,23 @@ func buildContextForUser(ctx context.Context, db *database.Connection, userID in
 
 func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int64, isSuperAdmin, isHeadless bool) policy.Policy {
 	var roles []models.UserOperationPermission
-	err := db.Select(&roles, sq.Select("operation_id", "role").
-		From("user_operation_permissions").
-		Where(sq.Eq{"user_id": userID}))
-
-	var userGroupIds []int64
-	err = db.Select(&userGroupIds, sq.Select("group_id").
-		From("group_user_map").
-		Where(sq.Eq{"user_id": userID}))
 
 	var groupRoles []models.UserGroupOperationPermission
-	err = db.Select(&groupRoles, sq.Select("operation_id", "role").
-		From("user_group_operation_permissions").
-		Where(sq.Eq{"group_id": userGroupIds}))
+
+	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+		tx.Select(&roles, sq.Select("operation_id", "role").
+			From("user_operation_permissions").
+			Where(sq.Eq{"user_id": userID}))
+
+		var userGroupIds []int64
+		tx.Select(&userGroupIds, sq.Select("group_id").
+			From("group_user_map").
+			Where(sq.Eq{"user_id": userID}))
+
+		tx.Select(&groupRoles, sq.Select("operation_id", "role").
+			From("user_group_operation_permissions").
+			Where(sq.Eq{"group_id": userGroupIds}))
+	})
 
 	if err != nil {
 		logging.Log(ctx, "msg", "Unable to build user policy", "error", err.Error())
