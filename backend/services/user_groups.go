@@ -76,16 +76,16 @@ func (i CreateUserGroupInput) validateUserGroupInput() error {
 	return nil
 }
 
-func AddUsersToGroup(db database.ConnectionProxy, userSlugs []string, groupID int64) error {
+func AddUsersToGroup(tx database.ConnectionProxy, userSlugs []string, groupID int64) error {
 	for _, userSlug := range userSlugs {
 		var userID int64
-		err := db.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": userSlug}))
+		err := tx.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": userSlug}))
 		if err != nil {
 			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
 		}
 
 		var userGroupMap []models.UserGroupMap
-		err = db.Select(&userGroupMap, sq.Select("*").
+		err = tx.Select(&userGroupMap, sq.Select("*").
 			From("group_user_map").
 			Where(sq.Eq{
 				"user_id":  userID,
@@ -95,7 +95,7 @@ func AddUsersToGroup(db database.ConnectionProxy, userSlugs []string, groupID in
 			return backend.WrapError("Unable to group from group id", backend.DatabaseErr(err))
 		}
 		if len(userGroupMap) == 0 {
-			_, err = db.Insert("group_user_map", map[string]interface{}{
+			_, err = tx.Insert("group_user_map", map[string]interface{}{
 				"user_id":  userID,
 				"group_id": groupID,
 			})
