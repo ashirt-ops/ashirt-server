@@ -76,33 +76,31 @@ func (i CreateUserGroupInput) validateUserGroupInput() error {
 	return nil
 }
 
-func AddUsersToGroup(tx database.ConnectionProxy, userSlugs []string, groupID int64) error {
-	for _, userSlug := range userSlugs {
-		var userID int64
-		err := tx.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": userSlug}))
-		if err != nil {
-			return backend.WrapError("Unable to get user id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug %s was found`, userSlug)))
+func AddUsersToGroup(tx *database.Transactable, userSlugs []string, groupID int64) error {
+	if len(userSlugs) > 0 {
+		questionMarks := "("
+		for i := 0; i < len(userSlugs); i++ {
+			questionMarks += "?, "
 		}
+		questionMarks = strings.TrimSuffix(questionMarks, ", ")
+		questionMarks += ")"
 
-		var userGroupMap []models.UserGroupMap
-		err = tx.Select(&userGroupMap, sq.Select("*").
-			From("group_user_map").
-			Where(sq.Eq{
-				"user_id":  userID,
-				"group_id": groupID,
-			}))
+		sqlStatement := fmt.Sprintf(`INSERT IGNORE INTO group_user_map(user_id, group_id)
+					SELECT users.id, user_groups.id
+					FROM users, user_groups
+					WHERE users.slug in %s and user_groups.id = ?;`, questionMarks)
+
+		interfaceSlice := make([]interface{}, len(userSlugs)+1)
+		for i, v := range userSlugs {
+			interfaceSlice[i] = v
+		}
+		interfaceSlice[len(userSlugs)] = groupID
+		err := tx.Exec(sq.Expr(sqlStatement, interfaceSlice...))
+
 		if err != nil {
-			return backend.WrapError("Unable to group from group id", backend.DatabaseErr(err))
+			return backend.WrapError("Unable to add users to group", backend.DatabaseErr(err))
 		}
-		if len(userGroupMap) == 0 {
-			_, err = tx.Insert("group_user_map", map[string]interface{}{
-				"user_id":  userID,
-				"group_id": groupID,
-			})
-			if err != nil {
-				return backend.WrapError("Unable to connect user to group", backend.DatabaseErr(err))
-			}
-		}
+		return nil
 	}
 
 	return nil
@@ -123,9 +121,7 @@ func CreateUserGroup(ctx context.Context, db *database.Connection, i CreateUserG
 			"slug": cleanSlug,
 			"name": i.Name,
 		})
-		if len(i.UserSlugs) > 0 {
-			AddUsersToGroup(tx, i.UserSlugs, id)
-		}
+		AddUsersToGroup(tx, i.UserSlugs, id)
 	})
 
 	if err != nil {
@@ -160,9 +156,7 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 				tx.Exec(sq.Expr("DELETE gm FROM group_user_map gm JOIN users u on gm.user_id = u.id WHERE u.slug=?;", userSlug))
 			}
 		}
-		if len(i.UsersToAdd) > 0 {
-			AddUsersToGroup(tx, i.UsersToAdd, userGroup.ID)
-		}
+		AddUsersToGroup(tx, i.UsersToAdd, userGroup.ID)
 	})
 	if err != nil {
 		return nil, backend.WrapError("Error creating user group", backend.BadInputErr(err, "A user group with this name already exists; please choose another name"))
