@@ -114,26 +114,27 @@ func SetUserGroupOperationRole(ctx context.Context, db *database.Connection, i S
 		return nil
 	}
 
-	var permission models.UserGroupOperationPermission
-	err = db.Get(&permission, sq.Select("*").
-		From("user_group_operation_permissions").
-		Where(sq.Eq{
-			"group_id":     userGroupID,
-			"operation_id": operation.ID,
-		}))
-	if err != nil {
-		_, err = db.Insert("user_group_operation_permissions", map[string]interface{}{
-			"group_id":     userGroupID,
-			"operation_id": operation.ID,
-			"role":         i.Role,
-		})
-		if err != nil {
-			return backend.WrapError("Unable to add user role", backend.DatabaseErr(err))
+	var permissions []models.UserGroupOperationPermission
+	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
+		tx.Select(&permissions, sq.Select("*").
+			From("user_group_operation_permissions").
+			Where(sq.Eq{
+				"group_id":     userGroupID,
+				"operation_id": operation.ID,
+			}))
+		if len(permissions) == 0 {
+			tx.Insert("user_group_operation_permissions", map[string]interface{}{
+				"group_id":     userGroupID,
+				"operation_id": operation.ID,
+				"role":         i.Role,
+			})
 		}
-		return nil
+	})
+	if err != nil {
+		return backend.WrapError("Unable to add user role", backend.DatabaseErr(err))
 	}
 
-	if permission.Role != i.Role {
+	if len(permissions) > 0 && permissions[0].Role != i.Role {
 		err = db.Update(sq.Update("user_group_operation_permissions").
 			Set("role", i.Role).
 			Where(sq.Eq{"group_id": userGroupID, "operation_id": operation.ID}))
