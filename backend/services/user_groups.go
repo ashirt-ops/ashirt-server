@@ -79,9 +79,13 @@ func (i CreateUserGroupInput) validateUserGroupInput() error {
 func AddUsersToGroup(tx *database.Transactable, userSlugs []string, groupID int64) error {
 	if len(userSlugs) > 0 {
 		questionMarks := "("
-		for i := 0; i < len(userSlugs); i++ {
+
+		interfaceSlice := make([]interface{}, len(userSlugs)+1)
+		for i, v := range userSlugs {
 			questionMarks += "?, "
+			interfaceSlice[i] = v
 		}
+
 		questionMarks = strings.TrimSuffix(questionMarks, ", ")
 		questionMarks += ")"
 
@@ -90,10 +94,6 @@ func AddUsersToGroup(tx *database.Transactable, userSlugs []string, groupID int6
 					FROM users, user_groups
 					WHERE users.slug in %s and user_groups.id = ?;`, questionMarks)
 
-		interfaceSlice := make([]interface{}, len(userSlugs)+1)
-		for i, v := range userSlugs {
-			interfaceSlice[i] = v
-		}
 		interfaceSlice[len(userSlugs)] = groupID
 		err := tx.Exec(sq.Expr(sqlStatement, interfaceSlice...))
 
