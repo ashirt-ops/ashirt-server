@@ -157,9 +157,7 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 		}
 		if len(i.UsersToRemove) > 0 {
 			for _, userSlug := range i.UsersToRemove {
-				var userID int64
-				tx.Get(&userID, sq.Select("id").From("users").Where(sq.Eq{"slug": userSlug}))
-				tx.Delete(sq.Delete("group_user_map").Where(sq.Eq{"user_id": userID, "group_id": userGroup.ID}))
+				tx.Exec(sq.Expr("DELETE gm FROM group_user_map gm JOIN users u on gm.user_id = u.id WHERE u.slug=?;", userSlug))
 			}
 		}
 		if len(i.UsersToAdd) > 0 {
