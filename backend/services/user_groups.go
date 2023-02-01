@@ -59,18 +59,18 @@ type ListUserGroupsInput struct {
 	OperationSlug  string
 }
 
-func (cugi ModifyUserGroupInput) validateUserGroupInput() error {
-	if cugi.Slug == "" {
+func (i ModifyUserGroupInput) validateUserGroupInput() error {
+	if i.Slug == "" {
 		return backend.MissingValueErr("Slug")
 	}
 	return nil
 }
 
-func (cugi CreateUserGroupInput) validateUserGroupInput() error {
-	if cugi.Slug == "" {
+func (i CreateUserGroupInput) validateUserGroupInput() error {
+	if i.Slug == "" {
 		return backend.MissingValueErr("Slug")
 	}
-	if cugi.Name == "" {
+	if i.Name == "" {
 		return backend.MissingValueErr("Name")
 	}
 	return nil
