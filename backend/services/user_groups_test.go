@@ -292,18 +292,6 @@ func TestSortUsersInToGroups(t *testing.T) {
 			},
 			{
 				UserSlug: sql.NullString{
-					String: "",
-					Valid:  false,
-				},
-				GroupSlug: UserGroupGryffindor.Slug,
-				GroupName: UserGroupGryffindor.Name,
-				Deleted: sql.NullString{
-					String: "",
-					Valid:  false,
-				},
-			},
-			{
-				UserSlug: sql.NullString{
 					String: UserCedric.Slug,
 					Valid:  true,
 				},
@@ -318,18 +306,6 @@ func TestSortUsersInToGroups(t *testing.T) {
 				UserSlug: sql.NullString{
 					String: UserFleur.Slug,
 					Valid:  true,
-				},
-				GroupSlug: UserGroupHufflepuff.Slug,
-				GroupName: UserGroupHufflepuff.Name,
-				Deleted: sql.NullString{
-					String: "",
-					Valid:  false,
-				},
-			},
-			{
-				UserSlug: sql.NullString{
-					String: "",
-					Valid:  false,
 				},
 				GroupSlug: UserGroupHufflepuff.Slug,
 				GroupName: UserGroupHufflepuff.Name,
@@ -377,18 +353,6 @@ func TestSortUsersInToGroups(t *testing.T) {
 			},
 			{
 				UserSlug: sql.NullString{
-					String: "",
-					Valid:  false,
-				},
-				GroupSlug: UserGroupRavenclaw.Slug,
-				GroupName: UserGroupRavenclaw.Name,
-				Deleted: sql.NullString{
-					String: "",
-					Valid:  false,
-				},
-			},
-			{
-				UserSlug: sql.NullString{
 					String: UserDraco.Slug,
 					Valid:  true,
 				},
@@ -415,18 +379,6 @@ func TestSortUsersInToGroups(t *testing.T) {
 				UserSlug: sql.NullString{
 					String: UserLucius.Slug,
 					Valid:  true,
-				},
-				GroupSlug: UserGroupSlytherin.Slug,
-				GroupName: UserGroupSlytherin.Name,
-				Deleted: sql.NullString{
-					String: "",
-					Valid:  false,
-				},
-			},
-			{
-				UserSlug: sql.NullString{
-					String: "",
-					Valid:  false,
 				},
 				GroupSlug: UserGroupSlytherin.Slug,
 				GroupName: UserGroupSlytherin.Name,

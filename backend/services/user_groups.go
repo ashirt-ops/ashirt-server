@@ -255,7 +255,7 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 		isLastItem := j == len(slugMap)-1
 		otherItem := j > 0 && j < len(slugMap)-1
 		hasUserSlug := slugMap[j].UserSlug.Valid
-		noUserSlug := !hasUserSlug
+		groupWithNoUsers := !hasUserSlug
 		sameGroupAsPrev := false
 		if j > 0 {
 			sameGroupAsPrev = slugMap[j].GroupSlug == slugMap[j-1].GroupSlug
@@ -271,7 +271,7 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 				},
 				Deleted: slugMap[j].Deleted.Valid,
 			}
-		} else if firstItem && noUserSlug {
+		} else if firstItem && groupWithNoUsers {
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug:    slugMap[j].GroupSlug,
 				Name:    slugMap[j].GroupName,
@@ -289,7 +289,7 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 				},
 				Deleted: slugMap[j].Deleted.Valid,
 			}
-		} else if otherItem && diffGroup && noUserSlug {
+		} else if otherItem && diffGroup && groupWithNoUsers {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug:    slugMap[j].GroupSlug,
@@ -298,8 +298,6 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 			}
 		} else if isLastItem && sameGroupAsPrev && hasUserSlug {
 			tempGroupMap.UserSlugs = append(tempGroupMap.UserSlugs, slugMap[j].UserSlug.String)
-			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
-		} else if isLastItem && sameGroupAsPrev && noUserSlug {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 		} else if isLastItem && diffGroup && hasUserSlug {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
@@ -312,7 +310,7 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 				Deleted: slugMap[j].Deleted.Valid,
 			}
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
-		} else if isLastItem && diffGroup && noUserSlug {
+		} else if isLastItem && groupWithNoUsers {
 			userGroupsDTO = append(userGroupsDTO, tempGroupMap)
 			tempGroupMap = dtos.UserGroupAdminView{
 				Slug:    slugMap[j].GroupSlug,
