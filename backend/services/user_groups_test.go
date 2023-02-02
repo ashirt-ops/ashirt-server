@@ -212,7 +212,7 @@ func TestGetSlugMap(t *testing.T) {
 
 		slugMap, err := services.GetSlugMap(db, i)
 		require.NoError(t, err)
-		require.Equal(t, 16, len(slugMap))
+		require.Equal(t, 12, len(slugMap))
 		for _, slugMapEntry := range slugMap {
 			userName := slugMapEntry.UserSlug.String
 			if userName != "" {
@@ -235,7 +235,7 @@ func TestGetSlugMap(t *testing.T) {
 
 		slugMap, err = services.GetSlugMap(db, i)
 		require.NoError(t, err)
-		require.Equal(t, 15, len(slugMap))
+		require.Equal(t, 11, len(slugMap))
 	})
 }
 

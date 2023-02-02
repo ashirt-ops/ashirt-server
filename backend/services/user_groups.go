@@ -215,8 +215,8 @@ func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i List
 func GetSlugMap(db *database.Connection, i ListUserGroupsForAdminInput) (SlugMap, error) {
 	sb := sq.Select("user_groups.slug AS group_slug, user_groups.name AS group_name, users.slug AS user_slug, user_groups.deleted_at AS deleted").
 		From("group_user_map").
-		LeftJoin("user_groups ON group_user_map.group_id = user_groups.id").
-		Join("users ON group_user_map.user_id = users.id")
+		Join("users ON group_user_map.user_id = users.id").
+		RightJoin("user_groups ON group_user_map.group_id = user_groups.id")
 
 	i.AddWhere(&sb)
 
@@ -224,21 +224,11 @@ func GetSlugMap(db *database.Connection, i ListUserGroupsForAdminInput) (SlugMap
 		sb = sb.Where(sq.Eq{"user_groups.deleted_at": nil})
 	}
 
-	sb2 := sq.Select("user_groups.slug AS group_slug, user_groups.name AS group_name, NULL as user_slug, user_groups.deleted_at AS deleted").
-		From("user_groups")
-
-	if !i.IncludeDeleted {
-		sb2 = sb2.Where(sq.Eq{"deleted_at": nil})
-	}
-
-	sb2 = sb2.OrderBy("group_name")
-
-	sql, args, _ := sb2.ToSql()
-	unionSelect := sb.Suffix("UNION "+sql, args...)
+	sb = sb.OrderBy("group_name")
 
 	var slugMap SlugMap
 
-	err := db.Select(&slugMap, unionSelect)
+	err := db.Select(&slugMap, sb)
 
 	if err != nil {
 		return nil, backend.WrapError("unable to get map of user IDs to group IDs from database", backend.DatabaseErr(err))
