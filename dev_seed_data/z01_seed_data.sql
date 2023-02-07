@@ -63,7 +63,7 @@ VALUES
     ;
 
 INSERT INTO auth_scheme_data
-    (auth_scheme, auth_type, user_key, user_id, encrypted_password)
+    (auth_scheme, auth_type, username, user_id, encrypted_password)
 VALUES
       ('local', 'local', 'adefaultuser@example.com', @alice_uid,     @defaultPassword)
     , ('local', 'local', 'bsnooper@example.com',     @bob_uid,       @defaultPassword)
@@ -99,13 +99,13 @@ SET @no_op_id = 4;
 SET @big_op_id = 5;
 
 INSERT INTO operations
-    (`id`, `slug`, `name`, `description`, active, `status`)
+    (`id`, `slug`, `name`, `description`, active)
 VALUES
-      (@alice_op_id, 'alice-op',     'AliceOp',      'An operation for Alice',  1, 0)
-    , (@bob_op_id,   'bob-op',       'BobOp',        'An operation for Bob',    1, 0)
-    , (@co_op_id,    'co-op',        'Co-Op',        'A Cooperative Operation', 1, 0)
-    , (@no_op_id,    'no-op',        'No-Op',        'An Orphaned Operation',   1, 0)
-    , (@big_op_id,   'big-op',       'BigOp',        'An operation with lots of users', 1, 0)
+      (@alice_op_id, 'alice-op',     'AliceOp',      'An operation for Alice',  1)
+    , (@bob_op_id,   'bob-op',       'BobOp',        'An operation for Bob',    1)
+    , (@co_op_id,    'co-op',        'Co-Op',        'A Cooperative Operation', 1)
+    , (@no_op_id,    'no-op',        'No-Op',        'An Orphaned Operation',   1)
+    , (@big_op_id,   'big-op',       'BigOp',        'An operation with lots of users', 1)
     ;
 
 INSERT INTO user_operation_permissions
