@@ -41,11 +41,13 @@ func main() {
 		logging.Fatal(logger, "msg", "store setup error", "error", err)
 	}
 
-	http.Handle("/api/", server.API(
+	mux := http.NewServeMux()
+
+	mux.Handle("/api/", server.API(
 		db, contentStore, logger,
 	))
 
 	logger.Log("msg", "starting API server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), nil)
+	serveErr := http.ListenAndServe(":"+config.Port(), mux)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }

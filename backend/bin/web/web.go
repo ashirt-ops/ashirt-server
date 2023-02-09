@@ -86,7 +86,9 @@ func main() {
 		logger.Log("msg", "No Emailer selected")
 	}
 
-	http.Handle("/web/", http.StripPrefix("/web", server.Web(
+	mux := http.NewServeMux()
+
+	mux.Handle("/web/", http.StripPrefix("/web", server.Web(
 		db, contentStore, &server.WebConfig{
 			CSRFAuthKey:      []byte(config.CSRFAuthKey()),
 			SessionStoreKey:  []byte(config.SessionStoreKey()),
@@ -97,7 +99,7 @@ func main() {
 	)))
 
 	logger.Log("msg", "starting Web server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), nil)
+	serveErr := http.ListenAndServe(":"+config.Port(), mux)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }
 
