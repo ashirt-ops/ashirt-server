@@ -20,7 +20,7 @@ require (
 	github.com/jonboulle/clockwork v0.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/pquerna/otp v1.3.0
+	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/rubenv/sql-migrate v1.2.0
 	github.com/stretchr/testify v1.8.1
