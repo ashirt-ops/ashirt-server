@@ -117,7 +117,9 @@ func tryRunServer(logger logging.Logger) error {
 		logger.Log("msg", "No Emailer selected")
 	}
 
-	http.Handle("/web/", http.StripPrefix("/web", server.Web(
+	mux := http.NewServeMux()
+
+	mux.Handle("/web/", http.StripPrefix("/web", server.Web(
 		db, contentStore, &server.WebConfig{
 			CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
 			SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
@@ -126,12 +128,11 @@ func tryRunServer(logger logging.Logger) error {
 			Logger:           logger,
 		},
 	)))
-	http.Handle("/api/", server.API(
+	mux.Handle("/api/", server.API(
 		db, contentStore, logger,
 	))
-
 	logger.Log("port", config.Port(), "msg", "Now Serving")
-	return http.ListenAndServe(":"+config.Port(), nil)
+	return http.ListenAndServe(":"+config.Port(), mux)
 }
 
 func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, error) {
