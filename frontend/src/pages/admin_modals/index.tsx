@@ -178,7 +178,7 @@ export const AddUserGroupModal = (props: {
   onRequestClose: () => void,
 }) => {
   const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
-  const [includedUsers, setIncludedUsers] = React.useState(() => new Set());
+  const [includedUsers, setIncludedUsers] = React.useState<Set<string>>(() => new Set());
 
   const name = useFormField<string>("")
   const userSlugs = Array.from(includedUsers as Set<string>)
