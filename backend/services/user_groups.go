@@ -77,32 +77,24 @@ func (i CreateUserGroupInput) validateUserGroupInput() error {
 }
 
 func AddUsersToGroup(tx *database.Transactable, userSlugs []string, groupID int64) error {
-	if len(userSlugs) > 0 {
-		questionMarks := "("
-
-		interfaceSlice := make([]interface{}, len(userSlugs)+1)
-		for i, v := range userSlugs {
-			questionMarks += "?, "
-			interfaceSlice[i] = v
-		}
-
-		questionMarks = strings.TrimSuffix(questionMarks, ", ")
-		questionMarks += ")"
-
-		sqlStatement := fmt.Sprintf(`INSERT IGNORE INTO group_user_map(user_id, group_id)
-					SELECT users.id, user_groups.id
-					FROM users, user_groups
-					WHERE users.slug in %s and user_groups.id = ?;`, questionMarks)
-
-		interfaceSlice[len(userSlugs)] = groupID
-		err := tx.Exec(sq.Expr(sqlStatement, interfaceSlice...))
-
-		if err != nil {
-			return backend.WrapError("Unable to add users to group", backend.DatabaseErr(err))
-		}
+	if len(userSlugs) == 0 {
 		return nil
 	}
 
+	peopleToAdd := sq.Select("id", strconv.FormatInt(groupID, 10)).
+		From("users").
+		Where(sq.Eq{"slug": userSlugs})
+
+	insertQuery := sq.
+		Insert("group_user_map").
+		Options("Ignore").
+		Columns("user_id", "group_id").Select(peopleToAdd)
+
+	err := tx.Exec(insertQuery)
+
+	if err != nil {
+		return backend.WrapError("Unable to add users to group", backend.DatabaseErr(err))
+	}
 	return nil
 }
 
