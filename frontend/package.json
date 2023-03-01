@@ -8,7 +8,7 @@
     "test-file": "mocha"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.3",
+    "@types/chai": "^4.3.4",
     "@types/classnames": "^2.3.1",
     "@types/lodash": "^4.14.191",
     "@types/mocha": "^10.0.1",
@@ -18,7 +18,7 @@
     "@types/sinon-chai": "^3.2.9",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.42.0",
-    "chai": "^4.3.6",
+    "chai": "^4.3.7",
     "css-loader": "^6.7.1",
     "eslint": "^8.23.0",
     "eslint-plugin-react": "^7.31.7",
