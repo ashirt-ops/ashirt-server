@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -144,9 +145,19 @@ func ModifyUserGroup(ctx context.Context, db *database.Connection, i ModifyUserG
 			tx.Update(sq.Update("user_groups").Set("name", i.Name).Where(sq.Eq{"id": userGroup.ID}))
 		}
 		if len(i.UsersToRemove) > 0 {
-			for _, userSlug := range i.UsersToRemove {
-				tx.Exec(sq.Expr("DELETE gm FROM group_user_map gm JOIN users u on gm.user_id = u.id WHERE u.slug=?;", userSlug))
+			interfaceSlice := make([]interface{}, len(i.UsersToRemove))
+			questionMarks := "("
+
+			for i, v := range i.UsersToRemove {
+				questionMarks += "?, "
+				interfaceSlice[i] = v
 			}
+
+			questionMarks = strings.TrimSuffix(questionMarks, ", ")
+			questionMarks += ")"
+
+			sqlStatement := fmt.Sprintf(`DELETE gm FROM group_user_map gm JOIN users u on gm.user_id = u.id WHERE u.slug in %s;`, questionMarks)
+			tx.Exec(sq.Expr(sqlStatement, interfaceSlice...))
 		}
 		AddUsersToGroup(tx, i.UsersToAdd, userGroup.ID)
 	})
