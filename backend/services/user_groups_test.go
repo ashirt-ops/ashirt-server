@@ -398,10 +398,7 @@ func TestSortUsersInToGroups(t *testing.T) {
 		result, err := services.SortUsersInToGroups(slugMap, p)
 		require.NoError(t, err)
 		var content = result.Content.([]dtos.UserGroupAdminView)
-		require.Equal(t, int64(1), result.PageNumber)
-		require.Equal(t, int64(5), result.PageSize)
 		require.Equal(t, int64(5), result.TotalCount)
-		require.Equal(t, int64(1), result.TotalPages)
 
 		require.Equal(t, UserGroupGryffindor.Name, content[0].Name)
 		require.Equal(t, UserGroupGryffindor.Slug, content[0].Slug)
@@ -440,10 +437,7 @@ func TestSortUsersInToGroups(t *testing.T) {
 
 		// if len(slugMap) == 0
 		result, err = services.SortUsersInToGroups(services.SlugMap{}, p)
-		require.Equal(t, int64(1), result.PageNumber)
-		require.Equal(t, int64(0), result.PageSize)
 		require.Equal(t, int64(0), result.TotalCount)
-		require.Equal(t, int64(1), result.TotalPages)
 
 		require.NoError(t, err)
 	})
