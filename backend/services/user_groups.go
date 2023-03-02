@@ -8,7 +8,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -246,10 +245,7 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 
 	if len(slugMap) == 0 {
 		return &dtos.PaginationWrapper{
-			PageNumber: 1,
-			PageSize:   0,
 			TotalCount: int64(0),
-			TotalPages: int64(1),
 		}, nil
 	}
 
@@ -324,25 +320,11 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 		}
 	}
 
-	prevLastIndex := (pagination.Page - 1) * pagination.PageSize
 	groupLength := len(userGroupsDTO)
-	totalPages := math.Ceil(float64(groupLength) / float64(pagination.PageSize))
-	remainingItemsCount := (groupLength - int(prevLastIndex)) % int(pagination.PageSize)
 
-	currLastIndex := int(pagination.Page * pagination.PageSize)
-	pageSize := pagination.PageSize
-	if pagination.Page == int64(totalPages) {
-		currLastIndex = int(prevLastIndex) + remainingItemsCount
-		pageSize = int64(remainingItemsCount)
-	}
-
-	paginatedResults := userGroupsDTO[prevLastIndex:currLastIndex]
 	paginatedData := &dtos.PaginationWrapper{
-		PageNumber: pagination.Page,
-		PageSize:   pageSize,
-		Content:    paginatedResults,
+		Content:    userGroupsDTO,
 		TotalCount: int64(groupLength),
-		TotalPages: int64(totalPages),
 	}
 	return paginatedData, nil
 }

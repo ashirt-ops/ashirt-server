@@ -177,12 +177,6 @@ const PermissionTable = (props: {
                 />
               ))}
             </Table>
-            <StandardPager
-              className={cx('user-table-pager')}
-              page={currentPage}
-              maxPages={Math.ceil(matchingUsers.length / itemsPerPage)}
-              onPageChange={(newPage) => setCurrentPage(newPage)}
-            />
           </>
         )
       })}
