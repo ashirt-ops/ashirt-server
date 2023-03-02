@@ -24,11 +24,13 @@ var TinyCodeblock = seeding.TinyCodeblock
 var TinyTermRec = seeding.TinyTermRec
 
 type UserOpPermJoinUser = seeding.UserOpPermJoinUser
+type UserGroupOpPermJoinUser = seeding.UserGroupOpPermJoinUser
 type FullEvidence = seeding.FullEvidence
 
 // Exported functions/helpers
 var initTest = seeding.InitTest
 var getUsersWithRoleForOperationByOperationID = seeding.GetUsersWithRoleForOperationByOperationID
+var getUserGroupsWithRoleForOperationByOperationID = seeding.GetUserGroupsWithRoleForOperationByOperationID
 var contextForUser = seeding.ContextForUser
 var GetInternalClock = seeding.GetInternalClock
 
@@ -65,6 +67,7 @@ var getAuthsForUser = seeding.GetAuthsForUser
 var getUsersForAuth = seeding.GetUsersForAuth
 var getRealUsers = seeding.GetRealUsers
 var getTagUsage = seeding.GetTagUsage
+var getUserGroupFromSlug = seeding.GetUserGroupFromSlug
 
 var getServiceWorkerByName = seeding.GetServiceWorkerByName
 var getServiceWorkerByID = seeding.GetServiceWorkerByID
@@ -108,6 +111,12 @@ var UserPeter = seeding.UserPeter
 var UserParvati = seeding.UserParvati
 var UserPadma = seeding.UserPadma
 var UserCho = seeding.UserCho
+
+var UserGroupGryffindor = seeding.UserGroupGryffindor
+var UserGroupSlytherin = seeding.UserGroupSlytherin
+var UserGroupHufflepuff = seeding.UserGroupHufflepuff
+var UserGroupRavenclaw = seeding.UserGroupRavenclaw
+var UserGroupOtherHouse = seeding.UserGroupOtherHouse
 
 var APIKeyHarry1 = seeding.APIKeyHarry1
 var APIKeyHarry2 = seeding.APIKeyHarry2
@@ -225,6 +234,10 @@ func (seed TestSeedData) UsersForOp(op models.Operation) []models.User {
 
 func (seed TestSeedData) UserRoleForOp(user models.User, op models.Operation) policy.OperationRole {
 	return seed.Seeder.UserRoleForOp(user, op)
+}
+
+func (seed TestSeedData) UserGroupRoleForOp(userGroup models.UserGroup, op models.Operation) policy.OperationRole {
+	return seed.Seeder.UserGroupRoleForOp(userGroup, op)
 }
 
 func (seed TestSeedData) EvidenceForOperation(opID int64) []models.Evidence {

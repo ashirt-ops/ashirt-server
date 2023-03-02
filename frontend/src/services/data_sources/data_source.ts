@@ -8,6 +8,7 @@ type EvidenceUuid = { evidenceUuid: string }
 type FindingUuid = { findingUuid: string }
 type OpSlug = { operationSlug: string }
 type UserSlug = { userSlug: string }
+type UserGroupSlug = { userGroupSlug: string }
 type QueryId = { queryId: number }
 type TagId = { tagId: number }
 type FindingCategoryId = { findingCategoryId: number }
@@ -82,7 +83,9 @@ export interface DataSource {
   readOperation(ids: OpSlug): Promise<dtos.Operation>
   updateOperation(ids: OpSlug, payload: { name: string }): Promise<void>
   listUserPermissions(ids: OpSlug, query: { name?: string }): Promise<Array<dtos.UserOperationRole>>
+  listUserGroupPermissions(ids: OpSlug, query: { name?: string }): Promise<Array<dtos.UserGroupOperationRole>>
   updateUserPermissions(ids: OpSlug, payload: { userSlug: string, role: types.UserRole }): Promise<void>
+  updateUserGroupPermissions(ids: OpSlug, payload: { userGroupSlug: string, role: types.UserRole }): Promise<void>
   deleteOperation(ids: OpSlug): Promise<void>
   setFavorite(ids: OpSlug, payload: { favorite: boolean }): Promise<void>
 
@@ -93,6 +96,12 @@ export interface DataSource {
   deleteUserAuthScheme(ids: UserSlug & { authSchemeName: string }): Promise<void>
   adminListUsers(query: { deleted: boolean, name?: string }): Promise<types.PaginationResult<dtos.UserAdminView>>
   adminCreateHeadlessUser(payload: UserPayload): Promise<dtos.CreateUserOutput>
+
+  listUserGroups(query: string, includeDeleted: boolean, operationSlug: string): Promise<Array<dtos.UserGroupAdminView>>
+  adminListUserGroups(query: { deleted: boolean }): Promise<types.PaginationResult<dtos.UserGroupAdminView>>
+  adminCreateUserGroup(payload: { slug: string, name: string, userSlugs: string[] }): Promise<void>
+  adminDeleteUserGroup(ids: UserGroupSlug): Promise<void>
+  adminModifyUserGroup(ids: UserGroupSlug, payload: { newName: string | null, userSlugsToAdd: string[], userSlugsToRemove: string[], }): Promise<void>
 
   listQueries(ids: OpSlug): Promise<Array<dtos.Query>>
   createQuery(ids: OpSlug, payload: { name: string, query: string, type: 'evidence' | 'findings' }): Promise<void>

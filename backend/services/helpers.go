@@ -6,6 +6,8 @@ package services
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
@@ -219,6 +221,28 @@ func userSlugToUserID(db *database.Connection, slug string) (int64, error) {
 	return userID, err
 }
 
+func userGroupSlugToUserGroupID(db *database.Connection, slug string) (int64, error) {
+	var userGroupID int64
+	err := db.Get(&userGroupID, sq.Select("id").From("user_groups").Where(sq.Eq{"slug": slug}))
+	if err != nil {
+		return userGroupID, backend.WrapError("Unable to look up user group by slug", err)
+	}
+	return userGroupID, err
+}
+
+// lookupUserGroup returns an user group model for the given slug
+func lookupUserGroup(db *database.Connection, userGroupSlug string) (*models.UserGroup, error) {
+	var userGroup models.UserGroup
+
+	err := db.Get(&userGroup, sq.Select("id", "name", "slug").
+		From("user_groups").
+		Where(sq.Eq{"slug": userGroupSlug}))
+	if err != nil {
+		return &userGroup, backend.WrapError("Unable to lookup user group by slug", err)
+	}
+	return &userGroup, nil
+}
+
 func SelfOrSlugToUserID(ctx context.Context, db *database.Connection, slug string) (int64, error) {
 	if slug == "" {
 		return middleware.UserID(ctx), nil
@@ -241,4 +265,16 @@ func ListActiveServices(ctx context.Context, db *database.Connection) ([]*dtos.A
 		}
 	})
 	return servicesDTO, nil
+}
+
+var disallowedCharactersRegex = regexp.MustCompile(`[^A-Za-z0-9]+`)
+
+// SanitizeOperationSlug removes objectionable characters from a slug and returns the new slug.
+// Current logic: only allow alphanumeric characters and hyphen, with hypen excluded at the start
+// and end
+func SanitizeSlug(slug string) string {
+	return strings.Trim(
+		disallowedCharactersRegex.ReplaceAllString(strings.ToLower(slug), "-"),
+		"-",
+	)
 }

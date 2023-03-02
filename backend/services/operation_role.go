@@ -21,6 +21,12 @@ type SetUserOperationRoleInput struct {
 	Role          policy.OperationRole
 }
 
+type SetUserGroupOperationRoleInput struct {
+	OperationSlug string
+	UserGroupSlug string
+	Role          policy.OperationRole
+}
+
 func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUserOperationRoleInput) error {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
@@ -77,5 +83,60 @@ func SetUserOperationRole(ctx context.Context, db *database.Connection, i SetUse
 			return backend.WrapError("Unable to alter user role", backend.DatabaseErr(err))
 		}
 	}
+	return nil
+}
+
+func SetUserGroupOperationRole(ctx context.Context, db *database.Connection, i SetUserGroupOperationRoleInput) error {
+	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return backend.WrapError("Unable to set user group role", backend.UnauthorizedWriteErr(err))
+	}
+
+	if i.UserGroupSlug == "" {
+		return backend.MissingValueErr("User Group Slug")
+	}
+
+	userGroupID, err := userGroupSlugToUserGroupID(db, i.UserGroupSlug)
+	if err != nil {
+		return backend.WrapError("Unable to get user group id from slug", backend.BadInputErr(err, fmt.Sprintf(`No user with slug "%s" was found`, i.UserGroupSlug)))
+	}
+
+	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyUserGroupOfOperation{UserGroupID: userGroupID, OperationID: operation.ID}); err != nil {
+		return backend.WrapError("Unwilling to set user group role", backend.UnauthorizedWriteErr(err))
+	}
+
+	if i.Role == "" {
+		err := db.Delete(sq.Delete("user_group_operation_permissions").Where(sq.Eq{"group_id": userGroupID, "operation_id": operation.ID}))
+
+		if err != nil {
+			return backend.WrapError("Cannot delete user group role", backend.DatabaseErr(err))
+		}
+		return nil
+	}
+
+	var permissions []models.UserGroupOperationPermission
+	err = db.WithTx(context.Background(), func(tx *database.Transactable) {
+		tx.Select(&permissions, sq.Select("*").
+			From("user_group_operation_permissions").
+			Where(sq.Eq{
+				"group_id":     userGroupID,
+				"operation_id": operation.ID,
+			}))
+		if len(permissions) == 0 {
+			tx.Insert("user_group_operation_permissions", map[string]interface{}{
+				"group_id":     userGroupID,
+				"operation_id": operation.ID,
+				"role":         i.Role,
+			})
+		} else if permissions[0].Role != i.Role {
+			tx.Update(sq.Update("user_group_operation_permissions").
+				Set("role", i.Role).
+				Where(sq.Eq{"group_id": userGroupID, "operation_id": operation.ID}))
+		}
+	})
+	if err != nil {
+		return backend.WrapError("Unable to add user role", backend.DatabaseErr(err))
+	}
+
 	return nil
 }

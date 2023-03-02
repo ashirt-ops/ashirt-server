@@ -141,6 +141,19 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ListUsers(r.Context(), db, i)
 	}))
 
+	route(r, "GET", "/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ListUserGroupsInput{
+			Query:          dr.FromQuery("query").Required().AsString(),
+			IncludeDeleted: dr.FromQuery("includeDeleted").OrDefault(false).AsBool(),
+			OperationSlug:  dr.FromQuery("operationSlug").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ListUserGroups(r.Context(), db, i)
+	}))
+
 	route(r, "GET", "/admin/users", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUsersForAdminInput{
@@ -192,6 +205,58 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		return nil, services.SetUserFlags(r.Context(), db, i)
+	}))
+
+	route(r, "GET", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ListUserGroupsForAdminInput{
+			UserGroupFilter: services.ParseRequestQueryUserGroupFilter(dr),
+			Pagination:      services.ParseRequestQueryPagination(dr, 10),
+			IncludeDeleted:  dr.FromQuery("deleted").OrDefault(false).AsBool(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ListUserGroupsForAdmin(r.Context(), db, i)
+	}))
+
+	route(r, "POST", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.CreateUserGroupInput{
+			Slug:      dr.FromBody("slug").Required().AsString(),
+			Name:      dr.FromBody("name").Required().AsString(),
+			UserSlugs: dr.FromBody("userSlugs").Required().AsStringSlice(),
+		}
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.CreateUserGroup(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ModifyUserGroupInput{
+			Name:          dr.FromBody("newName").AsString(),
+			UsersToAdd:    dr.FromBody("userSlugsToAdd").AsStringSlice(),
+			UsersToRemove: dr.FromBody("userSlugsToRemove").AsStringSlice(),
+			Slug:          dr.FromURL("group_slug").Required().AsString(),
+		}
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ModifyUserGroup(r.Context(), db, i)
+	}))
+
+	route(r, "DELETE", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		groupSlug := dr.FromURL("group_slug").AsString()
+
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteUserGroup(r.Context(), db, groupSlug)
 	}))
 
 	route(r, "GET", "/auths", jsonHandler(func(r *http.Request) (interface{}, error) {
@@ -281,6 +346,19 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		return services.ListUsersForOperation(r.Context(), db, i)
 	}))
 
+	route(r, "GET", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ListUserGroupsForOperationInput{
+			OperationSlug:   dr.FromURL("operation_slug").Required().AsString(),
+			UserGroupFilter: services.ParseRequestQueryUserGroupFilter(dr),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+
+		return services.ListUserGroupsForOperation(r.Context(), db, i)
+	}))
+
 	route(r, "PATCH", "/operations/{operation_slug}/users", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetUserOperationRoleInput{
@@ -292,6 +370,19 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 			return nil, dr.Error
 		}
 		return nil, services.SetUserOperationRole(r.Context(), db, i)
+	}))
+
+	route(r, "PATCH", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.SetUserGroupOperationRoleInput{
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			UserGroupSlug: dr.FromBody("userGroupSlug").Required().AsString(),
+			Role:          policy.OperationRole(dr.FromBody("role").Required().AsString()),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.SetUserGroupOperationRole(r.Context(), db, i)
 	}))
 
 	route(r, "GET", "/operations/{operation_slug}/findings", jsonHandler(func(r *http.Request) (interface{}, error) {

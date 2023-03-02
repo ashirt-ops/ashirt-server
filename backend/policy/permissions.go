@@ -39,3 +39,9 @@ type CanModifyUserOfOperation struct {
 	OperationID int64
 	UserID      int64
 }
+
+type CanListUserGroupsOfOperation struct{ OperationID int64 }
+type CanModifyUserGroupOfOperation struct {
+	OperationID int64
+	UserGroupID int64
+}

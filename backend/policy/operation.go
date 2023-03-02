@@ -30,6 +30,8 @@ func (o *Operation) Check(permission Permission) bool {
 	case CanModifyUserOfOperation:
 		return p.UserID != o.UserID && // A user cannot modify their own permissions (to prevent lockout)
 			o.hasRole(p.OperationID, OperationRoleAdmin)
+	case CanModifyUserGroupOfOperation:
+		return o.hasRole(p.OperationID, OperationRoleAdmin)
 
 	case CanDeleteOperation:
 		return o.hasRole(p.OperationID, OperationRoleAdmin)
@@ -49,6 +51,9 @@ func (o *Operation) Check(permission Permission) bool {
 		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite, OperationRoleRead) || o.IsHeadless
 	case CanReadOperation:
 		return o.hasRole(p.OperationID, OperationRoleAdmin, OperationRoleWrite, OperationRoleRead) || o.IsHeadless
+
+	case CanListUserGroupsOfOperation:
+		return o.hasRole(p.OperationID, OperationRoleAdmin) || o.IsHeadless
 	}
 	return false
 }

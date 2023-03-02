@@ -60,14 +60,15 @@ type EvidenceCount struct {
 }
 
 type Operation struct {
-	Slug          string        `json:"slug"`
-	Name          string        `json:"name"`
-	NumUsers      int           `json:"numUsers"`
-	NumEvidence   int           `json:"numEvidence"`
-	NumTags       int           `json:"numTags"`
-	Favorite      bool          `json:"favorite"`
-	TopContribs   []TopContrib  `json:"topContribs"`
-	EvidenceCount EvidenceCount `json:"evidenceCount,omitempty"`
+	Slug              string        `json:"slug"`
+	Name              string        `json:"name"`
+	NumUsers          int           `json:"numUsers"`
+	NumEvidence       int           `json:"numEvidence"`
+	NumTags           int           `json:"numTags"`
+	Favorite          bool          `json:"favorite"`
+	TopContribs       []TopContrib  `json:"topContribs"`
+	EvidenceCount     EvidenceCount `json:"evidenceCount,omitempty"`
+	UserCanViewGroups *bool         `json:"userCanViewGroups,omitempty"`
 }
 
 type Query struct {
@@ -129,6 +130,11 @@ type UserOperationRole struct {
 	Role policy.OperationRole `json:"role"`
 }
 
+type UserGroupOperationRole struct {
+	UserGroup UserGroupAdminView   `json:"userGroup"`
+	Role      policy.OperationRole `json:"role"`
+}
+
 type PaginationWrapper struct {
 	Content    interface{} `json:"content"`
 	PageNumber int64       `json:"page"`
@@ -188,6 +194,18 @@ type NewUserCreatedByAdmin struct {
 type CreateUserOutput struct {
 	RealSlug string `json:"slug"`
 	UserID   int64  `json:"-"` // don't transmit the userid
+}
+
+type UserGroupAdminView struct {
+	Slug      string   `json:"slug"`
+	Name      string   `json:"name"`
+	UserSlugs []string `json:"userSlugs"`
+	Deleted   bool     `json:"deleted"`
+}
+
+type UserGroup struct {
+	Slug string `json:"slug"`
+	Name string `json:"name"`
 }
 
 type ServiceWorker struct {

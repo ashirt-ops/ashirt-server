@@ -8,11 +8,13 @@ import AuthTable from './auth_table'
 import HeadlessButton from './add_headless'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
 import CreateUserButton from "./add_user"
+import CreateUserGroupButton from "./add_user_group"
 import InviteuserButton from "./invite_user"
 import OperationsTable from './operations_table'
 import FindingCategoriesTable from "./finding_categories_table"
 import RecoveryMetrics from './recovery_metrics'
 import UserTable from './user_table'
+import UserGroupTable from './user_group_table'
 import ServiceWorkerTable from './service_worker_table'
 import AddServiceWorker from './service_worker_table/add_service_button'
 
@@ -33,6 +35,7 @@ export const AdminTools = () => {
           title="Admin Tools"
           tabs={[
             { id: "users", label: "User Management" },
+            { id: "groups", label: "Group Management" },
             { id: "authdata", label: "Authentication Overview" },
             { id: "operations", label: "Operation Management" },
             { id: "tags", label: "Tag Management" },
@@ -42,6 +45,7 @@ export const AdminTools = () => {
         >
           <Routes>
             <Route path="users" element={<UserManagement {...bus} />} />
+            <Route path="groups" element={<UserGroupManagement {...bus} />} />
             <Route path="authdata" element={<AuthOverview />} />
             <Route path="operations" element={<OperationsTable />} />
             <Route path="tags" element={<TagManagement {...bus} />} />
@@ -63,6 +67,13 @@ const UserManagement = (props: BusSupportedService) => (
     <HeadlessButton {...props} />
     <CreateUserButton {...props} />
     <InviteuserButton {...props} />
+  </>
+)
+
+const UserGroupManagement = (props: BusSupportedService) => (
+  <>
+    <UserGroupTable {...props} />
+    <CreateUserGroupButton {...props} />
   </>
 )
 

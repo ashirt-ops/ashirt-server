@@ -1,16 +1,20 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import * as React from 'react'
+import * as React  from 'react'
 import classnames from 'classnames/bind'
 
-import { ApiKey, User, UserAdminView } from 'src/global_types'
+import { ApiKey, User, UserAdminView, UserGroupAdminView } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
   adminInviteUser,
-  createApiKey
+  createApiKey,
+  createUserGroup,
+  deleteUserGroup,
+  modifyUserGroup
 } from 'src/services'
+import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
@@ -22,6 +26,7 @@ import ModalForm from 'src/components/modal_form'
 import { InputWithCopyButton } from 'src/components/text_copiers'
 import { useForm, useFormField } from 'src/helpers'
 import { NewApiKeyModalContents } from 'src/pages/account_settings/api_keys/modals'
+import { BuildReloadBus } from 'src/helpers/reload_bus'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -168,6 +173,130 @@ export const AddUserModal = (props: {
     </Modal>
   )
 }
+
+export const AddUserGroupModal = (props: {
+  onRequestClose: () => void,
+}) => {
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+  const [includedUsers, setIncludedUsers] = React.useState<Set<string>>(() => new Set());
+
+  const name = useFormField<string>("")
+  const userSlugs = Array.from(includedUsers as Set<string>)
+  const formComponentProps = useForm({
+    fields: [name],
+    handleSubmit: () => {
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("User group should have a name")))
+      }
+      const runSubmit = async () => {
+        await createUserGroup({
+          name: name.value,
+          userSlugs: userSlugs
+        })
+        setIsCompleted(true)
+      }
+      return runSubmit()
+    },
+  })
+
+  const bus = BuildReloadBus()
+  return (
+    <Modal title="Create New Group" onRequestClose={props.onRequestClose}>
+      {isCompleted ? (<>
+        <div className={cx('success-area')}>
+          <p>Group has been created successfully!</p>
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      :
+      (<>
+      <h1 className={cx('header')}>Users</h1>
+      <SimpleUserTable {...bus} setIncludedUsers={setIncludedUsers} includedUsers={includedUsers as Set<string>} />
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...name} disabled={isCompleted} />
+      </Form>
+      </>)
+      }
+    </Modal>
+  )
+}
+
+export const ModifyUserGroupModal = (props: {
+  userGroup: UserGroupAdminView,
+  onRequestClose: () => void,
+}) => {
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+  const slugs = props.userGroup?.userSlugs ? props.userGroup.userSlugs : []
+  const [includedUsers, setIncludedUsers] = React.useState(() => new Set([...slugs]));
+
+  const name = useFormField<string>(props.userGroup.name)
+  const formComponentProps = useForm({
+    fields: [name],
+    handleSubmit: () => {
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("User goup should have a name")))
+      }
+
+      const slugsToAdd: Array<string> = []
+      const slugsToRemove: Array<string> = []
+      const initialSlugs = new Set([...slugs])
+      const newSlugs = includedUsers as Set<string>
+      initialSlugs.forEach((slug) => !newSlugs.has(slug) && slugsToRemove.push(slug))
+      newSlugs.forEach((slug) => !initialSlugs.has(slug) && slugsToAdd.push(slug))
+
+      const nameOrNull = name.value.toLowerCase() !== props.userGroup.name.toLowerCase() ? name.value : null
+      const runSubmit = async () => {
+        await modifyUserGroup({
+          slug: props.userGroup.slug,
+          newName: nameOrNull,
+          userSlugsToAdd: slugsToAdd,
+          userSlugsToRemove: slugsToRemove,
+        })
+        setIsCompleted(true)
+      }
+      return runSubmit()
+    },
+  })
+
+  const bus = BuildReloadBus()
+  return (
+    <Modal title="Modify Group" onRequestClose={props.onRequestClose}>
+      {isCompleted ? (<>
+        <div className={cx('success-area')}>
+          <p>Group has been modified successfully!</p>
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      :
+      (<>
+      <h1 className={cx('header')}>Users</h1>
+      <SimpleUserTable {...bus} setIncludedUsers={setIncludedUsers} includedUsers={includedUsers as Set<string>} />
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...name} disabled={isCompleted} />
+      </Form>
+      </>)
+      }
+    </Modal>
+  )
+}
+
+export const DeleteUserGroupModal = (props: {
+  userGroup: UserGroupAdminView,
+  onRequestClose: () => void,
+}) => <ChallengeModalForm
+    modalTitle="Delete User"
+    warningText="This will remove the user group from the system. All user group information will be lost."
+    submitText="Delete"
+    challengeText={props.userGroup.slug}
+    handleSubmit={() => deleteUserGroup({ userGroupSlug: props.userGroup.slug })}
+    onRequestClose={props.onRequestClose}
+  />
 
 export const UpdateUserFlagsModal = (props: {
   user: UserAdminView,

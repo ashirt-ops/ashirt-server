@@ -46,6 +46,9 @@ func main() {
 	gen(dtos.ServiceWorkerTestOutput{})
 	gen(dtos.ActiveServiceWorker{})
 	gen(dtos.Flags{})
+	gen(dtos.UserGroup{})
+	gen(dtos.UserGroupAdminView{})
+	gen(dtos.UserGroupOperationRole{})
 
 	// Since this file only contains typescript types, webpack doesn't pick up the
 	// changes unless there is some actual executable javascript referenced from

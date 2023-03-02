@@ -40,6 +40,11 @@ export function userOperationRoleFromDto({ user, role }: dtos.UserOperationRole)
   return { user, role }
 }
 
+export function userGroupOperationRoleFromDto({ userGroup, role }: dtos.UserGroupOperationRole): types.UserGroupOperationRole {
+  if (!isValidUserRole(role)) throw Error(`Unknown userrole ${role}`)
+  return { userGroup, role }
+}
+
 export function userOwnViewFromDto(user: dtos.UserOwnView): types.UserOwnView {
   return { ...user, authSchemes: user.authSchemes.map(authenticationInfoFromDto) }
 }

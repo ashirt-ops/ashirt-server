@@ -82,6 +82,7 @@ func ClearDB(db *database.Connection) error {
 	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
 		tx.Delete(sq.Delete("sessions"))
 		tx.Delete(sq.Delete("user_operation_permissions"))
+		tx.Delete(sq.Delete("user_group_operation_permissions"))
 		tx.Delete(sq.Delete("user_operation_preferences"))
 		tx.Delete(sq.Delete("api_keys"))
 		tx.Delete(sq.Delete("auth_scheme_data"))
@@ -94,7 +95,9 @@ func ClearDB(db *database.Connection) error {
 		tx.Delete(sq.Delete("evidence"))
 		tx.Delete(sq.Delete("findings"))
 		tx.Delete(sq.Delete("finding_categories"))
+		tx.Delete(sq.Delete("group_user_map"))
 		tx.Delete(sq.Delete("users"))
+		tx.Delete(sq.Delete("user_groups"))
 		tx.Delete(sq.Delete("queries"))
 		tx.Delete(sq.Delete("operations"))
 		tx.Delete(sq.Delete("service_workers"))
@@ -548,6 +551,30 @@ func GetUsersWithRoleForOperationByOperationID(t *testing.T, db *database.Connec
 		Where(sq.Eq{"operation_id": id}))
 	require.NoError(t, err)
 	return allUserOpRoles
+}
+
+type UserGroupOpPermJoinUser struct {
+	models.UserGroup
+	Role policy.OperationRole `db:"role"`
+}
+
+func GetUserGroupsWithRoleForOperationByOperationID(t *testing.T, db *database.Connection, id int64) []UserGroupOpPermJoinUser {
+	var allUserGroupOpRoles []UserGroupOpPermJoinUser
+	err := db.Select(&allUserGroupOpRoles, sq.Select("user_group_operation_permissions.role", "user_groups.name", "user_groups.slug").
+		From("user_group_operation_permissions").
+		LeftJoin("user_groups ON user_groups.id = user_group_operation_permissions.group_id").
+		Where(sq.Eq{"operation_id": id}))
+	require.NoError(t, err)
+	return allUserGroupOpRoles
+}
+
+func GetUserGroupFromSlug(t *testing.T, db *database.Connection, slug string) models.UserGroup {
+	var fullUserGroup models.UserGroup
+	err := db.Get(&fullUserGroup, sq.Select("id", "slug", "name").
+		From("user_groups").
+		Where(sq.Eq{"slug": slug}))
+	require.NoError(t, err)
+	return fullUserGroup
 }
 
 type PreferencesOperations struct {

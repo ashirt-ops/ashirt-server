@@ -104,6 +104,7 @@ export type Operation = {
   favorite: boolean,
   topContribs: Array<TopContrib>,
   evidenceCount: EvidenceCount,
+  userCanViewGroups?: boolean,
 }
 
 export type Evidence = {
@@ -197,8 +198,23 @@ export type UserAdminView = UserWithAuth & {
   authSchemes: Array<string>,
 }
 
+export type UserGroup = {
+  slug: string,
+  name: string,
+  userSlugs: Array<string>,
+}
+
+export type UserGroupAdminView = UserGroup &{
+  deleted: boolean,
+}
+
 export type UserOperationRole = {
   user: User,
+  role: UserRole,
+}
+
+export type UserGroupOperationRole = {
+  userGroup: UserGroupAdminView,
   role: UserRole,
 }
 
@@ -211,7 +227,7 @@ export type UserFilter = {
   name?: string
 }
 
-export type ListUsersForAdminQuery = PaginationQuery & {
+export type ListObjectForAdminQuery = PaginationQuery & {
   deleted: boolean,
 }
 

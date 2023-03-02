@@ -1,0 +1,46 @@
+@import '~src/vars'
+
+table 
+  table-layout: fixed
+
+.table-row
+  .scheme-list
+    display: inline
+    padding-right: 10px
+
+  .checkbox
+    display: initial
+
+  .column-button
+    float: right
+
+.user-table-pager
+  display: inline
+  float: right
+  margin-top: 10px
+
+.deleted-user
+  font-style: italic
+
+.arrow
+  $arrow-size = 5px
+  &:after
+    content: ""
+    position: absolute
+    top: 15px - $arrow-size
+    left: 15px - $arrow-size
+    border: $arrow-size solid transparent
+    border-top-color: $foreground
+
+.popover
+  display: flex
+
+.inline-form
+  display: flex
+  align-items: center
+  margin-bottom: 25px
+
+  & > *
+    margin-right: 20px
+    align-self flex-end
+

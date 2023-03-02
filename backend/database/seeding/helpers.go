@@ -236,12 +236,53 @@ func newUserOpPermission(user models.User, op models.Operation, role policy.Oper
 	}
 }
 
+func newUserGroupOpPermission(userGroup models.UserGroup, op models.Operation, role policy.OperationRole) models.UserGroupOperationPermission {
+	return models.UserGroupOperationPermission{
+		UserGroupID: userGroup.ID,
+		OperationID: op.ID,
+		Role:        role,
+		CreatedAt:   internalClock.Now(),
+	}
+}
+
 func newUserOperationPreferences(user models.User, op models.Operation, isFavorite bool) models.UserOperationPreferences {
 	return models.UserOperationPreferences{
 		UserID:      user.ID,
 		OperationID: op.ID,
 		IsFavorite:  isFavorite,
 		CreatedAt:   internalClock.Now(),
+	}
+}
+
+func newUserGroupGen(first int64) func(name string, deleted bool) models.UserGroup {
+	id := iotaLike(first)
+	return func(name string, deleted bool) models.UserGroup {
+		if deleted {
+			now := internalClock.Now()
+			return models.UserGroup{
+				ID:        id(),
+				Slug:      name,
+				Name:      name,
+				CreatedAt: internalClock.Now(),
+				DeletedAt: &now,
+			}
+		} else {
+			return models.UserGroup{
+				ID:        id(),
+				Slug:      name,
+				Name:      name,
+				CreatedAt: internalClock.Now(),
+			}
+		}
+
+	}
+}
+
+func newUserGroupMapping(user models.User, group models.UserGroup) models.UserGroupMap {
+	return models.UserGroupMap{
+		GroupID:   group.ID,
+		UserID:    user.ID,
+		CreatedAt: internalClock.Now(),
 	}
 }
 

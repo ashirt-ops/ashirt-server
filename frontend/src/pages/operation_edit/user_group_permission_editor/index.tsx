@@ -1,4 +1,4 @@
-// Copyright 2020, Verizon Media
+// Copyright 2023, Yahoo Inc.
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
@@ -12,11 +12,11 @@ import Input from 'src/components/input'
 import RadioGroup from 'src/components/radio_group'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import UserChooser from 'src/components/user_chooser'
+import UserGroupChooser from 'src/components/user_group_chooser'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { User, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
-import { getUserPermissions, setUserPermission } from 'src/services'
+import { UserGroup, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
+import { getUserGroupPermissions, setUserGroupPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { StandardPager } from 'src/components/paging'
@@ -38,29 +38,29 @@ const RoleSelect = (props: {
     />
   )
 
-const NewUserForm = (props: {
+const NewUserGroupForm = (props: {
   operationSlug: string,
   requestReload: () => void
 }) => {
-  const userField = useFormField<User | null>(null)
+  const userGroupField = useFormField<UserGroup | null>(null)
   const roleField = useFormField(UserRole.READ)
   const formProps = useForm({
-    fields: [userField, roleField],
+    fields: [userGroupField, roleField],
     handleSubmit: async () => {
-      if (userField.value == null) throw Error("A user must be selected")
-      await setUserPermission({
+      if (userGroupField.value == null) throw Error("A user group must be selected")
+      await setUserGroupPermission({
         operationSlug: props.operationSlug,
-        userSlug: userField.value.slug,
+        userGroupSlug: userGroupField.value.slug,
         role: roleField.value,
       })
-      userField.onChange(null)
+      userGroupField.onChange(null)
       props.requestReload()
     }
   })
   return (
     <Form {...formProps}>
       <div className={cx('inline-form')}>
-        <UserChooser {...userField} />
+        <UserGroupChooser operationSlug={props.operationSlug} {...userGroupField} />
         <RoleSelect label="Role" {...roleField} />
         <Button primary loading={formProps.loading}>Add</Button>
       </div>
@@ -71,29 +71,28 @@ const NewUserForm = (props: {
 const PermissionTableRow = (props: {
   disabled?: boolean,
   role: UserRole,
-  user: User,
+  userGroup: UserGroup,
   currentUser?: UserOwnView,
   requestReload: () => void
   updatePermissions: (role: UserRole) => Promise<void>
 }) => {
-  const currentUser = props?.currentUser
-  const isCurrentUser = currentUser ? currentUser.slug === props.user.slug : false
-  const isAdmin = currentUser ? currentUser?.admin : false
+  const currentUserGroup = props?.currentUser
+  const isCurrentUser = currentUserGroup ? currentUserGroup.slug === props.userGroup.slug : false
 
   const removeWarningModal = useModal<{}>(modalProps => (
-    <RemoveWarningModal {...modalProps} removeUser={async () => {
+    <RemoveWarningModal {...modalProps} removeUserGroup={async () => {
       await props.updatePermissions(UserRole.NO_ACCESS)
       props.requestReload()
     }} />
   ))
 
-  const disabled = props.disabled || (isCurrentUser && !isAdmin)
+  const disabled = props.disabled
 
   return (
     <>
       <tr>
         <td style={{ fontWeight: isCurrentUser ? 800 : 400 }}>
-          {props.user.firstName} {props.user.lastName}
+          {props.userGroup.name}
         </td>
         <td><RoleSelect disabled={disabled} value={props.role} onChange={async (r) => {
           await props.updatePermissions(r)
@@ -108,18 +107,18 @@ const PermissionTableRow = (props: {
 
 const RemoveWarningModal = (props: {
   onRequestClose: () => void,
-  removeUser: () => Promise<void>
+  removeUserGroup: () => Promise<void>
 }) => {
   const warningForm = useForm({
     fields: [],
     handleSubmit: async () => {
-      props.removeUser()
+      props.removeUserGroup()
     }
   })
   return (
-    <Modal title="Remove User?" onRequestClose={props.onRequestClose}>
-      <Form {...warningForm} submitText={"Remove User"} cancelText={"Go Back"} onCancel={props.onRequestClose}>
-        <em>Removing this user will remove all read/write access to this user from this operation. Do you wish to continue?</em>
+    <Modal title="Remove User Group?" onRequestClose={props.onRequestClose}>
+      <Form {...warningForm} submitText={"Remove User Group"} cancelText={"Go Back"} onCancel={props.onRequestClose}>
+        <em>Removing this user group will remove all read/write access to all the users in that group from this operation. Do you wish to continue?</em>
       </Form>
     </Modal>
   )
@@ -139,11 +138,11 @@ const PermissionTable = (props: {
   const filterField = useFormField("")
   const [currentPage, setCurrentPage] = React.useState(1)
 
-  const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
+  const normalizeName = (userGroup: UserGroup) => `${userGroup.name}`.toLowerCase()
   const normalizedSearchTerm = filterField.value.toLowerCase()
 
   const wiredPermissions = useWiredData(
-    React.useCallback(() => getUserPermissions({ slug: props.operationSlug, name: "" }), [props.operationSlug]),
+    React.useCallback(() => getUserGroupPermissions({ slug: props.operationSlug, name: "" }), [props.operationSlug]),
     (err) => <ErrorDisplay err={err} />,
     () => <LoadingSpinner />
   )
@@ -156,34 +155,28 @@ const PermissionTable = (props: {
   return (
     <>
       {wiredPermissions.render(data => {
-        const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
+        const matchingUsers = data.filter(({ userGroup }) => normalizeName(userGroup).includes(normalizedSearchTerm))
         const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
 
         const notAdmin = !props.isAdmin
 
         return (
           <>
-            <Input label="User Filter" {...filterField} />
+            <Input label="User Group Filter" {...filterField} />
 
             <Table columns={columns}>
-              {renderableData.map(({ user, role }) => (
+              {renderableData.map(({ userGroup, role }) => (
                 <PermissionTableRow
                   currentUser={props?.currentUser}
                   disabled={notAdmin}
-                  key={user.slug}
+                  key={userGroup.slug}
                   requestReload={props.requestReload}
-                  updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: user.slug, role: r })}
-                  user={user}
+                  updatePermissions={(r: UserRole) => setUserGroupPermission({ operationSlug: props.operationSlug, userGroupSlug: userGroup.slug, role: r })}
+                  userGroup={userGroup}
                   role={role}
                 />
               ))}
             </Table>
-            <StandardPager
-              className={cx('user-table-pager')}
-              page={currentPage}
-              maxPages={Math.ceil(matchingUsers.length / itemsPerPage)}
-              onPageChange={(newPage) => setCurrentPage(newPage)}
-            />
           </>
         )
       })}
@@ -193,14 +186,14 @@ const PermissionTable = (props: {
 
 export default (props: {
   operationSlug: string,
-  isAdmin: boolean
+  isAdmin: boolean,
 }) => {
   const bus = BuildReloadBus()
-
   const currentUser = React.useContext(AuthContext)?.user
+
   return (
-    <SettingsSection title="Operation Users" width="wide">
-      {props.isAdmin && (<NewUserForm
+    <SettingsSection title="Operation User Groups" width="wide">
+      {props.isAdmin && (<NewUserGroupForm
         {...bus}
         operationSlug={props.operationSlug}
       />)}

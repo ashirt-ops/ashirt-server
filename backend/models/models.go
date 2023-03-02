@@ -114,9 +114,36 @@ type User struct {
 	DeletedAt *time.Time `db:"deleted_at"`
 }
 
+// Group reflects the structure of the database table 'user_groups'
+type UserGroup struct {
+	ID        int64      `db:"id"`
+	Slug      string     `db:"slug"`
+	Name      string     `db:"name"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+	DeletedAt *time.Time `db:"deleted_at"`
+}
+
+// TagEvidenceMap reflects the structure of the database table 'user_group_map'
+type UserGroupMap struct {
+	GroupID   int64      `db:"group_id"`
+	UserID    int64      `db:"user_id"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
 // UserOperationPermission reflects the structure of the database table 'user_operation_permissions'
 type UserOperationPermission struct {
 	UserID      int64                `db:"user_id"`
+	OperationID int64                `db:"operation_id"`
+	Role        policy.OperationRole `db:"role"`
+	CreatedAt   time.Time            `db:"created_at"`
+	UpdatedAt   *time.Time           `db:"updated_at"`
+}
+
+// UserOperationPermission reflects the structure of the database table 'user_group_operation_permissions'
+type UserGroupOperationPermission struct {
+	UserGroupID int64                `db:"group_id"`
 	OperationID int64                `db:"operation_id"`
 	Role        policy.OperationRole `db:"role"`
 	CreatedAt   time.Time            `db:"created_at"`

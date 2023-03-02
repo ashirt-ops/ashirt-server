@@ -20,6 +20,15 @@ var HarryPotterSeedData = Seeder{
 	Users: []models.User{UserHarry, UserRon, UserGinny, UserHermione, UserNeville, UserSeamus, UserDraco, UserSnape, UserDumbledore, UserHagrid, UserTomRiddle, UserHeadlessNick,
 		UserCedric, UserFleur, UserViktor, UserAlastor, UserMinerva, UserLucius, UserSirius, UserPeter, UserParvati, UserPadma, UserCho,
 	},
+	UserGroups: []models.UserGroup{
+		UserGroupGryffindor, UserGroupHufflepuff, UserGroupRavenclaw, UserGroupSlytherin, UserGroupOtherHouse,
+	},
+	UserGroupMaps: []models.UserGroupMap{
+		AddHarryToGryffindor, AddRonToGryffindor, AddGinnyToGryffindor, AddHermioneToGryffindor,
+		AddMalfoyToSlytherin, AddSnapeToSlytherin, AddLuciusToSlytherin,
+		AddCedricToHufflepuff, AddFleurToHufflepuff,
+		AddChoToRavenclaw, AddViktorToRavenclaw,
+	},
 	Operations: []models.Operation{OpSorcerersStone, OpChamberOfSecrets, OpPrisonerOfAzkaban, OpGobletOfFire, OpOrderOfThePhoenix, OpHalfBloodPrince, OpDeathlyHallows},
 	Tags: []models.Tag{
 		TagFamily, TagFriendship, TagHome, TagLoyalty, TagCourage, TagGoodVsEvil, TagSupernatural,
@@ -97,6 +106,11 @@ var HarryPotterSeedData = Seeder{
 		newUserOpPermission(UserDumbledore, OpChamberOfSecrets, policy.OperationRoleAdmin),
 		newUserOpPermission(UserDumbledore, OpGobletOfFire, policy.OperationRoleAdmin),
 	},
+	UserGroupOpMap: []models.UserGroupOperationPermission{
+		newUserGroupOpPermission(UserGroupGryffindor, OpSorcerersStone, policy.OperationRoleRead),
+		newUserGroupOpPermission(UserGroupHufflepuff, OpSorcerersStone, policy.OperationRoleWrite),
+		newUserGroupOpPermission(UserGroupSlytherin, OpSorcerersStone, policy.OperationRoleAdmin),
+	},
 	Findings: []models.Finding{
 		FindingBook2Magic, FindingBook2CGI, FindingBook2SpiderFear, FindingBook2Robes,
 	},
@@ -170,6 +184,31 @@ var UserTomRiddle = newHPUser(newUserInput{FirstName: "Tom", LastName: "Riddle",
 var UserHeadlessNick = newHPUser(newUserInput{FirstName: "Nicholas", LastName: "de Mimsy-Porpington", Birthday: date(1980, 1, 1), SetLastUpdated: true, Headless: true})
 
 // Reserved users: Luna Lovegood (Create user test)
+
+var newUserGroup = newUserGroupGen(1)
+
+var UserGroupGryffindor = newUserGroup("Gryffindor", false)
+var UserGroupHufflepuff = newUserGroup("Hufflepuff", false)
+var UserGroupRavenclaw = newUserGroup("Ravenclaw", false)
+var UserGroupSlytherin = newUserGroup("Slytherin", false)
+
+// UserGroupOtherHouse is reserved to test deleted user groups
+var UserGroupOtherHouse = newUserGroup("Other House", true)
+
+var AddHarryToGryffindor = newUserGroupMapping(UserHarry, UserGroupGryffindor)
+var AddRonToGryffindor = newUserGroupMapping(UserRon, UserGroupGryffindor)
+var AddGinnyToGryffindor = newUserGroupMapping(UserGinny, UserGroupGryffindor)
+var AddHermioneToGryffindor = newUserGroupMapping(UserHermione, UserGroupGryffindor)
+
+var AddMalfoyToSlytherin = newUserGroupMapping(UserDraco, UserGroupSlytherin)
+var AddLuciusToSlytherin = newUserGroupMapping(UserLucius, UserGroupSlytherin)
+var AddSnapeToSlytherin = newUserGroupMapping(UserSnape, UserGroupSlytherin)
+
+var AddCedricToHufflepuff = newUserGroupMapping(UserCedric, UserGroupHufflepuff)
+var AddFleurToHufflepuff = newUserGroupMapping(UserFleur, UserGroupHufflepuff)
+
+var AddViktorToRavenclaw = newUserGroupMapping(UserViktor, UserGroupRavenclaw)
+var AddChoToRavenclaw = newUserGroupMapping(UserCho, UserGroupRavenclaw)
 
 var newAPIKey = newAPIKeyGen(1)
 var APIKeyHarry1 = newAPIKey(UserHarry.ID, "harry-abc", []byte{0x01, 0x02, 0x03})

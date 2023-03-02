@@ -16,11 +16,11 @@ export default (props: {
 }) => {
 
   const evidenceNameMap = {
-    imageCount: 'Images',
-    codeblockCount: 'Codeblocks',
-    recordingCount: 'Recordings',
-    eventCount: 'Events',
-    harCount: 'HAR files',
+    imageCount: 'Image',
+    codeblockCount: 'Codeblock',
+    recordingCount: 'Recording',
+    eventCount: 'Event',
+    harCount: 'HAR file',
   }
   type ObjectKey = keyof typeof evidenceNameMap;
   const evidencePresent = Object.values(props.evidenceCount).reduce((prev, curr) => prev + curr, 0) > 0
@@ -46,13 +46,20 @@ export default (props: {
             </div>
           <div>
           {evidencePresent && (
-            Object.entries(props.evidenceCount).map(ebc => ebc[1] > 0 && (
-                  <div className={cx('grouping')}>
-                    <h1 className={cx('large-text', 'group')}>{`${ebc[1]} `}</h1>
-                    <p className={cx('supporting-text')}>{evidenceNameMap[ebc[0] as ObjectKey].toUpperCase()}</p>
-                  </div>
-                )
+            Object.entries(props.evidenceCount).map(ebc => {
+              const count = ebc[1]
+
+              const label = evidenceNameMap[ebc[0] as ObjectKey]
+              const modLabel = count > 1 ? `${label}s` : label
+              const upperCaseLabel = modLabel.toUpperCase()
+
+              return count > 0 && (
+                <div className={cx('grouping')}>
+                  <h1 className={cx('large-text', 'group')}>{`${ebc[1]} `}</h1>
+                  <p className={cx('supporting-text')}>{upperCaseLabel}</p>
+                </div>
               )
+            })
           )}
           </div>
       </div>
