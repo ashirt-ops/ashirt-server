@@ -204,15 +204,14 @@ export type UserGroup = {
   userSlugs: Array<string>,
 }
 
-export type UserGroupAdminView = UserGroup &{
-  deleted: boolean,
-}
+export type UserGroupAdminView = UserGroup & IncludeDeleted 
 
 export type UserOperationRole = {
   user: User,
   role: UserRole,
 }
 
+// TODO Will not using pagination here cause issues? TODO TN
 export type UserGroupOperationRole = {
   userGroup: UserGroupAdminView,
   role: UserRole,
@@ -227,9 +226,12 @@ export type UserFilter = {
   name?: string
 }
 
-export type ListObjectForAdminQuery = PaginationQuery & {
+export type IncludeDeleted = {
   deleted: boolean,
 }
+
+// TODO TN - what did this used to be called?
+export type ListObjectForAdminQuery = PaginationQuery & IncludeDeleted
 
 export type PaginationResult<T> = PaginationQuery & {
   totalCount: number,
