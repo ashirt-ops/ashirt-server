@@ -211,7 +211,6 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 		dr := dissectJSONRequest(r)
 		i := services.ListUserGroupsForAdminInput{
 			UserGroupFilter: services.ParseRequestQueryUserGroupFilter(dr),
-			Pagination:      services.ParseRequestQueryPagination(dr, 10),
 			IncludeDeleted:  dr.FromQuery("deleted").OrDefault(false).AsBool(),
 		}
 		if dr.Error != nil {
