@@ -5,7 +5,7 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import { WiredData} from 'src/helpers'
 
-import { UserGroup, UserGroupAdminView } from 'src/global_types'
+import { UserGroupAdminView } from 'src/global_types'
 import { listUserGroupsAdminView } from 'src/services'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
@@ -33,6 +33,9 @@ export default (props: {
   const [deletingUserGroup, setDeletingUserGroup] = React.useState<null | UserGroupAdminView>(null)
   const [modifyingUserGroup, setModifyingUserGroup] = React.useState<null | UserGroupAdminView>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
+  const itemsPerPage = 10
+  const [page, setPage] = React.useState(1)
+  const [pageLength, setPageLength] = React.useState(0)
 
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
@@ -49,6 +52,9 @@ export default (props: {
     return () => { props.offReload(wiredUserGroups.reload) }
   })
   React.useEffect(() => { setIncludeDeletedUsers(withDeleted) }, [withDeleted])
+  React.useEffect(() => {
+    wiredUserGroups.expose(data => setPageLength(Math.ceil(data.length / itemsPerPage)))
+  }, [wiredUserGroups])
 
   return (
     <SettingsSection title="Group List" width="wide">
@@ -67,9 +73,15 @@ export default (props: {
       </div>
       <Table className={cx('table')} columns={columns}>
         {wiredUserGroups.render(data => <>
-          {data?.map(group => <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, setModifyingUserGroup))} />)}
+          {data?.map((group, i) => {
+            const belowUpperBound = i < page * itemsPerPage 
+            const aboveLowerBound = i >= (page - 1) * itemsPerPage
+            const inPageRange = belowUpperBound && aboveLowerBound
+            return inPageRange && <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, setModifyingUserGroup))} />
+          })}
         </>)}
       </Table>
+      <StandardPager className={cx('user-table-pager')} page={page} maxPages={pageLength} onPageChange={(newPage) => setPage(newPage)} />
 
       {deletingUserGroup && <DeleteUserGroupModal userGroup={deletingUserGroup} onRequestClose={() => { setDeletingUserGroup(null); wiredUserGroups.reload() }} />}
       {modifyingUserGroup && <ModifyUserGroupModal userGroup={modifyingUserGroup} onRequestClose={() => { setModifyingUserGroup(null); wiredUserGroups.reload() }} />}
