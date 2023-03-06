@@ -211,7 +211,6 @@ export type UserOperationRole = {
   role: UserRole,
 }
 
-// TODO Will not using pagination here cause issues? TODO TN
 export type UserGroupOperationRole = {
   userGroup: UserGroupAdminView,
   role: UserRole,
@@ -230,8 +229,7 @@ export type IncludeDeleted = {
   deleted: boolean,
 }
 
-// TODO TN - what did this used to be called?
-export type ListObjectForAdminQuery = PaginationQuery & IncludeDeleted
+export type ListUsersForAdminQuery = PaginationQuery & IncludeDeleted
 
 export type PaginationResult<T> = PaginationQuery & {
   totalCount: number,
