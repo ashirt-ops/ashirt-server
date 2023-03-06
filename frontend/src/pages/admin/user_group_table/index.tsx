@@ -81,7 +81,7 @@ export default (props: {
           })}
         </>)}
       </Table>
-      <StandardPager className={cx('user-table-pager')} page={page} maxPages={pageLength} onPageChange={(newPage) => setPage(newPage)} />
+      <StandardPager className={cx('user-table-pager')} page={page} maxPages={pageLength} onPageChange={setPage} />
 
       {deletingUserGroup && <DeleteUserGroupModal userGroup={deletingUserGroup} onRequestClose={() => { setDeletingUserGroup(null); wiredUserGroups.reload() }} />}
       {modifyingUserGroup && <ModifyUserGroupModal userGroup={modifyingUserGroup} onRequestClose={() => { setModifyingUserGroup(null); wiredUserGroups.reload() }} />}
