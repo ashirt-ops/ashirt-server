@@ -156,7 +156,11 @@ const PermissionTable = (props: {
     <>
       {wiredPermissions.render(data => {
         const matchingUsers = data.filter(({ userGroup }) => normalizeName(userGroup).includes(normalizedSearchTerm))
-        const renderableData = matchingUsers.filter((_, i) => i >= ((page - 1) * itemsPerPage) && i < (itemsPerPage * page))
+        const usersInPageRange = matchingUsers.filter((_, i) => {
+          const belowUpperBound = i < page * itemsPerPage 
+          const aboveLowerBound = i >= (page - 1) * itemsPerPage
+          return belowUpperBound && aboveLowerBound
+        })
 
         const notAdmin = !props.isAdmin
 
@@ -165,7 +169,7 @@ const PermissionTable = (props: {
             <Input label="User Group Filter" {...filterField} />
 
             <Table columns={columns}>
-              {renderableData.map(({ userGroup, role }) => (
+              {usersInPageRange.map(({ userGroup, role }) => (
                 <PermissionTableRow
                   currentUser={props?.currentUser}
                   disabled={notAdmin}
