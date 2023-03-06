@@ -136,7 +136,7 @@ const PermissionTable = (props: {
   const itemsPerPage = 10
 
   const filterField = useFormField("")
-  const [currentPage, setCurrentPage] = React.useState(1)
+  const [page, setPage] = React.useState(1)
 
   const normalizeName = (userGroup: UserGroup) => `${userGroup.name}`.toLowerCase()
   const normalizedSearchTerm = filterField.value.toLowerCase()
@@ -156,7 +156,7 @@ const PermissionTable = (props: {
     <>
       {wiredPermissions.render(data => {
         const matchingUsers = data.filter(({ userGroup }) => normalizeName(userGroup).includes(normalizedSearchTerm))
-        const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
+        const renderableData = matchingUsers.filter((_, i) => i >= ((page - 1) * itemsPerPage) && i < (itemsPerPage * page))
 
         const notAdmin = !props.isAdmin
 
@@ -179,9 +179,9 @@ const PermissionTable = (props: {
             </Table>
             <StandardPager
               className={cx('user-table-pager')}
-              page={currentPage}
+              page={page}
               maxPages={Math.ceil(matchingUsers.length / itemsPerPage)}
-              onPageChange={(newPage) => setCurrentPage(newPage)}
+              onPageChange={(newPage) => setPage(newPage)}
             />
           </>
         )
