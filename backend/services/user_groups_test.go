@@ -179,11 +179,6 @@ func TestListUserGroupsForAdmin(t *testing.T) {
 		ctx := contextForUser(nonAdminUser, db)
 
 		i := services.ListUserGroupsForAdminInput{
-			Pagination: services.Pagination{
-				TotalCount: 4,
-				PageSize:   10,
-				Page:       1,
-			},
 			IncludeDeleted: false,
 		}
 
@@ -202,11 +197,6 @@ func TestListUserGroupsForAdmin(t *testing.T) {
 func TestGetSlugMap(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		i := services.ListUserGroupsForAdminInput{
-			Pagination: services.Pagination{
-				TotalCount: 4,
-				PageSize:   10,
-				Page:       1,
-			},
 			IncludeDeleted: true,
 		}
 
@@ -225,11 +215,6 @@ func TestGetSlugMap(t *testing.T) {
 
 		// test for non-deleted user groups
 		i = services.ListUserGroupsForAdminInput{
-			Pagination: services.Pagination{
-				TotalCount: 4,
-				PageSize:   10,
-				Page:       1,
-			},
 			IncludeDeleted: false,
 		}
 
@@ -389,55 +374,48 @@ func TestSortUsersInToGroups(t *testing.T) {
 			},
 		}
 
-		p := services.Pagination{
-			PageSize:   10,
-			Page:       1,
-			TotalCount: 1,
-		}
-
-		result, err := services.SortUsersInToGroups(slugMap, p)
+		result, err := services.SortUsersInToGroups(slugMap)
 		require.NoError(t, err)
-		var content = result.Content.([]dtos.UserGroupAdminView)
-		require.Equal(t, int64(5), result.TotalCount)
+		require.Equal(t, int(5), len(result))
 
-		require.Equal(t, UserGroupGryffindor.Name, content[0].Name)
-		require.Equal(t, UserGroupGryffindor.Slug, content[0].Slug)
-		require.Equal(t, false, content[0].Deleted)
-		for _, userSlug := range content[0].UserSlugs {
+		require.Equal(t, UserGroupGryffindor.Name, result[0].Name)
+		require.Equal(t, UserGroupGryffindor.Slug, result[0].Slug)
+		require.Equal(t, false, result[0].Deleted)
+		for _, userSlug := range result[0].UserSlugs {
 			require.Contains(t, []string{UserHarry.Slug, UserGinny.Slug, UserRon.Slug, UserHermione.Slug}, userSlug)
 		}
 
-		require.Equal(t, UserGroupHufflepuff.Name, content[1].Name)
-		require.Equal(t, UserGroupHufflepuff.Slug, content[1].Slug)
-		require.Equal(t, false, content[1].Deleted)
-		for _, userSlug := range content[1].UserSlugs {
+		require.Equal(t, UserGroupHufflepuff.Name, result[1].Name)
+		require.Equal(t, UserGroupHufflepuff.Slug, result[1].Slug)
+		require.Equal(t, false, result[1].Deleted)
+		for _, userSlug := range result[1].UserSlugs {
 			require.Contains(t, []string{UserFleur.Slug, UserCedric.Slug}, userSlug)
 		}
 
-		require.Equal(t, UserGroupOtherHouse.Name, content[2].Name)
-		require.Equal(t, UserGroupOtherHouse.Slug, content[2].Slug)
-		require.Equal(t, false, content[2].Deleted)
-		for _, userSlug := range content[2].UserSlugs {
+		require.Equal(t, UserGroupOtherHouse.Name, result[2].Name)
+		require.Equal(t, UserGroupOtherHouse.Slug, result[2].Slug)
+		require.Equal(t, false, result[2].Deleted)
+		for _, userSlug := range result[2].UserSlugs {
 			require.Contains(t, []string{UserViktor.Slug, UserCho.Slug}, userSlug)
 		}
 
-		require.Equal(t, UserGroupRavenclaw.Name, content[3].Name)
-		require.Equal(t, UserGroupRavenclaw.Slug, content[3].Slug)
-		require.Equal(t, false, content[3].Deleted)
-		for _, userSlug := range content[3].UserSlugs {
+		require.Equal(t, UserGroupRavenclaw.Name, result[3].Name)
+		require.Equal(t, UserGroupRavenclaw.Slug, result[3].Slug)
+		require.Equal(t, false, result[3].Deleted)
+		for _, userSlug := range result[3].UserSlugs {
 			require.Contains(t, []string{UserViktor.Slug, UserCho.Slug}, userSlug)
 		}
 
-		require.Equal(t, UserGroupSlytherin.Name, content[4].Name)
-		require.Equal(t, UserGroupSlytherin.Name, content[4].Slug)
-		require.Equal(t, false, content[4].Deleted)
-		for _, userSlug := range content[4].UserSlugs {
+		require.Equal(t, UserGroupSlytherin.Name, result[4].Name)
+		require.Equal(t, UserGroupSlytherin.Name, result[4].Slug)
+		require.Equal(t, false, result[4].Deleted)
+		for _, userSlug := range result[4].UserSlugs {
 			require.Contains(t, []string{UserDraco.Slug, UserSnape.Slug, UserLucius.Slug}, userSlug)
 		}
 
 		// if len(slugMap) == 0
-		result, err = services.SortUsersInToGroups(services.SlugMap{}, p)
-		require.Equal(t, int64(0), result.TotalCount)
+		result, err = services.SortUsersInToGroups(services.SlugMap{})
+		require.Equal(t, int(0), len(result))
 
 		require.NoError(t, err)
 	})

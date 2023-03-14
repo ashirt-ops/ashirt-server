@@ -38,12 +38,10 @@ type ModifyUserGroupInput struct {
 
 type ListUserGroupsForAdminInput struct {
 	UserGroupFilter
-	Pagination
 	IncludeDeleted bool
 }
 
 type ListUserGroupsForOperationInput struct {
-	Pagination
 	UserGroupFilter
 	OperationSlug string
 }
@@ -198,20 +196,20 @@ type SlugMap []struct {
 }
 
 // Lists all usergroups for an admin, with pagination
-func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) (*dtos.PaginationWrapper, error) {
+func ListUserGroupsForAdmin(ctx context.Context, db *database.Connection, i ListUserGroupsForAdminInput) ([]dtos.UserGroupAdminView, error) {
 	if err := isAdmin(ctx); err != nil {
 		return nil, backend.WrapError("Unwilling to list user groups", backend.UnauthorizedReadErr(err))
 	}
 
 	slugMap, _ := GetSlugMap(db, i)
 
-	paginatedSortedUser, err := SortUsersInToGroups(slugMap, i.Pagination)
+	sortedUser, err := SortUsersInToGroups(slugMap)
 
 	if err != nil {
 		return nil, backend.WrapError("Unable to list user groups", backend.DatabaseErr(err))
 	}
 
-	return paginatedSortedUser, nil
+	return sortedUser, nil
 }
 
 func GetSlugMap(db *database.Connection, i ListUserGroupsForAdminInput) (SlugMap, error) {
@@ -239,14 +237,12 @@ func GetSlugMap(db *database.Connection, i ListUserGroupsForAdminInput) (SlugMap
 	return slugMap, nil
 }
 
-func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.PaginationWrapper, error) {
+func SortUsersInToGroups(slugMap SlugMap) ([]dtos.UserGroupAdminView, error) {
 	userGroupsDTO := []dtos.UserGroupAdminView{}
 	tempGroupMap := dtos.UserGroupAdminView{}
 
 	if len(slugMap) == 0 {
-		return &dtos.PaginationWrapper{
-			TotalCount: int64(0),
-		}, nil
+		return []dtos.UserGroupAdminView{}, nil
 	}
 
 	for j := 0; j < len(slugMap); j++ {
@@ -320,13 +316,7 @@ func SortUsersInToGroups(slugMap SlugMap, pagination Pagination) (*dtos.Paginati
 		}
 	}
 
-	groupLength := len(userGroupsDTO)
-
-	paginatedData := &dtos.PaginationWrapper{
-		Content:    userGroupsDTO,
-		TotalCount: int64(groupLength),
-	}
-	return paginatedData, nil
+	return userGroupsDTO, nil
 }
 
 // Lists all user groups for an operation; op admins and sys admins can view
@@ -368,7 +358,6 @@ func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dt
 }
 
 // lists all user groups that can be added to an operation
-// no pagination, because this is used for the search bar
 func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGroupsInput) ([]*dtos.UserGroupAdminView, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {

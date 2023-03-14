@@ -1,4 +1,4 @@
-import { ListObjectForAdminQuery, PaginationResult, UserGroup, UserGroupAdminView } from 'src/global_types'
+import { IncludeDeleted, UserGroup, UserGroupAdminView } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function listUserGroups(i: {
@@ -9,7 +9,7 @@ export async function listUserGroups(i: {
   return await ds.listUserGroups(i.query, i.includeDeleted || false, i.operationSlug)
 }
 
-export async function listUserGroupsAdminView(i: ListObjectForAdminQuery): Promise<PaginationResult<UserGroupAdminView>> {
+export async function listUserGroupsAdminView(i: IncludeDeleted): Promise<UserGroupAdminView[]> {
   return await ds.adminListUserGroups(i)
 }
 

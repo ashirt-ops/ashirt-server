@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { PaginatedWiredData, usePaginatedWiredData} from 'src/helpers'
+import { WiredData} from 'src/helpers'
 
 import { UserGroupAdminView } from 'src/global_types'
 import { listUserGroupsAdminView } from 'src/services'
@@ -22,6 +22,7 @@ import { default as Menu } from 'src/components/menu'
 import { ClickPopover } from 'src/components/popover'
 import Input from 'src/components/input'
 import { DeleteUserGroupModal, ModifyUserGroupModal } from 'src/pages/admin_modals'
+import { useWiredData } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -32,14 +33,17 @@ export default (props: {
   const [deletingUserGroup, setDeletingUserGroup] = React.useState<null | UserGroupAdminView>(null)
   const [modifyingUserGroup, setModifyingUserGroup] = React.useState<null | UserGroupAdminView>(null)
   const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
+  const itemsPerPage = 10
+  const [page, setPage] = React.useState(1)
+  const [pageLength, setPageLength] = React.useState(0)
 
   const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
   const columns = Object.keys(rowBuilder(null, <span />, <span />))
 
-  const wiredUserGroups = usePaginatedWiredData<UserGroupAdminView>(
-    React.useCallback(page => listUserGroupsAdminView({ page, pageSize: 10, deleted: withDeleted }), [usernameFilterValue, withDeleted]),
-    (err) => <ErrorRow span={columns.length} error={err} />,
+  const wiredUserGroups = useWiredData<UserGroupAdminView[]>(
+    React.useCallback(() => listUserGroupsAdminView({  deleted: withDeleted }), [usernameFilterValue, withDeleted]),
+    (err: Error) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />
   )
 
@@ -48,6 +52,9 @@ export default (props: {
     return () => { props.offReload(wiredUserGroups.reload) }
   })
   React.useEffect(() => { setIncludeDeletedUsers(withDeleted) }, [withDeleted])
+  React.useEffect(() => {
+    wiredUserGroups.expose(data => setPageLength(Math.ceil(data.length / itemsPerPage)))
+  }, [wiredUserGroups])
 
   return (
     <SettingsSection title="Group List" width="wide">
@@ -55,7 +62,7 @@ export default (props: {
         <Input
           label="Group Filter"
           value={usernameFilterValue}
-          onChange={v => { setUsernameFilterValue(v); wiredUserGroups.pagerProps.onPageChange(1) }}
+          onChange={v => { setUsernameFilterValue(v); }}
           loading={usernameFilterValue.length > 0 && wiredUserGroups.loading}
         />
         <Checkbox
@@ -66,9 +73,15 @@ export default (props: {
       </div>
       <Table className={cx('table')} columns={columns}>
         {wiredUserGroups.render(data => <>
-          {data?.map(group => <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, setModifyingUserGroup))} />)}
+          {data?.map((group, i) => {
+            const belowUpperBound = i < page * itemsPerPage 
+            const aboveLowerBound = i >= (page - 1) * itemsPerPage
+            const inPageRange = belowUpperBound && aboveLowerBound
+            return inPageRange && <TableRow key={group.slug} data={rowBuilder(group, usersInGroup(wiredUserGroups, group), modifyActions(group, setDeletingUserGroup, setModifyingUserGroup))} />
+          })}
         </>)}
       </Table>
+      <StandardPager className={cx('user-table-pager')} page={page} maxPages={pageLength} onPageChange={setPage} />
 
       {deletingUserGroup && <DeleteUserGroupModal userGroup={deletingUserGroup} onRequestClose={() => { setDeletingUserGroup(null); wiredUserGroups.reload() }} />}
       {modifyingUserGroup && <ModifyUserGroupModal userGroup={modifyingUserGroup} onRequestClose={() => { setModifyingUserGroup(null); wiredUserGroups.reload() }} />}
@@ -100,7 +113,7 @@ const rowBuilder = (u: UserGroupAdminView | null, users: JSX.Element, actions: J
 })
 
 const usersInGroup = (
-  wiredUserGroups: PaginatedWiredData<UserGroupAdminView>,
+  wiredUserGroups: WiredData<UserGroupAdminView[]>,
   u: UserGroupAdminView
 ) => {
   const userCount = wiredUserGroups.render(data => <span>{data.find(group => group.slug === u.slug)?.userSlugs?.length ?? 0}</span>)

@@ -204,9 +204,7 @@ export type UserGroup = {
   userSlugs: Array<string>,
 }
 
-export type UserGroupAdminView = UserGroup &{
-  deleted: boolean,
-}
+export type UserGroupAdminView = UserGroup & IncludeDeleted 
 
 export type UserOperationRole = {
   user: User,
@@ -227,9 +225,11 @@ export type UserFilter = {
   name?: string
 }
 
-export type ListObjectForAdminQuery = PaginationQuery & {
+export type IncludeDeleted = {
   deleted: boolean,
 }
+
+export type ListUsersForAdminQuery = PaginationQuery & IncludeDeleted
 
 export type PaginationResult<T> = PaginationQuery & {
   totalCount: number,
