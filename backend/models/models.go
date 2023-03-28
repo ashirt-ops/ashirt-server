@@ -177,6 +177,7 @@ type AuthSchemeData struct {
 	// AuthType defines how the scheme should work. e.g. "oidc" or "local"
 	AuthType          string     `db:"auth_type"`
 	Username          string     `db:"username"`
+	AuthnID           string     `db:"authn_id"`
 	UserID            int64      `db:"user_id"`
 	EncryptedPassword []byte     `db:"encrypted_password"`
 	MustResetPassword bool       `db:"must_reset_password"`
