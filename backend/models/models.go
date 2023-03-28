@@ -4,6 +4,7 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/theparanoids/ashirt-server/backend/policy"
@@ -175,17 +176,17 @@ type AuthSchemeData struct {
 	// AuthScheme defines the name of the authentication method. e.g. Okta
 	AuthScheme string `db:"auth_scheme"`
 	// AuthType defines how the scheme should work. e.g. "oidc" or "local"
-	AuthType          string     `db:"auth_type"`
-	Username          string     `db:"username"`
-	AuthnID           string     `db:"authn_id"`
-	UserID            int64      `db:"user_id"`
-	EncryptedPassword []byte     `db:"encrypted_password"`
-	MustResetPassword bool       `db:"must_reset_password"`
-	TOTPSecret        *string    `db:"totp_secret"`
-	JSONData          *string    `db:"json_data"`
-	LastLogin         *time.Time `db:"last_login"`
-	CreatedAt         time.Time  `db:"created_at"`
-	UpdatedAt         *time.Time `db:"updated_at"`
+	AuthType          string         `db:"auth_type"`
+	Username          string         `db:"username"`
+	AuthnID           sql.NullString `db:"authn_id"`
+	UserID            int64          `db:"user_id"`
+	EncryptedPassword []byte         `db:"encrypted_password"`
+	MustResetPassword bool           `db:"must_reset_password"`
+	TOTPSecret        *string        `db:"totp_secret"`
+	JSONData          *string        `db:"json_data"`
+	LastLogin         *time.Time     `db:"last_login"`
+	CreatedAt         time.Time      `db:"created_at"`
+	UpdatedAt         *time.Time     `db:"updated_at"`
 }
 
 // Session reflects the structure of the database table 'sessions'
