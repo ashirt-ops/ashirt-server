@@ -19,6 +19,7 @@ func CreateNewAuthForUserGeneric(db *database.Connection, authSchemeName, authSc
 		"auth_type":           authSchemeType,
 		"username":            data.Username,
 		"user_id":             data.UserID,
+		"authn_id":            string(data.AuthnID),
 		"encrypted_password":  data.EncryptedPassword,
 		"totp_secret":         data.TOTPSecret,
 		"must_reset_password": data.NeedsPasswordReset,

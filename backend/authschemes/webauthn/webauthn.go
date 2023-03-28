@@ -139,8 +139,12 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			return nil, backend.WrapError("Unable to create user", err)
 		}
 
+		rawSessionData := bridge.ReadAuthSchemeSession(r)
+		sessionData, _ := rawSessionData.(*webAuthNSessionData)
+
 		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:   userResult.UserID,
+			AuthnID:  sessionData.UserData.AuthnID,
 			Username: data.UserData.UserName,
 			JSONData: helpers.Ptr(string(encodedCreds)),
 		})
@@ -382,7 +386,7 @@ func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge auth
 		return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 	}
 
-	webauthnUser := makeWebAuthnUser(user.FirstName, user.LastName, username, user.Email, user.ID, creds)
+	webauthnUser := makeWebAuthnUser(user.FirstName, user.LastName, username, user.Email, user.ID, authData.AuthnID, creds)
 	options, sessionData, err := a.Web.BeginLogin(&webauthnUser)
 	if err != nil {
 		return nil, backend.WebauthnLoginError(err, "Unable to begin login process")
