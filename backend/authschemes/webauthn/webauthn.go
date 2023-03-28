@@ -20,8 +20,8 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 
-	"github.com/duo-labs/webauthn/protocol"
-	auth "github.com/duo-labs/webauthn/webauthn"
+	"github.com/go-webauthn/webauthn/protocol"
+	auth "github.com/go-webauthn/webauthn/webauthn"
 )
 
 type WebAuthn struct {
