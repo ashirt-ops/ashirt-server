@@ -12,6 +12,7 @@ import (
 
 type webauthnUser struct {
 	UserID         []byte
+	AuthnID        []byte
 	UserName       string
 	IconURL        string
 	Credentials    []AShirtWebauthnCredential
@@ -24,7 +25,7 @@ type webauthnUser struct {
 
 func makeNewWebAuthnUser(firstName, lastName, email, username, keyName string) webauthnUser {
 	return webauthnUser{
-		UserID:         []byte(uuid.New().String()),
+		AuthnID:        []byte(uuid.New().String()),
 		UserName:       username,
 		FirstName:      firstName,
 		LastName:       lastName,
@@ -49,9 +50,10 @@ func makeAddKeyWebAuthnUser(userID int64, username, keyName string, creds []AShi
 	return user
 }
 
-func makeWebAuthnUser(firstName, lastName, username, email string, userID int64, creds []AShirtWebauthnCredential) webauthnUser {
+func makeWebAuthnUser(firstName, lastName, username, email string, UserID int64, authnID []byte, creds []AShirtWebauthnCredential) webauthnUser {
 	return webauthnUser{
-		UserID:      i64ToByteSlice(userID),
+		AuthnID:     authnID,
+		UserID:      i64ToByteSlice(UserID),
 		UserName:    username,
 		Credentials: creds,
 		FirstName:   firstName,
@@ -73,7 +75,7 @@ func byteSliceToI64(b []byte) int64 {
 }
 
 func (u *webauthnUser) WebAuthnID() []byte {
-	return u.UserID
+	return u.AuthnID
 }
 
 func (u *webauthnUser) WebAuthnName() string {

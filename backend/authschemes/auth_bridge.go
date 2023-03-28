@@ -135,6 +135,7 @@ func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request)
 // UserAuthData is a small structure capturing data relevant to a user for authentication purposes
 type UserAuthData struct {
 	UserID             int64   `db:"user_id"`
+	AuthnID            []byte  `db:"authn_id"`
 	Username           string  `db:"username"`
 	EncryptedPassword  []byte  `db:"encrypted_password"`
 	NeedsPasswordReset bool    `db:"must_reset_password"`
@@ -363,7 +364,7 @@ func (ah AShirtAuthBridge) AddScheduledEmail(emailAddress string, userID int64, 
 // normal column names (i.e. no aliasing is happening)
 func (ah AShirtAuthBridge) buildFindUserAuthQuery() sq.SelectBuilder {
 	return sq.Select(
-		"user_id", "username", "encrypted_password",
+		"user_id", "authn_id", "username", "encrypted_password",
 		"must_reset_password", "totp_secret", "json_data").
 		From("auth_scheme_data")
 }
