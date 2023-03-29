@@ -9,7 +9,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.5.0
 	github.com/go-kit/kit v0.12.0
 	github.com/go-sql-driver/mysql v1.7.0
-	github.com/go-webauthn/webauthn v0.5.0
+	github.com/go-webauthn/webauthn v0.8.2
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/csrf v1.7.1
 	github.com/gorilla/mux v1.8.0
