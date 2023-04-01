@@ -50,7 +50,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.2",
     "react-markdown": "^8.0.3",
-    "react-router-dom": "^6.8.0",
+    "react-router-dom": "^6.10.0",
     "xterm": "^5.0.0"
   }
 }
