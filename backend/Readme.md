@@ -684,7 +684,7 @@ If you're using Visual Studio Code, you may want to make these changes:
   3. In the `up` version, provide the proper SQL statements to adjust the schema as needed
   4. In the `down` version, provide the opposite SQL statements to revert the changes
   5. While developing, **make sure that the database is running**, otherwise the next step will fail
-  6. Once done with the pair of changes, run `${PROJECT_ROOT}/bin/migrate-up` to provide a new `${PROJECT_ROOT}/backend/schema.sql` file and update the running database
+  6. Once done with the pair of changes, run `make migrate-up` to provide a new `${PROJECT_ROOT}/backend/schema.sql` file and update the running database
   
   Note: you may also need to update the `models` and/or the `dtos`
 

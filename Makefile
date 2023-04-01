@@ -91,6 +91,11 @@ view-db:
 new-migration:
 	bin/create-migration.sh
 
+# migrate-up runs all pending migrations
+.PHONY: migrate-up
+migrate-up:
+	bin/migrate-up
+
 # prep is shorthand for formatting and testing. Useful when prepping for a new Pull Request.
 .PHONY: prep
 prep: tidy-all test-all
