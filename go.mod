@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/storage v1.29.0
-	github.com/Masterminds/squirrel v1.5.3
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/aws/aws-sdk-go v1.44.211
 	github.com/coreos/go-oidc/v3 v3.5.0
 	github.com/duo-labs/webauthn v0.0.0-20220330035159-03696f3d4499
