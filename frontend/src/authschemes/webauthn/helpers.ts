@@ -20,8 +20,6 @@ export const base64UrlEncode = (value: string) => {
 
 export const toKeycode = (c: string) => c.charCodeAt(0)
 
-export const toByteArray = (s: string) => Uint8Array.from(atob(s), toKeycode)
-
 const base64UrlToBase64 = (input: string) => {
   // Replace non-url compatible chars with base64 standard chars
   let standardCharInput = input
@@ -52,10 +50,10 @@ export const convertToCredentialCreationOptions = (
       challenge: toByteArrayFromB64URL(input.publicKey.challenge),
       user: {
         ...input.publicKey.user,
-        id: toByteArray(input.publicKey.user.id)
+        id: toByteArrayFromB64URL(input.publicKey.user.id)
       },
       excludeCredentials: input.publicKey.excludeCredentials?.map(
-        cred => ({ ...cred, id: toByteArray(cred.id) })
+        cred => ({ ...cred, id: toByteArrayFromB64URL(cred.id) })
       )
     }
   }
@@ -68,7 +66,7 @@ export const convertToPublicKeyCredentialRequestOptions = (input: ProvidedCreden
     ...input.publicKey,
     challenge: toByteArrayFromB64URL(input.publicKey.challenge),
     allowCredentials: input.publicKey.allowCredentials.map(
-      listItem => ({ ...listItem, id: toByteArray(listItem.id) })
+      listItem => ({ ...listItem, id: toByteArrayFromB64URL(listItem.id) })
     )
   }
 
