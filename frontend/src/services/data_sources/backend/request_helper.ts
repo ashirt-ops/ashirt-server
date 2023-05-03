@@ -1,9 +1,7 @@
 // Copyright 2020, Verizon Media
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
-import {
-  stringify as stringifyQuerystring,
-} from 'query-string'
+import { queryString } from 'query-string'
 
 var CSRF_TOKEN: string | null = null
 
@@ -27,7 +25,7 @@ export async function xhrText(method: string, path: string, data?: Object | null
 
 async function request(decode: (res: Response) => Promise<any>, method: string, path: string, data?: Object | null, query?: QueryObj) {
   path = '/web' + path
-  if (query != null) path += `?${stringifyQuerystring(query)}`
+  if (query != null) path += `?${queryString.stringify(query)}`
   let res;
   if (method === 'GET') {
     res = await fetch(path, { method })
