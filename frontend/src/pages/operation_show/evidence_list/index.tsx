@@ -17,6 +17,9 @@ import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { mkNavTo } from 'src/helpers/navigate-to-query'
 
+import { saveAs } from 'file-saver';
+var JSZip = require("jszip");
+
 export default () => {
   const { slug } = useParams<{ slug: string }>()
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
@@ -61,6 +64,21 @@ export default () => {
     slug: operationSlug
   })
 
+  const zipIt = async () => {
+    var zip = new JSZip();
+    zip.file("Hello.txt", "Hello World\n");
+    console.log("zipping?")
+    var img = zip.folder("images");
+    // const imgData = await fetch('https://pbs.twimg.com/media/FuYBCUHWIAA4LkB?format=jpg&name=4096x4096')
+    // img.file("smile.gif", imgData, {base64: true});
+    const content = await zip.generateAsync({type:"blob"})
+    saveAs(content, "example.zip");
+    console.log("finsihed zipping?", content)
+    // .then(function(content) {
+    //     // see FileSaver.js
+        
+    // });
+  }
   return (
     <Layout
       onEvidenceCreated={reloadToTop}
@@ -69,6 +87,7 @@ export default () => {
       query={query}
       view="evidence"
     >
+      <button onClick={zipIt}>Zip it</button>
       {wiredEvidence.render(evidence => (
         <Timeline
           scrollToUuid={lastEditedUuid}

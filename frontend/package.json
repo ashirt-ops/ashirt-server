@@ -10,6 +10,7 @@
   "devDependencies": {
     "@types/chai": "^4.3.4",
     "@types/classnames": "^2.3.1",
+    "@types/file-saver": "^2.0.5",
     "@types/lodash": "^4.14.191",
     "@types/mocha": "^10.0.1",
     "@types/react": "^18.0.28",
@@ -42,6 +43,8 @@
     "ace-builds": "^1.13.2",
     "classnames": "^2.3.2",
     "date-fns": "^2.30.0",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "query-string": "^8.1.0",
     "react": "^18.2.0",
