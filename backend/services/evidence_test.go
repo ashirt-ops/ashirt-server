@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
@@ -381,7 +382,7 @@ func validateReadEvidenceOutput(t *testing.T, expected models.Evidence, actual *
 	require.Equal(t, expected.UUID, actual.UUID)
 	require.Equal(t, expected.Description, actual.Description)
 	require.Equal(t, expected.ContentType, actual.ContentType)
-	require.Equal(t, expected.OccurredAt, actual.OccurredAt)
+	require.Equal(t, expected.OccurredAt.Round(time.Second).UTC(), actual.OccurredAt)
 }
 
 func validateInsertedEvidence(t *testing.T, evi *dtos.Evidence, src services.CreateEvidenceInput,

@@ -351,7 +351,7 @@ func TestUpdateTag(t *testing.T) {
 			OperationID: op.ID,
 			Name:        "Moon",
 			ColorName:   "green",
-			CreatedAt:   TagEarth.CreatedAt,
+			CreatedAt:   TagEarth.CreatedAt.Round(time.Second).UTC(),
 			UpdatedAt:   updatedTag.UpdatedAt,
 		}, updatedTag)
 	})
@@ -384,7 +384,7 @@ func TestUpdateDefaultTag(t *testing.T) {
 			ID:        tagToUpdate.ID,
 			Name:      i.Name,
 			ColorName: i.ColorName,
-			CreatedAt: tagToUpdate.CreatedAt,
+			CreatedAt: tagToUpdate.CreatedAt.Round(time.Second).UTC(),
 			UpdatedAt: updatedTag.UpdatedAt,
 		}, updatedTag)
 	})
