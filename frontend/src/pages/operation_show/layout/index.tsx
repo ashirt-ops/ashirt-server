@@ -26,6 +26,7 @@ export default (props: {
   operationSlug: string,
   query: string,
   view: ViewName,
+  exportEvidence?: () => Promise<void>,
 }) => {
   const reloadBus = BuildReloadBus()
 
@@ -66,6 +67,7 @@ export default (props: {
             showCreateButtons={showCreateButtons}
             requestQueriesReload={reloadBus.requestReload}
             queryName={currentQuery?.name}
+            exportEvidence={props.exportEvidence}
           />
         </div>
         <div className={cx('sidebar')}>

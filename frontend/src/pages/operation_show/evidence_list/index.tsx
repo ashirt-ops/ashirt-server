@@ -95,7 +95,7 @@ export default () => {
       console.error(error.message);
     });
 
-  const zipFiles = async () => {
+  const exportEvidence = async () => {
     const jsonEvidence = createJsonEvidence(evidence)
     var zip = new JSZip();
     zip.file("evidence.json", jsonEvidence);
@@ -122,8 +122,8 @@ export default () => {
       operationSlug={operationSlug}
       query={query}
       view="evidence"
+      exportEvidence={exportEvidence}
     >
-      <button onClick={zipFiles}>Export Evidence</button>
       {wiredEvidence.render(evidence => (
         <Timeline
           scrollToUuid={lastEditedUuid}

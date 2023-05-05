@@ -29,6 +29,7 @@ export const Toolbar = (props: {
   onRequestCreateEvidence: () => void
   requestQueriesReload?: () => void
   showCreateButtons: CreateButtonPosition
+  exportEvidence?: () => Promise<void>
 }) => {
   const [queryString, setQueryString] = React.useState<string>(props.query)
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -72,6 +73,8 @@ export const Toolbar = (props: {
                 <ButtonGroup className={cx('tb-create-buttons')}>
                   <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
                   <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
+                  {/* TODO TN  - ensure this is blocked for non admins */}
+                  <Button onClick={props.exportEvidence}>Export Evidence</Button>
                 </ButtonGroup>
               )}
             </div>
