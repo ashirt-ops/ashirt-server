@@ -4,6 +4,9 @@
 export type SuccessfulResult<T> = { success: T }
 export type ErrorResult = { err: Error }
 
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
 export type Result<T> =
   | ErrorResult
   | SuccessfulResult<T>
@@ -116,6 +119,8 @@ export type Evidence = {
   contentType: SupportedEvidenceType
 }
 
+export type DenormalizedEvidence = PartialBy<Evidence, 'uuid'>
+
 export type EvidenceMetadata = {
   source: string,
   body: string,
@@ -151,6 +156,8 @@ export type Tag = {
   name: string,
   colorName: string,
 }
+
+export type DenormalizedTag = PartialBy<Tag, 'id'>
 
 export type DefaultTag = Tag
 
