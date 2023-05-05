@@ -11,13 +11,14 @@ import {
   MoveEvidenceModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
-import { Evidence } from 'src/global_types'
+import { DenormalizedEvidence, DenormalizedTag, Evidence } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { mkNavTo } from 'src/helpers/navigate-to-query'
 
 import { saveAs } from 'file-saver';
+import _ from 'lodash'
 var JSZip = require("jszip");
 
 export default () => {
@@ -25,6 +26,7 @@ export default () => {
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const location = useLocation()
   const navigate = useNavigate()
+  const [evidence, setEvidence] = React.useState<Evidence[]>([])
 
   const query: string = new URLSearchParams(location.search).get('q') || ''
   const [lastEditedUuid, setLastEditedUuid] = React.useState("")
@@ -33,6 +35,10 @@ export default () => {
     operationSlug,
     query,
   }), [operationSlug, query]))
+
+  React.useEffect(() => {
+    wiredEvidence.expose(data => data.length && setEvidence(data))
+  }, [wiredEvidence])
 
   const reloadToTop = () => {
     setLastEditedUuid("")
@@ -64,21 +70,51 @@ export default () => {
     slug: operationSlug
   })
 
-  const zipIt = async () => {
-    var zip = new JSZip();
-    zip.file("Hello.txt", "Hello World\n");
-    console.log("zipping?")
-    var img = zip.folder("images");
-    // const imgData = await fetch('https://pbs.twimg.com/media/FuYBCUHWIAA4LkB?format=jpg&name=4096x4096')
-    // img.file("smile.gif", imgData, {base64: true});
-    const content = await zip.generateAsync({type:"blob"})
-    saveAs(content, "example.zip");
-    console.log("finsihed zipping?", content)
-    // .then(function(content) {
-    //     // see FileSaver.js
-        
-    // });
+  const createJsonEvidence = (evidence: Evidence[]) => {
+    const evidenceCopy = _.cloneDeep(evidence)
+    evidenceCopy.forEach(e => {
+      e.tags.forEach(t => {
+        delete (t as DenormalizedTag).id
+        })
+      delete (e as DenormalizedEvidence).uuid
+    })
+    return JSON.stringify(evidenceCopy) 
   }
+
+  const getMediaBlobs = async (evidence: Evidence[]) => 
+    await Promise.all(evidence.map(async (e) => {
+      const media = await fetch(`/web/operations/${operationSlug}/evidence/${e.uuid}/media`)
+      const blob = await media.blob()
+      return {
+        description: e.description,
+        contentType: e.contentType, 
+        blob
+      }
+    }))
+    .catch((error) => {
+      console.error(error.message);
+    });
+
+  const zipFiles = async () => {
+    const jsonEvidence = createJsonEvidence(evidence)
+    var zip = new JSZip();
+    zip.file("evidence.json", jsonEvidence);
+
+    var imgFolder = zip.folder("images");
+    const mediaBlobs = await getMediaBlobs(evidence)
+
+    if (mediaBlobs){
+      mediaBlobs.forEach((mb) => {
+        const fileName = `${mb.description}.${mb.contentType === "image" ? "jpeg" : "txt"}`
+        imgFolder.file(fileName, mb.blob, {base64: true});
+      })    
+      const zipFile = await zip.generateAsync({type:"blob"})
+      saveAs(zipFile, `evidence-${operationSlug}-${new Date().toISOString()}.zip`);
+    } else {
+      // TODO TN add modal to show error
+    }
+  }
+
   return (
     <Layout
       onEvidenceCreated={reloadToTop}
@@ -87,7 +123,7 @@ export default () => {
       query={query}
       view="evidence"
     >
-      <button onClick={zipIt}>Zip it</button>
+      <button onClick={zipFiles}>Export Evidence</button>
       {wiredEvidence.render(evidence => (
         <Timeline
           scrollToUuid={lastEditedUuid}
