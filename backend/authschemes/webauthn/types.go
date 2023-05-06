@@ -3,7 +3,7 @@ package webauthn
 import (
 	"time"
 
-	auth "github.com/duo-labs/webauthn/webauthn"
+	auth "github.com/go-webauthn/webauthn/webauthn"
 )
 
 type RegistrationType int

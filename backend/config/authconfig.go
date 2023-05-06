@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/duo-labs/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
