@@ -38,6 +38,7 @@ func makeNewWebAuthnUser(firstName, lastName, email, username, keyName string) w
 func makeLinkingWebAuthnUser(userID int64, username, keyName string) webauthnUser {
 	return webauthnUser{
 		UserID:         i64ToByteSlice(userID),
+		AuthnID:        []byte(uuid.New().String()),
 		UserName:       username,
 		KeyName:        keyName,
 		KeyCreatedDate: time.Now(),
