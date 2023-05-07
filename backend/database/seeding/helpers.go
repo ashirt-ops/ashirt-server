@@ -11,28 +11,12 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jonboulle/clockwork"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/models"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
 )
-
-var internalClock clockwork.Clock = clockwork.NewFakeClock()
-
-// SetInternalClock provides a mechanism to override the default/testing clock and use a custom
-// clock. There are two options: clockwork.NewRealClock() (for current time) or
-// clockwork.NewFakeClockAt() for a fake clock at a given time.
-//
-// Note: this should be called _before_ seeding the database
-func SetInternalClock(newClock clockwork.Clock) {
-	internalClock = newClock
-}
-
-func GetInternalClock() clockwork.Clock {
-	return internalClock
-}
 
 // ContextForUser genereates a user's context as if they had just logged in. All settings are set,
 // except for NeedsReset, which is always false
@@ -78,7 +62,7 @@ func newAPIKeyGen(first int64) func(int64, string, []byte) models.APIKey {
 			UserID:    userID,
 			AccessKey: accessKey,
 			SecretKey: secretKey,
-			CreatedAt: internalClock.Now(),
+			CreatedAt: time.Now(),
 		}
 	}
 }
@@ -128,7 +112,7 @@ func newTagGen(first int64) func(opID int64, name, colorName string) models.Tag 
 			OperationID: opID,
 			Name:        name,
 			ColorName:   colorName,
-			CreatedAt:   internalClock.Now(),
+			CreatedAt:   time.Now(),
 		}
 	}
 }
@@ -140,7 +124,7 @@ func newDefaultTagGen(first int64) func(name, colorName string) models.DefaultTa
 			ID:        id(),
 			Name:      name,
 			ColorName: colorName,
-			CreatedAt: internalClock.Now(),
+			CreatedAt: time.Now(),
 		}
 	}
 }
@@ -152,7 +136,7 @@ func newOperationGen(first int64) func(slug, fullName string) models.Operation {
 			ID:        id(),
 			Slug:      slug,
 			Name:      fullName,
-			CreatedAt: internalClock.Now(),
+			CreatedAt: time.Now(),
 		}
 	}
 }
@@ -169,8 +153,8 @@ func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentTy
 			ContentType:   contentType,
 			FullImageKey:  uuid,
 			ThumbImageKey: uuid,
-			OccurredAt:    internalClock.Now().AddDate(0, 0, clockDayOffset),
-			CreatedAt:     internalClock.Now(),
+			OccurredAt:    time.Now().AddDate(0, 0, clockDayOffset),
+			CreatedAt:     time.Now(),
 		}
 	}
 }
@@ -185,7 +169,7 @@ func newEvidenceMetadataGen(first int64) func(eviID int64, source, body string, 
 			CanProcess: canProcess,
 			Body:       body,
 			Status:     status,
-			CreatedAt:  internalClock.Now(),
+			CreatedAt:  time.Now(),
 		}
 	}
 }
@@ -196,11 +180,11 @@ func newFindingCategoryGen(first int64) func(category string, deleted bool) mode
 		findingCategory := models.FindingCategory{
 			ID:        id(),
 			Category:  category,
-			CreatedAt: internalClock.Now(),
+			CreatedAt: time.Now(),
 		}
 
 		if deleted {
-			deletedDate := internalClock.Now()
+			deletedDate := time.Now()
 			findingCategory.DeletedAt = &deletedDate
 		}
 		return findingCategory
@@ -218,7 +202,7 @@ func newFindingGen(first int64) func(opID int64, uuid string, category *int64, t
 			Title:         title,
 			Description:   desc,
 			ReadyToReport: (ticketLink != nil),
-			CreatedAt:     internalClock.Now(),
+			CreatedAt:     time.Now(),
 		}
 		if finding.ReadyToReport && *ticketLink != "" {
 			finding.TicketLink = ticketLink
@@ -232,7 +216,7 @@ func newUserOpPermission(user models.User, op models.Operation, role policy.Oper
 		UserID:      user.ID,
 		OperationID: op.ID,
 		Role:        role,
-		CreatedAt:   internalClock.Now(),
+		CreatedAt:   time.Now(),
 	}
 }
 
@@ -241,7 +225,7 @@ func newUserGroupOpPermission(userGroup models.UserGroup, op models.Operation, r
 		UserGroupID: userGroup.ID,
 		OperationID: op.ID,
 		Role:        role,
-		CreatedAt:   internalClock.Now(),
+		CreatedAt:   time.Now(),
 	}
 }
 
@@ -250,7 +234,7 @@ func newUserOperationPreferences(user models.User, op models.Operation, isFavori
 		UserID:      user.ID,
 		OperationID: op.ID,
 		IsFavorite:  isFavorite,
-		CreatedAt:   internalClock.Now(),
+		CreatedAt:   time.Now(),
 	}
 }
 
@@ -258,12 +242,12 @@ func newUserGroupGen(first int64) func(name string, deleted bool) models.UserGro
 	id := iotaLike(first)
 	return func(name string, deleted bool) models.UserGroup {
 		if deleted {
-			now := internalClock.Now()
+			now := time.Now()
 			return models.UserGroup{
 				ID:        id(),
 				Slug:      name,
 				Name:      name,
-				CreatedAt: internalClock.Now(),
+				CreatedAt: time.Now(),
 				DeletedAt: &now,
 			}
 		} else {
@@ -271,7 +255,7 @@ func newUserGroupGen(first int64) func(name string, deleted bool) models.UserGro
 				ID:        id(),
 				Slug:      name,
 				Name:      name,
-				CreatedAt: internalClock.Now(),
+				CreatedAt: time.Now(),
 			}
 		}
 
@@ -282,7 +266,7 @@ func newUserGroupMapping(user models.User, group models.UserGroup) models.UserGr
 	return models.UserGroupMap{
 		GroupID:   group.ID,
 		UserID:    user.ID,
-		CreatedAt: internalClock.Now(),
+		CreatedAt: time.Now(),
 	}
 }
 
@@ -295,7 +279,7 @@ func newQueryGen(first int64) func(opID int64, name, query, qType string) models
 			Name:        name,
 			Query:       query,
 			Type:        qType,
-			CreatedAt:   internalClock.Now(),
+			CreatedAt:   time.Now(),
 		}
 	}
 }
@@ -307,7 +291,7 @@ func newServiceWorkerGen(first int64) func(name, config string) models.ServiceWo
 			ID:        id(),
 			Name:      name,
 			Config:    config,
-			CreatedAt: internalClock.Now(),
+			CreatedAt: time.Now(),
 		}
 	}
 }
@@ -318,7 +302,7 @@ func associateEvidenceToTag(tag models.Tag, evis ...models.Evidence) []models.Ta
 	mappings := make([]models.TagEvidenceMap, 0, len(evis))
 	for _, evi := range evis {
 		if evi.OperationID == tag.OperationID {
-			mappings = append(mappings, models.TagEvidenceMap{TagID: tag.ID, EvidenceID: evi.ID, CreatedAt: internalClock.Now()})
+			mappings = append(mappings, models.TagEvidenceMap{TagID: tag.ID, EvidenceID: evi.ID, CreatedAt: time.Now()})
 		} else {
 			// will likely be ignored, but helpful in constructing new sets
 			os.Stderr.WriteString("[Testing - WARNING] Trying to associate tag(" + tag.Name + ") with evidence(" + evi.UUID + ") in differeing operations\n")
@@ -332,7 +316,7 @@ func associateTagsToEvidence(evi models.Evidence, tags ...models.Tag) []models.T
 
 	for _, t := range tags {
 		if t.OperationID == evi.OperationID {
-			mappings = append(mappings, models.TagEvidenceMap{TagID: t.ID, EvidenceID: evi.ID, CreatedAt: internalClock.Now()})
+			mappings = append(mappings, models.TagEvidenceMap{TagID: t.ID, EvidenceID: evi.ID, CreatedAt: time.Now()})
 		} else {
 			// will likely be ignored, but helpful in constructing new sets
 			os.Stderr.WriteString("[Testing - WARNING] Trying to associate tag(" + t.Name + ") with evidence(" + evi.UUID + ") in differeing operations\n")
@@ -346,7 +330,7 @@ func associateEvidenceToFinding(finding models.Finding, evi ...models.Evidence) 
 
 	for _, e := range evi {
 		if e.OperationID == finding.OperationID {
-			mappings = append(mappings, models.EvidenceFindingMap{EvidenceID: e.ID, FindingID: finding.ID, CreatedAt: internalClock.Now()})
+			mappings = append(mappings, models.EvidenceFindingMap{EvidenceID: e.ID, FindingID: finding.ID, CreatedAt: time.Now()})
 		} else {
 			// will likely be ignored, but helpful in constructing new sets
 			os.Stderr.WriteString("[Testing - WARNING] Trying to associate evidence(" + e.UUID + ") with finding(" + finding.Title + ") in differeing operations\n")
