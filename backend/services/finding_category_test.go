@@ -6,6 +6,7 @@ package services_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/database"
@@ -70,7 +71,7 @@ func TestDeleteFindingCategory(t *testing.T) {
 		updatedFindingList := make([]models.FindingCategory, 0)
 		for _, item := range seed.FindingCategories {
 			if item == deleteTargetCategory {
-				deletedTime := GetInternalClock().Now()
+				deletedTime := time.Now()
 				deleteTargetCategory.DeletedAt = &deletedTime
 				updatedFindingList = append(updatedFindingList, deleteTargetCategory)
 			} else if item == restoreTargetCategory {

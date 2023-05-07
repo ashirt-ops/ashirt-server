@@ -32,7 +32,6 @@ var initTest = seeding.InitTest
 var getUsersWithRoleForOperationByOperationID = seeding.GetUsersWithRoleForOperationByOperationID
 var getUserGroupsWithRoleForOperationByOperationID = seeding.GetUserGroupsWithRoleForOperationByOperationID
 var contextForUser = seeding.ContextForUser
-var GetInternalClock = seeding.GetInternalClock
 
 var getFullEvidenceByFindingID = seeding.GetFullEvidenceByFindingID
 var getFullEvidenceByOperationID = seeding.GetFullEvidenceByOperationID
