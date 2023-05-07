@@ -83,7 +83,7 @@ func (w WebauthnConfig) AuthenticatorAttachmentPreference() protocol.Authenticat
 }
 
 func (w WebauthnConfig) AuthenticatorResidentKeyPreference() protocol.ResidentKeyRequirement {
-	val := strings.TrimSpace(strings.ToLower(w.AttestationPreference))
+	val := strings.TrimSpace(strings.ToLower(w.AuthenticatorResidentKey))
 	if val == "preferred" {
 		return protocol.ResidentKeyRequirementPreferred
 	}
