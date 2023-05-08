@@ -108,6 +108,7 @@ export type Operation = {
   topContribs: Array<TopContrib>,
   evidenceCount: EvidenceCount,
   userCanViewGroups?: boolean,
+  userCanExportData?: boolean,
 }
 
 export type Evidence = {

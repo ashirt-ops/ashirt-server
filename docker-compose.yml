@@ -80,6 +80,7 @@ services:
     environment:
       - NODE_ENV=development
       - WEB_BACKEND_ORIGIN=http://backend:3000
+      - ENABLE_EVIDENCE_EXPORT=false
 
   db:
     image: mysql:8.0

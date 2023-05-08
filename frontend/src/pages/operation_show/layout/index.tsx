@@ -57,6 +57,7 @@ export default (props: {
         <div className={cx(expanded ? 'expanded-toolbar' : 'toolbar')}>
           <Toolbar
             operationSlug={props.operationSlug}
+            userCanExportData={operation?.userCanExportData}
             query={props.query}
             onSearch={query => props.onNavigate(props.view, query)}
             expandedView={expanded}

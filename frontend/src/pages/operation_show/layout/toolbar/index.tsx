@@ -30,6 +30,7 @@ export const Toolbar = (props: {
   requestQueriesReload?: () => void
   showCreateButtons: CreateButtonPosition
   exportEvidence?: () => Promise<void>
+  userCanExportData?: boolean
 }) => {
   const [queryString, setQueryString] = React.useState<string>(props.query)
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -45,6 +46,8 @@ export const Toolbar = (props: {
         listEvidenceCreators({ operationSlug: props.operationSlug }),
       ]), [props.operationSlug]
     ))
+
+  const userCanExport = process.env.ENABLE_EVIDENCE_EXPORT && props.userCanExportData
 
   return (
     <div className={cx('toolbar-root')}>
@@ -74,7 +77,7 @@ export const Toolbar = (props: {
                   <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
                   <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
                   {/* TODO TN  - ensure this is blocked for non admins */}
-                  <Button onClick={props.exportEvidence}>Export Evidence</Button>
+                  {userCanExport && <Button onClick={props.exportEvidence}>Export Evidence</Button>}
                 </ButtonGroup>
               )}
             </div>

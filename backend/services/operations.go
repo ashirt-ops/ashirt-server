@@ -283,6 +283,13 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		userCanViewGroups = true
 	}
 
+	var userCanExportData bool
+	if middleware.IsAdmin(ctx) {
+		userCanExportData = true
+	} else if err := policyRequireWithAdminBypass(ctx, policy.CanExportOperationData{OperationID: operation.ID}); err == nil {
+		userCanExportData = true
+	}
+
 	return &dtos.Operation{
 		Slug:              operationSlug,
 		Name:              operation.Name,
@@ -293,6 +300,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		TopContribs:       topContribsForOp,
 		EvidenceCount:     evidenceCountForOp,
 		UserCanViewGroups: &userCanViewGroups,
+		UserCanExportData: &userCanExportData,
 	}, nil
 }
 

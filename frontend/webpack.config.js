@@ -2,6 +2,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const HtmlWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 const path = require('path')
+const webpack = require('webpack');
 
 const miniCssExtraPluginConfig = {
   loader: MiniCssExtractPlugin.loader,
@@ -60,6 +61,11 @@ module.exports = (env, argv) => ({
       filename: 'main-[contenthash].css',
       chunkFilename: '[chunkhash].css',
     }),
+    new webpack.DefinePlugin({
+      'process.env': {
+        'ENABLE_EVIDENCE_EXPORT': process.env.ENABLE_EVIDENCE_EXPORT == 'true',
+      }
+    })
   ],
 
   resolve: {
