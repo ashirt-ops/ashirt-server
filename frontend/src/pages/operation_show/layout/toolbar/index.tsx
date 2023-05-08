@@ -76,7 +76,6 @@ export const Toolbar = (props: {
                 <ButtonGroup className={cx('tb-create-buttons')}>
                   <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
                   <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
-                  {/* TODO TN  - ensure this is blocked for non admins */}
                   {userCanExport && <Button onClick={props.exportEvidence}>Export Evidence</Button>}
                 </ButtonGroup>
               )}

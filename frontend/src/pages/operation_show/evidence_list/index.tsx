@@ -19,7 +19,8 @@ import { mkNavTo } from 'src/helpers/navigate-to-query'
 
 import { saveAs } from 'file-saver';
 import _ from 'lodash'
-var JSZip = require("jszip");
+import Modal from 'src/components/modal'
+const JSZip = require("jszip");
 
 export default () => {
   const { slug } = useParams<{ slug: string }>()
@@ -30,6 +31,7 @@ export default () => {
 
   const query: string = new URLSearchParams(location.search).get('q') || ''
   const [lastEditedUuid, setLastEditedUuid] = React.useState("")
+  const [showModal, setShowModal] = React.useState(false)
 
   const wiredEvidence = useWiredData(React.useCallback(() => getEvidenceList({
     operationSlug,
@@ -84,6 +86,7 @@ export default () => {
   const getMediaBlobs = async (evidence: Evidence[]) => 
     await Promise.all(evidence.map(async (e) => {
       const media = await fetch(`/web/operations/${operationSlug}/evidence/${e.uuid}/media`)
+      if (media.status !== 200) throw new Error("Error downloading media")
       const blob = await media.blob()
       return {
         description: e.description,
@@ -91,8 +94,8 @@ export default () => {
         blob
       }
     }))
-    .catch((error) => {
-      console.error(error.message);
+    .catch(() => {
+      setShowModal(true)
     });
 
   const exportEvidence = async () => {
@@ -110,8 +113,6 @@ export default () => {
       })    
       const zipFile = await zip.generateAsync({type:"blob"})
       saveAs(zipFile, `evidence-${operationSlug}-${new Date().toISOString()}.zip`);
-    } else {
-      // TODO TN add modal to show error
     }
   }
 
@@ -124,6 +125,9 @@ export default () => {
       view="evidence"
       exportEvidence={exportEvidence}
     >
+      {showModal && <Modal smallerWidth={true} title='Evidence Download Error' onRequestClose={() => setShowModal(false)}>
+        <p>Error downloading evidence - please try again later</p>
+      </Modal>}
       {wiredEvidence.render(evidence => (
         <Timeline
           scrollToUuid={lastEditedUuid}
