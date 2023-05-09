@@ -11,7 +11,7 @@ import {
   MoveEvidenceModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
-import { DenormalizedEvidence, DenormalizedTag, Evidence } from 'src/global_types'
+import { Codeblock, DenormalizedTag, Evidence, ExportedEvidence, Media } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
@@ -20,6 +20,7 @@ import { mkNavTo } from 'src/helpers/navigate-to-query'
 import { saveAs } from 'file-saver';
 import _ from 'lodash'
 import Modal from 'src/components/modal'
+import { languageToFileExtension } from 'src/helpers/languages'
 const JSZip = require("jszip");
 
 export default () => {
@@ -72,44 +73,65 @@ export default () => {
     slug: operationSlug
   })
 
-  const createJsonEvidence = (evidence: Evidence[]) => {
-    const evidenceCopy = _.cloneDeep(evidence)
-    evidenceCopy.forEach(e => {
-      e.tags.forEach(t => {
-        delete (t as DenormalizedTag).id
-        })
-      delete (e as DenormalizedEvidence).uuid
-    })
-    return JSON.stringify(evidenceCopy) 
+  const contentToFileExtension = {
+    "image": "jpeg",
+    "terminal-recording": "cast",
+    "codeblock": languageToFileExtension,
+    "event": "txt",
+    "none": "txt",
+    "http-request-cycle": "har",
   }
 
-  const getMediaBlobs = async (evidence: Evidence[]) => 
-    await Promise.all(evidence.map(async (e) => {
-      const media = await fetch(`/web/operations/${operationSlug}/evidence/${e.uuid}/media`)
-      if (media.status !== 200) throw new Error("Error downloading media")
-      const blob = await media.blob()
-      return {
-        description: e.description,
-        contentType: e.contentType, 
-        blob
+  const getMedia = async (evidence: ExportedEvidence[]): Promise<[void | Media[], ExportedEvidence[]]> => {
+    const media = await Promise.all(evidence.map(async (e) => {
+      const rawMedia = await fetch(`/web/operations/${operationSlug}/evidence/${e.uuid}/media`)
+      if (rawMedia.status !== 200) { throw new Error("Error downloading media") }
+
+      // remove tag IDs from the evidence
+      e.tags.forEach(t => {
+        delete (t as DenormalizedTag).id
+      })
+
+      if (e.contentType === "codeblock") {
+        const data: Codeblock = await rawMedia.json();
+        e.fileName = `${e.uuid}.${contentToFileExtension[e.contentType][data?.contentSubtype]}`;
+        e.sourceFileName= data?.metadata?.source
+        return {
+          uuid: e.uuid,
+          contentType: e.contentType, 
+          contentSubtype: data.contentSubtype,
+          blob: new Blob([data.content], {type: `text/${contentToFileExtension[e.contentType][data.contentSubtype]}`})
+        }
+      } else {
+        const blob = await rawMedia.blob()
+        e.fileName = `${e.uuid}.${contentToFileExtension[e.contentType]}`;
+        return {
+          uuid: e.uuid,
+          contentType: e.contentType, 
+          blob
+        }
       }
     }))
     .catch(() => {
       setShowModal(true)
     });
+    return [media, evidence]
+  }
 
   const exportEvidence = async () => {
-    const jsonEvidence = createJsonEvidence(evidence)
     var zip = new JSZip();
-    zip.file("evidence.json", jsonEvidence);
+    var evidenceFolder = zip.folder("evidence");
+    const evidenceCopy = _.cloneDeep(evidence)
+    const [media, modEvidenceCopy] = await getMedia(evidenceCopy)
 
-    var imgFolder = zip.folder("images");
-    const mediaBlobs = await getMediaBlobs(evidence)
+    zip.file("evidence.json", JSON.stringify(modEvidenceCopy))
 
-    if (mediaBlobs){
-      mediaBlobs.forEach((mb) => {
-        const fileName = `${mb.description}.${mb.contentType === "image" ? "jpeg" : "txt"}`
-        imgFolder.file(fileName, mb.blob, {base64: true});
+    if (media){
+      media.forEach((mb) => {
+        const fileName = mb.contentType === "codeblock" 
+          ? `${mb.uuid}.${contentToFileExtension[mb.contentType][mb.contentSubtype!]}` 
+          : `${mb.uuid}.${contentToFileExtension[mb.contentType]}`;
+        evidenceFolder.file(fileName, mb.blob, {base64: true});
       })    
       const zipFile = await zip.generateAsync({type:"blob"})
       saveAs(zipFile, `evidence-${operationSlug}-${new Date().toISOString()}.zip`);

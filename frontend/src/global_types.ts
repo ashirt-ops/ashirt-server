@@ -120,7 +120,10 @@ export type Evidence = {
   contentType: SupportedEvidenceType
 }
 
-export type DenormalizedEvidence = PartialBy<Evidence, 'uuid'>
+export interface ExportedEvidence extends Evidence {
+  fileName?: string,
+  sourceFileName?: string,
+}
 
 export type EvidenceMetadata = {
   source: string,
@@ -308,4 +311,24 @@ export type FilterText = {
   onChange: React.Dispatch<React.SetStateAction<string>>;
   disabled: boolean;
   setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export type ContentType = "image" | "terminal-recording" | "http-request-cycle" | "event" | "none" | "codeblock"
+
+type Languages = "" | "abap" | "actionscript" | "ada" | "c_cpp" | "csharp" | "cobol" | "d" | "dart" | "dockerfile" | "elixir" | "elm" | "erlang" | "fsharp" | "fortran" | "golang" | "groovy" | "haskell" | "java" | "javascript" | "julia" | "kotlin" | "lisb" | "lua" | "matlab" | "markdown" | "objectivec" | "pascal" | "php" | "perl" | "prolog" | "properties" | "python" | "r" | "ruby" | "rust" | "sass" | "scala" | "scheme" | "sh" | "sql" | "swift" | "tcl" | "terraform" | "toml" | "typescript" | "vbscript" | "xml"
+
+export interface Media {
+  uuid: string,
+  contentType: ContentType,
+  contentSubtype?: Languages,
+  blob: Blob
+}
+
+export interface Codeblock {
+  contentType: string,
+  contentSubtype: Languages,
+  content: string 
+  metadata: {
+    source: string,
+  }
 }
