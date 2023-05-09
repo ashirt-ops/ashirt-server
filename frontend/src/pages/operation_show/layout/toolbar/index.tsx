@@ -47,8 +47,6 @@ export const Toolbar = (props: {
       ]), [props.operationSlug]
     ))
 
-  const userCanExport = process.env.ENABLE_EVIDENCE_EXPORT && props.userCanExportData
-
   return (
     <div className={cx('toolbar-root')}>
       {wiredData.render(([tags, users]) => {
@@ -76,7 +74,7 @@ export const Toolbar = (props: {
                 <ButtonGroup className={cx('tb-create-buttons')}>
                   <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
                   <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
-                  {userCanExport && <Button onClick={props.exportEvidence}>Export Evidence</Button>}
+                  {props.userCanExportData && <Button onClick={props.exportEvidence}>Export Evidence</Button>}
                 </ButtonGroup>
               )}
             </div>

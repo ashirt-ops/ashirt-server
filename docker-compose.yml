@@ -31,6 +31,8 @@ services:
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
       APP_USE_LAMBDA_RIE: "true"
 
+      ENABLE_EVIDENCE_EXPORT: "false"
+
       # Common Value for all emailers
       EMAIL_FROM_ADDRESS: AShirt
 
@@ -80,7 +82,6 @@ services:
     environment:
       - NODE_ENV=development
       - WEB_BACKEND_ORIGIN=http://backend:3000
-      - ENABLE_EVIDENCE_EXPORT=false
 
   db:
     image: mysql:8.0

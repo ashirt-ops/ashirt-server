@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
@@ -283,10 +284,15 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		userCanViewGroups = true
 	}
 
+	var userIsAdmin bool
+	if err := policyRequireWithAdminBypass(ctx, policy.CanExportOperationData{OperationID: operation.ID}); err == nil {
+		userIsAdmin = true
+	} else {
+		userIsAdmin = middleware.IsAdmin(ctx)
+	}
+
 	var userCanExportData bool
-	if middleware.IsAdmin(ctx) {
-		userCanExportData = true
-	} else if err := policyRequireWithAdminBypass(ctx, policy.CanExportOperationData{OperationID: operation.ID}); err == nil {
+	if os.Getenv("ENABLE_EVIDENCE_EXPORT") == "true" && userIsAdmin {
 		userCanExportData = true
 	}
 
