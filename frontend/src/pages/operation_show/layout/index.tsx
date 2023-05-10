@@ -26,6 +26,7 @@ export default (props: {
   operationSlug: string,
   query: string,
   view: ViewName,
+  exportEvidence?: () => Promise<void>,
 }) => {
   const reloadBus = BuildReloadBus()
 
@@ -56,6 +57,7 @@ export default (props: {
         <div className={cx(expanded ? 'expanded-toolbar' : 'toolbar')}>
           <Toolbar
             operationSlug={props.operationSlug}
+            userCanExportData={operation?.userCanExportData}
             query={props.query}
             onSearch={query => props.onNavigate(props.view, query)}
             expandedView={expanded}
@@ -66,6 +68,7 @@ export default (props: {
             showCreateButtons={showCreateButtons}
             requestQueriesReload={reloadBus.requestReload}
             queryName={currentQuery?.name}
+            exportEvidence={props.exportEvidence}
           />
         </div>
         <div className={cx('sidebar')}>
