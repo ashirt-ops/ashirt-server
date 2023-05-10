@@ -118,8 +118,8 @@ export type Evidence = {
 }
 
 export interface ExportedEvidence extends Evidence {
-  fileName?: string,
-  sourceFileName?: string,
+  filename?: string,
+  sourceFilename?: string,
 }
 
 export type EvidenceMetadata = {

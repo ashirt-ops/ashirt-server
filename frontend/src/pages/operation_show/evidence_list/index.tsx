@@ -95,8 +95,8 @@ export default () => {
 
       if (e.contentType === "codeblock") {
         const data: Codeblock = await rawMedia.json();
-        e.fileName = `${e.uuid}.${contentToFileExtension[e.contentType][data?.contentSubtype]}`;
-        e.sourceFileName= data?.metadata?.source
+        e.filename = `${e.uuid}.${contentToFileExtension[e.contentType][data?.contentSubtype]}`;
+        e.sourceFilename= data?.metadata?.source
         return {
           filename: e.uuid,
           contentType: e.contentType, 
@@ -106,7 +106,7 @@ export default () => {
         }
       } else {
         const blob = await rawMedia.blob()
-        e.fileName = `${e.uuid}.${contentToFileExtension[e.contentType]}`;
+        e.filename = `${e.uuid}.${contentToFileExtension[e.contentType]}`;
         return {
           filename: e.uuid,
           contentType: e.contentType, 
