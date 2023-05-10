@@ -19,25 +19,25 @@ export default (props: {
 }) => {
   const initialUsername = props.userData.authSchemes.find(s => s.schemeType == 'local')?.username
   const username = useFormField<string>(initialUsername ?? "")
-  const keyName = useFormField<string>('')
+  const credentialName = useFormField<string>('')
   const [allowUsernameOverride, setOverride] = React.useState(false)
 
   const formComponentProps = useForm({
-    fields: [username, keyName],
+    fields: [username, credentialName],
     onSuccess: () => props.onSuccess(),
     handleSubmit: async () => {
       if (username.value === '') {
         return Promise.reject(new Error("Username must be populated"))
       }
-      if (keyName.value === '') {
-        return Promise.reject(new Error("Key name must be populated"))
+      if (credentialName.value === '') {
+        return Promise.reject(new Error("Credential name must be populated"))
       }
 
       let reg = null
       try {
         reg = await beginLink({
           username: username.value,
-          keyName: keyName.value,
+          credentialName: credentialName.value,
         })
       }
       catch (err) {
@@ -79,7 +79,7 @@ export default (props: {
   return (
     <Form submitText="Link Account" {...formComponentProps}>
       <Input label="Username" {...username} disabled={readonlyUsername} />
-      <Input label="Key name" {...keyName} />
+      <Input label="Credential name" {...credentialName} />
     </Form>
   )
 }

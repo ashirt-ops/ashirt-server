@@ -61,6 +61,6 @@ export type KeyList = {
 }
 
 export type KeyEntry = {
-  keyName: string
+  credentialName: string
   dateCreated: Date
 }

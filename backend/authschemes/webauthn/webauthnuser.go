@@ -19,34 +19,34 @@ type webauthnUser struct {
 	FirstName      string
 	LastName       string
 	Email          string
-	KeyName        string
+	CredentialName string
 	KeyCreatedDate time.Time
 }
 
-func makeNewWebAuthnUser(firstName, lastName, email, username, keyName string) webauthnUser {
+func makeNewWebAuthnUser(firstName, lastName, email, username, credentialName string) webauthnUser {
 	return webauthnUser{
 		AuthnID:        []byte(uuid.New().String()),
 		UserName:       username,
 		FirstName:      firstName,
 		LastName:       lastName,
 		Email:          email,
-		KeyName:        keyName,
+		CredentialName: credentialName,
 		KeyCreatedDate: time.Now(),
 	}
 }
 
-func makeLinkingWebAuthnUser(userID int64, username, keyName string) webauthnUser {
+func makeLinkingWebAuthnUser(userID int64, username, credentialName string) webauthnUser {
 	return webauthnUser{
 		UserID:         i64ToByteSlice(userID),
 		AuthnID:        []byte(uuid.New().String()),
 		UserName:       username,
-		KeyName:        keyName,
+		CredentialName: credentialName,
 		KeyCreatedDate: time.Now(),
 	}
 }
 
-func makeAddKeyWebAuthnUser(userID int64, username, keyName string, creds []AShirtWebauthnCredential) webauthnUser {
-	user := makeLinkingWebAuthnUser(userID, username, keyName)
+func makeAddKeyWebAuthnUser(userID int64, username, credentialName string, creds []AShirtWebauthnCredential) webauthnUser {
+	user := makeLinkingWebAuthnUser(userID, username, credentialName)
 	user.Credentials = creds
 	return user
 }

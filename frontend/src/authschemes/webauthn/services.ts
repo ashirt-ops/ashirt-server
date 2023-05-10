@@ -17,7 +17,7 @@ export async function beginRegistration(i: {
   username: string,
   firstName: string,
   lastName: string
-  keyName: string
+  credentialName: string
 }): Promise<ProvidedCredentialCreationOptions> {
   return await req('POST', '/auth/webauthn/register/begin', i)
 }
@@ -38,7 +38,7 @@ export async function finishLogin(i: CompletedLoginChallenge): Promise<void> {
 
 export async function beginLink(i: {
   username: string,
-  keyName: string
+  credentialName: string
 }): Promise<ProvidedCredentialCreationOptions> {
   return await req('POST', '/auth/webauthn/link/begin', i)
 }
@@ -48,7 +48,7 @@ export async function finishLinking(i: WebAuthNRegisterConfirmation) {
 }
 
 export async function beginAddKey(i: {
-  keyName: string
+  credentialName: string
 }): Promise<ProvidedCredentialCreationOptions> {
   return await req('POST', '/auth/webauthn/key/add/begin', i)
 }
@@ -69,6 +69,6 @@ export async function listWebauthnKeys(): Promise<KeyList> {
 
 }
 
-export async function deleteWebauthnKey(i: { keyName: string }): Promise<KeyList> {
-  return await req('DELETE', `/auth/webauthn/key/${i.keyName}`)
+export async function deleteWebauthnKey(i: { credentialName: string }): Promise<KeyList> {
+  return await req('DELETE', `/auth/webauthn/key/${i.credentialName}`)
 }

@@ -44,22 +44,22 @@ const KeyList = (props: {
     return () => { props.offReload(wiredKeys.reload) }
   })
 
-  const deleteModal = useModal<{ keyName: string }>(mProps => <DeleteKeyModal {...mProps} />, wiredKeys.reload)
+  const deleteModal = useModal<{ credentialName: string }>(mProps => <DeleteKeyModal {...mProps} />, wiredKeys.reload)
 
   return (<>
     {wiredKeys.render(data => {
       return (
         <div>
-          <Table columns={['Key Name', 'Date Created', 'Actions']}>
+          <Table columns={['Credential Name', 'Date Created', 'Actions']}>
             {data.keys.map(keyEntry => {
-              const { keyName, dateCreated } = keyEntry
+              const { credentialName, dateCreated } = keyEntry
               return (
-                <tr key={keyName}>
-                  <td>{keyName}</td>
+                <tr key={credentialName}>
+                  <td>{credentialName}</td>
                   <td>{toEnUSDate(dateCreated)}</td>
                   <td>
                     <Button small danger onClick={() => {
-                      deleteModal.show({ keyName })
+                      deleteModal.show({ credentialName })
                     }}>
                       Delete
                     </Button>
@@ -93,16 +93,16 @@ const AddKeyButton = (props: {
 const AddKeyModal = (props: {
   onRequestClose: () => void,
 }) => {
-  const keyName = useFormField("")
+  const credentialName = useFormField("")
 
   const formComponentProps = useForm({
-    fields: [keyName],
+    fields: [credentialName],
     handleSubmit: async () => {
-      if (keyName.value === '') {
-        return Promise.reject(new Error("Key name must be populated"))
+      if (credentialName.value === '') {
+        return Promise.reject(new Error("Credential name must be populated"))
       }
       const reg = await beginAddKey({
-        keyName: keyName.value,
+        credentialName: credentialName.value,
       })
       const credOptions = convertToCredentialCreationOptions(reg)
 
@@ -135,21 +135,21 @@ const AddKeyModal = (props: {
       onRequestClose={props.onRequestClose}
       {...formComponentProps}
     >
-      <Input label="Key name" {...keyName} />
+      <Input label="Credential name" {...credentialName} />
     </ModalForm>
   )
 }
 
 const DeleteKeyModal = (props: {
-  keyName: string,
+  credentialName: string,
   onRequestClose: () => void,
 }) => (
   <ChallengeModalForm
     modalTitle="Delete Key"
     warningText="Are you sure you want to delete this security key?"
     submitText="Delete"
-    challengeText={props.keyName}
-    handleSubmit={() => deleteWebauthnKey({ keyName: props.keyName })}
+    challengeText={props.credentialName}
+    handleSubmit={() => deleteWebauthnKey({ credentialName: props.credentialName })}
     onRequestClose={props.onRequestClose}
   />
 )

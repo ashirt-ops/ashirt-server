@@ -10,6 +10,6 @@ type ListKeysOutput struct {
 }
 
 type KeyEntry struct {
-	KeyName     string    `json:"keyName"`
-	DateCreated time.Time `json:"dateCreated"`
+	CredentialName string    `json:"credentialName"`
+	DateCreated    time.Time `json:"dateCreated"`
 }

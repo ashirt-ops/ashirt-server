@@ -107,7 +107,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				Username:         dr.FromBody("username").Required().AsString(),
 				FirstName:        dr.FromBody("firstName").Required().AsString(),
 				LastName:         dr.FromBody("lastName").Required().AsString(),
-				KeyName:          dr.FromBody("keyName").Required().AsString(),
+				CredentialName:   dr.FromBody("credentialName").Required().AsString(),
 				RegistrationType: CreateKey,
 			}
 			if dr.Error != nil {
@@ -194,7 +194,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			dr := remux.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
 				Username:         dr.FromBody("username").Required().AsString(),
-				KeyName:          dr.FromBody("keyName").Required().AsString(),
+				CredentialName:   dr.FromBody("credentialName").Required().AsString(),
 				UserID:           callingUserId,
 				RegistrationType: LinkKey,
 			}
@@ -227,14 +227,14 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 		return a.getKeys(callingUserID, bridge)
 	}))
 
-	remux.Route(r, "DELETE", "/key/{keyName}", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+	remux.Route(r, "DELETE", "/key/{credentialName}", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		callingUserID := middleware.UserID(r.Context())
 		dr := remux.DissectJSONRequest(r)
-		keyName := dr.FromURL("keyName").Required().AsString()
+		credentialName := dr.FromURL("credentialName").Required().AsString()
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, a.deleteKey(callingUserID, keyName, bridge)
+		return nil, a.deleteKey(callingUserID, credentialName, bridge)
 	}))
 
 	remux.Route(r, "POST", "/key/add/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -245,14 +245,14 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 			}
 
 			dr := remux.DissectJSONRequest(r)
-			keyName := dr.FromBody("keyName").Required().AsString()
+			credentialName := dr.FromBody("credentialName").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
 			}
 
 			info := WebAuthnRegistrationInfo{
 				Username:         auth.Username,
-				KeyName:          keyName,
+				CredentialName:   credentialName,
 				UserID:           auth.UserID,
 				RegistrationType: AddKey,
 			}
@@ -302,15 +302,15 @@ func (a WebAuthn) getKeys(userID int64, bridge authschemes.AShirtAuthBridge) (*L
 
 	results := helpers.Map(creds, func(cred AShirtWebauthnCredential) KeyEntry {
 		return KeyEntry{
-			KeyName:     cred.KeyName,
-			DateCreated: cred.KeyCreatedDate,
+			CredentialName: cred.CredentialName,
+			DateCreated:    cred.KeyCreatedDate,
 		}
 	})
 	output := ListKeysOutput{results}
 	return &output, nil
 }
 
-func (a WebAuthn) deleteKey(userID int64, keyName string, bridge authschemes.AShirtAuthBridge) error {
+func (a WebAuthn) deleteKey(userID int64, credentialName string, bridge authschemes.AShirtAuthBridge) error {
 	auth, err := bridge.FindUserAuthByUserID(userID)
 	if err != nil {
 		return backend.WrapError("Unable to find user", err)
@@ -323,7 +323,7 @@ func (a WebAuthn) deleteKey(userID int64, keyName string, bridge authschemes.ASh
 	}
 
 	results := helpers.Filter(creds, func(cred AShirtWebauthnCredential) bool {
-		return cred.KeyName != keyName
+		return cred.CredentialName != credentialName
 	})
 	encodedCreds, err := json.Marshal(results)
 	if err != nil {
@@ -339,11 +339,11 @@ func (a WebAuthn) deleteKey(userID int64, keyName string, bridge authschemes.ASh
 func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, info WebAuthnRegistrationInfo) (*protocol.CredentialCreation, error) {
 	var user webauthnUser
 	if info.RegistrationType == CreateKey {
-		user = makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email, info.Username, info.KeyName)
+		user = makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email, info.Username, info.CredentialName)
 	} else if info.RegistrationType == LinkKey {
-		user = makeLinkingWebAuthnUser(info.UserID, info.Username, info.KeyName)
+		user = makeLinkingWebAuthnUser(info.UserID, info.Username, info.CredentialName)
 	} else { // Add Key
-		user = makeAddKeyWebAuthnUser(info.UserID, info.KeyName, info.Username, info.ExistingCredentials)
+		user = makeAddKeyWebAuthnUser(info.UserID, info.CredentialName, info.Username, info.ExistingCredentials)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
@@ -422,7 +422,7 @@ func (a WebAuthn) validateRegistrationComplete(r *http.Request, bridge authschem
 	}
 
 	data.UserData.Credentials = append(data.UserData.Credentials, wrapCredential(*cred, AShirtWebauthnExtension{
-		KeyName:        data.UserData.KeyName,
+		CredentialName: data.UserData.CredentialName,
 		KeyCreatedDate: data.UserData.KeyCreatedDate,
 	}))
 

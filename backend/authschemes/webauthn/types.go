@@ -20,7 +20,7 @@ type WebAuthnRegistrationInfo struct {
 	Username            string
 	FirstName           string
 	LastName            string
-	KeyName             string
+	CredentialName      string
 	UserID              int64
 	RegistrationType    RegistrationType
 	ExistingCredentials []AShirtWebauthnCredential
@@ -28,7 +28,7 @@ type WebAuthnRegistrationInfo struct {
 }
 
 type AShirtWebauthnExtension struct {
-	KeyName        string    `json:"keyName"`
+	CredentialName string    `json:"credentialName"`
 	KeyCreatedDate time.Time `json:"keyCreatedDate"`
 }
 
