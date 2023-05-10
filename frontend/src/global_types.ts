@@ -320,6 +320,7 @@ export interface Media {
   filename: string,
   contentType: ContentType,
   contentSubtype?: Languages,
+  sourceFilename?: string,
   blob: Blob
 }
 

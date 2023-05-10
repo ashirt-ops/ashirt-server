@@ -101,6 +101,7 @@ export default () => {
           filename: e.uuid,
           contentType: e.contentType, 
           contentSubtype: data.contentSubtype,
+          sourceFilename: data?.metadata?.source,
           blob: new Blob([data.content], {type: `text/${contentToFileExtension[e.contentType][data.contentSubtype]}`})
         }
       } else {
@@ -129,10 +130,18 @@ export default () => {
 
     if (media){
       media.forEach((mb) => {
-        const fileName = mb.contentType === "codeblock" 
+        let filename;
+        const fileExtension = mb.sourceFilename?.slice(mb.sourceFilename?.lastIndexOf(".") + 1)
+        console.log("fileExtension", fileExtension)
+        if (mb.contentType === "codeblock" && mb.contentSubtype === "c_cpp" && fileExtension === "cpp") {
+          filename = `${mb.filename}.cpp`;
+        } else {
+          filename = mb.contentType === "codeblock" 
           ? `${mb.filename}.${contentToFileExtension[mb.contentType][mb.contentSubtype!]}` 
           : `${mb.filename}.${contentToFileExtension[mb.contentType]}`;
-        evidenceFolder.file(fileName, mb.blob, {base64: true});
+        }
+        
+        evidenceFolder.file(filename, mb.blob, {base64: true});
       })    
       const zipFile = await zip.generateAsync({type:"blob"})
       saveAs(zipFile, `evidence-${operationSlug}-${new Date().toISOString()}.zip`);
