@@ -89,7 +89,8 @@ export default () => {
 
       // remove tag IDs from the evidence
       e.tags.forEach(t => {
-        delete (t as DenormalizedTag).id
+        delete (t as DenormalizedTag).id;
+        delete (t as DenormalizedTag).colorName;
       })
 
       if (e.contentType === "codeblock") {
