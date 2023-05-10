@@ -162,6 +162,8 @@ export type DenormalizedTag = {
   name: string;
 } & Partial<Tag>;
 
+export type DefaultTag = Tag
+
 export type TagWithUsage = {
   id: number,
   name: string,
