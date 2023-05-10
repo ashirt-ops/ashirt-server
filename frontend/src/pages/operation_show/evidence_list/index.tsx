@@ -93,13 +93,15 @@ export default () => {
         tagArr.push((t as Tag).name)
       })
       e.tags = tagArr;
+      const uuid = e.uuid!
+      delete e.uuid
 
       if (e.contentType === "codeblock") {
         const data: Codeblock = await rawMedia.json();
-        e.filename = `${e.uuid}.${contentToFileExtension[e.contentType][data?.contentSubtype]}`;
+        e.filename = `${uuid}.${contentToFileExtension[e.contentType][data?.contentSubtype]}`;
         e.sourceFilename= data?.metadata?.source
         return {
-          filename: e.uuid,
+          filename: uuid,
           contentType: e.contentType, 
           contentSubtype: data.contentSubtype,
           sourceFilename: data?.metadata?.source,
@@ -107,9 +109,9 @@ export default () => {
         }
       } else {
         const blob = await rawMedia.blob()
-        e.filename = `${e.uuid}.${contentToFileExtension[e.contentType]}`;
+        e.filename = `${uuid}.${contentToFileExtension[e.contentType]}`;
         return {
-          filename: e.uuid,
+          filename: uuid,
           contentType: e.contentType, 
           blob
         }

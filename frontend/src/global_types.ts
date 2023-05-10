@@ -117,10 +117,11 @@ export type Evidence = {
   contentType: SupportedEvidenceType
 }
 
-export type ExportedEvidence = Omit<Evidence, 'tags'> & {
+export type ExportedEvidence = Omit<Evidence, 'tags' | 'uuid'> & {
   filename?: string,
   sourceFilename?: string,
   tags: Array<string | Tag>,
+  uuid?: string,
 }
 
 export type EvidenceMetadata = {
