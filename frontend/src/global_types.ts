@@ -117,9 +117,10 @@ export type Evidence = {
   contentType: SupportedEvidenceType
 }
 
-export interface ExportedEvidence extends Evidence {
+export type ExportedEvidence = Omit<Evidence, 'tags'> & {
   filename?: string,
   sourceFilename?: string,
+  tags: Array<string | Tag>,
 }
 
 export type EvidenceMetadata = {

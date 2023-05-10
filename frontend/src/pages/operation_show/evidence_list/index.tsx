@@ -11,7 +11,7 @@ import {
   MoveEvidenceModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
-import { Codeblock, DenormalizedTag, Evidence, ExportedEvidence, Media } from 'src/global_types'
+import { Codeblock, DenormalizedTag, Evidence, ExportedEvidence, Media, Tag } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
@@ -88,10 +88,11 @@ export default () => {
       if (rawMedia.status !== 200) { throw new Error("Error downloading media") }
 
       // remove tag IDs from the evidence
+      const tagArr: string[] = [];
       e.tags.forEach(t => {
-        delete (t as DenormalizedTag).id;
-        delete (t as DenormalizedTag).colorName;
+        tagArr.push((t as Tag).name)
       })
+      e.tags = tagArr;
 
       if (e.contentType === "codeblock") {
         const data: Codeblock = await rawMedia.json();
