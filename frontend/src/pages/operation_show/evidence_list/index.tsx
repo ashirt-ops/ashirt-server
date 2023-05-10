@@ -98,7 +98,7 @@ export default () => {
         e.fileName = `${e.uuid}.${contentToFileExtension[e.contentType][data?.contentSubtype]}`;
         e.sourceFileName= data?.metadata?.source
         return {
-          uuid: e.uuid,
+          filename: e.uuid,
           contentType: e.contentType, 
           contentSubtype: data.contentSubtype,
           blob: new Blob([data.content], {type: `text/${contentToFileExtension[e.contentType][data.contentSubtype]}`})
@@ -107,7 +107,7 @@ export default () => {
         const blob = await rawMedia.blob()
         e.fileName = `${e.uuid}.${contentToFileExtension[e.contentType]}`;
         return {
-          uuid: e.uuid,
+          filename: e.uuid,
           contentType: e.contentType, 
           blob
         }
@@ -130,8 +130,8 @@ export default () => {
     if (media){
       media.forEach((mb) => {
         const fileName = mb.contentType === "codeblock" 
-          ? `${mb.uuid}.${contentToFileExtension[mb.contentType][mb.contentSubtype!]}` 
-          : `${mb.uuid}.${contentToFileExtension[mb.contentType]}`;
+          ? `${mb.filename}.${contentToFileExtension[mb.contentType][mb.contentSubtype!]}` 
+          : `${mb.filename}.${contentToFileExtension[mb.contentType]}`;
         evidenceFolder.file(fileName, mb.blob, {base64: true});
       })    
       const zipFile = await zip.generateAsync({type:"blob"})

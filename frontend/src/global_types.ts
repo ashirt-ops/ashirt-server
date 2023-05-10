@@ -315,7 +315,7 @@ export type ContentType = "image" | "terminal-recording" | "http-request-cycle" 
 type Languages = "" | "abap" | "actionscript" | "ada" | "c_cpp" | "csharp" | "cobol" | "d" | "dart" | "dockerfile" | "elixir" | "elm" | "erlang" | "fsharp" | "fortran" | "golang" | "groovy" | "haskell" | "java" | "javascript" | "julia" | "kotlin" | "lisb" | "lua" | "matlab" | "markdown" | "objectivec" | "pascal" | "php" | "perl" | "prolog" | "properties" | "python" | "r" | "ruby" | "rust" | "sass" | "scala" | "scheme" | "sh" | "sql" | "swift" | "tcl" | "terraform" | "toml" | "typescript" | "vbscript" | "xml"
 
 export interface Media {
-  uuid: string,
+  filename: string,
   contentType: ContentType,
   contentSubtype?: Languages,
   blob: Blob
