@@ -5,11 +5,11 @@ package webauthn
 
 import "time"
 
-type ListKeysOutput struct {
-	Keys []KeyEntry `json:"keys"`
+type ListCredentialsOutput struct {
+	Credentials []CredentialEntry `json:"credentials"`
 }
 
-type KeyEntry struct {
+type CredentialEntry struct {
 	CredentialName string    `json:"credentialName"`
 	DateCreated    time.Time `json:"dateCreated"`
 }

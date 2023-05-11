@@ -5,8 +5,8 @@ import req from 'src/services/data_sources/backend/request_helper'
 
 import {
   CompletedLoginChallenge,
-  KeyEntry,
-  KeyList,
+  CredentialEntry,
+  CredentialList,
   ProvidedCredentialCreationOptions,
   ProvidedCredentialRequestOptions,
   WebAuthNRegisterConfirmation,
@@ -47,28 +47,28 @@ export async function finishLinking(i: WebAuthNRegisterConfirmation) {
   return await req('POST', '/auth/webauthn/link/finish', i)
 }
 
-export async function beginAddKey(i: {
+export async function beginAddCredential(i: {
   credentialName: string
 }): Promise<ProvidedCredentialCreationOptions> {
-  return await req('POST', '/auth/webauthn/key/add/begin', i)
+  return await req('POST', '/auth/webauthn/credential/add/begin', i)
 }
 
-export async function finishAddKey(i: WebAuthNRegisterConfirmation) {
-  return await req('POST', '/auth/webauthn/key/add/finish', i)
+export async function finishAddCredential(i: WebAuthNRegisterConfirmation) {
+  return await req('POST', '/auth/webauthn/credential/add/finish', i)
 }
 
-export async function listWebauthnKeys(): Promise<KeyList> {
-  const data: KeyList = await req('GET', '/auth/webauthn/keys')
+export async function listWebauthnCredentials(): Promise<CredentialList> {
+  const data: CredentialList = await req('GET', '/auth/webauthn/credentials')
 
   return {
-    keys: data.keys.map((key: KeyEntry) => ({
-      ...key,
-      dateCreated: new Date(key.dateCreated)
+    credentials: data.credentials.map((credential: CredentialEntry) => ({
+      ...credential,
+      dateCreated: new Date(credential.dateCreated)
     }))
   }
 
 }
 
-export async function deleteWebauthnKey(i: { credentialName: string }): Promise<KeyList> {
-  return await req('DELETE', `/auth/webauthn/key/${i.credentialName}`)
+export async function deleteWebauthnCredential(i: { credentialName: string }): Promise<CredentialList> {
+  return await req('DELETE', `/auth/webauthn/credential/${i.credentialName}`)
 }

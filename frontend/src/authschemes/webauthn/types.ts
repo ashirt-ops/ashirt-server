@@ -56,11 +56,11 @@ export type CompletedLoginChallenge = {
   }
 }
 
-export type KeyList = {
-  keys: Array<KeyEntry>
+export type CredentialList = {
+  credentials: Array<CredentialEntry>
 }
 
-export type KeyEntry = {
+export type CredentialEntry = {
   credentialName: string
   dateCreated: Date
 }

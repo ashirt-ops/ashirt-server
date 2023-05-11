@@ -9,7 +9,7 @@ import SettingsSection from 'src/components/settings_section'
 import classnames from 'classnames/bind'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { renderModals, useModal, useWiredData } from 'src/helpers'
-import { beginAddKey, deleteWebauthnKey, finishAddKey, listWebauthnKeys } from '../services'
+import { beginAddCredential, deleteWebauthnCredential, finishAddCredential, listWebauthnCredentials } from '../services'
 import Table from 'src/components/table'
 import Button from 'src/components/button'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
@@ -26,33 +26,33 @@ export default (props: {
 }) => {
   const bus = BuildReloadBus()
   return (
-    <SettingsSection className={cx('security-keys-section')} title="WebAuthn Security Keys" width="narrow">
-      <KeyList {...bus} />
-      <AddKeyButton {...bus} />
+    <SettingsSection className={cx('security-credentials-section')} title="WebAuthn Security Credentials" width="narrow">
+      <CredentialList {...bus} />
+      <AddCredentialButton {...bus} />
     </SettingsSection>
   )
 }
 
-const KeyList = (props: {
+const CredentialList = (props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
 }) => {
-  const wiredKeys = useWiredData(listWebauthnKeys)
+  const wiredCredentials = useWiredData(listWebauthnCredentials)
 
   React.useEffect(() => {
-    props.onReload(wiredKeys.reload)
-    return () => { props.offReload(wiredKeys.reload) }
+    props.onReload(wiredCredentials.reload)
+    return () => { props.offReload(wiredCredentials.reload) }
   })
 
-  const deleteModal = useModal<{ credentialName: string }>(mProps => <DeleteKeyModal {...mProps} />, wiredKeys.reload)
+  const deleteModal = useModal<{ credentialName: string }>(mProps => <DeleteCredentialModal {...mProps} />, wiredCredentials.reload)
 
   return (<>
-    {wiredKeys.render(data => {
+    {wiredCredentials.render(data => {
       return (
         <div>
           <Table columns={['Credential Name', 'Date Created', 'Actions']}>
-            {data.keys.map(keyEntry => {
-              const { credentialName, dateCreated } = keyEntry
+            {data.credentials.map(credentialEntry => {
+              const { credentialName, dateCreated } = credentialEntry
               return (
                 <tr key={credentialName}>
                   <td>{credentialName}</td>
@@ -75,22 +75,22 @@ const KeyList = (props: {
   </>)
 }
 
-const AddKeyButton = (props: {
+const AddCredentialButton = (props: {
   requestReload: () => void
 }) => {
   const createModal = useModal(mProps => (
-    <AddKeyModal {...mProps} />
+    <AddCredentialModal {...mProps} />
   ), props.requestReload)
 
   return (
     <div>
-      <Button primary onClick={createModal.show}>Register new security key</Button>
+      <Button primary onClick={createModal.show}>Register new security credential</Button>
       {renderModals(createModal)}
     </div>
   )
 }
 
-const AddKeyModal = (props: {
+const AddCredentialModal = (props: {
   onRequestClose: () => void,
 }) => {
   const credentialName = useFormField("")
@@ -101,7 +101,7 @@ const AddKeyModal = (props: {
       if (credentialName.value === '') {
         return Promise.reject(new Error("Credential name must be populated"))
       }
-      const reg = await beginAddKey({
+      const reg = await beginAddCredential({
         credentialName: credentialName.value,
       })
       const credOptions = convertToCredentialCreationOptions(reg)
@@ -111,16 +111,16 @@ const AddKeyModal = (props: {
       if (signed == null || signed.type != 'public-key') {
         throw new Error("WebAuthn is not supported")
       }
-      const pubKeyCred = signed as PublicKeyCredential
-      const pubKeyResponse = pubKeyCred.response as AuthenticatorAttestationResponse
+      const pubCredential = signed as PublicKeyCredential
+      const pubCredentialResponse = pubCredential.response as AuthenticatorAttestationResponse
 
-      await finishAddKey({
+      await finishAddCredential({
         type: 'public-key',
-        id: pubKeyCred.id,
-        rawId: encodeAsB64(pubKeyCred.rawId),
+        id: pubCredential.id,
+        rawId: encodeAsB64(pubCredential.rawId),
         response: {
-          attestationObject: encodeAsB64(pubKeyResponse.attestationObject),
-          clientDataJSON: encodeAsB64(pubKeyResponse.clientDataJSON),
+          attestationObject: encodeAsB64(pubCredentialResponse.attestationObject),
+          clientDataJSON: encodeAsB64(pubCredentialResponse.clientDataJSON),
         },
       })
     },
@@ -129,7 +129,7 @@ const AddKeyModal = (props: {
 
   return (
     <ModalForm
-      title={"Add Security Key"}
+      title={"Add Security Credential"}
       submitText={"Create"}
       cancelText="Cancel"
       onRequestClose={props.onRequestClose}
@@ -140,16 +140,16 @@ const AddKeyModal = (props: {
   )
 }
 
-const DeleteKeyModal = (props: {
+const DeleteCredentialModal = (props: {
   credentialName: string,
   onRequestClose: () => void,
 }) => (
   <ChallengeModalForm
-    modalTitle="Delete Key"
-    warningText="Are you sure you want to delete this security key?"
+    modalTitle="Delete Credential"
+    warningText="Are you sure you want to delete this security credential?"
     submitText="Delete"
     challengeText={props.credentialName}
-    handleSubmit={() => deleteWebauthnKey({ credentialName: props.credentialName })}
+    handleSubmit={() => deleteWebauthnCredential({ credentialName: props.credentialName })}
     onRequestClose={props.onRequestClose}
   />
 )

@@ -108,7 +108,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				FirstName:        dr.FromBody("firstName").Required().AsString(),
 				LastName:         dr.FromBody("lastName").Required().AsString(),
 				CredentialName:   dr.FromBody("credentialName").Required().AsString(),
-				RegistrationType: CreateKey,
+				RegistrationType: CreateCredential,
 			}
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -196,7 +196,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				Username:         dr.FromBody("username").Required().AsString(),
 				CredentialName:   dr.FromBody("credentialName").Required().AsString(),
 				UserID:           callingUserId,
-				RegistrationType: LinkKey,
+				RegistrationType: LinkCredential,
 			}
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -222,22 +222,22 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 		})
 	}))
 
-	remux.Route(r, "GET", "/keys", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+	remux.Route(r, "GET", "/credentials", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		callingUserID := middleware.UserID(r.Context())
-		return a.getKeys(callingUserID, bridge)
+		return a.getCredentials(callingUserID, bridge)
 	}))
 
-	remux.Route(r, "DELETE", "/key/{credentialName}", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+	remux.Route(r, "DELETE", "/credential/{credentialName}", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		callingUserID := middleware.UserID(r.Context())
 		dr := remux.DissectJSONRequest(r)
 		credentialName := dr.FromURL("credentialName").Required().AsString()
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, a.deleteKey(callingUserID, credentialName, bridge)
+		return nil, a.deleteCredential(callingUserID, credentialName, bridge)
 	}))
 
-	remux.Route(r, "POST", "/key/add/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	remux.Route(r, "POST", "/credential/add/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			auth, err := bridge.FindUserAuthByContext(r.Context())
 			if err != nil {
@@ -254,7 +254,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 				Username:         auth.Username,
 				CredentialName:   credentialName,
 				UserID:           auth.UserID,
-				RegistrationType: AddKey,
+				RegistrationType: AddCredential,
 			}
 
 			creds, err := a.getExistingCredentials(auth)
@@ -267,7 +267,7 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 		}).ServeHTTP(w, r)
 	}))
 
-	remux.Route(r, "POST", "/key/add/finish", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+	remux.Route(r, "POST", "/credential/add/finish", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		_, encodedCreds, err := a.validateRegistrationComplete(r, bridge)
 		if err != nil {
 			return nil, backend.WrapError("Unable to validate registration data", err)
@@ -280,18 +280,18 @@ func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge)
 		userAuth.JSONData = helpers.Ptr(string(encodedCreds))
 		err = bridge.UpdateAuthForUser(userAuth)
 		if err != nil {
-			return nil, backend.WrapError("Unable to update keys", err)
+			return nil, backend.WrapError("Unable to update credentials", err)
 		}
 
-		// We might want to return a full list of keys. TODO: check if we want that
+		// We might want to return a full list of credentials. TODO: check if we want that
 		return nil, nil
 	}))
 }
 
-func (a WebAuthn) getKeys(userID int64, bridge authschemes.AShirtAuthBridge) (*ListKeysOutput, error) {
+func (a WebAuthn) getCredentials(userID int64, bridge authschemes.AShirtAuthBridge) (*ListCredentialsOutput, error) {
 	auth, err := bridge.FindUserAuthByUserID(userID)
 	if err != nil {
-		return nil, backend.WrapError("Unable to get keys", err)
+		return nil, backend.WrapError("Unable to get credentials", err)
 	}
 
 	webauthRawCreds := []byte(*auth.JSONData)
@@ -300,17 +300,17 @@ func (a WebAuthn) getKeys(userID int64, bridge authschemes.AShirtAuthBridge) (*L
 		return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 	}
 
-	results := helpers.Map(creds, func(cred AShirtWebauthnCredential) KeyEntry {
-		return KeyEntry{
+	results := helpers.Map(creds, func(cred AShirtWebauthnCredential) CredentialEntry {
+		return CredentialEntry{
 			CredentialName: cred.CredentialName,
-			DateCreated:    cred.KeyCreatedDate,
+			DateCreated:    cred.CredentialCreatedDate,
 		}
 	})
-	output := ListKeysOutput{results}
+	output := ListCredentialsOutput{results}
 	return &output, nil
 }
 
-func (a WebAuthn) deleteKey(userID int64, credentialName string, bridge authschemes.AShirtAuthBridge) error {
+func (a WebAuthn) deleteCredential(userID int64, credentialName string, bridge authschemes.AShirtAuthBridge) error {
 	auth, err := bridge.FindUserAuthByUserID(userID)
 	if err != nil {
 		return backend.WrapError("Unable to find user", err)
@@ -327,7 +327,7 @@ func (a WebAuthn) deleteKey(userID int64, credentialName string, bridge authsche
 	})
 	encodedCreds, err := json.Marshal(results)
 	if err != nil {
-		return backend.WrapError("Unable to delete key", err)
+		return backend.WrapError("Unable to delete credential", err)
 	}
 	auth.JSONData = helpers.Ptr(string(encodedCreds))
 
@@ -338,12 +338,12 @@ func (a WebAuthn) deleteKey(userID int64, credentialName string, bridge authsche
 
 func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, info WebAuthnRegistrationInfo) (*protocol.CredentialCreation, error) {
 	var user webauthnUser
-	if info.RegistrationType == CreateKey {
+	if info.RegistrationType == CreateCredential {
 		user = makeNewWebAuthnUser(info.FirstName, info.LastName, info.Email, info.Username, info.CredentialName)
-	} else if info.RegistrationType == LinkKey {
+	} else if info.RegistrationType == LinkCredential {
 		user = makeLinkingWebAuthnUser(info.UserID, info.Username, info.CredentialName)
-	} else { // Add Key
-		user = makeAddKeyWebAuthnUser(info.UserID, info.CredentialName, info.Username, info.ExistingCredentials)
+	} else { // Add Credential
+		user = makeAddCredentialWebAuthnUser(info.UserID, info.CredentialName, info.Username, info.ExistingCredentials)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
@@ -422,8 +422,8 @@ func (a WebAuthn) validateRegistrationComplete(r *http.Request, bridge authschem
 	}
 
 	data.UserData.Credentials = append(data.UserData.Credentials, wrapCredential(*cred, AShirtWebauthnExtension{
-		CredentialName: data.UserData.CredentialName,
-		KeyCreatedDate: data.UserData.KeyCreatedDate,
+		CredentialName:        data.UserData.CredentialName,
+		CredentialCreatedDate: data.UserData.CredentialCreatedDate,
 	}))
 
 	encodedCreds, err := json.Marshal(data.UserData.Credentials)

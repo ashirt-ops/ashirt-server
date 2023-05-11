@@ -9,27 +9,27 @@ import (
 type RegistrationType int
 
 const (
-	// CreateOrLinkKey reflects the usecase where
-	CreateKey RegistrationType = iota
-	LinkKey
-	AddKey
+	// CreateOrLinkCredential reflects the usecase where
+	CreateCredential RegistrationType = iota
+	LinkCredential
+	AddCredential
 )
 
 type WebAuthnRegistrationInfo struct {
-	Email               string
-	Username            string
-	FirstName           string
-	LastName            string
-	CredentialName      string
-	UserID              int64
-	RegistrationType    RegistrationType
-	ExistingCredentials []AShirtWebauthnCredential
-	KeyCreatedDate      time.Time
+	Email                 string
+	Username              string
+	FirstName             string
+	LastName              string
+	CredentialName        string
+	UserID                int64
+	RegistrationType      RegistrationType
+	ExistingCredentials   []AShirtWebauthnCredential
+	CredentialCreatedDate time.Time
 }
 
 type AShirtWebauthnExtension struct {
-	CredentialName string    `json:"credentialName"`
-	KeyCreatedDate time.Time `json:"keyCreatedDate"`
+	CredentialName        string    `json:"credentialName"`
+	CredentialCreatedDate time.Time `json:"credentialCreatedDate"`
 }
 
 type AShirtWebauthnCredential struct {
