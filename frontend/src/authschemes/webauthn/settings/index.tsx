@@ -45,7 +45,7 @@ const CredentialList = (props: {
   })
 
   const deleteModal = useModal<{ credentialName: string }>(mProps => <DeleteCredentialModal {...mProps} />, wiredCredentials.reload)
-  const modifyModal = useModal<{ credentialName: string }>(mProps => {console.log("trying", mProps); return (<EditCredentialModal {...mProps} />)}, wiredCredentials.reload)
+  const modifyModal = useModal<{ credentialName: string }>(mProps => <EditCredentialModal {...mProps} />, wiredCredentials.reload)
 
   return (<>
     {wiredCredentials.render(data => {
@@ -72,8 +72,7 @@ const CredentialList = (props: {
               )
             })}
           </Table>
-          {renderModals(deleteModal)}
-          {renderModals(modifyModal)}
+          {renderModals(deleteModal, modifyModal)}
         </div>
       )
     })}

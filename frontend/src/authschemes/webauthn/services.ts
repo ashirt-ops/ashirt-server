@@ -73,7 +73,6 @@ export async function deleteWebauthnCredential(i: { credentialName: string }): P
   return await req('DELETE', `/auth/webauthn/credential/${i.credentialName}`)
 }
 
-// TODO TN what do other PUTs return?
 export async function modifyCredentialName(i: { credentialName: string, newCredentialName: string }): Promise<void> {
   return await req('PUT', `/auth/webauthn/credential`, i)
 }
