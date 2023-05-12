@@ -27,6 +27,12 @@ type WebAuthnRegistrationInfo struct {
 	CredentialCreatedDate time.Time
 }
 
+type WebAuthnUpdateCredentialInfo struct {
+	UserID            int64
+	CredentialName    string
+	NewCredentialName string
+}
+
 type AShirtWebauthnExtension struct {
 	CredentialName        string    `json:"credentialName"`
 	CredentialCreatedDate time.Time `json:"credentialCreatedDate"`

@@ -9,9 +9,9 @@ import SettingsSection from 'src/components/settings_section'
 import classnames from 'classnames/bind'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { renderModals, useModal, useWiredData } from 'src/helpers'
-import { beginAddCredential, deleteWebauthnCredential, finishAddCredential, listWebauthnCredentials } from '../services'
+import { beginAddCredential, deleteWebauthnCredential, finishAddCredential, listWebauthnCredentials, modifyCredentialName } from '../services'
 import Table from 'src/components/table'
-import Button from 'src/components/button'
+import Button, { ButtonGroup } from 'src/components/button'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import ModalForm from 'src/components/modal_form'
 import { convertToCredentialCreationOptions, encodeAsB64 } from '../helpers'
@@ -45,6 +45,7 @@ const CredentialList = (props: {
   })
 
   const deleteModal = useModal<{ credentialName: string }>(mProps => <DeleteCredentialModal {...mProps} />, wiredCredentials.reload)
+  const modifyModal = useModal<{ credentialName: string }>(mProps => {console.log("trying", mProps); return (<EditCredentialModal {...mProps} />)}, wiredCredentials.reload)
 
   return (<>
     {wiredCredentials.render(data => {
@@ -57,18 +58,22 @@ const CredentialList = (props: {
                 <tr key={credentialName}>
                   <td>{credentialName}</td>
                   <td>{toEnUSDate(dateCreated)}</td>
-                  <td>
-                    <Button small danger onClick={() => {
-                      deleteModal.show({ credentialName })
-                    }}>
-                      Delete
-                    </Button>
+                  <td className={cx('button-cell')}>
+                    <ButtonGroup className={cx('row-buttons')}>
+                      <Button small onClick={() => {
+                        modifyModal.show({ credentialName })
+                      }}>Edit</Button>
+                      <Button danger small onClick={() => {
+                        deleteModal.show({ credentialName })
+                      }}>Delete</Button>
+                    </ButtonGroup>
                   </td>
                 </tr>
               )
             })}
           </Table>
           {renderModals(deleteModal)}
+          {renderModals(modifyModal)}
         </div>
       )
     })}
@@ -153,3 +158,36 @@ const DeleteCredentialModal = (props: {
     onRequestClose={props.onRequestClose}
   />
 )
+
+const EditCredentialModal = (props: {
+  credentialName: string,
+  onRequestClose: () => void,
+}) => {
+  const credentialName = useFormField("")
+
+  const formComponentProps = useForm({
+    fields: [credentialName],
+    handleSubmit: async () => {
+      if (credentialName.value === '') {
+        return Promise.reject(new Error("Credential name must be populated"))
+      }
+      await modifyCredentialName({
+        newCredentialName: credentialName.value,
+        credentialName: props.credentialName,
+      })
+    },
+    onSuccess: props.onRequestClose
+  })
+
+  return (
+    <ModalForm
+      title={"Edit Credential Name"}
+      submitText={"Edit"}
+      cancelText="Cancel"
+      onRequestClose={props.onRequestClose}
+      {...formComponentProps}
+    >
+      <Input label="New Credential name" {...credentialName} />
+    </ModalForm>
+  )
+}
