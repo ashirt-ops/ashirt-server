@@ -23,6 +23,7 @@ type WebConfig struct {
 	SuccessRedirectURL       string        `split_words:"true"`
 	FailureRedirectURLPrefix string        `split_words:"true"`
 	UseLambdaRIE             bool          `split_words:"true"`
+	EnableEvidenceExport     bool          `split_words:"true"`
 	Flags                    string
 	Port                     int
 }
@@ -168,4 +169,8 @@ func StoreRegion() string {
 
 func UseLambdaRIE() bool {
 	return app.UseLambdaRIE
+}
+
+func EnableEvidenceExport() bool {
+	return app.EnableEvidenceExport
 }
