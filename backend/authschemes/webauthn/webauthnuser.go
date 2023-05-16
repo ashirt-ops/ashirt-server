@@ -11,42 +11,42 @@ import (
 )
 
 type webauthnUser struct {
-	UserID         []byte
-	AuthnID        []byte
-	UserName       string
-	IconURL        string
-	Credentials    []AShirtWebauthnCredential
-	FirstName      string
-	LastName       string
-	Email          string
-	KeyName        string
-	KeyCreatedDate time.Time
+	UserID                []byte
+	AuthnID               []byte
+	UserName              string
+	IconURL               string
+	Credentials           []AShirtWebauthnCredential
+	FirstName             string
+	LastName              string
+	Email                 string
+	CredentialName        string
+	CredentialCreatedDate time.Time
 }
 
-func makeNewWebAuthnUser(firstName, lastName, email, username, keyName string) webauthnUser {
+func makeNewWebAuthnUser(firstName, lastName, email, username, credentialName string) webauthnUser {
 	return webauthnUser{
-		AuthnID:        []byte(uuid.New().String()),
-		UserName:       username,
-		FirstName:      firstName,
-		LastName:       lastName,
-		Email:          email,
-		KeyName:        keyName,
-		KeyCreatedDate: time.Now(),
+		AuthnID:               []byte(uuid.New().String()),
+		UserName:              username,
+		FirstName:             firstName,
+		LastName:              lastName,
+		Email:                 email,
+		CredentialName:        credentialName,
+		CredentialCreatedDate: time.Now(),
 	}
 }
 
-func makeLinkingWebAuthnUser(userID int64, username, keyName string) webauthnUser {
+func makeLinkingWebAuthnUser(userID int64, username, credentialName string) webauthnUser {
 	return webauthnUser{
-		UserID:         i64ToByteSlice(userID),
-		AuthnID:        []byte(uuid.New().String()),
-		UserName:       username,
-		KeyName:        keyName,
-		KeyCreatedDate: time.Now(),
+		UserID:                i64ToByteSlice(userID),
+		AuthnID:               []byte(uuid.New().String()),
+		UserName:              username,
+		CredentialName:        credentialName,
+		CredentialCreatedDate: time.Now(),
 	}
 }
 
-func makeAddKeyWebAuthnUser(userID int64, username, keyName string, creds []AShirtWebauthnCredential) webauthnUser {
-	user := makeLinkingWebAuthnUser(userID, username, keyName)
+func makeAddCredentialWebAuthnUser(userID int64, username, credentialName string, creds []AShirtWebauthnCredential) webauthnUser {
+	user := makeLinkingWebAuthnUser(userID, username, credentialName)
 	user.Credentials = creds
 	return user
 }

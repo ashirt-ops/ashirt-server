@@ -106,7 +106,7 @@ const RegisterModal = (props: {
         lastName: lastNameField.value,
         email: emailField.value,
         username: usernameField.value,
-        keyName: keyNameField.value,
+        credentialName: keyNameField.value,
       })
       const credOptions = convertToCredentialCreationOptions(reg)
 
@@ -140,7 +140,7 @@ const RegisterModal = (props: {
         <Input label="Last Name" {...lastNameField} />
         <Input label="Email" {...emailField} />
         <Input label="Desired Username" {...usernameField} />
-        <Input label="Key Name" {...keyNameField} />
+        <Input label="Credential Name" {...keyNameField} />
       </Form>
     </Modal>
   )
