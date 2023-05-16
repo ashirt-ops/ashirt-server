@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
@@ -291,10 +291,7 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		userIsAdmin = middleware.IsAdmin(ctx)
 	}
 
-	var userCanExportData bool
-	if os.Getenv("ENABLE_EVIDENCE_EXPORT") == "true" && userIsAdmin {
-		userCanExportData = true
-	}
+	userCanExportData := config.EnableEvidenceExport() && userIsAdmin
 
 	return &dtos.Operation{
 		Slug:              operationSlug,
@@ -305,8 +302,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		NumTags:           operation.NumTags,
 		TopContribs:       topContribsForOp,
 		EvidenceCount:     evidenceCountForOp,
-		UserCanViewGroups: &userCanViewGroups,
-		UserCanExportData: &userCanExportData,
+		UserCanViewGroups: userCanViewGroups,
+		UserCanExportData: userCanExportData,
 	}, nil
 }
 

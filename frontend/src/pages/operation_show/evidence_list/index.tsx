@@ -135,7 +135,6 @@ export default () => {
       media.forEach((mb) => {
         let filename;
         const fileExtension = mb.sourceFilename?.slice(mb.sourceFilename?.lastIndexOf(".") + 1)
-        console.log("fileExtension", fileExtension)
         if (mb.contentType === "codeblock" && mb.contentSubtype === "c_cpp" && fileExtension === "cpp") {
           filename = `${mb.filename}.cpp`;
         } else {
