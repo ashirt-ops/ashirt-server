@@ -68,8 +68,8 @@ type Operation struct {
 	Favorite          bool          `json:"favorite"`
 	TopContribs       []TopContrib  `json:"topContribs"`
 	EvidenceCount     EvidenceCount `json:"evidenceCount,omitempty"`
-	UserCanViewGroups *bool         `json:"userCanViewGroups,omitempty"`
-	UserCanExportData *bool         `json:"userCanExportData,omitempty"`
+	UserCanViewGroups bool          `json:"userCanViewGroups,omitempty"`
+	UserCanExportData bool          `json:"userCanExportData,omitempty"`
 }
 
 type Query struct {

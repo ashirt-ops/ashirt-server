@@ -66,6 +66,8 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Used in some authentication schemes to redirect to the frontend after a failed authentication.
   * `APP_FLAGS`
     * Sets flags that enable or disable certain frontend features. Generally has no direct effect on the backend. See the [flags](#flags) section on a list of supported flags.
+  * `APP_ENABLE_EVIDENCE_EXPORT`
+    * When set to `'true'`, used to allow global admins, operation admins, or member of a group with admin permissions to export zipped evidence from an operation
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
