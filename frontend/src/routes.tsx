@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Routes, Navigate, useParams, generatePath } from 'react-router-dom'
+import { Route, Routes, Navigate, useParams, Params } from 'react-router-dom'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -21,11 +21,21 @@ const AsyncAdminSettings = makeAsyncPage(() => import('src/pages/admin'))
 const AsyncAccountSettings = makeAsyncPage(() => import('src/pages/account_settings'))
 const AsyncNotFound = makeAsyncPage(() => import('src/pages/not_found'))
 
+/**
+ * Redirect provides a mechanism to redirect a user to the indicated URL
+ * @param props.to [Required] The base url to go to
+ * @param props.queryBuilder [Optional] A function to create the query string from the params
+ * 
+ * @returns A React-Router Navigate element to redirect the user to the indicated path
+ */
 function Redirect(props: {
-  to: string
+  to: string,
+  queryBuilder?: (params: Readonly<Params<string>>) => string
 }) {
   const params = useParams()
-  return <Navigate to={generatePath(props.to, params)} replace />
+  const query = props.queryBuilder?.(params)
+
+  return <Navigate to={`${props.to}${query ? `?${query}` : ""}`} replace />
 }
 
 export default () => {
@@ -59,7 +69,12 @@ export default () => {
         <Route path=":slug/*" >
           <Route index element={<Redirect to={`evidence`} />} />
           <Route path="evidence" element={<AsyncEvidenceList />} />
-          <Route path="evidence/:uuid" element={<Redirect to={`../evidence?q=uuid%3A:uuid`} />} />
+          <Route
+            path="evidence/:uuid"
+            element={
+              <Redirect to={`../evidence`} queryBuilder={(params) => `q=uuid%3A${params.uuid}`}/>
+            }
+          />
           {/* ^^^ we need to do ../evidence because .. points to :slug, while . points to evidence/:uuid */}
           <Route path="findings" element={<AsyncFindingList />} />
           <Route path="findings/:uuid" element={<AsyncFindingShow />} />
