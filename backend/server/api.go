@@ -15,6 +15,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
@@ -146,6 +147,16 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 		}
 		return services.ListTagsForOperation(r.Context(), db, i)
+	}))
+
+	route(r, "GET", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		tlq, _ := helpers.ParseTimelineQuery(dr.FromQuery("q").AsString())
+		i := services.ListEvidenceForOperationInput{
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			Filters:       tlq,
+		}
+		return services.ListEvidenceForOperation(r.Context(), db, i)
 	}))
 
 	route(r, "POST", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
