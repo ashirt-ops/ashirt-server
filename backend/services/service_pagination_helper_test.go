@@ -12,7 +12,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
+	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 	"github.com/theparanoids/ashirt-server/backend/services"
 
 	sq "github.com/Masterminds/squirrel"
@@ -21,7 +21,7 @@ import (
 func TestParseRequestQueryPagination(t *testing.T) {
 
 	r := httptest.NewRequest("POST", "/whatever?page=2&pageSize=3", nil)
-	dr := remux.DissectJSONRequest(r)
+	dr := dissectors.DissectJSONRequest(r)
 
 	pagination := services.ParseRequestQueryPagination(dr, 10)
 

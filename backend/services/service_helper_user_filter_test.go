@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
+	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 	"github.com/theparanoids/ashirt-server/backend/services"
 
 	sq "github.com/Masterminds/squirrel"
@@ -25,7 +25,7 @@ func TestParseRequestQueryUserFilter(t *testing.T) {
 
 func testParseRequestQueryUserFilter(t *testing.T, endpoint string, expectedContent []string) {
 	r := httptest.NewRequest("POST", endpoint, nil)
-	dr := remux.DissectJSONRequest(r)
+	dr := dissectors.DissectJSONRequest(r)
 
 	filter := services.ParseRequestQueryUserFilter(dr)
 

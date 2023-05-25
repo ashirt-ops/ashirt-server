@@ -17,6 +17,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/authschemes/webauthn/constants"
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 
@@ -101,7 +102,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 				return nil, errors.New("registration is closed to users")
 			}
 
-			dr := remux.DissectJSONRequest(r)
+			dr := dissectors.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
 				Email:            dr.FromBody("email").Required().AsString(),
 				Username:         dr.FromBody("username").Required().AsString(),
@@ -152,7 +153,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 
 	remux.Route(r, "POST", "/login/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-			dr := remux.DissectJSONRequest(r)
+			dr := dissectors.DissectJSONRequest(r)
 			username := dr.FromBody("username").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -191,7 +192,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			callingUserId := middleware.UserID(r.Context())
 
-			dr := remux.DissectJSONRequest(r)
+			dr := dissectors.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
 				Username:         dr.FromBody("username").Required().AsString(),
 				CredentialName:   dr.FromBody("credentialName").Required().AsString(),
@@ -229,7 +230,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 
 	remux.Route(r, "DELETE", "/credential/{credentialName}", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		callingUserID := middleware.UserID(r.Context())
-		dr := remux.DissectJSONRequest(r)
+		dr := dissectors.DissectJSONRequest(r)
 		credentialName := dr.FromURL("credentialName").Required().AsString()
 		if dr.Error != nil {
 			return nil, dr.Error
@@ -244,7 +245,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 				return nil, backend.DatabaseErr(err)
 			}
 
-			dr := remux.DissectJSONRequest(r)
+			dr := dissectors.DissectJSONRequest(r)
 			credentialName := dr.FromBody("credentialName").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
