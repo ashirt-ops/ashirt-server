@@ -151,10 +151,16 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 	route(r, "GET", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
-		tlq, _ := helpers.ParseTimelineQuery(dr.FromQuery("q").AsString())
+		tlq, err := helpers.ParseTimelineQuery(dr.FromQuery("query").AsString())
+		if err != nil {
+			return nil, err
+		}
 		i := services.ListEvidenceForOperationInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 			Filters:       tlq,
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
 		}
 		return services.ListEvidenceForOperation(r.Context(), db, i)
 	}))
