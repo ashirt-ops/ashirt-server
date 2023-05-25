@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
@@ -22,9 +21,6 @@ import (
 )
 
 func API(r chi.Router, db *database.Connection, contentStore contentstore.Store, logger logging.Logger) {
-	// TODO TN should I include htis?
-	r.Use(render.SetContentType(render.ContentTypeJSON))
-
 	r.Use(middleware.AuthenticateAppAndInjectCtx(db))
 	r.Use(middleware.LogRequests(logger))
 

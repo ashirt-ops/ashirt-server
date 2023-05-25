@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
@@ -48,8 +47,6 @@ func NewTester(t *testing.T) *Tester {
 	commonLogger := logging.SetupStdoutLogging()
 
 	s := chi.NewRouter()
-	// TODO TN do we need this?
-	s.Use(render.SetContentType(render.ContentTypeJSON))
 
 	s.Route("/web", func(r chi.Router) {
 		server.Web(r,

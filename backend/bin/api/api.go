@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
@@ -44,8 +43,6 @@ func main() {
 	}
 
 	s := chi.NewRouter()
-	// TODO TN do we need this?
-	s.Use(render.SetContentType(render.ContentTypeJSON))
 
 	s.Route("/api", func(r chi.Router) {
 		server.API(r,

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
@@ -120,8 +119,6 @@ func tryRunServer(logger logging.Logger) error {
 	}
 
 	r := chi.NewRouter()
-	// TODO TN do I need this?
-	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Route("/web", func(r chi.Router) {
 		server.Web(r,
