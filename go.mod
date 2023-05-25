@@ -7,6 +7,8 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/aws/aws-sdk-go v1.44.234
 	github.com/coreos/go-oidc/v3 v3.5.0
+	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/render v1.0.2
 	github.com/go-kit/kit v0.12.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-webauthn/webauthn v0.8.2
@@ -33,6 +35,7 @@ require (
 	cloud.google.com/go/compute v1.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v0.12.0 // indirect
+	github.com/ajg/form v1.5.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect

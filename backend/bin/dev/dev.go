@@ -10,6 +10,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
@@ -117,22 +119,24 @@ func tryRunServer(logger logging.Logger) error {
 		logger.Log("msg", "No Emailer selected")
 	}
 
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
+	// TODO TN do I need this?
+	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	mux.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
-			CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
-			SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
-			UseSecureCookies: false,
-			AuthSchemes:      schemes,
-			Logger:           logger,
-		},
-	)))
-	mux.Handle("/api/", server.API(
-		db, contentStore, logger,
-	))
+	r.Route("/web", func(r chi.Router) {
+		server.Web(r,
+			db, contentStore, &server.WebConfig{
+				CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
+				SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
+				UseSecureCookies: false,
+				AuthSchemes:      schemes,
+				Logger:           logger,
+			},
+		)
+	})
+
 	logger.Log("port", config.Port(), "msg", "Now Serving")
-	return http.ListenAndServe(":"+config.Port(), mux)
+	return http.ListenAndServe(":"+config.Port(), r)
 }
 
 func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, error) {

@@ -6,10 +6,10 @@ package remux
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-// Route rewraps gorilla.mux's Handle/Methods to provide a better at-a-glance reading of route definitions
-func Route(r *mux.Router, method string, path string, handler http.Handler) {
-	r.Handle(path, handler).Methods(method)
+// Route rewraps chi's Handle/Methods to provide a better at-a-glance reading of route definitions
+func Route(r chi.Router, method string, path string, handler http.Handler) {
+	r.Method(method, path, handler)
 }

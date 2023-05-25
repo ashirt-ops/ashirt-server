@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 )
 
@@ -28,7 +27,7 @@ func (w *responseWriterWrapper) Write(b []byte) (int, error) {
 	return n, err
 }
 
-func LogRequests(baseLogger logging.Logger) mux.MiddlewareFunc {
+func LogRequests(baseLogger logging.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()

@@ -83,7 +83,7 @@ func Policy(ctx context.Context) policy.Policy {
 	return p
 }
 
-func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
+func AuthenticateAppAndInjectCtx(db *database.Connection) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			body, cleanup, err := cloneBody(r)

@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
@@ -77,7 +77,7 @@ func (LocalAuthScheme) Type() string {
 //
 // In each case above, the actual action is deferred to the bridge connecting this auth scheme to
 // the underlying system/database
-func (p LocalAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
+func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/register", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		if !p.RegistrationEnabled {
 			return nil, fmt.Errorf("registration is closed to users")

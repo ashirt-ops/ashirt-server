@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/csrf"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
@@ -18,16 +20,14 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/contentstore"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
+
+	// "github.com/theparanoids/ashirt-server/backend/errors"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
 	"github.com/theparanoids/ashirt-server/backend/session"
-
-	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type WebConfig struct {
@@ -56,7 +56,16 @@ func (c *WebConfig) validate() error {
 	return nil
 }
 
-func Web(db *database.Connection, contentStore contentstore.Store, config *WebConfig) http.Handler {
+// func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+// 	// Check the health of your application here
+// 	// Perform any necessary checks or validations
+
+// 	// Send a success response if the health check passes
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Write([]byte("OK"))
+// }
+
+func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store, config *WebConfig) {
 	if err := config.validate(); err != nil {
 		panic(err)
 	}
@@ -68,10 +77,10 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 	if err != nil {
 		panic(err)
 	}
-
-	r := mux.NewRouter()
-	metricRouter := r.PathPrefix("").Subrouter()
-	metricRouter.Handle("/metrics", promhttp.Handler())
+	// TODO TN figure this out
+	// r := mux.NewRouter()
+	// metricRouter := r.PathPrefix("").Subrouter()
+	// metricRouter.Handle("/metrics", promhttp.Handler())
 
 	r.Use(middleware.LogRequests(config.Logger))
 	r.Use(csrf.Protect(config.CSRFAuthKey,
@@ -81,12 +90,15 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 			return nil, backend.CSRFErr(csrf.FailureReason(r))
 		}))))
 	r.Use(middleware.InjectCSRFTokenHeader())
+	// r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionStore).Handler)
+
 	r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionStore))
 
 	supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))
 	for i, scheme := range config.AuthSchemes {
-		authRouter := r.PathPrefix("/auth/" + scheme.Name()).Subrouter()
-		scheme.BindRoutes(authRouter, authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
+		r.Route("/auth/"+scheme.Name(), func(r chi.Router) {
+			scheme.BindRoutes(r.(chi.Router), authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
+		})
 		supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
 			SchemeName:  scheme.FriendlyName(),
 			SchemeCode:  scheme.Name(),
@@ -105,10 +117,9 @@ func Web(db *database.Connection, contentStore contentstore.Store, config *WebCo
 	}
 
 	bindWebRoutes(r, db, contentStore, sessionStore, &authsWithOutRecovery)
-	return r
 }
 
-func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contentstore.Store, sessionStore *session.Store, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
+func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store, sessionStore *session.Store, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
 	route(r, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jsonHandler(func(r *http.Request) (interface{}, error) {
 			err := sessionStore.Delete(w, r)
@@ -946,7 +957,7 @@ func bindWebRoutes(r *mux.Router, db *database.Connection, contentStore contents
 	bindServiceWorkerRoutes(r, db)
 }
 
-func bindServiceWorkerRoutes(r *mux.Router, db *database.Connection) {
+func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 	route(r, "GET", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListServiceWorker(r.Context(), db)
 	}))

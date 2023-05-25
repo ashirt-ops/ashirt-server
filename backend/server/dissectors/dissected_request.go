@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
 )
 
@@ -33,16 +34,14 @@ import (
 type DissectedRequest struct {
 	Request     *http.Request
 	bodyValues  map[string]interface{}
-	urlValues   map[string]string
 	queryValues url.Values
 	Error       error
 }
 
-func makeDefaultRequest(r *http.Request, urlParameters map[string]string) DissectedRequest {
+func makeDefaultRequest(r *http.Request) DissectedRequest {
 	return DissectedRequest{
 		Request:     r,
 		bodyValues:  make(map[string]interface{}),
-		urlValues:   urlParameters,
 		queryValues: r.URL.Query(),
 		Error:       nil,
 	}
@@ -54,8 +53,8 @@ func makeDefaultRequest(r *http.Request, urlParameters map[string]string) Dissec
 //
 // If an error is encountered while trying to parse the json, it will be stored in the
 // DissectedRequest.Error field
-func DissectJSONRequest(r *http.Request, urlParameters map[string]string) DissectedRequest {
-	rtn := makeDefaultRequest(r, urlParameters)
+func DissectJSONRequest(r *http.Request) DissectedRequest {
+	rtn := makeDefaultRequest(r)
 
 	if r.Body != http.NoBody {
 		if err := json.NewDecoder(r.Body).Decode(&rtn.bodyValues); err != nil {
@@ -71,8 +70,8 @@ func DissectJSONRequest(r *http.Request, urlParameters map[string]string) Dissec
 //
 // If an error is encountered while trying to parse the json, it will be stored in the
 // DissectedRequest.Error field
-func DissectPlainRequest(r *http.Request, urlParameters map[string]string) DissectedRequest {
-	return makeDefaultRequest(r, urlParameters)
+func DissectPlainRequest(r *http.Request) DissectedRequest {
+	return makeDefaultRequest(r)
 }
 
 // DissectFormRequest retrieves query string values from the provided request and parses a multipart
@@ -82,8 +81,8 @@ func DissectPlainRequest(r *http.Request, urlParameters map[string]string) Disse
 //
 // If an error is encountered while trying to parse the json, it will be stored in the
 // DissectedRequest.Error field
-func DissectFormRequest(r *http.Request, urlParameters map[string]string) DissectedRequest {
-	rtn := makeDefaultRequest(r, urlParameters)
+func DissectFormRequest(r *http.Request) DissectedRequest {
+	rtn := makeDefaultRequest(r)
 
 	if r.Body != http.NoBody {
 		if err := r.ParseMultipartForm(5 * 1024 * 1024); err != nil {
@@ -117,7 +116,11 @@ func (m *DissectedRequest) FromURL(key string) *Coercable {
 	if m.Error != nil {
 		return makeErrCoercable(m)
 	}
-	value, found := m.urlValues[key]
+	value := chi.URLParam(m.Request, key)
+	found := true
+	if value == "" {
+		found = false
+	}
 	return makeCoercable(m, key, found, value)
 }
 

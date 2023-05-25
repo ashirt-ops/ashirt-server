@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/webauthn/constants"
@@ -93,7 +93,7 @@ func (a WebAuthn) Type() string {
 	return constants.Name
 }
 
-func (a WebAuthn) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
+func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/register/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			// validate basic registration data
