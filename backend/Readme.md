@@ -460,7 +460,7 @@ The details for this service are detailed in [pipeline readme](/backend/pipeline
 
 ## Development Overview
 
-This project utilizes Golang 1.13 (with modules), interfaces with a MySQL database and leverages Gorilla Mux to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
+This project utilizes Golang 1.13 (with modules), interfaces with a MySQL database and leverages Chi to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
 
 ### Development Environment
 
@@ -598,7 +598,7 @@ The project contains various source code directories, effectively acting as a co
 ├── server                             # Route endpoint definitions and basic request validation
 │   ├── dissectors                     # A builder-pattern like solution for interpreting request objects
 │   ├── middleware                     # Middleware to assist with request handling
-│   ├── remux                          # A rewrapping package for better ergonmics when utilizing gorilla mux
+│   ├── remux                          # A rewrapping package for better ergonmics when utilizing chi
 │   ├── api.go                         # Routes for the "API" / screenshot tool
 │   └── web.go                         # Routes for the web service
 ├── services                           # Underlying service logic. Also includes a number of unit tests
