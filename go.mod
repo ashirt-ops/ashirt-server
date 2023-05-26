@@ -8,13 +8,11 @@ require (
 	github.com/aws/aws-sdk-go v1.44.234
 	github.com/coreos/go-oidc/v3 v3.5.0
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/go-chi/render v1.0.2
 	github.com/go-kit/kit v0.12.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-webauthn/webauthn v0.8.2
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/csrf v1.7.1
-	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.1
 	github.com/jaytaylor/html2text v0.0.0-20211105163654-bc68cce691ba
@@ -35,7 +33,6 @@ require (
 	cloud.google.com/go/compute v1.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v0.12.0 // indirect
-	github.com/ajg/form v1.5.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
