@@ -24,8 +24,8 @@ func API(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 	r.Use(middleware.AuthenticateAppAndInjectCtx(db))
 	r.Use(middleware.LogRequests(logger))
 
-	r.Mount("/metrics", promhttp.Handler())
 	bindAPIRoutes(r, db, contentStore)
+	r.Mount("/metrics", promhttp.Handler())
 }
 
 func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
