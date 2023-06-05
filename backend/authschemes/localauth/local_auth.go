@@ -15,7 +15,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 	"golang.org/x/crypto/bcrypt"
@@ -84,7 +83,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 			return nil, fmt.Errorf("registration is closed to users")
 		}
 
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		info := RegistrationInfo{
 			Username:  dr.FromBody("username").Required().AsString(),
 			Email:     dr.FromBody("email").Required().AsString(),
@@ -119,7 +118,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 		// convert authKey into readable format
 		readKey := base64.StdEncoding.EncodeToString(authKey)
 
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		info := RegistrationInfo{
 			Username:           dr.FromBody("username").Required().AsString(),
 			Email:              dr.FromBody("email").Required().AsString(),
@@ -148,7 +147,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 
 	remux.Route(r, "POST", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-			dr := dissectors.DissectJSONRequest(r)
+			dr := remux.DissectJSONRequest(r)
 			username := dr.FromBody("username").Required().AsString()
 			password := dr.FromBody("password").Required().AsString()
 			if dr.Error != nil {
@@ -167,7 +166,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 
 	remux.Route(r, "POST", "/login/resetpassword", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-			dr := dissectors.DissectJSONRequest(r)
+			dr := remux.DissectJSONRequest(r)
 			newPassword := dr.FromBody("newPassword").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -195,7 +194,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 
 	remux.Route(r, "POST", "/login/totp", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-			dr := dissectors.DissectJSONRequest(r)
+			dr := remux.DissectJSONRequest(r)
 			totpPasscode := dr.FromBody("totpPasscode").Required().AsString()
 			if dr.Error != nil {
 				return nil, dr.Error
@@ -230,7 +229,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 
 	remux.Route(r, "PUT", "/password", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-			dr := dissectors.DissectJSONRequest(r)
+			dr := remux.DissectJSONRequest(r)
 			username := dr.FromBody("username").Required().AsString()
 			oldPassword := dr.FromBody("oldPassword").Required().AsString()
 			newPassword := dr.FromBody("newPassword").Required().AsString()
@@ -256,7 +255,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 			return nil, backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin"))
 		}
 
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		userSlug := dr.FromBody("userSlug").Required().AsString()
 		newPassword := dr.FromBody("newPassword").Required().AsString()
 
@@ -293,7 +292,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 	}))
 
 	remux.Route(r, "POST", "/link", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		username := dr.FromBody("username").Required().AsString()
 		password := dr.FromBody("password").Required().AsString()
 
@@ -325,7 +324,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 	}))
 
 	remux.Route(r, "GET", "/totp", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		userSlug := dr.FromBody("userSlug").AsString()
 		if dr.Error != nil {
 			return nil, dr.Error
@@ -343,7 +342,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 	}))
 
 	remux.Route(r, "POST", "/totp", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		secret := dr.FromBody("secret").Required().AsString()
 		passcode := dr.FromBody("passcode").Required().AsString()
 		if dr.Error != nil {
@@ -375,7 +374,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 	}))
 
 	remux.Route(r, "DELETE", "/totp", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		userSlug := dr.FromBody("userSlug").AsString()
 		if dr.Error != nil {
 			return nil, dr.Error

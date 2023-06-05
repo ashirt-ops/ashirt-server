@@ -14,7 +14,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
@@ -48,7 +47,7 @@ func (RecoveryAuthScheme) Type() string {
 
 func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/generate", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		userSlug := dr.FromBody("userSlug").Required().AsString()
 		if dr.Error != nil {
 			return nil, dr.Error
@@ -58,7 +57,7 @@ func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAu
 	}))
 
 	remux.Route(r, "POST", "/generateemail", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		userEmail := dr.FromBody("userEmail").Required().AsString()
 		if dr.Error != nil {
 			return nil, dr.Error
@@ -76,7 +75,7 @@ func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAu
 			return nil, backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin"))
 		}
 
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		firstName := dr.FromBody("firstName").Required().AsString()
 		lastName := dr.FromBody("lastName").AsString()
 		profile := authschemes.UserProfile{
@@ -98,7 +97,7 @@ func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAu
 	}))
 
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		dr := dissectors.DissectJSONRequest(r)
+		dr := remux.DissectJSONRequest(r)
 		recoveryKey := dr.FromQuery("code").Required().AsString()
 
 		if dr.Error != nil {

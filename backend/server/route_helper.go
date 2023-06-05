@@ -21,15 +21,15 @@ func route(r chi.Router, method string, path string, handler http.Handler) {
 }
 
 func dissectJSONRequest(r *http.Request) dissectors.DissectedRequest {
-	return dissectors.DissectJSONRequest(r)
+	return remux.DissectJSONRequest(r)
 }
 
 func dissectFormRequest(r *http.Request) dissectors.DissectedRequest {
-	return dissectors.DissectFormRequest(r)
+	return remux.DissectFormRequest(r)
 }
 
 func dissectNoBodyRequest(r *http.Request) dissectors.DissectedRequest {
-	return dissectors.DissectPlainRequest(r)
+	return remux.DissectNoBodyRequest(r)
 }
 
 func mediaHandler(handler func(*http.Request) (io.Reader, error)) http.Handler {

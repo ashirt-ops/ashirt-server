@@ -9,11 +9,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 
 	extract "github.com/theparanoids/ashirt-server/backend/server/dissectors"
@@ -50,7 +50,7 @@ const rawJSON = `{
 func TestGetRequiredAfterError(t *testing.T) {
 	rawBody, _ := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	str := pq.FromBody("DoesNotExit").Required().AsString()
 
@@ -70,7 +70,7 @@ func TestGetRequiredAfterError(t *testing.T) {
 
 func TestNoBody(t *testing.T) {
 	req := makeRequest(nil, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	assert.Nil(t, pq.Error, "Should have no error")
 }
@@ -78,14 +78,14 @@ func TestNoBody(t *testing.T) {
 func TestNotJSONBody(t *testing.T) {
 	notJson := "[}"
 	req := makeRequest(&notJson, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	assert.NotNil(t, pq.Error, "Should have a parse error")
 }
 
 func TestNoContentAsString(t *testing.T) {
 	req := makeRequest(nil, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("DoesNotExist").AsString()
 	expected := ""
@@ -96,7 +96,7 @@ func TestNoContentAsString(t *testing.T) {
 
 func TestNoContentAsRequiredString(t *testing.T) {
 	req := makeRequest(nil, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("DoesNotExist").Required().AsString()
 	expected := ""
@@ -107,7 +107,7 @@ func TestNoContentAsRequiredString(t *testing.T) {
 
 func TestNoContentAsInt64(t *testing.T) {
 	req := makeRequest(nil, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("DoesNotExist").AsInt64()
 	expected := int64(0)
@@ -120,7 +120,7 @@ func TestStringAsInt64(t *testing.T) {
 	// designed to fail, because we cannot convert a random string into an integer
 	rawBody, _ := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("stringAsString").Required().AsInt64()
 	expected := int64(0)
@@ -131,7 +131,7 @@ func TestStringAsInt64(t *testing.T) {
 
 func TestNoContentAsRequiredInt64(t *testing.T) {
 	req := makeRequest(nil, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("DoesNotExist").Required().AsInt64()
 	expected := int64(0)
@@ -145,7 +145,7 @@ func TestNoContentAsRequiredInt64(t *testing.T) {
 func TestDefaultValue(t *testing.T) {
 	rawBody, _ := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	defaultValue := "It's Okay"
 	actual := pq.FromBody("DoesNotExist").OrDefault(defaultValue).AsString()
@@ -157,7 +157,7 @@ func TestDefaultValue(t *testing.T) {
 func TestRequiredValue_doesNotExist(t *testing.T) {
 	rawBody, _ := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("DoesNotExist").Required().AsString()
 	expected := ""
@@ -170,7 +170,7 @@ func TestRequiredValue_doesNotExist(t *testing.T) {
 func TestParseStringFromBody(t *testing.T) {
 	rawBody, asStruct := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("stringAsString").Required().AsString()
 	expected := asStruct.StringAsString
@@ -181,7 +181,7 @@ func TestParseStringFromBody(t *testing.T) {
 func TestParseIntFromBody(t *testing.T) {
 	rawBody, asStruct := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("intAsNumber").Required().AsInt64()
 	expected := int64(asStruct.IntAsNumber)
@@ -192,7 +192,7 @@ func TestParseIntFromBody(t *testing.T) {
 func TestParseIntSliceFromBody(t *testing.T) {
 	rawBody, asStruct := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("intSliceAsNumberArray").Required().AsInt64Slice()
 	expected := toInt64Slice(asStruct.IntSliceAsNumberArray)
@@ -203,7 +203,7 @@ func TestParseIntSliceFromBody(t *testing.T) {
 func TestParseStringSliceFromBody(t *testing.T) {
 	rawBody, asStruct := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("stringSliceAsStringArray").Required().AsStringSlice()
 	expected := asStruct.StringSliceAsStringArray
@@ -214,7 +214,7 @@ func TestParseStringSliceFromBody(t *testing.T) {
 func TestParseTimeFromBody(t *testing.T) {
 	rawBody, asStruct := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("timeAsRFC3339").Required().AsTime()
 	expected := asStruct.TimeAsRFC3339
@@ -225,7 +225,7 @@ func TestParseTimeFromBody(t *testing.T) {
 func TestParseFullTimeFromBody(t *testing.T) {
 	rawBody, asStruct := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("timeAsRFC3339WithTZ").Required().AsTime()
 	expected := asStruct.TimeAsRFC3339WithTZ
@@ -236,7 +236,7 @@ func TestParseFullTimeFromBody(t *testing.T) {
 func TestParseBoolFromBody(t *testing.T) {
 	rawBody, asStruct := prepInputData()
 	req := makeRequest(&rawBody, "")
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromBody("boolAsBool").Required().AsBool()
 	expected := asStruct.BoolAsBool
@@ -249,7 +249,7 @@ func TestParseBoolFromBody(t *testing.T) {
 func TestParseStringFromQuery(t *testing.T) {
 	key, value := "key", "singleValue"
 	req := makeRequest(nil, fmt.Sprintf("%v=%v", key, value))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsString()
 	expected := value
@@ -260,7 +260,7 @@ func TestParseStringFromQuery(t *testing.T) {
 func TestParseIntFromQuery(t *testing.T) {
 	key, value := "key", int64(123)
 	req := makeRequest(nil, fmt.Sprintf("%v=%v", key, value))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsInt64()
 	expected := value
@@ -272,7 +272,7 @@ func TestParseIntSliceFromQuery(t *testing.T) {
 	key, value1 := "key", int64(123)
 	key, value2 := "key", int64(456)
 	req := makeRequest(nil, fmt.Sprintf("%v=%v&%v=%v", key, value1, key, value2))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsInt64Slice()
 	expected := []int64{value1, value2}
@@ -284,7 +284,7 @@ func TestParseStringSliceFromQuery(t *testing.T) {
 	key, value1 := "key", "dog"
 	key, value2 := "key", "cat"
 	req := makeRequest(nil, fmt.Sprintf("%v=%v&%v=%v", key, value1, key, value2))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsStringSlice()
 	expected := []string{value1, value2}
@@ -295,7 +295,7 @@ func TestParseStringSliceFromQuery(t *testing.T) {
 func TestParseTimeFromQuery(t *testing.T) {
 	key, value1 := "key", "2001-01-31T11:22:33Z"
 	req := makeRequest(nil, fmt.Sprintf("%v=%v", key, value1))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsTime()
 	expected, _ := time.Parse(time.RFC3339, value1)
@@ -306,7 +306,7 @@ func TestParseTimeFromQuery(t *testing.T) {
 func TestParseFullTimeFromQuery(t *testing.T) {
 	key, value1 := "key", "2001-01-31T11:22:33-07:00"
 	req := makeRequest(nil, fmt.Sprintf("%v=%v", key, value1))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsTime()
 	expected, _ := time.Parse(time.RFC3339, value1)
@@ -318,7 +318,7 @@ func TestParseMultipleValuesFromQuery(t *testing.T) {
 	key, value1, value2 := "key", int64(123), int64(456)
 	altKey, altValue := "mischief", "managed"
 	req := makeRequest(nil, fmt.Sprintf("%v=%v&%v=%v&%v=%v", key, value1, key, value2, altKey, altValue))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual1 := pq.FromQuery(key).Required().AsInt64Slice()
 	expected1 := []int64{value1, value2}
@@ -333,7 +333,7 @@ func TestParseMultipleValuesFromQuery(t *testing.T) {
 func TestParseBoolFromQuery(t *testing.T) {
 	key, value := "key", true
 	req := makeRequest(nil, fmt.Sprintf("%v=%v", key, value))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsBool()
 	expected := value
@@ -344,7 +344,7 @@ func TestParseBoolFromQuery(t *testing.T) {
 func TestParseBoolFlagFromQuery(t *testing.T) {
 	key := "key"
 	req := makeRequest(nil, fmt.Sprintf("%v", key))
-	pq := extract.DissectJSONRequest(req)
+	pq := extract.DissectJSONRequest(req, map[string]string{})
 
 	actual := pq.FromQuery(key).Required().AsBool()
 	expected := true
@@ -353,23 +353,80 @@ func TestParseBoolFlagFromQuery(t *testing.T) {
 }
 
 // Verify reading/converting from URL
-type URLParamProvider interface {
-	URLParam(r *http.Request, key string) string
+
+func TestParseStringFromURL(t *testing.T) {
+	req := makeRequest(nil, "")
+	key, value := "key", "value"
+	secondKey, secondValue := "key2", "value2"
+	pq := extract.DissectJSONRequest(req, makeUrlParamMap(key, value, secondKey, secondValue))
+
+	actual := pq.FromURL(key).Required().AsString()
+	expected := value
+	assert.Equal(t, expected, actual)
+	assert.Nil(t, pq.Error, "Should have no error")
 }
 
-type chiURLParamProvider struct{}
+func TestParseInt64FromURL(t *testing.T) {
+	req := makeRequest(nil, "")
+	key, value := "key", "12"
+	secondKey, secondValue := "key2", "value2"
+	pq := extract.DissectJSONRequest(req, makeUrlParamMap(key, value, secondKey, secondValue))
 
-func (c *chiURLParamProvider) URLParam(r *http.Request, key string) string {
-	return chi.URLParam(r, key)
+	actual := pq.FromURL(key).Required().AsInt64()
+	expected, _ := strconv.ParseInt(value, 10, 64)
+	assert.Equal(t, expected, actual)
+	assert.Nil(t, pq.Error, "Should have no error")
 }
 
-type MockURLParamProvider struct{}
+func TestParseMultipleValuesFromURL(t *testing.T) {
+	req := makeRequest(nil, "")
+	key, value := "key", "12"
+	key2, value2 := "key2", "value2"
+	pq := extract.DissectJSONRequest(req, makeUrlParamMap(key, value, key2, value2))
 
-func (m *MockURLParamProvider) URLParam(r *http.Request, key string) string {
-	// Mocked implementation of URLParam
-	// Return a predefined value or behavior based on `r` and `key`
-	// ...
-	return "mocked value"
+	actualValue1 := pq.FromURL(key).Required().AsInt64()
+	expectedValue1, _ := strconv.ParseInt(value, 10, 64)
+	assert.Equal(t, expectedValue1, actualValue1)
+
+	actualValue2 := pq.FromURL(key2).Required().AsString()
+	expectedValue2 := value2
+	assert.Equal(t, expectedValue2, actualValue2)
+
+	assert.Nil(t, pq.Error, "Should have no error")
+}
+
+func TestParseTimeFromURL(t *testing.T) {
+	key, value := "key", "2001-01-31T11:22:33Z"
+	req := makeRequest(nil, "")
+	pq := extract.DissectJSONRequest(req, makeUrlParamMap(key, value))
+
+	actual := pq.FromURL(key).Required().AsTime()
+	expected, _ := time.Parse(time.RFC3339, value)
+	assert.Equal(t, expected, actual)
+	assert.Nil(t, pq.Error, "Should have no error")
+}
+
+func TestParseFullTimeFromURL(t *testing.T) {
+	key, value := "key", "2001-01-31T11:22:33-07:00"
+	req := makeRequest(nil, "")
+	pq := extract.DissectJSONRequest(req, makeUrlParamMap(key, value))
+
+	actual := pq.FromURL(key).Required().AsTime()
+	expected, _ := time.Parse(time.RFC3339, value)
+	assert.Equal(t, expected, actual)
+	assert.Nil(t, pq.Error, "Should have no error")
+}
+
+func TestParseBoolFromURL(t *testing.T) {
+	req := makeRequest(nil, "")
+	key, value := "key", "true"
+	secondKey, secondValue := "key2", "value2"
+	pq := extract.DissectJSONRequest(req, makeUrlParamMap(key, value, secondKey, secondValue))
+
+	actual := pq.FromURL(key).Required().AsBool()
+	expected, _ := strconv.ParseBool(value)
+	assert.Equal(t, expected, actual)
+	assert.Nil(t, pq.Error, "Should have no error")
 }
 
 // test helpers
