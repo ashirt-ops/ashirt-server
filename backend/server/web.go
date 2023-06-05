@@ -69,40 +69,42 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 		panic(err)
 	}
 
-	r.Use(middleware.LogRequests(config.Logger))
-	r.Use(csrf.Protect(config.CSRFAuthKey,
-		csrf.Secure(config.UseSecureCookies),
-		csrf.Path("/"),
-		csrf.ErrorHandler(jsonHandler(func(r *http.Request) (interface{}, error) {
-			return nil, backend.CSRFErr(csrf.FailureReason(r))
-		}))))
-	r.Use(middleware.InjectCSRFTokenHeader())
-	r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionStore))
+	r.Handle("/metrics", promhttp.Handler())
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.LogRequests(config.Logger))
+		r.Use(csrf.Protect(config.CSRFAuthKey,
+			csrf.Secure(config.UseSecureCookies),
+			csrf.Path("/"),
+			csrf.ErrorHandler(jsonHandler(func(r *http.Request) (interface{}, error) {
+				return nil, backend.CSRFErr(csrf.FailureReason(r))
+			}))))
+		r.Use(middleware.InjectCSRFTokenHeader())
+		r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionStore))
 
-	supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))
-	for i, scheme := range config.AuthSchemes {
-		r.Route("/auth/"+scheme.Name(), func(r chi.Router) {
-			scheme.BindRoutes(r.(chi.Router), authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
-		})
-		supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
-			SchemeName:  scheme.FriendlyName(),
-			SchemeCode:  scheme.Name(),
-			SchemeFlags: scheme.Flags(),
-			SchemeType:  scheme.Type(),
+		supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))
+		for i, scheme := range config.AuthSchemes {
+			r.Route("/auth/"+scheme.Name(), func(r chi.Router) {
+				scheme.BindRoutes(r.(chi.Router), authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
+			})
+			supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
+				SchemeName:  scheme.FriendlyName(),
+				SchemeCode:  scheme.Name(),
+				SchemeFlags: scheme.Flags(),
+				SchemeType:  scheme.Type(),
+			}
 		}
-	}
-	authsWithOutRecovery := make([]dtos.SupportedAuthScheme, 0, len(supportedAuthSchemes)-1)
+		authsWithOutRecovery := make([]dtos.SupportedAuthScheme, 0, len(supportedAuthSchemes)-1)
 
-	// recovery is a special authentication that we kind of want to hide/separate from the other auth schemes
-	// so, we filter it out here
-	for _, auth := range supportedAuthSchemes {
-		if auth.SchemeCode != recoveryConsts.Code {
-			authsWithOutRecovery = append(authsWithOutRecovery, auth)
+		// recovery is a special authentication that we kind of want to hide/separate from the other auth schemes
+		// so, we filter it out here
+		for _, auth := range supportedAuthSchemes {
+			if auth.SchemeCode != recoveryConsts.Code {
+				authsWithOutRecovery = append(authsWithOutRecovery, auth)
+			}
 		}
-	}
 
-	bindWebRoutes(r, db, contentStore, sessionStore, &authsWithOutRecovery)
-	r.Mount("/metrics", promhttp.Handler())
+		bindWebRoutes(r, db, contentStore, sessionStore, &authsWithOutRecovery)
+	})
 }
 
 func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store, sessionStore *session.Store, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {

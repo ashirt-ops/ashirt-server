@@ -21,11 +21,12 @@ import (
 )
 
 func API(r chi.Router, db *database.Connection, contentStore contentstore.Store, logger logging.Logger) {
-	r.Use(middleware.AuthenticateAppAndInjectCtx(db))
-	r.Use(middleware.LogRequests(logger))
-
-	bindAPIRoutes(r, db, contentStore)
-	r.Mount("/metrics", promhttp.Handler())
+	r.Handle("/metrics", promhttp.Handler())
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.AuthenticateAppAndInjectCtx(db))
+		r.Use(middleware.LogRequests(logger))
+		bindAPIRoutes(r, db, contentStore)
+	})
 }
 
 func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
