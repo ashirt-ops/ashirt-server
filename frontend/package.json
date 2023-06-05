@@ -8,20 +8,20 @@
     "test-file": "mocha"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.4",
+    "@types/chai": "^4.3.5",
     "@types/classnames": "^2.3.1",
     "@types/file-saver": "^2.0.5",
     "@types/lodash": "^4.14.191",
     "@types/mocha": "^10.0.1",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "@types/sinon": "^10.0.14",
+    "@types/sinon": "^10.0.15",
     "@types/sinon-chai": "^3.2.9",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
-    "@typescript-eslint/parser": "^5.54.0",
+    "@typescript-eslint/parser": "^5.59.8",
     "chai": "^4.3.7",
     "css-loader": "^6.7.3",
-    "eslint": "^8.37.0",
+    "eslint": "^8.41.0",
     "eslint-plugin-react": "^7.31.7",
     "eslint-plugin-react-hooks": "^4.6.0",
     "html-webpack-harddisk-plugin": "^2.0.0",
@@ -35,7 +35,7 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "webpack": "5.76",
-    "webpack-cli": "^4.10.0",
+    "webpack-cli": "^5.1.1",
     "webpack-dev-server": "^4.11.0"
   },
   "dependencies": {
