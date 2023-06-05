@@ -227,5 +227,3 @@ func cloneBody(r *http.Request) (io.Reader, func(), error) {
 	}
 	return body, cleanup, nil
 }
-
-type MiddlewareFunc func(http.Handler) http.Handler
