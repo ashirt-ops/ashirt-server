@@ -82,7 +82,7 @@ func Policy(ctx context.Context) policy.Policy {
 	return p
 }
 
-func AuthenticateAppAndInjectCtx(db *database.Connection) func(http.Handler) http.Handler {
+func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			body, cleanup, err := cloneBody(r)
@@ -103,7 +103,7 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) func(http.Handler) htt
 	}
 }
 
-func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session.Store) func(http.Handler) http.Handler {
+func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session.Store) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sess := sessionStore.Read(r)
@@ -227,3 +227,5 @@ func cloneBody(r *http.Request) (io.Reader, func(), error) {
 	}
 	return body, cleanup, nil
 }
+
+type MiddlewareFunc func(http.Handler) http.Handler
