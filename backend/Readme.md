@@ -460,7 +460,7 @@ The details for this service are detailed in [pipeline readme](/backend/pipeline
 
 ## Development Overview
 
-This project utilizes Golang 1.13 (with modules), interfaces with a MySQL database and leverages Chi to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
+This project utilizes Golang 1.20, interfaces with a MySQL database and leverages Chi to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
 
 ### Development Environment
 
