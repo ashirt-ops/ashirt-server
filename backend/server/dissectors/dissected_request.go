@@ -17,10 +17,10 @@ import (
 //
 // Usage Example:
 //
-// // Gorilla Mux
+// // Chi
 //
 //	func(w http.ResponseWriter, r *http.Request) {
-//	  parsedRequest := DissectJSONRequest(r, mux.Vars(r))
+//	  parsedRequest := DissectJSONRequest(r, GenerateUrlParamMap(r))
 //	  input := service.RepeatWordInput{
 //			SomeString: parsedRequest.FromURL("someString").Required(true).AsString()
 //	     Times: parsedRequest.FromQuery("times").OrDefault(2).AsInt64()

@@ -4,7 +4,7 @@
 package authschemes
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 // AuthScheme provides a small interface into interacting with the AShirt backend authentication.
@@ -23,7 +23,7 @@ import (
 // system can use to register custom endpoints. Each router is prefixed with /auth/{name} (as
 // determined by the Name() method)
 type AuthScheme interface {
-	BindRoutes(*mux.Router, AShirtAuthBridge)
+	BindRoutes(chi.Router, AShirtAuthBridge)
 	Name() string
 	FriendlyName() string
 	Flags() []string

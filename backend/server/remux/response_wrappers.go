@@ -38,7 +38,7 @@ func MediaHandler(handler func(*http.Request) (io.Reader, error)) http.Handler {
 // success scenarios, and most error scenarios, json is returned. The exception here is when
 // this project cannot decode/Marshal a JSON message, in which case a plain 500 error with no content
 // is returned.
-func JSONHandler(handler func(*http.Request) (interface{}, error)) http.Handler {
+func JSONHandler(handler func(*http.Request) (interface{}, error)) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var data interface{}
 		var err error

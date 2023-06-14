@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -83,7 +82,7 @@ func Policy(ctx context.Context) policy.Policy {
 	return p
 }
 
-func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
+func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			body, cleanup, err := cloneBody(r)
@@ -104,7 +103,7 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
 	}
 }
 
-func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session.Store) mux.MiddlewareFunc {
+func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session.Store) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sess := sessionStore.Read(r)

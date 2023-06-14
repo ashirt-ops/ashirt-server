@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
@@ -45,7 +45,7 @@ func (RecoveryAuthScheme) Type() string {
 	return constants.Code
 }
 
-func (p RecoveryAuthScheme) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
+func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/generate", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		dr := remux.DissectJSONRequest(r)
 		userSlug := dr.FromBody("userSlug").Required().AsString()

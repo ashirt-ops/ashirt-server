@@ -7,10 +7,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 )
 
-func InjectCSRFTokenHeader() mux.MiddlewareFunc {
+func InjectCSRFTokenHeader() MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("X-CSRF-Token", csrf.Token(r))

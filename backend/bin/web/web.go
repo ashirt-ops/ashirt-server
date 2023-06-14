@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
@@ -86,20 +87,22 @@ func main() {
 		logger.Log("msg", "No Emailer selected")
 	}
 
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
 
-	mux.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
-			CSRFAuthKey:      []byte(config.CSRFAuthKey()),
-			SessionStoreKey:  []byte(config.SessionStoreKey()),
-			UseSecureCookies: true,
-			AuthSchemes:      schemes,
-			Logger:           logger,
-		},
-	)))
+	r.Route("/web", func(r chi.Router) {
+		server.Web(r,
+			db, contentStore, &server.WebConfig{
+				CSRFAuthKey:      []byte(config.CSRFAuthKey()),
+				SessionStoreKey:  []byte(config.SessionStoreKey()),
+				UseSecureCookies: true,
+				AuthSchemes:      schemes,
+				Logger:           logger,
+			},
+		)
+	})
 
 	logger.Log("msg", "starting Web server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), mux)
+	serveErr := http.ListenAndServe(":"+config.Port(), r)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }
 
