@@ -132,6 +132,12 @@ func tryRunServer(logger logging.Logger) error {
 		)
 	})
 
+	r.Route("/api", func(r chi.Router) {
+		server.API(r,
+			db, contentStore, logger,
+		)
+	})
+
 	logger.Log("port", config.Port(), "msg", "Now Serving")
 	return http.ListenAndServe(":"+config.Port(), r)
 }
