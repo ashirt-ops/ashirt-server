@@ -342,10 +342,17 @@ func (a WebAuthn) deleteCredential(userID int64, credentialName string, bridge a
 		return backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
 	}
 
-	results := helpers.Filter(creds, func(cred AShirtWebauthnCredential) bool {
-		return cred.CredentialName != credentialName
-	})
-	encodedCreds, err := json.Marshal(results)
+	var filteredCreds []AShirtWebauthnCredential
+	for i, v := range creds {
+		if v.CredentialName != credentialName {
+			filteredCreds = append(filteredCreds, creds[i])
+		} else {
+			filteredCreds = append(filteredCreds, creds[i+1:]...)
+			break
+		}
+	}
+
+	encodedCreds, err := json.Marshal(filteredCreds)
 	if err != nil {
 		return backend.WrapError("Unable to delete credential", err)
 	}
