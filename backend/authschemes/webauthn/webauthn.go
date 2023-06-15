@@ -388,7 +388,7 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 	} else if info.RegistrationType == LinkCredential {
 		user = makeLinkingWebAuthnUser(info.UserID, info.Username, info.CredentialName)
 	} else { // Add Credential
-		user = makeAddCredentialWebAuthnUser(info.UserID, info.CredentialName, info.Username, info.ExistingCredentials)
+		user = makeAddCredentialWebAuthnUser(info.UserID, info.Username, info.CredentialName, info.ExistingCredentials)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
