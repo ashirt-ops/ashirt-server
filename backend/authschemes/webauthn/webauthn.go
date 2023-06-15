@@ -216,8 +216,13 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 		if err != nil {
 			return nil, backend.WrapError("Unable to validate registration data", err)
 		}
+
+		rawSessionData := bridge.ReadAuthSchemeSession(r)
+		sessionData, _ := rawSessionData.(*webAuthNSessionData)
+
 		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:   byteSliceToI64(data.UserData.UserID),
+			AuthnID:  sessionData.UserData.AuthnID,
 			Username: data.UserData.UserName,
 			JSONData: helpers.Ptr(string(encodedCreds)),
 		})
