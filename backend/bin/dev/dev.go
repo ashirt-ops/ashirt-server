@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
@@ -25,6 +26,7 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/emailservices"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server"
+	"github.com/theparanoids/ashirt-server/backend/session"
 	"github.com/theparanoids/ashirt-server/backend/workers"
 
 	sq "github.com/Masterminds/squirrel"
@@ -48,6 +50,8 @@ func main() {
 		time.Sleep(3 * time.Second)
 	}
 }
+
+var sessionManager *scs.SessionManager
 
 func tryRunServer(logger logging.Logger) error {
 	db, err := database.NewConnection(config.DBUri(), "./migrations")
@@ -120,8 +124,12 @@ func tryRunServer(logger logging.Logger) error {
 
 	r := chi.NewRouter()
 
+	sessionManager = scs.New()
+	// TODO TN is it okay to get rid of this?
+	sessionManager.Store = session.New(db.DB)
+
 	r.Route("/web", func(r chi.Router) {
-		server.Web(r,
+		server.Web(r, sessionManager,
 			db, contentStore, &server.WebConfig{
 				CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
 				SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
@@ -133,7 +141,9 @@ func tryRunServer(logger logging.Logger) error {
 	})
 
 	logger.Log("port", config.Port(), "msg", "Now Serving")
-	return http.ListenAndServe(":"+config.Port(), r)
+	// return http.ListenAndServe(":"+config.Port(), r)
+	return http.ListenAndServe(":"+config.Port(), sessionManager.LoadAndSave(r))
+	// logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }
 
 func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, error) {

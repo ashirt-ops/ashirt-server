@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
@@ -18,9 +19,12 @@ func initBridge(t *testing.T) authschemes.AShirtAuthBridge {
 		DatabaseName: helpers.Ptr("local-auth-test-db"),
 	})
 	seeding.ApplySeeding(t, seeding.HarryPotterSeedData, db)
-	sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
-	require.NoError(t, err)
-	return authschemes.MakeAuthBridge(db, sessionStore, "local", "local")
+	sessionManager := scs.New()
+	sessionManager.Store = session.New(db.DB)
+	sessionManager.Lifetime = time.Hour
+	// sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
+	// require.NoError(t, err)
+	return authschemes.MakeAuthBridge(db, sessionManager, "local", "local")
 }
 
 func TestReadUserTotpStatus(t *testing.T) {

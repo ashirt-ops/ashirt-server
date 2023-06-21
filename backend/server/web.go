@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/csrf"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -56,18 +57,15 @@ func (c *WebConfig) validate() error {
 	return nil
 }
 
-func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store, config *WebConfig) {
+func Web(r chi.Router, sessionManager *scs.SessionManager, db *database.Connection, contentStore contentstore.Store, config *WebConfig) {
 	if err := config.validate(); err != nil {
 		panic(err)
 	}
-	sessionStore, err := session.NewStore(db, session.StoreOptions{
-		SessionDuration:  30 * 24 * time.Hour,
-		UseSecureCookies: config.UseSecureCookies,
-		Key:              config.SessionStoreKey,
-	})
-	if err != nil {
-		panic(err)
-	}
+	// 	Key:              config.SessionStoreKey,
+	// TODO TN what was key and how to pass it along here?
+	sessionManager.Store = session.New(db.DB)
+	sessionManager.Lifetime = 30 * 24 * time.Hour
+	sessionManager.Cookie.Secure = config.UseSecureCookies
 
 	r.Handle("/metrics", promhttp.Handler())
 	r.Group(func(r chi.Router) {
@@ -79,12 +77,12 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 				return nil, backend.CSRFErr(csrf.FailureReason(r))
 			}))))
 		r.Use(middleware.InjectCSRFTokenHeader())
-		r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionStore))
+		r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionManager))
 
 		supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))
 		for i, scheme := range config.AuthSchemes {
 			r.Route("/auth/"+scheme.Name(), func(r chi.Router) {
-				scheme.BindRoutes(r.(chi.Router), authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
+				scheme.BindRoutes(r.(chi.Router), authschemes.MakeAuthBridge(db, sessionManager, scheme.Name(), scheme.Type()))
 			})
 			supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
 				SchemeName:  scheme.FriendlyName(),
@@ -103,17 +101,15 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 			}
 		}
 
-		bindWebRoutes(r, db, contentStore, sessionStore, &authsWithOutRecovery)
+		bindWebRoutes(r, db, contentStore, sessionManager, &authsWithOutRecovery)
 	})
 }
 
-func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store, sessionStore *session.Store, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
+func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store, sessionManager *scs.SessionManager, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
 	route(r, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jsonHandler(func(r *http.Request) (interface{}, error) {
-			err := sessionStore.Delete(w, r)
-			if err != nil {
-				return nil, backend.WrapError("Unable to delete session", err)
-			}
+			// TODO TN figure out what the key will be and replace hardcoded string
+			sessionManager.Remove(r.Context(), "CHANGE_THIS")
 			return nil, nil
 		}).ServeHTTP(w, r)
 	}))

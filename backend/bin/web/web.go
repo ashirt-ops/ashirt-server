@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
@@ -29,6 +30,9 @@ type SchemeError struct {
 	name string
 	err  error
 }
+
+// TODO TN is there anyway I can not have to do this part in web/dev/api?
+var sessionManager *scs.SessionManager
 
 func main() {
 	err := config.LoadWebConfig()
@@ -89,8 +93,17 @@ func main() {
 
 	r := chi.NewRouter()
 
+	sessionManager = scs.New()
+	// TODO TN - should I add this back?
+	// TODO TN I do't ned this here right?
+	// sessionManager.Store = session.New(db.DB)
+	// TODO TN what do I do re the custom attributes?
+	// sessionManager.Lifetime = 24 * time.Hour
+	// TODO TN - should this be the ID? or user ID?
+	// sessionManager.Put(r.Context, , backend.SessionValue)
+
 	r.Route("/web", func(r chi.Router) {
-		server.Web(r,
+		server.Web(r, sessionManager,
 			db, contentStore, &server.WebConfig{
 				CSRFAuthKey:      []byte(config.CSRFAuthKey()),
 				SessionStoreKey:  []byte(config.SessionStoreKey()),
@@ -101,8 +114,13 @@ func main() {
 		)
 	})
 
+	// TODO create New method I guess?
+	// sessionManager.Store = mysqlstore.New(db)
+	// TODO TN what do I do re the custom attributes?
+	// sessionManager.Lifetime = 24 * time.Hour
+
 	logger.Log("msg", "starting Web server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), r)
+	serveErr := http.ListenAndServe(":"+config.Port(), sessionManager.LoadAndSave(r))
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }
 

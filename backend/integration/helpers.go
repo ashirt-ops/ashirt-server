@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
@@ -47,9 +48,10 @@ func NewTester(t *testing.T) *Tester {
 	commonLogger := logging.SetupStdoutLogging()
 
 	s := chi.NewRouter()
+	sessionManager := scs.New()
 
 	s.Route("/web", func(r chi.Router) {
-		server.Web(r,
+		server.Web(r, sessionManager,
 			db, contentStore, &server.WebConfig{
 				CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
 				SessionStoreKey: []byte("session-store-key-for-integration-tests"),
@@ -69,7 +71,7 @@ func NewTester(t *testing.T) *Tester {
 
 	return &Tester{
 		t: t,
-		s: httptest.NewServer(s),
+		s: httptest.NewServer(sessionManager.LoadAndSave(s)),
 	}
 }
 

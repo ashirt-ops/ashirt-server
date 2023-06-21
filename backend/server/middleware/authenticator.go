@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -103,10 +104,10 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 	}
 }
 
-func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session.Store) MiddlewareFunc {
+func AuthenticateUserAndInjectCtx(db *database.Connection, sessionManager *scs.SessionManager) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			sess := sessionStore.Read(r)
+			sess := session.ReadWrapper(sessionManager, r)
 			if sess.UserID == 0 {
 				next.ServeHTTP(w, r)
 				return

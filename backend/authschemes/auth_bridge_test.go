@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -60,7 +61,7 @@ func TestCreateNewUser(t *testing.T) {
 type testSession struct{ Some string }
 
 func TestLoginUser(t *testing.T) {
-	_, sessionStore, bridge := initBridgeTest(t)
+	_, sessionManager, bridge := initBridgeTest(t)
 
 	gob.Register(&testSession{})
 
@@ -68,11 +69,11 @@ func TestLoginUser(t *testing.T) {
 
 	browser := &testBrowser{}
 	w, r := browser.newRequest()
-	err := bridge.LoginUser(w, r, userID, &testSession{Some: "data"})
+	err := bridge.LoginUser(w, r, userID, &testSession{Some: "CHANGE_THIS"})
 	require.NoError(t, err)
 
 	_, r = browser.newRequest()
-	session := sessionStore.Read(r)
+	session := session.ReadWrapper(sessionManager, r)
 	require.NoError(t, err)
 	require.Equal(t, userID, session.UserID)
 	require.Equal(t, "data", session.AuthSchemeData.(*testSession).Some)
@@ -92,7 +93,7 @@ func TestAddToSession(t *testing.T) {
 }
 
 func TestDeleteSession(t *testing.T) {
-	_, sessionStore, bridge := initBridgeTest(t)
+	_, sessionManager, bridge := initBridgeTest(t)
 
 	gob.Register(&testSession{})
 
@@ -107,7 +108,7 @@ func TestDeleteSession(t *testing.T) {
 	bridge.DeleteSession(w, r)
 
 	_, r = browser.newRequest()
-	session := sessionStore.Read(r)
+	session := session.ReadWrapper(sessionManager, r)
 	require.Equal(t, int64(0), session.UserID)
 }
 
@@ -250,16 +251,21 @@ func TestFindUserAuthsByEmail(t *testing.T) {
 	require.Equal(t, expectedAuth, foundAuths[0])
 }
 
-func initBridgeTest(t *testing.T) (*database.Connection, *session.Store, authschemes.AShirtAuthBridge) {
+func initBridgeTest(t *testing.T) (*database.Connection, *scs.SessionManager, authschemes.AShirtAuthBridge) {
 	db := database.NewTestConnection(t, "authschemes-test-db")
 
 	if logging.GetSystemLogger() == nil {
 		logging.SetupStdoutLogging()
 	}
 
-	sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
-	require.NoError(t, err)
-	return db, sessionStore, authschemes.MakeAuthBridge(db, sessionStore, "test", "test-type")
+	sessionManager := scs.New()
+	sessionManager.Store = session.New(db.DB)
+	sessionManager.Lifetime = time.Hour
+
+	// TODO TN how much do these optoins matter?
+	// sessionManager, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
+	// require.NoError(t, err)
+	return db, sessionManager, authschemes.MakeAuthBridge(db, sessionManager, "test", "test-type")
 }
 
 func createDummyUser(t *testing.T, bridge authschemes.AShirtAuthBridge, extra string) int64 {

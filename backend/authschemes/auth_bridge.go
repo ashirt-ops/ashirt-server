@@ -6,10 +6,13 @@ package authschemes
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
@@ -26,17 +29,19 @@ import (
 // (the AuthScheme) and persistent user/session management
 type AShirtAuthBridge struct {
 	db             *database.Connection
-	sessionStore   *session.Store
+	sessionManager *scs.SessionManager
 	authSchemeName string
 	authSchemeType string
 }
 
+var sessionManager *scs.SessionManager
+
 // MakeAuthBridge constructs returns a set of functions to interact with the underlying AShirt
 // authentication scheme
-func MakeAuthBridge(db *database.Connection, sessionStore *session.Store, authSchemeName, authSchemeType string) AShirtAuthBridge {
+func MakeAuthBridge(db *database.Connection, sessionManager *scs.SessionManager, authSchemeName, authSchemeType string) AShirtAuthBridge {
 	return AShirtAuthBridge{
 		db:             db,
-		sessionStore:   sessionStore,
+		sessionManager: sessionManager,
 		authSchemeName: authSchemeName,
 		authSchemeType: authSchemeType,
 	}
@@ -51,14 +56,21 @@ func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (*dtos.CreateUserO
 // SetAuthSchemeSession sets authscheme specific session data to the current user session. Session data should
 // be a struct and registered with `gob.Register` in an init function of the authscheme
 func (ah AShirtAuthBridge) SetAuthSchemeSession(w http.ResponseWriter, r *http.Request, data interface{}) error {
-	s := ah.sessionStore.Read(r)
+	s := session.ReadWrapper(ah.sessionManager, r)
 	s.AuthSchemeData = data
-	return ah.sessionStore.Set(w, r, s)
+	jsonData, err := json.Marshal(s)
+	if err != nil {
+		fmt.Println("Error:", err)
+		// TODO TN what to return here?
+	}
+	ah.sessionManager.Put(r.Context(), "CHANGE_THIS", jsonData)
+	// TODO TN can this error out?
+	return nil
 }
 
 // ReadAuthSchemeSession retrieves previously saved session data set by SetAuthSchemeSession
 func (ah AShirtAuthBridge) ReadAuthSchemeSession(r *http.Request) interface{} {
-	return ah.sessionStore.Read(r).AuthSchemeData
+	return session.ReadWrapper(ah.sessionManager, r).AuthSchemeData
 }
 
 // LoginUser denotes that a user shall be logged in.
@@ -71,11 +83,24 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 
 	ah.updateLastLogin(r, userID)
 
-	return ah.sessionStore.Set(w, r, &session.Session{
-		UserID:         userID,
-		IsAdmin:        ah.isAdmin(r, userID),
+	// TODO - should I just have a User ID and IsAdmin on all of the authScheme data types?
+	// OR, do I need to even store this data? I can get userId form teh session table, and I could also add isAdmin there too
+	// ah.sessionManager.Put(r.Context(), "CHANGE_THIS", "lolx")
+	data := session.SessionData{
+		UserID:  userID,
+		IsAdmin: ah.isAdmin(r, userID),
+		// TODO TN make this not nil
 		AuthSchemeData: authSchemeSessionData,
-	})
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error:", err)
+		// TODO TN what to return here?
+	}
+	ah.sessionManager.Put(r.Context(), "CHANGE_THIS", jsonData)
+	// TODO TN can this error out?
+	return nil
 }
 
 func (ah AShirtAuthBridge) updateLastLogin(r *http.Request, userID int64) {
@@ -129,7 +154,9 @@ func (ah AShirtAuthBridge) GetUserFromID(userID int64) (models.User, error) {
 // DeleteSession removes a user's session. Useful in situtations where authentication fails,
 // and we want to treat the user as not-logged-in
 func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request) error {
-	return ah.sessionStore.Delete(w, r)
+	// TODO TN figure this out
+	// return ah.sessionManager.Delete(w, r)
+	return nil
 }
 
 // UserAuthData is a small structure capturing data relevant to a user for authentication purposes
