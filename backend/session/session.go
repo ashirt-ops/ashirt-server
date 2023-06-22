@@ -4,13 +4,12 @@ import (
 	"encoding/gob"
 )
 
-// TODO TN should this be changed back to session?
-type SessionData struct {
+type Session struct {
 	UserID         int64
 	IsAdmin        bool
 	AuthSchemeData interface{}
 }
 
 func init() {
-	gob.Register(&SessionData{})
+	gob.Register(&Session{})
 }

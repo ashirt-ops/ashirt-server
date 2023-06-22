@@ -41,22 +41,22 @@ type SessionRow struct {
 }
 
 // TODO TN make a write wrapper for sessionMAnager.Put?
-func GetSession(sessionManager *scs.SessionManager, r *http.Request) *SessionData {
+func GetSession(sessionManager *scs.SessionManager, r *http.Request) *Session {
 	strData := sessionManager.Get(r.Context(), "sess_key")
 
-	var session SessionData
+	var session Session
 	if jsonData, ok := strData.([]byte); ok {
 		err := json.Unmarshal(jsonData, &session)
 		if err != nil {
 			fmt.Println("Error:", err)
-			return &SessionData{}
+			return &Session{}
 		} else {
 			return &session
 		}
 	}
 
 	// TODO TN figure out how to get to this part?? maybe only happens on error?
-	return &SessionData{}
+	return &Session{}
 }
 
 // New returns a new MySQLStore instance, with a background cleanup goroutine

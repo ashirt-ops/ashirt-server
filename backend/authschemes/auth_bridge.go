@@ -86,7 +86,7 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 	// TODO - should I just have a User ID and IsAdmin on all of the authScheme data types?
 	// OR, do I need to even store this data? I can get userId form teh session table, and I could also add isAdmin there too
 	// ah.sessionManager.Put(r.Context(), "CHANGE_THIS", "lolx")
-	data := session.SessionData{
+	data := session.Session{
 		UserID:  userID,
 		IsAdmin: ah.isAdmin(r, userID),
 		// TODO TN make this not nil
@@ -99,10 +99,6 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 		// TODO TN what to return here?
 	}
 
-	// saveData := session.SessionToSave{
-	// 	UserID:      userID,
-	// 	SessionData: jsonData,
-	// }
 	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
 	// TODO TN can this error out?
 	return nil
