@@ -6,7 +6,6 @@ package session
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -40,22 +39,17 @@ type SessionRow struct {
 	ExpiresAt  time.Time `json:"expires_at"`
 }
 
-// TODO TN make a write wrapper for sessionMAnager.Put?
 func GetSession(sessionManager *scs.SessionManager, r *http.Request) *Session {
 	sessionData := sessionManager.Get(r.Context(), "sess_key")
 
 	var session Session
 	if jsonData, ok := sessionData.([]byte); ok {
 		err := json.Unmarshal(jsonData, &session)
-		if err != nil {
-			fmt.Println("Error:", err)
-			return &Session{}
-		} else {
+		if err == nil {
 			return &session
 		}
 	}
 
-	// TODO TN figure out how to get to this part?? maybe only happens on error?
 	return &Session{}
 }
 
@@ -100,7 +94,6 @@ func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 	}
 	byteData := []byte(sess.Data)
 
-	// TODO TN - should I save byte data instead of convertig to string onlhy to decode?
 	return byteData, true, nil
 }
 
