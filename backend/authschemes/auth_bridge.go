@@ -33,8 +33,6 @@ type AShirtAuthBridge struct {
 	authSchemeType string
 }
 
-var sessionManager *scs.SessionManager
-
 // MakeAuthBridge constructs returns a set of functions to interact with the underlying AShirt
 // authentication scheme
 func MakeAuthBridge(db *database.Connection, sessionManager *scs.SessionManager, authSchemeName, authSchemeType string) AShirtAuthBridge {
