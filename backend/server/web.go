@@ -109,7 +109,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 	route(r, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jsonHandler(func(r *http.Request) (interface{}, error) {
 			// TODO TN figure out what the key will be and replace hardcoded string
-			sessionManager.Remove(r.Context(), "CHANGE_THIS")
+			sessionManager.Remove(r.Context(), "sess_key")
 			return nil, nil
 		}).ServeHTTP(w, r)
 	}))

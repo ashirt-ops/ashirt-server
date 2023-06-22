@@ -69,11 +69,11 @@ func TestLoginUser(t *testing.T) {
 
 	browser := &testBrowser{}
 	w, r := browser.newRequest()
-	err := bridge.LoginUser(w, r, userID, &testSession{Some: "CHANGE_THIS"})
+	err := bridge.LoginUser(w, r, userID, &testSession{Some: "sess_key"})
 	require.NoError(t, err)
 
 	_, r = browser.newRequest()
-	session := session.ReadWrapper(sessionManager, r)
+	session := session.GetSession(sessionManager, r)
 	require.NoError(t, err)
 	require.Equal(t, userID, session.UserID)
 	require.Equal(t, "data", session.AuthSchemeData.(*testSession).Some)
@@ -108,7 +108,7 @@ func TestDeleteSession(t *testing.T) {
 	bridge.DeleteSession(w, r)
 
 	_, r = browser.newRequest()
-	session := session.ReadWrapper(sessionManager, r)
+	session := session.GetSession(sessionManager, r)
 	require.Equal(t, int64(0), session.UserID)
 }
 

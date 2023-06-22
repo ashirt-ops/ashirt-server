@@ -43,11 +43,8 @@ type SessionRow struct {
 }
 
 // TODO TN make a write wrapper for sessionMAnager.Put?
-// TODO TN CHANGE NAME
-func ReadWrapper(sessionManager *scs.SessionManager, r *http.Request) *SessionData {
-	// TODO TN change the key
-	// fmt.Println("____!!!_____in read wrapper")
-	strData := sessionManager.Get(r.Context(), "CHANGE_THIS")
+func GetSession(sessionManager *scs.SessionManager, r *http.Request) *SessionData {
+	strData := sessionManager.Get(r.Context(), "sess_key")
 
 	var session SessionData
 	if jsonData, ok := strData.([]byte); ok {
@@ -118,7 +115,38 @@ func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 // time are updated.
 // TODO TN - what is current expirity time? and how to change new library to use it?
 func (m *MySQLStore) Commit(id string, b []byte, expiry time.Time) error {
-	_, err := m.DB.Exec("INSERT INTO sessions (id, user_id, session_data, expires_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE session_data = VALUES(session_data), expires_at = VALUES(expires_at)", id, 3, string(b), expiry.UTC())
+
+	// aux := &struct {
+	// 	Deadline time.Time
+	// 	Values   map[string]interface{}
+	// }{}
+
+	// r := bytes.NewReader(b)
+	// if err := gob.NewDecoder(r).Decode(&aux); err != nil {
+	// 	fmt.Println("Error in gob decode: ", err)
+	// }
+
+	// return aux.Deadline, aux.Values, nil
+
+	// var session SessionData
+	// if jsonData, ok := b.([]byte); ok {
+	// 	err := json.Unmarshal(jsonData, &session)
+	// 	if err != nil {
+	// 		fmt.Println("Error:", err)
+	// 		return &SessionData{}
+	// 	} else {
+	// 		return &session
+	// 	}
+	// }
+
+	// data := SessionData{}
+
+	// err := json.Unmarshal(aux.Values, &data)
+	// if err != nil {
+	// 	fmt.Println("Error:", err)
+	// 	// TODO TN what to return here?
+	// }
+	_, err := m.DB.Exec("INSERT INTO sessions (id, user_id, session_data, expires_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE session_data = VALUES(session_data), expires_at = VALUES(expires_at)", id, nil, string(b), expiry.UTC())
 	if err != nil {
 		return err
 	}

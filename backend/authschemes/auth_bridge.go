@@ -56,21 +56,21 @@ func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (*dtos.CreateUserO
 // SetAuthSchemeSession sets authscheme specific session data to the current user session. Session data should
 // be a struct and registered with `gob.Register` in an init function of the authscheme
 func (ah AShirtAuthBridge) SetAuthSchemeSession(w http.ResponseWriter, r *http.Request, data interface{}) error {
-	s := session.ReadWrapper(ah.sessionManager, r)
+	s := session.GetSession(ah.sessionManager, r)
 	s.AuthSchemeData = data
 	jsonData, err := json.Marshal(s)
 	if err != nil {
 		fmt.Println("Error:", err)
 		// TODO TN what to return here?
 	}
-	ah.sessionManager.Put(r.Context(), "CHANGE_THIS", jsonData)
+	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
 	// TODO TN can this error out?
 	return nil
 }
 
 // ReadAuthSchemeSession retrieves previously saved session data set by SetAuthSchemeSession
 func (ah AShirtAuthBridge) ReadAuthSchemeSession(r *http.Request) interface{} {
-	return session.ReadWrapper(ah.sessionManager, r).AuthSchemeData
+	return session.GetSession(ah.sessionManager, r).AuthSchemeData
 }
 
 // LoginUser denotes that a user shall be logged in.
@@ -98,7 +98,12 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 		fmt.Println("Error:", err)
 		// TODO TN what to return here?
 	}
-	ah.sessionManager.Put(r.Context(), "CHANGE_THIS", jsonData)
+
+	// saveData := session.SessionToSave{
+	// 	UserID:      userID,
+	// 	SessionData: jsonData,
+	// }
+	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
 	// TODO TN can this error out?
 	return nil
 }

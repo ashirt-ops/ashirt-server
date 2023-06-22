@@ -107,7 +107,7 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 func AuthenticateUserAndInjectCtx(db *database.Connection, sessionManager *scs.SessionManager) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			sess := session.ReadWrapper(sessionManager, r)
+			sess := session.GetSession(sessionManager, r)
 			if sess.UserID == 0 {
 				next.ServeHTTP(w, r)
 				return
