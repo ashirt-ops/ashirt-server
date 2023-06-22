@@ -105,7 +105,7 @@ func TestDeleteSession(t *testing.T) {
 	require.NoError(t, err)
 
 	w, r = browser.newRequest()
-	bridge.DeleteSession(w, r)
+	bridge.DeleteSession(r)
 
 	_, r = browser.newRequest()
 	session := session.GetSession(sessionManager, r)

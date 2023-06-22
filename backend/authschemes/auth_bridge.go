@@ -79,7 +79,7 @@ func (ah AShirtAuthBridge) createSession(r *http.Request, s interface{}) error {
 // In addition to the required userID, a user can also provide custom authscheme specific session data
 func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, userID int64, authSchemeSessionData interface{}) error {
 	if !(ah.isAccountEnabled(r, userID)) {
-		ah.DeleteSession(w, r)
+		ah.DeleteSession(r)
 		return backend.WrapError("Unable to login user", backend.AccountDisabled())
 	}
 
@@ -147,10 +147,8 @@ func (ah AShirtAuthBridge) GetUserFromID(userID int64) (models.User, error) {
 
 // DeleteSession removes a user's session. Useful in situtations where authentication fails,
 // and we want to treat the user as not-logged-in
-func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request) error {
-	// TODO TN figure this out
-	// return ah.sessionManager.Delete(w, r)
-	return nil
+func (ah AShirtAuthBridge) DeleteSession(r *http.Request) {
+	ah.sessionManager.Remove(r.Context(), "sess_key")
 }
 
 // UserAuthData is a small structure capturing data relevant to a user for authentication purposes
