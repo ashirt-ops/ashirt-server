@@ -94,9 +94,6 @@ func main() {
 	r := chi.NewRouter()
 
 	sessionManager = scs.New()
-	// TODO TN - should I add this back?
-	// TODO TN I do't ned this here right?
-	// sessionManager.Store = session.New(db.DB)
 
 	r.Route("/web", func(r chi.Router) {
 		server.Web(r, sessionManager,

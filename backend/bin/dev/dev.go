@@ -26,7 +26,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/emailservices"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/server"
-	"github.com/theparanoids/ashirt-server/backend/session"
 	"github.com/theparanoids/ashirt-server/backend/workers"
 
 	sq "github.com/Masterminds/squirrel"
@@ -125,8 +124,6 @@ func tryRunServer(logger logging.Logger) error {
 	r := chi.NewRouter()
 
 	sessionManager = scs.New()
-	// TODO TN is it okay to get rid of this?
-	sessionManager.Store = session.New(db.DB)
 
 	r.Route("/web", func(r chi.Router) {
 		server.Web(r, sessionManager,
