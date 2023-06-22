@@ -19,24 +19,8 @@ type MySQLStore struct {
 	stopCleanup chan bool
 }
 
-// TODO TN should I be using SEssoin from Models.Go?
-// I think I have to make id into a string because of the underlying store
-// type SessionRow struct {
-// 	Id         string
-// 	UserID     *int64
-// 	Data       string
-// 	CreatedAt  time.Time
-// 	ModifiedAt time.Time
-// 	ExpiresAt  time.Time
-// }
-
 type SessionRow struct {
-	Id         string    `json:"id"`
-	UserID     *int64    `json:"user_id"`
-	Data       string    `json:"session_data"`
-	CreatedAt  time.Time `json:"created_at"`
-	ModifiedAt time.Time `json:"modified_at"`
-	ExpiresAt  time.Time `json:"expires_at"`
+	Data string `json:"session_data"`
 }
 
 func GetSession(sessionManager *scs.SessionManager, r *http.Request) *Session {
@@ -82,11 +66,8 @@ func NewWithCleanupInterval(db *sql.DB, cleanupInterval time.Duration) *MySQLSto
 
 func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 	sess := SessionRow{}
-	// TODO TN - any downside or errors that will come about because of getting all of this data?
-	// TODO TN - I don't use any of this data AFAIK - maybe I shouldn't select it?
-	// TODO TN - should we delete user_id since I'm not using it?
-	row := m.DB.QueryRow("SELECT id, user_id, session_data, created_at, modified_at, expires_at FROM sessions WHERE id = ? AND UTC_TIMESTAMP(6) < expires_at", id)
-	err := row.Scan(&sess.Id, &sess.UserID, &sess.Data, &sess.CreatedAt, &sess.ModifiedAt, &sess.ExpiresAt)
+	row := m.DB.QueryRow("SELECT session_data FROM sessions WHERE id = ? AND UTC_TIMESTAMP(6) < expires_at", id)
+	err := row.Scan(&sess.Data)
 	if err == sql.ErrNoRows {
 		return nil, false, nil
 	} else if err != nil {
@@ -116,6 +97,7 @@ func (m *MySQLStore) Delete(id string) error {
 	return err
 }
 
+// TODO TN - do I need this?
 // All returns a map containing the id and data for all active (i.e.
 // not expired) sessions in the MySQLStore instance.
 func (m *MySQLStore) All() (map[string][]byte, error) {
@@ -128,7 +110,6 @@ func (m *MySQLStore) All() (map[string][]byte, error) {
 	sessions := make(map[string][]byte)
 
 	for rows.Next() {
-		// TODO TN problem that this is called data and not session_data?
 		var (
 			id     string
 			userID int64
