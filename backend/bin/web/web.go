@@ -31,7 +31,6 @@ type SchemeError struct {
 	err  error
 }
 
-// TODO TN is there anyway I can not have to do this part in web/dev/api?
 var sessionManager *scs.SessionManager
 
 func main() {
