@@ -8,7 +8,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -60,11 +59,9 @@ func (ah AShirtAuthBridge) SetAuthSchemeSession(w http.ResponseWriter, r *http.R
 	s.AuthSchemeData = data
 	jsonData, err := json.Marshal(s)
 	if err != nil {
-		fmt.Println("Error:", err)
-		// TODO TN what to return here?
+		return backend.WrapError("Error marshalling session data when setting session", err)
 	}
 	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
-	// TODO TN can this error out?
 	return nil
 }
 
@@ -83,24 +80,18 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 
 	ah.updateLastLogin(r, userID)
 
-	// TODO - should I just have a User ID and IsAdmin on all of the authScheme data types?
-	// OR, do I need to even store this data? I can get userId form teh session table, and I could also add isAdmin there too
-	// ah.sessionManager.Put(r.Context(), "CHANGE_THIS", "lolx")
 	data := session.Session{
-		UserID:  userID,
-		IsAdmin: ah.isAdmin(r, userID),
-		// TODO TN make this not nil
+		UserID:         userID,
+		IsAdmin:        ah.isAdmin(r, userID),
 		AuthSchemeData: authSchemeSessionData,
 	}
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		fmt.Println("Error:", err)
-		// TODO TN what to return here?
+		return backend.WrapError("Unable to marshal session data when logging in", err)
 	}
 
 	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
-	// TODO TN can this error out?
 	return nil
 }
 
