@@ -262,9 +262,6 @@ func initBridgeTest(t *testing.T) (*database.Connection, *scs.SessionManager, au
 	sessionManager.Store = session.New(db.DB)
 	sessionManager.Lifetime = time.Hour
 
-	// TODO TN how much do these optoins matter?
-	// sessionManager, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
-	// require.NoError(t, err)
 	return db, sessionManager, authschemes.MakeAuthBridge(db, sessionManager, "test", "test-type")
 }
 

@@ -61,8 +61,6 @@ func Web(r chi.Router, sessionManager *scs.SessionManager, db *database.Connecti
 	if err := config.validate(); err != nil {
 		panic(err)
 	}
-	// 	Key:              config.SessionStoreKey,
-	// TODO TN what was key and how to pass it along here?
 	sessionManager.Store = session.New(db.DB)
 	sessionManager.Lifetime = 30 * 24 * time.Hour
 	sessionManager.Cookie.Secure = config.UseSecureCookies
