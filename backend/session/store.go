@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
@@ -18,7 +17,6 @@ import (
 // MySQLStore represents the session store.
 type MySQLStore struct {
 	*sql.DB
-	version     string
 	stopCleanup chan bool
 }
 
@@ -74,8 +72,7 @@ func New(db *sql.DB) *MySQLStore {
 // from running (i.e. expired sessions will not be removed).
 func NewWithCleanupInterval(db *sql.DB, cleanupInterval time.Duration) *MySQLStore {
 	m := &MySQLStore{
-		DB:      db,
-		version: getVersion(db),
+		DB: db,
 	}
 
 	if cleanupInterval > 0 {
@@ -89,13 +86,11 @@ func NewWithCleanupInterval(db *sql.DB, cleanupInterval time.Duration) *MySQLSto
 // If the session id is not found or is expired, the returned exists flag will
 // be set to false.
 
-// TODO TN figure out where to put options now?
-
-// TODO TN this has to be a string because of the underlying store, what to change?
-// OR we could update DB table I guess?
 func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 	sess := SessionRow{}
 	// TODO TN - any downside or errors that will come about because of getting all of this data?
+	// TODO TN - I don't use any of this data AFAIK - maybe I shouldn't select it?
+	// TODO TN - should we delete user_id since I'm not using it?
 	row := m.DB.QueryRow("SELECT id, user_id, session_data, created_at, modified_at, expires_at FROM sessions WHERE id = ? AND UTC_TIMESTAMP(6) < expires_at", id)
 	err := row.Scan(&sess.Id, &sess.UserID, &sess.Data, &sess.CreatedAt, &sess.ModifiedAt, &sess.ExpiresAt)
 	if err == sql.ErrNoRows {
@@ -107,7 +102,6 @@ func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 
 	// TODO TN - should I save byte data instead of convertig to string onlhy to decode?
 	return byteData, true, nil
-	// return []byte(sess), true, nil
 }
 
 // Commit adds a session id and data to the MySQLStore instance with the given
@@ -115,37 +109,6 @@ func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 // time are updated.
 // TODO TN - what is current expirity time? and how to change new library to use it?
 func (m *MySQLStore) Commit(id string, b []byte, expiry time.Time) error {
-
-	// aux := &struct {
-	// 	Deadline time.Time
-	// 	Values   map[string]interface{}
-	// }{}
-
-	// r := bytes.NewReader(b)
-	// if err := gob.NewDecoder(r).Decode(&aux); err != nil {
-	// 	fmt.Println("Error in gob decode: ", err)
-	// }
-
-	// return aux.Deadline, aux.Values, nil
-
-	// var session SessionData
-	// if jsonData, ok := b.([]byte); ok {
-	// 	err := json.Unmarshal(jsonData, &session)
-	// 	if err != nil {
-	// 		fmt.Println("Error:", err)
-	// 		return &SessionData{}
-	// 	} else {
-	// 		return &session
-	// 	}
-	// }
-
-	// data := SessionData{}
-
-	// err := json.Unmarshal(aux.Values, &data)
-	// if err != nil {
-	// 	fmt.Println("Error:", err)
-	// 	// TODO TN what to return here?
-	// }
 	_, err := m.DB.Exec("INSERT INTO sessions (id, user_id, session_data, expires_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE session_data = VALUES(session_data), expires_at = VALUES(expires_at)", id, nil, string(b), expiry.UTC())
 	if err != nil {
 		return err
@@ -231,15 +194,4 @@ func (m *MySQLStore) StopCleanup() {
 func (m *MySQLStore) deleteExpired() error {
 	_, err := m.DB.Exec("DELETE FROM sessions WHERE expires_at < UTC_TIMESTAMP(6)")
 	return err
-}
-
-// TODO TN delete this?
-func getVersion(db *sql.DB) string {
-	var version string
-	row := db.QueryRow("SELECT VERSION()")
-	err := row.Scan(&version)
-	if err != nil {
-		return ""
-	}
-	return strings.Split(version, "-")[0]
 }

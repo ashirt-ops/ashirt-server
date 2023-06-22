@@ -108,7 +108,6 @@ func Web(r chi.Router, sessionManager *scs.SessionManager, db *database.Connecti
 func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store, sessionManager *scs.SessionManager, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
 	route(r, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jsonHandler(func(r *http.Request) (interface{}, error) {
-			// TODO TN figure out what the key will be and replace hardcoded string
 			sessionManager.Remove(r.Context(), "sess_key")
 			return nil, nil
 		}).ServeHTTP(w, r)
