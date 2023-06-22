@@ -55,17 +55,24 @@ func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (*dtos.CreateUserO
 func (ah AShirtAuthBridge) SetAuthSchemeSession(w http.ResponseWriter, r *http.Request, data interface{}) error {
 	s := session.GetSession(ah.sessionManager, r)
 	s.AuthSchemeData = data
-	jsonData, err := json.Marshal(s)
-	if err != nil {
-		return backend.WrapError("Error marshalling session data when setting session", err)
+	if err := ah.createSession(r, &data); err != nil {
+		return backend.WrapError("Unable to create session when setting session", err)
 	}
-	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
 	return nil
 }
 
 // ReadAuthSchemeSession retrieves previously saved session data set by SetAuthSchemeSession
 func (ah AShirtAuthBridge) ReadAuthSchemeSession(r *http.Request) interface{} {
 	return session.GetSession(ah.sessionManager, r).AuthSchemeData
+}
+
+func (ah AShirtAuthBridge) createSession(r *http.Request, s interface{}) error {
+	jsonData, err := json.Marshal(s)
+	if err != nil {
+		return backend.WrapError("Error marshalling session data", err)
+	}
+	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
+	return nil
 }
 
 // LoginUser denotes that a user shall be logged in.
@@ -84,12 +91,9 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 		AuthSchemeData: authSchemeSessionData,
 	}
 
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return backend.WrapError("Unable to marshal session data when logging in", err)
+	if err := ah.createSession(r, &data); err != nil {
+		return backend.WrapError("Unable to create session when logging in", err)
 	}
-
-	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
 	return nil
 }
 
