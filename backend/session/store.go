@@ -42,10 +42,10 @@ type SessionRow struct {
 
 // TODO TN make a write wrapper for sessionMAnager.Put?
 func GetSession(sessionManager *scs.SessionManager, r *http.Request) *Session {
-	strData := sessionManager.Get(r.Context(), "sess_key")
+	sessionData := sessionManager.Get(r.Context(), "sess_key")
 
 	var session Session
-	if jsonData, ok := strData.([]byte); ok {
+	if jsonData, ok := sessionData.([]byte); ok {
 		err := json.Unmarshal(jsonData, &session)
 		if err != nil {
 			fmt.Println("Error:", err)
@@ -109,7 +109,7 @@ func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 // time are updated.
 // TODO TN - what is current expirity time? and how to change new library to use it?
 func (m *MySQLStore) Commit(id string, b []byte, expiry time.Time) error {
-	_, err := m.DB.Exec("INSERT INTO sessions (id, user_id, session_data, expires_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE session_data = VALUES(session_data), expires_at = VALUES(expires_at)", id, nil, string(b), expiry.UTC())
+	_, err := m.DB.Exec("INSERT INTO sessions (id, user_id, session_data, expires_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE session_data = VALUES(session_data), expires_at = VALUES(expires_at)", id, nil, b, expiry.UTC())
 	if err != nil {
 		return err
 	}
