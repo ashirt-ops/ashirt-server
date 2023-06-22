@@ -97,41 +97,6 @@ func (m *MySQLStore) Delete(id string) error {
 	return err
 }
 
-// TODO TN - do I need this?
-// All returns a map containing the id and data for all active (i.e.
-// not expired) sessions in the MySQLStore instance.
-func (m *MySQLStore) All() (map[string][]byte, error) {
-	rows, err := m.DB.Query("SELECT id, user_id, session_data, created_at, modified_at, expires_at FROM sessions WHERE UTC_TIMESTAMP(6) < expires_at")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	sessions := make(map[string][]byte)
-
-	for rows.Next() {
-		var (
-			id     string
-			userID int64
-			data   []byte
-		)
-
-		err = rows.Scan(&id, &userID, &data)
-		if err != nil {
-			return nil, err
-		}
-
-		sessions[id] = data
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-
-	return sessions, nil
-}
-
 func (m *MySQLStore) startCleanup(interval time.Duration) {
 	m.stopCleanup = make(chan bool)
 	ticker := time.NewTicker(interval)
