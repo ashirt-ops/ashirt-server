@@ -22,7 +22,7 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.15.1
 	github.com/rubenv/sql-migrate v1.4.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.10.0
 	golang.org/x/oauth2 v0.9.0
 	golang.org/x/sync v0.2.0
