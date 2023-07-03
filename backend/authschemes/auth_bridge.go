@@ -71,6 +71,7 @@ func (ah AShirtAuthBridge) createSession(r *http.Request, s interface{}) error {
 	if err != nil {
 		return backend.WrapError("Error marshalling session data", err)
 	}
+	// TODO TN replace sess_key with config var?
 	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
 	return nil
 }

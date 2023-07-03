@@ -5,6 +5,8 @@ package services_test
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -93,16 +95,16 @@ func TestDeleteUser(t *testing.T) {
 
 		// verify that non-admins cannot delete
 		ctx := contextForUser(UserDraco, db)
-		err := services.DeleteUser(ctx, db, targetUser.Slug)
+		err := services.DeleteUser(ctx, nil, db, targetUser.Slug)
 		require.Error(t, err)
 
 		// verify user cannot delete themselves
 		ctx = contextForUser(admin, db)
-		err = services.DeleteUser(ctx, db, admin.Slug)
+		err = services.DeleteUser(ctx, nil, db, admin.Slug)
 		require.NotNil(t, err)
 
 		// Verify delete actually works
-		err = services.DeleteUser(ctx, db, targetUser.Slug)
+		err = services.DeleteUser(ctx, nil, db, targetUser.Slug)
 		require.Nil(t, err)
 
 		require.True(t, countRows(t, db, "api_keys", "user_id=?", targetUser.ID) == 0)
@@ -377,48 +379,14 @@ func verifyUserProfileUpdate(t *testing.T, expectError bool, ctx context.Context
 	require.Equal(t, updatedData.Email, newProfile.Email)
 }
 
-func TestDeleteSessionsForUserSlug(t *testing.T) {
-	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
-		targetedUser := UserDraco
-		alsoPresentUser := UserHarry
-
-		// populate some sessions
-		sessionsToAdd := []models.Session{
-			{UserID: targetedUser.ID, SessionData: []byte("a")},
-			{UserID: alsoPresentUser.ID, SessionData: []byte("b")},
-			{UserID: targetedUser.ID, SessionData: []byte("c")},
-			{UserID: alsoPresentUser.ID, SessionData: []byte("d")},
-		}
-		err := db.BatchInsert("sessions", len(sessionsToAdd), func(i int) map[string]interface{} {
-			return map[string]interface{}{
-				"user_id":      sessionsToAdd[i].UserID,
-				"session_data": sessionsToAdd[i].SessionData,
-			}
-		})
-
-		require.NoError(t, err)
-
-		// verify sessions exist
-		var targetedUserSessions []models.Session
-		err = db.Select(&targetedUserSessions, sq.Select("*").From("sessions").Where(sq.Eq{"user_id": targetedUser.ID}))
-		require.NoError(t, err)
-		require.True(t, len(targetedUserSessions) > 0)
-
-		// verify non-admin cannot delete session data
-		ctx := contextForUser(UserHarry, db)
-		err = services.DeleteSessionsForUserSlug(ctx, db, targetedUser.Slug)
-		require.Error(t, err)
-
-		// verify admin can delete session data
-		ctx = contextForUser(UserDumbledore, db)
-		err = services.DeleteSessionsForUserSlug(ctx, db, targetedUser.Slug)
-		require.NoError(t, err)
-
-		targetedUserSessions = []models.Session{}
-		err = db.Select(&targetedUserSessions, sq.Select("*").From("sessions").Where(sq.Eq{"user_id": targetedUser.ID}))
-		require.NoError(t, err)
-		require.True(t, len(targetedUserSessions) == 0)
-	})
+// taken from scs
+func generateToken() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
 func TestSetUserFlags(t *testing.T) {
@@ -435,7 +403,7 @@ func TestSetUserFlags(t *testing.T) {
 
 		// verify access restricted for non-admins
 		ctx := contextForUser(UserDraco, db)
-		err := services.SetUserFlags(ctx, db, input)
+		err := services.SetUserFlags(ctx, nil, db, input)
 		require.Error(t, err)
 
 		// As an admin
@@ -447,13 +415,13 @@ func TestSetUserFlags(t *testing.T) {
 			Admin:    &admin,    // true at this point (no change)
 			Disabled: &disabled, // true at this point
 		}
-		err = services.SetUserFlags(ctx, db, sameUserInput)
+		err = services.SetUserFlags(ctx, nil, db, sameUserInput)
 		require.Error(t, err)
 
 		// verify users can't demote themselves
 		disabled = false
 		admin = false
-		err = services.SetUserFlags(ctx, db, sameUserInput)
+		err = services.SetUserFlags(ctx, nil, db, sameUserInput)
 		require.Error(t, err)
 
 		// reset for next tests
@@ -462,7 +430,7 @@ func TestSetUserFlags(t *testing.T) {
 
 		// try setting and then unsetting admin/disabled
 		for i := 0; i < 2; i++ {
-			err = services.SetUserFlags(ctx, db, input)
+			err = services.SetUserFlags(ctx, nil, db, input)
 			require.NoError(t, err)
 
 			dbProfile := getUserProfile(t, db, targetUser.ID)
@@ -477,7 +445,7 @@ func TestSetUserFlags(t *testing.T) {
 
 		// verify headless users cannot be admins
 		admin = true
-		err = services.SetUserFlags(ctx, db, services.SetUserFlagsInput{
+		err = services.SetUserFlags(ctx, nil, db, services.SetUserFlagsInput{
 			Slug:  UserHeadlessNick.Slug,
 			Admin: &admin,
 		})

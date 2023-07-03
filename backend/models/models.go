@@ -191,7 +191,7 @@ type AuthSchemeData struct {
 
 // Session reflects the structure of the database table 'sessions'
 type Session struct {
-	ID          int64      `db:"id"`
+	ID          string     `db:"id"`
 	UserID      int64      `db:"user_id"`
 	SessionData []byte     `db:"session_data"`
 	CreatedAt   time.Time  `db:"created_at"`

@@ -63,6 +63,7 @@ func Web(r chi.Router, sessionManager *scs.SessionManager, db *database.Connecti
 	}
 	sessionManager.Store = session.New(db.DB)
 	sessionManager.Lifetime = 30 * 24 * time.Hour
+	// TODO TN implement secure cookies
 	sessionManager.Cookie.Secure = config.UseSecureCookies
 
 	r.Handle("/metrics", promhttp.Handler())
@@ -166,7 +167,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, services.DeleteUser(r.Context(), db, i)
+		return nil, services.DeleteUser(r.Context(), sessionManager, db, i)
 	}))
 
 	route(r, "POST", "/admin/user/headless", jsonHandler(func(r *http.Request) (interface{}, error) {
@@ -196,7 +197,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, services.SetUserFlags(r.Context(), db, i)
+		return nil, services.SetUserFlags(r.Context(), sessionManager, db, i)
 	}))
 
 	route(r, "GET", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {

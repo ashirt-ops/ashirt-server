@@ -12,6 +12,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend"
 	localauth "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
 	"github.com/theparanoids/ashirt-server/backend/database"
@@ -168,7 +169,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 // removes access only. Evidence and other contributions remain. Note that users are not able to
 // delete their own accounts to prevent accidents. Also note that once a user has been deleted,
 // they cannot be restored.
-func DeleteUser(ctx context.Context, db *database.Connection, slug string) error {
+func DeleteUser(ctx context.Context, sessionManager *scs.SessionManager, db *database.Connection, slug string) error {
 	if !middleware.IsAdmin(ctx) {
 		return backend.WrapError("Unwilling to delete user", backend.UnauthorizedWriteErr(fmt.Errorf("Requesting user is not an admin")))
 	}
@@ -184,7 +185,7 @@ func DeleteUser(ctx context.Context, db *database.Connection, slug string) error
 
 	disabled := true
 	// session data is deleted when disabling the user
-	disableErr := SetUserFlags(ctx, db, SetUserFlagsInput{
+	disableErr := SetUserFlags(ctx, sessionManager, db, SetUserFlagsInput{
 		Slug:     slug,
 		Disabled: &disabled,
 	})
@@ -480,26 +481,11 @@ func UpdateUserProfile(ctx context.Context, db *database.Connection, i UpdateUse
 	return nil
 }
 
-// DeleteSessionsForUserSlug finds all existing sessions for a given user, then removes them, effectively
-// logging the user out of the service.
-func DeleteSessionsForUserSlug(ctx context.Context, db *database.Connection, userSlug string) error {
-	if !middleware.IsAdmin(ctx) {
-		return backend.UnauthorizedReadErr(fmt.Errorf("Requesting user is not an admin"))
-	}
-
-	userID, err := userSlugToUserID(db, userSlug)
-	if err != nil {
-		return backend.WrapError("Unable to delete user session", backend.DatabaseErr(err))
-	}
-
-	return deleteSessionsForUserID(db, userID)
-}
-
 // SetUserFlags updates flags for the indicated user, namely: admin and disabled.
 // Then removes all sessions for that user (logging them out)
 //
 // NOTE: The flag is to _disable_ the user, which prevents access. To enable a user, set Disabled=false
-func SetUserFlags(ctx context.Context, db *database.Connection, i SetUserFlagsInput) error {
+func SetUserFlags(ctx context.Context, sessionManager *scs.SessionManager, db *database.Connection, i SetUserFlagsInput) error {
 	if !middleware.IsAdmin(ctx) {
 		return backend.WrapError("Unwilling to set user flag", backend.UnauthorizedReadErr(fmt.Errorf("Requesting user is not an admin")))
 	}
@@ -522,21 +508,8 @@ func SetUserFlags(ctx context.Context, db *database.Connection, i SetUserFlagsIn
 		valuesToUpdate["admin"] = *i.Admin
 	}
 
-	if len(valuesToUpdate) > 0 {
-		err := db.Update(sq.Update("users").SetMap(valuesToUpdate).Where(sq.Eq{"slug": i.Slug}))
-		if err != nil {
-			return backend.DatabaseErr(err)
-		}
-		return deleteSessionsForUserID(db, targetUser.ID)
-	}
-	return nil
-}
-
-// Note: this should only ever be done behind an IsAdmin check
-func deleteSessionsForUserID(db *database.Connection, userID int64) error {
-
-	if err := db.Exec("DELETE FROM sessions WHERE user_id = ?", userID); err != nil {
-		return backend.WrapError("Cannot delete user session", backend.DatabaseErr(err))
+	if len(valuesToUpdate) > 0 && sessionManager != nil {
+		sessionManager.Remove(ctx, "sess_key")
 	}
 	return nil
 }
