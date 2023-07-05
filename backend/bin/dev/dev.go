@@ -129,7 +129,7 @@ func tryRunServer(logger logging.Logger) error {
 		server.Web(r, sessionManager,
 			db, contentStore, &server.WebConfig{
 				CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
-				SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
+				SessionStoreKey:  "DEVELOPMENT_SESSION_STORE_KEY_SECRET",
 				UseSecureCookies: false,
 				AuthSchemes:      schemes,
 				Logger:           logger,

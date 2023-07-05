@@ -127,7 +127,7 @@ func CSRFAuthKey() string {
 	return app.CsrfAuthKey
 }
 
-// SessionStoreKey retrieves the SESSION_STORE_KEY value from the environment
+// SessionStoreKey retrieves the APP_SESSION_STORE_KEY value from the environment
 func SessionStoreKey() string {
 	return app.SessionStoreKey
 }

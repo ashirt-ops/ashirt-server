@@ -12,6 +12,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
@@ -69,7 +70,7 @@ func TestLoginUser(t *testing.T) {
 
 	browser := &testBrowser{}
 	w, r := browser.newRequest()
-	err := bridge.LoginUser(w, r, userID, &testSession{Some: "sess_key"})
+	err := bridge.LoginUser(w, r, userID, &testSession{Some: config.SessionStoreKey()})
 	require.NoError(t, err)
 
 	_, r = browser.newRequest()

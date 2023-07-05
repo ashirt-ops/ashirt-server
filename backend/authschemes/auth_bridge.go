@@ -12,6 +12,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -67,8 +68,7 @@ func (ah AShirtAuthBridge) ReadAuthSchemeSession(r *http.Request) interface{} {
 }
 
 func (ah AShirtAuthBridge) createSession(r *http.Request, s interface{}) error {
-	// TODO TN replace sess_key with config var?
-	ah.sessionManager.Put(r.Context(), "sess_key", s)
+	ah.sessionManager.Put(r.Context(), config.SessionStoreKey(), s)
 	return nil
 }
 
@@ -145,7 +145,7 @@ func (ah AShirtAuthBridge) GetUserFromID(userID int64) (models.User, error) {
 // DeleteSession removes a user's session. Useful in situtations where authentication fails,
 // and we want to treat the user as not-logged-in
 func (ah AShirtAuthBridge) DeleteSession(r *http.Request) {
-	ah.sessionManager.Remove(r.Context(), "sess_key")
+	ah.sessionManager.Remove(r.Context(), config.SessionStoreKey())
 }
 
 // UserAuthData is a small structure capturing data relevant to a user for authentication purposes

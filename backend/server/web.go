@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
@@ -34,7 +35,7 @@ type WebConfig struct {
 	DBConnection     *database.Connection
 	AuthSchemes      []authschemes.AuthScheme
 	CSRFAuthKey      []byte
-	SessionStoreKey  []byte
+	SessionStoreKey  string
 	UseSecureCookies bool
 	Logger           logging.Logger
 }
@@ -47,7 +48,7 @@ func (c *WebConfig) validate() error {
 	if len(c.CSRFAuthKey) < 32 {
 		return errors.New("CSRFAuthKey must be 32 bytes or longer")
 	}
-	if len(c.SessionStoreKey) < 32 {
+	if reflect.ValueOf(c.SessionStoreKey).Kind() != reflect.String {
 		return errors.New("SessionStoreKey must be 32 bytes or longer")
 	}
 	if !c.UseSecureCookies {
@@ -105,7 +106,7 @@ func Web(r chi.Router, sessionManager *scs.SessionManager, db *database.Connecti
 func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store, sessionManager *scs.SessionManager, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
 	route(r, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jsonHandler(func(r *http.Request) (interface{}, error) {
-			sessionManager.Remove(r.Context(), "sess_key")
+			sessionManager.Remove(r.Context(), config.SessionStoreKey())
 			return nil, nil
 		}).ServeHTTP(w, r)
 	}))

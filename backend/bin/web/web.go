@@ -98,7 +98,7 @@ func main() {
 		server.Web(r, sessionManager,
 			db, contentStore, &server.WebConfig{
 				CSRFAuthKey:      []byte(config.CSRFAuthKey()),
-				SessionStoreKey:  []byte(config.SessionStoreKey()),
+				SessionStoreKey:  config.SessionStoreKey(),
 				UseSecureCookies: true,
 				AuthSchemes:      schemes,
 				Logger:           logger,
