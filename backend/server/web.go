@@ -62,7 +62,6 @@ func Web(r chi.Router, sessionManager *scs.SessionManager, db *database.Connecti
 		panic(err)
 	}
 	sessionManager.Lifetime = 30 * 24 * time.Hour
-	// TODO TN implement secure cookies
 	sessionManager.Cookie.Secure = config.UseSecureCookies
 
 	r.Handle("/metrics", promhttp.Handler())
