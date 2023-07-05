@@ -6,7 +6,6 @@ package authschemes
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -55,6 +54,7 @@ func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (*dtos.CreateUserO
 func (ah AShirtAuthBridge) SetAuthSchemeSession(w http.ResponseWriter, r *http.Request, data interface{}) error {
 	s := session.GetSession(ah.sessionManager, r)
 	s.AuthSchemeData = data
+	// TODO TN hsould be all of 's' right?
 	if err := ah.createSession(r, &data); err != nil {
 		return backend.WrapError("Unable to create session when setting session", err)
 	}
@@ -67,12 +67,8 @@ func (ah AShirtAuthBridge) ReadAuthSchemeSession(r *http.Request) interface{} {
 }
 
 func (ah AShirtAuthBridge) createSession(r *http.Request, s interface{}) error {
-	jsonData, err := json.Marshal(s)
-	if err != nil {
-		return backend.WrapError("Error marshalling session data", err)
-	}
 	// TODO TN replace sess_key with config var?
-	ah.sessionManager.Put(r.Context(), "sess_key", jsonData)
+	ah.sessionManager.Put(r.Context(), "sess_key", s)
 	return nil
 }
 

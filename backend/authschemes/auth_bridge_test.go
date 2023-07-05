@@ -259,7 +259,6 @@ func initBridgeTest(t *testing.T) (*database.Connection, *scs.SessionManager, au
 	}
 
 	sessionManager := scs.New()
-	sessionManager.Store = session.New(db.DB)
 	sessionManager.Lifetime = time.Hour
 
 	return db, sessionManager, authschemes.MakeAuthBridge(db, sessionManager, "test", "test-type")

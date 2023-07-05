@@ -28,7 +28,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/policy"
 	"github.com/theparanoids/ashirt-server/backend/server/middleware"
 	"github.com/theparanoids/ashirt-server/backend/services"
-	"github.com/theparanoids/ashirt-server/backend/session"
 )
 
 type WebConfig struct {
@@ -61,7 +60,6 @@ func Web(r chi.Router, sessionManager *scs.SessionManager, db *database.Connecti
 	if err := config.validate(); err != nil {
 		panic(err)
 	}
-	sessionManager.Store = session.New(db.DB)
 	sessionManager.Lifetime = 30 * 24 * time.Hour
 	// TODO TN implement secure cookies
 	sessionManager.Cookie.Secure = config.UseSecureCookies

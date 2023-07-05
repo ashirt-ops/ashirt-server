@@ -2,6 +2,9 @@ package session
 
 import (
 	"encoding/gob"
+	"net/http"
+
+	"github.com/alexedwards/scs/v2"
 )
 
 type Session struct {
@@ -12,4 +15,14 @@ type Session struct {
 
 func init() {
 	gob.Register(&Session{})
+}
+
+func GetSession(sessionManager *scs.SessionManager, r *http.Request) *Session {
+	sessionData := sessionManager.Get(r.Context(), "sess_key") //sessionData := sessionManager.Get(r.Context(), "sess_key")
+
+	if session, ok := sessionData.(*Session); ok {
+		return session
+	}
+
+	return &Session{}
 }

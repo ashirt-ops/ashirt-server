@@ -10,7 +10,6 @@ import (
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
 	"github.com/theparanoids/ashirt-server/backend/database/seeding"
 	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/session"
 )
 
 func initBridge(t *testing.T) authschemes.AShirtAuthBridge {
@@ -20,7 +19,6 @@ func initBridge(t *testing.T) authschemes.AShirtAuthBridge {
 	})
 	seeding.ApplySeeding(t, seeding.HarryPotterSeedData, db)
 	sessionManager := scs.New()
-	sessionManager.Store = session.New(db.DB)
 	sessionManager.Lifetime = time.Hour
 	// sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
 	// require.NoError(t, err)
