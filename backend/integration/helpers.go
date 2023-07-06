@@ -54,7 +54,7 @@ func NewTester(t *testing.T) *Tester {
 		server.Web(r, sessionManager,
 			db, contentStore, &server.WebConfig{
 				CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
-				SessionStoreKey: []byte("session-store-key-for-integration-tests"),
+				SessionStoreKey: "session-store-key-for-integration-tests",
 				AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
 					RegistrationEnabled: true,
 				}},
