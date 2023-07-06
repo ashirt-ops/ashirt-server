@@ -509,8 +509,15 @@ func SetUserFlags(ctx context.Context, sessionManager *scs.SessionManager, db *d
 		valuesToUpdate["admin"] = *i.Admin
 	}
 
-	if len(valuesToUpdate) > 0 && sessionManager != nil {
-		sessionManager.Remove(ctx, config.SessionStoreKey())
+	if len(valuesToUpdate) > 0 {
+		err := db.Update(sq.Update("users").SetMap(valuesToUpdate).Where(sq.Eq{"slug": i.Slug}))
+		if err != nil {
+			return backend.DatabaseErr(err)
+		}
+		if sessionManager != nil {
+			sessionManager.Remove(ctx, config.SessionStoreKey())
+		}
+
 	}
 	return nil
 }
