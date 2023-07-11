@@ -15,7 +15,6 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend"
 	localauth "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
-	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/dtos"
 	"github.com/theparanoids/ashirt-server/backend/logging"
@@ -514,10 +513,10 @@ func SetUserFlags(ctx context.Context, sessionManager *scs.SessionManager, db *d
 		if err != nil {
 			return backend.DatabaseErr(err)
 		}
-		if sessionManager != nil {
-			sessionManager.Remove(ctx, config.SessionStoreKey())
+		err = db.Delete(sq.Delete("sessions").Where(sq.Eq{"user_id": targetUser.ID}))
+		if err != nil {
+			return backend.DatabaseErr(err)
 		}
-
 	}
 	return nil
 }
