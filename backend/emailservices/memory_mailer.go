@@ -1,6 +1,6 @@
 package emailservices
 
-import "github.com/theparanoids/ashirt-server/backend/logging"
+import "github.com/ashirt-ops/ashirt-server/backend/logging"
 
 // MemoryMailer is an EmailServicer that holds all of the emails it receives in memory. This mailer
 // is designed to be used with testing, where the caller can quickly check if the email details

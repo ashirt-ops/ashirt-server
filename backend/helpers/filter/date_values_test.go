@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers/filter"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
 
 func date(year int, month time.Month, day int) time.Time {

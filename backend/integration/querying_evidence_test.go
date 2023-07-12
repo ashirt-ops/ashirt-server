@@ -9,8 +9,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/integration"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/integration"
 )
 
 func expectQueryToReturnIDs(t *testing.T, a *integration.Tester, query string, expectedUUIDs []string) {

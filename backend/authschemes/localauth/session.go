@@ -7,7 +7,7 @@ import (
 	"encoding/gob"
 	"net/http"
 
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
 )
 
 // localAuthSession is saved as an authscheme session for users that have "some difficulty" in logging in --

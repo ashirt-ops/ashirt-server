@@ -6,11 +6,11 @@ package contentstore
 import (
 	"io"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
-	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // S3Store is the backing structure needed to interact with an Amazon S3 storage service

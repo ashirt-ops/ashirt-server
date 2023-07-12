@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"reflect"
 
-	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
+	recoveryConsts "github.com/ashirt-ops/ashirt-server/backend/authschemes/recoveryauth/constants"
 )
 
 // Policy is a simple interface into interacting with Permission structs.

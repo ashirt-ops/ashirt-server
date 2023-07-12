@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers/filter"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 )
 
 func TestTokenizeTimelineQuery(t *testing.T) {

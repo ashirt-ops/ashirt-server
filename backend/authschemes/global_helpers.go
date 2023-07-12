@@ -4,8 +4,8 @@
 package authschemes
 
 import (
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
 )
 
 // CreateNewAuthForUserGeneric provides a mechanism for non-auth providers to generate new authentications

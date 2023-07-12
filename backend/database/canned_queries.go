@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
 
 	sq "github.com/Masterminds/squirrel"
 )

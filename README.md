@@ -1,6 +1,6 @@
 # ASHIRT
 
-Adversary Simulators High-Fidelity Intelligence and Reporting Toolkit. This repo contains only the server side and frontend code for ASHIRT. You can find the ASHIRT client [here](https://www.github.com/theparanoids/ashirt) and aterm [here](https://www.github.com/theparanoids/aterm).
+Adversary Simulators High-Fidelity Intelligence and Reporting Toolkit. This repo contains only the server side and frontend code for ASHIRT. You can find the ASHIRT client [here](https://www.github.com/ashirt-ops/ashirt) and aterm [here](https://www.github.com/ashirt-ops/aterm).
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ Documenting and reporting is a key part of our jobs and generally the part we al
 [![2020 presentation](https://img.youtube.com/vi/NNPsfTbDPG0/0.jpg)](https://youtu.be/NNPsfTbDPG0)
 
 ## Install
-If you just want to try ashirt out locally, check out the [quickstart docs](https://github.com/theparanoids/ashirt-server/wiki/quickstart). If you're looking for a production-ready deployment reference, check out [ashirt-deployments](https://github.com/theparanoids/ashirt-deployments/tree/main/ecs).
+If you just want to try ashirt out locally, check out the [quickstart docs](https://github.com/ashirt-ops/ashirt-server/wiki/quickstart). If you're looking for a production-ready deployment reference, check out [ashirt-deployments](https://github.com/ashirt-ops/ashirt-deployments/tree/main/ecs).
 
 Detailed instructions for building and installation are available for the [frontend](frontend/Readme.md) and [backend](backend/Readme.md).
 

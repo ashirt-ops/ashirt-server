@@ -3,9 +3,9 @@ package confighelpers
 import (
 	"fmt"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 )
 
 // ChooseContentStoreType inspects the type of store provided by environment variables.

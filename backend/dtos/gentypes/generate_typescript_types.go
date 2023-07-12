@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
 )
 
 func main() {

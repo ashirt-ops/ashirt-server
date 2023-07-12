@@ -4,10 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
-	"github.com/theparanoids/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	recoveryConsts "github.com/ashirt-ops/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
 )
 
 const recoveryKeyLength = 40
