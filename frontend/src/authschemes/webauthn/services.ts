@@ -72,3 +72,7 @@ export async function listWebauthnCredentials(): Promise<CredentialList> {
 export async function deleteWebauthnCredential(i: { credentialName: string }): Promise<CredentialList> {
   return await req('DELETE', `/auth/webauthn/credential/${i.credentialName}`)
 }
+
+export async function modifyCredentialName(i: { credentialName: string, newCredentialName: string }): Promise<void> {
+  return await req('PUT', `/auth/webauthn/credential`, i)
+}

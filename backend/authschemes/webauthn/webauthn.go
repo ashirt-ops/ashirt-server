@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/theparanoids/ashirt-server/backend"
@@ -215,8 +216,13 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 		if err != nil {
 			return nil, backend.WrapError("Unable to validate registration data", err)
 		}
+
+		rawSessionData := bridge.ReadAuthSchemeSession(r)
+		sessionData, _ := rawSessionData.(*webAuthNSessionData)
+
 		return nil, bridge.CreateNewAuthForUser(authschemes.UserAuthData{
 			UserID:   byteSliceToI64(data.UserData.UserID),
+			AuthnID:  sessionData.UserData.AuthnID,
 			Username: data.UserData.UserName,
 			JSONData: helpers.Ptr(string(encodedCreds)),
 		})
@@ -235,6 +241,20 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 			return nil, dr.Error
 		}
 		return nil, a.deleteCredential(callingUserID, credentialName, bridge)
+	}))
+
+	remux.Route(r, "PUT", "/credential", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+		callingUserID := middleware.UserID(r.Context())
+		dr := remux.DissectJSONRequest(r)
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		info := WebAuthnUpdateCredentialInfo{
+			NewCredentialName: dr.FromBody("newCredentialName").Required().AsString(),
+			CredentialName:    dr.FromBody("credentialName").Required().AsString(),
+			UserID:            callingUserID,
+		}
+		return nil, a.updateCredentialName(info, bridge)
 	}))
 
 	remux.Route(r, "POST", "/credential/add/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -336,6 +356,36 @@ func (a WebAuthn) deleteCredential(userID int64, credentialName string, bridge a
 	return nil
 }
 
+func (a WebAuthn) updateCredentialName(info WebAuthnUpdateCredentialInfo, bridge authschemes.AShirtAuthBridge) error {
+	userAuth, err := bridge.FindUserAuthByUserID(info.UserID)
+	if err != nil {
+		return backend.WrapError("Unable to find user", err)
+	}
+	webauthRawCreds := []byte(*userAuth.JSONData)
+	var creds []AShirtWebauthnCredential
+	if err = json.Unmarshal(webauthRawCreds, &creds); err != nil {
+		return backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
+	}
+	matchingIndex, _ := helpers.Find(creds, func(item AShirtWebauthnCredential) bool {
+		return string(item.CredentialName) == string(info.CredentialName)
+	})
+	if matchingIndex == -1 {
+		return backend.WrapError("Could not find matching credential", err)
+	}
+	creds[matchingIndex].CredentialName = info.NewCredentialName
+	creds[matchingIndex].CredentialCreatedDate = time.Now()
+
+	encodedCreds, err := json.Marshal(creds)
+	if err != nil {
+		return backend.WrapError("Unable to encode credentials", err)
+	}
+	userAuth.JSONData = helpers.Ptr(string(encodedCreds))
+	if err = bridge.UpdateAuthForUser(userAuth); err != nil {
+		return backend.WrapError("Unable to update credential", err)
+	}
+	return nil
+}
+
 func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, info WebAuthnRegistrationInfo) (*protocol.CredentialCreation, error) {
 	var user webauthnUser
 	if info.RegistrationType == CreateCredential {
@@ -343,7 +393,7 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 	} else if info.RegistrationType == LinkCredential {
 		user = makeLinkingWebAuthnUser(info.UserID, info.Username, info.CredentialName)
 	} else { // Add Credential
-		user = makeAddCredentialWebAuthnUser(info.UserID, info.CredentialName, info.Username, info.ExistingCredentials)
+		user = makeAddCredentialWebAuthnUser(info.UserID, info.Username, info.CredentialName, info.ExistingCredentials)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))

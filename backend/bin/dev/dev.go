@@ -138,9 +138,7 @@ func tryRunServer(logger logging.Logger) error {
 	})
 
 	logger.Log("port", config.Port(), "msg", "Now Serving")
-	// return http.ListenAndServe(":"+config.Port(), r)
 	return http.ListenAndServe(":"+config.Port(), sessionManager.LoadAndSave(r))
-	// logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }
 
 func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, error) {
