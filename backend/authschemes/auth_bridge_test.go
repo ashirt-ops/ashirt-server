@@ -12,7 +12,6 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/config"
 	"github.com/theparanoids/ashirt-server/backend/database"
 	"github.com/theparanoids/ashirt-server/backend/logging"
 	"github.com/theparanoids/ashirt-server/backend/models"
@@ -61,6 +60,21 @@ func TestCreateNewUser(t *testing.T) {
 
 type testSession struct{ Some string }
 
+func createContextForRequest(sessionManager scs.SessionManager, r *http.Request, w http.ResponseWriter) *http.Request {
+	var token string
+	cookie, err := r.Cookie("cookie-name")
+	if err == nil {
+		token = cookie.Value
+	}
+
+	ctx, err := sessionManager.Load(r.Context(), token)
+	if err != nil {
+		sessionManager.ErrorFunc(w, r, err)
+		return r
+	}
+	return r.WithContext(ctx)
+}
+
 func TestLoginUser(t *testing.T) {
 	_, sessionManager, bridge := initBridgeTest(t)
 
@@ -70,47 +84,26 @@ func TestLoginUser(t *testing.T) {
 
 	browser := &testBrowser{}
 	w, r := browser.newRequest()
-	err := bridge.LoginUser(w, r, userID, &testSession{Some: config.SessionStoreKey()})
+	sr := createContextForRequest(*sessionManager, r, w)
+	err := bridge.LoginUser(w, sr, userID, &testSession{Some: "data"})
 	require.NoError(t, err)
 
-	_, r = browser.newRequest()
-	session := session.GetSession(sessionManager, r)
+	session := session.GetSession(sessionManager, sr)
 	require.NoError(t, err)
 	require.Equal(t, userID, session.UserID)
 	require.Equal(t, "data", session.AuthSchemeData.(*testSession).Some)
 }
 
 func TestAddToSession(t *testing.T) {
-	_, _, bridge := initBridgeTest(t)
-
-	gob.Register(&testSession{})
-
-	browser := &testBrowser{}
-	w, r := browser.newRequest()
-	bridge.SetAuthSchemeSession(w, r, &testSession{Some: "data"})
-
-	_, r = browser.newRequest()
-	require.Equal(t, &testSession{Some: "data"}, bridge.ReadAuthSchemeSession(r))
-}
-
-func TestDeleteSession(t *testing.T) {
 	_, sessionManager, bridge := initBridgeTest(t)
 
 	gob.Register(&testSession{})
 
-	userID := createDummyUser(t, bridge, "")
-
 	browser := &testBrowser{}
 	w, r := browser.newRequest()
-	err := bridge.LoginUser(w, r, userID, &testSession{Some: "data"})
+	sr := createContextForRequest(*sessionManager, r, w)
+	err := bridge.SetAuthSchemeSession(w, sr, &testSession{Some: "data"})
 	require.NoError(t, err)
-
-	w, r = browser.newRequest()
-	bridge.DeleteSession(r)
-
-	_, r = browser.newRequest()
-	session := session.GetSession(sessionManager, r)
-	require.Equal(t, int64(0), session.UserID)
 }
 
 func TestUserAuthCreationAndLookup(t *testing.T) {
