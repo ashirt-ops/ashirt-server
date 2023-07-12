@@ -79,6 +79,7 @@ func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 	return byteData, true, nil
 }
 
+// Same function SCS uses to decode session data
 func Decode(b []byte) (time.Time, map[string]interface{}, error) {
 	aux := &struct {
 		Deadline time.Time
@@ -96,11 +97,11 @@ func Decode(b []byte) (time.Time, map[string]interface{}, error) {
 // Commit adds a session id and data to the MySQLStore instance with the given
 // expiry time. If the session id already exists, then the data and expiry
 // time are updated.
-// TODO TN - what is current expirity time? and how to change new library to use it?
 func (m *MySQLStore) Commit(id string, b []byte, expiry time.Time) error {
 	_, val, err := Decode(b)
-	// TODO TN add error message
-	// fmt.Printf("val[config.SessionStoreKey()]: %+v\n", val[config.SessionStoreKey()].(*Session).UserID)
+	if err != nil {
+		return err
+	}
 	userID := val[config.SessionStoreKey()].(*Session).UserID
 	_, err = m.DB.Exec("INSERT INTO sessions (id, user_id, session_data, expires_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE session_data = VALUES(session_data), expires_at = VALUES(expires_at)", id, userID, b, expiry.UTC())
 	if err != nil {
