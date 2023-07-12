@@ -34,8 +34,6 @@ func initBridge(t *testing.T) authschemes.AShirtAuthBridge {
 	sessionManager := scs.New()
 	sessionManager.Store = session.New(db.DB)
 	sessionManager.Lifetime = time.Hour
-	// sessionStore, err := session.NewStore(db, session.StoreOptions{SessionDuration: time.Hour, Key: []byte{}})
-	// require.NoError(t, err)
 	return authschemes.MakeAuthBridge(db, sessionManager, "local", "local")
 }
 
