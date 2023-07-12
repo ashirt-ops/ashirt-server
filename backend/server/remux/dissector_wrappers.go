@@ -22,17 +22,17 @@ func generateUrlParamMap(r *http.Request) map[string]string {
 	return urlParamMap
 }
 
-// DissectJSONRequest is a gorilla.mux focused rewrap of dissectors.DissectJSONRequest
+// DissectJSONRequest is a rewrap of dissectors.DissectJSONRequest
 func DissectJSONRequest(r *http.Request) dissectors.DissectedRequest {
 	return dissectors.DissectJSONRequest(r, generateUrlParamMap(r))
 }
 
-// DissectFormRequest is a gorilla.mux focused rewrap of dissectors.DissectFormRequest
+// DissectFormRequest is a rewrap of dissectors.DissectFormRequest
 func DissectFormRequest(r *http.Request) dissectors.DissectedRequest {
 	return dissectors.DissectFormRequest(r, generateUrlParamMap(r))
 }
 
-// DissectNoBodyRequest is a gorilla.mux focused rewrap of dissectors.DissectPlainRequest
+// DissectNoBodyRequest is a rewrap of dissectors.DissectPlainRequest
 func DissectNoBodyRequest(r *http.Request) dissectors.DissectedRequest {
 	return dissectors.DissectPlainRequest(r, generateUrlParamMap(r))
 }
