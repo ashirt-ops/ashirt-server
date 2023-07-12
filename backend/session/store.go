@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/gob"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -71,10 +70,7 @@ func (m *MySQLStore) Find(id string) ([]byte, bool, error) {
 	} else if err != nil {
 		return nil, false, err
 	}
-	fmt.Printf("sess: %+v\n", sess)
-	fmt.Println("data: ", sess.Data)
 	byteData := []byte(sess.Data)
-	fmt.Println("byteData: ", byteData)
 
 	return byteData, true, nil
 }
