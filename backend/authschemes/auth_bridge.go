@@ -52,13 +52,10 @@ func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (*dtos.CreateUserO
 
 // SetAuthSchemeSession sets authscheme specific session data to the current user session. Session data should
 // be a struct and registered with `gob.Register` in an init function of the authscheme
-func (ah AShirtAuthBridge) SetAuthSchemeSession(w http.ResponseWriter, r *http.Request, data interface{}) error {
+func (ah AShirtAuthBridge) SetAuthSchemeSession(w http.ResponseWriter, r *http.Request, data interface{}) {
 	s := session.GetSession(ah.sessionManager, r)
 	s.AuthSchemeData = data
-	if err := ah.createSession(r, &s); err != nil {
-		return backend.WrapError("Unable to create session when setting session", err)
-	}
-	return nil
+	ah.createSession(r, &s)
 }
 
 // ReadAuthSchemeSession retrieves previously saved session data set by SetAuthSchemeSession
@@ -66,9 +63,8 @@ func (ah AShirtAuthBridge) ReadAuthSchemeSession(r *http.Request) interface{} {
 	return session.GetSession(ah.sessionManager, r).AuthSchemeData
 }
 
-func (ah AShirtAuthBridge) createSession(r *http.Request, s interface{}) error {
+func (ah AShirtAuthBridge) createSession(r *http.Request, s interface{}) {
 	ah.sessionManager.Put(r.Context(), config.SessionStoreKey(), s)
-	return nil
 }
 
 // LoginUser denotes that a user shall be logged in.
@@ -87,9 +83,7 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 		AuthSchemeData: authSchemeSessionData,
 	}
 
-	if err := ah.createSession(r, &data); err != nil {
-		return backend.WrapError("Unable to create session when logging in", err)
-	}
+	ah.createSession(r, &data)
 	return nil
 }
 

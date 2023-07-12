@@ -33,8 +33,8 @@ func readLocalSession(r *http.Request, bridge authschemes.AShirtAuthBridge) *loc
 	return sess
 }
 
-func (sess *localAuthSession) writeLocalSession(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge) error {
-	return bridge.SetAuthSchemeSession(w, r, &localAuthSession{
+func (sess *localAuthSession) writeLocalSession(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge) {
+	bridge.SetAuthSchemeSession(w, r, &localAuthSession{
 		SessionValid:  true,
 		Username:      sess.Username,
 		TOTPValidated: sess.TOTPValidated,

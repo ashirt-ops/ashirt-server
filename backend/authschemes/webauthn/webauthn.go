@@ -412,7 +412,7 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		return nil, err
 	}
 
-	err = bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(user, sessionData))
+	bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(user, sessionData))
 
 	return credOptions, err
 }
@@ -442,10 +442,7 @@ func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge auth
 		return nil, backend.WebauthnLoginError(err, "Unable to begin login process")
 	}
 
-	if err = bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(webauthnUser, sessionData)); err != nil {
-		return nil, backend.WebauthnLoginError(err, "Unable to begin login process", "Unable to set session")
-	}
-
+	bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(webauthnUser, sessionData))
 	return options, nil
 }
 

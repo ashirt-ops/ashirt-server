@@ -219,9 +219,7 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 				return nil, backend.WrapError("Could not validate passcode", err)
 			}
 			sess.TOTPValidated = true
-			if err = sess.writeLocalSession(w, r, bridge); err != nil {
-				return nil, backend.WrapError("Could not validate passcode", backend.WrapError("Unable to set auth scheme in session", err))
-			}
+			sess.writeLocalSession(w, r, bridge)
 
 			return nil, attemptFinishLogin(w, r, bridge, authData)
 		}).ServeHTTP(w, r)
@@ -391,17 +389,13 @@ func attemptFinishLogin(w http.ResponseWriter, r *http.Request, bridge authschem
 	if authData.TOTPSecret != nil {
 		if !sess.SessionValid || !sess.TOTPValidated {
 			sess.TOTPValidated = false
-			if err := sess.writeLocalSession(w, r, bridge); err != nil {
-				return backend.WrapError("Unable to set auth scheme in session", err)
-			}
+			sess.writeLocalSession(w, r, bridge)
 			return backend.UserRequiresAdditionalAuthenticationErr("TOTP_REQUIRED")
 		}
 	}
 
 	if authData.NeedsPasswordReset {
-		if err := sess.writeLocalSession(w, r, bridge); err != nil {
-			return backend.WrapError("Unable to set auth scheme in session", err)
-		}
+		sess.writeLocalSession(w, r, bridge)
 		return backend.UserRequiresAdditionalAuthenticationErr("PASSWORD_RESET_REQUIRED")
 	}
 

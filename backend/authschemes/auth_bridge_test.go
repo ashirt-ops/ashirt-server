@@ -94,18 +94,6 @@ func TestLoginUser(t *testing.T) {
 	require.Equal(t, "data", session.AuthSchemeData.(*testSession).Some)
 }
 
-func TestAddToSession(t *testing.T) {
-	_, sessionManager, bridge := initBridgeTest(t)
-
-	gob.Register(&testSession{})
-
-	browser := &testBrowser{}
-	w, r := browser.newRequest()
-	sr := createContextForRequest(*sessionManager, r, w)
-	err := bridge.SetAuthSchemeSession(w, sr, &testSession{Some: "data"})
-	require.NoError(t, err)
-}
-
 func TestUserAuthCreationAndLookup(t *testing.T) {
 	_, _, bridge := initBridgeTest(t)
 
