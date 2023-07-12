@@ -39,10 +39,9 @@ func GetSession(sessionManager *scs.SessionManager, r *http.Request) *Session {
 // New returns a new MySQLStore instance, with a background cleanup goroutine
 // that runs every 5 minutes to remove expired session data.
 func New(db *sql.DB) *MySQLStore {
-	return NewWithCleanupInterval(db, 5*time.Minute)
+	return NewWithCleanupInterval(db, 12*time.Hour)
 }
 
-// TODO TN do I want to use this???
 // NewWithCleanupInterval returns a new MySQLStore instance. The cleanupInterval
 // parameter controls how frequently expired session data is removed by the
 // background cleanup goroutine. Setting it to 0 prevents the cleanup goroutine
