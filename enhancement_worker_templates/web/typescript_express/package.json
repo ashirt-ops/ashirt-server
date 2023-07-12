@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "typecheck": "echo Typechecking... && tsc --pretty"
   },
-  "author": "The Paranoids",
+  "author": "ASHIRT Ops",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.27.0",

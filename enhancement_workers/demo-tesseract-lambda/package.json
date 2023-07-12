@@ -2,7 +2,7 @@
   "name": "ashirt-tesseract-lambda",
   "version": "1.0.0",
   "description": "Runs tesseract on image evidence for AShirt",
-  "author": "The Paranoids",
+  "author": "ASHIRT Ops",
   "license": "MIT",
   "source": "app/app.js",
   "main": "dist/main.js",
