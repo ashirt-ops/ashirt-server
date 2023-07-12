@@ -5,8 +5,6 @@ package services_test
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -377,16 +375,6 @@ func verifyUserProfileUpdate(t *testing.T, expectError bool, ctx context.Context
 	require.Equal(t, updatedData.FirstName, newProfile.FirstName)
 	require.Equal(t, updatedData.LastName, newProfile.LastName)
 	require.Equal(t, updatedData.Email, newProfile.Email)
-}
-
-// taken from scs
-func generateToken() (string, error) {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "", err
-	}
-	return base64.RawURLEncoding.EncodeToString(b), nil
 }
 
 func TestSetUserFlags(t *testing.T) {
