@@ -395,18 +395,6 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 		return services.ListEvidenceCreatorsForOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.ReadEvidenceInput{
-			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-		}
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.ReadEvidence(r.Context(), db, contentStore, i)
-	}))
-
 	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
 		dr := dissectNoBodyRequest(r)
 		i := services.ReadEvidenceInput{
@@ -445,17 +433,6 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 			Body:          dr.FromBody("body").Required().AsString(),
 		}
 		return nil, services.CreateEvidenceMetadata(r.Context(), db, i)
-	}))
-
-	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.EditEvidenceMetadataInput{
-			OperationSlug: dr.FromURL("operation_slug").AsString(),
-			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
-			Source:        dr.FromBody("source").Required().AsString(),
-			Body:          dr.FromBody("body").Required().AsString(),
-		}
-		return nil, services.UpdateEvidenceMetadata(r.Context(), db, i)
 	}))
 
 	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/{service_name}/run", jsonHandler(func(r *http.Request) (interface{}, error) {

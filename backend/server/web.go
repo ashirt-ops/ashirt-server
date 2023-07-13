@@ -151,4 +151,27 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		}
 		return services.CreateEvidence(r.Context(), db, contentStore, i)
 	}))
+
+	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.ReadEvidenceInput{
+			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ReadEvidence(r.Context(), db, contentStore, i)
+	}))
+
+	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.EditEvidenceMetadataInput{
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
+			Source:        dr.FromBody("source").Required().AsString(),
+			Body:          dr.FromBody("body").Required().AsString(),
+		}
+		return nil, services.UpdateEvidenceMetadata(r.Context(), db, i)
+	}))
 }
