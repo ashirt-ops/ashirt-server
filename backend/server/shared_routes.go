@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/config"
@@ -482,25 +481,6 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 			return nil, dr.Error
 		}
 		return nil, services.RunServiceWorker(r.Context(), db, i)
-	}))
-
-	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectFormRequest(r)
-		i := services.CreateEvidenceInput{
-			Description:   dr.FromBody("description").Required().AsString(),
-			Content:       dr.FromFile("content"),
-			ContentType:   dr.FromBody("contentType").OrDefault("image").AsString(),
-			OccurredAt:    dr.FromBody("occurredAt").OrDefault(time.Now()).AsTime(),
-			OperationSlug: dr.FromURL("operation_slug").AsString(),
-		}
-		tagIDsJSON := dr.FromBody("tagIds").OrDefault("[]").AsString()
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		if err := json.Unmarshal([]byte(tagIDsJSON), &i.TagIDs); err != nil {
-			return nil, backend.BadInputErr(err, "tagIds must be a json array of ints")
-		}
-		return services.CreateEvidence(r.Context(), db, contentStore, i)
 	}))
 
 	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {

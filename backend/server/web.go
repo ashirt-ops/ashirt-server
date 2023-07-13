@@ -4,6 +4,7 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -130,5 +131,24 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 	route(r, "GET", "/auths/breakdown", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListAuthDetails(r.Context(), db, supportedAuthSchemes)
+	}))
+
+	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectFormRequest(r)
+		i := services.CreateEvidenceInput{
+			Description:   dr.FromBody("description").Required().AsString(),
+			Content:       dr.FromFile("content"),
+			ContentType:   dr.FromBody("contentType").OrDefault("image").AsString(),
+			OccurredAt:    dr.FromBody("occurredAt").OrDefault(time.Now()).AsTime(),
+			OperationSlug: dr.FromURL("operation_slug").AsString(),
+		}
+		tagIDsJSON := dr.FromBody("tagIds").OrDefault("[]").AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		if err := json.Unmarshal([]byte(tagIDsJSON), &i.TagIDs); err != nil {
+			return nil, backend.BadInputErr(err, "tagIds must be a json array of ints")
+		}
+		return services.CreateEvidence(r.Context(), db, contentStore, i)
 	}))
 }
