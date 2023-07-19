@@ -6,8 +6,8 @@ package remux
 import (
 	"net/http"
 
+	"github.com/ashirt-ops/ashirt-server/backend/server/dissectors"
 	"github.com/go-chi/chi/v5"
-	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
 )
 
 func generateUrlParamMap(r *http.Request) map[string]string {

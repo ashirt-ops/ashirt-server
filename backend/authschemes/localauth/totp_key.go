@@ -7,9 +7,9 @@ import (
 	"image/png"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
-	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // TOTPKey represents the secret and QR code for a given URL to authenticate with

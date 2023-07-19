@@ -7,10 +7,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestCreateAPIKey(t *testing.T) {

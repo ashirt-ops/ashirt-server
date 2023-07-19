@@ -8,8 +8,8 @@ import (
 	"io"
 
 	"cloud.google.com/go/storage"
+	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/google/uuid"
-	"github.com/theparanoids/ashirt-server/backend"
 )
 
 type GCPStore struct {

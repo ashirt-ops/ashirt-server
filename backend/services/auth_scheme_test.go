@@ -7,13 +7,13 @@ import (
 	"context"
 	"testing"
 
+	localConsts "github.com/ashirt-ops/ashirt-server/backend/authschemes/localauth/constants"
+	recoveryConsts "github.com/ashirt-ops/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
-	localConsts "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
-	recoveryConsts "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestDeleteAuthScheme(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"io"
 	"text/template"
 
-	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // WriterMailer acts as a no-email email server for monitoring when running locally. All emails are

@@ -11,9 +11,9 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/ashirt-ops/ashirt-server/backend/server/dissectors"
+	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
 	"github.com/go-chi/chi/v5"
-	"github.com/theparanoids/ashirt-server/backend/server/dissectors"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
 
 func route(r chi.Router, method string, path string, handler http.Handler) {

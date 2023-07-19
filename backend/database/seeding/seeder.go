@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	localConsts "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
+	localConsts "github.com/ashirt-ops/ashirt-server/backend/authschemes/localauth/constants"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
 	"golang.org/x/crypto/bcrypt"
 )
 

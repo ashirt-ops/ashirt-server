@@ -353,7 +353,7 @@ While Webauthn provides a number of possible configurations, the minimum is actu
 
 ##### Webauthn as a second factor for local login
 
-Currently, AShirt does not support Webauthn as a second factor for multi-factor local login. If you'd like to see this, please [leave an issue](https://github.com/theparanoids/ashirt-server/issues?q=is%3Aissue+is%3Aopen+webauthn) requesting this feature.
+Currently, AShirt does not support Webauthn as a second factor for multi-factor local login. If you'd like to see this, please [leave an issue](https://github.com/ashirt-ops/ashirt-server/issues?q=is%3Aissue+is%3Aopen+webauthn) requesting this feature.
 
 #### Custom Authentication
 

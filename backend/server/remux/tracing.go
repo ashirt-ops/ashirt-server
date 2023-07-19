@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // StackTraceEntry is a small structure for holding relevent data pertaining to a single line

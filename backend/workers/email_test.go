@@ -5,14 +5,14 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
+	"github.com/ashirt-ops/ashirt-server/backend/emailservices"
+	"github.com/ashirt-ops/ashirt-server/backend/emailtemplates"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/workers"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/database/seeding"
-	"github.com/theparanoids/ashirt-server/backend/emailservices"
-	"github.com/theparanoids/ashirt-server/backend/emailtemplates"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/workers"
 )
 
 func setupDb(t *testing.T) *database.Connection {

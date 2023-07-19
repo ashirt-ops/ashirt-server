@@ -8,8 +8,8 @@ import (
 	"net/textproto"
 	"strings"
 
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // SMTPEmailAuthType indicates how the system should authenticate with the STMP server

@@ -5,11 +5,11 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/emailservices"
-	"github.com/theparanoids/ashirt-server/backend/emailtemplates"
-	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/emailservices"
+	"github.com/ashirt-ops/ashirt-server/backend/emailtemplates"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // EmailStatus reflects the possible statuses for emails in any state

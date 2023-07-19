@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	auth "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 type webauthnUser struct {

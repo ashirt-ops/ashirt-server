@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers/filter"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 
 	sq "github.com/Masterminds/squirrel"
 )

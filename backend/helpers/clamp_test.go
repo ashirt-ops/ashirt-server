@@ -6,8 +6,8 @@ package helpers_test
 import (
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 func TestClamp(t *testing.T) {

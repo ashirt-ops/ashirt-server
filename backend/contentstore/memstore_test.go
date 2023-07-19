@@ -8,8 +8,8 @@ import (
 	"io"
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
 )
 
 func TestMemstore(t *testing.T) {

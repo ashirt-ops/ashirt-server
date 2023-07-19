@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 // AuthConfig provides configuration details for all authentication services
