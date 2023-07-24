@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers/filter"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
-	"github.com/theparanoids/ashirt-server/backend/models"
 
 	sq "github.com/Masterminds/squirrel"
 )

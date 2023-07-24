@@ -10,7 +10,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend"
 )
 
 // DevStore is the backing structure needed to interact with a local, temporary image store

@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/theparanoids/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 )
 
 func TestAddHeaders(t *testing.T) {

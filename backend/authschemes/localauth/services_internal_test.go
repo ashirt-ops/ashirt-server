@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/session"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/database/seeding"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/session"
 )
 
 func initBridge(t *testing.T) authschemes.AShirtAuthBridge {

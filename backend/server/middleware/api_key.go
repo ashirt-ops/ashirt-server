@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/signer"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/signer"
 
 	sq "github.com/Masterminds/squirrel"
 )

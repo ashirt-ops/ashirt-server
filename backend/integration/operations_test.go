@@ -6,7 +6,7 @@ package integration_test
 import (
 	"testing"
 
-	"github.com/theparanoids/ashirt-server/backend/integration"
+	"github.com/ashirt-ops/ashirt-server/backend/integration"
 )
 
 func TestOperations(t *testing.T) {

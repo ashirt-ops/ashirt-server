@@ -12,10 +12,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/integration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/integration"
 )
 
 func TestEvidence(t *testing.T) {

@@ -7,13 +7,13 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/config/confighelpers"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/server"
 	"github.com/go-chi/chi/v5"
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server"
 )
 
 func main() {

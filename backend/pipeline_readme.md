@@ -188,7 +188,7 @@ Headers:
 * `Date`: now, in `GMT`, in RFC1123 format (note: must be `GMT`, not `UTC`). e.g: `Sun, 21 Oct 2018 12:16:24 GMT` (Also known as RFC7231)
 * `Authorization`: HMAC. See below
 
-Authorization is accomplished by constructing an HMAC message. You can find a Golang version in `signer/hmac.go`, in the BuildRequestHMAC function. Likewise, there is a C++ version in AShirt [here](https://github.com/theparanoids/ashirt/blob/main/src/helpers/netman.h#L105-L123) (See the `generateHash` method if the link rusts). However, the process is fairly straight forward, and detailed here:
+Authorization is accomplished by constructing an HMAC message. You can find a Golang version in `signer/hmac.go`, in the BuildRequestHMAC function. Likewise, there is a C++ version in AShirt [here](https://github.com/ashirt-ops/ashirt/blob/main/src/helpers/netman.h#L105-L123) (See the `generateHash` method if the link rusts). However, the process is fairly straight forward, and detailed here:
 
 1. Create the body content. Then, hash this content using the `sha-256` algorithm. Note that in situations where there is no body, you would instead hash an empty string. The output from this should be a series of bytes in no special encoding ("raw" format).
 2. Create a string with the following information:

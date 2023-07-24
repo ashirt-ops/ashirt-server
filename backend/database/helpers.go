@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/go-sql-driver/mysql"

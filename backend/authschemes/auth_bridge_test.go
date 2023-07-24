@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/session"
-	"github.com/theparanoids/ashirt-server/backend/workers"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/session"
+	"github.com/ashirt-ops/ashirt-server/backend/workers"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/stretchr/testify/require"

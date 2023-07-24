@@ -10,13 +10,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/localauth/constants"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
 	"github.com/go-chi/chi/v5"
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
 	"golang.org/x/crypto/bcrypt"
 )
 

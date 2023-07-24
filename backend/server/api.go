@@ -9,15 +9,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
-	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func API(r chi.Router, db *database.Connection, contentStore contentstore.Store, logger logging.Logger) {

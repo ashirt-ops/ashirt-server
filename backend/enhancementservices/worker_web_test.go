@@ -10,10 +10,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 	// aliasing as this to shorten lines / aid in reading
-	this "github.com/theparanoids/ashirt-server/backend/enhancementservices"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
+	this "github.com/ashirt-ops/ashirt-server/backend/enhancementservices"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 func TestWebTest(t *testing.T) {

@@ -6,8 +6,8 @@ package authschemes_test
 import (
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
 )
 
 func TestCreateNewAuthForUserGeneric(t *testing.T) {

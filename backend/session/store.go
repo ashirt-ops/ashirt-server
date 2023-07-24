@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/theparanoids/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
 )
 
 // MySQLStore represents the session store.

@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/recoveryauth/constants"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
 	"github.com/go-chi/chi/v5"
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/constants"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
 )
 
 type RecoveryAuthScheme struct {

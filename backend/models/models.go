@@ -7,8 +7,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 // APIKey reflects the structure of the database table 'api_keys'

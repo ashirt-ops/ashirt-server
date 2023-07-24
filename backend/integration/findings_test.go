@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/theparanoids/ashirt-server/backend/integration"
+	"github.com/ashirt-ops/ashirt-server/backend/integration"
 )
 
 func TestFindings(t *testing.T) {

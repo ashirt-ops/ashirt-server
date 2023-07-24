@@ -1,4 +1,4 @@
-module github.com/theparanoids/ashirt-server
+module github.com/ashirt-ops/ashirt-server
 
 go 1.20
 

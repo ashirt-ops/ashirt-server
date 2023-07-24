@@ -11,13 +11,13 @@ import (
 	"os"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
-	"github.com/theparanoids/ashirt-server/backend/session"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
+	"github.com/ashirt-ops/ashirt-server/backend/session"
 
 	sq "github.com/Masterminds/squirrel"
 )

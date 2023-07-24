@@ -4,8 +4,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/database/seeding"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
 )
 
 var retrieveMutex sync.Mutex
