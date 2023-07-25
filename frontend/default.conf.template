@@ -15,6 +15,10 @@ server {
       proxy_pass ${WEB_URL};
     }
 
+    location /api {
+      proxy_pass ${WEB_URL};
+    }
+
     location /assets {
       root     /usr/share/nginx/html;
       try_files $uri $uri/;
