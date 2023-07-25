@@ -101,6 +101,12 @@ func main() {
 		)
 	})
 
+	r.Route("/api", func(r chi.Router) {
+		server.API(r,
+			db, contentStore, logger,
+		)
+	})
+
 	logger.Log("msg", "starting Web server", "port", config.Port())
 	serveErr := http.ListenAndServe(":"+config.Port(), r)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
