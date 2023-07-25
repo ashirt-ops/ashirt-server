@@ -12,4 +12,5 @@ type ListCredentialsOutput struct {
 type CredentialEntry struct {
 	CredentialName string    `json:"credentialName"`
 	DateCreated    time.Time `json:"dateCreated"`
+	CredentialID   string    `json:"credentialId"`
 }

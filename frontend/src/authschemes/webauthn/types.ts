@@ -63,4 +63,5 @@ export type CredentialList = {
 export type CredentialEntry = {
   credentialName: string
   dateCreated: Date
+  credentialId: string
 }
