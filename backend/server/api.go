@@ -12,7 +12,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
-	"github.com/ashirt-ops/ashirt-server/backend/dtos"
 	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
@@ -25,44 +24,12 @@ func API(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.AuthenticateAppAndInjectCtx(db))
 		r.Use(middleware.LogRequests(logger))
+		bindSharedRoutes(r, db, contentStore)
 		bindAPIRoutes(r, db, contentStore)
 	})
 }
 
 func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
-	route(r, "GET", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
-		return services.ListOperations(r.Context(), db)
-	}))
-
-	route(r, "GET", "/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
-		return dtos.CheckConnection{Ok: true}, nil
-	}))
-
-	route(r, "POST", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.CreateOperationInput{
-			Slug:    dr.FromBody("slug").Required().AsString(),
-			Name:    dr.FromBody("name").Required().AsString(),
-			OwnerID: middleware.UserID(r.Context()),
-		}
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.CreateOperation(r.Context(), db, i)
-	}))
-
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.ReadEvidenceInput{
-			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-		}
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.ReadEvidence(r.Context(), db, contentStore, i)
-	}))
-
 	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
 		dr := dissectNoBodyRequest(r)
 		i := services.ReadEvidenceInput{
@@ -138,26 +105,5 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			CanProcess: dr.FromBody("canProcess").AsBoolPtr(),
 		}
 		return nil, services.UpsertEvidenceMetadata(r.Context(), db, i)
-	}))
-
-	route(r, "GET", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.ListTagsForOperationInput{
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-		}
-		return services.ListTagsForOperation(r.Context(), db, i)
-	}))
-
-	route(r, "POST", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.CreateTagInput{
-			Name:          dr.FromBody("name").Required().AsString(),
-			ColorName:     dr.FromBody("colorName").AsString(),
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-		}
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.CreateTag(r.Context(), db, i)
 	}))
 }
