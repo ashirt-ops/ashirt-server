@@ -12,6 +12,7 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
 	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
@@ -30,6 +31,10 @@ func API(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 }
 
 func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
+	route(r, "GET", "/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return dtos.CheckConnection{Ok: true}, nil
+	}))
+
 	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
 		dr := dissectNoBodyRequest(r)
 		i := services.ReadEvidenceInput{

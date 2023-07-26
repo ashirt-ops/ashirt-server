@@ -8,17 +8,12 @@ import (
 
 	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
-	"github.com/ashirt-ops/ashirt-server/backend/dtos"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/go-chi/chi/v5"
 )
 
 func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
-	route(r, "GET", "/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
-		return dtos.CheckConnection{Ok: true}, nil
-	}))
-
 	route(r, "GET", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListOperations(r.Context(), db)
 	}))
