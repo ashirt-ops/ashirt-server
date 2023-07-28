@@ -1,6 +1,6 @@
 version: "3"
 services:
-  ashirt-private-service:
+  ashirt-service:
     build:
       context: .
       dockerfile: Dockerfile.prod.web
@@ -23,21 +23,6 @@ services:
       AUTH_SERVICES: ashirt
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
 
-
-  ashirt-public-service:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod.api
-    ports:
-      - 8001:8000
-    restart: on-failure
-    environment:
-      APP_IMGSTORE_BUCKET_NAME: ""
-      APP_IMGSTORE_REGION: ""
-      APP_PORT: 8000
-      DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
-
-
   frontend:
     build:
       context: .
@@ -46,7 +31,7 @@ services:
       - 8080:8080
     environment:
       NGINX_PORT: 8080
-      WEB_URL: http://ashirt-private-service:8000
+      WEB_URL: http://ashirt-service:8000
 
   db:
     image: mysql:8.0

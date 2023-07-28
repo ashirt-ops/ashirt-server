@@ -103,6 +103,7 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 			}
 		}
 
+		bindSharedRoutes(r, db, contentStore)
 		bindWebRoutes(r, db, contentStore, sessionStore, &authsWithOutRecovery)
 	})
 }
@@ -278,25 +279,8 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteAuthSchemeUsers(r.Context(), db, schemeCode)
 	}))
 
-	route(r, "GET", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
-		return services.ListOperations(r.Context(), db)
-	}))
-
 	route(r, "GET", "/admin/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListOperationsForAdmin(r.Context(), db)
-	}))
-
-	route(r, "POST", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.CreateOperationInput{
-			Slug:    dr.FromBody("slug").Required().AsString(),
-			Name:    dr.FromBody("name").Required().AsString(),
-			OwnerID: middleware.UserID(r.Context()),
-		}
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.CreateOperation(r.Context(), db, i)
 	}))
 
 	route(r, "DELETE", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
@@ -742,27 +726,6 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			return nil, dr.Error
 		}
 		return nil, services.DeleteQuery(r.Context(), db, i)
-	}))
-
-	route(r, "GET", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.ListTagsForOperationInput{
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-		}
-		return services.ListTagsForOperation(r.Context(), db, i)
-	}))
-
-	route(r, "POST", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		i := services.CreateTagInput{
-			Name:          dr.FromBody("name").Required().AsString(),
-			ColorName:     dr.FromBody("colorName").AsString(),
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-		}
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.CreateTag(r.Context(), db, i)
 	}))
 
 	route(r, "PUT", "/operations/{operation_slug}/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
