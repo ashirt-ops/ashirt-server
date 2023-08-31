@@ -457,7 +457,7 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 			metadataSubquery = metadataSubquery.Where(sq.Like{"body": "%" + text + "%"})
 		}
 		if q, v, e := metadataSubquery.ToSql(); e == nil {
-			sb = sb.Where("evidence.id IN ("+q+")", v)
+			sb = sb.Where("evidence.id IN ("+q+")", v...)
 		}
 	}
 
