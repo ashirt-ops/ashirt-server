@@ -405,7 +405,10 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 	})
 
 	if idx != -1 {
-		return nil, errors.New("Credential name is already taken")
+		return nil, backend.BadInputErr(
+			errors.New("user trying to register with taken credential name"),
+			"Credential name is already taken",
+		)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
@@ -415,7 +418,6 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 			CredentialID: cred.ID,
 		}
 	}
-	// TODO TN can I iterate on the lit I have in the old PR in a similar way?
 	registrationOptions := func(credCreationOpts *protocol.PublicKeyCredentialCreationOptions) {
 		credCreationOpts.CredentialExcludeList = credExcludeList
 	}
