@@ -452,12 +452,12 @@ func buildListEvidenceWhereClause(sb sq.SelectBuilder, operationID int64, filter
 	}
 
 	if len(filters.Metadata) > 0 {
-		metadataSubquery := sq.Select("evidence_id").From("evidence_metadata")
 		for _, text := range filters.Metadata {
-			metadataSubquery = metadataSubquery.Where(sq.Like{"body": "%" + text + "%"})
-		}
-		if q, v, e := metadataSubquery.ToSql(); e == nil {
-			sb = sb.Where("evidence.id IN ("+q+")", v)
+			metadataSubquery := sq.Select("evidence_id").From("evidence_metadata").Where(sq.Like{"body": "%" + text + "%"})
+			if q, v, e := metadataSubquery.ToSql(); e == nil {
+				currentFilter := v[0]
+				sb = sb.Where("evidence.id IN ("+q+")", currentFilter)
+			}
 		}
 	}
 
