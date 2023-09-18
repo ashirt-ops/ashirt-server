@@ -2,6 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import Button, { ButtonGroup } from 'src/components/button'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
@@ -10,11 +11,13 @@ import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, OnRequestClose } from 'src/helpers'
 import { convertToCredentialCreationOptions, convertToPublicKeyCredentialRequestOptions, encodeAsB64 } from '../helpers'
 import { getResultState } from 'src/helpers/is_success_result'
+import classnames from 'classnames/bind'
+const cx = classnames.bind(require('./stylesheet'))
 
 
 export default (props: {
   query: URLSearchParams,
-  authFlags?: Array<string>
+  authFlags?: Array<string>,
 }) => {
   return (
     <Login authFlags={props.authFlags} />
@@ -22,14 +25,15 @@ export default (props: {
 }
 
 const Login = (props: {
-  authFlags?: Array<string>
+  authFlags?: Array<string>,
 }) => {
   const usernameField = useFormField('')
+  const [isDiscoverable, setIsDiscoverable] = React.useState(false)
 
   const loginForm = useForm({
     fields: [usernameField],
     handleSubmit: async () => {
-      const protoOptions = await beginLogin({ username: usernameField.value })
+      const protoOptions = await beginLogin({ username: usernameField.value }, isDiscoverable)
       const credOptions = convertToPublicKeyCredentialRequestOptions(protoOptions)
 
       const cred = await navigator.credentials.get({
@@ -51,12 +55,12 @@ const Login = (props: {
           signature: encodeAsB64(pubKeyResponse.signature),
           userHandle: pubKeyResponse.userHandle == null ? "" : encodeAsB64(pubKeyResponse.userHandle),
         }
-      })
+      }, isDiscoverable)
       window.location.pathname = '/'
     },
   })
 
-  const registerModal = useModal<void>(modalProps => <RegisterModal {...(modalProps as OnRequestClose)} />)
+  const registerModal = useModal<void>(modalProps => <RegisterModal onRequestClose={() => modalProps.onRequestClose()} isDiscoverable={isDiscoverable} />)
 
   const allowRegister = props.authFlags?.includes("open-registration") // TODO: this isn't being used
 
@@ -64,14 +68,33 @@ const Login = (props: {
     ? { cancelText: "Register", onCancel: () => registerModal.show() }
     : {}
 
+  const makeDiscoverable = () => setIsDiscoverable(true)
+  const makeNonDiscoverable = () => setIsDiscoverable(false)
+
   return (
     <div>
       {window.PublicKeyCredential && (
-        <div style={{ minWidth: 300 }}>
-          <Form submitText="Login with WebAuthN" {...registerProps} {...loginForm}>
-            <Input label="Username" {...usernameField} />
-          </Form>
-          {renderModals(registerModal)}
+        <div>
+          <div className={cx('mode-buttons')}>
+            <ButtonGroup className={cx('row-buttons')}>
+              <Button active={!isDiscoverable} className={cx('mode-button-left')} onClick={makeNonDiscoverable}>Webauthn</Button>
+              <Button active={isDiscoverable} className={cx('mode-button-right')} onClick={makeDiscoverable}>Discoverable Webauthn</Button>
+            </ButtonGroup>
+          </div>
+          {!isDiscoverable ? (
+            <div>
+              <Form submitText="Login" {...registerProps} {...loginForm}>
+                <Input label="Username" {...usernameField} />
+              </Form>
+              {renderModals(registerModal)}
+            </div>
+          ) : (
+            <div>
+              <Form submitText="Discoverable Login" {...registerProps} {...loginForm}>
+              </Form>
+              {renderModals(registerModal)}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -80,6 +103,7 @@ const Login = (props: {
 
 const RegisterModal = (props: {
   onRequestClose: () => void,
+  isDiscoverable: boolean,
 }) => {
   const firstNameField = useFormField('')
   const lastNameField = useFormField('')
@@ -107,7 +131,7 @@ const RegisterModal = (props: {
         email: emailField.value,
         username: usernameField.value,
         credentialName: keyNameField.value,
-      })
+      }, props.isDiscoverable)
       const credOptions = convertToCredentialCreationOptions(reg)
 
       const signed = await navigator.credentials.create(credOptions)
