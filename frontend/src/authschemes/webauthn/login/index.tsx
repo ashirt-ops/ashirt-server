@@ -28,7 +28,7 @@ const Login = (props: {
   authFlags?: Array<string>,
 }) => {
   const usernameField = useFormField('')
-  const [isDiscoverable, setIsDiscoverable] = React.useState(false)
+  const [isDiscoverable, setIsDiscoverable] = React.useState(true)
 
   const loginForm = useForm({
     fields: [usernameField],
@@ -77,23 +77,23 @@ const Login = (props: {
         <div>
           <div className={cx('mode-buttons')}>
             <ButtonGroup className={cx('row-buttons')}>
-              <Button active={!isDiscoverable} className={cx('mode-button-left')} onClick={makeNonDiscoverable}>Webauthn</Button>
-              <Button active={isDiscoverable} className={cx('mode-button-right')} onClick={makeDiscoverable}>Discoverable Webauthn</Button>
+              <Button active={isDiscoverable} className={cx('mode-button-right')} onClick={makeDiscoverable}>Discoverable</Button>
+              <Button active={!isDiscoverable} className={cx('mode-button-left')} onClick={makeNonDiscoverable}>Username</Button>
             </ButtonGroup>
           </div>
-          {!isDiscoverable ? (
+          {isDiscoverable ? (
             <div>
-              <Form submitText="Login" {...registerProps} {...loginForm}>
-                <Input label="Username" {...usernameField} />
-              </Form>
-              {renderModals(registerModal)}
-            </div>
+            <Form submitText="Login" {...registerProps} {...loginForm}>
+            </Form>
+            {renderModals(registerModal)}
+          </div>
           ) : (
             <div>
-              <Form submitText="Discoverable Login" {...registerProps} {...loginForm}>
-              </Form>
-              {renderModals(registerModal)}
-            </div>
+            <Form submitText="Login" {...registerProps} {...loginForm}>
+              <Input label="Username" {...usernameField} />
+            </Form>
+            {renderModals(registerModal)}
+          </div>
           )}
         </div>
       )}
