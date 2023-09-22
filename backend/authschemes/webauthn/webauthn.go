@@ -4,6 +4,8 @@
 package webauthn
 
 import (
+	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net"
@@ -233,14 +235,15 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 		return a.getCredentials(callingUserID, bridge)
 	}))
 
-	remux.Route(r, "DELETE", "/credential/{credentialName}", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
+	remux.Route(r, "DELETE", "/credential/{credentialID}", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		callingUserID := middleware.UserID(r.Context())
 		dr := remux.DissectJSONRequest(r)
-		credentialName := dr.FromURL("credentialName").Required().AsString()
+		credentialID := dr.FromURL("credentialID").Required().AsString()
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return nil, a.deleteCredential(callingUserID, credentialName, bridge)
+		credIDByteArr, _ := hex.DecodeString(credentialID)
+		return nil, a.deleteCredential(callingUserID, credIDByteArr, bridge)
 	}))
 
 	remux.Route(r, "PUT", "/credential", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
@@ -324,13 +327,14 @@ func (a WebAuthn) getCredentials(userID int64, bridge authschemes.AShirtAuthBrid
 		return CredentialEntry{
 			CredentialName: cred.CredentialName,
 			DateCreated:    cred.CredentialCreatedDate,
+			CredentialID:   hex.EncodeToString(cred.ID),
 		}
 	})
 	output := ListCredentialsOutput{results}
 	return &output, nil
 }
 
-func (a WebAuthn) deleteCredential(userID int64, credentialName string, bridge authschemes.AShirtAuthBridge) error {
+func (a WebAuthn) deleteCredential(userID int64, credentialID []byte, bridge authschemes.AShirtAuthBridge) error {
 	auth, err := bridge.FindUserAuthByUserID(userID)
 	if err != nil {
 		return backend.WrapError("Unable to find user", err)
@@ -343,7 +347,7 @@ func (a WebAuthn) deleteCredential(userID int64, credentialName string, bridge a
 	}
 
 	results := helpers.Filter(creds, func(cred AShirtWebauthnCredential) bool {
-		return cred.CredentialName != credentialName
+		return !bytes.Equal(cred.ID, credentialID)
 	})
 	encodedCreds, err := json.Marshal(results)
 	if err != nil {
@@ -394,6 +398,17 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		user = makeLinkingWebAuthnUser(info.UserID, info.Username, info.CredentialName)
 	} else { // Add Credential
 		user = makeAddCredentialWebAuthnUser(info.UserID, info.Username, info.CredentialName, info.ExistingCredentials)
+	}
+
+	idx, _ := helpers.Find(info.ExistingCredentials, func(cred AShirtWebauthnCredential) bool {
+		return strings.ToLower(cred.CredentialName) == strings.ToLower(info.CredentialName)
+	})
+
+	if idx != -1 {
+		return nil, backend.BadInputErr(
+			errors.New("user trying to register with taken credential name"),
+			"Credential name is already taken",
+		)
 	}
 
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))

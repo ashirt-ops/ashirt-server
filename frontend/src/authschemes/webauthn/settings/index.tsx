@@ -44,7 +44,7 @@ const CredentialList = (props: {
     return () => { props.offReload(wiredCredentials.reload) }
   })
 
-  const deleteModal = useModal<{ credentialName: string }>(mProps => <DeleteCredentialModal {...mProps} />, wiredCredentials.reload)
+  const deleteModal = useModal<{ credentialId: string, credentialName: string }>(mProps => <DeleteCredentialModal {...mProps} />, wiredCredentials.reload)
   const modifyModal = useModal<{ credentialName: string }>(mProps => <EditCredentialModal {...mProps} />, wiredCredentials.reload)
 
   return (<>
@@ -53,7 +53,7 @@ const CredentialList = (props: {
         <div>
           <Table columns={['Credential Name', 'Date Created', 'Actions']}>
             {data.credentials.map(credentialEntry => {
-              const { credentialName, dateCreated } = credentialEntry
+              const { credentialName, dateCreated, credentialId } = credentialEntry
               return (
                 <tr key={credentialName}>
                   <td>{credentialName}</td>
@@ -64,7 +64,7 @@ const CredentialList = (props: {
                         modifyModal.show({ credentialName })
                       }}>Edit</Button>
                       <Button danger small onClick={() => {
-                        deleteModal.show({ credentialName })
+                        deleteModal.show({ credentialId, credentialName })
                       }}>Delete</Button>
                     </ButtonGroup>
                   </td>
@@ -146,6 +146,7 @@ const AddCredentialModal = (props: {
 
 const DeleteCredentialModal = (props: {
   credentialName: string,
+  credentialId: string,
   onRequestClose: () => void,
 }) => (
   <ChallengeModalForm
@@ -153,7 +154,7 @@ const DeleteCredentialModal = (props: {
     warningText="Are you sure you want to delete this security credential?"
     submitText="Delete"
     challengeText={props.credentialName}
-    handleSubmit={() => deleteWebauthnCredential({ credentialName: props.credentialName })}
+    handleSubmit={() => deleteWebauthnCredential({ credentialId: props.credentialId })}
     onRequestClose={props.onRequestClose}
   />
 )
