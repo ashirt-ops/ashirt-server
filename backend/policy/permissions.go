@@ -46,3 +46,11 @@ type CanModifyUserGroupOfOperation struct {
 	OperationID int64
 	UserGroupID int64
 }
+
+// TODO TN which one of these is correct?
+type CanCreateGlobalVars struct{ UserID int64 }
+
+// type CanCreateGlobalVars struct{}
+
+type CanDeleteGlobalVar struct{ GlobalVarID int64 }
+type CanModifyGlobalVar struct{ GlobalVarID int64 }

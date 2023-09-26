@@ -987,4 +987,42 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		}
 		return nil, services.SetFavoriteOperation(r.Context(), db, i)
 	}))
+
+	route(r, "GET", "/globalvars", jsonHandler(func(r *http.Request) (interface{}, error) {
+		return services.ListGlobalVars(r.Context(), db)
+	}))
+
+	route(r, "POST", "/globalvars", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.CreateGlobalVarInput{
+			Name:  dr.FromBody("name").Required().AsString(),
+			Value: dr.FromBody("value").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.CreateGlobalVar(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/globalvars/{name}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpdateGlobalVarInput{
+			GlobalVarName: dr.FromURL("name").Required().AsString(),
+			Value:         dr.FromBody("value").AsString(),
+			NewName:       dr.FromBody("newName").AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.UpdateGlobalVar(r.Context(), db, i)
+	}))
+
+	route(r, "DELETE", "/globalvars/{name}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		name := dr.FromURL("name").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteGlobalVar(r.Context(), db, name)
+	}))
 }

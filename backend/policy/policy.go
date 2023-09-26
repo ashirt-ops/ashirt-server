@@ -90,6 +90,11 @@ func (a *Authenticated) Check(permission Permission) bool {
 	case CanCreateOperations:
 		return true
 
+	case CanCreateGlobalVars:
+		// TODO TN figure this out
+		// return true
+		return selfOrAdmin(target.UserID)
+
 	case AdminUsersOnly:
 		return a.IsSuperAdmin
 

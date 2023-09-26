@@ -107,4 +107,9 @@ export const backendDataSource: DataSource = {
   adminInviteUser: i => req('POST', '/auth/recovery/admin/register', i),
   getTotpForUser: ids => req('GET', '/auth/local/totp', ids),
   deleteTotpForUser: ids => req('DELETE', '/auth/local/totp', ids),
+
+  listGlobalVars: () => req('GET', '/globalvars'),
+  createGlobalVar: payload => req('POST', '/globalvars', payload),
+  updateGlobalVar: (ids, payload) => req('PUT', `/globalvars/${ids.globalVarName}`, payload),
+  deleteGlobalVar: (ids) => req('DELETE', `/globalvars/${ids.globalVarName}`),
 }

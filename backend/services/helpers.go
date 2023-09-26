@@ -278,3 +278,16 @@ func SanitizeSlug(slug string) string {
 		"-",
 	)
 }
+
+func LookupGlobalVar(db *database.Connection, globalVarName string) (*models.GlobalVar, error) {
+	var globalVar models.GlobalVar
+
+	err := db.Get(&globalVar, sq.Select("*").
+		From("global_vars").
+		// TODO TN - should name be indexed? see if places are doing this with slug
+		Where(sq.Eq{"name": globalVarName}))
+	if err != nil {
+		return &globalVar, backend.WrapError("Unable to lookup global variable by name", err)
+	}
+	return &globalVar, nil
+}

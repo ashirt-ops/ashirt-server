@@ -17,6 +17,7 @@ import UserTable from './user_table'
 import UserGroupTable from './user_group_table'
 import ServiceWorkerTable from './service_worker_table'
 import AddServiceWorker from './service_worker_table/add_service_button'
+import GlobalVarsTable from './global_vars_table'
 
 import { BuildReloadBus, BusSupportedService } from 'src/helpers/reload_bus'
 import { DefaultTagEditor } from './default_tag_editor'
@@ -41,6 +42,7 @@ export const AdminTools = () => {
             { id: "tags", label: "Tag Management" },
             { id: "findings", label: "Finding Categories" },
             { id: "services", label: "Service Workers" },
+            { id: "globalvars", label: "Global Variables"}
           ]}
         >
           <Routes>
@@ -51,6 +53,7 @@ export const AdminTools = () => {
             <Route path="tags" element={<TagManagement {...bus} />} />
             <Route path="findings" element={<FindingCategoriesTable />} />
             <Route path="services" element={<ServiceWorkers {...bus} />} />
+            <Route path="globalvars" element={<VarsManagement {...bus} />} />
           </Routes>
         </NavVerticalTabMenu>
       </div>
@@ -95,5 +98,11 @@ const ServiceWorkers = (props: BusSupportedService) => (
   <>
     <ServiceWorkerTable {...props} />
     <AddServiceWorker {...props} />
+  </>
+)
+
+const VarsManagement = (props: BusSupportedService) => (
+  <>
+    <GlobalVarsTable {...props} />
   </>
 )
