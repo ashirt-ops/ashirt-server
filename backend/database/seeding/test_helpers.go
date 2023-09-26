@@ -605,6 +605,16 @@ func GetFavoriteForOperation(t *testing.T, db *database.Connection, slug string,
 	return isFavorite
 }
 
+func GetGlobalVarFromName(t *testing.T, db *database.Connection, globalVarName string) models.GlobalVar {
+	var globalVar models.GlobalVar
+
+	err := db.Get(&globalVar, sq.Select("*").
+		From("global_vars").
+		Where(sq.Eq{"name": globalVarName}))
+	require.NoError(t, err)
+	return globalVar
+}
+
 type TestOptions struct {
 	DatabasePath *string
 	DatabaseName *string

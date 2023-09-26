@@ -147,6 +147,10 @@ var HarryPotterSeedData = Seeder{
 	ServiceWorkers: []models.ServiceWorker{
 		DemoServiceWorker,
 	},
+	GlobalVars: []models.GlobalVar{
+		// VarExpelliarmus,
+		VarExpelliarmus, VarAlohomora,
+	},
 }
 
 var newHPUser = newUserGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
@@ -361,3 +365,7 @@ var FindingBook2Robes = newHPFinding(OpChamberOfSecrets.ID, "find-uuid-robes", n
 
 var newHPServiceWorker = newServiceWorkerGen(1)
 var DemoServiceWorker = newHPServiceWorker("Demo", `{ "type": "web",  "version": 1, "url": "http://demo:3001/process" }`)
+
+var newGlobalVar = newGlobalVarGen(1)
+var VarExpelliarmus = newGlobalVar("Expelliarmus", "disarm an opponent")
+var VarAlohomora = newGlobalVar("Alohomora", "unlock doors")

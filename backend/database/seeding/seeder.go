@@ -5,6 +5,7 @@ package seeding
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -38,6 +39,7 @@ type Seeder struct {
 	EviFindingsMap    []models.EvidenceFindingMap
 	Queries           []models.Query
 	ServiceWorkers    []models.ServiceWorker
+	GlobalVars        []models.GlobalVar
 }
 
 // AllInitialTagIds is a (convenience) method version of the function TagIDsFromTags
@@ -242,6 +244,14 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 			}
 		})
 		tx.BatchInsert("queries", len(seed.Queries), func(i int) map[string]interface{} {
+			fmt.Println("Queries", seed.Queries[i].Name)
+			fmt.Println("len(seed.Queries)", len(seed.Queries))
+			fmt.Println("i", i)
+			fmt.Printf("seed.Queries[0] %v+\n", seed.Queries[0])
+			fmt.Printf("seed.Queries[1] %v+\n", seed.Queries[1])
+			// fmt.Printf("seed.GlobalVars %v+\n", seed.GlobalVars)
+			// fmt.Printf("seed.GlobalVars[0] %v+\n", seed.GlobalVars[0])
+			// fmt.Printf("seed.GlobalVars[1] %v+\n", seed.GlobalVars[1])
 			return map[string]interface{}{
 				"id":           seed.Queries[i].ID,
 				"operation_id": seed.Queries[i].OperationID,
@@ -262,8 +272,17 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"deleted_at": seed.ServiceWorkers[i].DeletedAt,
 			}
 		})
+		tx.BatchInsert("global_vars", len(seed.GlobalVars), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.GlobalVars[i].ID,
+				"name":       seed.GlobalVars[i].Name,
+				"value":      seed.GlobalVars[i].Value,
+				"created_at": seed.GlobalVars[i].CreatedAt,
+				"updated_at": seed.GlobalVars[i].UpdatedAt,
+			}
+		})
 	})
-
+	fmt.Println("err", err)
 	return err
 }
 

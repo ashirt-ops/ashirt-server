@@ -296,6 +296,18 @@ func newServiceWorkerGen(first int64) func(name, config string) models.ServiceWo
 	}
 }
 
+func newGlobalVarGen(first int64) func(name, value string) models.GlobalVar {
+	id := iotaLike(first)
+	return func(name, value string) models.GlobalVar {
+		return models.GlobalVar{
+			ID:        id(),
+			Value:     value,
+			Name:      name,
+			CreatedAt: time.Now(),
+		}
+	}
+}
+
 // associateEvidenceToTag mirrors associateTagsToEvidence. Rather than associating multiple tags
 // with a single piece of evidence this will instead associate a single tag to multiple evidence.
 func associateEvidenceToTag(tag models.Tag, evis ...models.Evidence) []models.TagEvidenceMap {

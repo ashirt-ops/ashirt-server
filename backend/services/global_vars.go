@@ -132,10 +132,15 @@ func UpdateGlobalVar(ctx context.Context, db *database.Connection, i UpdateGloba
 
 	var val string
 	var name string
+	fmt.Println("i.Value", i.Value)
+	fmt.Println("i.NewName", i.NewName)
+	fmt.Println("i.GlobalVarName", i.GlobalVarName)
+	fmt.Println(i.Value == "")
 	// TODO TN test this to make sure it works as intended
 	if i.Value != "" {
 		val = i.Value
 	} else {
+		fmt.Println("i isquotes")
 		val = globalVar.Value
 	}
 
