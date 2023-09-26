@@ -5,7 +5,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
@@ -42,23 +41,11 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 		return nil, backend.MissingValueErr("Name")
 	}
 
-	// TODO TN can this be empty? I think it should be able to be
-	// if i.Value == "" {
-	// 	return nil, backend.MissingValueErr("Value")
-	// }
-
-	// todo TN does this need to happen?
-	// cleanSlug := SanitizeSlug(i.Name)
-	// if cleanSlug == "" {
-	// 	return nil, backend.BadInputErr(errors.New("Unable to create operation. Invalid operation slug"), "Slug must contain english letters or numbers")
-	// }
-
 	globalVarID, err := db.Insert("global_vars", map[string]interface{}{
 		"name":  i.Name,
 		"value": i.Value,
 	})
 	if err != nil {
-		fmt.Println("other error", err)
 		if database.IsAlreadyExistsError(err) {
 			return nil, backend.BadInputErr(backend.WrapError("global variable already exists", err), "A global variable with this name already exists")
 		}
@@ -132,15 +119,10 @@ func UpdateGlobalVar(ctx context.Context, db *database.Connection, i UpdateGloba
 
 	var val string
 	var name string
-	fmt.Println("i.Value", i.Value)
-	fmt.Println("i.NewName", i.NewName)
-	fmt.Println("i.GlobalVarName", i.GlobalVarName)
-	fmt.Println(i.Value == "")
-	// TODO TN test this to make sure it works as intended
+
 	if i.Value != "" {
 		val = i.Value
 	} else {
-		fmt.Println("i isquotes")
 		val = globalVar.Value
 	}
 
