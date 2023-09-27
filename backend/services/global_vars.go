@@ -59,16 +59,11 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 }
 
 func DeleteGlobalVar(ctx context.Context, db *database.Connection, name string) error {
-	globalVar, err := LookupGlobalVar(db, name)
-	if err != nil {
-		return backend.WrapError("Unable to delete global variable", backend.UnauthorizedWriteErr(err))
-	}
-
-	if err := policyRequireWithAdminBypass(ctx, policy.CanDeleteGlobalVar{GlobalVarID: globalVar.ID}); err != nil {
+	if err := policyRequireWithAdminBypass(ctx, policy.AdminUsersOnly{}); err != nil {
 		return backend.WrapError("Unwilling to delete global variable", backend.UnauthorizedWriteErr(err))
 	}
 
-	err = db.Delete(sq.Delete("global_vars").Where(sq.Eq{"name": name}))
+	err := db.Delete(sq.Delete("global_vars").Where(sq.Eq{"name": name}))
 	if err != nil {
 		return backend.WrapError("Cannot delete global variable", backend.DatabaseErr(err))
 	}
@@ -108,7 +103,7 @@ func UpdateGlobalVar(ctx context.Context, db *database.Connection, i UpdateGloba
 		return backend.WrapError("Unable to update operation", backend.UnauthorizedWriteErr(err))
 	}
 
-	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyGlobalVar{GlobalVarID: globalVar.ID}); err != nil {
+	if err := policyRequireWithAdminBypass(ctx, policy.AdminUsersOnly{}); err != nil {
 		return backend.WrapError("Unwilling to update operation", backend.UnauthorizedWriteErr(err))
 	}
 

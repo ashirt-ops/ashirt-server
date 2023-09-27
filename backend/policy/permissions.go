@@ -46,6 +46,3 @@ type CanModifyUserGroupOfOperation struct {
 	OperationID int64
 	UserGroupID int64
 }
-
-type CanDeleteGlobalVar struct{ GlobalVarID int64 }
-type CanModifyGlobalVar struct{ GlobalVarID int64 }
