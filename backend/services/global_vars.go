@@ -41,7 +41,7 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 		return nil, backend.MissingValueErr("Name")
 	}
 
-	globalVarID, err := db.Insert("global_vars", map[string]interface{}{
+	_, err := db.Insert("global_vars", map[string]interface{}{
 		"name":  i.Name,
 		"value": i.Value,
 	})
@@ -53,7 +53,6 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 	}
 
 	return &dtos.GlobalVar{
-		ID:    globalVarID,
 		Name:  i.Name,
 		Value: i.Value,
 	}, nil
@@ -95,7 +94,6 @@ func ListGlobalVars(ctx context.Context, db *database.Connection) ([]*dtos.Globa
 	var globalVarsDTO = make([]*dtos.GlobalVar, len(globalVars))
 	for i, globalVar := range globalVars {
 		globalVarsDTO[i] = &dtos.GlobalVar{
-			ID:    globalVar.ID,
 			Name:  globalVar.Name,
 			Value: globalVar.Value,
 		}
