@@ -140,7 +140,7 @@ export interface DataSource {
   deleteTotpForUser(ids: UserSlug): Promise<void>
 
   listGlobalVars(): Promise<Array<dtos.GlobalVar>>
-  createGlobalVar(payload: { name: string, value: string }): Promise<dtos.GlobalVar>
+  createGlobalVar(payload: { name: string, value: string | null }): Promise<dtos.GlobalVar>
   updateGlobalVar(ids: GlobalVarName, payload: { value: string | null, newName: string | null }): Promise<void>
   deleteGlobalVar(ids: GlobalVarName): Promise<void>
 }

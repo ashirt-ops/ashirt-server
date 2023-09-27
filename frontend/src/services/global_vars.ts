@@ -4,7 +4,7 @@
 import { GlobalVar } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
-export async function createGlobalVar(name: string, value: string): Promise<GlobalVar> {
+export async function createGlobalVar(name: string, value: string | null): Promise<GlobalVar> {
   if (name === "") {
     return Promise.reject(Error("Global variable name must not be empty"))
   }

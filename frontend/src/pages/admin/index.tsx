@@ -9,6 +9,7 @@ import HeadlessButton from './add_headless'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
 import CreateUserButton from "./add_user"
 import CreateUserGroupButton from "./add_user_group"
+import CreateGlobalVarButton from "./add_global_variable"
 import InviteuserButton from "./invite_user"
 import OperationsTable from './operations_table'
 import FindingCategoriesTable from "./finding_categories_table"
@@ -104,5 +105,6 @@ const ServiceWorkers = (props: BusSupportedService) => (
 const VarsManagement = (props: BusSupportedService) => (
   <>
     <GlobalVarsTable {...props} />
+    <CreateGlobalVarButton {...props} />
   </>
 )

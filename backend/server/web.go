@@ -996,7 +996,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateGlobalVarInput{
 			Name:  dr.FromBody("name").Required().AsString(),
-			Value: dr.FromBody("value").Required().AsString(),
+			Value: dr.FromBody("value").AsString(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error

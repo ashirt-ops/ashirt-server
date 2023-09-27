@@ -14,7 +14,8 @@ import {
   deleteUserGroup,
   modifyUserGroup,
   deleteGlobalVar,
-  updateGlobalVar
+  updateGlobalVar,
+  createGlobalVar
 } from 'src/services'
 import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
@@ -459,6 +460,54 @@ export const RemoveTotpModal = (props: {
   </ModalForm>
 }
 
+export const AddGlobalVarModal = (props: {
+  onRequestClose: () => void,
+}) => {
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+
+  const name = useFormField<string>("")
+  const value = useFormField<string>("")
+  const formComponentProps = useForm({
+    fields: [name, value],
+    handleSubmit: () => {
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Global Variable should have a name")))
+      }
+
+      // TODO TN does this line up with what the API is expecting?
+      const valOrNull = value.value === "" ? null : value.value
+      const runSubmit = async () => {
+        await createGlobalVar(name.value, valOrNull) 
+        setIsCompleted(true)
+      }
+      return runSubmit()
+    },
+  })
+
+  return (
+    <Modal title="Add Variable" onRequestClose={props.onRequestClose}>
+      {isCompleted ? (<>
+        <div className={cx('success-area')}>
+          <p>Variable has been added successfully!</p>
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      :
+      (<>
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <h1 className={cx('header')}>Name</h1>
+        <Input label="" {...name} disabled={isCompleted} />
+        <h1 className={cx('header')}>Value<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...value} disabled={isCompleted} />
+      </Form>
+      </>)
+      }
+    </Modal>
+  )
+}
+
 export const DeleteGlobalVarModal = (props: {
   globalVar: GlobalVar,
   onRequestClose: () => void,
@@ -471,55 +520,55 @@ export const DeleteGlobalVarModal = (props: {
     onRequestClose={props.onRequestClose}
   />
 
-  export const ModifyGlobalVarModal = (props: {
-    globalVar: GlobalVar,
-    onRequestClose: () => void,
-  }) => {
-    const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
-  
-    const name = useFormField<string>(props.globalVar.name)
-    const value = useFormField<string>(props.globalVar.value)
-    const formComponentProps = useForm({
-      fields: [name, value],
-      handleSubmit: () => {
-        if (name.value.length == 0) {
-          return new Promise((_resolve, reject) => reject(Error("User goup should have a name")))
-        }
-  
-        const nameOrNull = name.value.toLowerCase() !== props.globalVar.name.toLowerCase() ? name.value : null
-        const valOrNull = value.value.toLowerCase() !== props.globalVar.value.toLowerCase() ? value.value : null
-        const somethingChanged = nameOrNull !== null || valOrNull !== null
-        const runSubmit = async () => {
-          somethingChanged && await updateGlobalVar(props.globalVar.name, {
-            value: valOrNull,
-            newName: nameOrNull,
-          }) 
-          setIsCompleted(true)
-        }
-        return runSubmit()
-      },
-    })
-  
-    return (
-      <Modal title="Modify Variable" onRequestClose={props.onRequestClose}>
-        {isCompleted ? (<>
-          <div className={cx('success-area')}>
-            <p>Variable has been modified successfully!</p>
-            <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
-          </div>
-        </>)
-        :
-        (<>
-        <Form {...formComponentProps} loading={isCompleted}
-          submitText={isCompleted ? undefined : "Submit"}
-        >
-          <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
-          <Input label="" {...name} disabled={isCompleted} />
-          <h1 className={cx('header')}>Value<span className={cx('optional')}>*</span></h1>
-          <Input label="" {...value} disabled={isCompleted} />
-        </Form>
-        </>)
-        }
-      </Modal>
-    )
-  }
+export const ModifyGlobalVarModal = (props: {
+  globalVar: GlobalVar,
+  onRequestClose: () => void,
+}) => {
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+
+  const name = useFormField<string>(props.globalVar.name)
+  const value = useFormField<string>(props.globalVar.value)
+  const formComponentProps = useForm({
+    fields: [name, value],
+    handleSubmit: () => {
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Global Variable should have a name")))
+      }
+
+      const nameOrNull = name.value.toLowerCase() !== props.globalVar.name.toLowerCase() ? name.value : null
+      const valOrNull = value.value.toLowerCase() !== props.globalVar.value.toLowerCase() ? value.value : null
+      const somethingChanged = nameOrNull !== null || valOrNull !== null
+      const runSubmit = async () => {
+        somethingChanged && await updateGlobalVar(props.globalVar.name, {
+          value: valOrNull,
+          newName: nameOrNull,
+        }) 
+        setIsCompleted(true)
+      }
+      return runSubmit()
+    },
+  })
+
+  return (
+    <Modal title="Modify Variable" onRequestClose={props.onRequestClose}>
+      {isCompleted ? (<>
+        <div className={cx('success-area')}>
+          <p>Variable has been modified successfully!</p>
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      :
+      (<>
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...name} disabled={isCompleted} />
+        <h1 className={cx('header')}>Value<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...value} disabled={isCompleted} />
+      </Form>
+      </>)
+      }
+    </Modal>
+  )
+}
