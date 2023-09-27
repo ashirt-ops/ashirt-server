@@ -77,7 +77,6 @@ func DeleteGlobalVar(ctx context.Context, db *database.Connection, name string) 
 	return nil
 }
 
-// ListQueriesForOperation retrieves all saved queries for a given globalVar id
 func ListGlobalVars(ctx context.Context, db *database.Connection) ([]*dtos.GlobalVar, error) {
 
 	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {

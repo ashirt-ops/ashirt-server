@@ -474,7 +474,6 @@ export const AddGlobalVarModal = (props: {
         return new Promise((_resolve, reject) => reject(Error("Global Variable should have a name")))
       }
 
-      // TODO TN does this line up with what the API is expecting?
       const valOrNull = value.value === "" ? null : value.value
       const runSubmit = async () => {
         await createGlobalVar(name.value, valOrNull) 
