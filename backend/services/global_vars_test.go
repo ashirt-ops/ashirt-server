@@ -88,9 +88,9 @@ func TestUpdateGlobalVar(t *testing.T) {
 		ctx := contextForUser(UserHarry, db)
 
 		input := services.UpdateGlobalVarInput{
-			GlobalVarName: initialVar.Name,
-			NewName:       "Patronus",
-			Value:         "Summon a Patronus",
+			Name:    initialVar.Name,
+			NewName: "Patronus",
+			Value:   "Summon a Patronus",
 		}
 
 		err := services.UpdateGlobalVar(ctx, db, input)
@@ -103,9 +103,9 @@ func TestUpdateGlobalVar(t *testing.T) {
 		newValue := "Bring an object to you"
 
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: newVar.Name,
-			NewName:       newName,
-			Value:         newValue,
+			Name:    newVar.Name,
+			NewName: newName,
+			Value:   newValue,
 		}
 
 		err = services.UpdateGlobalVar(ctx, db, input)
@@ -120,9 +120,9 @@ func TestUpdateGlobalVar(t *testing.T) {
 		newVar = VarImperio
 		newName = "Expecto Patronum"
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: newVar.Name,
-			NewName:       newName,
-			Value:         "",
+			Name:    newVar.Name,
+			NewName: newName,
+			Value:   "",
 		}
 
 		err = services.UpdateGlobalVar(ctx, db, input)
@@ -135,9 +135,9 @@ func TestUpdateGlobalVar(t *testing.T) {
 		newVar = VarLumos
 		newValue = "Summon a Patronus"
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: newVar.Name,
-			NewName:       "",
-			Value:         newValue,
+			Name:    newVar.Name,
+			NewName: "",
+			Value:   newValue,
 		}
 
 		err = services.UpdateGlobalVar(ctx, db, input)
@@ -149,9 +149,9 @@ func TestUpdateGlobalVar(t *testing.T) {
 		// Update name to another var that already exists
 		newVar = VarAlohomora
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: newName,
-			NewName:       newVar.Name,
-			Value:         "",
+			Name:    newName,
+			NewName: newVar.Name,
+			Value:   "",
 		}
 
 		err = services.UpdateGlobalVar(ctx, db, input)

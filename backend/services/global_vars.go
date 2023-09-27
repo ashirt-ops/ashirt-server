@@ -23,9 +23,9 @@ type CreateGlobalVarInput struct {
 }
 
 type UpdateGlobalVarInput struct {
-	GlobalVarName string
-	Value         string
-	NewName       string
+	Name    string
+	Value   string
+	NewName string
 }
 
 type DeleteGlobalVarInput struct {
@@ -59,16 +59,11 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 }
 
 func DeleteGlobalVar(ctx context.Context, db *database.Connection, name string) error {
-	globalVar, err := LookupGlobalVar(db, name)
-	if err != nil {
-		return backend.WrapError("Unable to delete global variable", backend.UnauthorizedWriteErr(err))
-	}
-
-	if err := policyRequireWithAdminBypass(ctx, policy.CanDeleteGlobalVar{GlobalVarID: globalVar.ID}); err != nil {
+	if err := policyRequireWithAdminBypass(ctx, policy.AdminUsersOnly{}); err != nil {
 		return backend.WrapError("Unwilling to delete global variable", backend.UnauthorizedWriteErr(err))
 	}
 
-	err = db.Delete(sq.Delete("global_vars").Where(sq.Eq{"name": name}))
+	err := db.Delete(sq.Delete("global_vars").Where(sq.Eq{"name": name}))
 	if err != nil {
 		return backend.WrapError("Cannot delete global variable", backend.DatabaseErr(err))
 	}
@@ -77,7 +72,6 @@ func DeleteGlobalVar(ctx context.Context, db *database.Connection, name string) 
 }
 
 func ListGlobalVars(ctx context.Context, db *database.Connection) ([]*dtos.GlobalVar, error) {
-
 	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
 		return nil, backend.WrapError("Unwilling to list global variables", backend.UnauthorizedReadErr(err))
 	}
@@ -103,12 +97,12 @@ func ListGlobalVars(ctx context.Context, db *database.Connection) ([]*dtos.Globa
 }
 
 func UpdateGlobalVar(ctx context.Context, db *database.Connection, i UpdateGlobalVarInput) error {
-	globalVar, err := LookupGlobalVar(db, i.GlobalVarName)
+	globalVar, err := LookupGlobalVar(db, i.Name)
 	if err != nil {
 		return backend.WrapError("Unable to update operation", backend.UnauthorizedWriteErr(err))
 	}
 
-	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyGlobalVar{GlobalVarID: globalVar.ID}); err != nil {
+	if err := policyRequireWithAdminBypass(ctx, policy.AdminUsersOnly{}); err != nil {
 		return backend.WrapError("Unwilling to update operation", backend.UnauthorizedWriteErr(err))
 	}
 

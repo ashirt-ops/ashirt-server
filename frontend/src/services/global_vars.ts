@@ -20,9 +20,9 @@ export async function getGlobalVars(): Promise<Array<GlobalVar>> {
 }
 
 export async function deleteGlobalVar(name: string): Promise<void> {
-  await ds.deleteGlobalVar({ globalVarName: name })
+  await ds.deleteGlobalVar({ name })
 }
 
 export async function updateGlobalVar(name: string, i: { value: string | null, newName: string | null }): Promise<void> {
-  await ds.updateGlobalVar({ globalVarName: name, }, i)
+  await ds.updateGlobalVar({ name, }, i)
 }

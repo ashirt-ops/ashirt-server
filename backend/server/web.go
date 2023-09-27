@@ -1007,9 +1007,9 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 	route(r, "PUT", "/globalvars/{name}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateGlobalVarInput{
-			GlobalVarName: dr.FromURL("name").Required().AsString(),
-			Value:         dr.FromBody("value").AsString(),
-			NewName:       dr.FromBody("newName").AsString(),
+			Name:    dr.FromURL("name").Required().AsString(),
+			Value:   dr.FromBody("value").AsString(),
+			NewName: dr.FromBody("newName").AsString(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error
