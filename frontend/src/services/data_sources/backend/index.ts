@@ -108,8 +108,8 @@ export const backendDataSource: DataSource = {
   getTotpForUser: ids => req('GET', '/auth/local/totp', ids),
   deleteTotpForUser: ids => req('DELETE', '/auth/local/totp', ids),
 
-  listGlobalVars: () => req('GET', '/globalvars'),
-  createGlobalVar: payload => req('POST', '/globalvars', payload),
-  updateGlobalVar: (ids, payload) => req('PUT', `/globalvars/${ids.name}`, payload),
-  deleteGlobalVar: (ids) => req('DELETE', `/globalvars/${ids.name}`),
+  listGlobalVars: () => req('GET', '/global-vars'),
+  createGlobalVar: payload => req('POST', '/global-vars', payload),
+  updateGlobalVar: (ids, payload) => req('PUT', `/global-vars/${ids.name}`, payload),
+  deleteGlobalVar: (ids) => req('DELETE', `/global-vars/${ids.name}`),
 }
