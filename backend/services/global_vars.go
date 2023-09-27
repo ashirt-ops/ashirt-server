@@ -33,7 +33,7 @@ type DeleteGlobalVarInput struct {
 }
 
 func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGlobalVarInput) (*dtos.GlobalVar, error) {
-	if err := policy.Require(middleware.Policy(ctx), policy.CanCreateGlobalVars{}); err != nil {
+	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
 		return nil, backend.WrapError("Unable to create global variable", backend.UnauthorizedWriteErr(err))
 	}
 
@@ -80,15 +80,13 @@ func DeleteGlobalVar(ctx context.Context, db *database.Connection, name string) 
 // ListQueriesForOperation retrieves all saved queries for a given globalVar id
 func ListGlobalVars(ctx context.Context, db *database.Connection) ([]*dtos.GlobalVar, error) {
 
-	// TODO TN - what needs to happen here to check this?
-	// if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: globalVar.ID}); err != nil {
-	// 	return nil, backend.WrapError("Unwilling to list global variables", backend.UnauthorizedReadErr(err))
-	// }
+	if err := policy.Require(middleware.Policy(ctx), policy.AdminUsersOnly{}); err != nil {
+		return nil, backend.WrapError("Unwilling to list global variables", backend.UnauthorizedReadErr(err))
+	}
 
 	var globalVars = make([]models.GlobalVar, 0)
 	err := db.Select(&globalVars, sq.Select("*").
 		From("global_vars").
-		// TODO TN - do we want to do this?
 		OrderBy("name ASC"))
 
 	if err != nil {

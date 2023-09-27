@@ -148,8 +148,7 @@ var HarryPotterSeedData = Seeder{
 		DemoServiceWorker,
 	},
 	GlobalVars: []models.GlobalVar{
-		// VarExpelliarmus,
-		VarExpelliarmus, VarAlohomora,
+		VarExpelliarmus, VarAlohomora, VarAscendio, VarImperio, VarLumos, VarObliviate,
 	},
 }
 
@@ -369,3 +368,7 @@ var DemoServiceWorker = newHPServiceWorker("Demo", `{ "type": "web",  "version":
 var newGlobalVar = newGlobalVarGen(1)
 var VarExpelliarmus = newGlobalVar("Expelliarmus", "disarm an opponent")
 var VarAlohomora = newGlobalVar("Alohomora", "unlock doors")
+var VarAscendio = newGlobalVar("Ascendio", "lifts the caster high into the air")
+var VarImperio = newGlobalVar("Imperio", "control another person")
+var VarLumos = newGlobalVar("Lumos", "creates a narrow beam of light")
+var VarObliviate = newGlobalVar("Obliviate", "erases memories")

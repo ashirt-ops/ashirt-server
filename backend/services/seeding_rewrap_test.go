@@ -197,6 +197,10 @@ var DemoServiceWorker = seeding.DemoServiceWorker
 
 var VarExpelliarmus = seeding.VarExpelliarmus
 var VarAlohomora = seeding.VarAlohomora
+var VarAscendio = seeding.VarAscendio
+var VarImperio = seeding.VarImperio
+var VarLumos = seeding.VarLumos
+var VarObliviate = seeding.VarObliviate
 
 type TestSeedData struct {
 	seeding.Seeder

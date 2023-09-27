@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
 )
@@ -52,16 +53,14 @@ func TestCreateGlobalVar(t *testing.T) {
 func TestListGlobalVars(t *testing.T) {
 	RunDisposableDBTestWithSeed(t, HarryPotterSeedData, func(db *database.Connection, _ TestSeedData) {
 		// Verify that non-admins cannot list variables
+		ctx := contextForUser(UserHarry, db)
+		_, err := services.ListGlobalVars(ctx, db)
+		require.Error(t, err)
 
-		// fix this
-		// ctx := contextForUser(UserHarry, db)
-		// _, err := services.ListGlobalVars(ctx, db)
-		// require.Error(t, err)
-
-		ctx := contextForUser(UserDumbledore, db)
+		ctx = contextForUser(UserDumbledore, db)
 		ops, err := services.ListGlobalVars(ctx, db)
 		require.NoError(t, err)
-		require.Equal(t, 2, len(ops))
+		require.Equal(t, len(seeding.HarryPotterSeedData.GlobalVars), len(ops))
 	})
 }
 
@@ -98,12 +97,13 @@ func TestUpdateGlobalVar(t *testing.T) {
 		require.Error(t, err)
 
 		// update name and value
+		newVar := VarAscendio
 		ctx = contextForUser(UserDumbledore, db)
 		newName := "Accio"
 		newValue := "Bring an object to you"
 
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: initialVar.Name,
+			GlobalVarName: newVar.Name,
 			NewName:       newName,
 			Value:         newValue,
 		}
@@ -117,38 +117,40 @@ func TestUpdateGlobalVar(t *testing.T) {
 		require.Equal(t, newValue, updatedGlobalVar.Value)
 
 		// update only name
-		secondNewName := "Expecto Patronum"
+		newVar = VarImperio
+		newName = "Expecto Patronum"
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: newName,
-			NewName:       secondNewName,
+			GlobalVarName: newVar.Name,
+			NewName:       newName,
 			Value:         "",
 		}
 
 		err = services.UpdateGlobalVar(ctx, db, input)
 		require.NoError(t, err)
-		updatedGlobalVar, err = services.LookupGlobalVar(db, secondNewName)
-		require.Equal(t, secondNewName, updatedGlobalVar.Name)
-		require.Equal(t, newValue, updatedGlobalVar.Value)
+		updatedGlobalVar, err = services.LookupGlobalVar(db, newName)
+		require.Equal(t, newName, updatedGlobalVar.Name)
+		require.Equal(t, newVar.Value, updatedGlobalVar.Value)
 
 		// update only value
-		secondNewValue := "Summon a Patronus"
+		newVar = VarLumos
+		newValue = "Summon a Patronus"
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: secondNewName,
+			GlobalVarName: newVar.Name,
 			NewName:       "",
-			Value:         secondNewValue,
+			Value:         newValue,
 		}
 
 		err = services.UpdateGlobalVar(ctx, db, input)
 		require.NoError(t, err)
-		updatedGlobalVar, err = services.LookupGlobalVar(db, secondNewName)
-		require.Equal(t, secondNewName, updatedGlobalVar.Name)
-		require.Equal(t, secondNewValue, updatedGlobalVar.Value)
+		updatedGlobalVar, err = services.LookupGlobalVar(db, newVar.Name)
+		require.Equal(t, newVar.Name, updatedGlobalVar.Name)
+		require.Equal(t, newValue, updatedGlobalVar.Value)
 
 		// Update name to another var that already exists
-		newGlobalVar := VarAlohomora
+		newVar = VarAlohomora
 		input = services.UpdateGlobalVarInput{
-			GlobalVarName: secondNewName,
-			NewName:       newGlobalVar.Name,
+			GlobalVarName: newName,
+			NewName:       newVar.Name,
 			Value:         "",
 		}
 

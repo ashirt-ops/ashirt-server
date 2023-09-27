@@ -128,8 +128,8 @@ const modifyActions = (
 ) => {
   return (
     <ButtonGroup className={cx('row-buttons')}>
-      <Button small disabled={false} onClick={() => onEditClick(u)}>Edit</Button>
-      <Button small disabled={false} onClick={() => onDeleteClick(u)}>Delete</Button>
+      <Button small onClick={() => onEditClick(u)}>Edit</Button>
+      <Button small danger={true} onClick={() => onDeleteClick(u)}>Delete</Button>
     </ButtonGroup>
   )
 }
