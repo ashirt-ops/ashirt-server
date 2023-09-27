@@ -13,7 +13,7 @@ type QueryId = { queryId: number }
 type TagId = { tagId: number }
 type FindingCategoryId = { findingCategoryId: number }
 type ServiceWorkerId = { serviceWorkerId: number }
-type Name = { globalVarName: string }
+type Name = { name: string }
 
 type FindingPayload = {
   category: string,

@@ -110,6 +110,6 @@ export const backendDataSource: DataSource = {
 
   listGlobalVars: () => req('GET', '/globalvars'),
   createGlobalVar: payload => req('POST', '/globalvars', payload),
-  updateGlobalVar: (ids, payload) => req('PUT', `/globalvars/${ids.globalVarName}`, payload),
-  deleteGlobalVar: (ids) => req('DELETE', `/globalvars/${ids.globalVarName}`),
+  updateGlobalVar: (ids, payload) => req('PUT', `/globalvars/${ids.name}`, payload),
+  deleteGlobalVar: (ids) => req('DELETE', `/globalvars/${ids.name}`),
 }
