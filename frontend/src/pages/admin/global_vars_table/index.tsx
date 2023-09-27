@@ -53,26 +53,13 @@ export default (props: {
   }, [wiredGlobalVars])
 
   return (
-    <SettingsSection title="Group List" width="wide">
-      <div className={cx('inline-form')}>
-        <Input
-          label="Group Filter"
-          value={usernameFilterValue}
-          onChange={v => { setUsernameFilterValue(v); }}
-          loading={usernameFilterValue.length > 0 && wiredGlobalVars.loading}
-        />
-      </div>
+    <SettingsSection title="Global Variables List" width="wide">
       <Table className={cx('table')} columns={columns}>
         {wiredGlobalVars.render(data => <>
-          {data?.map((globalVar, i) => {
-            const belowUpperBound = i < page * itemsPerPage 
-            const aboveLowerBound = i >= (page - 1) * itemsPerPage
-            const inPageRange = belowUpperBound && aboveLowerBound
-            return inPageRange && <TableRow key={globalVar.name} data={rowBuilder(globalVar, usersInGroup(wiredGlobalVars, globalVar), modifyActions(globalVar, setDeletingGlobalVar, setModifyingGlobalVar))} />
-          })}
+          {data?.map((globalVar, i) => <TableRow key={globalVar.name} data={rowBuilder(globalVar, usersInGroup(wiredGlobalVars, globalVar), modifyActions(globalVar, setDeletingGlobalVar, setModifyingGlobalVar))} />
+          )}
         </>)}
       </Table>
-      <StandardPager className={cx('user-table-pager')} page={page} maxPages={pageLength} onPageChange={setPage} />
 
       {deletingGlobalVar && <DeleteGlobalVarModal globalVar={deletingGlobalVar} onRequestClose={() => { setDeletingGlobalVar(null); wiredGlobalVars.reload() }} />}
       {modifyingGlobalVar && <ModifyGlobalVarModal globalVar={modifyingGlobalVar} onRequestClose={() => { setModifyingGlobalVar(null); wiredGlobalVars.reload() }} />}
