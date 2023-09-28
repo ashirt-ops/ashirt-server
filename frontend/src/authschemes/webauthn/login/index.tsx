@@ -74,7 +74,7 @@ const Login = (props: {
   return (
     <div>
       {window.PublicKeyCredential && (
-        <div>
+        <div className={cx('login-container')}>
           <div className={cx('mode-buttons')}>
             <ButtonGroup className={cx('row-buttons')}>
               <Button active={isDiscoverable} className={cx('mode-button-right')} onClick={makeDiscoverable}>Discoverable</Button>
