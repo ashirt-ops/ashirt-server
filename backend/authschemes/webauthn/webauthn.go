@@ -456,8 +456,8 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 	} else { // Add Credential
 		user = makeAddCredentialWebAuthnUser(info.UserID, info.Username, info.CredentialName, info.ExistingCredentials)
 	}
-  
-  idx, _ := helpers.Find(info.ExistingCredentials, func(cred AShirtWebauthnCredential) bool {
+
+	idx, _ := helpers.Find(info.ExistingCredentials, func(cred AShirtWebauthnCredential) bool {
 		return strings.ToLower(cred.CredentialName) == strings.ToLower(info.CredentialName)
 	})
 
