@@ -3,7 +3,6 @@
 
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { WiredData} from 'src/helpers'
 
 import { GlobalVar } from 'src/global_types'
 import { getGlobalVars } from 'src/services'
@@ -15,8 +14,6 @@ import {
 } from 'src/components/table'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
-import { default as Menu } from 'src/components/menu'
-import { ClickPopover } from 'src/components/popover'
 import { DeleteGlobalVarModal, ModifyGlobalVarModal } from 'src/pages/admin_modals'
 import { useWiredData } from 'src/helpers'
 
