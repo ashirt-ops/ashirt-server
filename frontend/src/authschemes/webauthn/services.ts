@@ -69,8 +69,8 @@ export async function listWebauthnCredentials(): Promise<CredentialList> {
 
 }
 
-export async function deleteWebauthnCredential(i: { credentialName: string }): Promise<CredentialList> {
-  return await req('DELETE', `/auth/webauthn/credential/${i.credentialName}`)
+export async function deleteWebauthnCredential(i: { credentialId: string }): Promise<CredentialList> {
+  return await req('DELETE', `/auth/webauthn/credential/${i.credentialId}`)
 }
 
 export async function modifyCredentialName(i: { credentialName: string, newCredentialName: string }): Promise<void> {
