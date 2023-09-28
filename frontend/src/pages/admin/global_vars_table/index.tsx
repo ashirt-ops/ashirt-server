@@ -29,7 +29,7 @@ export default (props: {
   const [deletingGlobalVar, setDeletingGlobalVar] = React.useState<null | GlobalVar>(null)
   const [modifyingGlobalVar, setModifyingGlobalVar] = React.useState<null | GlobalVar>(null)
 
-  const columns = Object.keys(rowBuilder(null, <span />, <span />))
+  const columns = Object.keys(rowBuilder(null, <span />))
 
   const wiredGlobalVars = useWiredData<GlobalVar[]>(
     React.useCallback(() => getGlobalVars(), []),
@@ -46,7 +46,7 @@ export default (props: {
     <SettingsSection title="Global Variables List" width="wide">
       <Table className={cx('table')} columns={columns}>
         {wiredGlobalVars.render(data => <>
-          {data?.map((globalVar, i) => <TableRow key={globalVar.name} data={rowBuilder(globalVar, usersInGroup(wiredGlobalVars, globalVar), modifyActions(globalVar, setDeletingGlobalVar, setModifyingGlobalVar))} />
+          {data?.map((globalVar, i) => <TableRow key={globalVar.name} data={rowBuilder(globalVar, modifyActions(globalVar, setDeletingGlobalVar, setModifyingGlobalVar))} />
           )}
         </>)}
       </Table>
@@ -71,32 +71,11 @@ type Rowdata = {
   "Actions": JSX.Element,
 }
 
-const rowBuilder = (u: GlobalVar | null, users: JSX.Element, actions: JSX.Element): Rowdata => ({
+const rowBuilder = (u: GlobalVar | null, actions: JSX.Element): Rowdata => ({
   "Name": u ? u.name : "",
   "Value": u ? u.value : "",
   "Actions": actions,
 })
-
-const usersInGroup = (
-  wiredGlobalVars: WiredData<GlobalVar[]>,
-  u: GlobalVar
-) => {
-  const count = wiredGlobalVars.render(data => <span>{data.length}</span>)
-  return (
-    <ButtonGroup>
-      <ClickPopover className={cx('popover')} closeOnContentClick content={
-        <Menu>
-          {wiredGlobalVars.render(data => {
-            const varList = data.map(globalVar => <p key={globalVar.name} className={cx('global-var')}>{globalVar.name}</p>)
-            return <>{varList}</>
-      })}
-        </Menu>
-      }>
-        <Button small className={cx('arrow')}><p className={cx('button-text')}>{count} Global Variables</p></Button>
-      </ClickPopover>
-    </ButtonGroup>
-  )
-}
 
 const modifyActions = (
   u: GlobalVar,
