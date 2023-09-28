@@ -14,11 +14,9 @@ import {
   LoadingRow,
 } from 'src/components/table'
 import { default as Button, ButtonGroup } from 'src/components/button'
-import { StandardPager } from 'src/components/paging'
 import SettingsSection from 'src/components/settings_section'
 import { default as Menu } from 'src/components/menu'
 import { ClickPopover } from 'src/components/popover'
-import Input from 'src/components/input'
 import { DeleteGlobalVarModal, ModifyGlobalVarModal } from 'src/pages/admin_modals'
 import { useWiredData } from 'src/helpers'
 
@@ -30,16 +28,11 @@ export default (props: {
 }) => {
   const [deletingGlobalVar, setDeletingGlobalVar] = React.useState<null | GlobalVar>(null)
   const [modifyingGlobalVar, setModifyingGlobalVar] = React.useState<null | GlobalVar>(null)
-  const itemsPerPage = 10
-  const [page, setPage] = React.useState(1)
-  const [pageLength, setPageLength] = React.useState(0)
-
-  const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
 
   const columns = Object.keys(rowBuilder(null, <span />, <span />))
 
   const wiredGlobalVars = useWiredData<GlobalVar[]>(
-    React.useCallback(() => getGlobalVars(), [usernameFilterValue]),
+    React.useCallback(() => getGlobalVars(), []),
     (err: Error) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />
   )
@@ -48,9 +41,6 @@ export default (props: {
     props.onReload(wiredGlobalVars.reload)
     return () => { props.offReload(wiredGlobalVars.reload) }
   })
-  React.useEffect(() => {
-    wiredGlobalVars.expose(data => setPageLength(Math.ceil(data.length / itemsPerPage)))
-  }, [wiredGlobalVars])
 
   return (
     <SettingsSection title="Global Variables List" width="wide">
@@ -97,7 +87,7 @@ const usersInGroup = (
       <ClickPopover className={cx('popover')} closeOnContentClick content={
         <Menu>
           {wiredGlobalVars.render(data => {
-            const varList = data.map(globalVar => <p key={globalVar.name} className={cx('user')}>{globalVar.name}</p>)
+            const varList = data.map(globalVar => <p key={globalVar.name} className={cx('global-var')}>{globalVar.name}</p>)
             return <>{varList}</>
       })}
         </Menu>
