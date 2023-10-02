@@ -230,3 +230,8 @@ type ActiveServiceWorker struct {
 type Flags struct {
 	Flags []string `json:"flags"`
 }
+
+type GlobalVar struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}

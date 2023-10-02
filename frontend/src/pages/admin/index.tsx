@@ -9,6 +9,7 @@ import HeadlessButton from './add_headless'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
 import CreateUserButton from "./add_user"
 import CreateUserGroupButton from "./add_user_group"
+import CreateGlobalVarButton from "./add_global_variable"
 import InviteuserButton from "./invite_user"
 import OperationsTable from './operations_table'
 import FindingCategoriesTable from "./finding_categories_table"
@@ -17,6 +18,7 @@ import UserTable from './user_table'
 import UserGroupTable from './user_group_table'
 import ServiceWorkerTable from './service_worker_table'
 import AddServiceWorker from './service_worker_table/add_service_button'
+import GlobalVarsTable from './global_vars_table'
 
 import { BuildReloadBus, BusSupportedService } from 'src/helpers/reload_bus'
 import { DefaultTagEditor } from './default_tag_editor'
@@ -41,6 +43,7 @@ export const AdminTools = () => {
             { id: "tags", label: "Tag Management" },
             { id: "findings", label: "Finding Categories" },
             { id: "services", label: "Service Workers" },
+            { id: "globalvars", label: "Global Variables"}
           ]}
         >
           <Routes>
@@ -51,6 +54,7 @@ export const AdminTools = () => {
             <Route path="tags" element={<TagManagement {...bus} />} />
             <Route path="findings" element={<FindingCategoriesTable />} />
             <Route path="services" element={<ServiceWorkers {...bus} />} />
+            <Route path="globalvars" element={<VarsManagement {...bus} />} />
           </Routes>
         </NavVerticalTabMenu>
       </div>
@@ -95,5 +99,12 @@ const ServiceWorkers = (props: BusSupportedService) => (
   <>
     <ServiceWorkerTable {...props} />
     <AddServiceWorker {...props} />
+  </>
+)
+
+const VarsManagement = (props: BusSupportedService) => (
+  <>
+    <GlobalVarsTable {...props} />
+    <CreateGlobalVarButton {...props} />
   </>
 )

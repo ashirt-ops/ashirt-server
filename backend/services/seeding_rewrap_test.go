@@ -71,6 +71,7 @@ var getUserGroupFromSlug = seeding.GetUserGroupFromSlug
 var getServiceWorkerByName = seeding.GetServiceWorkerByName
 var getServiceWorkerByID = seeding.GetServiceWorkerByID
 var listServiceWorkers = seeding.ListServiceWorkers
+var getGlobalVarFromName = seeding.GetGlobalVarFromName
 
 var TagIDsFromTags = seeding.TagIDsFromTags
 var sorted = seeding.Sorted
@@ -193,6 +194,13 @@ var DetectionGapFindingCategory = seeding.DetectionGapFindingCategory
 var DeletedCategory = seeding.DeletedCategory
 
 var DemoServiceWorker = seeding.DemoServiceWorker
+
+var VarExpelliarmus = seeding.VarExpelliarmus
+var VarAlohomora = seeding.VarAlohomora
+var VarAscendio = seeding.VarAscendio
+var VarImperio = seeding.VarImperio
+var VarLumos = seeding.VarLumos
+var VarObliviate = seeding.VarObliviate
 
 type TestSeedData struct {
 	seeding.Seeder

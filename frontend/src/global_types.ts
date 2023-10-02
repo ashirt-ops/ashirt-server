@@ -334,3 +334,8 @@ export interface Codeblock {
     source: string,
   }
 }
+
+export type GlobalVar = {
+  name: string,
+  value: string,
+}

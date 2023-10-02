@@ -278,3 +278,15 @@ func SanitizeSlug(slug string) string {
 		"-",
 	)
 }
+
+func LookupGlobalVar(db *database.Connection, name string) (*models.GlobalVar, error) {
+	var globalVar models.GlobalVar
+
+	err := db.Get(&globalVar, sq.Select("*").
+		From("global_vars").
+		Where(sq.Eq{"name": name}))
+	if err != nil {
+		return &globalVar, backend.WrapError("Unable to lookup global variable by name", err)
+	}
+	return &globalVar, nil
+}
