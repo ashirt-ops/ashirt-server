@@ -14,10 +14,8 @@ import {
 } from 'src/components/table'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
-import { DeleteGlobalVarModal, ModifyGlobalVarModal } from 'src/pages/admin_modals'
+import { DeleteGlobalVarModal, ModifyGlobalVarModal, } from 'src/pages/admin_modals'
 import { useWiredData } from 'src/helpers'
-
-const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   onReload: (listener: () => void) => void
@@ -41,9 +39,9 @@ export default (props: {
 
   return (
     <SettingsSection title="Global Variables List" width="wide">
-      <Table className={cx('table')} columns={columns}>
+      <Table columns={columns}>
         {wiredGlobalVars.render(data => <>
-          {data?.map((globalVar, i) => <TableRow key={globalVar.name} data={rowBuilder(globalVar, modifyActions(globalVar, setDeletingGlobalVar, setModifyingGlobalVar))} />
+          {data?.map((globalVar) => <TableRow key={globalVar.name} globalVar={globalVar} data={rowBuilder(globalVar, modifyActions(globalVar, setDeletingGlobalVar, setModifyingGlobalVar))} />
           )}
         </>)}
       </Table>
@@ -54,23 +52,24 @@ export default (props: {
   )
 }
 
-const TableRow = (props: { data: Rowdata }) => (
-  <tr>
-    <td>{props.data["Name"]}</td>
-    <td>{props.data["Value"]}</td>
-    <td>{props.data["Actions"]}</td>
-  </tr>
-)
+
+const TableRow = (props: { 
+  data: Rowdata, 
+  globalVar: GlobalVar, 
+}) => (
+    <tr>
+      <td>{props.data["Name"]}</td>
+      <td>{props.data["Actions"]}</td>
+    </tr>
+  )
 
 type Rowdata = {
   "Name": string,
-  "Value": string,
   "Actions": JSX.Element,
 }
 
 const rowBuilder = (u: GlobalVar | null, actions: JSX.Element): Rowdata => ({
   "Name": u ? u.name : "",
-  "Value": u ? u.value : "",
   "Actions": actions,
 })
 
@@ -80,7 +79,7 @@ const modifyActions = (
   onEditClick: (u: GlobalVar) => void
 ) => {
   return (
-    <ButtonGroup className={cx('row-buttons')}>
+    <ButtonGroup>
       <Button small onClick={() => onEditClick(u)}>Edit</Button>
       <Button small danger={true} onClick={() => onDeleteClick(u)}>Delete</Button>
     </ButtonGroup>
