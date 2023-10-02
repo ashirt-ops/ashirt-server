@@ -96,6 +96,17 @@ func (a WebAuthn) Type() string {
 	return constants.Name
 }
 
+// Using DissectJSONRequest(r) on discoverable requests causes the request to be parsed twice, which causes an error
+// so this function allows us to get query ars without dissecting it
+func isDiscoverable(r *http.Request) bool {
+	parsedURL, err := url.Parse(r.URL.String())
+	if err != nil {
+		return false
+	}
+
+	return parsedURL.Query().Get("discoverable") == "true"
+}
+
 func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/register/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
@@ -171,13 +182,59 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 			if !ok {
 				return nil, errors.New("Unable to complete login -- session not found or corrupt")
 			}
+			discoverable := isDiscoverable(r)
 
-			user := &data.UserData
-			cred, err := a.Web.FinishLogin(user, *data.WebAuthNSessionData, r)
-			if err != nil {
-				return nil, backend.BadAuthErr(err)
-			} else if cred.Authenticator.CloneWarning {
-				return nil, backend.WrapError("credential appears to be cloned", backend.BadAuthErr(err))
+			var cred *auth.Credential
+			var err error
+
+			if discoverable {
+				parsedResponse, err := protocol.ParseCredentialRequestResponse(r)
+				if err != nil {
+					return nil, backend.WrapError("error parsing credential", backend.BadAuthErr(err))
+				}
+
+				var webauthnUser webauthnUser
+				userHandler := func(_, userHandle []byte) (user auth.User, err error) {
+					authnID := string(userHandle)
+					dbUser, err := bridge.GetUserFromAuthnID(authnID)
+					if err != nil {
+						return nil, backend.WebauthnLoginError(err, "Could not find user from authn ID", "No such user found")
+					}
+					auth, err := bridge.FindUserAuthByUserID(dbUser.ID)
+					if err != nil {
+						return nil, backend.DatabaseErr(err)
+					}
+					creds, err := a.getExistingCredentials(auth)
+					if err != nil {
+						return nil, err
+					}
+					webauthnUser = makeWebAuthnUser(dbUser.FirstName, dbUser.LastName, dbUser.Slug, dbUser.Email, dbUser.ID, userHandle, creds)
+					return &webauthnUser, nil
+				}
+				cred, err = a.Web.ValidateDiscoverableLogin(userHandler, *data.WebAuthNSessionData, parsedResponse)
+				if err != nil {
+					return nil, backend.BadAuthErr(err)
+				} else if cred.Authenticator.CloneWarning {
+					return nil, backend.WrapError("credential appears to be cloned", backend.BadAuthErr(err))
+				}
+
+				err = bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(webauthnUser, data.WebAuthNSessionData))
+				if err != nil {
+					return nil, backend.WebauthnLoginError(err, "Unable to finish login process", "Unable to set session")
+				}
+				rawData = bridge.ReadAuthSchemeSession(r)
+				data, ok = rawData.(*webAuthNSessionData)
+				if !ok {
+					return nil, errors.New("Unable to finish login -- session not found or corrupt")
+				}
+			} else {
+				user := &data.UserData
+				cred, err = a.Web.FinishLogin(user, *data.WebAuthNSessionData, r)
+				if err != nil {
+					return nil, backend.BadAuthErr(err)
+				} else if cred.Authenticator.CloneWarning {
+					return nil, backend.WrapError("credential appears to be cloned", backend.BadAuthErr(err))
+				}
 			}
 
 			updateSignCount(data, cred, bridge)
@@ -411,6 +468,8 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		)
 	}
 
+	discoverable := isDiscoverable(r)
+
 	credExcludeList := make([]protocol.CredentialDescriptor, len(user.Credentials))
 	for i, cred := range user.Credentials {
 		credExcludeList[i] = protocol.CredentialDescriptor{
@@ -418,11 +477,21 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 			CredentialID: cred.ID,
 		}
 	}
-	registrationOptions := func(credCreationOpts *protocol.PublicKeyCredentialCreationOptions) {
-		credCreationOpts.CredentialExcludeList = credExcludeList
+
+	var selection protocol.AuthenticatorSelection
+
+	if discoverable {
+		selection = protocol.AuthenticatorSelection{
+			ResidentKey: protocol.ResidentKeyRequirementRequired,
+		}
 	}
 
-	credOptions, sessionData, err := a.Web.BeginRegistration(&user, registrationOptions)
+	registrationOptions := func(credCreationOpts *protocol.PublicKeyCredentialCreationOptions) {
+		credCreationOpts.CredentialExcludeList = credExcludeList
+		credCreationOpts.AuthenticatorSelection = selection
+	}
+
+	credOptions, sessionData, err := a.Web.BeginRegistration(&user, auth.WithAuthenticatorSelection(selection), registrationOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -433,31 +502,52 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 }
 
 func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, username string) (interface{}, error) {
-	authData, err := bridge.FindUserAuth(username)
-	if err != nil {
-		return nil, backend.WebauthnLoginError(err, "Could not validate user", "No such auth")
-	}
-	if authData.JSONData == nil {
-		return nil, backend.WebauthnLoginError(err, "User lacks webauthn credentials")
+	discoverable := isDiscoverable(r)
+
+	var data interface{}
+	var options *protocol.CredentialAssertion
+	var sessionData *auth.SessionData
+	var err error
+
+	if discoverable {
+		var opts = []auth.LoginOption{
+			auth.WithUserVerification(protocol.VerificationPreferred),
+		}
+		options, sessionData, err = a.Web.BeginDiscoverableLogin(opts...)
+
+		if err != nil {
+			return nil, backend.WebauthnLoginError(err, "Unable to find login credentials", "Unable to find login credentials")
+		}
+		data = makeDiscoverableWebauthNSessionData(sessionData)
+	} else {
+		authData, err := bridge.FindUserAuth(username)
+		if err != nil {
+			return nil, backend.WebauthnLoginError(err, "Could not validate user", "No such auth")
+		}
+		if authData.JSONData == nil {
+			return nil, backend.WebauthnLoginError(err, "User lacks webauthn credentials")
+		}
+
+		user, err := bridge.GetUserFromID(authData.UserID)
+		if err != nil {
+			return nil, backend.WebauthnLoginError(err, "Could not validate user", "No such user")
+		}
+
+		creds, err := a.getExistingCredentials(authData)
+		if err != nil {
+			return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
+		}
+
+		webauthnUser := makeWebAuthnUser(user.FirstName, user.LastName, username, user.Email, user.ID, authData.AuthnID, creds)
+		options, sessionData, err = a.Web.BeginLogin(&webauthnUser)
+		if err != nil {
+			return nil, backend.WebauthnLoginError(err, "Unable to begin login process")
+		}
+		data = makeWebauthNSessionData(webauthnUser, sessionData)
 	}
 
-	user, err := bridge.GetUserFromID(authData.UserID)
+	err = bridge.SetAuthSchemeSession(w, r, data)
 	if err != nil {
-		return nil, backend.WebauthnLoginError(err, "Could not validate user", "No such user")
-	}
-
-	creds, err := a.getExistingCredentials(authData)
-	if err != nil {
-		return nil, backend.WebauthnLoginError(err, "Unable to parse webauthn credentials")
-	}
-
-	webauthnUser := makeWebAuthnUser(user.FirstName, user.LastName, username, user.Email, user.ID, authData.AuthnID, creds)
-	options, sessionData, err := a.Web.BeginLogin(&webauthnUser)
-	if err != nil {
-		return nil, backend.WebauthnLoginError(err, "Unable to begin login process")
-	}
-
-	if err = bridge.SetAuthSchemeSession(w, r, makeWebauthNSessionData(webauthnUser, sessionData)); err != nil {
 		return nil, backend.WebauthnLoginError(err, "Unable to begin login process", "Unable to set session")
 	}
 

@@ -26,6 +26,7 @@ export default (props: {
   submitDanger?: boolean,
   disableSubmit?: boolean,
   disableCancel?: boolean,
+  autoFocus?: boolean,
 }) => {
   const onCancel = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -46,6 +47,7 @@ export default (props: {
           loading={props.loading}
           disabled={props.disableSubmit}
           children={props.submitText}
+          autoFocus={props?.autoFocus}
         />
       )}
       {props.onCancel && <Button

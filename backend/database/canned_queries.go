@@ -20,6 +20,13 @@ func (c *Connection) RetrieveUserByID(userID int64) (models.User, error) {
 	return rtn, err
 }
 
+// RetrieveUserIDByAuthnID retrieves a full user from a given authn ID
+func (c *Connection) RetrieveUserIDByAuthnID(authn_id string) (models.User, error) {
+	var rtn models.User
+	err := c.Get(&rtn, sq.Select("u.first_name, u.last_name, u.slug, u.email, u.id").From("users u").Join("auth_scheme_data ad ON u.id = ad.user_id").Where(sq.Eq{"ad.authn_id": authn_id}))
+	return rtn, err
+}
+
 // RetrieveUserBySlug retrieves a full user from the users table give a user slug
 func (c *Connection) RetrieveUserBySlug(slug string) (models.User, error) {
 	var rtn models.User
