@@ -20,7 +20,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pquerna/otp v1.4.0
-	github.com/prometheus/client_golang v1.16.0
+	github.com/prometheus/client_golang v1.17.0
 	github.com/rubenv/sql-migrate v1.5.2
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.13.0
@@ -60,9 +60,9 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.42.0 // indirect
-	github.com/prometheus/procfs v0.10.1 // indirect
+	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
+	github.com/prometheus/common v0.44.0 // indirect
+	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
