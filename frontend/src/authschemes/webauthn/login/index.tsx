@@ -83,7 +83,7 @@ const Login = (props: {
           </div>
           {isDiscoverable ? (
             <div>
-            <Form submitText="Login" {...registerProps} {...loginForm}>
+            <Form submitText="Login" {...registerProps} {...loginForm} autoFocus={true}>
             </Form>
             {renderModals(registerModal)}
           </div>

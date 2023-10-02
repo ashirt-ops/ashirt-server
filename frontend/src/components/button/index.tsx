@@ -36,7 +36,8 @@ const Button = (props: ButtonStyle & {
   loading?: boolean,
   onClick?: (e: React.MouseEvent) => void,
   title?: string,
-  doNotSubmit?: boolean
+  doNotSubmit?: boolean,
+  autoFocus?: boolean,
 }) => {
   return (
     <button
@@ -48,6 +49,7 @@ const Button = (props: ButtonStyle & {
       disabled={props.disabled || props.loading}
       onClick={props.onClick}
       title={props.title}
+      autoFocus={props?.autoFocus}
     >
       {props.loading && <LoadingSpinner small className={cx('spinner')} />}
       <div className={cx('children')}>
