@@ -4,7 +4,7 @@
 import { OperationVar } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
-export async function createOperationVar(name: string, value: string | null): Promise<OperationVar> {
+export async function createOperationVar(operationSlug: string, name: string, value: string | null): Promise<OperationVar> {
   let slug = name.toLowerCase().replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
   if (slug === "") {
     return (name === ""
@@ -13,24 +13,24 @@ export async function createOperationVar(name: string, value: string | null): Pr
     )
   }
   try {
-    return await ds.createOperationVar({ slug, name, value })
+    return await ds.createOperationVar({ operationSlug }, {name, value, varSlug: slug })
   } catch (err) {
     if (err.message.match(/slug already exists/g)) {
       slug += '-' + Date.now()
-      return await ds.createOperationVar({ slug, name, value })
+      return await ds.createOperationVar({ operationSlug }, {varSlug: slug, name, value })
     }
     throw err
   }
 }
 
-export async function getOperationVars(): Promise<Array<OperationVar>> {
-  return await ds.listOperationVars()
+export async function getOperationVars(operationSlug: string): Promise<Array<OperationVar>> {
+  return await ds.listOperationVars({operationSlug})
 }
 
-export async function deleteOperationVar(name: string): Promise<void> {
-  await ds.deleteOperationVar({ name })
+export async function deleteOperationVar(operationSlug: string, varSlug: string): Promise<void> {
+  await ds.deleteOperationVar({ operationSlug, varSlug })
 }
 
-export async function updateOperationVar(name: string, i: { value: string | null, newName: string | null }): Promise<void> {
-  await ds.updateOperationVar({ name, }, i)
+export async function updateOperationVar(operationSlug: string, varSlug: string, i: { value: string | null, name: string | null }): Promise<void> {
+  await ds.updateOperationVar({ operationSlug, varSlug}, i)
 }

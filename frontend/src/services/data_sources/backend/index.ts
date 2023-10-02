@@ -112,4 +112,9 @@ export const backendDataSource: DataSource = {
   createGlobalVar: payload => req('POST', '/globalvars', payload),
   updateGlobalVar: (ids, payload) => req('PUT', `/globalvars/${ids.name}`, payload),
   deleteGlobalVar: (ids) => req('DELETE', `/globalvars/${ids.name}`),
+
+  listOperationVars: (ids) => req('GET', `/operation-vars/${ids.operationSlug}`, null, ids),
+  createOperationVar: (ids, payload) => req('POST', `/operation-vars/${ids.operationSlug}`, payload),
+  updateOperationVar: (ids, payload) => req('PUT', `/operation-vars/${ids.operationSlug}/${ids.varSlug}`, payload),
+  deleteOperationVar: (ids) => req('DELETE', `/operation-vars/${ids.operationSlug}/${ids.varSlug}`),
 }

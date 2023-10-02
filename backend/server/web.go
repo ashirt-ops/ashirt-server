@@ -1039,6 +1039,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateOperationVarInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			VarSlug:       dr.FromBody("varSlug").Required().AsString(),
 			Name:          dr.FromBody("name").Required().AsString(),
 			Value:         dr.FromBody("value").AsString(),
 		}
@@ -1053,7 +1054,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		i := services.UpdateOperationVarInput{
 			VarSlug:       dr.FromURL("var_slug").Required().AsString(),
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-			Name:          dr.FromURL("name").AsString(),
+			Name:          dr.FromBody("name").AsString(),
 			Value:         dr.FromBody("value").AsString(),
 		}
 		if dr.Error != nil {
