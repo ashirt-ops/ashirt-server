@@ -96,11 +96,12 @@ func ListOperationVars(ctx context.Context, db *database.Connection, operationSl
 	}
 
 	var operationVars = make([]models.OperationVar, 0)
+	// TODO TN rename ovm to vom
 
 	err = db.Select(&operationVars, sq.
 		Select("ov.*").
 		From("operation_vars ov").
-		Join("operation_var_map ovm ON ov.id = ovm.operation_var_id").
+		Join("var_operation_map ovm ON ov.id = ovm.operation_id").
 		Where(sq.Eq{"ovm.operation_id": operation.ID}).
 		OrderBy("ov.name ASC"))
 

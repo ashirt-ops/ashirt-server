@@ -346,3 +346,12 @@ export type OperationVar = {
   varSlug: string,
   operationSlug: string,
 }
+
+export type GlobalVariableData = {
+  variable: GlobalVar,
+}
+
+export type OperationVariableData = {
+  operationSlug: string,
+  variable: OperationVar,
+}

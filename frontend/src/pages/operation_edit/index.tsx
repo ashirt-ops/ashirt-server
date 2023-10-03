@@ -15,6 +15,7 @@ import DeleteOperationButton from './delete_operation_button'
 import BatchRunWorker from './batch_run_worker'
 import { useWiredData } from 'src/helpers'
 import { getOperation } from 'src/services/operations'
+import OperationVarsTable from './operation_vars_table'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -42,7 +43,7 @@ export const OperationEdit = () => {
   ]
 
   if (canViewGroups) {
-    tabs.push({ id: "groups", label: "Groups" })
+    tabs.push({ id: "groups", label: "Groups" }, { id: "variables", label: "Variables"})
   }
 
   return (
@@ -62,6 +63,8 @@ export const OperationEdit = () => {
           <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
           <Route path="tasks" element={<BatchRunWorker operationSlug={operationSlug} />} />
           <Route path="groups" element={<UserGroupPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />} />
+          {/* TODO TN add new button */}
+          <Route path="variables" element={<OperationVarsTable isAdmin={canViewGroups} operationSlug={operationSlug} />} />
         </Routes>
       </NavVerticalTabMenu>
     </>
