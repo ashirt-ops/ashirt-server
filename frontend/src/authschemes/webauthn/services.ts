@@ -18,8 +18,8 @@ export async function beginRegistration(i: {
   firstName: string,
   lastName: string
   credentialName: string
-}): Promise<ProvidedCredentialCreationOptions> {
-  return await req('POST', '/auth/webauthn/register/begin', i)
+}, discoverable: boolean): Promise<ProvidedCredentialCreationOptions> {
+  return await req('POST', '/auth/webauthn/register/begin', i, { discoverable })
 }
 
 export async function finishRegistration(i: WebAuthNRegisterConfirmation) {
@@ -28,12 +28,12 @@ export async function finishRegistration(i: WebAuthNRegisterConfirmation) {
 
 export async function beginLogin(i: {
   username: string,
-}): Promise<ProvidedCredentialRequestOptions> {
-  return await req('POST', '/auth/webauthn/login/begin', i)
+}, discoverable: boolean): Promise<ProvidedCredentialRequestOptions> {
+  return await req('POST', '/auth/webauthn/login/begin', i, { discoverable })
 }
 
-export async function finishLogin(i: CompletedLoginChallenge): Promise<void> {
-  return await req('POST', '/auth/webauthn/login/finish', i)
+export async function finishLogin(i: CompletedLoginChallenge, discoverable: boolean): Promise<void> {
+  return await req('POST', '/auth/webauthn/login/finish', i, { discoverable })
 }
 
 export async function beginLink(i: {
@@ -69,8 +69,8 @@ export async function listWebauthnCredentials(): Promise<CredentialList> {
 
 }
 
-export async function deleteWebauthnCredential(i: { credentialName: string }): Promise<CredentialList> {
-  return await req('DELETE', `/auth/webauthn/credential/${i.credentialName}`)
+export async function deleteWebauthnCredential(i: { credentialId: string }): Promise<CredentialList> {
+  return await req('DELETE', `/auth/webauthn/credential/${i.credentialId}`)
 }
 
 export async function modifyCredentialName(i: { credentialName: string, newCredentialName: string }): Promise<void> {

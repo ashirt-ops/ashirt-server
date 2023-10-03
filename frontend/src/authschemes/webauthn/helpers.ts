@@ -65,7 +65,7 @@ export const convertToPublicKeyCredentialRequestOptions = (input: ProvidedCreden
   const output: PublicKeyCredentialRequestOptions = {
     ...input.publicKey,
     challenge: toByteArrayFromB64URL(input.publicKey.challenge),
-    allowCredentials: input.publicKey.allowCredentials.map(
+    allowCredentials: input.publicKey.allowCredentials?.map(
       listItem => ({ ...listItem, id: toByteArrayFromB64URL(listItem.id) })
     )
   }
