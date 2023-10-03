@@ -50,11 +50,16 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 		return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable slug"), "Slug must contain english letters or numbers")
 	}
 
-	// TODO TN write a transaction here? OR will the table automatically populate?
-	_, err = db.Insert("operation_vars", map[string]interface{}{
-		"name":  i.Name,
-		"value": i.Value,
-		"slug":  i.VarSlug,
+	err = db.WithTx(ctx, func(tx *database.Transactable) {
+		varID, _ := tx.Insert("operation_vars", map[string]interface{}{
+			"name":  i.Name,
+			"value": i.Value,
+			"slug":  i.VarSlug,
+		})
+		tx.Insert("var_operation_map", map[string]interface{}{
+			"var_id":       varID,
+			"operation_id": operation.ID,
+		})
 	})
 	if err != nil {
 		return nil, backend.WrapError("Unable to add new operation variable", backend.DatabaseErr(err))
@@ -100,9 +105,10 @@ func ListOperationVars(ctx context.Context, db *database.Connection, operationSl
 
 	err = db.Select(&operationVars, sq.
 		Select("ov.*").
-		From("operation_vars ov").
-		Join("var_operation_map ovm ON ov.id = ovm.operation_id").
-		Where(sq.Eq{"ovm.operation_id": operation.ID}).
+		From("operations o").
+		Join("var_operation_map vom ON o.id = vom.operation_id").
+		Join("operation_vars ov ON ov.id = vom.var_id").
+		Where(sq.Eq{"o.id": operation.ID}).
 		OrderBy("ov.name ASC"))
 
 	if err != nil {

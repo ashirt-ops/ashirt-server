@@ -18,6 +18,7 @@ import {
   createGlobalVar,
   deleteOperationVar,
   updateOperationVar,
+  createOperationVar,
 } from 'src/services'
 import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
@@ -29,7 +30,7 @@ import Modal from 'src/components/modal'
 import Form from 'src/components/form'
 import ModalForm from 'src/components/modal_form'
 import { InputWithCopyButton } from 'src/components/text_copiers'
-import { useForm, useFormField } from 'src/helpers'
+import { isOperationVariable, useForm, useFormField } from 'src/helpers'
 import { NewApiKeyModalContents } from 'src/pages/account_settings/api_keys/modals'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 
@@ -462,8 +463,9 @@ export const RemoveTotpModal = (props: {
   </ModalForm>
 }
 
-export const AddGlobalVarModal = (props: {
+export const AddVarModal = (props: {
   onRequestClose: () => void,
+  operationSlug?: string,
 }) => {
   const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
 
@@ -473,12 +475,14 @@ export const AddGlobalVarModal = (props: {
     fields: [name, value],
     handleSubmit: () => {
       if (name.value.length == 0) {
-        return new Promise((_resolve, reject) => reject(Error("Global Variable should have a name")))
+        return new Promise((_resolve, reject) => reject(Error("Variable should have a name")))
       }
 
       const valOrNull = value.value === "" ? null : value.value
       const runSubmit = async () => {
-        await createGlobalVar(name.value, valOrNull) 
+        props.operationSlug
+          ? await createOperationVar(props.operationSlug ,name.value, valOrNull) 
+          : await createGlobalVar(name.value, valOrNull)
         setIsCompleted(true)
       }
       return runSubmit()
@@ -511,9 +515,7 @@ export const AddGlobalVarModal = (props: {
 
 
 
-function isOperationVariable(variable: GlobalVariableData | OperationVariableData): variable is OperationVariableData {
-  return (variable as OperationVariableData).operationSlug !== undefined;
-}
+
 
 
 export const DeleteVarModal = (props: {
@@ -524,7 +526,10 @@ export const DeleteVarModal = (props: {
     warningText="This will remove the variable from the system."
     submitText="Delete"
     challengeText={props.variableData.variable.name}
-    handleSubmit={() => isOperationVariable(props.variableData) ? deleteOperationVar(props.variableData.operationSlug, props.variableData.variable.varSlug) : deleteGlobalVar(props.variableData.variable.name) }
+    handleSubmit={() => isOperationVariable(props.variableData) 
+      ? deleteOperationVar(props.variableData.operationSlug, props.variableData.variable.varSlug) 
+      : deleteGlobalVar(props.variableData.variable.name) 
+    }
     onRequestClose={props.onRequestClose}
   />
 

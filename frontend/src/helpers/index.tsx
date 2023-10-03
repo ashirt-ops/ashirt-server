@@ -2,6 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
+import { GlobalVariableData, OperationVariableData } from 'src/global_types'
 
 export * from './clamp'
 export * from './compute_delta'
@@ -42,4 +43,8 @@ export function useWindowSize(): {width: number, height: number} {
   })
 
   return size
+}
+
+export function isOperationVariable(variable: GlobalVariableData | OperationVariableData): variable is OperationVariableData {
+  return (variable as OperationVariableData).operationSlug !== undefined;
 }

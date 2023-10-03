@@ -16,14 +16,15 @@ import SettingsSection from 'src/components/settings_section'
 import { DeleteVarModal, ModifyVarModal, } from 'src/pages/admin_modals'
 import { useWiredData } from 'src/helpers'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
+import CreateVarButton from "src/components/add_variable"
+import classnames from 'classnames'
+const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
   operationSlug: string,
   isAdmin: boolean,
 }) => {
   const bus = BuildReloadBus()
-
-  // const currentUser = React.useContext(AuthContext)?.user
 
   const [deletingOperationVar, setDeletingOperationVar] = React.useState<null | OperationVar>(null)
   const [modifyingOperationVar, setModifyingOperationVar] = React.useState<null | OperationVar>(null)
@@ -42,16 +43,20 @@ export default (props: {
   })
 
   return (
-    <SettingsSection title="Operation Variables" width="wide">
-      <Table columns={columns}>
-        {wiredOperationVars.render(data => <>
-          {data?.map((operationVar) => <TableRow key={operationVar.name} operationVar={operationVar} data={rowBuilder(operationVar, modifyActions(operationVar, setDeletingOperationVar, setModifyingOperationVar))} />
-          )}
-        </>)}
-      </Table>
-      {deletingOperationVar && <DeleteVarModal variableData={{variable: deletingOperationVar, operationSlug: props.operationSlug}} onRequestClose={() => { setDeletingOperationVar(null); wiredOperationVars.reload() }} />}
-      {modifyingOperationVar && <ModifyVarModal variableData={{variable: modifyingOperationVar, operationSlug: props.operationSlug}} onRequestClose={() => { setModifyingOperationVar(null); wiredOperationVars.reload() }} />}
-    </SettingsSection>
+    <div className={cx("op-var-parent")}>
+      <p className={cx('text')}>adsfasf</p>
+      <SettingsSection title="Operation Variables" width="wide">
+        <Table columns={columns}>
+          {wiredOperationVars.render(data => <>
+            {data?.map((operationVar) => <TableRow key={operationVar.name} operationVar={operationVar} data={rowBuilder(operationVar, modifyActions(operationVar, setDeletingOperationVar, setModifyingOperationVar))} />
+            )}
+          </>)}
+        </Table>
+        {deletingOperationVar && <DeleteVarModal variableData={{variable: deletingOperationVar, operationSlug: props.operationSlug}} onRequestClose={() => { setDeletingOperationVar(null); wiredOperationVars.reload() }} />}
+        {modifyingOperationVar && <ModifyVarModal variableData={{variable: modifyingOperationVar, operationSlug: props.operationSlug}} onRequestClose={() => { setModifyingOperationVar(null); wiredOperationVars.reload() }} />}
+      </SettingsSection>
+      <CreateVarButton {...bus} operationSlug={props.operationSlug} />
+    </div>
   )
 }
 
