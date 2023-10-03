@@ -99,6 +99,7 @@ func ClearDB(db *database.Connection) error {
 		tx.Delete(sq.Delete("users"))
 		tx.Delete(sq.Delete("user_groups"))
 		tx.Delete(sq.Delete("queries"))
+		tx.Delete(sq.Delete("var_operation_map"))
 		tx.Delete(sq.Delete("operations"))
 		tx.Delete(sq.Delete("service_workers"))
 		tx.Delete(sq.Delete("global_vars"))
