@@ -256,3 +256,11 @@ type OperationVar struct {
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at"`
 }
+
+// TagEvidenceMap reflects the structure of the database table 'tag_evidence_map'
+type VarOperationMap struct {
+	VarID       int64      `db:"var_id"`
+	OperationID int64      `db:"operation_id"`
+	CreatedAt   time.Time  `db:"created_at"`
+	UpdatedAt   *time.Time `db:"updated_at"`
+}
