@@ -63,7 +63,6 @@ export const OperationEdit = () => {
           <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
           <Route path="tasks" element={<BatchRunWorker operationSlug={operationSlug} />} />
           <Route path="groups" element={<UserGroupPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />} />
-          {/* TODO TN add new button */}
           <Route path="variables" element={<OperationVarsTable isAdmin={canViewGroups} operationSlug={operationSlug} />} />
         </Routes>
       </NavVerticalTabMenu>

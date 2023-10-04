@@ -90,7 +90,6 @@ func DeleteOperationVar(ctx context.Context, db *database.Connection, varSlug st
 }
 
 func ListOperationVars(ctx context.Context, db *database.Connection, operationSlug string) ([]*dtos.OperationVar, error) {
-	// tODO TN don't use this but get from SQL query below?
 	operation, err := lookupOperation(db, operationSlug)
 	if err != nil {
 		return nil, backend.WrapError("Unable to read operation", backend.UnauthorizedReadErr(err))
@@ -101,7 +100,6 @@ func ListOperationVars(ctx context.Context, db *database.Connection, operationSl
 	}
 
 	var operationVars = make([]models.OperationVar, 0)
-	// TODO TN rename ovm to vom
 
 	err = db.Select(&operationVars, sq.
 		Select("ov.*").
