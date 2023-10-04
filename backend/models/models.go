@@ -257,7 +257,7 @@ type OperationVar struct {
 	UpdatedAt *time.Time `db:"updated_at"`
 }
 
-// TagEvidenceMap reflects the structure of the database table 'tag_evidence_map'
+// VarOperationMap reflects the structure of the database table 'var_operation_map'
 type VarOperationMap struct {
 	VarID       int64      `db:"var_id"`
 	OperationID int64      `db:"operation_id"`
