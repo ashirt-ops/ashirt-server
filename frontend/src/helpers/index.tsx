@@ -17,6 +17,7 @@ export * from './localStroage'
 export * from './trim_url'
 export * from './highlight_substring'
 export * from './codeblock_to_blob'
+export * from './c2event_to_blob'
 
 export function useFocusFirstFocusableChild(ref: React.MutableRefObject<HTMLDivElement|null>) {
   React.useLayoutEffect(() => {

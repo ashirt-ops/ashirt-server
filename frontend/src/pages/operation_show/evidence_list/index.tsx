@@ -11,7 +11,7 @@ import {
   MoveEvidenceModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
-import { Codeblock, DenormalizedTag, Evidence, ExportedEvidence, Media, Tag } from 'src/global_types'
+import { C2Event, C2EventInterface, Codeblock, DenormalizedTag, Evidence, ExportedEvidence, Media, Tag } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
@@ -77,6 +77,7 @@ export default () => {
     "image": "jpeg",
     "terminal-recording": "cast",
     "codeblock": languageToFileExtension,
+    "c2-event": "txt",
     "event": "txt",
     "none": "txt",
     "http-request-cycle": "har",
@@ -107,7 +108,17 @@ export default () => {
           sourceFilename: data?.metadata?.source,
           blob: new Blob([data.content], {type: `text/${contentToFileExtension[e.contentType][data.contentSubtype]}`})
         }
-      } else {
+      } else if (e.contentType === "c2-event"){
+        const data: C2EventInterface = await rawMedia.json();
+        e.filename = `${uuid}.${contentToFileExtension[e.contentType]}`;
+        e.sourceFilename= data?.metadata?.source
+        return {
+          filename: uuid,
+          contentType: e.contentType, 
+          sourceFilename: data?.metadata?.source,
+          blob: new Blob([data.content], {type: `text/${contentToFileExtension[e.contentType]}`})
+        }
+        } else {
         const blob = await rawMedia.blob()
         e.filename = `${uuid}.${contentToFileExtension[e.contentType]}`;
         return {

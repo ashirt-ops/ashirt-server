@@ -13,6 +13,7 @@ export type EvidenceTypeOption = BulletProps & {
 export const supportedEvidenceCount: Array<EvidenceTypeOption> = [
   { name: 'Screenshot', id: 'image' },
   { name: 'Code Block', id: 'codeblock' },
+  { name: 'C2Event', id: 'c2-event' },
   { name: 'Terminal Recording', id: 'terminal-recording' },
   { name: 'HTTP Request/Response', id: 'http-request-cycle' },
   { name: 'Events', id: 'event' },

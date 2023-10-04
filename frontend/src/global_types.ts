@@ -34,6 +34,7 @@ export type ApiKey = {
 export type SupportedEvidenceType =
   | 'image'
   | 'codeblock'
+  | 'c2-event'
   | 'terminal-recording'
   | 'http-request-cycle'
   | 'event'
@@ -50,8 +51,29 @@ export type CodeBlock = {
   source: string | null,
 }
 
+export type C2Event = {
+  type: 'c2-event',
+  c2: string,         // "Cobalt Strike"
+  c2Operator: string, // The c2 frameworke user that issued task
+  beacon: string,     // Beacon identifier
+  externalIP: string,
+  internalIP: string,
+  hostname: string,
+  userContext: string,// The user context that the implant/beacon/agent is running under
+  integrity: string,  // "Low", "Medium", "High", "System"
+  processName: string,// process image file shortname
+  processID: number,  // is 'number' acceptable here? Its a float :/
+  command: string,    // The actual command that an operator entered to task a beacon
+  result: string,     // The result, if any, that a beacon responded to a tasking with
+}
+
 export type SubmittableCodeblock = {
   type: 'codeblock',
+  file: Blob
+}
+
+export type SubmittableC2Event = {
+  type: 'c2-event',
   file: Blob
 }
 
@@ -76,6 +98,7 @@ export type ContentFreeEvidence = {
 
 export type SubmittableEvidence =
   | SubmittableCodeblock
+  | SubmittableC2Event
   | ImageEvidence
   | TerminalRecording
   | HttpRequestCycle
@@ -314,7 +337,7 @@ export type FilterText = {
   setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export type ContentType = "image" | "terminal-recording" | "http-request-cycle" | "event" | "none" | "codeblock"
+export type ContentType = "image" | "terminal-recording" | "http-request-cycle" | "event" | "none" | "codeblock" | "c2-event"
 
 type Languages = "" | "abap" | "actionscript" | "ada" | "c_cpp" | "csharp" | "cobol" | "d" | "dart" | "dockerfile" | "elixir" | "elm" | "erlang" | "fsharp" | "fortran" | "golang" | "groovy" | "haskell" | "java" | "javascript" | "julia" | "kotlin" | "lisb" | "lua" | "matlab" | "markdown" | "objectivec" | "pascal" | "php" | "perl" | "prolog" | "properties" | "python" | "r" | "ruby" | "rust" | "sass" | "scala" | "scheme" | "sh" | "sql" | "swift" | "tcl" | "terraform" | "toml" | "typescript" | "vbscript" | "xml"
 
@@ -326,9 +349,18 @@ export interface Media {
   blob: Blob
 }
 
+// Because we are using this interface for all JSON-ified event types and not just Codeblock anymore, propose rename
 export interface Codeblock {
   contentType: string,
   contentSubtype: Languages,
+  content: string 
+  metadata: {
+    source: string,
+  }
+}
+
+export interface C2EventInterface {
+  contentType: string,
   content: string 
   metadata: {
     source: string,
