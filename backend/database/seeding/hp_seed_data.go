@@ -156,7 +156,7 @@ var HarryPotterSeedData = Seeder{
 	VarOperationMap: unionVarOperationMap(
 		associateVarsToOperation(OpSorcerersStone, OpVarImmobulus, OpVarObscuro),
 		associateVarsToOperation(OpChamberOfSecrets, OpVarProtego, OpVarReparo),
-		associateVarsToOperation(OpPrisonerOfAzkaban, OpVarStupefy, OpVarWingardiumLeviosa),
+		associateVarsToOperation(OpGobletOfFire, OpVarStupefy, OpVarWingardiumLeviosa),
 	),
 }
 

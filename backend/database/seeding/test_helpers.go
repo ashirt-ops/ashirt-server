@@ -104,6 +104,7 @@ func ClearDB(db *database.Connection) error {
 		tx.Delete(sq.Delete("service_workers"))
 		tx.Delete(sq.Delete("global_vars"))
 		tx.Delete(sq.Delete("operation_vars"))
+		tx.Delete(sq.Delete("var_operation_map"))
 	})
 	return err
 }
@@ -616,6 +617,16 @@ func GetGlobalVarFromName(t *testing.T, db *database.Connection, name string) mo
 		Where(sq.Eq{"name": name}))
 	require.NoError(t, err)
 	return globalVar
+}
+
+func GetOperationVarFromSlug(t *testing.T, db *database.Connection, slug string) models.OperationVar {
+	var operationVar models.OperationVar
+
+	err := db.Get(&operationVar, sq.Select("*").
+		From("operation_vars").
+		Where(sq.Eq{"slug": slug}))
+	require.NoError(t, err)
+	return operationVar
 }
 
 type TestOptions struct {
