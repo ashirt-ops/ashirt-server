@@ -104,7 +104,6 @@ func ClearDB(db *database.Connection) error {
 		tx.Delete(sq.Delete("service_workers"))
 		tx.Delete(sq.Delete("global_vars"))
 		tx.Delete(sq.Delete("operation_vars"))
-		tx.Delete(sq.Delete("var_operation_map"))
 	})
 	return err
 }
