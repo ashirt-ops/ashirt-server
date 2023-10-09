@@ -31,8 +31,8 @@ Configuration is handled entirely via environment variables. To that end, here a
     * This captures the configuration details for your ASHIRT storage. Different services require different configuration, so this area captures all possible fields. Their specific use is detailed below. More details on how to use content store can be found [in Storage](#storage)
       * `STORE_TYPE`
         * Required for all stores
-        * Valid values: `file`, `s3`, `gcp`, `memory`, `_` (the empty string)
-        * `file` and `memory` are used for local development and testing respectively. These are not recommended for a real deployment
+        * Valid values: `local`, `s3`, `gcp`, `memory`, `_` (the empty string)
+        * `local` and `memory` are used for local development and testing respectively. These are not recommended for a real deployment
         * `s3` connects to an AWS S3 bucket. See [below](#aws-s3) for more details
         * `gcp` connects to a Google Cloud Platform Cloud Storage bucket. See [below](#google-cloud-platform-cloud-storage) for more details
         * The empty string is technically supported, but acts as a fallback to legacy storage (i.e. S3 storage, configured via `APP_IMGSTORE_BUCKET_NAME` and `APP_IMGSTORE_REGION`).
