@@ -52,6 +52,13 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 
 	var varID int64
 
+	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
+	for _, varInOperation := range listOfVarsInOperation {
+		if varInOperation.Name == i.Name {
+			return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
+		}
+	}
+
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		varID, _ = tx.Insert("operation_vars", map[string]interface{}{
 			"name":  i.Name,
