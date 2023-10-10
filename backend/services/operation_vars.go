@@ -50,8 +50,10 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 		return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable slug"), "Slug must contain english letters or numbers")
 	}
 
+	var varID int64
+
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
-		varID, _ := tx.Insert("operation_vars", map[string]interface{}{
+		varID, _ = tx.Insert("operation_vars", map[string]interface{}{
 			"name":  i.Name,
 			"value": i.Value,
 			"slug":  i.VarSlug,
@@ -62,7 +64,16 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 		})
 	})
 	if err != nil {
-		return nil, backend.WrapError("Unable to add new operation variable", backend.DatabaseErr(err))
+		var errMessage string
+		if database.IsAlreadyExistsError(err) {
+			errMessage = "An operation variable with this name already exists"
+		} else if database.InputIsTooLongError(err) {
+			errMessage = "The variable name must be 255 characters or less"
+		} else {
+			errMessage = "Unable to add new operation variable"
+		}
+
+		return nil, backend.BadInputErr(backend.WrapError("Unable to add new operation variable", backend.DatabaseErr(err)), errMessage)
 	}
 
 	return &dtos.OperationVar{
