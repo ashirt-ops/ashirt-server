@@ -26,9 +26,19 @@ func TestCreateOperationVar(t *testing.T) {
 		require.Error(t, err)
 
 		ctx = contextForUser(UserHarry, db)
-		operationVar := OpVarImmobulus
 
-		// verify name is invalid
+		// verify name must be under 255 characters
+		i = services.CreateOperationVarInput{
+			OperationSlug: OpSorcerersStone.Slug,
+			VarSlug:       "something",
+			Name:          "fskwZNfZUYSDAFmnpRiujnTIIll3XZDzOXJdmkQziAeKt41xwi11ztrxkPj2rwqCbVvasgwQqUF5K8gbWcv3ODhOnuCh8QL8tSaDplQzHa6RCJV0ml3WelZTquJ2IAjYLHtRQnWKNqBOEH2XzVMi4aYPSFD3TJsv4BfE8JVMdqyvlOwDMEAA6hFCNwMLuyTsZFz8h0byLs4m0VbTaXTHqAWxyujzpt4LEskbfwPzJ7e5jJzbY6rnEGNZsO7UPhU2",
+			Value:         "slash a target",
+		}
+		_, err = services.CreateOperationVar(ctx, db, i)
+		require.Error(t, err)
+
+		// verify slug is invalid (duplicate)
+		operationVar := OpVarImmobulus
 		i = services.CreateOperationVarInput{
 			OperationSlug: OpSorcerersStone.Slug,
 			VarSlug:       operationVar.Slug,
@@ -46,6 +56,32 @@ func TestCreateOperationVar(t *testing.T) {
 			Value:         "slash a target",
 		}
 		createdOperationVar, err := services.CreateOperationVar(ctx, db, i)
+		require.NoError(t, err)
+		operationVar = getOperationVarFromSlug(t, db, createdOperationVar.VarSlug)
+
+		require.NotEqual(t, 0, operationVar.ID)
+		require.Equal(t, i.VarSlug, operationVar.Slug)
+		require.Equal(t, i.Name, operationVar.Name)
+		require.Equal(t, i.Value, operationVar.Value)
+
+		// verify name must be unique within an operation
+		i = services.CreateOperationVarInput{
+			OperationSlug: OpSorcerersStone.Slug,
+			VarSlug:       "Sectumsempra2",
+			Name:          "Sectumsempra",
+			Value:         "slash a target",
+		}
+		createdOperationVar, err = services.CreateOperationVar(ctx, db, i)
+		require.Error(t, err)
+
+		// verify no error when same name in diff operations
+		i = services.CreateOperationVarInput{
+			OperationSlug: OpGobletOfFire.Slug,
+			VarSlug:       "Sectumsempra2",
+			Name:          "Sectumsempra",
+			Value:         "slash a target",
+		}
+		createdOperationVar, err = services.CreateOperationVar(ctx, db, i)
 		require.NoError(t, err)
 		operationVar = getOperationVarFromSlug(t, db, createdOperationVar.VarSlug)
 
@@ -103,10 +139,23 @@ func TestUpdateOperationVar(t *testing.T) {
 		err := services.UpdateOperationVar(ctx, db, input)
 		require.Error(t, err)
 
-		// update name and value
+		// verify name can't be over 255 characters
 		newVar := OpVarReparo
 		ctx = contextForUser(UserRon, db)
-		newName := "Accio"
+		newName := "fskwZNfZUYSDAFmnpRiujnTIIll3XZDzOXJdmkQziAeKt41xwi11ztrxkPj2rwqCbVvasgwQqUF5K8gbWcv3ODhOnuCh8QL8tSaDplQzHa6RCJV0ml3WelZTquJ2IAjYLHtRQnWKNqBOEH2XzVMi4aYPSFD3TJsv4BfE8JVMdqyvlOwDMEAA6hFCNwMLuyTsZFz8h0byLs4m0VbTaXTHqAWxyujzpt4LEskbfwPzJ7e5jJzbY6rnEGNZsO7UPhU2"
+
+		input = services.UpdateOperationVarInput{
+			VarSlug:       newVar.Slug,
+			OperationSlug: OpChamberOfSecrets.Slug,
+			Name:          newName,
+			Value:         "",
+		}
+
+		err = services.UpdateOperationVar(ctx, db, input)
+		require.Error(t, err)
+
+		// update name and value
+		newName = "Accio"
 		newValue := "Bring an object to you"
 
 		input = services.UpdateOperationVarInput{
@@ -158,5 +207,30 @@ func TestUpdateOperationVar(t *testing.T) {
 		updatedOperationVar, err = services.LookupOperationVar(db, newVar.Slug)
 		require.Equal(t, newVar.Name, updatedOperationVar.Name)
 		require.Equal(t, newValue, updatedOperationVar.Value)
+
+		// verify name must be unique within an operation
+		input = services.UpdateOperationVarInput{
+			OperationSlug: OpGobletOfFire.Slug,
+			VarSlug:       newVar.Slug,
+			Name:          newName,
+			Value:         "",
+		}
+		err = services.UpdateOperationVar(ctx, db, input)
+		require.Error(t, err)
+
+		// verify no error when same name in diff operations
+		newVar = OpVarReparo
+		ctx = contextForUser(UserRon, db)
+		input = services.UpdateOperationVarInput{
+			OperationSlug: OpChamberOfSecrets.Slug,
+			VarSlug:       newVar.Slug,
+			Name:          newName,
+			Value:         "",
+		}
+		err = services.UpdateOperationVar(ctx, db, input)
+		require.NoError(t, err)
+		updatedOperationVar, err = services.LookupOperationVar(db, newVar.Slug)
+		require.Equal(t, newName, updatedOperationVar.Name)
+		require.Equal(t, "Bring an object to you", updatedOperationVar.Value)
 	})
 }
