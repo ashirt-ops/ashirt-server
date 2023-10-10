@@ -134,8 +134,9 @@ func ListOperationVars(ctx context.Context, db *database.Connection, operationSl
 	var operationVarsDTO = make([]*dtos.OperationVar, len(operationVars))
 	for i, operationVar := range operationVars {
 		operationVarsDTO[i] = &dtos.OperationVar{
-			Name:  operationVar.Name,
-			Value: operationVar.Value,
+			Name:    operationVar.Name,
+			Value:   operationVar.Value,
+			VarSlug: operationVar.Slug,
 		}
 	}
 
