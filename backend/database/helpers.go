@@ -161,6 +161,13 @@ func IsAlreadyExistsError(err error) bool {
 	return ok && mysqlErr.Number == 1062
 }
 
+// When updating a row using sq, the above function isAlreadyExistsError won't work
+// (because extra text is appended to the error message)
+// so this function manually checks for error code 1062
+func IsAlreadyExistsErrorSq(err error) bool {
+	return strings.Contains(err.Error(), "1062")
+}
+
 // InputIsTooLongError returns true if the passed error is a database error resulting
 // from attempting to insert a row that exceeds the max length of a column
 func InputIsTooLongError(err error) bool {
@@ -168,11 +175,11 @@ func InputIsTooLongError(err error) bool {
 	return ok && mysqlErr.Number == 1406
 }
 
-// When updating a row using sq, the above function isAlreadyExistsError won't work
+// When updating a row using sq, the above function InputIsTooLongError won't work
 // (because extra text is appended to the error message)
-// so this function manually checks for error code 1062
-func IsAlreadyExistsErrorSq(err error) bool {
-	return strings.Contains(err.Error(), "1062")
+// so this function manually checks for error code 1406
+func InputIsTooLongErrorSq(err error) bool {
+	return strings.Contains(err.Error(), "1406")
 }
 
 func addDuplicatesClause(query squirrel.InsertBuilder, onDuplicates ...interface{}) (squirrel.InsertBuilder, error) {

@@ -80,7 +80,7 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 			errMessage = "Unable to add new operation variable"
 		}
 
-		return nil, backend.BadInputErr(backend.WrapError("Unable to add new operation variable", backend.DatabaseErr(err)), errMessage)
+		return nil, backend.BadInputErr(backend.WrapError(errMessage, backend.DatabaseErr(err)), errMessage)
 	}
 
 	return &dtos.OperationVar{
@@ -156,6 +156,13 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 		return backend.WrapError("Unwilling to update operation", backend.UnauthorizedWriteErr(err))
 	}
 
+	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
+	for _, varInOperation := range listOfVarsInOperation {
+		if varInOperation.Name == i.Name {
+			return backend.BadInputErr(errors.New("Unable to update operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
+		}
+	}
+
 	var val string
 	var name string
 
@@ -178,7 +185,14 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 		}).
 		Where(sq.Eq{"id": operationVar.ID}))
 	if err != nil {
-		return backend.WrapError("Cannot update operation variable", backend.DatabaseErr(err))
+		var errMessage string
+		if database.InputIsTooLongErrorSq(err) {
+			errMessage = "The variable name must be 255 characters or less"
+		} else {
+			errMessage = "Unable to update new operation variable"
+		}
+
+		return backend.BadInputErr(backend.WrapError(errMessage, backend.DatabaseErr(err)), errMessage)
 	}
 
 	return nil
