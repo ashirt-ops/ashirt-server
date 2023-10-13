@@ -7,7 +7,7 @@ import WithLabel from 'src/components/with_label'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
-type SharedProps = {
+export type SharedProps = {
   className?: string,
   disabled?: boolean,
   label?: string,

@@ -68,7 +68,7 @@ function isValidUserRole(maybeRole: string): maybeRole is types.UserRole {
 
 function isValidSupportedEvidenceType(maybeSupportedEvidence: string): maybeSupportedEvidence is types.SupportedEvidenceType {
   return ['codeblock', 'image', 'terminal-recording',
-    'http-request-cycle', 'event',
+    'http-request-cycle', 'event', 'c2-event',
     'none'].indexOf(maybeSupportedEvidence) > -1
 }
 

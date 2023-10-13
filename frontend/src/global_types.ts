@@ -349,7 +349,6 @@ export interface Media {
   blob: Blob
 }
 
-// Because we are using this interface for all JSON-ified event types and not just Codeblock anymore, propose rename
 export interface Codeblock {
   contentType: string,
   contentSubtype: Languages,
