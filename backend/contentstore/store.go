@@ -24,6 +24,10 @@ type Store interface {
 	Name() string
 }
 
+type ProductionStore interface {
+	SendURL(key string) string
+}
+
 // ContentKeys stores the location/path of the original content, as well as the thumbnail/preview location
 type ContentKeys struct {
 	Full      string

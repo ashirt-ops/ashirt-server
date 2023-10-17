@@ -54,7 +54,8 @@ export interface DataSource {
 
   listEvidence(ids: OpSlug, query: string): Promise<Array<dtos.Evidence>>
   createEvidence(ids: OpSlug, formData: FormData): Promise<void>
-  readEvidenceContent(ids: OpSlug & EvidenceUuid): Promise<string>
+  readEvidenceContent(ids: OpSlug & EvidenceUuid): Promise<dtos.ActiveServiceWorker>
+  readEvidenceContentCodeblock(ids: OpSlug & EvidenceUuid): Promise<string>
   updateEvidence(ids: OpSlug & EvidenceUuid, formData: FormData): Promise<void>
   deleteEvidence(ids: OpSlug & EvidenceUuid, payload: { deleteAssociatedFindings: boolean }): Promise<void>
   getEvidenceMigrationDifference(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<dtos.TagDifference>

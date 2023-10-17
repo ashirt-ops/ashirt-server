@@ -5,6 +5,7 @@ package contentstore
 
 import (
 	"io"
+	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/aws/aws-sdk-go/aws"
@@ -68,6 +69,21 @@ func (s *S3Store) Read(key string) (io.Reader, error) {
 		return nil, backend.WrapError("Unable to read from s3", err)
 	}
 	return res.Body, nil
+}
+
+func (s *S3Store) SendURL(key string) (*string, error) {
+	req, _ := s.s3Client.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(s.bucketName),
+		Key:    aws.String(key),
+	})
+
+	// TODO TN should be as long as cookie expiration?
+	url, err := req.Presign(time.Minute * 15)
+	if err != nil {
+		return nil, backend.WrapError("Unable to get presigned URL", err)
+	}
+
+	return &url, nil
 }
 
 // Delete removes files in in your OS's temp directory

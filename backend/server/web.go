@@ -506,25 +506,55 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
-		dr := dissectNoBodyRequest(r)
-		i := services.ReadEvidenceInput{
-			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-			LoadPreview:   dr.FromURL("type").AsString() == "preview",
-			LoadMedia:     dr.FromURL("type").AsString() == "media",
-		}
+	var handler http.Handler
 
-		evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
-		if err != nil {
-			return nil, backend.WrapError("Unable to read evidence", err)
-		}
+	if _, ok := contentStore.(contentstore.ProductionStore); ok {
+		handler = jsonHandler(func(r *http.Request) (interface{}, error) {
+			store := contentStore.(contentstore.ProductionStore)
+			dr := dissectNoBodyRequest(r)
+			i := services.ReadEvidenceInput{
+				EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+				OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+				LoadPreview:   dr.FromURL("type").AsString() == "preview",
+				LoadMedia:     dr.FromURL("type").AsString() == "media",
+			}
 
-		if i.LoadPreview {
-			return evidence.Preview, nil
-		}
-		return evidence.Media, nil
-	}))
+			z, err := services.SendURL(r.Context(), db, store, i)
+			if err != nil {
+				return nil, backend.WrapError("Unable to read evidence", err)
+			}
+			// TODO TN get rid of this part
+			// a := interface{}(z)
+
+			// if value, ok := a.(struct{ Name string }); ok {
+			// 	return value, nil
+			// }
+
+			return z, nil
+		})
+	} else {
+		handler = mediaHandler(func(r *http.Request) (io.Reader, error) {
+			dr := dissectNoBodyRequest(r)
+			i := services.ReadEvidenceInput{
+				EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+				OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+				LoadPreview:   dr.FromURL("type").AsString() == "preview",
+				LoadMedia:     dr.FromURL("type").AsString() == "media",
+			}
+
+			evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
+			if err != nil {
+				return nil, backend.WrapError("Unable to read evidence", err)
+			}
+
+			if i.LoadPreview {
+				return evidence.Preview, nil
+			}
+			return evidence.Media, nil
+		})
+	}
+
+	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", handler)
 
 	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
