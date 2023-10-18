@@ -82,7 +82,10 @@ const EvidenceImage = (props: EvidenceProps) => {
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
 
-  return wiredEvidence.render(evi => <img src={evi.name} />)
+  return wiredEvidence.render(evi => {
+    console.log("evidence name", evi.name, evi)
+    return (<img src={evi.name} />)
+  })
 }
 
 // const EvidenceImage = async (props: EvidenceProps) => {
