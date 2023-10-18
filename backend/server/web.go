@@ -535,7 +535,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			return z, nil
 		})
 	} else {
-		fmt.Println("not using s3")
+		fmt.Println("not using s3", contentStore.Name())
 		handler = mediaHandler(func(r *http.Request) (io.Reader, error) {
 			fmt.Println("in the media handler")
 			dr := dissectNoBodyRequest(r)
