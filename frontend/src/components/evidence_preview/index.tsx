@@ -82,6 +82,8 @@ const EvidenceImage = (props: EvidenceProps) => {
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
 
+  console.log("something stomething", wiredEvidence.expose(data => console.log(data)))
+
   return wiredEvidence.render(evi => {
     console.log("evidence name", evi.name, evi)
     return (<img src={evi.name} />)

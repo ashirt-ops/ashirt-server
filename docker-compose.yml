@@ -14,10 +14,10 @@ services:
       - 3000:3000
     restart: on-failure
     environment:
-      # STORE_TYPE: local
-      STORE_TYPE: s3
-      STORE_BUCKET: my-ashirt-data-123
-      STORE_REGION: us-east-1
+      STORE_TYPE: local
+      # STORE_TYPE: s3
+      # STORE_BUCKET: my-ashirt-data-123
+      # STORE_REGION: us-east-1
       # If using GCP or S3...
       # STORE_BUCKET: 
       # If using S3...
