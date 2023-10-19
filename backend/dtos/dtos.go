@@ -17,12 +17,13 @@ type APIKey struct {
 }
 
 type Evidence struct {
-	UUID        string    `json:"uuid"`
-	Description string    `json:"description"`
-	OccurredAt  time.Time `json:"occurredAt"`
-	Operator    User      `json:"operator"`
-	Tags        []Tag     `json:"tags"`
-	ContentType string    `json:"contentType"`
+	UUID          string    `json:"uuid"`
+	Description   string    `json:"description"`
+	OccurredAt    time.Time `json:"occurredAt"`
+	Operator      User      `json:"operator"`
+	Tags          []Tag     `json:"tags"`
+	ContentType   string    `json:"contentType"`
+	SendImageInfo bool      `json:"sendImageInfo"`
 }
 
 type EvidenceMetadata struct {

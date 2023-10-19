@@ -43,6 +43,7 @@ const EvidenceRow = (props: {
         evidenceUuid={props.evidence.uuid}
         contentType={props.evidence.contentType}
         onClick={(e) => { e.stopPropagation(); setLightboxOpen(true)} }
+        streamImage={props.evidence.sendImageInfo}
         fitToContainer
         viewHint="small"
         interactionHint="inactive"
@@ -55,6 +56,7 @@ const EvidenceRow = (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
+          streamImage={props.evidence.sendImageInfo}
           viewHint="large"
           interactionHint="active"
         />

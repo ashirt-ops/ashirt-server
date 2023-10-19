@@ -479,7 +479,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return services.ListEvidenceForOperation(r.Context(), db, i)
+		return services.ListEvidenceForOperation(r.Context(), db, contentStore, i)
 	}))
 
 	route(r, "GET", "/operations/{operation_slug}/evidence/creators", jsonHandler(func(r *http.Request) (interface{}, error) {
@@ -525,12 +525,8 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			return url, nil
 		})
 	} else {
-		// TODO TN clean up logs in this file
-		fmt.Println("not using s3", contentStore.Name())
 		handler = mediaHandler(func(r *http.Request) (io.Reader, error) {
-			fmt.Println("in the media handler")
 			dr := dissectNoBodyRequest(r)
-			fmt.Println("___received request not s3")
 			i := services.ReadEvidenceInput{
 				EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
 				OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -540,10 +536,8 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 			evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
 			if err != nil {
-				fmt.Println("error", err)
 				return nil, backend.WrapError("Unable to read evidence", err)
 			}
-			fmt.Printf("evidence: %+v\n", evidence)
 
 			if i.LoadPreview {
 				return evidence.Preview, nil

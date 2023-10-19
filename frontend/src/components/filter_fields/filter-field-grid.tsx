@@ -266,6 +266,8 @@ const uuidToBasicEvidence = (uuid: string): Evidence => ({
   occurredAt: new Date(),
   tags: [],
   contentType: 'none',
+  // TODO TN what should this be?
+  sendImageInfo: false
 })
 
 const ChooseEvidenceModal = (props: {

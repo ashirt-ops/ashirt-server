@@ -111,6 +111,8 @@ export default (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
+          // TODO TN figure out bettwer wording?
+          streamImage={!activeEvidence.sendImageInfo}
           viewHint="large"
           interactionHint="active"
         />
@@ -158,6 +160,7 @@ const TimelineRow = (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
+          streamImage={!props.evidence.sendImageInfo}
           viewHint="medium"
           interactionHint="inactive"
         />

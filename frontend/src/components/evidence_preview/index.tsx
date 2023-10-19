@@ -40,6 +40,7 @@ export default (props: {
   interactionHint?: InteractionHint,
   className?: string,
   fitToContainer?: boolean,
+  streamImage: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
 }) => {
   const Component = getComponent(props.contentType)
@@ -65,6 +66,7 @@ type EvidenceProps = {
   evidenceUuid: string,
   viewHint?: EvidenceViewHint,
   interactionHint?: InteractionHint,
+  streamImage: boolean
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
@@ -76,22 +78,20 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
   return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
 }
 
+// TODO TN - only send extra data if image?
 const EvidenceImage = (props: EvidenceProps) => {
-  const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getEvidence({
-    operationSlug: props.operationSlug,
-    evidenceUuid: props.evidenceUuid,
-  }), [props.operationSlug, props.evidenceUuid]))
-
-
-  return wiredImageInfo.render(info => <img src={info.url} />)
+  if (props.streamImage) {
+    const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
+    return <img src={fullUrl} />
+  } else {
+    const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getEvidence({
+      operationSlug: props.operationSlug,
+      evidenceUuid: props.evidenceUuid,
+    }), [props.operationSlug, props.evidenceUuid]))
+  
+    return wiredImageInfo.render(info => <img src={info.url} />)
+  }
 }
-
-// TODO TN - should this be different for non s3, or should we leave it as is?
-// const EvidenceImage = async (props: EvidenceProps) => {
-//   const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-//   const url = await getEvidence({operationSlug: props.operationSlug, evidenceUuid: props.evidenceUuid})
-//   return <img src={url} />
-// }
 
 const EvidenceEvent = (_props: EvidenceProps) => {
   return <div className={cx('event')}></div>
@@ -112,7 +112,6 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
   return wiredEvidence.render(evi => <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />)
 }
 
-// TODO TN replace activeservericeworker with correct type
 const EvidenceHttpCycle = (props: EvidenceProps) => {
   const wiredEvidence = useWiredData<ImageInfo>(React.useCallback(() => getEvidenceAsString({
     operationSlug: props.operationSlug,

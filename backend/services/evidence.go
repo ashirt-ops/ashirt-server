@@ -257,7 +257,7 @@ func ListEvidenceForFinding(ctx context.Context, db *database.Connection, i List
 
 // ListEvidenceForOperation retrieves all evidence for a particular operation id matching a particular
 // set of filters (e.g. tag:some_tag)
-func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i ListEvidenceForOperationInput) ([]*dtos.Evidence, error) {
+func ListEvidenceForOperation(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i ListEvidenceForOperationInput) ([]*dtos.Evidence, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
 		return nil, backend.WrapError("Unable to list evidence for an operation", backend.UnauthorizedReadErr(err))
@@ -316,6 +316,12 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 	}
 
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))
+
+	sendImageInfo := false
+	if _, ok := contentStore.(*contentstore.S3Store); ok {
+		sendImageInfo = true
+	}
+
 	for idx, evi := range evidence {
 		tags, ok := tagsByEvidenceID[evi.ID]
 
@@ -324,12 +330,13 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 		}
 
 		evidenceDTO[idx] = &dtos.Evidence{
-			UUID:        evi.UUID,
-			Description: evi.Description,
-			Operator:    dtos.User{FirstName: evi.FirstName, LastName: evi.LastName, Slug: evi.Slug},
-			OccurredAt:  evi.OccurredAt,
-			ContentType: evi.ContentType,
-			Tags:        tags,
+			UUID:          evi.UUID,
+			Description:   evi.Description,
+			Operator:      dtos.User{FirstName: evi.FirstName, LastName: evi.LastName, Slug: evi.Slug},
+			OccurredAt:    evi.OccurredAt,
+			ContentType:   evi.ContentType,
+			Tags:          tags,
+			SendImageInfo: sendImageInfo,
 		}
 	}
 	return evidenceDTO, nil
