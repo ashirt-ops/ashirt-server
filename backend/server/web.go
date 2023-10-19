@@ -508,8 +508,9 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 	var handler http.Handler
 
-	fmt.Println("___contentStore.Name", contentStore.Name())
-	if contentStore.Name() == "s3" {
+	fmt.Println("___contentStore.Name", contentStore.Name(), "it name equal to s3", contentStore.Name() == "s3")
+	if true {
+		// if contentStore.Name() == "s3" {
 		// if _, ok := contentStore.(contentstore.ProdStore); ok {
 		fmt.Println("using s3")
 		handler = jsonHandler(func(r *http.Request) (interface{}, error) {
