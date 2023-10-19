@@ -4,7 +4,6 @@
 package contentstore
 
 import (
-	"fmt"
 	"io"
 	"time"
 
@@ -83,7 +82,6 @@ func (s *S3Store) SendURL(key string) (*string, error) {
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
 	}
-	fmt.Println("__url", url)
 
 	return &url, nil
 }

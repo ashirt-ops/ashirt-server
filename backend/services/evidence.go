@@ -355,10 +355,10 @@ func SendURL(ctx context.Context, db *database.Connection, contentStore *content
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
 	}
 	// TODO TN fix headers
-	url := &dtos.ImageInfo{
+	ImageInfo := &dtos.ImageInfo{
 		Url: *str,
 	}
-	return url, nil
+	return ImageInfo, nil
 
 }
 
