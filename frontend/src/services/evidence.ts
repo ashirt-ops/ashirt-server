@@ -1,4 +1,4 @@
-import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata, ActiveServiceWorker } from 'src/global_types'
+import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata, ActiveServiceWorker, ImageInfo } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { evidenceFromDto } from './data_sources/converters'
@@ -30,12 +30,9 @@ export async function moveEvidence(i: {
 export async function getEvidence(i: {
   operationSlug: string,
   evidenceUuid: string,
-}): Promise<ActiveServiceWorker> {
+}): Promise<ImageInfo> {
   console.log("getEvidence", i)
-  const thing = await ds.readEvidenceContent(i)
-  console.log("__thing", thing)
-  console.log("__thing.name", thing.name)
-  return thing
+  return await ds.readEvidenceContent(i)
 }
 
 export async function getEvidenceAsCodeblock(i: {
@@ -56,7 +53,7 @@ export async function getEvidenceAsCodeblock(i: {
 export async function getEvidenceAsString(i: {
   operationSlug: string,
   evidenceUuid: string,
-}): Promise<ActiveServiceWorker> {
+}): Promise<ImageInfo> {
 // }): Promise<string> {
   return await ds.readEvidenceContent(i)
 }

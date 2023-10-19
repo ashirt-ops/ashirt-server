@@ -339,3 +339,7 @@ export type GlobalVar = {
   name: string,
   value: string,
 }
+
+export type ImageInfo = {
+  url: string
+}

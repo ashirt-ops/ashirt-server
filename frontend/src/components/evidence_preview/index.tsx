@@ -5,7 +5,7 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
-import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint, ActiveServiceWorker } from 'src/global_types'
+import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint, ActiveServiceWorker, ImageInfo } from 'src/global_types'
 import { getEvidence, getEvidenceAsCodeblock, getEvidenceAsString, getEvidenceAsStringTerm, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
@@ -77,17 +77,13 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
-  const wiredEvidence = useWiredData<ActiveServiceWorker>(React.useCallback(() => getEvidence({
+  const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getEvidence({
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
 
-  console.log("something stomething", wiredEvidence.expose(data => console.log(data)))
 
-  return wiredEvidence.render(evi => {
-    console.log("evidence name", evi.name, evi)
-    return (<img src={evi.name} />)
-  })
+  return wiredImageInfo.render(info => <img src={info.url} />)
 }
 
 // TODO TN - should this be different for non s3, or should we leave it as is?
@@ -118,7 +114,7 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
 
 // TODO TN replace activeservericeworker with correct type
 const EvidenceHttpCycle = (props: EvidenceProps) => {
-  const wiredEvidence = useWiredData<ActiveServiceWorker>(React.useCallback(() => getEvidenceAsString({
+  const wiredEvidence = useWiredData<ImageInfo>(React.useCallback(() => getEvidenceAsString({
     operationSlug: props.operationSlug,
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))

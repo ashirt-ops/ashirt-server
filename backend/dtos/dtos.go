@@ -235,3 +235,7 @@ type GlobalVar struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
+
+type ImageInfo struct {
+	Url string `json:"url"`
+}

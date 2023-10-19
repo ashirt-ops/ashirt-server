@@ -508,11 +508,8 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 	var handler http.Handler
 
-	fmt.Println("___contentStore.Name", contentStore.Name(), "it name equal to s3", contentStore.Name() == "s3")
 	if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
-		fmt.Println("using s3")
 		handler = jsonHandler(func(r *http.Request) (interface{}, error) {
-			fmt.Println("___received request s3")
 			dr := dissectNoBodyRequest(r)
 			i := services.ReadEvidenceInput{
 				EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -521,12 +518,11 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 				LoadMedia:     dr.FromURL("type").AsString() == "media",
 			}
 
-			// TODO TN ChANGE var names
-			z, err := services.SendURL(r.Context(), db, s3Store, i)
+			url, err := services.SendURL(r.Context(), db, s3Store, i)
 			if err != nil {
-				return nil, backend.WrapError("Unable to read evidence", err)
+				return nil, backend.WrapError("Unable to obtain image URL", err)
 			}
-			return z, nil
+			return url, nil
 		})
 	} else {
 		// TODO TN clean up logs in this file
