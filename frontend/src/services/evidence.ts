@@ -27,21 +27,11 @@ export async function moveEvidence(i: {
   return await ds.moveEvidence({ operationSlug: i.toOperationSlug, evidenceUuid: i.evidenceUuid }, i.fromOperationSlug)
 }
 
-export async function getEvidence(i: {
-  operationSlug: string,
-  evidenceUuid: string,
-}): Promise<ImageInfo> {
-  console.log("getEvidence", i)
-  return await ds.readEvidenceContent(i)
-}
-
 export async function getEvidenceAsCodeblock(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<CodeBlock> {
-  // const evi = await ds.readEvidenceContent(i)
-  const evi = JSON.parse(await ds.readEvidenceContentCodeblock(i))
-  console.log("evi codeblack", evi)
+  const evi = JSON.parse(await ds.readEvidenceContent(i))
   return {
     type: 'codeblock',
     language: evi.contentSubtype,
@@ -53,17 +43,9 @@ export async function getEvidenceAsCodeblock(i: {
 export async function getEvidenceAsString(i: {
   operationSlug: string,
   evidenceUuid: string,
-}): Promise<ImageInfo> {
-// }): Promise<string> {
-  return await ds.readEvidenceContent(i)
-}
-
-export async function getEvidenceAsStringTerm(i: {
-  operationSlug: string,
-  evidenceUuid: string,
+// }): Promise<ImageInfo> {
 }): Promise<string> {
-  // TODO TN change this name to be more genertic?
-  return await ds.readEvidenceContentCodeblock(i)
+  return await ds.readEvidenceContent(i)
 }
 
 export async function createEvidence(i: {
