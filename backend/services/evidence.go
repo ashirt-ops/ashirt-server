@@ -335,7 +335,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 	return evidenceDTO, nil
 }
 
-func SendURL(ctx context.Context, db *database.Connection, contentStore contentstore.ProdStore, i ReadEvidenceInput) (*dtos.ActiveServiceWorker, error) {
+func SendURL(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*dtos.ActiveServiceWorker, error) {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {
 		return nil, backend.WrapError("Unable to read evidence", backend.UnauthorizedReadErr(err))
@@ -343,10 +343,16 @@ func SendURL(ctx context.Context, db *database.Connection, contentStore contents
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
 	}
-	z := &dtos.ActiveServiceWorker{
-		Name: contentStore.SendURL(evidence.FullImageKey),
+	str, err := contentStore.SendURL(evidence.FullImageKey)
+	if err != nil {
+		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
+	} else {
+		z := &dtos.ActiveServiceWorker{
+			Name: *str,
+		}
+		return z, nil
 	}
-	return z, nil
+
 }
 
 func ReadEvidence(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i ReadEvidenceInput) (*ReadEvidenceOutput, error) {

@@ -509,13 +509,13 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 	var handler http.Handler
 
 	fmt.Println("___contentStore.Name", contentStore.Name(), "it name equal to s3", contentStore.Name() == "s3")
-	if true {
+	if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
 		// if contentStore.Name() == "s3" {
 		// if _, ok := contentStore.(contentstore.ProdStore); ok {
 		fmt.Println("using s3")
 		handler = jsonHandler(func(r *http.Request) (interface{}, error) {
 			fmt.Println("__log before getting store")
-			store := contentStore.(contentstore.ProdStore)
+			// store := *contentstore.S3Store
 			fmt.Println("___received request s3")
 			dr := dissectNoBodyRequest(r)
 			i := services.ReadEvidenceInput{
@@ -525,7 +525,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 				LoadMedia:     dr.FromURL("type").AsString() == "media",
 			}
 
-			z, err := services.SendURL(r.Context(), db, store, i)
+			z, err := services.SendURL(r.Context(), db, s3Store, i)
 			if err != nil {
 				return nil, backend.WrapError("Unable to read evidence", err)
 			}
