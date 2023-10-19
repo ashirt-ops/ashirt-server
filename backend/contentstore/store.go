@@ -24,7 +24,9 @@ type Store interface {
 	Name() string
 }
 
-type ProductionStore interface {
+// TODO TN CHANGE THIS
+type ProdStore interface {
+	Store
 	SendURL(key string) string
 }
 
