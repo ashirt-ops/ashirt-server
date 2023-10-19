@@ -90,6 +90,7 @@ const EvidenceImage = (props: EvidenceProps) => {
   })
 }
 
+// TODO TN - should this be different for non s3, or should we leave it as is?
 // const EvidenceImage = async (props: EvidenceProps) => {
 //   const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
 //   const url = await getEvidence({operationSlug: props.operationSlug, evidenceUuid: props.evidenceUuid})

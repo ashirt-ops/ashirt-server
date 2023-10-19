@@ -24,12 +24,6 @@ type Store interface {
 	Name() string
 }
 
-// TODO TN CHANGE THIS
-type ProdStore interface {
-	Store
-	SendURL(key string) string
-}
-
 // ContentKeys stores the location/path of the original content, as well as the thumbnail/preview location
 type ContentKeys struct {
 	Full      string

@@ -346,12 +346,14 @@ func SendURL(ctx context.Context, db *database.Connection, contentStore *content
 	str, err := contentStore.SendURL(evidence.FullImageKey)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
-	} else {
-		z := &dtos.ActiveServiceWorker{
-			Name: *str,
-		}
-		return z, nil
 	}
+	// TODO TN change var name
+	// TODO TN change active service worker to ogther name
+	// TODO TN fix headers
+	z := &dtos.ActiveServiceWorker{
+		Name: *str,
+	}
+	return z, nil
 
 }
 

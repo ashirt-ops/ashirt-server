@@ -34,12 +34,8 @@ export async function getEvidence(i: {
   console.log("getEvidence", i)
   const thing = await ds.readEvidenceContent(i)
   console.log("__thing", thing)
-  // const thing = { name: "asdf"}
-  // thing.name = "https://imgs.xkcd.com/comics/sign_combo_2x.png"
-  // const evi = JSON.parse(thing)
-  // console.log("__evi", evi)
+  console.log("__thing.name", thing.name)
   return thing
-  // return evi
 }
 
 export async function getEvidenceAsCodeblock(i: {

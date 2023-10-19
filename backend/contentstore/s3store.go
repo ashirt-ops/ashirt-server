@@ -78,8 +78,8 @@ func (s *S3Store) SendURL(key string) (*string, error) {
 		Key:    aws.String(key),
 	})
 
-	// TODO TN should be as long as cookie expiration?
-	url, err := req.Presign(time.Minute * 15)
+	// TODO TN how long should this be? and Should I try to cache these images
+	url, err := req.Presign(time.Hour * 24)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
 	}

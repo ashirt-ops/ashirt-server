@@ -43,10 +43,6 @@ func (s *GCPStore) Upload(data io.Reader) (string, error) {
 	return key, err
 }
 
-func (d *GCPStore) SendURL(key string) string {
-	return "thing" //path.Join(d.dir, path.Clean(key))
-}
-
 // UploadWithName is a test/dev helper that places a file on Google Cloud with a given name
 // This is not intended for general use.
 func (s *GCPStore) UploadWithName(key string, data io.Reader) error {
