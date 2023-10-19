@@ -43,7 +43,6 @@ export async function getEvidenceAsCodeblock(i: {
 export async function getEvidenceAsString(i: {
   operationSlug: string,
   evidenceUuid: string,
-// }): Promise<ImageInfo> {
 }): Promise<string> {
   return await ds.readEvidenceContent(i)
 }
