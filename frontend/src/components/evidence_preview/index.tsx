@@ -81,9 +81,11 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 // TODO TN - only send extra data if image?
 const EvidenceImage = (props: EvidenceProps) => {
   if (props.streamImage) {
+    console.log("non-s3 devlelopment")
     const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
     return <img src={fullUrl} />
   } else {
+    console.log("using s3 which is dope")
     const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getEvidence({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
