@@ -542,12 +542,13 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
 
 			url, _ := services.SendURL2(r.Context(), db, s3Store, i)
-			fmt.Println("___url", url)
+			fmt.Println("___*url", *url)
 
 			reader := strings.NewReader(*url)
 
 			// Use the io.Reader as needed
 			buffer := make([]byte, 32)
+			result := ""
 			for {
 				n, err := reader.Read(buffer)
 				if err == io.EOF {
@@ -557,8 +558,17 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 					fmt.Println("Error:", err)
 					break
 				}
-				fmt.Print(string(buffer[:n]))
+				result += string(buffer[:n])
 			}
+			// Print the result to verify
+			fmt.Println("Content from io.Reader:", result, *url)
+			// Compare the result with the original string
+			if result == *url {
+				fmt.Println("Content matches the original string.")
+			} else {
+				fmt.Println("Content does not match the original string.")
+			}
+
 			return reader, nil
 		}
 
