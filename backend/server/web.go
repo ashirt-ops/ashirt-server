@@ -542,7 +542,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		// TODO TN - maybe we want all stuff sent out of band?
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok && evidence.ContentType == "image" {
 			url, _ := services.SendURL2(r.Context(), db, s3Store, i)
-			fmt.Println("___*url", *url)
+			// fmt.Println("___*url", *url)
 
 			reader := strings.NewReader(*url)
 			var genericReader io.Reader
@@ -550,7 +550,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 			// Use the io.Reader as needed
 			fmt.Println("len(*url)", len(*url))
-			buffer := make([]byte, len(*url))
+			buffer := make([]byte, 32)
 			// result := ""
 			for {
 				_, err := genericReader.Read(buffer)
