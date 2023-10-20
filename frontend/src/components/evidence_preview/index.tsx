@@ -95,7 +95,11 @@ const EvidenceImage = (props: EvidenceProps) => {
     console.log("about to see wiredImageinfo")
     return wiredImageInfo.render(url => {
       console.log("___url", url, url == null, url == undefined, url == "")
-      // console.log("___url JSON", JSON.parse(url))
+      if (url != ""){
+        console.log("___url JSON", JSON.parse(url))
+      } else {
+        url = "https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" 
+      }
     return <img src={url} />
   })
   }
@@ -117,7 +121,9 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
     updatedContent: content,
   })
 
-  return wiredEvidence.render(evi => { console.log("evi term recording", evi); console.log("JSON evi term recording", JSON.parse(evi)); return <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />})
+  return wiredEvidence.render(evi => { 
+    // console.log("evi term recording", evi); 
+    return <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />})
 }
 
 const EvidenceHttpCycle = (props: EvidenceProps) => {
@@ -128,9 +134,9 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
 
   return wiredEvidence.render(evi => {
     try {
-      console.log("evi http cycle", evi)
+      // console.log("evi http cycle", evi)
       const log = JSON.parse(evi)
-      console.log("log", log)
+      // console.log("log", log)
       if (isAHar(log)) {
         const isActive = props.interactionHint == 'inactive' ? {disableKeyHandler : true} : {}
         return <HarViewer log={log} viewHint={props.viewHint} {...isActive} />
