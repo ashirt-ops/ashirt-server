@@ -542,6 +542,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
 
 			url, _ := services.SendURL2(r.Context(), db, s3Store, i)
+			fmt.Println("___url", url)
 
 			reader := strings.NewReader(*url)
 

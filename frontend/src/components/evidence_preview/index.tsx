@@ -117,7 +117,7 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
     updatedContent: content,
   })
 
-  return wiredEvidence.render(evi => <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />)
+  return wiredEvidence.render(evi => { console.log("evi term recording", evi); console.log("JSON evi term recording", JSON.parse(evi)); return <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />})
 }
 
 const EvidenceHttpCycle = (props: EvidenceProps) => {
@@ -128,7 +128,9 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
 
   return wiredEvidence.render(evi => {
     try {
+      console.log("evi http cycle", evi)
       const log = JSON.parse(evi)
+      console.log("log", log)
       if (isAHar(log)) {
         const isActive = props.interactionHint == 'inactive' ? {disableKeyHandler : true} : {}
         return <HarViewer log={log} viewHint={props.viewHint} {...isActive} />
