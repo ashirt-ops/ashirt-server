@@ -549,6 +549,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			genericReader = reader
 
 			// Use the io.Reader as needed
+			fmt.Println("len(*url)", len(*url))
 			buffer := make([]byte, len(*url))
 			// result := ""
 			for {
