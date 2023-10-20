@@ -546,12 +546,14 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			fmt.Println("___*url", *url)
 
 			reader := strings.NewReader(*url)
+			var genericReader io.Reader
+			genericReader = reader
 
 			// Use the io.Reader as needed
 			buffer := make([]byte, 32)
-			// result := ""
+			result := ""
 			for {
-				_, err := reader.Read(buffer)
+				n, err := genericReader.Read(buffer)
 				// n, err := reader.Read(buffer)
 				if err == io.EOF {
 					break
@@ -560,7 +562,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 					fmt.Println("Error:", err)
 					break
 				}
-				// result += string(buffer[:n])
+				result += string(buffer[:n])
 			}
 			// Print the result to verify
 			// fmt.Println("Content from io.Reader:", result, *url)
@@ -571,7 +573,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			// 	fmt.Println("Content does not match the original string.")
 			// }
 
-			return reader, nil
+			return genericReader, nil
 		}
 
 		if i.LoadPreview {
