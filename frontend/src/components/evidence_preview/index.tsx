@@ -94,8 +94,8 @@ const EvidenceImage = (props: EvidenceProps) => {
     // TODO TN rename wiredimageinfor
     console.log("about to see wiredImageinfo")
     return wiredImageInfo.render(url => {
-      console.log("___url", url)
-      console.log("___url JSON", JSON.parse(url))
+      console.log("___url", url, url == null, url == undefined, url == "")
+      // console.log("___url JSON", JSON.parse(url))
     return <img src={url} />
   })
   }
