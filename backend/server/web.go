@@ -571,7 +571,10 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			// 	fmt.Println("Content does not match the original string.")
 			// }
 
-			return evidence.Preview, nil
+			if i.LoadPreview {
+				return evidence.Preview, nil
+			}
+			return evidence.Media, nil
 			// return genericReader, nil
 		}
 
