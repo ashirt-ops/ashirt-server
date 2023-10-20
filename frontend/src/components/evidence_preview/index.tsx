@@ -91,7 +91,11 @@ const EvidenceImage = (props: EvidenceProps) => {
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
   
-    return wiredImageInfo.render(url => <img src={url} />)
+    return wiredImageInfo.render(url => {
+      console.log("___url", url)
+      console.log("___url JSON", JSON.parse(url))
+    return <img src={url} />
+  })
   }
 }
 
