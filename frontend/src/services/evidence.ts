@@ -50,6 +50,13 @@ export async function getEvidenceAsString(i: {
   return await ds.readEvidenceContent(i)
 }
 
+export async function getEvidenceUrl(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<string> {
+  return await ds.getEvidenceUrl(i)
+}
+
 export async function createEvidence(i: {
   operationSlug: string,
   description: string,
