@@ -548,9 +548,10 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 			// Use the io.Reader as needed
 			buffer := make([]byte, 32)
-			result := ""
+			// result := ""
 			for {
-				n, err := reader.Read(buffer)
+				_, err := reader.Read(buffer)
+				// n, err := reader.Read(buffer)
 				if err == io.EOF {
 					break
 				}
@@ -558,16 +559,16 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 					fmt.Println("Error:", err)
 					break
 				}
-				result += string(buffer[:n])
+				// result += string(buffer[:n])
 			}
 			// Print the result to verify
-			fmt.Println("Content from io.Reader:", result, *url)
-			// Compare the result with the original string
-			if result == *url {
-				fmt.Println("Content matches the original string.")
-			} else {
-				fmt.Println("Content does not match the original string.")
-			}
+			// fmt.Println("Content from io.Reader:", result, *url)
+			// // Compare the result with the original string
+			// if result == *url {
+			// 	fmt.Println("Content matches the original string.")
+			// } else {
+			// 	fmt.Println("Content does not match the original string.")
+			// }
 
 			return reader, nil
 		}
