@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
@@ -544,25 +543,25 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			url, _ := services.SendURL2(r.Context(), db, s3Store, i)
 			fmt.Println("___*url", *url)
 
-			reader := strings.NewReader(*url)
-			var genericReader io.Reader
-			genericReader = reader
+			// reader := strings.NewReader(*url)
+			// var genericReader io.Reader
+			// genericReader = reader
 
-			// Use the io.Reader as needed
-			buffer := make([]byte, 32)
-			result := ""
-			for {
-				n, err := genericReader.Read(buffer)
-				// n, err := reader.Read(buffer)
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					fmt.Println("Error:", err)
-					break
-				}
-				result += string(buffer[:n])
-			}
+			// // Use the io.Reader as needed
+			// buffer := make([]byte, 32)
+			// result := ""
+			// for {
+			// 	n, err := genericReader.Read(buffer)
+			// 	// n, err := reader.Read(buffer)
+			// 	if err == io.EOF {
+			// 		break
+			// 	}
+			// 	if err != nil {
+			// 		fmt.Println("Error:", err)
+			// 		break
+			// 	}
+			// 	result += string(buffer[:n])
+			// }
 			// Print the result to verify
 			// fmt.Println("Content from io.Reader:", result, *url)
 			// // Compare the result with the original string
