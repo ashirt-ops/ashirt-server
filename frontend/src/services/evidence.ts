@@ -31,7 +31,10 @@ export async function getEvidenceAsCodeblock(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<CodeBlock> {
-  const evi = JSON.parse(await ds.readEvidenceContent(i))
+  const preJsonEvi = await ds.readEvidenceContent(i)
+  console.log("pre JSON evi code block", preJsonEvi)
+  const evi = JSON.parse(preJsonEvi)
+  console.log("evi code block", evi)
   return {
     type: 'codeblock',
     language: evi.contentSubtype,

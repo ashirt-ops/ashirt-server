@@ -85,24 +85,38 @@ const EvidenceImage = (props: EvidenceProps) => {
     const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
     return <img src={fullUrl} />
   } else {
-    console.log("using s3 which is dope")
-    const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
-      operationSlug: props.operationSlug,
-      evidenceUuid: props.evidenceUuid,
-    }), [props.operationSlug, props.evidenceUuid]))
+  //   console.log("using s3 which is dope")
+  //   const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+  //     operationSlug: props.operationSlug,
+  //     evidenceUuid: props.evidenceUuid,
+  //   }), [props.operationSlug, props.evidenceUuid]))
   
-    // TODO TN rename wiredimageinfor
-    console.log("about to see wiredImageinfo")
-    return wiredImageInfo.render(url => {
-      console.log("___url", url,)
-      console.log(url == null, url == undefined, url == "")
-      if (url != ""){
-        console.log("___url JSON", JSON.parse(url))
-      } else {
-        url = "https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" 
-      }
-    return <img src={url} />
-  })
+  //   // TODO TN rename wiredimageinfor
+  //   console.log("about to see wiredImageinfo")
+  //   return wiredImageInfo.render(url => {
+  //     console.log("___url", url,)
+  //     console.log(url == null, url == undefined, url == "")
+  //     if (url != ""){
+  //       console.log("___url JSON", JSON.parse(url))
+  //     } else {
+  //       url = "https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" 
+  //     }
+  //   return <img src={url} />
+  // })
+      const wiredEvidence = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidenceUuid,
+      }), [props.operationSlug, props.evidenceUuid]))
+
+      const updateContent = (content: Blob): Promise<void> => updateEvidence({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidenceUuid,
+        updatedContent: content,
+      })
+
+      return wiredEvidence.render(evi => { 
+        console.log("evi term recording", evi); 
+        return <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />})
   }
 }
 
