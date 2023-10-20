@@ -91,6 +91,8 @@ const EvidenceImage = (props: EvidenceProps) => {
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
   
+    // TODO TN rename wiredimageinfor
+    console.log("about to see wiredImageinfo")
     return wiredImageInfo.render(url => {
       console.log("___url", url)
       console.log("___url JSON", JSON.parse(url))
