@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
@@ -507,26 +506,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	var handler http.Handler
-
-	// if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
-	// 	handler = jsonHandler(func(r *http.Request) (interface{}, error) {
-	// 		dr := dissectNoBodyRequest(r)
-	// 		i := services.ReadEvidenceInput{
-	// 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
-	// 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-	// 			LoadPreview:   dr.FromURL("type").AsString() == "preview",
-	// 			LoadMedia:     dr.FromURL("type").AsString() == "media",
-	// 		}
-
-	// 		url, err := services.SendURL(r.Context(), db, s3Store, i)
-	// 		if err != nil {
-	// 			return nil, backend.WrapError("Unable to obtain image URL", err)
-	// 		}
-	// 		return url, nil
-	// 	})
-	// } else {
-	handler = mediaHandler(func(r *http.Request) (io.Reader, error) {
+	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
 		dr := dissectNoBodyRequest(r)
 		i := services.ReadEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -539,57 +519,31 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if err != nil {
 			return nil, backend.WrapError("Unable to read evidence", err)
 		}
-		// TODO TN - maybe we want all stuff sent out of band?
-		if s3Store, ok := contentStore.(*contentstore.S3Store); ok && evidence.ContentType == "image" {
-			url, _ := services.SendURL2(r.Context(), db, s3Store, i)
-			fmt.Println("___*url", *url)
-
-			reader := strings.NewReader(*url)
-			var genericReader io.Reader
-			genericReader = reader
-
-			// Use the io.Reader as needed
-			fmt.Println("len(*url)", len(*url))
-			buffer := make([]byte, len(*url))
-			// result := ""
-			for {
-				_, err := reader.Read(buffer)
-				// n, err := reader.Read(buffer)
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					fmt.Println("Error:", err)
-					break
-				}
-				// result += string(buffer[:n])
-			}
-			// _, err := io.ReadAll(genericReader)
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
-
-			// Print the result to verify
-			// fmt.Println("Content from io.Reader:", result, *url)
-			// // Compare the result with the original string
-			// if result == *url {
-			// 	fmt.Println("Content matches the original string.")
-			// } else {
-			// 	fmt.Println("Content does not match the original string.")
-			// }
-
-			return genericReader, nil
-			// return genericReader, nil
-		}
 
 		if i.LoadPreview {
 			return evidence.Preview, nil
 		}
 		return evidence.Media, nil
-	})
-	// }
+	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", handler)
+	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/url", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectNoBodyRequest(r)
+		i := services.ReadEvidenceInput{
+			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			LoadPreview:   dr.FromURL("type").AsString() == "preview",
+			LoadMedia:     dr.FromURL("type").AsString() == "media",
+		}
+		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
+			url, err := services.SendURL(r.Context(), db, s3Store, i)
+			if err != nil {
+				return nil, backend.WrapError("Unable to obtain image URL", err)
+			}
+			return url, nil
+		} else {
+			return nil, errors.New("Unable to send image URL")
+		}
+	}))
 
 	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)

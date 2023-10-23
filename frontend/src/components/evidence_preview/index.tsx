@@ -6,7 +6,7 @@ import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
 import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint, ImageInfo } from 'src/global_types'
-import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
+import { getEvidenceAsCodeblock, getEvidenceAsString, getEvidenceUrl, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
 
@@ -88,7 +88,7 @@ const EvidenceImage = (props: EvidenceProps) => {
     return <img src={fullUrl} />
   } else {
     console.log("using s3 which is dope")
-    const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+    const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceUrl({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
