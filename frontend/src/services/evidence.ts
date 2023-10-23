@@ -53,7 +53,7 @@ export async function getEvidenceAsString(i: {
 export async function getEvidenceUrl(i: {
   operationSlug: string,
   evidenceUuid: string,
-}): Promise<string> {
+}): Promise<ImageInfo> {
   return await ds.getEvidenceUrl(i)
 }
 
