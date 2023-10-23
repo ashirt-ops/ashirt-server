@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -350,7 +351,9 @@ func SendURL(ctx context.Context, db *database.Connection, contentStore *content
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
 	}
+	// TODO TN change name
 	str, err := contentStore.SendURL(evidence.FullImageKey)
+	fmt.Println("url - *str", *str)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
 	}
