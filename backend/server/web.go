@@ -539,6 +539,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
 			fmt.Println("about to get URL")
 			url, err := services.SendURL(r.Context(), db, s3Store, i)
+			fmt.Println("url.url", url.Url)
 			if err != nil {
 				return nil, backend.WrapError("Unable to obtain image URL", err)
 			}

@@ -353,7 +353,8 @@ func SendURL(ctx context.Context, db *database.Connection, contentStore *content
 	}
 	// TODO TN change name
 	str, err := contentStore.SendURL(evidence.FullImageKey)
-	fmt.Println("url - *str", *str)
+	url := *str
+	fmt.Println("url here", url)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
 	}
