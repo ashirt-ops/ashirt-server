@@ -56,7 +56,7 @@ export interface DataSource {
   createEvidence(ids: OpSlug, formData: FormData): Promise<void>
   // TODO TN - maybe this should just be a separate endpoint for images?
   readEvidenceContent(ids: OpSlug & EvidenceUuid): Promise<string>
-  getEvidenceUrl(ids: OpSlug & EvidenceUuid): Promise<dtos.ImageInfo>
+  getEvidenceUrl(ids: OpSlug & EvidenceUuid): Promise<string>
   updateEvidence(ids: OpSlug & EvidenceUuid, formData: FormData): Promise<void>
   deleteEvidence(ids: OpSlug & EvidenceUuid, payload: { deleteAssociatedFindings: boolean }): Promise<void>
   getEvidenceMigrationDifference(ids: OpSlug & EvidenceUuid, fromOperationSlug: string): Promise<dtos.TagDifference>
