@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -551,24 +550,24 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 
 			// Use the io.Reader as needed
 			fmt.Println("len(*url)", len(*url))
-			// buffer := make([]byte, 32)
-			// // result := ""
-			// for {
-			// 	_, err := reader.Read(buffer)
-			// 	// n, err := reader.Read(buffer)
-			// 	if err == io.EOF {
-			// 		break
-			// 	}
-			// 	if err != nil {
-			// 		fmt.Println("Error:", err)
-			// 		break
-			// 	}
-			// 	// result += string(buffer[:n])
-			// }
-			_, err := io.ReadAll(genericReader)
-			if err != nil {
-				log.Fatal(err)
+			buffer := make([]byte, len(*url))
+			// result := ""
+			for {
+				_, err := reader.Read(buffer)
+				// n, err := reader.Read(buffer)
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					fmt.Println("Error:", err)
+					break
+				}
+				// result += string(buffer[:n])
 			}
+			// _, err := io.ReadAll(genericReader)
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
 
 			// Print the result to verify
 			// fmt.Println("Content from io.Reader:", result, *url)
