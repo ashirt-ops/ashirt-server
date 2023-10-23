@@ -87,7 +87,7 @@ const EvidenceImage = (props: EvidenceProps) => {
     const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
     return <img src={fullUrl} />
   } else {
-    console.log("using s3 which is dope")
+    console.log("using s3 get evidenceUrl")
     const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceUrl({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
