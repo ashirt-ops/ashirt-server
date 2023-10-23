@@ -46,10 +46,11 @@ func (s *S3Store) Upload(data io.Reader) (string, error) {
 // This is not intended for general use.
 func (s *S3Store) UploadWithName(key string, data io.Reader) error {
 	_, err := s.s3Client.PutObject(&s3.PutObjectInput{
-		ACL:    aws.String("bucket-owner-full-control"),
-		Body:   aws.ReadSeekCloser(data),
-		Bucket: aws.String(s.bucketName),
-		Key:    aws.String(key),
+		ACL:         aws.String("bucket-owner-full-control"),
+		Body:        aws.ReadSeekCloser(data),
+		Bucket:      aws.String(s.bucketName),
+		Key:         aws.String(key),
+		ContentType: aws.String("image/jpeg"),
 	})
 
 	if err != nil {
@@ -72,9 +73,11 @@ func (s *S3Store) Read(key string) (io.Reader, error) {
 }
 
 func (s *S3Store) SendURL(key string) (*string, error) {
+	contentType := "image/jpeg"
 	req, _ := s.s3Client.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(s.bucketName),
-		Key:    aws.String(key),
+		Bucket:              aws.String(s.bucketName),
+		Key:                 aws.String(key),
+		ResponseContentType: aws.String(contentType),
 	})
 
 	// TODO TN how long should this be? and Should I try to cache these images
