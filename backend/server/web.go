@@ -544,7 +544,8 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 				return nil, backend.WrapError("Unable to obtain image URL", err)
 			}
 			fmt.Println("got URL")
-			return url, nil
+			actual := *url
+			return actual, nil
 		} else {
 			fmt.Println("not an s3 store")
 			return nil, errors.New("Unable to send image URL")

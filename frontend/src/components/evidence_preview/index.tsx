@@ -89,7 +89,7 @@ const EvidenceImage = (props: EvidenceProps) => {
     return <img src={url} />
   } else {
     console.log("using s3 get evidenceUrl")
-    const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceUrl({
+    const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getEvidenceUrl({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
@@ -97,17 +97,17 @@ const EvidenceImage = (props: EvidenceProps) => {
     // TODO TN rename wiredimageinfor
     console.log("about to see wiredImageinfo")
     return wiredImageInfo.render(url => {
-      const parsedJSON = JSON.parse(url)
+      // const parsedJSON = JSON.parse(url)
       console.log("typeof ___url", typeof url)
-      console.log("typeof ___Parsedurl", typeof parsedJSON)
-      console.log("___url.yrk", parsedJSON.url)
+      console.log("typeof ___Parsedurl", typeof url)
+      console.log("___url.yrk", url.url)
       // console.log(url == null, url == undefined, url == "")      
       // if (url.url != ""){
       //   console.log("___url JSON", url.url)
       // } else {
       //   url.url = "https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" 
       // }
-    return <img src={parsedJSON.url} />
+    return <img src={url.url} />
   })
   }
 }
