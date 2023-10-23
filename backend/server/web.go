@@ -536,12 +536,12 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		}
 		// TODO TN PR squash into one commit
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
-			url, err := services.SendImageInfo(r.Context(), db, s3Store, i)
+			imgInfoPointer, err := services.SendImageInfo(r.Context(), db, s3Store, i)
 			if err != nil {
 				return nil, backend.WrapError("Unable to obtain image URL", err)
 			}
-			actual := *url
-			return actual, nil
+			imgInfo := *imgInfoPointer
+			return imgInfo, nil
 		} else {
 			return nil, errors.New("Unable to send image URL")
 		}

@@ -31,10 +31,7 @@ export async function getEvidenceAsCodeblock(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<CodeBlock> {
-  const preJsonEvi = await ds.readEvidenceContent(i)
-  console.log("pre JSON evi code block", preJsonEvi)
-  const evi = JSON.parse(preJsonEvi)
-  console.log("evi code block", evi)
+  const evi = JSON.parse(await ds.readEvidenceContent(i))
   return {
     type: 'codeblock',
     language: evi.contentSubtype,
@@ -54,8 +51,7 @@ export async function getImageInfo(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<ImageInfo> {
-  const imageInfo = await ds.getImageInfo(i)
-  return imageInfo
+  return await ds.getImageInfo(i)
 }
 
 export async function createEvidence(i: {

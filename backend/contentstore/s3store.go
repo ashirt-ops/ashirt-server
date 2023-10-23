@@ -46,11 +46,10 @@ func (s *S3Store) Upload(data io.Reader) (string, error) {
 // This is not intended for general use.
 func (s *S3Store) UploadWithName(key string, data io.Reader) error {
 	_, err := s.s3Client.PutObject(&s3.PutObjectInput{
-		ACL:         aws.String("bucket-owner-full-control"),
-		Body:        aws.ReadSeekCloser(data),
-		Bucket:      aws.String(s.bucketName),
-		Key:         aws.String(key),
-		ContentType: aws.String("image/jpeg"),
+		ACL:    aws.String("bucket-owner-full-control"),
+		Body:   aws.ReadSeekCloser(data),
+		Bucket: aws.String(s.bucketName),
+		Key:    aws.String(key),
 	})
 
 	if err != nil {

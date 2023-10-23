@@ -75,8 +75,7 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
     evidenceUuid: props.evidenceUuid,
   }), [props.operationSlug, props.evidenceUuid]))
 
-  return wiredEvidence.render(evi => {
-  return <CodeBlockViewer value={evi} />})
+  return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
@@ -109,8 +108,7 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
     updatedContent: content,
   })
 
-  return wiredEvidence.render(evi => { 
-    return <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />})
+  return wiredEvidence.render(evi => <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />)
 }
 
 const EvidenceHttpCycle = (props: EvidenceProps) => {

@@ -350,34 +350,17 @@ func SendImageInfo(ctx context.Context, db *database.Connection, contentStore *c
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
 	}
-	urlRef, err := contentStore.SendImageInfo(evidence.FullImageKey)
+	urlPointer, err := contentStore.SendImageInfo(evidence.FullImageKey)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
 	}
-	url := *urlRef
+	url := *urlPointer
 	ImageInfo := &dtos.ImageInfo{
 		Url: url,
 	}
 	// TODO TN PR: use ref to allow for nil value
 	// TODO TN - figure out content permissions etc
 	return ImageInfo, nil
-
-}
-
-func SendURL2(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*string, error) {
-	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
-	if err != nil {
-		return nil, backend.WrapError("Unable to read evidence", backend.UnauthorizedReadErr(err))
-	}
-	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
-	}
-	str, err := contentStore.SendImageInfo(evidence.FullImageKey)
-	if err != nil {
-		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
-	}
-
-	return str, nil
 
 }
 
