@@ -97,11 +97,12 @@ const EvidenceImage = (props: EvidenceProps) => {
     console.log("about to see wiredImageinfo")
     return wiredImageInfo.render(url => {
       console.log("___url", url)
-      // console.log(url == null, url == undefined, url == "")
-      // if (url != ""){
-      //   console.log("___url JSON", JSON.parse(url))
+      console.log("___url.yrk", url.url)
+      // console.log(url == null, url == undefined, url == "")      
+      // if (url.url != ""){
+      //   console.log("___url JSON", url.url)
       // } else {
-      //   url = "https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" 
+      //   url.url = "https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" 
       // }
     return <img src={url.url} />
   })
