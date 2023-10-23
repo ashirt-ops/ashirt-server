@@ -526,7 +526,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return evidence.Media, nil
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/url", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/image-info", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectNoBodyRequest(r)
 		i := services.ReadEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -534,20 +534,15 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			LoadPreview:   dr.FromURL("type").AsString() == "preview",
 			LoadMedia:     dr.FromURL("type").AsString() == "media",
 		}
-		fmt.Println("trying to get the url")
-		fmt.Printf("contentStore: %v+\n", contentStore)
+		// TODO TN PR squash into one commit
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
-			fmt.Println("about to get URL")
-			url, err := services.SendURL(r.Context(), db, s3Store, i)
-			fmt.Println("url.url", url.Url)
+			url, err := services.SendImageInfo(r.Context(), db, s3Store, i)
 			if err != nil {
 				return nil, backend.WrapError("Unable to obtain image URL", err)
 			}
-			fmt.Println("got URL")
 			actual := *url
 			return actual, nil
 		} else {
-			fmt.Println("not an s3 store")
 			return nil, errors.New("Unable to send image URL")
 		}
 	}))

@@ -42,7 +42,6 @@ export const BatchRunWorker = (props: {
           tags: [],
           metadata: [],
           contentType: 'image',
-          // TODO TN what does this do?
           sendImageInfo: false
         }))
       )}

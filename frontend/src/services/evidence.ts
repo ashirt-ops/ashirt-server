@@ -50,12 +50,11 @@ export async function getEvidenceAsString(i: {
   return await ds.readEvidenceContent(i)
 }
 
-export async function getEvidenceUrl(i: {
+export async function getImageInfo(i: {
   operationSlug: string,
   evidenceUuid: string,
 }): Promise<ImageInfo> {
-  const imageInfo = await ds.getEvidenceUrl(i)
-  // TODO TN - should backend return this as a proper type? how would that work?
+  const imageInfo = await ds.getImageInfo(i)
   return imageInfo
 }
 

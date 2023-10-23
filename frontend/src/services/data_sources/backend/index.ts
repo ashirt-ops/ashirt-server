@@ -23,8 +23,7 @@ export const backendDataSource: DataSource = {
   listEvidence: (ids, query) => req('GET', `/operations/${ids.operationSlug}/evidence`, null, { query }),
   createEvidence: (ids, formData) => reqMultipart('POST', `/operations/${ids.operationSlug}/evidence`, formData),
   readEvidenceContent: ids => reqText('GET', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/media`),
-  // TODO TN Why is this erroring out?
-  getEvidenceUrl: ids => req('GET', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/url`),
+  getImageInfo: ids => req('GET', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}/image-info`),
   updateEvidence: (ids, formData) => reqMultipart('PUT', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, formData),
   deleteEvidence: (ids, payload) => req('DELETE', `/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, payload),
   getEvidenceMigrationDifference: (ids, fromOperationSlug) => req('GET', `/move/operations/${ids.operationSlug}/evidence/${ids.evidenceUuid}`, null, { sourceOperationSlug: fromOperationSlug }),

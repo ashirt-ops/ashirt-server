@@ -6,7 +6,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"time"
 
@@ -343,7 +342,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 	return evidenceDTO, nil
 }
 
-func SendURL(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*dtos.ImageInfo, error) {
+func SendImageInfo(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*dtos.ImageInfo, error) {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {
 		return nil, backend.WrapError("Unable to read evidence", backend.UnauthorizedReadErr(err))
@@ -351,17 +350,16 @@ func SendURL(ctx context.Context, db *database.Connection, contentStore *content
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
 	}
-	// TODO TN change name
-	str, err := contentStore.SendURL(evidence.FullImageKey)
-	url := *str
-	fmt.Println("url here", url)
+	urlRef, err := contentStore.SendImageInfo(evidence.FullImageKey)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
 	}
-	// TODO TN fix headers
+	url := *urlRef
 	ImageInfo := &dtos.ImageInfo{
-		Url: *str,
+		Url: url,
 	}
+	// TODO TN PR: use ref to allow for nil value
+	// TODO TN - figure out content permissions etc
 	return ImageInfo, nil
 
 }
@@ -374,7 +372,7 @@ func SendURL2(ctx context.Context, db *database.Connection, contentStore *conten
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
 	}
-	str, err := contentStore.SendURL(evidence.FullImageKey)
+	str, err := contentStore.SendImageInfo(evidence.FullImageKey)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
 	}
