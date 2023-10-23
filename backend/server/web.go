@@ -534,6 +534,8 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			LoadPreview:   dr.FromURL("type").AsString() == "preview",
 			LoadMedia:     dr.FromURL("type").AsString() == "media",
 		}
+		fmt.Println("trying to get the url")
+		fmt.Printf("contentStore: %v+\n", contentStore)
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
 			fmt.Println("about to get URL")
 			url, err := services.SendURL(r.Context(), db, s3Store, i)
@@ -543,6 +545,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			fmt.Println("got URL")
 			return url, nil
 		} else {
+			fmt.Println("not an s3 store")
 			return nil, errors.New("Unable to send image URL")
 		}
 	}))
