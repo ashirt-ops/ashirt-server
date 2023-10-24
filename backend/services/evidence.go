@@ -317,9 +317,9 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))
 
-	sendImageInfo := false
+	sendUrl := false
 	if _, ok := contentStore.(*contentstore.S3Store); ok {
-		sendImageInfo = true
+		sendUrl = true
 	}
 
 	for idx, evi := range evidence {
@@ -330,40 +330,19 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 		}
 
 		evidenceDTO[idx] = &dtos.Evidence{
-			UUID:          evi.UUID,
-			Description:   evi.Description,
-			Operator:      dtos.User{FirstName: evi.FirstName, LastName: evi.LastName, Slug: evi.Slug},
-			OccurredAt:    evi.OccurredAt,
-			ContentType:   evi.ContentType,
-			Tags:          tags,
-			SendImageInfo: sendImageInfo,
+			UUID:        evi.UUID,
+			Description: evi.Description,
+			Operator:    dtos.User{FirstName: evi.FirstName, LastName: evi.LastName, Slug: evi.Slug},
+			OccurredAt:  evi.OccurredAt,
+			ContentType: evi.ContentType,
+			Tags:        tags,
+			SendUrl:     sendUrl,
 		}
 	}
 	return evidenceDTO, nil
 }
 
-func SendImageInfo(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*dtos.ImageInfo, error) {
-	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
-	if err != nil {
-		return nil, backend.WrapError("Unable to read evidence", backend.UnauthorizedReadErr(err))
-	}
-	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
-		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
-	}
-	urlPointer, err := contentStore.SendImageInfo(evidence.FullImageKey)
-	if err != nil {
-		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
-	}
-	url := *urlPointer
-	ImageInfo := &dtos.ImageInfo{
-		Url: url,
-	}
-	// TODO TN PR: use ref to allow for nil value
-	// TODO TN - figure out content permissions etc
-	return ImageInfo, nil
-}
-
-func SendURL2(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*string, error) {
+func SendUrl(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*string, error) {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {
 		return nil, backend.WrapError("Unable to read evidence", backend.UnauthorizedReadErr(err))

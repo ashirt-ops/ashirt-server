@@ -72,21 +72,6 @@ func (s *S3Store) Read(key string) (io.Reader, error) {
 }
 
 func (s *S3Store) SendURL(key string) (*string, error) {
-	req, _ := s.s3Client.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(s.bucketName),
-		Key:    aws.String(key),
-	})
-
-	// TODO TN how long should this be? and Should I try to cache these images
-	url, err := req.Presign(time.Hour * 24)
-	if err != nil {
-		return nil, backend.WrapError("Unable to get presigned URL", err)
-	}
-
-	return &url, nil
-}
-
-func (s *S3Store) SendImageInfo(key string) (*string, error) {
 	contentType := "image/jpeg"
 	req, _ := s.s3Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket:              aws.String(s.bucketName),
@@ -94,7 +79,7 @@ func (s *S3Store) SendImageInfo(key string) (*string, error) {
 		ResponseContentType: aws.String(contentType),
 	})
 
-	// TODO TN PR how long should this be? and Should I try to cache these images
+	// TODO TN how long should this be? and Should I try to cache these images
 	url, err := req.Presign(time.Hour * 24)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)

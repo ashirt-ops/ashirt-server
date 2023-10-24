@@ -17,13 +17,13 @@ type APIKey struct {
 }
 
 type Evidence struct {
-	UUID          string    `json:"uuid"`
-	Description   string    `json:"description"`
-	OccurredAt    time.Time `json:"occurredAt"`
-	Operator      User      `json:"operator"`
-	Tags          []Tag     `json:"tags"`
-	ContentType   string    `json:"contentType"`
-	SendImageInfo bool      `json:"sendImageInfo"`
+	UUID        string    `json:"uuid"`
+	Description string    `json:"description"`
+	OccurredAt  time.Time `json:"occurredAt"`
+	Operator    User      `json:"operator"`
+	Tags        []Tag     `json:"tags"`
+	ContentType string    `json:"contentType"`
+	SendUrl     bool      `json:"sendUrl"`
 }
 
 type EvidenceMetadata struct {
@@ -235,8 +235,4 @@ type Flags struct {
 type GlobalVar struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
-}
-
-type ImageInfo struct {
-	Url string `json:"url"`
 }

@@ -115,7 +115,7 @@ export type Evidence = {
   occurredAt: Date,
   tags: Array<Tag>,
   contentType: SupportedEvidenceType
-  sendImageInfo: boolean,
+  sendUrl: boolean,
 }
 
 export type ExportedEvidence = Omit<Evidence, 'tags' | 'uuid'> & {
@@ -339,8 +339,4 @@ export interface Codeblock {
 export type GlobalVar = {
   name: string,
   value: string,
-}
-
-export type ImageInfo = {
-  url: string
 }

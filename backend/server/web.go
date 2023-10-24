@@ -522,38 +522,16 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		}
 		fmt.Println("evidence.Description", evidence.Description)
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok && evidence.ContentType == "image" {
-			fmt.Println("in image block")
-			url, _ := services.SendURL2(r.Context(), db, s3Store, i)
-			fmt.Println("___*url", *url)
-			bytesLOL := []byte(*url)
-			thing := bytes.NewReader(bytesLOL)
-			return thing, nil
+			url, err := services.SendUrl(r.Context(), db, s3Store, i)
+			if err != nil {
+				return nil, backend.WrapError("Unable get s3 URL", err)
+			}
+			return bytes.NewReader([]byte(*url)), nil
 		}
 		if i.LoadPreview {
 			return evidence.Preview, nil
 		}
 		return evidence.Media, nil
-	}))
-
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/image-info", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectNoBodyRequest(r)
-		i := services.ReadEvidenceInput{
-			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-			LoadPreview:   dr.FromURL("type").AsString() == "preview",
-			LoadMedia:     dr.FromURL("type").AsString() == "media",
-		}
-		// TODO TN PR squash into one commit
-		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
-			imgInfoPointer, err := services.SendImageInfo(r.Context(), db, s3Store, i)
-			if err != nil {
-				return nil, backend.WrapError("Unable to obtain image URL", err)
-			}
-			imgInfo := *imgInfoPointer
-			return imgInfo, nil
-		} else {
-			return nil, errors.New("Unable to send image URL")
-		}
 	}))
 
 	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {

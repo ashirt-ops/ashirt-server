@@ -5,8 +5,8 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
-import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint, ImageInfo } from 'src/global_types'
-import { getEvidenceAsCodeblock, getEvidenceAsString, getImageInfo, updateEvidence } from 'src/services/evidence'
+import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint } from 'src/global_types'
+import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
 
@@ -80,28 +80,14 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 
 const EvidenceImage = (props: EvidenceProps) => {
   if (!props.useS3Url) {
+    const wiredUrl = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+      operationSlug: props.operationSlug,
+      evidenceUuid: props.evidenceUuid,
+    }), [props.operationSlug, props.evidenceUuid]))
+    return wiredUrl.render(url => <img src={url} />)
+  } else {
     const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
     return <img src={fullUrl} />
-  } else {
-  //   const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getImageInfo({
-  //     operationSlug: props.operationSlug,
-  //     evidenceUuid: props.evidenceUuid,
-  //   }), [props.operationSlug, props.evidenceUuid]))
-  
-  //   return wiredImageInfo.render(imageInfo => <img src={imageInfo.url} />)
-  // }
-  const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
-    operationSlug: props.operationSlug,
-    evidenceUuid: props.evidenceUuid,
-  }), [props.operationSlug, props.evidenceUuid]))
-
-  // TODO TN rename wiredimageinfor
-  console.log("about to see wiredImageinfo")
-  return wiredImageInfo.render(url => {
-    console.log("___url", url, url == null, url == undefined, url == "")
-    // console.log("___url JSON", JSON.parse(url))
-  return <img src={url} />
-})
   }
 }
 

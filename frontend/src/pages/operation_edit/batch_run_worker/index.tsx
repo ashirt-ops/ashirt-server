@@ -42,7 +42,7 @@ export const BatchRunWorker = (props: {
           tags: [],
           metadata: [],
           contentType: 'image',
-          sendImageInfo: false
+          sendUrl: false
         }))
       )}
       {...modalProps}

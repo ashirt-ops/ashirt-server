@@ -1,4 +1,4 @@
-import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata, ActiveServiceWorker, ImageInfo } from 'src/global_types'
+import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { evidenceFromDto } from './data_sources/converters'
@@ -45,13 +45,6 @@ export async function getEvidenceAsString(i: {
   evidenceUuid: string,
 }): Promise<string> {
   return await ds.readEvidenceContent(i)
-}
-
-export async function getImageInfo(i: {
-  operationSlug: string,
-  evidenceUuid: string,
-}): Promise<ImageInfo> {
-  return await ds.getImageInfo(i)
 }
 
 export async function createEvidence(i: {

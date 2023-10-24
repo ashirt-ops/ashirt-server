@@ -50,7 +50,6 @@ func main() {
 	gen(dtos.UserGroupAdminView{})
 	gen(dtos.UserGroupOperationRole{})
 	gen(dtos.GlobalVar{})
-	gen(dtos.ImageInfo{})
 
 	// Since this file only contains typescript types, webpack doesn't pick up the
 	// changes unless there is some actual executable javascript referenced from
