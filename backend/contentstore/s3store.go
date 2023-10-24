@@ -79,8 +79,7 @@ func (s *S3Store) SendURL(key string) (*string, error) {
 		ResponseContentType: aws.String(contentType),
 	})
 
-	// TODO TN how long should this be? and Should I try to cache these images
-	url, err := req.Presign(time.Hour * 24)
+	url, err := req.Presign(time.Hour * 8)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
 	}
