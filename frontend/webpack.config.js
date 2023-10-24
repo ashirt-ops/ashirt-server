@@ -107,15 +107,14 @@ module.exports = (env, argv) => ({
         "base-uri 'none'",
         "form-action 'none'",
         "frame-ancestors 'none'",
-        "sandbox allow-downloads allow-scripts allow-same-origin allow-forms allow-popups",
+        "sandbox allow-scripts allow-same-origin allow-forms allow-popups allow-downloads",
 
         // Allow xhr/fonts/images/scripts/css from self
         "connect-src 'self'",
         "font-src 'self'",
-        // amazonaws. or buvcket name
         "img-src 'self' data:",
         "script-src 'self'",
-        "style-src 'self' 'unsafe-inline'",       
+        "style-src 'self' 'unsafe-inline'", 
       ].join(';'),
     },
   }
