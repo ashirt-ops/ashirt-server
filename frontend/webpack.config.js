@@ -114,7 +114,7 @@ module.exports = (env, argv) => ({
         "font-src 'self'",
         "img-src 'self' data:",
         "script-src 'self'",
-        "style-src 'self' 'unsafe-inline'", 
+        "style-src 'self' 'unsafe-inline'",
       ].join(';'),
     },
   }
