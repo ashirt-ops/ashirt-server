@@ -83,12 +83,25 @@ const EvidenceImage = (props: EvidenceProps) => {
     const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
     return <img src={fullUrl} />
   } else {
-    const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getImageInfo({
-      operationSlug: props.operationSlug,
-      evidenceUuid: props.evidenceUuid,
-    }), [props.operationSlug, props.evidenceUuid]))
+  //   const wiredImageInfo = useWiredData<ImageInfo>(React.useCallback(() => getImageInfo({
+  //     operationSlug: props.operationSlug,
+  //     evidenceUuid: props.evidenceUuid,
+  //   }), [props.operationSlug, props.evidenceUuid]))
   
-    return wiredImageInfo.render(imageInfo => <img src={imageInfo.url} />)
+  //   return wiredImageInfo.render(imageInfo => <img src={imageInfo.url} />)
+  // }
+  const wiredImageInfo = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+    operationSlug: props.operationSlug,
+    evidenceUuid: props.evidenceUuid,
+  }), [props.operationSlug, props.evidenceUuid]))
+
+  // TODO TN rename wiredimageinfor
+  console.log("about to see wiredImageinfo")
+  return wiredImageInfo.render(url => {
+    console.log("___url", url, url == null, url == undefined, url == "")
+    // console.log("___url JSON", JSON.parse(url))
+  return <img src={url} />
+})
   }
 }
 

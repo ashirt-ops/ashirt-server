@@ -4,6 +4,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -519,7 +520,13 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if err != nil {
 			return nil, backend.WrapError("Unable to read evidence", err)
 		}
+		if s3Store, ok := contentStore.(*contentstore.S3Store); ok {
 
+			url, _ := services.SendURL2(r.Context(), db, s3Store, i)
+			fmt.Println("___*url", *url)
+			bytesLOL := []byte(*url)
+			return bytes.NewReader(bytesLOL), nil
+		}
 		if i.LoadPreview {
 			return evidence.Preview, nil
 		}
