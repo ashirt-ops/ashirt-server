@@ -100,7 +100,22 @@ module.exports = (env, argv) => ({
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Content-Security-Policy': [
-       
+        // Default to none
+        "default-src 'none'",
+
+        // These do not fallback to default-src
+        "base-uri 'none'",
+        "form-action 'none'",
+        "frame-ancestors 'none'",
+        "sandbox allow-downloads allow-scripts allow-same-origin allow-forms allow-popups",
+
+        // Allow xhr/fonts/images/scripts/css from self
+        "connect-src 'self'",
+        "font-src 'self'",
+        // amazonaws. or buvcket name
+        "img-src 'self' data:",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",       
       ].join(';'),
     },
   }
