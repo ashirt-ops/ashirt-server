@@ -317,9 +317,9 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))
 
-	sendUrl := false
+	usingS3 := false
 	if _, ok := contentStore.(*contentstore.S3Store); ok {
-		sendUrl = true
+		usingS3 = true
 	}
 
 	for idx, evi := range evidence {
@@ -327,6 +327,11 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 
 		if !ok {
 			tags = []dtos.Tag{}
+		}
+
+		sendUrl := false
+		if usingS3 && evi.ContentType == "image" {
+			sendUrl = true
 		}
 
 		evidenceDTO[idx] = &dtos.Evidence{
