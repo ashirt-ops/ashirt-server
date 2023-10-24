@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -318,9 +319,13 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))
 
 	sendUrl := false
+	fmt.Println("about to check contentSTore")
 	if _, ok := contentStore.(*contentstore.S3Store); ok {
+		fmt.Println("S3Store")
 		sendUrl = true
 	}
+
+	fmt.Println("sendUrl", sendUrl)
 
 	for idx, evi := range evidence {
 		tags, ok := tagsByEvidenceID[evi.ID]
