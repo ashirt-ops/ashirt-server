@@ -79,7 +79,7 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
-  if (!props.useS3Url) {
+  if (props.useS3Url) {
     const wiredUrl = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
