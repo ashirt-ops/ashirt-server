@@ -36,6 +36,14 @@ type DeleteOperationVarInput struct {
 	Name string
 }
 
+func StrToUpperCaseUnderscore(str string) string {
+	return strings.Replace(strings.ToUpper(str), " ", "_", -1)
+}
+
+func StrToLowerCaseUnderscore(str string) string {
+	return strings.Replace(strings.ToLower(str), " ", "_", -1)
+}
+
 func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOperationVarInput) (*dtos.OperationVar, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policy.Require(middleware.Policy(ctx), policy.CanCreateOpVars{OperationID: operation.ID}); err != nil {
@@ -45,30 +53,28 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 	if i.Name == "" {
 		return nil, backend.MissingValueErr("Name")
 	}
-	upperCaseName := strings.ToUpper(i.Name)
-	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
+	formattedName := StrToUpperCaseUnderscore(i.Name)
 
 	cleanSlug := SanitizeSlug(i.VarSlug)
 	if cleanSlug == "" {
 		return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable slug"), "Slug must contain english letters or numbers")
 	}
-	// make lower case to ensure uniqueness; no need to upper case since user never sees it and it gets used in urls
-	lowerCaseSlug := strings.ToLower(cleanSlug)
+	formattedSlug := StrToLowerCaseUnderscore(cleanSlug)
 
 	var varID int64
 
 	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
 	for _, varInOperation := range listOfVarsInOperation {
-		if varInOperation.Name == underscoreName {
+		if varInOperation.Name == formattedName {
 			return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
 		}
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		varID, _ = tx.Insert("operation_vars", map[string]interface{}{
-			"name":  underscoreName,
+			"name":  formattedName,
 			"value": i.Value,
-			"slug":  lowerCaseSlug,
+			"slug":  formattedSlug,
 		})
 		tx.Insert("var_operation_map", map[string]interface{}{
 			"var_id":       varID,
@@ -89,9 +95,9 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 	}
 
 	return &dtos.OperationVar{
-		Name:    underscoreName,
+		Name:    formattedName,
 		Value:   i.Value,
-		VarSlug: lowerCaseSlug,
+		VarSlug: formattedSlug,
 	}, nil
 }
 
@@ -161,12 +167,11 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyOpVars{OperationID: operation.ID}); err != nil {
 		return backend.WrapError("Unwilling to update operation", backend.UnauthorizedWriteErr(err))
 	}
-	upperCaseName := strings.ToUpper(i.Name)
-	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
+	formattedName := StrToUpperCaseUnderscore(i.Name)
 
 	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
 	for _, varInOperation := range listOfVarsInOperation {
-		if varInOperation.Name == underscoreName {
+		if varInOperation.Name == formattedName {
 			return backend.BadInputErr(errors.New("Unable to update operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
 		}
 	}
@@ -181,7 +186,7 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 	}
 
 	if i.Name != "" {
-		name = underscoreName
+		name = formattedName
 	} else {
 		name = operationVar.Name
 	}
