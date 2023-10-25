@@ -8,6 +8,7 @@ import (
 
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
 )
@@ -37,15 +38,15 @@ func TestCreateGlobalVar(t *testing.T) {
 
 		// verify proper creation of a new var
 		i = services.CreateGlobalVarInput{
-			Name:  "Sectumsempra",
-			Value: "slash a target",
+			Name:  "Wingardium Leviosa",
+			Value: "make a target fly",
 		}
 		createdGlobalVar, err := services.CreateGlobalVar(ctx, db, i)
 		require.NoError(t, err)
 		globalVar = getGlobalVarFromName(t, db, createdGlobalVar.Name)
 
 		require.NotEqual(t, 0, globalVar.ID)
-		require.Equal(t, i.Name, globalVar.Name)
+		require.Equal(t, helpers.StrToUpperCaseUnderscore(i.Name), globalVar.Name)
 		require.Equal(t, i.Value, globalVar.Value)
 	})
 }
@@ -111,9 +112,10 @@ func TestUpdateGlobalVar(t *testing.T) {
 		err = services.UpdateGlobalVar(ctx, db, input)
 		require.NoError(t, err)
 
-		updatedGlobalVar, err := services.LookupGlobalVar(db, newName)
+		formattedName := helpers.StrToUpperCaseUnderscore(newName)
+		updatedGlobalVar, err := services.LookupGlobalVar(db, formattedName)
 		require.NoError(t, err)
-		require.Equal(t, newName, updatedGlobalVar.Name)
+		require.Equal(t, formattedName, updatedGlobalVar.Name)
 		require.Equal(t, newValue, updatedGlobalVar.Value)
 
 		// update only name
@@ -127,8 +129,9 @@ func TestUpdateGlobalVar(t *testing.T) {
 
 		err = services.UpdateGlobalVar(ctx, db, input)
 		require.NoError(t, err)
-		updatedGlobalVar, err = services.LookupGlobalVar(db, newName)
-		require.Equal(t, newName, updatedGlobalVar.Name)
+		formattedName = helpers.StrToUpperCaseUnderscore(newName)
+		updatedGlobalVar, err = services.LookupGlobalVar(db, formattedName)
+		require.Equal(t, formattedName, updatedGlobalVar.Name)
 		require.Equal(t, newVar.Value, updatedGlobalVar.Value)
 
 		// update only value

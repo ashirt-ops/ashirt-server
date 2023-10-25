@@ -5,11 +5,11 @@ package services
 
 import (
 	"context"
-	"strings"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/models"
 	"github.com/ashirt-ops/ashirt-server/backend/policy"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
@@ -41,11 +41,10 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 	if i.Name == "" {
 		return nil, backend.MissingValueErr("Name")
 	}
-	upperCaseName := strings.ToUpper(i.Name)
-	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
+	formattedName := helpers.StrToUpperCaseUnderscore(i.Name)
 
 	_, err := db.Insert("global_vars", map[string]interface{}{
-		"name":  underscoreName,
+		"name":  formattedName,
 		"value": i.Value,
 	})
 	if err != nil {
@@ -56,7 +55,7 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 	}
 
 	return &dtos.GlobalVar{
-		Name:  underscoreName,
+		Name:  formattedName,
 		Value: i.Value,
 	}, nil
 }
@@ -118,11 +117,10 @@ func UpdateGlobalVar(ctx context.Context, db *database.Connection, i UpdateGloba
 		val = globalVar.Value
 	}
 
-	upperCaseName := strings.ToUpper(i.NewName)
-	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
+	formattedName := helpers.StrToUpperCaseUnderscore(i.NewName)
 
 	if i.NewName != "" {
-		name = underscoreName
+		name = formattedName
 	} else {
 		name = globalVar.Name
 	}
