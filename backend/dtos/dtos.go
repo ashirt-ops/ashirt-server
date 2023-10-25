@@ -235,3 +235,10 @@ type GlobalVar struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
+
+type OperationVar struct {
+	OperationSlug string `json:"operationSlug"`
+	VarSlug       string `json:"varSlug"`
+	Name          string `json:"name"`
+	Value         string `json:"value"`
+}

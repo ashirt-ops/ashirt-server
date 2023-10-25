@@ -168,6 +168,20 @@ func IsAlreadyExistsErrorSq(err error) bool {
 	return strings.Contains(err.Error(), "1062")
 }
 
+// InputIsTooLongError returns true if the passed error is a database error resulting
+// from attempting to insert a row that exceeds the max length of a column
+func InputIsTooLongError(err error) bool {
+	mysqlErr, ok := err.(*mysql.MySQLError)
+	return ok && mysqlErr.Number == 1406
+}
+
+// When updating a row using sq, the above function InputIsTooLongError won't work
+// (because extra text is appended to the error message)
+// so this function manually checks for error code 1406
+func InputIsTooLongErrorSq(err error) bool {
+	return strings.Contains(err.Error(), "1406")
+}
+
 func addDuplicatesClause(query squirrel.InsertBuilder, onDuplicates ...interface{}) (squirrel.InsertBuilder, error) {
 	if len(onDuplicates) == 0 {
 		return query, nil

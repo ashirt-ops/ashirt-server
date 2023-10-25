@@ -966,7 +966,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 	route(r, "PUT", "/operations/{operation_slug}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.BatchRunServiceWorkerInput{
-			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 			EvidenceUUIDs: dr.FromBody("evidenceUuids").Required().AsStringSlice(),
 			WorkerNames:   dr.FromBody("workers").Required().AsStringSlice(),
 		}
@@ -979,7 +979,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 	route(r, "POST", "/operations/{operation_slug}/favorite", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetFavoriteInput{
-			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 			IsFavorite:    dr.FromBody("favorite").Required().AsBool(),
 		}
 		if dr.Error != nil {
@@ -1024,5 +1024,52 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 			return nil, dr.Error
 		}
 		return nil, services.DeleteGlobalVar(r.Context(), db, name)
+	}))
+
+	route(r, "GET", "/operation-vars/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		operationSlug := dr.FromURL("operation_slug").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ListOperationVars(r.Context(), db, operationSlug)
+	}))
+
+	route(r, "POST", "/operation-vars/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.CreateOperationVarInput{
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			VarSlug:       dr.FromBody("varSlug").Required().AsString(),
+			Name:          dr.FromBody("name").Required().AsString(),
+			Value:         dr.FromBody("value").AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.CreateOperationVar(r.Context(), db, i)
+	}))
+
+	route(r, "PUT", "/operation-vars/{operation_slug}/{var_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		i := services.UpdateOperationVarInput{
+			VarSlug:       dr.FromURL("var_slug").Required().AsString(),
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			Name:          dr.FromBody("name").AsString(),
+			Value:         dr.FromBody("value").AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.UpdateOperationVar(r.Context(), db, i)
+	}))
+
+	route(r, "DELETE", "/operation-vars/{operation_slug}/{var_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		varSlug := dr.FromURL("var_slug").Required().AsString()
+		operationSlug := dr.FromURL("operation_slug").Required().AsString()
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return nil, services.DeleteOperationVar(r.Context(), db, varSlug, operationSlug)
 	}))
 }

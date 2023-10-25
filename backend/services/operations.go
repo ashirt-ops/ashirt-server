@@ -164,6 +164,8 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 			tx.Delete(sq.Delete("user_operation_permissions").Where(sq.Eq{"operation_id": operation.ID}))
 			// remove user preferences for operation
 			tx.Delete(sq.Delete("user_operation_preferences").Where(sq.Eq{"operation_id": operation.ID}))
+			// remove operation variables map
+			tx.Delete(sq.Delete("var_operation_map").Where(sq.Eq{"operation_id": operation.ID}))
 
 			tx.Delete(sq.Delete("operations").Where(sq.Eq{"id": operation.ID}))
 		})

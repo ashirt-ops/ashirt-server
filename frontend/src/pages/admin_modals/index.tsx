@@ -4,7 +4,7 @@
 import * as React  from 'react'
 import classnames from 'classnames/bind'
 
-import { ApiKey, GlobalVar, User, UserAdminView, UserGroupAdminView } from 'src/global_types'
+import { ApiKey, User, UserAdminView, UserGroupAdminView, GlobalVariableData, OperationVariableData } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
@@ -15,7 +15,10 @@ import {
   modifyUserGroup,
   deleteGlobalVar,
   updateGlobalVar,
-  createGlobalVar
+  createGlobalVar,
+  deleteOperationVar,
+  updateOperationVar,
+  createOperationVar,
 } from 'src/services'
 import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
@@ -27,7 +30,7 @@ import Modal from 'src/components/modal'
 import Form from 'src/components/form'
 import ModalForm from 'src/components/modal_form'
 import { InputWithCopyButton } from 'src/components/text_copiers'
-import { useForm, useFormField } from 'src/helpers'
+import { isOperationVariable, useForm, useFormField } from 'src/helpers'
 import { NewApiKeyModalContents } from 'src/pages/account_settings/api_keys/modals'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 
@@ -460,8 +463,9 @@ export const RemoveTotpModal = (props: {
   </ModalForm>
 }
 
-export const AddGlobalVarModal = (props: {
+export const AddVarModal = (props: {
   onRequestClose: () => void,
+  operationSlug?: string,
 }) => {
   const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
 
@@ -471,12 +475,14 @@ export const AddGlobalVarModal = (props: {
     fields: [name, value],
     handleSubmit: () => {
       if (name.value.length == 0) {
-        return new Promise((_resolve, reject) => reject(Error("Global Variable should have a name")))
+        return new Promise((_resolve, reject) => reject(Error("Variable should have a name")))
       }
 
       const valOrNull = value.value === "" ? null : value.value
       const runSubmit = async () => {
-        await createGlobalVar(name.value, valOrNull) 
+        props.operationSlug
+          ? await createOperationVar(props.operationSlug ,name.value, valOrNull) 
+          : await createGlobalVar(name.value, valOrNull)
         setIsCompleted(true)
       }
       return runSubmit()
@@ -507,27 +513,35 @@ export const AddGlobalVarModal = (props: {
   )
 }
 
-export const DeleteGlobalVarModal = (props: {
-  globalVar: GlobalVar,
+
+
+
+
+
+export const DeleteVarModal = (props: {
+  variableData: GlobalVariableData | OperationVariableData,
   onRequestClose: () => void,
 }) => <ChallengeModalForm
-    modalTitle="Delete Global Variable"
-    warningText="This will remove the global variable from the system."
+    modalTitle="Delete Variable"
+    warningText="This will remove the variable from the system."
     submitText="Delete"
-    challengeText={props.globalVar.name}
-    handleSubmit={() => deleteGlobalVar(props.globalVar.name)}
+    challengeText={props.variableData.variable.name}
+    handleSubmit={() => isOperationVariable(props.variableData) 
+      ? deleteOperationVar(props.variableData.operationSlug, props.variableData.variable.varSlug) 
+      : deleteGlobalVar(props.variableData.variable.name) 
+    }
     onRequestClose={props.onRequestClose}
   />
 
-export const ModifyGlobalVarModal = (props: {
-  globalVar: GlobalVar,
+export const ModifyVarModal = (props: {
+  variableData: GlobalVariableData | OperationVariableData,
   onRequestClose: () => void,
 }) => {
   const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
   const [copiedValue, setCopiedValue] = React.useState<boolean>(false)
 
-  const name = useFormField<string>(props.globalVar.name)
-  const value = useFormField<string>(props.globalVar.value)
+  const name = useFormField<string>(props.variableData.variable.name)
+  const value = useFormField<string>(props.variableData.variable.value)
   const formComponentProps = useForm({
     fields: [name, value],
     handleSubmit: () => {
@@ -535,17 +549,24 @@ export const ModifyGlobalVarModal = (props: {
         return new Promise((_resolve, reject) => reject(Error("Global Variable should have a name")))
       }
 
-      const nameOrNull = name.value.toLowerCase() !== props.globalVar.name.toLowerCase() ? name.value : null
-      const valOrNull = value.value.toLowerCase() !== props.globalVar.value.toLowerCase() ? value.value : null
+      const nameOrNull = name.value.toLowerCase() !== props.variableData.variable.name.toLowerCase() ? name.value : null
+      const valOrNull = value.value.toLowerCase() !== props.variableData.variable.value.toLowerCase() ? value.value : null
       const somethingChanged = nameOrNull !== null || valOrNull !== null
+     
       const runSubmit = async () => {
         if (copiedValue) {
           setCopiedValue(false)
         } else {
-          somethingChanged && await updateGlobalVar(props.globalVar.name, {
+          const update = isOperationVariable(props.variableData) 
+          ? await updateOperationVar(props.variableData.operationSlug, props.variableData.variable.name, {
+            value: valOrNull,
+            name: nameOrNull,
+          }) 
+          : await updateGlobalVar(props.variableData.variable.name, {
             value: valOrNull,
             newName: nameOrNull,
           }) 
+          somethingChanged && await update
           setIsCompleted(true)
         }
       }

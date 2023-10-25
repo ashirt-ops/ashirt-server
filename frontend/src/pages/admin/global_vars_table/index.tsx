@@ -2,7 +2,6 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import classnames from 'classnames/bind'
 
 import { GlobalVar } from 'src/global_types'
 import { getGlobalVars } from 'src/services'
@@ -14,7 +13,7 @@ import {
 } from 'src/components/table'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
-import { DeleteGlobalVarModal, ModifyGlobalVarModal, } from 'src/pages/admin_modals'
+import { DeleteVarModal, ModifyVarModal } from 'src/pages/admin_modals'
 import { useWiredData } from 'src/helpers'
 
 export default (props: {
@@ -38,7 +37,7 @@ export default (props: {
   })
 
   return (
-    <SettingsSection title="Global Variables List" width="wide">
+    <SettingsSection title="Global Variables" width="wide">
       <Table columns={columns}>
         {wiredGlobalVars.render(data => <>
           {data?.map((globalVar) => <TableRow key={globalVar.name} globalVar={globalVar} data={rowBuilder(globalVar, modifyActions(globalVar, setDeletingGlobalVar, setModifyingGlobalVar))} />
@@ -46,8 +45,8 @@ export default (props: {
         </>)}
       </Table>
 
-      {deletingGlobalVar && <DeleteGlobalVarModal globalVar={deletingGlobalVar} onRequestClose={() => { setDeletingGlobalVar(null); wiredGlobalVars.reload() }} />}
-      {modifyingGlobalVar && <ModifyGlobalVarModal globalVar={modifyingGlobalVar} onRequestClose={() => { setModifyingGlobalVar(null); wiredGlobalVars.reload() }} />}
+      {deletingGlobalVar && <DeleteVarModal variableData={{variable: deletingGlobalVar}} onRequestClose={() => { setDeletingGlobalVar(null); wiredGlobalVars.reload() }} />}
+      {modifyingGlobalVar && <ModifyVarModal variableData={{variable: modifyingGlobalVar}} onRequestClose={() => { setModifyingGlobalVar(null); wiredGlobalVars.reload() }} />}
     </SettingsSection>
   )
 }

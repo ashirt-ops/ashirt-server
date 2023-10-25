@@ -150,6 +150,14 @@ var HarryPotterSeedData = Seeder{
 	GlobalVars: []models.GlobalVar{
 		VarExpelliarmus, VarAlohomora, VarAscendio, VarImperio, VarLumos, VarObliviate,
 	},
+	OperationVars: []models.OperationVar{
+		OpVarImmobulus, OpVarObscuro, OpVarProtego, OpVarReparo, OpVarStupefy, OpVarWingardiumLeviosa,
+	},
+	VarOperationMap: unionVarOperationMap(
+		associateVarsToOperation(OpSorcerersStone, OpVarImmobulus, OpVarObscuro),
+		associateVarsToOperation(OpChamberOfSecrets, OpVarProtego, OpVarReparo),
+		associateVarsToOperation(OpGobletOfFire, OpVarStupefy, OpVarWingardiumLeviosa),
+	),
 }
 
 var newHPUser = newUserGen(1, func(f, l string) string { return strings.ToLower(f + "." + strings.Replace(l, " ", "", -1)) })
@@ -372,3 +380,11 @@ var VarAscendio = newGlobalVar("ASCENDIO", "lifts the caster high into the air")
 var VarImperio = newGlobalVar("IMPERIO", "control another person")
 var VarLumos = newGlobalVar("LUMOS", "creates a narrow beam of light")
 var VarObliviate = newGlobalVar("PETRIFICUS_TOTALUS", "paralyzes someone")
+
+var newOperationVar = newOperationVarGen(1)
+var OpVarImmobulus = newOperationVar("immobulus", "IMMOBULUS", "freezes objects")
+var OpVarObscuro = newOperationVar("obscuro", "OBSCURO", "blindfolds the victim")
+var OpVarProtego = newOperationVar("protego", "PROTEGO", "shield charm")
+var OpVarReparo = newOperationVar("reparo", "REPARO", "repairs broken objects")
+var OpVarStupefy = newOperationVar("stupefy", "STUPEFY", "knocks out opponent")
+var OpVarWingardiumLeviosa = newOperationVar("wingardium_leviosa", "WINGARDIUM_LEVIOSA", "levitates objects")

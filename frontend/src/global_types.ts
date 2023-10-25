@@ -339,3 +339,19 @@ export type GlobalVar = {
   name: string,
   value: string,
 }
+
+export type OperationVar = {
+  name: string,
+  value: string,
+  varSlug: string,
+  operationSlug: string,
+}
+
+export type GlobalVariableData = {
+  variable: GlobalVar,
+}
+
+export type OperationVariableData = {
+  operationSlug: string,
+  variable: OperationVar,
+}

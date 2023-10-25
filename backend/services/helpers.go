@@ -290,3 +290,15 @@ func LookupGlobalVar(db *database.Connection, name string) (*models.GlobalVar, e
 	}
 	return &globalVar, nil
 }
+
+func LookupOperationVar(db *database.Connection, varSlug string) (*models.OperationVar, error) {
+	var operationVar models.OperationVar
+
+	err := db.Get(&operationVar, sq.Select("*").
+		From("operation_vars").
+		Where(sq.Eq{"slug": varSlug}))
+	if err != nil {
+		return &operationVar, backend.WrapError("Unable to lookup operation variable by name", err)
+	}
+	return &operationVar, nil
+}
