@@ -16,7 +16,7 @@ const EditForm = (props: {
   const nameField = useFormField(props.name)
   React.useEffect(() => {
     nameField.onChange(props.name)
-  }, [props.name, nameField])
+  }, [props.name])
 
   const formComponentProps = useForm({
     fields: [nameField],

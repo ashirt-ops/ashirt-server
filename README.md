@@ -24,7 +24,7 @@ Detailed instructions for building and installation are available for the [front
 
 ## Configuration
 
-All configuration options for the backend are described [here](bakend/Readme.md). These cover the various components and configuration options necessary for deployment and outlines how the components interact.
+All configuration options for the backend are described [here](backend/Readme.md). These cover the various components and configuration options necessary for deployment and outlines how the components interact.
 
 ## Contribute
 

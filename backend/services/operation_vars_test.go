@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
 )
@@ -60,8 +61,8 @@ func TestCreateOperationVar(t *testing.T) {
 		operationVar = getOperationVarFromSlug(t, db, createdOperationVar.VarSlug)
 
 		require.NotEqual(t, 0, operationVar.ID)
-		require.Equal(t, services.StrToLowerCaseUnderscore(i.VarSlug), operationVar.Slug)
-		require.Equal(t, services.StrToUpperCaseUnderscore(i.Name), operationVar.Name)
+		require.Equal(t, helpers.StrToLowerCaseUnderscore(i.VarSlug), operationVar.Slug)
+		require.Equal(t, helpers.StrToUpperCaseUnderscore(i.Name), operationVar.Name)
 		require.Equal(t, i.Value, operationVar.Value)
 
 		// verify name must be unique within an operation
@@ -86,8 +87,8 @@ func TestCreateOperationVar(t *testing.T) {
 		operationVar = getOperationVarFromSlug(t, db, createdOperationVar.VarSlug)
 
 		require.NotEqual(t, 0, operationVar.ID)
-		require.Equal(t, services.StrToLowerCaseUnderscore(i.VarSlug), operationVar.Slug)
-		require.Equal(t, services.StrToUpperCaseUnderscore(i.Name), operationVar.Name)
+		require.Equal(t, helpers.StrToLowerCaseUnderscore(i.VarSlug), operationVar.Slug)
+		require.Equal(t, helpers.StrToUpperCaseUnderscore(i.Name), operationVar.Name)
 		require.Equal(t, i.Value, operationVar.Value)
 	})
 }
@@ -170,7 +171,7 @@ func TestUpdateOperationVar(t *testing.T) {
 
 		updatedOperationVar, err := services.LookupOperationVar(db, newVar.Slug)
 		require.NoError(t, err)
-		require.Equal(t, services.StrToUpperCaseUnderscore(newName), updatedOperationVar.Name)
+		require.Equal(t, helpers.StrToUpperCaseUnderscore(newName), updatedOperationVar.Name)
 		require.Equal(t, newValue, updatedOperationVar.Value)
 		require.Equal(t, newVar.Slug, updatedOperationVar.Slug)
 
@@ -188,7 +189,7 @@ func TestUpdateOperationVar(t *testing.T) {
 		err = services.UpdateOperationVar(ctx, db, input)
 		require.NoError(t, err)
 		updatedOperationVar, err = services.LookupOperationVar(db, newVar.Slug)
-		require.Equal(t, services.StrToUpperCaseUnderscore(newName), updatedOperationVar.Name)
+		require.Equal(t, helpers.StrToUpperCaseUnderscore(newName), updatedOperationVar.Name)
 		require.Equal(t, newVar.Value, updatedOperationVar.Value)
 		require.Equal(t, newVar.Slug, updatedOperationVar.Slug)
 
@@ -230,7 +231,7 @@ func TestUpdateOperationVar(t *testing.T) {
 		err = services.UpdateOperationVar(ctx, db, input)
 		require.NoError(t, err)
 		updatedOperationVar, err = services.LookupOperationVar(db, newVar.Slug)
-		require.Equal(t, services.StrToUpperCaseUnderscore(newName), updatedOperationVar.Name)
+		require.Equal(t, helpers.StrToUpperCaseUnderscore(newName), updatedOperationVar.Name)
 		require.Equal(t, "Bring an object to you", updatedOperationVar.Value)
 	})
 }

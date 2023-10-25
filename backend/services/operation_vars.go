@@ -6,11 +6,11 @@ package services
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/models"
 	"github.com/ashirt-ops/ashirt-server/backend/policy"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
@@ -36,14 +36,6 @@ type DeleteOperationVarInput struct {
 	Name string
 }
 
-func StrToUpperCaseUnderscore(str string) string {
-	return strings.Replace(strings.ToUpper(str), " ", "_", -1)
-}
-
-func StrToLowerCaseUnderscore(str string) string {
-	return strings.Replace(strings.ToLower(str), " ", "_", -1)
-}
-
 func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOperationVarInput) (*dtos.OperationVar, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err := policy.Require(middleware.Policy(ctx), policy.CanCreateOpVars{OperationID: operation.ID}); err != nil {
@@ -53,13 +45,13 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 	if i.Name == "" {
 		return nil, backend.MissingValueErr("Name")
 	}
-	formattedName := StrToUpperCaseUnderscore(i.Name)
+	formattedName := helpers.StrToUpperCaseUnderscore(i.Name)
 
 	cleanSlug := SanitizeSlug(i.VarSlug)
 	if cleanSlug == "" {
 		return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable slug"), "Slug must contain english letters or numbers")
 	}
-	formattedSlug := StrToLowerCaseUnderscore(cleanSlug)
+	formattedSlug := helpers.StrToLowerCaseUnderscore(cleanSlug)
 
 	var varID int64
 
@@ -167,7 +159,7 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyOpVars{OperationID: operation.ID}); err != nil {
 		return backend.WrapError("Unwilling to update operation", backend.UnauthorizedWriteErr(err))
 	}
-	formattedName := StrToUpperCaseUnderscore(i.Name)
+	formattedName := helpers.StrToUpperCaseUnderscore(i.Name)
 
 	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
 	for _, varInOperation := range listOfVarsInOperation {
