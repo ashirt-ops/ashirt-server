@@ -5,6 +5,7 @@ package services
 
 import (
 	"context"
+	"strings"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
@@ -40,9 +41,11 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 	if i.Name == "" {
 		return nil, backend.MissingValueErr("Name")
 	}
+	upperCaseName := strings.ToUpper(i.Name)
+	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
 
 	_, err := db.Insert("global_vars", map[string]interface{}{
-		"name":  i.Name,
+		"name":  underscoreName,
 		"value": i.Value,
 	})
 	if err != nil {
@@ -53,7 +56,7 @@ func CreateGlobalVar(ctx context.Context, db *database.Connection, i CreateGloba
 	}
 
 	return &dtos.GlobalVar{
-		Name:  i.Name,
+		Name:  underscoreName,
 		Value: i.Value,
 	}, nil
 }
@@ -115,8 +118,11 @@ func UpdateGlobalVar(ctx context.Context, db *database.Connection, i UpdateGloba
 		val = globalVar.Value
 	}
 
+	upperCaseName := strings.ToUpper(i.NewName)
+	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
+
 	if i.NewName != "" {
-		name = i.NewName
+		name = underscoreName
 	} else {
 		name = globalVar.Name
 	}
