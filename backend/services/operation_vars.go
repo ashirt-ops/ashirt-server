@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
@@ -44,26 +45,30 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 	if i.Name == "" {
 		return nil, backend.MissingValueErr("Name")
 	}
+	upperCaseName := strings.ToUpper(i.Name)
+	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
 
 	cleanSlug := SanitizeSlug(i.VarSlug)
 	if cleanSlug == "" {
 		return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable slug"), "Slug must contain english letters or numbers")
 	}
+	// make lower case to ensure uniqueness; no need to upper case since user never sees it and it gets used in urls
+	lowerCaseSlug := strings.ToLower(cleanSlug)
 
 	var varID int64
 
 	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
 	for _, varInOperation := range listOfVarsInOperation {
-		if varInOperation.Name == i.Name {
+		if varInOperation.Name == underscoreName {
 			return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
 		}
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
 		varID, _ = tx.Insert("operation_vars", map[string]interface{}{
-			"name":  i.Name,
+			"name":  underscoreName,
 			"value": i.Value,
-			"slug":  i.VarSlug,
+			"slug":  lowerCaseSlug,
 		})
 		tx.Insert("var_operation_map", map[string]interface{}{
 			"var_id":       varID,
@@ -84,9 +89,9 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 	}
 
 	return &dtos.OperationVar{
-		Name:    i.Name,
+		Name:    underscoreName,
 		Value:   i.Value,
-		VarSlug: cleanSlug,
+		VarSlug: lowerCaseSlug,
 	}, nil
 }
 
@@ -156,10 +161,12 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 	if err := policyRequireWithAdminBypass(ctx, policy.CanModifyOpVars{OperationID: operation.ID}); err != nil {
 		return backend.WrapError("Unwilling to update operation", backend.UnauthorizedWriteErr(err))
 	}
+	upperCaseName := strings.ToUpper(i.Name)
+	underscoreName := strings.Replace(upperCaseName, " ", "_", -1)
 
 	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
 	for _, varInOperation := range listOfVarsInOperation {
-		if varInOperation.Name == i.Name {
+		if varInOperation.Name == underscoreName {
 			return backend.BadInputErr(errors.New("Unable to update operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
 		}
 	}
@@ -174,7 +181,7 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 	}
 
 	if i.Name != "" {
-		name = i.Name
+		name = underscoreName
 	} else {
 		name = operationVar.Name
 	}
