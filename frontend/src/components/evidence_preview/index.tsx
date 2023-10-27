@@ -9,6 +9,8 @@ import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint } f
 import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
+import LazyLoadComponent from 'src/components/lazy_load_component'
+
 
 import TerminalPlayer from 'src/components/terminal_player'
 
@@ -56,7 +58,7 @@ export default (props: {
 
   return (
     <div className={className} onClick={props.onClick}>
-      <Component {...props} />
+      <LazyLoadComponent><Component {...props} /></LazyLoadComponent>
     </div>
   )
 }
