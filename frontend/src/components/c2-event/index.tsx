@@ -155,7 +155,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.c2 || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={c2 => props.onChange({...props.value, c2})}
             />
       </div>
       <div className={cx('operator')}>
@@ -164,7 +164,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.c2Operator || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={c2Operator => props.onChange({...props.value, c2Operator})}
             />
       </div>
       <div className={cx('user-context')}>
@@ -173,7 +173,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.userContext || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={userContext => props.onChange({...props.value, userContext})}
             />
       </div>
       <div className={cx('beacon')}>
@@ -182,7 +182,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.beacon || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={beacon => props.onChange({...props.value, beacon})}
             />
       </div>
       <div className={cx('hostname')}>
@@ -191,7 +191,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.hostname || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={hostname => props.onChange({...props.value, hostname})}
             />
       </div>
       <div className={cx('intIP')}>
@@ -200,7 +200,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.internalIP || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={internalIP => props.onChange({...props.value, internalIP})}
             />
       </div>
       <div className={cx('extIP')}>
@@ -209,7 +209,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.externalIP || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={externalIP => props.onChange({...props.value, externalIP})}
             />
       </div>
       <div className={cx('process')}>
@@ -218,7 +218,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.processName || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={processName => props.onChange({...props.value, processName})}
             />
       </div>
       <div className={cx('procID')}>
@@ -234,7 +234,6 @@ export const C2EventEditor = (props: {
               } else {
                 console.error('Invalid input. Please enter a number.'); // cowboy error handling... whats the ASHIRT way to do this?
               }
-              //props.onChange({...props.value, processID})
             }}
             disabled={props.disabled}
         />
@@ -245,7 +244,7 @@ export const C2EventEditor = (props: {
                 className={cx('c2-event-input')}
                 value={props.value.command || ''}
                 disabled={props.disabled}
-                readOnly
+                onChange={command => props.onChange({...props.value, command})}
             />
       </div>
       <div className={cx('result')}>
@@ -253,7 +252,7 @@ export const C2EventEditor = (props: {
                   label="Result" className={cx('c2-event-input', 'resizeable')}
                   value={props.value.result || ''}
                   disabled={props.disabled}
-                  readOnly
+                  onChange={result => props.onChange({...props.value, result})}
               />
         </div>
     </div>
