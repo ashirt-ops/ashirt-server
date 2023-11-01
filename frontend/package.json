@@ -39,7 +39,7 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
-    "@types/har-format": "^1.2.12",
+    "@types/har-format": "^1.2.14",
     "ace-builds": "^1.26.0",
     "classnames": "^2.3.2",
     "date-fns": "^2.30.0",
