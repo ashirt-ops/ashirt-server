@@ -79,7 +79,7 @@ func (s *S3Store) SendURL(key string) (*string, error) {
 		ResponseContentType: aws.String(contentType),
 	})
 
-	url, err := req.Presign(time.Hour * 8)
+	url, err := req.Presign(time.Minute * 30)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
 	}
