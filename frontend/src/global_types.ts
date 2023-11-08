@@ -115,6 +115,7 @@ export type Evidence = {
   occurredAt: Date,
   tags: Array<Tag>,
   contentType: SupportedEvidenceType
+  sendUrl: boolean,
 }
 
 export type ExportedEvidence = Omit<Evidence, 'tags' | 'uuid'> & {

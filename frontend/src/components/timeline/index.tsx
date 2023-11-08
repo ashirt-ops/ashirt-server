@@ -111,6 +111,7 @@ export default (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
+          useS3Url={activeEvidence.sendUrl}
           viewHint="large"
           interactionHint="active"
         />
@@ -158,6 +159,7 @@ const TimelineRow = (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
+          useS3Url={props.evidence.sendUrl}
           viewHint="medium"
           interactionHint="inactive"
         />

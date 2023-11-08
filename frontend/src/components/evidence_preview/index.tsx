@@ -9,6 +9,8 @@ import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint } f
 import { getEvidenceAsCodeblock, getEvidenceAsString, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
+import LazyLoadComponent from 'src/components/lazy_load_component'
+
 
 import TerminalPlayer from 'src/components/terminal_player'
 
@@ -40,6 +42,7 @@ export default (props: {
   interactionHint?: InteractionHint,
   className?: string,
   fitToContainer?: boolean,
+  useS3Url: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
 }) => {
   const Component = getComponent(props.contentType)
@@ -55,7 +58,7 @@ export default (props: {
 
   return (
     <div className={className} onClick={props.onClick}>
-      <Component {...props} />
+      <LazyLoadComponent><Component {...props} /></LazyLoadComponent>
     </div>
   )
 }
@@ -65,6 +68,7 @@ type EvidenceProps = {
   evidenceUuid: string,
   viewHint?: EvidenceViewHint,
   interactionHint?: InteractionHint,
+  useS3Url: boolean
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
@@ -77,8 +81,16 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
-  const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-  return <img src={fullUrl} />
+  if (props.useS3Url) {
+    const wiredUrl = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
+      operationSlug: props.operationSlug,
+      evidenceUuid: props.evidenceUuid,
+    }), [props.operationSlug, props.evidenceUuid]))
+    return wiredUrl.render(url => <img src={url} />)
+  } else {
+    const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
+    return <img src={fullUrl} />
+  }
 }
 
 const EvidenceEvent = (_props: EvidenceProps) => {

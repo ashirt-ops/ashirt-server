@@ -43,6 +43,7 @@ const EvidenceRow = (props: {
         evidenceUuid={props.evidence.uuid}
         contentType={props.evidence.contentType}
         onClick={(e) => { e.stopPropagation(); setLightboxOpen(true)} }
+        useS3Url={props.evidence.sendUrl}
         fitToContainer
         viewHint="small"
         interactionHint="inactive"
@@ -55,6 +56,7 @@ const EvidenceRow = (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
+          useS3Url={props.evidence.sendUrl}
           viewHint="large"
           interactionHint="active"
         />

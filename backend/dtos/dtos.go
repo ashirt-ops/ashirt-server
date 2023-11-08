@@ -23,6 +23,7 @@ type Evidence struct {
 	Operator    User      `json:"operator"`
 	Tags        []Tag     `json:"tags"`
 	ContentType string    `json:"contentType"`
+	SendUrl     bool      `json:"sendUrl"`
 }
 
 type EvidenceMetadata struct {
