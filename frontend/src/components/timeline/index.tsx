@@ -9,7 +9,7 @@ import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
 import Help from 'src/components/help'
 import { ClickPopover } from 'src/components/popover'
-import { Tag, Evidence } from 'src/global_types'
+import { Tag, Evidence, UrlData } from 'src/global_types'
 import { addTagToQuery, addOperatorToQuery } from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CopyTextButton } from 'src/components/text_copiers'
@@ -39,7 +39,7 @@ export default (props: {
 
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
-  const [currImageUrl, setCurrImageUrl] = React.useState<string | null>(null)
+  const [currImageUrl, setCurrImageUrl] = React.useState<UrlData| null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -117,7 +117,7 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
-          preSavedS3Url={currImageUrl ? currImageUrl : undefined}
+          preSavedS3UrlData={currImageUrl ? currImageUrl : undefined}
           viewHint="large"
           interactionHint="active"
         />
@@ -137,7 +137,7 @@ const TimelineRow = (props: {
   focusUuid?: string,
   onPreviewClick: () => void,
   onClick: () => void,
-  urlSetter?: (url: string | null) => void,
+  urlSetter?: (urlData: UrlData | null) => void,
 }) => {
   const self = React.useRef<null | HTMLDivElement>(null)
 
