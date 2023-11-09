@@ -84,7 +84,7 @@ func (s *S3Store) SendURLData(key string) (*URLData, error) {
 		ResponseContentType: aws.String(contentType),
 	})
 
-	minutes := time.Duration(30)
+	minutes := time.Duration(2)
 	url, err := req.Presign(time.Minute * minutes)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
