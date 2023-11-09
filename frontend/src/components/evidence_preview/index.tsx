@@ -44,6 +44,8 @@ export default (props: {
   fitToContainer?: boolean,
   useS3Url: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
+  urlSetter?: (url: string | null) => void,
+  preSavedS3Url?: string,
 }) => {
   const Component = getComponent(props.contentType)
   if (Component == null) return null
@@ -69,6 +71,8 @@ type EvidenceProps = {
   viewHint?: EvidenceViewHint,
   interactionHint?: InteractionHint,
   useS3Url: boolean
+  urlSetter?: (url: string) => void,
+  preSavedS3Url?: string,
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
@@ -81,16 +85,20 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
+  let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
   if (props.useS3Url) {
     const wiredUrl = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
-    return wiredUrl.render(url => <img src={url} />)
-  } else {
-    const fullUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-    return <img src={fullUrl} />
+    wiredUrl.expose(s3url => {
+      props.urlSetter && props.urlSetter(s3url)
+      url = s3url
+    })
+  } else if (props.preSavedS3Url){
+    url = props.preSavedS3Url
   }
+  return <img src={url} />
 }
 
 const EvidenceEvent = (_props: EvidenceProps) => {
