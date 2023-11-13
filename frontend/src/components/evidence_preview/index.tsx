@@ -90,6 +90,7 @@ const EvidenceImage = (props: EvidenceProps) => {
   console.log("preSavedS3UrlData", props.preSavedS3UrlData)
   console.log("now", now)
   console.log("props.useS3Url", props.useS3Url)
+  props.preSavedS3UrlData && console.log("props.preSavedS3UrlData.expirationTime < now", props.preSavedS3UrlData.expirationTime < now)
   if (props.useS3Url) {
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
@@ -99,10 +100,10 @@ const EvidenceImage = (props: EvidenceProps) => {
       props.urlSetter && props.urlSetter(s3url)
       url = s3url.url
     })
-  } else if (props.preSavedS3UrlData && props.preSavedS3UrlData.expirationTime < now){
-    console.log("preSavedS3UrlData.expirationTime", props.preSavedS3UrlData.expirationTime)
+  } else if (props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) < now){
+    console.log("preSavedS3UrlData.expirationTime", new Date(props.preSavedS3UrlData.expirationTime))
     console.log("preSavedS3UrlData.url", props.preSavedS3UrlData.url)
-    console.log("preSavedS3UrlData.expirationTime < now", props.preSavedS3UrlData.expirationTime < now)
+    console.log("preSavedS3UrlData.expirationTime < now", new Date(props.preSavedS3UrlData.expirationTime) < now)
     url = props.preSavedS3UrlData.url
   }
   return <img src={url} />
