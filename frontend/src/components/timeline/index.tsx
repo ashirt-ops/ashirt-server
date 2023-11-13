@@ -39,7 +39,7 @@ export default (props: {
 
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
-  const [currImageUrl, setCurrImageUrl] = React.useState<UrlData| null>(null)
+  const [currImageUrlData, setCurrImageUrlData] = React.useState<UrlData| null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -96,7 +96,7 @@ export default (props: {
             {...props}
             focusUuid={props.scrollToUuid}
             active={active}
-            urlSetter={active ? setCurrImageUrl : undefined}
+            urlSetter={active ? setCurrImageUrlData : undefined}
             evidence={evi}
             key={evi.uuid}
             onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
@@ -117,8 +117,7 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
-          // TODO TN rename currImageUrl to currUrlData?
-          preSavedS3UrlData={currImageUrl ? currImageUrl : undefined}
+          preSavedS3UrlData={currImageUrlData ? currImageUrlData : undefined}
           viewHint="large"
           interactionHint="active"
         />
