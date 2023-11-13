@@ -90,7 +90,8 @@ const EvidenceImage = (props: EvidenceProps) => {
   console.log("preSavedS3UrlData", props.preSavedS3UrlData)
   console.log("now", now)
   console.log("props.useS3Url", props.useS3Url)
-  props.preSavedS3UrlData && console.log("props.preSavedS3UrlData.expirationTime < now", props.preSavedS3UrlData.expirationTime < now)
+  props.preSavedS3UrlData && console.log("props.preSavedS3UrlData.expirationTime < now", new Date(props.preSavedS3UrlData.expirationTime) < now)
+  props.preSavedS3UrlData && console.log("props.preSavedS3UrlData.expirationTime", new Date(props.preSavedS3UrlData.expirationTime))
   if (props.useS3Url) {
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,

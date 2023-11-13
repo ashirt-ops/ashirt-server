@@ -117,6 +117,7 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
+          // TODO TN rename currImageUrl to currUrlData?
           preSavedS3UrlData={currImageUrl ? currImageUrl : undefined}
           viewHint="large"
           interactionHint="active"
