@@ -94,6 +94,10 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 
 			userData, err := authenticateAPI(db, r, body)
 			if err != nil {
+				logging.GetSystemLogger().Log(
+					"msg", "Unable to build user policy",
+					"error", err.Error(),
+				)
 				respondWithError(w, r, backend.UnauthorizedWriteErr(err))
 				return
 			}
