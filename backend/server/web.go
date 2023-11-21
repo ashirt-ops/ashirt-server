@@ -521,11 +521,15 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			return nil, backend.WrapError("Unable to read evidence", err)
 		}
 		if s3Store, ok := contentStore.(*contentstore.S3Store); ok && evidence.ContentType == "image" {
-			url, err := services.SendUrl(r.Context(), db, s3Store, i)
+			urlData, err := services.SendURLData(r.Context(), db, s3Store, i)
 			if err != nil {
-				return nil, backend.WrapError("Unable get s3 URL", err)
+				return nil, backend.WrapError("Unable to get s3 URL", err)
 			}
-			return bytes.NewReader([]byte(*url)), nil
+			jsonifiedData, err := json.Marshal(urlData)
+			if err != nil {
+				return nil, backend.WrapError("Unable to send s3 URL", err)
+			}
+			return bytes.NewReader(jsonifiedData), nil
 		}
 		if i.LoadPreview {
 			return evidence.Preview, nil

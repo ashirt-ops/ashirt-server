@@ -356,3 +356,8 @@ export type OperationVariableData = {
   operationSlug: string,
   variable: OperationVar,
 }
+
+export type UrlData = {
+  url: string,
+  expirationTime: Date,
+}

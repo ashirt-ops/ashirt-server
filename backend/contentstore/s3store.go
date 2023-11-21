@@ -71,7 +71,12 @@ func (s *S3Store) Read(key string) (io.Reader, error) {
 	return res.Body, nil
 }
 
-func (s *S3Store) SendURL(key string) (*string, error) {
+type URLData struct {
+	Url            string    `json:"url"`
+	ExpirationTime time.Time `json:"expirationTime"`
+}
+
+func (s *S3Store) SendURLData(key string) (*URLData, error) {
 	contentType := "image/jpeg"
 	req, _ := s.s3Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket:              aws.String(s.bucketName),
@@ -79,12 +84,17 @@ func (s *S3Store) SendURL(key string) (*string, error) {
 		ResponseContentType: aws.String(contentType),
 	})
 
-	url, err := req.Presign(time.Minute * 30)
+	minutes := time.Minute * time.Duration(30)
+	url, err := req.Presign(minutes)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
 	}
+	data := URLData{
+		Url:            url,
+		ExpirationTime: time.Now().UTC().Add(minutes),
+	}
 
-	return &url, nil
+	return &data, nil
 }
 
 // Delete removes files in in your OS's temp directory
