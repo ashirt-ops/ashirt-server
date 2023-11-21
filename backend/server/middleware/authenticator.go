@@ -94,6 +94,10 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 
 			userData, err := authenticateAPI(db, r, body)
 			if err != nil {
+				logging.LogWithoutAuth(
+					"msg", "Unable to build user policy",
+					"error", err.Error(),
+				)
 				respondWithError(w, r, backend.UnauthorizedWriteErr(err))
 				return
 			}
@@ -222,7 +226,11 @@ func cloneBody(r *http.Request) (io.Reader, func(), error) {
 		r.Body.Close()
 		err := os.Remove(bodyTmpFile.Name())
 		if err != nil {
-			logging.Log(r.Context(), "msg", "Unable to remove tmp file", "error", err, "tmpFile", bodyTmpFile.Name())
+			logging.LogWithoutAuth(
+				"msg", "Unable to remove tmp file",
+				"error", err,
+				"tmpFile", bodyTmpFile.Name(),
+			)
 		}
 	}
 	return body, cleanup, nil

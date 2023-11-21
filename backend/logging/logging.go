@@ -76,6 +76,13 @@ func Log(ctx context.Context, keyvals ...interface{}) error {
 	return ReqLogger(ctx).Log(keyvals...)
 }
 
+func LogWithoutAuth(keyvals ...interface{}) error {
+	if systemLogger != nil {
+		return systemLogger.Log(keyvals...)
+	}
+	return nil
+}
+
 // SystemLog provides a system-level logger, which is not tied to any request.
 // this should be used in situations where either a context is not handy, but logging is important
 // or for events that are not tied to a request (e.g. losing database connection)

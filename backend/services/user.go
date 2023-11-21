@@ -135,7 +135,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 					return nil, backend.WrapError("Unable to create new user after many attempts", backend.DatabaseErr(err))
 				}
 
-				logging.GetSystemLogger().Log(
+				logging.LogWithoutAuth(
 					"msg", "Unable to create user with slug; trying alternative",
 					"slug", attemptedSlug,
 					"attempt", attemptNumber,
@@ -155,7 +155,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 	if userID == 1 {
 		err := db.Update(sq.Update("users").Set("admin", true).Where(sq.Eq{"id": userID}))
 		if err != nil {
-			logging.GetSystemLogger().Log("msg", "Unable to make the first user an admin", "error", err.Error())
+			logging.LogWithoutAuth("msg", "Unable to make the first user an admin", "error", err.Error())
 		}
 	}
 	return &dtos.CreateUserOutput{
