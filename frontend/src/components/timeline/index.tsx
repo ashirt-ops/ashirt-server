@@ -85,6 +85,11 @@ export default (props: {
   const activeEvidence = props.evidence[activeChildIndex]
   if (activeEvidence == null) return null
 
+  const expDate = currImageData?.expirationTime
+  const now = new Date()
+  const expired = currImageData?.expirationTime ? new Date(currImageData?.expirationTime) > now : true
+
+
   return <>
     <div className={cx('root')} ref={rootRef}>
       {props.evidence.map((evi, idx) => {
@@ -116,9 +121,10 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
-          imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
+          imgDataSetter={(quicklookVisible && expired) ? setCurrImageData : undefined}
           // TODO TN replace this with ?? operator
-          preSavedS3UrlData={currImageData ? currImageData : undefined}
+          // TODO TN clean this up
+          preSavedS3UrlData={expired ? undefined : (currImageData ? currImageData : undefined)}
           viewHint="large"
           interactionHint="active"
         />

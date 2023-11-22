@@ -88,6 +88,7 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 
 const EvidenceImage = (props: EvidenceProps) => {
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
+  // TODO TN might be able to get rid o thifs
   const now = new Date()
   console.log("preSavedS3UrlData", props.preSavedS3UrlData)
   console.log("imgDataSetter", props.imgDataSetter)
