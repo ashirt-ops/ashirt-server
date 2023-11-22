@@ -37,6 +37,7 @@ export default (props: {
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
   const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
+  console.log("currImageData", currImageData)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
