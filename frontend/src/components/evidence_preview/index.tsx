@@ -85,6 +85,7 @@ const EvidenceImage = (props: EvidenceProps) => {
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
   const now = new Date()
   console.log("preSavedS3UrlData", props.preSavedS3UrlData)
+  console.log("imgDataSetter", props.imgDataSetter)
   if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > now){
     url = props.preSavedS3UrlData.url
   } else if (props.useS3Url) {

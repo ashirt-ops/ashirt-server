@@ -509,6 +509,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			if err != nil {
 				return nil, backend.WrapError("Unable to send s3 URL", err)
 			}
+			fmt.Printf("sending s3 URL %+v\n", urlData)
 			return bytes.NewReader(jsonifiedData), nil
 		}
 		if i.LoadPreview {
