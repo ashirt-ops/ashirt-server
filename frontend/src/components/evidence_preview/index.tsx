@@ -44,6 +44,9 @@ export default (props: {
   imgDataSetter?: (urlData: UrlData | null) => void,
   preSavedS3UrlData?: UrlData,
 }) => {
+  console.log("__imgDataSetter", props.imgDataSetter)
+  console.log("__preSavedS3UrlData", props.preSavedS3UrlData)
+  console.log("__interactionHint", props.interactionHint)
   const Component = getComponent(props.contentType)
   if (Component == null) return null
 
