@@ -36,7 +36,7 @@ export default (props: {
 
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
-  const [currImageUrlData, setCurrImageUrlData] = React.useState<UrlData| null>(null)
+  const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -93,7 +93,7 @@ export default (props: {
             {...props}
             focusUuid={props.scrollToUuid}
             active={active}
-            urlSetter={active ? setCurrImageUrlData : undefined}
+            imgDataSetter={active ? setCurrImageData : undefined}
             evidence={evi}
             key={evi.uuid}
             onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
@@ -114,7 +114,7 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
-          preSavedS3UrlData={currImageUrlData ? currImageUrlData : undefined}
+          preSavedS3UrlData={currImageData ? currImageData : undefined}
           viewHint="large"
           interactionHint="active"
         />
@@ -134,7 +134,7 @@ const TimelineRow = (props: {
   focusUuid?: string,
   onPreviewClick: () => void,
   onClick: () => void,
-  urlSetter?: (urlData: UrlData | null) => void,
+  imgDataSetter?: (urlData: UrlData | null) => void,
 }) => {
   const self = React.useRef<null | HTMLDivElement>(null)
 
@@ -167,7 +167,7 @@ const TimelineRow = (props: {
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
           useS3Url={props.evidence.sendUrl}
-          urlSetter={props.urlSetter}
+          imgDataSetter={props.imgDataSetter}
           viewHint="medium"
           interactionHint="inactive"
         />

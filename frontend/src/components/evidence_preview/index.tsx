@@ -41,7 +41,7 @@ export default (props: {
   fitToContainer?: boolean,
   useS3Url: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
-  urlSetter?: (urlData: UrlData | null) => void,
+  imgDataSetter?: (urlData: UrlData | null) => void,
   preSavedS3UrlData?: UrlData,
 }) => {
   const Component = getComponent(props.contentType)
@@ -68,7 +68,7 @@ type EvidenceProps = {
   viewHint?: EvidenceViewHint,
   interactionHint?: InteractionHint,
   useS3Url: boolean
-  urlSetter?: (urlData: UrlData) => void,
+  imgDataSetter?: (urlData: UrlData) => void,
   preSavedS3UrlData?: UrlData,
 }
 
@@ -88,13 +88,15 @@ const EvidenceImage = (props: EvidenceProps) => {
   if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > now){
     url = props.preSavedS3UrlData.url
   } else if (props.useS3Url) {
+    console.log("fetching new url")
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
     wiredUrl.expose(s3url => {
-      props.urlSetter && props.urlSetter(s3url)
-      url = s3url.url
+      console.log("setting new url", s3url)
+      props.imgDataSetter && props.imgDataSetter(s3url)
+      url = s3url.url 
     })
   }
   return <img src={url} />
