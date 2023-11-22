@@ -116,6 +116,8 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
+          imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
+          // TODO TN replace this with ?? operator
           preSavedS3UrlData={currImageData ? currImageData : undefined}
           viewHint="large"
           interactionHint="active"

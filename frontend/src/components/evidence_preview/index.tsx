@@ -44,7 +44,9 @@ export default (props: {
   imgDataSetter?: (urlData: UrlData | null) => void,
   preSavedS3UrlData?: UrlData,
 }) => {
+  // only gets passed along to main image
   console.log("__imgDataSetter", props.imgDataSetter)
+  // only gets passed along to preview image
   console.log("__preSavedS3UrlData", props.preSavedS3UrlData)
   console.log("__interactionHint", props.interactionHint)
   const Component = getComponent(props.contentType)
