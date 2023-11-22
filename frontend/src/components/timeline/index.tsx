@@ -89,6 +89,7 @@ export default (props: {
     <div className={cx('root')} ref={rootRef}>
       {props.evidence.map((evi, idx) => {
         const active = activeChildIndex === idx
+        console.log("evi active", evi.uuid, active)
         return (
           <TimelineRow
             {...props}
