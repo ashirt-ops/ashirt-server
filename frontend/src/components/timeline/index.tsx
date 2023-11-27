@@ -125,7 +125,7 @@ export default (props: {
           // imgDataSetter={(quicklookVisible && expired) ? setCurrImageData : undefined}
           // TODO TN replace this with ?? operator
           // TODO TN clean this up
-          preSavedS3UrlData={expired ? undefined : (currImageData ? currImageData : undefined)}
+          preSavedS3UrlData={currImageData ? currImageData : undefined}
           viewHint="large"
           interactionHint="active"
         />
