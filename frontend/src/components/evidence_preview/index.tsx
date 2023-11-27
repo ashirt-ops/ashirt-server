@@ -95,6 +95,7 @@ const EvidenceImage = (props: EvidenceProps) => {
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
     wiredUrl.expose(s3url => {
+      console.log("about to set img data", s3url)
       props.imgDataSetter && props.imgDataSetter(s3url)
       url = s3url.url 
     })
