@@ -37,7 +37,6 @@ export default (props: {
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
   const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
-  console.log("currImageData", currImageData)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -85,16 +84,10 @@ export default (props: {
   const activeEvidence = props.evidence[activeChildIndex]
   if (activeEvidence == null) return null
 
-  const expDate = currImageData?.expirationTime
-  const now = new Date()
-  const expired = currImageData?.expirationTime ? new Date(currImageData?.expirationTime) > now : true
-
-
   return <>
     <div className={cx('root')} ref={rootRef}>
       {props.evidence.map((evi, idx) => {
         const active = activeChildIndex === idx
-        console.log("evi active", evi.uuid, active)
         return (
           <TimelineRow
             {...props}
@@ -122,9 +115,6 @@ export default (props: {
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
           imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
-          // imgDataSetter={(quicklookVisible && expired) ? setCurrImageData : undefined}
-          // TODO TN replace this with ?? operator
-          // TODO TN clean this up
           preSavedS3UrlData={currImageData ? currImageData : undefined}
           viewHint="large"
           interactionHint="active"

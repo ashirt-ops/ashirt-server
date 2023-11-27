@@ -44,11 +44,6 @@ export default (props: {
   imgDataSetter?: (urlData: UrlData | null) => void,
   preSavedS3UrlData?: UrlData,
 }) => {
-  // only gets passed along to main image
-  console.log("__imgDataSetter", props.imgDataSetter)
-  // only gets passed along to preview image
-  console.log("__preSavedS3UrlData", props.preSavedS3UrlData)
-  console.log("__interactionHint", props.interactionHint)
   const Component = getComponent(props.contentType)
   if (Component == null) return null
 
@@ -88,20 +83,14 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 
 const EvidenceImage = (props: EvidenceProps) => {
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-  // TODO TN might be able to get rid o thifs
-  const now = new Date()
-  console.log("preSavedS3UrlData", props.preSavedS3UrlData)
-  console.log("imgDataSetter", props.imgDataSetter)
-  if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > now){
+  if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > new Date()){
     url = props.preSavedS3UrlData.url
   } else if (props.useS3Url) {
-    console.log("fetching new url")
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
     wiredUrl.expose(s3url => {
-      console.log("setting new url", s3url)
       props.imgDataSetter && props.imgDataSetter(s3url)
       url = s3url.url 
     })
