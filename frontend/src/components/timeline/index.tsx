@@ -121,7 +121,8 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
-          imgDataSetter={(quicklookVisible && expired) ? setCurrImageData : undefined}
+          imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
+          // imgDataSetter={(quicklookVisible && expired) ? setCurrImageData : undefined}
           // TODO TN replace this with ?? operator
           // TODO TN clean this up
           preSavedS3UrlData={expired ? undefined : (currImageData ? currImageData : undefined)}
