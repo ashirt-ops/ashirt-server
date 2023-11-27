@@ -18,7 +18,7 @@ function getComponent(evidenceType: SupportedEvidenceType) {
     case 'codeblock':
       return EvidenceCodeblock
     case 'image':
-      return EvidenceImage
+      return MemoizedEvidenceImage
     case 'terminal-recording':
       return EvidenceTerminalRecording
     case 'http-request-cycle':
@@ -108,6 +108,12 @@ const EvidenceImage = (props: EvidenceProps) => {
   }
   return <img src={url} />
 }
+
+const sameURL = (prevProps: EvidenceProps, nextProps: EvidenceProps) => {
+  return prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url;
+};
+
+const MemoizedEvidenceImage = React.memo(EvidenceImage, sameURL);
 
 const EvidenceEvent = (_props: EvidenceProps) => {
   return <div className={cx('event')}></div>
