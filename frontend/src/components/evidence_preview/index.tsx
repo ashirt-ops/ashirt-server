@@ -87,9 +87,9 @@ const EvidenceImage = (props: EvidenceProps) => {
   console.log("EvidenceImage props", props?.preSavedS3UrlData?.url.slice(-3))
   console.log("---------------------")
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-  if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > new Date()){
-    url = props.preSavedS3UrlData.url
-  } else if (props.useS3Url) {
+  // if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > new Date()){
+    // url = props.preSavedS3UrlData.url
+  // } else if (props.useS3Url) {
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
@@ -98,7 +98,7 @@ const EvidenceImage = (props: EvidenceProps) => {
       props.imgDataSetter && props.imgDataSetter(s3url)
       url = s3url.url 
     })
-  }
+  // }
   return <img src={url} />
 }
 
