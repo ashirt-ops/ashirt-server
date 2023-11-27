@@ -111,9 +111,10 @@ const sameURL = (prevProps: EvidenceProps, nextProps: EvidenceProps) => {
   console.log("nextProps", nextProps?.preSavedS3UrlData)
   console.log("last url, new url", prevProps?.preSavedS3UrlData?.url.slice(-3), nextProps?.preSavedS3UrlData?.url.slice(-3))
   console.log("is true or false?", prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url)
-  const sameUrl = prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url
+  // const sameUrl = prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url
   const sameUuid = prevProps.evidenceUuid === nextProps.evidenceUuid
-  return sameUrl && sameUuid
+  // return sameUrl && sameUuid
+  return sameUuid
 };
 
 const MemoizedEvidenceImage = React.memo(EvidenceImage, sameURL);
