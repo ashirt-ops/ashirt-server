@@ -103,12 +103,16 @@ const EvidenceImage = (props: EvidenceProps) => {
 }
 
 const sameURL = (prevProps: EvidenceProps, nextProps: EvidenceProps) => {
+  console.log("prevProps.evidenceUuid", prevProps.evidenceUuid)
+  console.log("nextProps.evidenceUuid", nextProps.evidenceUuid)
   console.log("viewHint in same URL", prevProps?.viewHint, nextProps?.viewHint)
   console.log("prevProps", prevProps?.preSavedS3UrlData)
   console.log("nextProps", nextProps?.preSavedS3UrlData)
   console.log("last url, new url", prevProps?.preSavedS3UrlData?.url.slice(-3), nextProps?.preSavedS3UrlData?.url.slice(-3))
   console.log("is true or false?", prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url)
-  return prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url;
+  const sameUrl = prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url
+  const sameUuid = prevProps.evidenceUuid === nextProps.evidenceUuid
+  return sameUrl && sameUuid
 };
 
 const MemoizedEvidenceImage = React.memo(EvidenceImage, sameURL);
