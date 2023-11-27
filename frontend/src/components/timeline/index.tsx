@@ -83,6 +83,10 @@ export default (props: {
 
   const activeEvidence = props.evidence[activeChildIndex]
   if (activeEvidence == null) return null
+  const imgDataSetter = (data: any) => {
+    console.log("imgDataSetter data", data)
+    return setCurrImageData(data)
+  }
 
   return <>
     <div className={cx('root')} ref={rootRef}>
@@ -93,7 +97,7 @@ export default (props: {
             {...props}
             focusUuid={props.scrollToUuid}
             active={active}
-            imgDataSetter={active ? setCurrImageData : undefined}
+            imgDataSetter={active ? imgDataSetter : undefined}
             evidence={evi}
             key={evi.uuid}
             onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
@@ -114,7 +118,7 @@ export default (props: {
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
           useS3Url={activeEvidence.sendUrl}
-          imgDataSetter={setCurrImageData}
+          imgDataSetter={imgDataSetter}
           // imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
           preSavedS3UrlData={currImageData ? currImageData : undefined}
           viewHint="large"
