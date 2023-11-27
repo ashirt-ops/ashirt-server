@@ -82,7 +82,9 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
+  console.log("---------------------")
   console.log("EvidenceImage props", props?.preSavedS3UrlData?.url.slice(-3))
+  console.log("---------------------")
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
   if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > new Date()){
     url = props.preSavedS3UrlData.url
@@ -100,7 +102,9 @@ const EvidenceImage = (props: EvidenceProps) => {
 }
 
 const sameURL = (prevProps: EvidenceProps, nextProps: EvidenceProps) => {
-  console.log("sameURL props", prevProps?.preSavedS3UrlData?.url.slice(-3), nextProps?.preSavedS3UrlData?.url.slice(-3))
+  console.log("prevProps", prevProps?.preSavedS3UrlData)
+  console.log("nextProps", nextProps?.preSavedS3UrlData)
+  console.log("last url, new url", prevProps?.preSavedS3UrlData?.url.slice(-3), nextProps?.preSavedS3UrlData?.url.slice(-3))
   console.log("is true or false?", prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url)
   return prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url;
 };
