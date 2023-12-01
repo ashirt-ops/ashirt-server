@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.34.1
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/aws/aws-sdk-go v1.47.0
-	github.com/coreos/go-oidc/v3 v3.7.0
+	github.com/coreos/go-oidc/v3 v3.8.0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-kit/kit v0.13.0
 	github.com/go-sql-driver/mysql v1.7.1
