@@ -13,8 +13,8 @@ require (
 	github.com/go-webauthn/webauthn v0.9.2
 	github.com/google/uuid v1.4.0
 	github.com/gorilla/csrf v1.7.1
-	github.com/gorilla/securecookie v1.1.1
-	github.com/gorilla/sessions v1.2.1
+	github.com/gorilla/securecookie v1.1.2
+	github.com/gorilla/sessions v1.2.2
 	github.com/jaytaylor/html2text v0.0.0-20211105163654-bc68cce691ba
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/kelseyhightower/envconfig v1.4.0
