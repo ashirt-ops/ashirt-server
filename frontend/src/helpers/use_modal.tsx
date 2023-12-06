@@ -1,6 +1,3 @@
-// Copyright 2022, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as React from 'react'
 
 // useModal & renderModals are helpers to make it easy for a component to display one or many modals to the user

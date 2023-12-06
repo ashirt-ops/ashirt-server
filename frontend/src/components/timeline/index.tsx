@@ -1,6 +1,3 @@
-// Copyright 2022, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as React from 'react'
 import EvidencePreview from 'src/components/evidence_preview'
 import Lightbox from 'src/components/lightbox'

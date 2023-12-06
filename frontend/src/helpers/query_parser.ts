@@ -1,6 +1,3 @@
-// Copyright 2022, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as dateFns from 'date-fns'
 
 function stringifyQuery(tokens: { [key: string]: Array<FilterValue> }): string {

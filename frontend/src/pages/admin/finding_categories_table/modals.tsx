@@ -1,6 +1,3 @@
-// Copyright 2021, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as React from 'react'
 import Input from 'src/components/input'
 import ModalForm from 'src/components/modal_form'

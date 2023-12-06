@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import { UserOwnView, SupportedAuthenticationScheme, AuthSchemeDetails, RecoveryMetrics } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { userOwnViewFromDto } from './data_sources/converters'

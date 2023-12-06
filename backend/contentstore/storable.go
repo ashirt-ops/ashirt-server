@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 package contentstore
 
 // Storable represents content in a yet-to-be-uploaded state. The basic workflow when using this is
