@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/nodejs:16
+FROM --platform=linux/amd64 public.ecr.aws/lambda/nodejs:18
 
 # RUN yum update -y \
 #     && yum install -y tesseract-ocr
