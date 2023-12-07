@@ -1,6 +1,3 @@
-// Copyright 2022, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 package helpers
 
 // ChanToSlice is a generic function that converts a buffered channel into a slice. This

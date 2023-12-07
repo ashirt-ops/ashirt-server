@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import { Operation, UserRole, UserOperationRole, UserFilter, UserGroupOperationRole } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { userGroupOperationRoleFromDto, userOperationRoleFromDto } from './data_sources/converters'

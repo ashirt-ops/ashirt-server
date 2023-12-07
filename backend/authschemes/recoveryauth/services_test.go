@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 // TODO: these tests rely on service-level testing data, which needs to be migrated out of services
 // (as a practical matter, having to recreate this functionality everywhere is burdensome at best)
 // However, all of these tests were run at the service level prior, and work. These should be re-enabled

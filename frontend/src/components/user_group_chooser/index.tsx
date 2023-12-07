@@ -1,6 +1,3 @@
-// Copyright 2023, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as React from 'react'
 import Input from 'src/components/input'
 import PopoverMenu from 'src/components/popover_menu'

@@ -1,6 +1,3 @@
-// Copyright 2022, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as React from 'react'
 import SettingsSection from 'src/components/settings_section'
 import { getDefaultTags } from 'src/services'

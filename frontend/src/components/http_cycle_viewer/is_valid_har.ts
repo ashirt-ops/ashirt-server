@@ -1,6 +1,3 @@
-// Copyright 2021, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import {
   Har, Log, Creator, Entry, Request, Response, Header, Content, PostData, Param,
   // Browser, Cache, CacheDetails, Cookie, Page, PageTiming, QueryString, Timings
