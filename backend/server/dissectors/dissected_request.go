@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/theparanoids/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend"
 )
 
 // DissectedRequest stores a parsed JSON body, the map of URL substituted values, and query string
@@ -17,10 +17,10 @@ import (
 //
 // Usage Example:
 //
-// // Gorilla Mux
+// // Chi
 //
 //	func(w http.ResponseWriter, r *http.Request) {
-//	  parsedRequest := DissectJSONRequest(r, mux.Vars(r))
+//	  parsedRequest := DissectJSONRequest(r, GenerateUrlParamMap(r))
 //	  input := service.RepeatWordInput{
 //			SomeString: parsedRequest.FromURL("someString").Required(true).AsString()
 //	     Times: parsedRequest.FromQuery("times").OrDefault(2).AsInt64()

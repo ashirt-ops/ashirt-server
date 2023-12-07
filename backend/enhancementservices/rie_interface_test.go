@@ -13,10 +13,10 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/enhancementservices"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/enhancementservices"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 func TestInvoke(t *testing.T) {

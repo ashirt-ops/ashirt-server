@@ -10,14 +10,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
-	"github.com/theparanoids/ashirt-server/backend/session"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
+	"github.com/ashirt-ops/ashirt-server/backend/session"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -83,7 +82,7 @@ func Policy(ctx context.Context) policy.Policy {
 	return p
 }
 
-func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
+func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			body, cleanup, err := cloneBody(r)
@@ -95,6 +94,10 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
 
 			userData, err := authenticateAPI(db, r, body)
 			if err != nil {
+				logging.LogWithoutAuth(
+					"msg", "Unable to build user policy",
+					"error", err.Error(),
+				)
 				respondWithError(w, r, backend.UnauthorizedWriteErr(err))
 				return
 			}
@@ -104,7 +107,7 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) mux.MiddlewareFunc {
 	}
 }
 
-func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session.Store) mux.MiddlewareFunc {
+func AuthenticateUserAndInjectCtx(db *database.Connection, sessionStore *session.Store) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sess := sessionStore.Read(r)
@@ -223,7 +226,11 @@ func cloneBody(r *http.Request) (io.Reader, func(), error) {
 		r.Body.Close()
 		err := os.Remove(bodyTmpFile.Name())
 		if err != nil {
-			logging.Log(r.Context(), "msg", "Unable to remove tmp file", "error", err, "tmpFile", bodyTmpFile.Name())
+			logging.LogWithoutAuth(
+				"msg", "Unable to remove tmp file",
+				"error", err,
+				"tmpFile", bodyTmpFile.Name(),
+			)
 		}
 	}
 	return body, cleanup, nil

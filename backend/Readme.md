@@ -31,8 +31,8 @@ Configuration is handled entirely via environment variables. To that end, here a
     * This captures the configuration details for your ASHIRT storage. Different services require different configuration, so this area captures all possible fields. Their specific use is detailed below. More details on how to use content store can be found [in Storage](#storage)
       * `STORE_TYPE`
         * Required for all stores
-        * Valid values: `file`, `s3`, `gcp`, `memory`, `_` (the empty string)
-        * `file` and `memory` are used for local development and testing respectively. These are not recommended for a real deployment
+        * Valid values: `local`, `s3`, `gcp`, `memory`, `_` (the empty string)
+        * `local` and `memory` are used for local development and testing respectively. These are not recommended for a real deployment
         * `s3` connects to an AWS S3 bucket. See [below](#aws-s3) for more details
         * `gcp` connects to a Google Cloud Platform Cloud Storage bucket. See [below](#google-cloud-platform-cloud-storage) for more details
         * The empty string is technically supported, but acts as a fallback to legacy storage (i.e. S3 storage, configured via `APP_IMGSTORE_BUCKET_NAME` and `APP_IMGSTORE_REGION`).
@@ -66,6 +66,8 @@ Configuration is handled entirely via environment variables. To that end, here a
     * Used in some authentication schemes to redirect to the frontend after a failed authentication.
   * `APP_FLAGS`
     * Sets flags that enable or disable certain frontend features. Generally has no direct effect on the backend. See the [flags](#flags) section on a list of supported flags.
+  * `APP_ENABLE_EVIDENCE_EXPORT`
+    * When set to `'true'`, used to allow global admins, operation admins, or member of a group with admin permissions to export zipped evidence from an operation
   * `AUTH_SERVICES`
     * Defines what authentication services are supported on the backend. This is limited by what the backend naturally supports.
     * Values must be comma separated (though commas are only needed when multiple values are used)
@@ -351,7 +353,7 @@ While Webauthn provides a number of possible configurations, the minimum is actu
 
 ##### Webauthn as a second factor for local login
 
-Currently, AShirt does not support Webauthn as a second factor for multi-factor local login. If you'd like to see this, please [leave an issue](https://github.com/theparanoids/ashirt-server/issues?q=is%3Aissue+is%3Aopen+webauthn) requesting this feature.
+Currently, AShirt does not support Webauthn as a second factor for multi-factor local login. If you'd like to see this, please [leave an issue](https://github.com/ashirt-ops/ashirt-server/issues?q=is%3Aissue+is%3Aopen+webauthn) requesting this feature.
 
 #### Custom Authentication
 
@@ -458,7 +460,7 @@ The details for this service are detailed in [pipeline readme](/backend/pipeline
 
 ## Development Overview
 
-This project utilizes Golang 1.13 (with modules), interfaces with a MySQL database and leverages Gorilla Mux to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
+This project utilizes Golang 1.20, interfaces with a MySQL database and leverages Chi to help with routing. The project is testable via docker/docker-compose and is also deployed via docker.
 
 ### Development Environment
 
@@ -596,7 +598,7 @@ The project contains various source code directories, effectively acting as a co
 ├── server                             # Route endpoint definitions and basic request validation
 │   ├── dissectors                     # A builder-pattern like solution for interpreting request objects
 │   ├── middleware                     # Middleware to assist with request handling
-│   ├── remux                          # A rewrapping package for better ergonmics when utilizing gorilla mux
+│   ├── remux                          # A rewrapping package for better ergonmics when utilizing chi
 │   ├── api.go                         # Routes for the "API" / screenshot tool
 │   └── web.go                         # Routes for the web service
 ├── services                           # Underlying service logic. Also includes a number of unit tests

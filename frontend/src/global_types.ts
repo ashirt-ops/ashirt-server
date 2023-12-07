@@ -105,6 +105,7 @@ export type Operation = {
   topContribs: Array<TopContrib>,
   evidenceCount: EvidenceCount,
   userCanViewGroups?: boolean,
+  userCanExportData?: boolean,
 }
 
 export type Evidence = {
@@ -114,6 +115,14 @@ export type Evidence = {
   occurredAt: Date,
   tags: Array<Tag>,
   contentType: SupportedEvidenceType
+  sendUrl: boolean,
+}
+
+export type ExportedEvidence = Omit<Evidence, 'tags' | 'uuid'> & {
+  filename?: string,
+  sourceFilename?: string,
+  tags: Array<string | Tag>,
+  uuid?: string,
 }
 
 export type EvidenceMetadata = {
@@ -151,6 +160,10 @@ export type Tag = {
   name: string,
   colorName: string,
 }
+
+export type DenormalizedTag = {
+  name: string;
+} & Partial<Tag>;
 
 export type DefaultTag = Tag
 
@@ -300,4 +313,51 @@ export type FilterText = {
   onChange: React.Dispatch<React.SetStateAction<string>>;
   disabled: boolean;
   setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export type ContentType = "image" | "terminal-recording" | "http-request-cycle" | "event" | "none" | "codeblock"
+
+type Languages = "" | "abap" | "actionscript" | "ada" | "c_cpp" | "csharp" | "cobol" | "d" | "dart" | "dockerfile" | "elixir" | "elm" | "erlang" | "fsharp" | "fortran" | "golang" | "groovy" | "haskell" | "java" | "javascript" | "julia" | "kotlin" | "lisb" | "lua" | "matlab" | "markdown" | "objectivec" | "pascal" | "php" | "perl" | "prolog" | "properties" | "python" | "r" | "ruby" | "rust" | "sass" | "scala" | "scheme" | "sh" | "sql" | "swift" | "tcl" | "terraform" | "toml" | "typescript" | "vbscript" | "xml"
+
+export interface Media {
+  filename: string,
+  contentType: ContentType,
+  contentSubtype?: Languages,
+  sourceFilename?: string,
+  blob: Blob
+}
+
+export interface Codeblock {
+  contentType: string,
+  contentSubtype: Languages,
+  content: string 
+  metadata: {
+    source: string,
+  }
+}
+
+export type GlobalVar = {
+  name: string,
+  value: string,
+}
+
+export type OperationVar = {
+  name: string,
+  value: string,
+  varSlug: string,
+  operationSlug: string,
+}
+
+export type GlobalVariableData = {
+  variable: GlobalVar,
+}
+
+export type OperationVariableData = {
+  operationSlug: string,
+  variable: OperationVar,
+}
+
+export type UrlData = {
+  url: string,
+  expirationTime: Date,
 }

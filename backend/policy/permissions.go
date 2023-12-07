@@ -41,7 +41,13 @@ type CanModifyUserOfOperation struct {
 }
 
 type CanListUserGroupsOfOperation struct{ OperationID int64 }
+type CanExportOperationData struct{ OperationID int64 }
 type CanModifyUserGroupOfOperation struct {
 	OperationID int64
 	UserGroupID int64
 }
+
+type CanCreateOpVars struct{ OperationID int64 }
+type CanViewOpVars struct{ OperationID int64 }
+type CanModifyOpVars struct{ OperationID int64 }
+type CanDeleteOpVars struct{ OperationID int64 }

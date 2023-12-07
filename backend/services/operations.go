@@ -8,15 +8,16 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"golang.org/x/sync/errgroup"
 
 	sq "github.com/Masterminds/squirrel"
@@ -163,6 +164,8 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 			tx.Delete(sq.Delete("user_operation_permissions").Where(sq.Eq{"operation_id": operation.ID}))
 			// remove user preferences for operation
 			tx.Delete(sq.Delete("user_operation_preferences").Where(sq.Eq{"operation_id": operation.ID}))
+			// remove operation variables map
+			tx.Delete(sq.Delete("var_operation_map").Where(sq.Eq{"operation_id": operation.ID}))
 
 			tx.Delete(sq.Delete("operations").Where(sq.Eq{"id": operation.ID}))
 		})
@@ -283,6 +286,15 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		userCanViewGroups = true
 	}
 
+	var userIsAdmin bool
+	if err := policyRequireWithAdminBypass(ctx, policy.CanExportOperationData{OperationID: operation.ID}); err == nil {
+		userIsAdmin = true
+	} else {
+		userIsAdmin = middleware.IsAdmin(ctx)
+	}
+
+	userCanExportData := config.EnableEvidenceExport() && userIsAdmin
+
 	return &dtos.Operation{
 		Slug:              operationSlug,
 		Name:              operation.Name,
@@ -292,7 +304,8 @@ func ReadOperation(ctx context.Context, db *database.Connection, operationSlug s
 		NumTags:           operation.NumTags,
 		TopContribs:       topContribsForOp,
 		EvidenceCount:     evidenceCountForOp,
-		UserCanViewGroups: &userCanViewGroups,
+		UserCanViewGroups: userCanViewGroups,
+		UserCanExportData: userCanExportData,
 	}, nil
 }
 

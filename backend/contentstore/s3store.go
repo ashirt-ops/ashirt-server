@@ -6,12 +6,13 @@ package contentstore
 import (
 	"context"
 	"io"
+	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
-	"github.com/theparanoids/ashirt-server/backend"
 )
 
 // S3Store is the backing structure needed to interact with an Amazon S3 storage service
@@ -69,6 +70,32 @@ func (s *S3Store) Read(key string) (io.Reader, error) {
 		return nil, backend.WrapError("Unable to read from s3", err)
 	}
 	return res.Body, nil
+}
+
+type URLData struct {
+	Url            string    `json:"url"`
+	ExpirationTime time.Time `json:"expirationTime"`
+}
+
+func (s *S3Store) SendURLData(key string) (*URLData, error) {
+	contentType := "image/jpeg"
+	req, _ := s.s3Client.GetObjectRequest(&s3.GetObjectInput{
+		Bucket:              aws.String(s.bucketName),
+		Key:                 aws.String(key),
+		ResponseContentType: aws.String(contentType),
+	})
+
+	minutes := time.Minute * time.Duration(30)
+	url, err := req.Presign(minutes)
+	if err != nil {
+		return nil, backend.WrapError("Unable to get presigned URL", err)
+	}
+	data := URLData{
+		Url:            url,
+		ExpirationTime: time.Now().UTC().Add(minutes),
+	}
+
+	return &data, nil
 }
 
 // Delete removes files in in your OS's temp directory

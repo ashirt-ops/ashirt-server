@@ -3,9 +3,9 @@ package enhancementservices
 import (
 	"net/http"
 
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 func handleProcessResponse(dbModel *models.EvidenceMetadata, statusCode int, parsedData ProcessResponse) {

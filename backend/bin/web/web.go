@@ -9,19 +9,20 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/oidcauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/webauthn"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/emailservices"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server"
-	"github.com/theparanoids/ashirt-server/backend/workers"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/localauth"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/oidcauth"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/recoveryauth"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/webauthn"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/config/confighelpers"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/emailservices"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/server"
+	"github.com/ashirt-ops/ashirt-server/backend/workers"
+	"github.com/go-chi/chi/v5"
 )
 
 type SchemeError struct {
@@ -86,20 +87,28 @@ func main() {
 		logger.Log("msg", "No Emailer selected")
 	}
 
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
 
-	mux.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
-			CSRFAuthKey:      []byte(config.CSRFAuthKey()),
-			SessionStoreKey:  []byte(config.SessionStoreKey()),
-			UseSecureCookies: true,
-			AuthSchemes:      schemes,
-			Logger:           logger,
-		},
-	)))
+	r.Route("/web", func(r chi.Router) {
+		server.Web(r,
+			db, contentStore, &server.WebConfig{
+				CSRFAuthKey:      []byte(config.CSRFAuthKey()),
+				SessionStoreKey:  []byte(config.SessionStoreKey()),
+				UseSecureCookies: true,
+				AuthSchemes:      schemes,
+				Logger:           logger,
+			},
+		)
+	})
+
+	r.Route("/api", func(r chi.Router) {
+		server.API(r,
+			db, contentStore, logger,
+		)
+	})
 
 	logger.Log("msg", "starting Web server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), mux)
+	serveErr := http.ListenAndServe(":"+config.Port(), r)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }
 

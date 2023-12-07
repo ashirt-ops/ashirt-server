@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/theparanoids/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
 )
 
 func main() {
@@ -49,6 +49,8 @@ func main() {
 	gen(dtos.UserGroup{})
 	gen(dtos.UserGroupAdminView{})
 	gen(dtos.UserGroupOperationRole{})
+	gen(dtos.GlobalVar{})
+	gen(dtos.OperationVar{})
 
 	// Since this file only contains typescript types, webpack doesn't pick up the
 	// changes unless there is some actual executable javascript referenced from

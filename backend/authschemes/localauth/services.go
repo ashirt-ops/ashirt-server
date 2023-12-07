@@ -5,13 +5,13 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/theparanoids/ashirt-server/backend/services"
+	"github.com/ashirt-ops/ashirt-server/backend/services"
 )
 
 type RegistrationInfo struct {

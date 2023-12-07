@@ -75,6 +75,7 @@ module.exports = (env, argv) => ({
     historyApiFallback: true,
     proxy: {
       '/web': {target: process.env.WEB_BACKEND_ORIGIN},
+      '/api': {target: process.env.WEB_BACKEND_ORIGIN},
     },
     devMiddleware: {
       publicPath: "/assets/"
@@ -106,7 +107,7 @@ module.exports = (env, argv) => ({
         "base-uri 'none'",
         "form-action 'none'",
         "frame-ancestors 'none'",
-        "sandbox allow-scripts allow-same-origin allow-forms allow-popups",
+        "sandbox allow-scripts allow-same-origin allow-forms allow-popups allow-downloads",
 
         // Allow xhr/fonts/images/scripts/css from self
         "connect-src 'self'",

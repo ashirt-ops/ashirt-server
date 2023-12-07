@@ -22,3 +22,10 @@ func makeWebauthNSessionData(user webauthnUser, data *auth.SessionData) *webAuth
 	}
 	return &sessionData
 }
+
+func makeDiscoverableWebauthNSessionData(data *auth.SessionData) *webAuthNSessionData {
+	sessionData := webAuthNSessionData{
+		WebAuthNSessionData: data,
+	}
+	return &sessionData
+}

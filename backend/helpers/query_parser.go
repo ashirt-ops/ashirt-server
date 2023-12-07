@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers/filter"
 )
 
 // TimelineFilters represents all of the parsed timeline configuraions

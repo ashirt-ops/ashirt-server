@@ -6,16 +6,16 @@ import (
 	"testing"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
-	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 // TinyImg is the smallest png. Used for testing. Reference: https://github.com/mathiasbynens/small
@@ -99,8 +99,11 @@ func ClearDB(db *database.Connection) error {
 		tx.Delete(sq.Delete("users"))
 		tx.Delete(sq.Delete("user_groups"))
 		tx.Delete(sq.Delete("queries"))
+		tx.Delete(sq.Delete("var_operation_map"))
 		tx.Delete(sq.Delete("operations"))
 		tx.Delete(sq.Delete("service_workers"))
+		tx.Delete(sq.Delete("global_vars"))
+		tx.Delete(sq.Delete("operation_vars"))
 	})
 	return err
 }
@@ -603,6 +606,26 @@ func GetFavoriteForOperation(t *testing.T, db *database.Connection, slug string,
 	isFavorite := len(favorites) > 0 && favorites[0]
 
 	return isFavorite
+}
+
+func GetGlobalVarFromName(t *testing.T, db *database.Connection, name string) models.GlobalVar {
+	var globalVar models.GlobalVar
+
+	err := db.Get(&globalVar, sq.Select("*").
+		From("global_vars").
+		Where(sq.Eq{"name": name}))
+	require.NoError(t, err)
+	return globalVar
+}
+
+func GetOperationVarFromSlug(t *testing.T, db *database.Connection, slug string) models.OperationVar {
+	var operationVar models.OperationVar
+
+	err := db.Get(&operationVar, sq.Select("*").
+		From("operation_vars").
+		Where(sq.Eq{"slug": slug}))
+	require.NoError(t, err)
+	return operationVar
 }
 
 type TestOptions struct {

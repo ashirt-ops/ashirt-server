@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	// aliasing as this to shorten lines / aid in reading
-	this "github.com/theparanoids/ashirt-server/backend/enhancementservices"
+	this "github.com/ashirt-ops/ashirt-server/backend/enhancementservices"
 )
 
 type transformFn = func(t *testing.T, data interface{}) []byte

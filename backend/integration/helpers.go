@@ -19,15 +19,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/localauth"
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/server"
+	"github.com/ashirt-ops/ashirt-server/signer"
+	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server"
-	"github.com/theparanoids/ashirt-server/signer"
 )
 
 type Tester struct {
@@ -45,20 +46,26 @@ func NewTester(t *testing.T) *Tester {
 	require.NoError(t, err)
 	commonLogger := logging.SetupStdoutLogging()
 
-	s := http.NewServeMux()
-	s.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
-			CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
-			SessionStoreKey: []byte("session-store-key-for-integration-tests"),
-			AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
-				RegistrationEnabled: true,
-			}},
-			Logger: commonLogger,
-		},
-	)))
-	s.Handle("/api/", server.API(
-		db, contentStore, commonLogger,
-	))
+	s := chi.NewRouter()
+
+	s.Route("/web", func(r chi.Router) {
+		server.Web(r,
+			db, contentStore, &server.WebConfig{
+				CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
+				SessionStoreKey: []byte("session-store-key-for-integration-tests"),
+				AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
+					RegistrationEnabled: true,
+				}},
+				Logger: commonLogger,
+			},
+		)
+	})
+
+	s.Route("/api", func(r chi.Router) {
+		server.API(r,
+			db, contentStore, commonLogger,
+		)
+	})
 
 	return &Tester{
 		t: t,

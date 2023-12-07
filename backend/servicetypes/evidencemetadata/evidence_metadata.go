@@ -1,6 +1,6 @@
 package evidencemetadata
 
-import "github.com/theparanoids/ashirt-server/backend/helpers"
+import "github.com/ashirt-ops/ashirt-server/backend/helpers"
 
 type Status string
 

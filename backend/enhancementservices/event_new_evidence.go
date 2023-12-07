@@ -7,18 +7,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
 
 	sq "github.com/Masterminds/squirrel"
 )
 
 type NewEvidencePayload struct {
-	Type          string `json:"type" db:"type"`
-	EvidenceUUID  string `json:"evidenceUuid"  db:"uuid"`
-	OperationSlug string `json:"operationSlug" db:"operation_slug"`
-	ContentType   string `json:"contentType"   db:"content_type"`
+	Type            string              `json:"type" db:"type"`
+	EvidenceUUID    string              `json:"evidenceUuid"  db:"uuid"`
+	OperationSlug   string              `json:"operationSlug" db:"operation_slug"`
+	ContentType     string              `json:"contentType"   db:"content_type"`
+	GlobalVariables []dtos.GlobalVar    `json:"globalVariables"`
+	OperationVars   []dtos.OperationVar `json:"operationVariables"`
 }
 
 type ExpandedNewEvidencePayload struct {
@@ -78,7 +81,21 @@ func batchBuildNewEvidencePayloadSpecial(ctx context.Context, db database.Connec
 func batchBuildNewEvidencePayloadFromIDs(db database.ConnectionProxy, evidenceIDs []int64) ([]ExpandedNewEvidencePayload, error) {
 	var payloads []ExpandedNewEvidencePayload
 
-	err := db.Select(&payloads, sq.Select(
+	var globalVariables []models.GlobalVar
+
+	err := db.Select(&globalVariables, sq.Select("name", "value").From("global_vars"))
+	if err != nil {
+		return nil, fmt.Errorf("unable to gather global variables for worker")
+	}
+	var globalVariablesDTO []dtos.GlobalVar
+	for _, v := range globalVariables {
+		globalVariablesDTO = append(globalVariablesDTO, dtos.GlobalVar{
+			Name:  v.Name,
+			Value: v.Value,
+		})
+	}
+
+	err = db.Select(&payloads, sq.Select(
 		"e.id AS id",
 		"e.uuid AS uuid",
 		"e.content_type",
@@ -93,6 +110,33 @@ func batchBuildNewEvidencePayloadFromIDs(db database.ConnectionProxy, evidenceID
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to gather evidence data for worker")
+	}
+
+	for i := range payloads {
+		var operationVariables []models.OperationVar
+
+		err := db.Select(&operationVariables,
+			sq.Select("ov.name", "ov.value", "ov.slug").
+				From("operation_vars ov").
+				Join("var_operation_map vom ON ov.id = vom.var_id").
+				Join("operations o ON o.id = vom.operation_id").
+				Where(sq.Eq{"o.slug": payloads[i].OperationSlug}))
+		if err != nil {
+			return nil, fmt.Errorf("unable to gather operation variables for worker")
+		}
+
+		var operationVariablesDTO []dtos.OperationVar
+		for _, v := range operationVariables {
+			operationVariablesDTO = append(operationVariablesDTO, dtos.OperationVar{
+				Name:          v.Name,
+				Value:         v.Value,
+				VarSlug:       v.Slug,
+				OperationSlug: payloads[i].OperationSlug,
+			})
+		}
+
+		payloads[i].OperationVars = operationVariablesDTO
+		payloads[i].GlobalVariables = globalVariablesDTO
 	}
 
 	return payloads, nil

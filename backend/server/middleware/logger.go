@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 type responseWriterWrapper struct {
@@ -28,7 +27,7 @@ func (w *responseWriterWrapper) Write(b []byte) (int, error) {
 	return n, err
 }
 
-func LogRequests(baseLogger logging.Logger) mux.MiddlewareFunc {
+func LogRequests(baseLogger logging.Logger) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()

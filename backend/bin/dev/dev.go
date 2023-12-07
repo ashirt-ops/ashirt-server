@@ -10,21 +10,22 @@ import (
 	"os"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/localauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/oidcauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth"
-	"github.com/theparanoids/ashirt-server/backend/authschemes/webauthn"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/database/seeding"
-	"github.com/theparanoids/ashirt-server/backend/emailservices"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server"
-	"github.com/theparanoids/ashirt-server/backend/workers"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/localauth"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/oidcauth"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/recoveryauth"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes/webauthn"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/config/confighelpers"
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
+	"github.com/ashirt-ops/ashirt-server/backend/emailservices"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/server"
+	"github.com/ashirt-ops/ashirt-server/backend/workers"
+	"github.com/go-chi/chi/v5"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -117,22 +118,28 @@ func tryRunServer(logger logging.Logger) error {
 		logger.Log("msg", "No Emailer selected")
 	}
 
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
 
-	mux.Handle("/web/", http.StripPrefix("/web", server.Web(
-		db, contentStore, &server.WebConfig{
-			CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
-			SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
-			UseSecureCookies: false,
-			AuthSchemes:      schemes,
-			Logger:           logger,
-		},
-	)))
-	mux.Handle("/api/", server.API(
-		db, contentStore, logger,
-	))
+	r.Route("/web", func(r chi.Router) {
+		server.Web(r,
+			db, contentStore, &server.WebConfig{
+				CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
+				SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
+				UseSecureCookies: false,
+				AuthSchemes:      schemes,
+				Logger:           logger,
+			},
+		)
+	})
+
+	r.Route("/api", func(r chi.Router) {
+		server.API(r,
+			db, contentStore, logger,
+		)
+	})
+
 	logger.Log("port", config.Port(), "msg", "Now Serving")
-	return http.ListenAndServe(":"+config.Port(), mux)
+	return http.ListenAndServe(":"+config.Port(), r)
 }
 
 func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, error) {

@@ -7,12 +7,13 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/config/confighelpers"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/server"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/config/confighelpers"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/server"
+	"github.com/go-chi/chi/v5"
 )
 
 func main() {
@@ -41,13 +42,15 @@ func main() {
 		logging.Fatal(logger, "msg", "store setup error", "error", err)
 	}
 
-	mux := http.NewServeMux()
+	s := chi.NewRouter()
 
-	mux.Handle("/api/", server.API(
-		db, contentStore, logger,
-	))
+	s.Route("/api", func(r chi.Router) {
+		server.API(r,
+			db, contentStore, logger,
+		)
+	})
 
 	logger.Log("msg", "starting API server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), mux)
+	serveErr := http.ListenAndServe(":"+config.Port(), s)
 	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
 }

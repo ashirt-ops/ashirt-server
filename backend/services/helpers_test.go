@@ -6,8 +6,8 @@ package services_test
 import (
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/services"
 )
 
 func TestSanitizeSlug(t *testing.T) {

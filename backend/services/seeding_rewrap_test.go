@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/database/seeding"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
 )
 
 // This file rewraps many of the database seeder helpers.
@@ -71,6 +71,8 @@ var getUserGroupFromSlug = seeding.GetUserGroupFromSlug
 var getServiceWorkerByName = seeding.GetServiceWorkerByName
 var getServiceWorkerByID = seeding.GetServiceWorkerByID
 var listServiceWorkers = seeding.ListServiceWorkers
+var getGlobalVarFromName = seeding.GetGlobalVarFromName
+var getOperationVarFromSlug = seeding.GetOperationVarFromSlug
 
 var TagIDsFromTags = seeding.TagIDsFromTags
 var sorted = seeding.Sorted
@@ -193,6 +195,20 @@ var DetectionGapFindingCategory = seeding.DetectionGapFindingCategory
 var DeletedCategory = seeding.DeletedCategory
 
 var DemoServiceWorker = seeding.DemoServiceWorker
+
+var VarExpelliarmus = seeding.VarExpelliarmus
+var VarAlohomora = seeding.VarAlohomora
+var VarAscendio = seeding.VarAscendio
+var VarImperio = seeding.VarImperio
+var VarLumos = seeding.VarLumos
+var VarObliviate = seeding.VarObliviate
+
+var OpVarImmobulus = seeding.OpVarImmobulus
+var OpVarObscuro = seeding.OpVarObscuro
+var OpVarProtego = seeding.OpVarProtego
+var OpVarReparo = seeding.OpVarReparo
+var OpVarStupefy = seeding.OpVarStupefy
+var OpVarWingardiumLeviosa = seeding.OpVarWingardiumLeviosa
 
 type TestSeedData struct {
 	seeding.Seeder

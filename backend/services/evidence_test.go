@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/contentstore"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/services"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -195,6 +195,7 @@ func TestListEvidenceForFinding(t *testing.T) {
 func TestListEvidenceForOperation(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		ctx := contextForUser(UserRon, db)
+		cs, _ := contentstore.NewMemStore()
 
 		masterOp := OpChamberOfSecrets
 		allEvidence := getFullEvidenceByOperationID(t, db, masterOp.ID)
@@ -206,7 +207,7 @@ func TestListEvidenceForOperation(t *testing.T) {
 			Filters:       helpers.TimelineFilters{},
 		}
 
-		foundEvidence, err := services.ListEvidenceForOperation(ctx, db, input)
+		foundEvidence, err := services.ListEvidenceForOperation(ctx, db, cs, input)
 		require.NoError(t, err)
 		require.Equal(t, len(foundEvidence), len(allEvidence))
 		validateEvidenceSets(t, toRealEvidenceList(foundEvidence), allEvidence, validateEvidence)

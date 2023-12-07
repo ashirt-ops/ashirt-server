@@ -12,14 +12,14 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	localauth "github.com/theparanoids/ashirt-server/backend/authschemes/localauth/constants"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	localauth "github.com/ashirt-ops/ashirt-server/backend/authschemes/localauth/constants"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -135,7 +135,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 					return nil, backend.WrapError("Unable to create new user after many attempts", backend.DatabaseErr(err))
 				}
 
-				logging.GetSystemLogger().Log(
+				logging.LogWithoutAuth(
 					"msg", "Unable to create user with slug; trying alternative",
 					"slug", attemptedSlug,
 					"attempt", attemptNumber,
@@ -155,7 +155,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 	if userID == 1 {
 		err := db.Update(sq.Update("users").Set("admin", true).Where(sq.Eq{"id": userID}))
 		if err != nil {
-			logging.GetSystemLogger().Log("msg", "Unable to make the first user an admin", "error", err.Error())
+			logging.LogWithoutAuth("msg", "Unable to make the first user an admin", "error", err.Error())
 		}
 	}
 	return &dtos.CreateUserOutput{

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/emailservices"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/emailservices"
-	"github.com/theparanoids/ashirt-server/backend/logging"
 )
 
 func TestAddPlainEmailToQueue(t *testing.T) {

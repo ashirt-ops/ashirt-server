@@ -8,9 +8,9 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/models"
 )
 
 var allWorkers []string = []string{}

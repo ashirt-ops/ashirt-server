@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
 )
 
 type LambdaRIEClient struct {

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"text/template"
 
+	recoveryHelpers "github.com/ashirt-ops/ashirt-server/backend/authschemes/recoveryauth/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
 	"github.com/jaytaylor/html2text"
-	recoveryHelpers "github.com/theparanoids/ashirt-server/backend/authschemes/recoveryauth/helpers"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/models"
 )
 
 // EmailTemplate is an enum describing each of the possible email types

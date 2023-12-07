@@ -4,7 +4,7 @@
 import * as React  from 'react'
 import classnames from 'classnames/bind'
 
-import { ApiKey, User, UserAdminView, UserGroupAdminView } from 'src/global_types'
+import { ApiKey, User, UserAdminView, UserGroupAdminView, GlobalVariableData, OperationVariableData } from 'src/global_types'
 import {
   adminChangePassword, adminSetUserFlags, adminDeleteUser, addHeadlessUser,
   deleteGlobalAuthScheme, deleteTotpForUser, adminCreateLocalUser,
@@ -12,19 +12,25 @@ import {
   createApiKey,
   createUserGroup,
   deleteUserGroup,
-  modifyUserGroup
+  modifyUserGroup,
+  deleteGlobalVar,
+  updateGlobalVar,
+  createGlobalVar,
+  deleteOperationVar,
+  updateOperationVar,
+  createOperationVar,
 } from 'src/services'
 import SimpleUserTable from './simple_user_table'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
 import Checkbox from 'src/components/checkbox'
-import Input from 'src/components/input'
+import Input, { TextArea } from 'src/components/input'
 import Modal from 'src/components/modal'
 import Form from 'src/components/form'
 import ModalForm from 'src/components/modal_form'
 import { InputWithCopyButton } from 'src/components/text_copiers'
-import { useForm, useFormField } from 'src/helpers'
+import { isOperationVariable, useForm, useFormField } from 'src/helpers'
 import { NewApiKeyModalContents } from 'src/pages/account_settings/api_keys/modals'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 
@@ -455,4 +461,147 @@ export const RemoveTotpModal = (props: {
       Are you sure you want to continue?
     </em>
   </ModalForm>
+}
+
+export const AddVarModal = (props: {
+  onRequestClose: () => void,
+  operationSlug?: string,
+}) => {
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+
+  const name = useFormField<string>("")
+  const value = useFormField<string>("")
+  const formComponentProps = useForm({
+    fields: [name, value],
+    handleSubmit: () => {
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Variable should have a name")))
+      }
+
+      const valOrNull = value.value === "" ? null : value.value
+      const runSubmit = async () => {
+        props.operationSlug
+          ? await createOperationVar(props.operationSlug ,name.value, valOrNull) 
+          : await createGlobalVar(name.value, valOrNull)
+        setIsCompleted(true)
+      }
+      return runSubmit()
+    },
+  })
+
+  return (
+    <Modal title="Add Variable" onRequestClose={props.onRequestClose}>
+      {isCompleted ? (<>
+        <div className={cx('success-area')}>
+          <p>Variable has been added successfully!</p>
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      :
+      (<>
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <h1 className={cx('header')}>Name</h1>
+        <Input label="" {...name} disabled={isCompleted} />
+        <h1 className={cx('header')}>Value<span className={cx('optional')}>*</span></h1>
+        <TextArea label="" {...value} disabled={isCompleted} />
+      </Form>
+      </>)
+      }
+    </Modal>
+  )
+}
+
+
+
+
+
+
+export const DeleteVarModal = (props: {
+  variableData: GlobalVariableData | OperationVariableData,
+  onRequestClose: () => void,
+}) => <ChallengeModalForm
+    modalTitle="Delete Variable"
+    warningText="This will remove the variable from the system."
+    submitText="Delete"
+    challengeText={props.variableData.variable.name}
+    handleSubmit={() => isOperationVariable(props.variableData) 
+      ? deleteOperationVar(props.variableData.operationSlug, props.variableData.variable.varSlug) 
+      : deleteGlobalVar(props.variableData.variable.name) 
+    }
+    onRequestClose={props.onRequestClose}
+  />
+
+export const ModifyVarModal = (props: {
+  variableData: GlobalVariableData | OperationVariableData,
+  onRequestClose: () => void,
+}) => {
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+  const [copiedValue, setCopiedValue] = React.useState<boolean>(false)
+
+  const name = useFormField<string>(props.variableData.variable.name)
+  const value = useFormField<string>(props.variableData.variable.value)
+  const formComponentProps = useForm({
+    fields: [name, value],
+    handleSubmit: () => {
+      if (name.value.length == 0) {
+        return new Promise((_resolve, reject) => reject(Error("Global Variable should have a name")))
+      }
+
+      const nameOrNull = name.value.toLowerCase() !== props.variableData.variable.name.toLowerCase() ? name.value : null
+      const valOrNull = value.value.toLowerCase() !== props.variableData.variable.value.toLowerCase() ? value.value : null
+      const somethingChanged = nameOrNull !== null || valOrNull !== null
+     
+      const runSubmit = async () => {
+        if (copiedValue) {
+          setCopiedValue(false)
+        } else {
+          const update = isOperationVariable(props.variableData) 
+          ? await updateOperationVar(props.variableData.operationSlug, props.variableData.variable.name, {
+            value: valOrNull,
+            name: nameOrNull,
+          }) 
+          : await updateGlobalVar(props.variableData.variable.name, {
+            value: valOrNull,
+            newName: nameOrNull,
+          }) 
+          somethingChanged && await update
+          setIsCompleted(true)
+        }
+      }
+      return runSubmit()
+    },
+  })
+
+  const copyValue = () => {
+    navigator.clipboard.writeText(value.value)
+    setCopiedValue(true)
+  }
+
+  return (
+    <Modal title="Modify Variable" onRequestClose={props.onRequestClose}>
+      {isCompleted ? (<>
+        <div className={cx('success-area')}>
+          <p>Variable has been modified successfully!</p>
+          <Button className={cx('success-close-button')} primary onClick={props.onRequestClose} >Close</Button>
+        </div>
+      </>)
+      :
+      (<>
+      <Form {...formComponentProps} loading={isCompleted}
+        submitText={isCompleted ? undefined : "Submit"}
+      >
+        <h1 className={cx('header')}>Name<span className={cx('optional')}>*</span></h1>
+        <Input label="" {...name} disabled={isCompleted} />
+        <h1 className={cx('header')}>Value
+          <span className={cx('optional')}>*</span>
+          <Button className={cx('copy-button')} onClick={copyValue}></Button>
+        </h1>
+        <TextArea label="" {...value} disabled={isCompleted} adjustHeight />
+      </Form>
+      </>)
+      }
+    </Modal>
+  )
 }

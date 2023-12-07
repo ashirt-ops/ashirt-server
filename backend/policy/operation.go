@@ -54,7 +54,18 @@ func (o *Operation) Check(permission Permission) bool {
 
 	case CanListUserGroupsOfOperation:
 		return o.hasRole(p.OperationID, OperationRoleAdmin) || o.IsHeadless
+	case CanExportOperationData:
+		return o.hasRole(p.OperationID, OperationRoleAdmin) || o.IsHeadless
+	case CanViewOpVars:
+		return o.hasRole(p.OperationID, OperationRoleAdmin)
+	case CanCreateOpVars:
+		return o.hasRole(p.OperationID, OperationRoleAdmin)
+	case CanModifyOpVars:
+		return o.hasRole(p.OperationID, OperationRoleAdmin)
+	case CanDeleteOpVars:
+		return o.hasRole(p.OperationID, OperationRoleAdmin)
 	}
+
 	return false
 }
 

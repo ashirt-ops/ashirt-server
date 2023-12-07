@@ -12,6 +12,8 @@ export type EvidenceCreatedMessage = {
   evidenceUuid: string,
   operationSlug: string,
   contentType: typeof SupportedContentTypes[number]
+  globalVariables: Record<string, unknown>[]
+  operationVariables: Record<string, unknown>[]
 }
 
 /**

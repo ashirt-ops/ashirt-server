@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/authschemes"
+	"github.com/ashirt-ops/ashirt-server/backend/config"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/authschemes"
-	"github.com/theparanoids/ashirt-server/backend/config"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
-	"github.com/theparanoids/ashirt-server/backend/server/remux"
 	"golang.org/x/oauth2"
 )
 
@@ -95,7 +95,7 @@ func (OIDCAuth) Flags() []string {
 	return []string{}
 }
 
-func (o OIDCAuth) BindRoutes(r *mux.Router, bridge authschemes.AShirtAuthBridge) {
+func (o OIDCAuth) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		o.redirectLogin(w, r, bridge, modeLogin)
 	}))

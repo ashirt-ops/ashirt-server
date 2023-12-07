@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers/filter"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/helpers/filter"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -46,10 +46,7 @@ func TestBuildListEvidenceWhereClause(t *testing.T) {
 	meta := []string{"one", "two"}
 	metaBuilder := buildListEvidenceWhereClause(base, opID, helpers.TimelineFilters{Metadata: meta})
 	require.Equal(t, " WHERE evidence.operation_id = ? AND evidence.id IN (SELECT evidence_id FROM evidence_metadata WHERE body LIKE ? AND body LIKE ?)", toWhere(metaBuilder))
-	require.Equal(t, []interface{}{opID, []interface{}{
-		"%" + meta[0] + "%",
-		"%" + meta[1] + "%",
-	}}, toWhereValues(metaBuilder))
+	require.Equal(t, []interface{}{opID, "%" + meta[0] + "%", "%" + meta[1] + "%"}, toWhereValues(metaBuilder))
 
 	start, end := time.Now(), time.Now().Add(5*time.Second)
 	singleDate := filter.DateValues{

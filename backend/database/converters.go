@@ -4,7 +4,7 @@
 package database
 
 import (
-	"github.com/theparanoids/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
 )
 
 // EvidenceToID is a small helper to grab the ID from a models.Evidence. Useful when paired with

@@ -6,8 +6,8 @@ package dtos
 import (
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/servicetypes/evidencemetadata"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/servicetypes/evidencemetadata"
 )
 
 type APIKey struct {
@@ -23,6 +23,7 @@ type Evidence struct {
 	Operator    User      `json:"operator"`
 	Tags        []Tag     `json:"tags"`
 	ContentType string    `json:"contentType"`
+	SendUrl     bool      `json:"sendUrl"`
 }
 
 type EvidenceMetadata struct {
@@ -68,7 +69,8 @@ type Operation struct {
 	Favorite          bool          `json:"favorite"`
 	TopContribs       []TopContrib  `json:"topContribs"`
 	EvidenceCount     EvidenceCount `json:"evidenceCount,omitempty"`
-	UserCanViewGroups *bool         `json:"userCanViewGroups,omitempty"`
+	UserCanViewGroups bool          `json:"userCanViewGroups,omitempty"`
+	UserCanExportData bool          `json:"userCanExportData,omitempty"`
 }
 
 type Query struct {
@@ -228,4 +230,16 @@ type ActiveServiceWorker struct {
 
 type Flags struct {
 	Flags []string `json:"flags"`
+}
+
+type GlobalVar struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type OperationVar struct {
+	OperationSlug string `json:"operationSlug"`
+	VarSlug       string `json:"varSlug"`
+	Name          string `json:"name"`
+	Value         string `json:"value"`
 }

@@ -10,14 +10,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/logging"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
-	"github.com/theparanoids/ashirt-server/backend/services"
-	"github.com/theparanoids/ashirt-server/backend/session"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/logging"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend/services"
+	"github.com/ashirt-ops/ashirt-server/backend/session"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -124,6 +124,10 @@ func (ah AShirtAuthBridge) GetUserIDFromSlug(userSlug string) (int64, error) {
 
 func (ah AShirtAuthBridge) GetUserFromID(userID int64) (models.User, error) {
 	return ah.db.RetrieveUserByID(userID)
+}
+
+func (ah AShirtAuthBridge) GetUserFromAuthnID(authnID string) (models.User, error) {
+	return ah.db.RetrieveUserIDByAuthnID(authnID)
 }
 
 // DeleteSession removes a user's session. Useful in situtations where authentication fails,

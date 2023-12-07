@@ -9,13 +9,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/theparanoids/ashirt-server/backend"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/dtos"
-	"github.com/theparanoids/ashirt-server/backend/helpers"
-	"github.com/theparanoids/ashirt-server/backend/models"
-	"github.com/theparanoids/ashirt-server/backend/policy"
-	"github.com/theparanoids/ashirt-server/backend/server/middleware"
+	"github.com/ashirt-ops/ashirt-server/backend"
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/dtos"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
+	"github.com/ashirt-ops/ashirt-server/backend/models"
+	"github.com/ashirt-ops/ashirt-server/backend/policy"
+	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -277,4 +277,28 @@ func SanitizeSlug(slug string) string {
 		disallowedCharactersRegex.ReplaceAllString(strings.ToLower(slug), "-"),
 		"-",
 	)
+}
+
+func LookupGlobalVar(db *database.Connection, name string) (*models.GlobalVar, error) {
+	var globalVar models.GlobalVar
+
+	err := db.Get(&globalVar, sq.Select("*").
+		From("global_vars").
+		Where(sq.Eq{"name": name}))
+	if err != nil {
+		return &globalVar, backend.WrapError("Unable to lookup global variable by name", err)
+	}
+	return &globalVar, nil
+}
+
+func LookupOperationVar(db *database.Connection, varSlug string) (*models.OperationVar, error) {
+	var operationVar models.OperationVar
+
+	err := db.Get(&operationVar, sq.Select("*").
+		From("operation_vars").
+		Where(sq.Eq{"slug": varSlug}))
+	if err != nil {
+		return &operationVar, backend.WrapError("Unable to lookup operation variable by name", err)
+	}
+	return &operationVar, nil
 }

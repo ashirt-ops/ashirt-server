@@ -3,10 +3,10 @@ package emailtemplates_test
 import (
 	"testing"
 
+	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/database/seeding"
+	"github.com/ashirt-ops/ashirt-server/backend/emailtemplates"
 	"github.com/stretchr/testify/require"
-	"github.com/theparanoids/ashirt-server/backend/database"
-	"github.com/theparanoids/ashirt-server/backend/database/seeding"
-	"github.com/theparanoids/ashirt-server/backend/emailtemplates"
 )
 
 func TestBuildEmailContent(t *testing.T) {
