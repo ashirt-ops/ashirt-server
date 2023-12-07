@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 // A Deferred is a promise that can be resolved/rejected externally
 export type Deferred<T> = {
   resolve: (value: T) => void,

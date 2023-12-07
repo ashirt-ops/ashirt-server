@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import {DateRange, addDateToRange, stringifyRange} from './range_picker_helpers'
 import {expect} from 'chai'
 import {getMonth, format} from 'date-fns'

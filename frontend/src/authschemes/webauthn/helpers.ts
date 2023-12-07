@@ -1,6 +1,3 @@
-// Copyright 2022, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import { ProvidedCredentialCreationOptions, ProvidedCredentialRequestOptions } from "./types"
 
 export const encodeAsB64 = (ab: ArrayBuffer) => {

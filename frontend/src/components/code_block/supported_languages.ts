@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 const supportedLanguages: Array<{name: string, value: string}> = [
   { name: "Plain Text",           value: ""             },
   { name: "ABAP",                 value: "abap"         },

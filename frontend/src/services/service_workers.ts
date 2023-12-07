@@ -1,6 +1,3 @@
-// Copyright 2022, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import { ActiveServiceWorker, ServiceWorker, ServiceWorkerTestOutput } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 

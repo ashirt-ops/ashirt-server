@@ -1,6 +1,3 @@
-// Copyright 2022, Yahoo Inc.
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 package helpers
 
 // Map is a generic function that converts a list of type T into a list of type U, along with

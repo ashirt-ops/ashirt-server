@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import {addTagToQuery, addOperatorToQuery, addOrUpdateDateRangeInQuery, getDateRangeFromQuery} from './query_parser'
 import {expect} from 'chai'
 
