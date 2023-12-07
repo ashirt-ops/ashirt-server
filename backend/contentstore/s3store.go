@@ -75,20 +75,15 @@ type URLData struct {
 }
 
 func (s *S3Store) SendURLData(key string) (*URLData, error) {
-	contentType := "image/jpeg"
-	req, _ := s.s3Client.GetObjectRequest(&s3.GetObjectInput{
-		Bucket:              aws.String(s.bucketName),
-		Key:                 aws.String(key),
-		ResponseContentType: aws.String(contentType),
-	})
-
 	minutes := time.Minute * time.Duration(30)
-	url, err := req.Presign(minutes)
+	presignClient := s3.NewPresignClient(s.s3Client)
+	presigner := Presigner{PresignClient: presignClient}
+	presignedGetRequest, err := presigner.GetObject(s.bucketName, key, minutes)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
 	}
 	data := URLData{
-		Url:            url,
+		Url:            presignedGetRequest.URL,
 		ExpirationTime: time.Now().UTC().Add(minutes),
 	}
 
