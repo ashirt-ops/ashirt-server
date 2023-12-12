@@ -463,23 +463,6 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteFinding(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
-		dr := dissectJSONRequest(r)
-		timelineFilters, err := helpers.ParseTimelineQuery(dr.FromQuery("query").AsString())
-		if err != nil {
-			return nil, err
-		}
-
-		i := services.ListEvidenceForOperationInput{
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-			Filters:       timelineFilters,
-		}
-		if dr.Error != nil {
-			return nil, dr.Error
-		}
-		return services.ListEvidenceForOperation(r.Context(), db, contentStore, i)
-	}))
-
 	route(r, "GET", "/operations/{operation_slug}/evidence/creators", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 

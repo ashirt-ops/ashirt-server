@@ -5,6 +5,7 @@ import (
 
 	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
+	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/go-chi/chi/v5"
@@ -78,4 +79,22 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 		}
 		return services.CreateTag(r.Context(), db, i)
 	}))
+
+	route(r, "GET", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+		dr := dissectJSONRequest(r)
+		timelineFilters, err := helpers.ParseTimelineQuery(dr.FromQuery("query").AsString())
+		if err != nil {
+			return nil, err
+		}
+
+		i := services.ListEvidenceForOperationInput{
+			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			Filters:       timelineFilters,
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
+		return services.ListEvidenceForOperation(r.Context(), db, contentStore, i)
+	}))
+
 }
