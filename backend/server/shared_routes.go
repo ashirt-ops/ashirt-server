@@ -1,14 +1,17 @@
 package server
 
 import (
-	"net/http"
-
+	"bytes"
+	"encoding/json"
+	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/go-chi/chi/v5"
+	"io"
+	"net/http"
 )
 
 func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
