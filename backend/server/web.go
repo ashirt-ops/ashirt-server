@@ -504,36 +504,6 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
-		dr := dissectNoBodyRequest(r)
-		i := services.ReadEvidenceInput{
-			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
-			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
-			LoadPreview:   dr.FromURL("type").AsString() == "preview",
-			LoadMedia:     dr.FromURL("type").AsString() == "media",
-		}
-
-		evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
-		if err != nil {
-			return nil, backend.WrapError("Unable to read evidence", err)
-		}
-		if s3Store, ok := contentStore.(*contentstore.S3Store); ok && evidence.ContentType == "image" {
-			urlData, err := services.SendURLData(r.Context(), db, s3Store, i)
-			if err != nil {
-				return nil, backend.WrapError("Unable to get s3 URL", err)
-			}
-			jsonifiedData, err := json.Marshal(urlData)
-			if err != nil {
-				return nil, backend.WrapError("Unable to send s3 URL", err)
-			}
-			return bytes.NewReader(jsonifiedData), nil
-		}
-		if i.LoadPreview {
-			return evidence.Preview, nil
-		}
-		return evidence.Media, nil
-	}))
-
 	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ReadEvidenceMetadataInput{
