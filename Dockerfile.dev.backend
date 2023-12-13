@@ -1,8 +1,8 @@
-FROM golang:1.20-alpine
+FROM golang:1.20.11-alpine
 
 RUN apk add --no-cache git inotify-tools g++ && \
     rm -rf /var/cache/apk/* && \
-    go install -v github.com/rubenv/sql-migrate/sql-migrate@latest
+    go install -v github.com/rubenv/sql-migrate/sql-migrate@v1.1.0
 
 RUN mkdir /typescript-dtos
 RUN mkdir /app
