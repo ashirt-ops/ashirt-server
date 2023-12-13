@@ -1,4 +1,4 @@
-FROM golang
+FROM golang:1.21-alpine
 RUN go install github.com/rubenv/sql-migrate/sql-migrate@latest
 COPY backend/ /app/backend/
 WORKDIR /app
