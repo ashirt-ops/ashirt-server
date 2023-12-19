@@ -11,12 +11,12 @@ RUN go mod download
 
 COPY backend backend
 COPY signer signer
-RUN go build ./backend/bin/web/
+RUN go build -gcflags "all=-N -l" ./backend/bin/web/
 
 
 FROM alpine:latest
 
-RUN apk add --no-cache ca-certificates && \
+RUN apk add --no-cache ca-certificates delve && \
     adduser -h /home/ashirt -S -D ashirt
 
 USER ashirt
@@ -25,4 +25,4 @@ WORKDIR /home/ashirt
 COPY --from=build /build/web /home/ashirt/public-api
 COPY backend/migrations /migrations
 
-CMD /home/ashirt/public-api
+CMD dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec /home/ashirt/public-api --continue

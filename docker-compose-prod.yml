@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile.prod.web
     ports:
       - 8000:8000
+      - 2345:2345
     restart: on-failure
     environment:
       APP_CSRF_AUTH_KEY: "dummy-csrf-for-testing-prod-locally"
