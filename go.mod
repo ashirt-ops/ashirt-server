@@ -28,7 +28,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/rubenv/sql-migrate v1.5.2
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 	golang.org/x/oauth2 v0.13.0
 	golang.org/x/sync v0.5.0
 )
