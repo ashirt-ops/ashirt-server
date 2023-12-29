@@ -44,7 +44,7 @@ jobs:
     strategy:
       matrix:
         service: [frontend,web,api,init]
-        debug_mode: ["debug",""]
+        debug_mode: ["-debug",""] # Conditional tag for debug images
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -56,9 +56,9 @@ jobs:
         with:
           images: ashirt/${{ matrix.service }} # list of Docker images to use as base name for tags
           tags: |
-            type=sha,suffix=${{ matrix_debug }}
-            type=ref,event=branch,suffix=${{ matrix_debug }}
-            type=ref,event=pr,suffix=${{ matrix_debug }}
+            type=sha,suffix=${{ matrix.debug_mode }}
+            type=ref,event=branch,suffix=${{ matrix.debug_mode }}
+            type=ref,event=pr,suffix=${{ matrix.debug_mode }}
           flavor: |
             latest=false
       - name: Login to Docker Hub
@@ -79,7 +79,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           platforms: linux/amd64
-          build-args: DEBUG=${{ matrix.debug_mode }}
+          build-args: DEBUG=${{ matrix.debug_mode == '-debug' }} # True if "-debug", false if absent
           push: true # Push with pr-### and sha-xxxxxxx tags
 
       - name: Build and Push Latest
