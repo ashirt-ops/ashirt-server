@@ -20,6 +20,9 @@ func ChooseContentStoreType(cfg config.ContentStoreConfig) (contentstore.Store, 
 		return contentstore.NewMemStore()
 	}
 	if cfg.Type == "s3" {
+		if cfg.S3UsePathStyle {
+			return contentstore.NewS3Store(cfg.Bucket, cfg.Region, contentstore.S3UsePathStyle)
+		}
 		return contentstore.NewS3Store(cfg.Bucket, cfg.Region)
 	}
 	if cfg.Type == "gcp" {

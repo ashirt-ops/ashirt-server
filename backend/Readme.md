@@ -42,6 +42,9 @@ Configuration is handled entirely via environment variables. To that end, here a
       * `STORE_REGION`
         * The cloud provider region where the files will be stored
         * Used with `s3` deployments
+      * `STORE_S3_USE_PATH_STYLE`
+        * Set to "1" to configure the client to use path-style bucket URLs (https://<s3_host>/<bucket>/<key> vs https://<bucket>.<s3_host>/<key)
+        * Used with `s3` deployments
   * `APP_CSRF_AUTH_KEY`
     * The actual authorization key
     * Web Only

@@ -20,15 +20,23 @@ type S3Store struct {
 }
 
 // NewS3Store provides a mechanism to initialize an S3 bucket in a particular region
-func NewS3Store(bucketName string, region string) (*S3Store, error) {
+func NewS3Store(bucketName string, region string, optsFns ...func(*s3.Options)) (*S3Store, error) {
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return nil, backend.WrapError("Unable to establish an s3 session", err)
 	}
 	return &S3Store{
 		bucketName: bucketName,
-		s3Client:   s3.NewFromConfig(cfg),
+		s3Client:   s3.NewFromConfig(cfg, optsFns...),
 	}, nil
+}
+
+// S3UsePathStyle is a s3.config function that allows you to enable the client to use
+// path-style addressing, i.e., https:// s3.amazonaws.com/BUCKET/KEY .
+// By default, the S3 client will use virtual hosted bucket addressing when
+// possible( https://BUCKET.s3.amazonaws.com/KEY ).
+func S3UsePathStyle(opts *s3.Options) {
+	opts.UsePathStyle = true
 }
 
 // Upload stores a file in the Amazon S3 bucket configured when the S3 store was created
