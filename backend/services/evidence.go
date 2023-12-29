@@ -283,6 +283,8 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 			"users.first_name",
 			"users.last_name",
 			"users.slug",
+			"full_image_key",
+			"thumb_image_key",
 		)
 
 	if i.Filters.SortAsc {
@@ -332,13 +334,15 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 		}
 
 		evidenceDTO[idx] = &dtos.Evidence{
-			UUID:        evi.UUID,
-			Description: evi.Description,
-			Operator:    dtos.User{FirstName: evi.FirstName, LastName: evi.LastName, Slug: evi.Slug},
-			OccurredAt:  evi.OccurredAt,
-			ContentType: evi.ContentType,
-			Tags:        tags,
-			SendUrl:     sendURL,
+			UUID:          evi.UUID,
+			Description:   evi.Description,
+			Operator:      dtos.User{FirstName: evi.FirstName, LastName: evi.LastName, Slug: evi.Slug},
+			OccurredAt:    evi.OccurredAt,
+			ContentType:   evi.ContentType,
+			Tags:          tags,
+			SendUrl:       sendURL,
+			FullImageKey:  evi.FullImageKey,
+			ThumbImageKey: evi.ThumbImageKey,
 		}
 	}
 	return evidenceDTO, nil
