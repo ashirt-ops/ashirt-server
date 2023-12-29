@@ -1,4 +1,5 @@
 FROM golang:1.21-alpine AS build
+ARG DEBUG=false
 
 RUN apk add --no-cache git && \
     rm -rf /var/cache/apk/*
@@ -11,13 +12,17 @@ RUN go mod download
 
 COPY backend backend
 COPY signer signer
-RUN go build -gcflags "all=-N -l" ./backend/bin/web/
+RUN if [ $DEBUG == false ] ; then go build ./backend/bin/web/; else go build -gcflags "all=-N -l" ./backend/bin/web/; fi
 
 
 FROM alpine:latest
+ARG DEBUG=false
+ENV DEBUG=$DEBUG
 
-RUN apk add --no-cache ca-certificates delve && \
+RUN apk add --no-cache ca-certificates && \
     adduser -h /home/ashirt -S -D ashirt
+
+RUN if [ $DEBUG == false ] ; then continue; else apk add --no-cache delve; fi
 
 USER ashirt
 WORKDIR /home/ashirt
@@ -25,4 +30,4 @@ WORKDIR /home/ashirt
 COPY --from=build /build/web /home/ashirt/public-api
 COPY backend/migrations /migrations
 
-CMD dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec /home/ashirt/public-api --continue
+CMD if [ $DEBUG == false ] ; then /home/ashirt/public-api ; else dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec /home/ashirt/public-api --continue ; fi
