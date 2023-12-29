@@ -44,6 +44,7 @@ jobs:
     strategy:
       matrix:
         service: [frontend,web,api,init]
+        debug_mode: ["debug",""]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -55,9 +56,9 @@ jobs:
         with:
           images: ashirt/${{ matrix.service }} # list of Docker images to use as base name for tags
           tags: |
-            type=sha
-            type=ref,event=branch
-            type=ref,event=pr
+            type=sha,suffix=${{ matrix_debug }}
+            type=ref,event=branch,suffix=${{ matrix_debug }}
+            type=ref,event=pr,suffix=${{ matrix_debug }}
           flavor: |
             latest=false
       - name: Login to Docker Hub
@@ -78,6 +79,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           platforms: linux/amd64
+          build-args: DEBUG=${{ matrix.debug_mode }}
           push: true # Push with pr-### and sha-xxxxxxx tags
 
       - name: Build and Push Latest
