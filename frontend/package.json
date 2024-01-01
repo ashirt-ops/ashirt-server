@@ -32,7 +32,7 @@
     "stylus": "^0.62.0",
     "stylus-loader": "^7.0.0",
     "ts-loader": "^9.4.2",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "webpack": "5.89",
     "webpack-cli": "^5.1.4",
