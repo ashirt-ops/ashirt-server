@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.25.12
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.49.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.47.7
-	github.com/coreos/go-oidc/v3 v3.8.0
+	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-kit/kit v0.13.0
 	github.com/go-sql-driver/mysql v1.7.1
