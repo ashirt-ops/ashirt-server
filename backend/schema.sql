@@ -125,6 +125,7 @@ CREATE TABLE `evidence` (
   `occurred_at` timestamp NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `adjusted_at` timestamp,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`),
   KEY `operation_id` (`operation_id`),
