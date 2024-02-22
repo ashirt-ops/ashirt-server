@@ -30,6 +30,7 @@ type CreateEvidenceInput struct {
 	ContentType   string
 	TagIDs        []int64
 	OccurredAt    time.Time
+	AdjustedAt    *time.Time
 }
 
 type DeleteEvidenceInput struct {
@@ -56,12 +57,13 @@ type ReadEvidenceInput struct {
 }
 
 type ReadEvidenceOutput struct {
-	UUID        string    `json:"uuid"`
-	Description string    `json:"description"`
-	ContentType string    `json:"contentType"`
-	OccurredAt  time.Time `json:"occurredAt"`
-	Preview     io.Reader `json:"-"`
-	Media       io.Reader `json:"-"`
+	UUID        string     `json:"uuid"`
+	Description string     `json:"description"`
+	ContentType string     `json:"contentType"`
+	OccurredAt  time.Time  `json:"occurredAt"`
+	AdjustedAt  *time.Time `json:"adjustedAt"`
+	Preview     io.Reader  `json:"-"`
+	Media       io.Reader  `json:"-"`
 }
 
 type UpdateEvidenceInput struct {
@@ -71,6 +73,7 @@ type UpdateEvidenceInput struct {
 	TagsToAdd     []int64
 	TagsToRemove  []int64
 	Content       io.Reader
+	AdjustedAt    *time.Time
 }
 
 type MoveEvidenceInput struct {
@@ -134,6 +137,7 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 			"description":     i.Description,
 			"content_type":    i.ContentType,
 			"occurred_at":     i.OccurredAt,
+			"adjusted_at":     i.AdjustedAt,
 			"operation_id":    operation.ID,
 			"operator_id":     middleware.UserID(ctx),
 			"full_image_key":  keys.Full,
@@ -161,6 +165,7 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		UUID:        evidenceUUID,
 		Description: i.Description,
 		OccurredAt:  i.OccurredAt,
+		AdjustedAt:  i.AdjustedAt,
 	}, nil
 }
 
@@ -240,6 +245,7 @@ func ListEvidenceForFinding(ctx context.Context, db *database.Connection, i List
 			ContentType: evi.ContentType,
 			Description: evi.Description,
 			OccurredAt:  evi.OccurredAt,
+			AdjustedAt:  evi.AdjustedAt,
 			Tags:        tags,
 			Operator: dtos.User{
 				Slug:      evi.Slug,
@@ -280,6 +286,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 			"description",
 			"evidence.content_type",
 			"occurred_at",
+			"adjusted_at",
 			"users.first_name",
 			"users.last_name",
 			"users.slug",
@@ -288,9 +295,9 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 		)
 
 	if i.Filters.SortAsc {
-		sb = sb.OrderBy("occurred_at ASC")
+		sb = sb.OrderBy("COALESCE(adjusted_at, occurred_at) ASC")
 	} else {
-		sb = sb.OrderBy("occurred_at DESC")
+		sb = sb.OrderBy("COALESCE(adjusted_at, occurred_at) DESC")
 	}
 
 	sb = buildListEvidenceWhereClause(sb, operation.ID, i.Filters)
@@ -338,6 +345,7 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, cont
 			Description:   evi.Description,
 			Operator:      dtos.User{FirstName: evi.FirstName, LastName: evi.LastName, Slug: evi.Slug},
 			OccurredAt:    evi.OccurredAt,
+			AdjustedAt:    evi.AdjustedAt,
 			ContentType:   evi.ContentType,
 			Tags:          tags,
 			SendUrl:       sendURL,
@@ -394,6 +402,7 @@ func ReadEvidence(ctx context.Context, db *database.Connection, contentStore con
 		Description: evidence.Description,
 		ContentType: evidence.ContentType,
 		OccurredAt:  evidence.OccurredAt,
+		AdjustedAt:  evidence.AdjustedAt,
 		Media:       media,
 		Preview:     preview,
 	}, nil
@@ -446,6 +455,9 @@ func UpdateEvidence(ctx context.Context, db *database.Connection, contentStore c
 				"full_image_key":  keys.Full,
 				"thumb_image_key": keys.Thumbnail,
 			})
+		}
+		if i.AdjustedAt != nil {
+			ub = ub.Set("adjusted_at", i.AdjustedAt)
 		}
 
 		if _, _, err := ub.ToSql(); err == nil {

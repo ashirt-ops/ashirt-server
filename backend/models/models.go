@@ -45,6 +45,7 @@ type Evidence struct {
 	ThumbImageKey string     `db:"thumb_image_key"`
 	OccurredAt    time.Time  `db:"occurred_at"`
 	CreatedAt     time.Time  `db:"created_at"`
+	AdjustedAt    *time.Time `db:"adjusted_at"`
 	UpdatedAt     *time.Time `db:"updated_at"`
 }
 

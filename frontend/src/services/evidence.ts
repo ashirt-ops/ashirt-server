@@ -61,11 +61,17 @@ export async function getEvidenceAsString(i: {
 export async function createEvidence(i: {
   operationSlug: string,
   description: string,
+  adjustedAt: Date | undefined,
   tagIds?: Array<number>,
   evidence: SubmittableEvidence,
 }): Promise<void> {
   const formData = new FormData()
   formData.append('description', i.description)
+
+  if (i.adjustedAt) {
+    formData.append("adjusted_at", i.adjustedAt.toISOString())
+  }
+
   if (i.tagIds && i.tagIds.length > 0) {
     formData.append('tagIds', JSON.stringify(i.tagIds))
   }
@@ -137,6 +143,7 @@ export async function updateEvidence(i: {
   oldTags?: Array<Tag>,
   newTags?: Array<Tag>,
   updatedContent: Blob | null,
+  adjustedAt?: Date
 }): Promise<void> {
   const formData = new FormData()
   if (i.description !== undefined) {
@@ -146,6 +153,10 @@ export async function updateEvidence(i: {
     const [adds, subs] = computeDelta(i.oldTags.map(tag => tag.id), i.newTags.map(tag => tag.id))
     formData.append('tagsToAdd', JSON.stringify(adds))
     formData.append('tagsToRemove', JSON.stringify(subs))
+  }
+
+  if (i.adjustedAt) {
+    formData.append("adjusted_at", i.adjustedAt.toISOString())
   }
 
   if (i.updatedContent != null) {

@@ -19,6 +19,7 @@ export function evidenceFromDto(evidence: dtos.Evidence): types.Evidence {
   if (!isValidSupportedEvidenceType(evidence.contentType)) throw Error(`Unknown content type ${evidence.contentType}`)
   return {
     ...evidence,
+    adjustedAt: evidence.adjustedAt ? new Date(evidence.adjustedAt) : null,
     occurredAt: new Date(evidence.occurredAt),
     contentType: evidence.contentType,
   }
