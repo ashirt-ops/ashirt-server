@@ -174,7 +174,7 @@ export const EditEvidenceModal = (props: {
         <CodeBlockEditor {...codeblockField} />
       )}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
-      <SplitInputRow label="Date Range" inputValue={adjustedAtField.value ? format(adjustedAtField.value, 'yyyy-dd-MM hh:mm') : ''} >
+      <SplitInputRow label="Date Range" inputValue={adjustedAtField.value ? format(adjustedAtField.value, 'yyyy-dd-MM HH:mm:ss') : ''} >
         <DateTimePicker
           onSelectedDate={(date) => adjustedAtField.onChange(date)}
           selected={adjustedAtField.value}

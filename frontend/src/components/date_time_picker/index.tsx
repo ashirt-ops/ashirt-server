@@ -6,7 +6,7 @@ import classnames from 'classnames/bind';
 
 import Popover from 'src/components/popover';
 import Button from 'src/components/button';
-import { setHours, setMinutes } from 'date-fns';
+import { format, setHours, setMinutes } from 'date-fns';
 
 const cx = classnames.bind(require('./stylesheet'));
 
@@ -46,7 +46,7 @@ const Picker: React.FC<PickerProps> = ({ onButtonClick, onSelectedDate, selected
 					selected={date}
 				/>
 				<div className={cx("time-picker-wrapper")}>
-					<input aria-label="Time" type="time" className={cx("time-picker")} onChange={onChangeHour} />
+					<input value={format(date, "HH:mm")} aria-label="Time" type="time" className={cx("time-picker")} onChange={onChangeHour} />
 				</div>
 				<Button primary className={cx('close-button')} onClick={onButtonClick}>
 					Close
