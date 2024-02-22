@@ -21,7 +21,7 @@ func API(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 	r.Handle("/metrics", promhttp.Handler())
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.AuthenticateAppAndInjectCtx(db))
-		r.Use(middleware.LogRequests(logger))
+		// r.Use(middleware.LogRequests(logger))
 		bindSharedRoutes(r, db, contentStore)
 		bindAPIRoutes(r, db, contentStore)
 	})
