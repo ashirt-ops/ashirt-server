@@ -6,6 +6,7 @@ import classnames from 'classnames/bind';
 
 import Popover from 'src/components/popover';
 import Button from 'src/components/button';
+import { setHours, setMinutes } from 'date-fns';
 
 const cx = classnames.bind(require('./stylesheet'));
 
@@ -30,12 +31,9 @@ const Picker: React.FC<PickerProps> = ({ onButtonClick, onSelectedDate, selected
 	}
 
 	const onChangeHour: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-		const [hours, minutes] = event.target.value.split(":").map(value => Number(value))
-		const newDate = date
+		const [hours, minutes] = event.target.value.split(":").map(Number)
 
-		newDate.setHours(hours, minutes)
-
-		setDate(new Date(newDate))
+		setDate(setMinutes(setHours(date, hours), minutes))
 	}
 
 	return (
