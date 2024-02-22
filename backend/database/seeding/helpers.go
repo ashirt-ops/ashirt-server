@@ -138,9 +138,10 @@ func newOperationGen(first int64) func(slug, fullName string) models.Operation {
 	}
 }
 
-func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentType string, clockDayOffset int) models.Evidence {
+func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentType string, clockDayOffset int, adjustedAt *time.Time) models.Evidence {
 	id := iotaLike(first)
-	return func(opID, ownerID int64, uuid, desc, contentType string, clockDayOffset int) models.Evidence {
+
+	return func(opID, ownerID int64, uuid, desc, contentType string, clockDayOffset int, adjustedAt *time.Time) models.Evidence {
 		return models.Evidence{
 			ID:            id(),
 			UUID:          uuid,
@@ -152,6 +153,7 @@ func newEvidenceGen(first int64) func(opID, ownerID int64, uuid, desc, contentTy
 			ThumbImageKey: uuid,
 			OccurredAt:    time.Now().AddDate(0, 0, clockDayOffset),
 			CreatedAt:     time.Now(),
+			AdjustedAt:    adjustedAt,
 		}
 	}
 }

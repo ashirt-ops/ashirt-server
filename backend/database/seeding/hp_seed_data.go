@@ -2,6 +2,7 @@ package seeding
 
 import (
 	"strings"
+	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/models"
@@ -297,11 +298,13 @@ var CommonTagWhereGoF = newHPTag(OpGobletOfFire.ID, "Where", "lightGreen")
 var CommonTagWhenGoF = newHPTag(OpGobletOfFire.ID, "When", "lightIndigo")
 var CommonTagWhyGoF = newHPTag(OpGobletOfFire.ID, "Why", "lightYellow")
 
+var timeNow = time.Now()
+
 var newHPEvidence = newEvidenceGen(1)
-var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_dursleys", "Family of self-centered muggles + Harry", "image", 0)
-var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_mirror", "Mysterious mirror that shows you your deepest desires", "image", 0)
-var EviLevitateSpell = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_md_levitate", "Documented Levitation Spell effects", "codeblock", 0)
-var EviRulesForQuidditch = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_rs_aoc201501", "Complex rules for a simple game", "codeblock", 0)
+var EviDursleys = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_dursleys", "Family of self-centered muggles + Harry", "image", 0, &timeNow)
+var EviMirrorOfErised = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_mirror", "Mysterious mirror that shows you your deepest desires", "image", 0, nil)
+var EviLevitateSpell = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_md_levitate", "Documented Levitation Spell effects", "codeblock", 0, &timeNow)
+var EviRulesForQuidditch = newHPEvidence(OpSorcerersStone.ID, UserHarry.ID, "seed_rs_aoc201501", "Complex rules for a simple game", "codeblock", 0, &timeNow)
 
 var newHPEviMetadata = newEvidenceMetadataGen(1)
 var EviMetaDursleys = newHPEviMetadata(EviDursleys.ID, "color-averager", "rgb(65, 65, 65)\n#414141\nhsl(0, 0%, 25%)", nil, helpers.PTrue(), 0)
@@ -310,14 +313,14 @@ var EviMetaLevitateSpell = newHPEviMetadata(EviLevitateSpell.ID, "wc -l", "12 se
 var EviMetaRulesForQuidditch = newHPEviMetadata(EviRulesForQuidditch.ID, "run-result", "Last floor reached: 138 \n Step on which basement is reached (first time): 1771", nil, helpers.PTrue(), 0)
 var EviMetaRulesForQuidditchTwo = newHPEviMetadata(EviRulesForQuidditch.ID, "wc-l", "33 main.rs", nil, helpers.PTrue(), 0)
 
-var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_car", "A Car that flies", "image", 0)
-var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_dobby", "an elf?", "image", 0)
-var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "seed_aragog", "Just a big spider", "image", 0)
-var EviMoaningMyrtle = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_myrtle", "She's very sad", "image", 0)
-var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_tree", "Don't get too close", "image", 0)
-var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_go_aoc201614", "What's a Horcrux?", "codeblock", 0)
-var EviHeadlessHuntApplication = newHPEvidence(OpChamberOfSecrets.ID, UserRon.ID, "seed_py_aoc201717", "This group is very particular", "codeblock", 0)
-var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_statue", "Strangely real-looking statue", "image", 0)
+var EviFlyingCar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_car", "A Car that flies", "image", 0, &timeNow)
+var EviDobby = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_dobby", "an elf?", "image", 0, nil)
+var EviSpiderAragog = newHPEvidence(OpChamberOfSecrets.ID, UserHagrid.ID, "seed_aragog", "Just a big spider", "image", 0, nil)
+var EviMoaningMyrtle = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_myrtle", "She's very sad", "image", 0, nil)
+var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_tree", "Don't get too close", "image", 0, &timeNow)
+var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_go_aoc201614", "What's a Horcrux?", "codeblock", 0, &timeNow)
+var EviHeadlessHuntApplication = newHPEvidence(OpChamberOfSecrets.ID, UserRon.ID, "seed_py_aoc201717", "This group is very particular", "codeblock", 0, &timeNow)
+var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_statue", "Strangely real-looking statue", "image", 0, &timeNow)
 
 var EviMetaFlyingCar = newHPEviMetadata(EviFlyingCar.ID, "color-averager", "rgb(106, 109, 84)\n#6a6d54\nhsl(67, 13%, 38%)", evidencemetadata.StatusCompleted.Ptr(), helpers.PTrue(), 0)
 var EviMetaDobby = newHPEviMetadata(EviDobby.ID, "color-averager", "rgb(74, 51, 32)\n#4a3320\nhsl(27, 40%, 21%)", nil, helpers.PTrue(), 0)
@@ -329,11 +332,11 @@ var EviMetaTomRiddlesDiaryTwo = newHPEviMetadata(EviTomRiddlesDiary.ID, "wc -l",
 var EviMetaHeadlessHuntApplication = newHPEviMetadata(EviHeadlessHuntApplication.ID, "run-result", "41797835\nelapsed time (seconds): 3.772843360900879", nil, helpers.PTrue(), 0)
 var EviMetaPetrifiedHermione = newHPEviMetadata(EviPetrifiedHermione.ID, "color-averager", "rgb(162, 104, 101)\n#a26865\nhsl(3, 25%, 52%)", nil, helpers.PTrue(), 0)
 
-var EviTristateTrophy = newHPEvidence(OpGobletOfFire.ID, UserHarry.ID, "seed_trophy", "First Triwizard Champion Trophy", "image", 0)
-var EviEntryForm = newHPEvidence(OpGobletOfFire.ID, UserCedric.ID, "seed_entry", "Cedric's entry form for Triwizard competition", "codeblock", 0)
-var EviWizardDance = newHPEvidence(OpGobletOfFire.ID, UserCho.ID, "seed_dance", "Advertising for the Triwizard Dance", "image", 0)
-var EviPolyjuice = newHPEvidence(OpGobletOfFire.ID, UserAlastor.ID, "seed_juice", "DIY instructions for Polyjuice Potion", "codeblock", 0)
-var EviWarewolf = newHPEvidence(OpGobletOfFire.ID, UserViktor.ID, "seed_wolf", "Strangely real-looking statue", "terminal-recording", 0)
+var EviTristateTrophy = newHPEvidence(OpGobletOfFire.ID, UserHarry.ID, "seed_trophy", "First Triwizard Champion Trophy", "image", 0, nil)
+var EviEntryForm = newHPEvidence(OpGobletOfFire.ID, UserCedric.ID, "seed_entry", "Cedric's entry form for Triwizard competition", "codeblock", 0, nil)
+var EviWizardDance = newHPEvidence(OpGobletOfFire.ID, UserCho.ID, "seed_dance", "Advertising for the Triwizard Dance", "image", 0, &timeNow)
+var EviPolyjuice = newHPEvidence(OpGobletOfFire.ID, UserAlastor.ID, "seed_juice", "DIY instructions for Polyjuice Potion", "codeblock", 0, &timeNow)
+var EviWarewolf = newHPEvidence(OpGobletOfFire.ID, UserViktor.ID, "seed_wolf", "Strangely real-looking statue", "terminal-recording", 0, &timeNow)
 
 var EviMetaTristateTrophy = newHPEviMetadata(EviTristateTrophy.ID, "color-averager", "rgb(182, 184, 183)\n#b6b8b7\nhsl(150, 1%, 72%)", nil, helpers.PTrue(), 0)
 var EviMetaEntryForm = newHPEviMetadata(EviEntryForm.ID, "run-result", "(No output)", nil, helpers.PTrue(), 0)
