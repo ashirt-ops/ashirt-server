@@ -69,7 +69,7 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 
 	r.Handle("/metrics", promhttp.Handler())
 	r.Group(func(r chi.Router) {
-		// r.Use(middleware.LogRequests(config.Logger))
+		r.Use(middleware.LogRequests(config.Logger))
 		r.Use(csrf.Protect(config.CSRFAuthKey,
 			csrf.Secure(config.UseSecureCookies),
 			csrf.Path("/"),
