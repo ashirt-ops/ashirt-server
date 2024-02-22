@@ -8,7 +8,7 @@ import {
   MoveEvidenceModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
-import { Codeblock, DenormalizedTag, Evidence, ExportedEvidence, Media, Tag } from 'src/global_types'
+import { Codeblock, Evidence, ExportedEvidence, Media, Tag } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
@@ -99,7 +99,7 @@ export default () => {
         e.sourceFilename= data?.metadata?.source
         return {
           filename: uuid,
-          contentType: e.contentType, 
+          contentType: e.contentType,
           contentSubtype: data.contentSubtype,
           sourceFilename: data?.metadata?.source,
           blob: new Blob([data.content], {type: `text/${contentToFileExtension[e.contentType][data.contentSubtype]}`})
@@ -109,7 +109,7 @@ export default () => {
         e.filename = `${uuid}.${contentToFileExtension[e.contentType]}`;
         return {
           filename: uuid,
-          contentType: e.contentType, 
+          contentType: e.contentType,
           blob
         }
       }
@@ -135,13 +135,13 @@ export default () => {
         if (mb.contentType === "codeblock" && mb.contentSubtype === "c_cpp" && fileExtension === "cpp") {
           filename = `${mb.filename}.cpp`;
         } else {
-          filename = mb.contentType === "codeblock" 
-          ? `${mb.filename}.${contentToFileExtension[mb.contentType][mb.contentSubtype!]}` 
+          filename = mb.contentType === "codeblock"
+          ? `${mb.filename}.${contentToFileExtension[mb.contentType][mb.contentSubtype!]}`
           : `${mb.filename}.${contentToFileExtension[mb.contentType]}`;
         }
-        
+
         evidenceFolder.file(filename, mb.blob, {base64: true});
-      })    
+      })
       const zipFile = await zip.generateAsync({type:"blob"})
       saveAs(zipFile, `evidence-${operationSlug}-${new Date().toISOString()}.zip`);
     }

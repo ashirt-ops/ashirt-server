@@ -145,6 +145,9 @@ const TimelineRow = (props: {
   }, [self, props.focusUuid, props.evidence.uuid])
 
   const onTagClick = (t: Tag) => {
+    if (!t.id) {
+      return
+    }
     props.onQueryUpdate(addTagToQuery(props.query, t.name))
   }
 
@@ -170,11 +173,21 @@ const TimelineRow = (props: {
         />
       </div>
       <div className={cx('right')}>
-        <div>{format(props.evidence.occurredAt, "MMMM do, yyyy 'at' HH:mm:ss")}</div>
+        <div>{format(props.evidence.adjustedAt ?? props.evidence.occurredAt, "MMMM do, yyyy 'at' HH:mm:ss")}</div>
         <a href="#" onClick={onOperatorClick}>
           {props.evidence.operator.firstName} {props.evidence.operator.lastName}
         </a>
-        <TagList tags={props.evidence.tags} onTagClick={onTagClick} />
+        <TagList
+          tags={
+            props.evidence.adjustedAt
+            ? [
+                ...props.evidence.tags,
+                { id: 0, name: 'Adjusted Timestamp', colorName: 'yellow' }
+              ]
+            : props.evidence.tags
+          }
+          onTagClick={onTagClick}
+        />
         <ButtonGroup>
           {
             props.actions.map(action => (

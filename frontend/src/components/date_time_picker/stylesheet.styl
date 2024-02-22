@@ -1,0 +1,101 @@
+@import '~src/vars'
+
+.open-button
+  width: 100%
+  strong
+    font-weight: 800
+
+.popup
+  display: flex
+  padding: 5px
+  border-radius: 5px
+  border: 1px solid $darker-background
+  box-shadow: 0 0 15px 0 rgba(#000, 0.5)
+  background: $lighter-background
+
+.day-picker-area
+  display: block
+
+.close-button
+  display: block
+  margin-left: auto
+  margin-right: 16px
+  margin-bottom: 10px
+
+.day-picker
+  --rdp-cell-size: 35px
+  --rdp-accent-color: $primary
+  --rdp-background-color: $primary
+  --rdp-accent-color-dark: transparent
+  --rdp-background-color-dark: transparent
+  --rdp-outline-selected: 2px solid transparent
+  --rdp-outline: 2px solid transparent
+  
+  :global
+    .rdp-months
+      margin: 1em
+      display: flex
+
+    .rdp-caption_label
+      font-size: 1.15rem
+      font-weight: 500
+
+    .rdp-head_cell
+      font-size: .875rem
+      font-weight: normal
+      text-transform: none
+      color: #8B9898
+
+    .rdp-day
+      border-radius: 3px
+      &:hover
+        background: $darker-background
+        border-radius: 3px
+
+    .rdp-day_today
+      background: $darker-background
+      border-radius: 3px
+      padding-bottom: 2px
+
+    .rdp-day_selected
+      background: $primary
+      border-radius: 0
+      &:hover
+        background: $darker-primary
+
+    .rdp-day_range_start
+      border-top-left-radius: 3px
+      border-bottom-left-radius: 3px
+      background: $lighter-primary !important
+
+    .rdp-day_range_end
+      border-top-right-radius: 3px
+      border-bottom-right-radius: 3px
+      background: $lighter-primary !important
+
+    .rdp-nav_button_previous
+      &:hover
+        background: transparent
+      &:focus
+        background: transparent
+        
+    .rdp-nav_button_next
+      &:hover
+        background: transparent
+      &:focus
+        background: transparent
+
+.time-picker-wrapper
+  display: flex
+  width: 100%
+  align-items: flex-end
+  justify-content: center
+
+.time-picker
+  background: $darker-background
+  color: $foreground
+  box-shadow: 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), inset 0 0 0 1px rgba(16,22,26,.3), inset 0 1px 1px rgba(16,22,26,.4)
+  border: none
+  outline: none
+  border-radius: 3px
+  color-scheme: dark

@@ -18,8 +18,9 @@ import { DateRange } from 'src/components/date_range_picker/range_picker_helpers
 import EvidenceChooser from 'src/components/evidence_chooser'
 import ModalForm from 'src/components/modal_form'
 import Input from 'src/components/input'
+import SplitInputRow from 'src/components/split_input_row'
+
 import { SearchOptions, stringifySearch } from "./helpers"
-import WithLabel from 'src/components/with_label'
 
 import Modal from 'src/components/modal'
 import { upsertQuery } from 'src/services'
@@ -240,20 +241,6 @@ const searchOptionsReducer = (state: SearchOptions, action: SearchOptionAction) 
   return state
 }
 
-const SplitInputRow = (props: {
-  label: string,
-  inputValue: string,
-  className?: string,
-  children: React.ReactNode,
-}) => (
-  <WithLabel label={props.label}>
-    <div className={cx('multi-item-row')}>
-      <Input readOnly className={cx('flex-input', props.className)} value={props.inputValue} />
-      {props.children}
-    </div>
-  </WithLabel>
-)
-
 const toEnUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")
 
 const uuidToBasicEvidence = (uuid: string): Evidence => ({
@@ -261,6 +248,7 @@ const uuidToBasicEvidence = (uuid: string): Evidence => ({
   description: "",
   operator: { slug: "", firstName: "", lastName: "", },
   occurredAt: new Date(),
+  adjustedAt: null,
   tags: [],
   contentType: 'none',
   sendUrl: false
