@@ -79,7 +79,7 @@ jobs:
           file: Dockerfile.prod.${{ matrix.service }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true # Push with pr-### and sha-xxxxxxx tags
 
       - name: Build and Push Latest
