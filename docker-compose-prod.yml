@@ -28,7 +28,7 @@ services:
 
   frontend:
     depends_on:
-      - backend
+      - ashirt-service
     build:
       context: .
       dockerfile: Dockerfile.prod.frontend
