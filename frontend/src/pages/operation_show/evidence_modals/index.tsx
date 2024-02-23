@@ -53,7 +53,7 @@ import TabMenu from 'src/components/tabs'
 import TagList from 'src/components/tag_list'
 import DateTimePicker from 'src/components/date_time_picker'
 import SplitInputRow from 'src/components/split_input_row'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -127,7 +127,7 @@ export const CreateEvidenceModal = (props: {
       />
       {getSelectedOption().content}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
-      <SplitInputRow label="Date Range" inputValue={adjustedAtField.value ? format(adjustedAtField.value, 'yyyy-dd-MM hh:mm') : ''} >
+      <SplitInputRow label="Adjusted Timestamp" inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''} >
         <DateTimePicker onSelectedDate={(date) => adjustedAtField.onChange(date)} />
       </SplitInputRow>
     </ModalForm>
@@ -174,7 +174,7 @@ export const EditEvidenceModal = (props: {
         <CodeBlockEditor {...codeblockField} />
       )}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
-      <SplitInputRow label="Date Range" inputValue={adjustedAtField.value ? format(adjustedAtField.value, 'yyyy-dd-MM HH:mm:ss') : ''} >
+      <SplitInputRow label="Adjusted Timestamp" inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''} >
         <DateTimePicker
           onSelectedDate={(date) => adjustedAtField.onChange(date)}
           selected={adjustedAtField.value}
