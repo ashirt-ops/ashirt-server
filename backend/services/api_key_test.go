@@ -41,8 +41,7 @@ func verifyCreateAPIKey(t *testing.T, expectError bool, ctx context.Context, db 
 
 	// Prefixed accessKey has a size of 24 + 3 due to prefixing with "AS-"
 	require.Len(t, apiKey.AccessKey, 27)
-	// Prefixed secretKey has a size of 64 + 3 due to prefixing with "AS-"
-	require.Len(t, apiKey.SecretKey, 67)
+	require.Len(t, apiKey.SecretKey, 64)
 
 	userAPIKeys := getAPIKeysForUserID(t, db, userID)
 	require.Equal(t, len(userAPIKeys)-len(originalKeys), 1)
