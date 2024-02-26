@@ -53,6 +53,7 @@ import TabMenu from 'src/components/tabs'
 import TagList from 'src/components/tag_list'
 import DateTimePicker from 'src/components/date_time_picker'
 import SplitInputRow from 'src/components/split_input_row'
+import WithLabel from 'src/components/with_label'
 import { format, isValid } from 'date-fns'
 
 
@@ -174,9 +175,18 @@ export const EditEvidenceModal = (props: {
         <CodeBlockEditor {...codeblockField} />
       )}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
-      <SplitInputRow label="Adjusted Timestamp" inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''} >
+      <WithLabel label='Occurred At'>
+        <Input
+          readOnly
+          value={isValid(props.evidence.occurredAt) ? format(props.evidence.occurredAt, "yyyy-dd-MM hh:mm") : ''}
+        />
+      </WithLabel>
+      <SplitInputRow
+        label="Adjusted Timestamp"
+        inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''}
+      >
         <DateTimePicker
-          onSelectedDate={(date) => adjustedAtField.onChange(date)}
+          onSelectedDate={(date) => adjustedAtField.onChange(isValid(date) ? date : undefined)}
           selected={adjustedAtField.value}
         />
       </SplitInputRow>

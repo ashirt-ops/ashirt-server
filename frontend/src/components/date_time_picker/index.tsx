@@ -46,7 +46,13 @@ const Picker: React.FC<PickerProps> = ({ onButtonClick, onSelectedDate, selected
 					selected={date}
 				/>
 				<div className={cx("time-picker-wrapper")}>
-					<input value={isValid(date) ? format(date, "HH:mm") : ''} aria-label="Time" type="time" className={cx("time-picker")} onChange={onChangeHour} />
+					<input
+						value={isValid(date) ? format(date, "HH:mm") : ''}
+						aria-label="Time"
+						type="time"
+						className={cx("time-picker")}
+						onChange={onChangeHour}
+					/>
 				</div>
 				<Button primary className={cx('close-button')} onClick={onButtonClick}>
 					Close

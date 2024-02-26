@@ -145,6 +145,7 @@ export async function updateEvidence(i: {
   updatedContent: Blob | null,
   adjustedAt?: Date
 }): Promise<void> {
+  console.log("updating")
   const formData = new FormData()
   if (i.description !== undefined) {
     formData.append('description', i.description)
@@ -155,6 +156,7 @@ export async function updateEvidence(i: {
     formData.append('tagsToRemove', JSON.stringify(subs))
   }
 
+  console.log(i.adjustedAt)
   if (i.adjustedAt) {
     formData.append("adjusted_at", i.adjustedAt.toISOString())
   }
