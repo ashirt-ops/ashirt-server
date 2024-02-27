@@ -1,6 +1,9 @@
 version: "3"
 services:
   backend:
+    depends_on:
+      db:
+        condition: service_healthy
     build:
       context: .
       dockerfile: Dockerfile.dev.backend
@@ -72,6 +75,8 @@ services:
       # AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD: preferred_username
 
   frontend:
+    depends_on:
+      - backend
     build:
       context: .
       dockerfile: Dockerfile.dev.frontend
@@ -96,6 +101,10 @@ services:
       - MYSQL_ROOT_PASSWORD=dev-root-password
       - MYSQL_USER=dev-user
       - MYSQL_PASSWORD=dev-user-password
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
 
   demo:
     image: ashirt/tesseract-lambda-python:latest

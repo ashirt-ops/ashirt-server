@@ -1,6 +1,9 @@
 version: "3"
 services:
   ashirt-service:
+    depends_on:
+      db:
+        condition: service_healthy
     build:
       context: .
       dockerfile: Dockerfile.prod.web
@@ -24,6 +27,8 @@ services:
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
 
   frontend:
+    depends_on:
+      - ashirt-service
     build:
       context: .
       dockerfile: Dockerfile.prod.frontend
@@ -45,3 +50,7 @@ services:
       - MYSQL_ROOT_PASSWORD=dev-root-password
       - MYSQL_USER=dev-user
       - MYSQL_PASSWORD=dev-user-password
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
