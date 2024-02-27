@@ -60,6 +60,7 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			ContentType:   dr.FromBody("contentType").OrDefault("image").AsString(),
 			OccurredAt:    dr.FromBody("occurred_at").OrDefault(time.Now()).AsUnixTime(),
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			AdjustedAt:    dr.FromBody("adjusted_at").OrDefault(nil).AsTimePtr(),
 		}
 		tagIDsJSON := dr.FromBody("tagIds").OrDefault("[]").AsString()
 		if dr.Error != nil {
@@ -76,6 +77,7 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		i := services.UpdateEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			AdjustedAt:    dr.FromBody("adjusted_at").OrDefault(nil).AsTimePtr(),
 			Description:   dr.FromBody("notes").AsStringPtr(),
 			Content:       dr.FromFile("file"),
 		}

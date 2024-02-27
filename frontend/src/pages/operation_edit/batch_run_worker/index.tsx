@@ -36,6 +36,7 @@ export const BatchRunWorker = (props: {
             slug: ''
           },
           occurredAt: new Date(),
+          adjustedAt: null,
           tags: [],
           metadata: [],
           contentType: 'image',

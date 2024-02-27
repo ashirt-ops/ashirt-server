@@ -110,6 +110,7 @@ export type Evidence = {
   description: string,
   operator: User,
   occurredAt: Date,
+  adjustedAt: Date | null,
   tags: Array<Tag>,
   contentType: SupportedEvidenceType
   sendUrl: boolean,
@@ -214,7 +215,7 @@ export type UserGroup = {
   userSlugs: Array<string>,
 }
 
-export type UserGroupAdminView = UserGroup & IncludeDeleted 
+export type UserGroupAdminView = UserGroup & IncludeDeleted
 
 export type UserOperationRole = {
   user: User,
@@ -327,7 +328,7 @@ export interface Media {
 export interface Codeblock {
   contentType: string,
   contentSubtype: Languages,
-  content: string 
+  content: string
   metadata: {
     source: string,
   }

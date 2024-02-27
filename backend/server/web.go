@@ -581,6 +581,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			ContentType:   dr.FromBody("contentType").OrDefault("image").AsString(),
 			OccurredAt:    dr.FromBody("occurredAt").OrDefault(time.Now()).AsTime(),
 			OperationSlug: dr.FromURL("operation_slug").AsString(),
+			AdjustedAt:    dr.FromBody("adjusted_at").OrDefault(nil).AsTimePtr(),
 		}
 		tagIDsJSON := dr.FromBody("tagIds").OrDefault("[]").AsString()
 		if dr.Error != nil {
@@ -598,6 +599,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 			Description:   dr.FromBody("description").AsStringPtr(),
+			AdjustedAt:    dr.FromBody("adjusted_at").OrDefault(nil).AsTimePtr(),
 			Content:       dr.FromFile("content"),
 		}
 		tagsToAddJSON := dr.FromBody("tagsToAdd").OrDefault("[]").AsString()

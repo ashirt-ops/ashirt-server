@@ -105,6 +105,18 @@ func (c *Coercable) AsStringPtr() *string {
 	return &v
 }
 
+// AsTimePtr converts the Coercable into a time.Time type.
+// If the underlying value is nil, then this will return nil.
+// if the underlying value is not nil, but also not a time.Time,
+// then the zero value will be returned
+func (c *Coercable) AsTimePtr() *time.Time {
+	if c.rawValue == nil {
+		return nil
+	}
+	v := c.AsTime()
+	return &v
+}
+
 // AsTime converts the Coercable into a time.Time type.
 // AsTime will look to parse an RFC3339 datetime string. If the string does not match the
 // format, then it will not parse, and the zero value will be returned.

@@ -51,6 +51,10 @@ import Modal from 'src/components/modal'
 import TagChooser from 'src/components/bullet_chooser/tag_chooser'
 import TabMenu from 'src/components/tabs'
 import TagList from 'src/components/tag_list'
+import DateTimePicker from 'src/components/date_time_picker'
+import SplitInputRow from 'src/components/split_input_row'
+import WithLabel from 'src/components/with_label'
+import { format, isValid } from 'date-fns'
 
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -64,6 +68,7 @@ export const CreateEvidenceModal = (props: {
   const tagsField = useFormField<Array<Tag>>([])
   const binaryBlobField = useFormField<File | null>(null)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
+  const adjustedAtField = useFormField<Date | undefined>(undefined)
 
   const isATerminalRecording = (file: File) => file.type == ''
   const isAnHttpRequestCycle = (file: File) => file.name.endsWith("har")
@@ -86,7 +91,7 @@ export const CreateEvidenceModal = (props: {
   const getSelectedOption = () => evidenceTypeOptions.filter(opt => opt.value === selectedCBValue)[0]
 
   const formComponentProps = useForm({
-    fields: [descriptionField, binaryBlobField],
+    fields: [descriptionField, binaryBlobField, adjustedAtField],
     onSuccess: () => { props.onCreated(); props.onRequestClose() },
     handleSubmit: () => {
       let data: SubmittableEvidence = { type: "none" }
@@ -102,6 +107,7 @@ export const CreateEvidenceModal = (props: {
       }
 
       return createEvidence({
+        adjustedAt: adjustedAtField.value,
         operationSlug: props.operationSlug,
         description: descriptionField.value,
         evidence: data,
@@ -122,6 +128,9 @@ export const CreateEvidenceModal = (props: {
       />
       {getSelectedOption().content}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
+      <SplitInputRow label="Adjusted Timestamp" inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''} >
+        <DateTimePicker onSelectedDate={(date) => adjustedAtField.onChange(date)} />
+      </SplitInputRow>
     </ModalForm>
   )
 }
@@ -135,6 +144,7 @@ export const EditEvidenceModal = (props: {
   const descriptionField = useFormField<string>(props.evidence.description)
   const tagsField = useFormField<Array<Tag>>(props.evidence.tags)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
+  const adjustedAtField = useFormField<Date | undefined>(props.evidence.adjustedAt ?? undefined)
   React.useEffect(() => {
     if (props.evidence.contentType !== 'codeblock') {
       return
@@ -151,6 +161,7 @@ export const EditEvidenceModal = (props: {
     handleSubmit: () => updateEvidence({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidence.uuid,
+      adjustedAt: adjustedAtField.value,
       description: descriptionField.value,
       oldTags: props.evidence.tags,
       newTags: tagsField.value,
@@ -164,6 +175,21 @@ export const EditEvidenceModal = (props: {
         <CodeBlockEditor {...codeblockField} />
       )}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
+      <WithLabel label='Occurred At'>
+        <Input
+          readOnly
+          value={isValid(props.evidence.occurredAt) ? format(props.evidence.occurredAt, "yyyy-dd-MM hh:mm") : ''}
+        />
+      </WithLabel>
+      <SplitInputRow
+        label="Adjusted Timestamp"
+        inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''}
+      >
+        <DateTimePicker
+          onSelectedDate={(date) => adjustedAtField.onChange(isValid(date) ? date : undefined)}
+          selected={adjustedAtField.value}
+        />
+      </SplitInputRow>
     </ModalForm>
   )
 }
