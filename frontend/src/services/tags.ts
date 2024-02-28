@@ -74,6 +74,7 @@ export async function updateDefaultTag(i: {
 export async function mergeDefaultTags(i: Array<{
   name: string,
   colorName: string,
+  description?: string,
 }>) {
   await ds.mergeDefaultTags(i)
 }

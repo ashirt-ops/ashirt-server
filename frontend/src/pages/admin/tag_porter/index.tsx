@@ -44,6 +44,7 @@ export const TagPorter = (props: {
                     .map(tag => ({
                       name: tag.name,
                       colorName: tag.colorName,
+                      description: tag.description,
                     })
                     ), null, 2)
 

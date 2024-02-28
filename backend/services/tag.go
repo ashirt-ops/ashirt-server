@@ -120,8 +120,9 @@ func CreateDefaultTag(ctx context.Context, db *database.Connection, i CreateDefa
 	}
 
 	tagID, err := db.Insert("default_tags", map[string]interface{}{
-		"name":       i.Name,
-		"color_name": i.ColorName,
+		"name":        i.Name,
+		"color_name":  i.ColorName,
+		"description": i.Description,
 	})
 	if err != nil {
 		return nil, backend.WrapError("Cannot add new tag", backend.DatabaseErr(err))
@@ -154,8 +155,9 @@ func MergeDefaultTags(ctx context.Context, db *database.Connection, i []CreateDe
 
 	err := db.BatchInsert("default_tags", len(tagsToInsert), func(idx int) map[string]interface{} {
 		return map[string]interface{}{
-			"name":       tagsToInsert[idx].Name,
-			"color_name": tagsToInsert[idx].ColorName,
+			"name":        tagsToInsert[idx].Name,
+			"color_name":  tagsToInsert[idx].ColorName,
+			"description": tagsToInsert[idx].Description,
 		}
 	}, "ON DUPLICATE KEY UPDATE color_name=VALUES(color_name)")
 
@@ -370,7 +372,7 @@ func ListDefaultTags(ctx context.Context, db *database.Connection) ([]*dtos.Defa
 	}
 
 	var tags []models.Tag
-	err := db.Select(&tags, sq.Select("id", "name", "color_name").From("default_tags"))
+	err := db.Select(&tags, sq.Select("id", "name", "color_name", "description").From("default_tags"))
 
 	if err != nil {
 		return nil, backend.WrapError("Cannot get default tags", backend.DatabaseErr(err))

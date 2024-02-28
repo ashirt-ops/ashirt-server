@@ -220,11 +220,12 @@ type FindingCategory struct {
 }
 
 type DefaultTag struct {
-	ID        int64      `db:"id"`
-	Name      string     `db:"name"`
-	ColorName string     `db:"color_name"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt *time.Time `db:"updated_at"`
+	ID          int64      `db:"id"`
+	Name        string     `db:"name"`
+	ColorName   string     `db:"color_name"`
+	Description *string    `db:"description"`
+	CreatedAt   time.Time  `db:"created_at"`
+	UpdatedAt   *time.Time `db:"updated_at"`
 }
 
 // ServiceWorker reflects the structure of the database table 'service_workers'
