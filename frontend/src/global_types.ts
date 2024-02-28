@@ -157,6 +157,7 @@ export type Tag = {
   id: number,
   name: string,
   colorName: string,
+  description?: string,
 }
 
 export type DenormalizedTag = {
@@ -169,6 +170,7 @@ export type TagWithUsage = {
   id: number,
   name: string,
   colorName: string,
+  description?: string,
   evidenceCount: number,
 }
 

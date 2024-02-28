@@ -94,6 +94,7 @@ type Tag struct {
 	OperationID int64      `db:"operation_id"`
 	Name        string     `db:"name"`
 	ColorName   string     `db:"color_name"`
+	Description *string    `db:"description"`
 	CreatedAt   time.Time  `db:"created_at"`
 	UpdatedAt   *time.Time `db:"updated_at"`
 }

@@ -18,9 +18,10 @@ function UpsertTagModal(props: {
 }) {
   const nameField = useFormField<string>(props.tag?.name ?? "")
   const colorField = useFormField<string>(props.tag?.colorName ?? randomTagColorName())
+  const descriptionField = useFormField<string | undefined>(props.tag?.description)
 
   const formComponentProps = useForm({
-    fields: [nameField, colorField],
+    fields: [nameField, colorField, descriptionField],
     onSuccess: () => { props.onEdited(); props.onRequestClose() },
     handleSubmit: () => {
       return (
@@ -28,12 +29,13 @@ function UpsertTagModal(props: {
           ? props.createFn({
             name: nameField.value.trim(),
             colorName: colorField.value,
+            description: descriptionField.value,
           })
           : props.updateFn({
             id: props.tag.id,
             name: nameField.value.trim(),
             colorName: colorField.value,
-
+            description: descriptionField.value,
           })
       )
     }
@@ -43,6 +45,7 @@ function UpsertTagModal(props: {
     <Modal title={props.tag ? "Edit Tag" : "Create Tag"} onRequestClose={props.onRequestClose}>
       <Form submitText="Save" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
         <Input label="Name" {...nameField} />
+        <Input label="Description" {...descriptionField} />
         <TagColorPicker label="Color" {...colorField} />
       </Form>
     </Modal>

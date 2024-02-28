@@ -728,6 +728,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 			Name:          dr.FromBody("name").Required().AsString(),
 			ColorName:     dr.FromBody("colorName").AsString(),
+			Description:   dr.FromBody("description").AsStringPtr(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error
@@ -754,8 +755,9 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 	route(r, "POST", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateDefaultTagInput{
-			Name:      dr.FromBody("name").Required().AsString(),
-			ColorName: dr.FromBody("colorName").AsString(),
+			Name:        dr.FromBody("name").Required().AsString(),
+			ColorName:   dr.FromBody("colorName").AsString(),
+			Description: dr.FromBody("description").AsStringPtr(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error
@@ -778,9 +780,10 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 	route(r, "PUT", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateDefaultTagInput{
-			ID:        dr.FromURL("tag_id").Required().AsInt64(),
-			Name:      dr.FromBody("name").Required().AsString(),
-			ColorName: dr.FromBody("colorName").AsString(),
+			ID:          dr.FromURL("tag_id").Required().AsInt64(),
+			Name:        dr.FromBody("name").Required().AsString(),
+			ColorName:   dr.FromBody("colorName").AsString(),
+			Description: dr.FromBody("description").AsStringPtr(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error

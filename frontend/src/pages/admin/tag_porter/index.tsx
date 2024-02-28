@@ -182,6 +182,7 @@ const TagImportUpload = (props: {
 type UpsertTag = {
   name: string
   colorName: string
+  description?: string
 }
 
 const isTag = (t: unknown): t is UpsertTag => {

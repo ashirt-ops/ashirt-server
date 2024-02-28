@@ -27,7 +27,8 @@ type UserPayload = {
 
 type TagPayload = {
   name: string,
-  colorName: string
+  colorName: string,
+  description?: string,
 }
 
 type ServiceWorkerPayload = {
