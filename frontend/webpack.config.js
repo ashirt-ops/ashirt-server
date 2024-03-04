@@ -73,10 +73,16 @@ module.exports = (env, argv) => ({
 
   devServer: {
     historyApiFallback: true,
-    proxy: {
-      '/web': {target: process.env.WEB_BACKEND_ORIGIN},
-      '/api': {target: process.env.WEB_BACKEND_ORIGIN},
-    },
+    proxy: [
+      {
+        context: ['/api'],
+        target: process.env.WEB_BACKEND_ORIGIN,
+      },
+      {
+        context: ['/web'],
+        target: process.env.WEB_BACKEND_ORIGIN,
+      },
+    ],
     devMiddleware: {
       publicPath: "/assets/"
     },
