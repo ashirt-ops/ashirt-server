@@ -12,6 +12,7 @@ import { default as Button, ButtonGroup } from 'src/components/button'
 import { CopyTextButton } from 'src/components/text_copiers'
 import { format } from 'date-fns'
 import { default as Menu, MenuItem } from 'src/components/menu'
+import EvidencesContextProvider from 'src/contexts/evidences_context'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -36,7 +37,7 @@ export default (props: {
 
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
-  const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
+  // const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -83,26 +84,28 @@ export default (props: {
 
   const activeEvidence = props.evidence[activeChildIndex]
   if (activeEvidence == null) return null
-  const imgDataSetter = (data: any) => {
-    console.log("imgDataSetter data", data)
-    return setCurrImageData(data)
-  }
+  // const imgDataSetter = (data: any) => {
+  //   console.log("imgDataSetter data", data)
+  //   return setCurrImageData(data)
+  // }
 
   return <>
     <div className={cx('root')} ref={rootRef}>
       {props.evidence.map((evi, idx) => {
         const active = activeChildIndex === idx
         return (
-          <TimelineRow
-            {...props}
-            focusUuid={props.scrollToUuid}
-            active={active}
-            imgDataSetter={active ? imgDataSetter : undefined}
-            evidence={evi}
-            key={evi.uuid}
-            onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
-            onClick={() => setActiveChildIndex(idx)}
-          />
+          <EvidencesContextProvider evidence={evi}>
+            <TimelineRow
+              {...props}
+              focusUuid={props.scrollToUuid}
+              active={active}
+              // imgDataSetter={active ? imgDataSetter : undefined}
+              evidence={evi}
+              key={evi.uuid}
+              onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
+              onClick={() => setActiveChildIndex(idx)}
+            />
+          </EvidencesContextProvider>
         )
       })}
       <Help className={cx('help')}
@@ -113,17 +116,18 @@ export default (props: {
     <Lightbox canUseFitToggle={activeEvidence.contentType == "image"}
       isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
       <div ref={lightboxRef}>
-        <EvidencePreview
-          operationSlug={props.operationSlug}
-          evidenceUuid={activeEvidence.uuid}
-          contentType={activeEvidence.contentType}
-          useS3Url={activeEvidence.sendUrl}
-          imgDataSetter={imgDataSetter}
-          // imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
-          preSavedS3UrlData={currImageData ? currImageData : undefined}
-          viewHint="large"
-          interactionHint="active"
-        />
+        <EvidencesContextProvider evidence={activeEvidence}>
+          <EvidencePreview
+            operationSlug={props.operationSlug}
+            evidenceUuid={activeEvidence.uuid}
+            contentType={activeEvidence.contentType}
+            useS3Url={activeEvidence.sendUrl}
+            // imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
+            // preSavedS3UrlData={currImageData ? currImageData : undefined}
+            viewHint="large"
+            interactionHint="active"
+          />
+        </EvidencesContextProvider>
       </div>
     </Lightbox>
   </>
@@ -173,7 +177,7 @@ const TimelineRow = (props: {
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
           useS3Url={props.evidence.sendUrl}
-          imgDataSetter={props.imgDataSetter}
+          // imgDataSetter={props.imgDataSetter}
           viewHint="medium"
           interactionHint="inactive"
         />

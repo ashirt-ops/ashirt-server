@@ -10,6 +10,8 @@ import LazyLoadComponent from 'src/components/lazy_load_component'
 
 
 import TerminalPlayer from 'src/components/terminal_player'
+import { useEvidenceContext } from 'src/contexts/evidences_context'
+import { isAfter } from 'date-fns'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -18,7 +20,7 @@ function getComponent(evidenceType: SupportedEvidenceType) {
     case 'codeblock':
       return EvidenceCodeblock
     case 'image':
-      return MemoizedEvidenceImage
+      return EvidenceImage
     case 'terminal-recording':
       return EvidenceTerminalRecording
     case 'http-request-cycle':
@@ -41,8 +43,6 @@ export default (props: {
   fitToContainer?: boolean,
   useS3Url: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
-  imgDataSetter?: (urlData: UrlData | null) => void,
-  preSavedS3UrlData?: UrlData,
 }) => {
   const Component = getComponent(props.contentType)
   if (Component == null) return null
@@ -68,8 +68,6 @@ type EvidenceProps = {
   viewHint?: EvidenceViewHint,
   interactionHint?: InteractionHint,
   useS3Url: boolean
-  imgDataSetter?: (urlData: UrlData) => void,
-  preSavedS3UrlData?: UrlData,
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
@@ -82,42 +80,37 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
+  const { imgDataSetter, imgData, evidence } = useEvidenceContext()
+
+
   console.log("---------------------")
   console.log("viewHint in same URL", props?.viewHint)
-  console.log("EvidenceImage props", props?.preSavedS3UrlData?.url.slice(-3))
-  console.log("---------------------")
+  console.log("EvidenceImage props", imgData?.url.slice(-3))
+  console.log("imgData:", imgData)
+  console.log("sendUrl", evidence?.sendUrl)
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-  // if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > new Date()){
-    // url = props.preSavedS3UrlData.url
-  // } else if (props.useS3Url) {
+
+  if (imgData && props.useS3Url && isAfter(imgData.expirationTime, new Date())) {
+    url = imgData.url
+  } else if (props.useS3Url) {
+    console.log("getting s3 url")
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
+
     wiredUrl.expose(s3url => {
-      console.log("about to set img data", s3url)
-      props.imgDataSetter && props.imgDataSetter(s3url)
-      url = s3url.url 
+      imgDataSetter(s3url)
+      url = s3url.url
     })
-  // }
+  }
+
+  console.log("setted url:", url)
+  console.log("---------------------")
+
   return <img src={url} />
 }
-
-const sameURL = (prevProps: EvidenceProps, nextProps: EvidenceProps) => {
-  console.log("prevProps.evidenceUuid", prevProps.evidenceUuid)
-  console.log("nextProps.evidenceUuid", nextProps.evidenceUuid)
-  console.log("viewHint in same URL", prevProps?.viewHint, nextProps?.viewHint)
-  console.log("prevProps", prevProps?.preSavedS3UrlData)
-  console.log("nextProps", nextProps?.preSavedS3UrlData)
-  console.log("last url, new url", prevProps?.preSavedS3UrlData?.url.slice(-3), nextProps?.preSavedS3UrlData?.url.slice(-3))
-  console.log("is true or false?", prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url)
-  // const sameUrl = prevProps?.preSavedS3UrlData?.url === nextProps?.preSavedS3UrlData?.url
-  const sameUuid = prevProps.evidenceUuid === nextProps.evidenceUuid
-  // return sameUrl && sameUuid
-  return sameUuid
-};
-
-const MemoizedEvidenceImage = React.memo(EvidenceImage, sameURL);
 
 const EvidenceEvent = (_props: EvidenceProps) => {
   return <div className={cx('event')}></div>
