@@ -6,7 +6,7 @@ import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
 import Help from 'src/components/help'
 import { ClickPopover } from 'src/components/popover'
-import { Tag, Evidence, UrlData } from 'src/global_types'
+import { Tag, Evidence } from 'src/global_types'
 import { addTagToQuery, addOperatorToQuery } from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CopyTextButton } from 'src/components/text_copiers'
@@ -134,8 +134,7 @@ const TimelineRow = (props: {
   query: string,
   focusUuid?: string,
   onPreviewClick: () => void,
-  onClick: () => void,
-  imgDataSetter?: (urlData: UrlData | null) => void,
+  onClick: () => void
 }) => {
   const self = React.useRef<null | HTMLDivElement>(null)
 
