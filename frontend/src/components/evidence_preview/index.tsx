@@ -90,7 +90,7 @@ const EvidenceImage = (props: EvidenceProps) => {
   console.log("sendUrl", evidence?.sendUrl)
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
 
-  if (imgData && props.useS3Url && isAfter(imgData.expirationTime, new Date())) {
+  if (imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date())) {
     url = imgData.url
   } else if (props.useS3Url) {
     console.log("getting s3 url")
