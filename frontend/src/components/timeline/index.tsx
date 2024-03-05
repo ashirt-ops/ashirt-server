@@ -84,10 +84,6 @@ export default (props: {
 
   const activeEvidence = props.evidence[activeChildIndex]
   if (activeEvidence == null) return null
-  // const imgDataSetter = (data: any) => {
-  //   console.log("imgDataSetter data", data)
-  //   return setCurrImageData(data)
-  // }
 
   return (
     <EvidencesContextProvider activeEvidence={activeEvidence}>
@@ -99,7 +95,6 @@ export default (props: {
                 {...props}
                 focusUuid={props.scrollToUuid}
                 active={active}
-                // imgDataSetter={active ? imgDataSetter : undefined}
                 evidence={evi}
                 key={evi.uuid}
                 onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
@@ -120,8 +115,6 @@ export default (props: {
               evidenceUuid={activeEvidence.uuid}
               contentType={activeEvidence.contentType}
               useS3Url={activeEvidence.sendUrl}
-              // imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
-              // preSavedS3UrlData={currImageData ? currImageData : undefined}
               viewHint="large"
               interactionHint="active"
             />
@@ -175,7 +168,6 @@ const TimelineRow = (props: {
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
           useS3Url={props.evidence.sendUrl}
-          // imgDataSetter={props.imgDataSetter}
           viewHint="medium"
           interactionHint="inactive"
         />
