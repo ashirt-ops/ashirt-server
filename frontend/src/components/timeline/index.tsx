@@ -89,48 +89,46 @@ export default (props: {
   //   return setCurrImageData(data)
   // }
 
-  return <>
-    <div className={cx('root')} ref={rootRef}>
-      {props.evidence.map((evi, idx) => {
-        const active = activeChildIndex === idx
-        return (
-          <EvidencesContextProvider evidence={evi}>
-            <TimelineRow
-              {...props}
-              focusUuid={props.scrollToUuid}
-              active={active}
-              // imgDataSetter={active ? imgDataSetter : undefined}
-              evidence={evi}
-              key={evi.uuid}
-              onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
-              onClick={() => setActiveChildIndex(idx)}
-            />
-          </EvidencesContextProvider>
-        )
-      })}
-      <Help className={cx('help')}
-        preamble="Review and Edit the accumulated evidence for this operation"
-        shortcuts={KeyboardShortcuts}
-      />
-    </div>
-    <Lightbox canUseFitToggle={activeEvidence.contentType == "image"}
-      isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
-      <div ref={lightboxRef}>
-        <EvidencesContextProvider evidence={activeEvidence}>
-          <EvidencePreview
-            operationSlug={props.operationSlug}
-            evidenceUuid={activeEvidence.uuid}
-            contentType={activeEvidence.contentType}
-            useS3Url={activeEvidence.sendUrl}
-            // imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
-            // preSavedS3UrlData={currImageData ? currImageData : undefined}
-            viewHint="large"
-            interactionHint="active"
-          />
-        </EvidencesContextProvider>
+  return (
+    <EvidencesContextProvider activeEvidence={activeEvidence}>
+      <div className={cx('root')} ref={rootRef}>
+        {props.evidence.map((evi, idx) => {
+          const active = activeChildIndex === idx
+          return (
+              <TimelineRow
+                {...props}
+                focusUuid={props.scrollToUuid}
+                active={active}
+                // imgDataSetter={active ? imgDataSetter : undefined}
+                evidence={evi}
+                key={evi.uuid}
+                onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
+                onClick={() => setActiveChildIndex(idx)}
+              />
+          )
+        })}
+        <Help className={cx('help')}
+          preamble="Review and Edit the accumulated evidence for this operation"
+          shortcuts={KeyboardShortcuts}
+        />
       </div>
-    </Lightbox>
-  </>
+      <Lightbox canUseFitToggle={activeEvidence.contentType == "image"}
+        isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
+        <div ref={lightboxRef}>
+            <EvidencePreview
+              operationSlug={props.operationSlug}
+              evidenceUuid={activeEvidence.uuid}
+              contentType={activeEvidence.contentType}
+              useS3Url={activeEvidence.sendUrl}
+              // imgDataSetter={quicklookVisible ? setCurrImageData : undefined}
+              // preSavedS3UrlData={currImageData ? currImageData : undefined}
+              viewHint="large"
+              interactionHint="active"
+            />
+        </div>
+      </Lightbox>
+    </EvidencesContextProvider>
+  )
 }
 
 const TimelineRow = (props: {

@@ -5,12 +5,11 @@ import { UrlData, Evidence } from 'src/global_types';
 interface IEvidencesContext {
 	imgDataSetter: (urlData: UrlData | null) => void
 	imgData: UrlData | null
-	evidence?: Evidence
+	activeEvidence?: Evidence
 }
 
 export const EvidencesContext = createContext<IEvidencesContext>({
 	imgData: null,
-	evidence: undefined,
 	imgDataSetter: () => 0,
 })
 
@@ -19,10 +18,10 @@ export const useEvidenceContext = () => {
 }
 
 interface EvidencesContextProviderProps {
-	evidence: Evidence
+	activeEvidence: Evidence
 }
 
-const EvidencesContextProvider: React.FC<PropsWithChildren<EvidencesContextProviderProps>> = ({ children, evidence }) => {
+const EvidencesContextProvider: React.FC<PropsWithChildren<EvidencesContextProviderProps>> = ({ children, activeEvidence }) => {
 	const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
 
 	return (
@@ -38,7 +37,7 @@ const EvidencesContextProvider: React.FC<PropsWithChildren<EvidencesContextProvi
 
 				return newData
 			}),
-			evidence
+			activeEvidence
 		}}>
 			{children}
 		</EvidencesContext.Provider>

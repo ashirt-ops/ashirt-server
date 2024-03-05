@@ -80,17 +80,17 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 }
 
 const EvidenceImage = (props: EvidenceProps) => {
-  const { imgDataSetter, imgData, evidence } = useEvidenceContext()
+  const { imgDataSetter, imgData, activeEvidence } = useEvidenceContext()
 
 
   console.log("---------------------")
   console.log("viewHint in same URL", props?.viewHint)
   console.log("EvidenceImage props", imgData?.url.slice(-3))
   console.log("imgData:", imgData)
-  console.log("sendUrl", evidence?.sendUrl)
+  console.log("sendUrl", props.useS3Url)
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
 
-  if (imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date())) {
+  if (imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date()) && (props.evidenceUuid === activeEvidence?.uuid)) {
     url = imgData.url
   } else if (props.useS3Url) {
     console.log("getting s3 url")
