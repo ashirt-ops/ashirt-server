@@ -47,9 +47,11 @@ func CreateAPIKey(ctx context.Context, db *database.Connection, userSlug string)
 		return nil, backend.WrapError("Unable to create secret key", err)
 	}
 
+	prefixedAccessKey := "AS-" + accessKeyStr
+
 	_, err = db.Insert("api_keys", map[string]interface{}{
 		"user_id":    userID,
-		"access_key": accessKeyStr,
+		"access_key": prefixedAccessKey,
 		"secret_key": secretKey,
 	})
 	if err != nil {
@@ -57,7 +59,7 @@ func CreateAPIKey(ctx context.Context, db *database.Connection, userSlug string)
 	}
 
 	return &dtos.APIKey{
-		AccessKey: accessKeyStr,
+		AccessKey: prefixedAccessKey,
 		SecretKey: secretKey,
 	}, nil
 }
