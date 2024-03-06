@@ -79,13 +79,21 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
   return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
 }
 
+const shouldUseCachedUrl = (imgData: UrlData | undefined, props: EvidenceProps) => (
+  imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date())
+)
+
 const EvidenceImage = (props: EvidenceProps) => {
-  const { imgDataSetter, imgData, activeEvidence } = useEvidenceContext()
+  const { imgDataSetter, cachedUrls } = useEvidenceContext()
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
 
-  if (imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date()) && (props.evidenceUuid === activeEvidence?.uuid)) {
-    url = imgData.url
+  const imgData = cachedUrls.get(props.evidenceUuid)
+
+  if (shouldUseCachedUrl(imgData, props)) {
+    console.log("using cached url")
+    url = imgData?.url as string
   } else if (props.useS3Url) {
+    console.log("getting url from s3")
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
@@ -93,7 +101,7 @@ const EvidenceImage = (props: EvidenceProps) => {
     }), [props.operationSlug, props.evidenceUuid]))
 
     wiredUrl.expose(s3url => {
-      imgDataSetter(s3url)
+      imgDataSetter(props.evidenceUuid, s3url)
       url = s3url.url
     })
   }

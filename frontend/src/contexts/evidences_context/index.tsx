@@ -3,14 +3,13 @@ import React, { PropsWithChildren, createContext, useContext } from 'react';
 import { UrlData, Evidence } from 'src/global_types';
 
 interface IEvidencesContext {
-	imgDataSetter: (urlData: UrlData | null) => void
-	imgData: UrlData | null
-	activeEvidence?: Evidence
+	imgDataSetter: (key: string, urlData: UrlData) => void
+	cachedUrls: Map<string, UrlData>
 }
 
 export const EvidencesContext = createContext<IEvidencesContext>({
-	imgData: null,
 	imgDataSetter: () => 0,
+	cachedUrls: new Map()
 })
 
 export const useEvidenceContext = () => {
@@ -22,22 +21,18 @@ interface EvidencesContextProviderProps {
 }
 
 const EvidencesContextProvider: React.FC<PropsWithChildren<EvidencesContextProviderProps>> = ({ children, activeEvidence }) => {
-	const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
+	const [cachedUrls, setCachedUrls] = React.useState<Map<string, UrlData>>(new Map())
 
 	return (
 		<EvidencesContext.Provider value={{
-			imgData: currImageData,
-			// This should prevent possible accidental state updates, since although
-			// the object could be equal, the reference is different, which would trigger
-			// a state update
-			imgDataSetter: (newData) => setCurrImageData(currData => {
-				if (_.isEqual(newData, currData)) {
-					return currData
-				}
+			imgDataSetter: (key, urlData) => {
+				const newCachedUrls = new Map(cachedUrls)
 
-				return newData
-			}),
-			activeEvidence
+				newCachedUrls.set(key, urlData)
+
+				setCachedUrls(newCachedUrls)
+			},
+			cachedUrls
 		}}>
 			{children}
 		</EvidencesContext.Provider>
