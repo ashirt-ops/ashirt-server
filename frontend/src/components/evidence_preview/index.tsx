@@ -90,10 +90,8 @@ const EvidenceImage = (props: EvidenceProps) => {
   const imgData = cachedUrls.get(props.evidenceUuid)
 
   if (shouldUseCachedUrl(imgData, props)) {
-    console.log("using cached url")
     url = imgData?.url as string
   } else if (props.useS3Url) {
-    console.log("getting url from s3")
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
