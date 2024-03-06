@@ -81,9 +81,10 @@ type Query struct {
 }
 
 type Tag struct {
-	ID        int64  `json:"id"`
-	ColorName string `json:"colorName"`
-	Name      string `json:"name"`
+	ID          int64   `json:"id"`
+	ColorName   string  `json:"colorName"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
 }
 
 type DefaultTag Tag

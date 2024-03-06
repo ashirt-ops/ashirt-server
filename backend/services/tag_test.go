@@ -15,10 +15,12 @@ import (
 func TestCreateTag(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
 		op := OpSorcerersStone
+		description := "optionalDescription"
 		i := services.CreateTagInput{
 			Name:          "New Tag",
 			ColorName:     "indigo",
 			OperationSlug: op.Slug,
+			Description:   &description,
 		}
 
 		ctx := contextForUser(UserHarry, db)
@@ -37,10 +39,12 @@ func TestCreateDefaultTag(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, seed TestSeedData) {
 		normalUser := UserRon
 		adminUser := UserDumbledore
+		description := "optionalDescription"
 
 		i := services.CreateDefaultTagInput{
-			Name:      "New Tag",
-			ColorName: "indigo",
+			Name:        "New Tag",
+			ColorName:   "indigo",
+			Description: &description,
 		}
 
 		// verify that a normal cannot create a new default tag
@@ -331,11 +335,13 @@ func verifyDroppedTags(t *testing.T, diff *dtos.TagDifference, separateTags ...m
 func TestUpdateTag(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		op := OpChamberOfSecrets
+		description := "Tag about earth"
 		i := services.UpdateTagInput{
 			ID:            TagEarth.ID,
 			OperationSlug: op.Slug,
 			Name:          "Moon",
 			ColorName:     "green",
+			Description:   &description,
 		}
 
 		ctx := contextForUser(UserHarry, db)
@@ -348,6 +354,7 @@ func TestUpdateTag(t *testing.T) {
 			OperationID: op.ID,
 			Name:        "Moon",
 			ColorName:   "green",
+			Description: &description,
 			CreatedAt:   TagEarth.CreatedAt.Round(time.Second).UTC(),
 			UpdatedAt:   updatedTag.UpdatedAt,
 		}, updatedTag)
@@ -359,11 +366,13 @@ func TestUpdateDefaultTag(t *testing.T) {
 		normalUser := UserRon
 		adminUser := UserDumbledore
 		tagToUpdate := DefaultTagWho
+		description := "Tag about earth"
 
 		i := services.UpdateDefaultTagInput{
-			ID:        tagToUpdate.ID,
-			Name:      "How",
-			ColorName: "green",
+			ID:          tagToUpdate.ID,
+			Name:        "How",
+			ColorName:   "green",
+			Description: &description,
 		}
 
 		// verify that a normal user cannot update a default tags
@@ -378,11 +387,12 @@ func TestUpdateDefaultTag(t *testing.T) {
 
 		updatedTag := getDefaultTagByID(t, db, tagToUpdate.ID)
 		require.Equal(t, models.DefaultTag{
-			ID:        tagToUpdate.ID,
-			Name:      i.Name,
-			ColorName: i.ColorName,
-			CreatedAt: tagToUpdate.CreatedAt.Round(time.Second).UTC(),
-			UpdatedAt: updatedTag.UpdatedAt,
+			ID:          tagToUpdate.ID,
+			Name:        i.Name,
+			ColorName:   i.ColorName,
+			Description: &description,
+			CreatedAt:   tagToUpdate.CreatedAt.Round(time.Second).UTC(),
+			UpdatedAt:   updatedTag.UpdatedAt,
 		}, updatedTag)
 	})
 }

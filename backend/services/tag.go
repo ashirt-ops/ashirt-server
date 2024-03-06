@@ -19,11 +19,13 @@ type CreateTagInput struct {
 	Name          string
 	ColorName     string
 	OperationSlug string
+	Description   *string
 }
 
 type CreateDefaultTagInput struct {
-	Name      string
-	ColorName string
+	Name        string
+	ColorName   string
+	Description *string
 }
 
 type DeleteTagInput struct {
@@ -62,9 +64,10 @@ type ListTagsForOperationInput struct {
 }
 
 type UpdateDefaultTagInput struct {
-	ID        int64
-	Name      string
-	ColorName string
+	ID          int64
+	Name        string
+	ColorName   string
+	Description *string
 }
 
 type UpdateTagInput struct {
@@ -72,6 +75,7 @@ type UpdateTagInput struct {
 	OperationSlug string
 	Name          string
 	ColorName     string
+	Description   *string
 }
 
 func CreateTag(ctx context.Context, db *database.Connection, i CreateTagInput) (*dtos.Tag, error) {
@@ -92,14 +96,16 @@ func CreateTag(ctx context.Context, db *database.Connection, i CreateTagInput) (
 		"name":         i.Name,
 		"color_name":   i.ColorName,
 		"operation_id": operation.ID,
+		"description":  i.Description,
 	})
 	if err != nil {
 		return nil, backend.WrapError("Cannot add new tag", backend.DatabaseErr(err))
 	}
 	return &dtos.Tag{
-		ID:        tagID,
-		Name:      i.Name,
-		ColorName: i.ColorName,
+		ID:          tagID,
+		Name:        i.Name,
+		ColorName:   i.ColorName,
+		Description: i.Description,
 	}, nil
 }
 
@@ -114,16 +120,18 @@ func CreateDefaultTag(ctx context.Context, db *database.Connection, i CreateDefa
 	}
 
 	tagID, err := db.Insert("default_tags", map[string]interface{}{
-		"name":       i.Name,
-		"color_name": i.ColorName,
+		"name":        i.Name,
+		"color_name":  i.ColorName,
+		"description": i.Description,
 	})
 	if err != nil {
 		return nil, backend.WrapError("Cannot add new tag", backend.DatabaseErr(err))
 	}
 	return &dtos.DefaultTag{
-		ID:        tagID,
-		Name:      i.Name,
-		ColorName: i.ColorName,
+		ID:          tagID,
+		Name:        i.Name,
+		ColorName:   i.ColorName,
+		Description: i.Description,
 	}, nil
 }
 
@@ -147,8 +155,9 @@ func MergeDefaultTags(ctx context.Context, db *database.Connection, i []CreateDe
 
 	err := db.BatchInsert("default_tags", len(tagsToInsert), func(idx int) map[string]interface{} {
 		return map[string]interface{}{
-			"name":       tagsToInsert[idx].Name,
-			"color_name": tagsToInsert[idx].ColorName,
+			"name":        tagsToInsert[idx].Name,
+			"color_name":  tagsToInsert[idx].ColorName,
+			"description": tagsToInsert[idx].Description,
 		}
 	}, "ON DUPLICATE KEY UPDATE color_name=VALUES(color_name)")
 
@@ -345,9 +354,10 @@ func listTagsForOperation(db *database.Connection, operationID int64) ([]*dtos.T
 	for idx, tag := range tags {
 		tagsDTO[idx] = &dtos.TagWithUsage{
 			Tag: dtos.Tag{
-				ID:        tag.Tag.ID,
-				Name:      tag.Tag.Name,
-				ColorName: tag.Tag.ColorName,
+				ID:          tag.Tag.ID,
+				Name:        tag.Tag.Name,
+				ColorName:   tag.Tag.ColorName,
+				Description: tag.Tag.Description,
 			},
 			EvidenceCount: tag.TagCount,
 		}
@@ -362,7 +372,7 @@ func ListDefaultTags(ctx context.Context, db *database.Connection) ([]*dtos.Defa
 	}
 
 	var tags []models.Tag
-	err := db.Select(&tags, sq.Select("id", "name", "color_name").From("default_tags"))
+	err := db.Select(&tags, sq.Select("id", "name", "color_name", "description").From("default_tags"))
 
 	if err != nil {
 		return nil, backend.WrapError("Cannot get default tags", backend.DatabaseErr(err))
@@ -371,9 +381,10 @@ func ListDefaultTags(ctx context.Context, db *database.Connection) ([]*dtos.Defa
 	tagsDTO := make([]*dtos.DefaultTag, len(tags))
 	for idx, tag := range tags {
 		tagsDTO[idx] = &dtos.DefaultTag{
-			ID:        tag.ID,
-			Name:      tag.Name,
-			ColorName: tag.ColorName,
+			ID:          tag.ID,
+			Name:        tag.Name,
+			ColorName:   tag.ColorName,
+			Description: tag.Description,
 		}
 	}
 	return tagsDTO, nil
@@ -392,8 +403,9 @@ func UpdateTag(ctx context.Context, db *database.Connection, i UpdateTagInput) e
 
 	err = db.Update(sq.Update("tags").
 		SetMap(map[string]interface{}{
-			"name":       i.Name,
-			"color_name": i.ColorName,
+			"name":        i.Name,
+			"color_name":  i.ColorName,
+			"description": i.Description,
 		}).
 		Where(sq.Eq{"id": i.ID}))
 
@@ -410,8 +422,9 @@ func UpdateDefaultTag(ctx context.Context, db *database.Connection, i UpdateDefa
 
 	err := db.Update(sq.Update("default_tags").
 		SetMap(map[string]interface{}{
-			"name":       i.Name,
-			"color_name": i.ColorName,
+			"name":        i.Name,
+			"color_name":  i.ColorName,
+			"description": i.Description,
 		}).
 		Where(sq.Eq{"id": i.ID}))
 

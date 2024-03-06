@@ -129,8 +129,8 @@ func TestTaggingFindings(t *testing.T) {
 
 	// Check that tags are populated from attached evidence
 	a.Get("/web/operations/op/findings").Do().ExpectSubsetJSONArray([]string{
-		`{"title": "f2", "tags": [{"id": 2, "name": "Lateral Movement", "colorName": "blue"}], "occurredFrom": "2019-06-01T10:00:00Z", "occurredTo": "2019-07-01T10:00:00Z"}`,
-		`{"title": "f3", "tags": [{"id": 1, "name": "Exploitation", "colorName": "red"}], "occurredFrom": "2019-05-01T10:00:00Z", "occurredTo": "2019-07-01T10:00:00Z"}`,
-		`{"title": "f1", "tags": [{"id": 1,"name": "Exploitation", "colorName": "red"}, {"id": 2, "name": "Lateral Movement", "colorName": "blue"}], "occurredFrom": "2019-05-01T10:00:00Z", "occurredTo": "2019-06-01T10:00:00Z"}`,
+		`{"title": "f2", "tags": [{"id": 2, "name": "Lateral Movement", "colorName": "blue", "description": null}], "occurredFrom": "2019-06-01T10:00:00Z", "occurredTo": "2019-07-01T10:00:00Z"}`,
+		`{"title": "f3", "tags": [{"id": 1, "name": "Exploitation", "colorName": "red", "description": null}], "occurredFrom": "2019-05-01T10:00:00Z", "occurredTo": "2019-07-01T10:00:00Z"}`,
+		`{"title": "f1", "tags": [{"id": 1,"name": "Exploitation", "colorName": "red", "description": null}, {"id": 2, "name": "Lateral Movement", "colorName": "blue", "description": null}], "occurredFrom": "2019-05-01T10:00:00Z", "occurredTo": "2019-06-01T10:00:00Z"}`,
 	})
 }

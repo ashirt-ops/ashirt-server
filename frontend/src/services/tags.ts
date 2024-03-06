@@ -5,10 +5,11 @@ export async function createTag(i: {
   operationSlug: string,
   name: string,
   colorName: string,
+  description?: string,
 }): Promise<Tag> {
   return await ds.createTag(
     { operationSlug: i.operationSlug },
-    { name: i.name, colorName: i.colorName },
+    { name: i.name, colorName: i.colorName, description: i.description },
   )
 }
 
@@ -30,10 +31,11 @@ export async function updateTag(i: {
   operationSlug: string,
   name: string,
   colorName: string,
+  description?: string,
 }): Promise<void> {
   await ds.updateTag(
     { operationSlug: i.operationSlug, tagId: i.id },
-    { name: i.name, colorName: i.colorName },
+    { name: i.name, colorName: i.colorName, description: i.description },
   )
 }
 
@@ -44,9 +46,10 @@ export async function getDefaultTags(): Promise<Array<DefaultTag>> {
 export async function createDefaultTag(i: {
   name: string,
   colorName: string,
+  description?: string,
 }): Promise<DefaultTag> {
   return await ds.createDefaultTag(
-    { name: i.name, colorName: i.colorName },
+    { name: i.name, colorName: i.colorName, description: i.description },
   )
 }
 
@@ -60,16 +63,18 @@ export async function updateDefaultTag(i: {
   id: number,
   name: string,
   colorName: string,
+  description?: string,
 }): Promise<void> {
   await ds.updateDefaultTag(
     { tagId: i.id },
-    { name: i.name, colorName: i.colorName },
+    { name: i.name, colorName: i.colorName, description: i.description },
   )
 }
 
 export async function mergeDefaultTags(i: Array<{
   name: string,
   colorName: string,
+  description?: string,
 }>) {
   await ds.mergeDefaultTags(i)
 }

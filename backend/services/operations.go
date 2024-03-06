@@ -79,10 +79,11 @@ func CreateOperation(ctx context.Context, db *database.Connection, i CreateOpera
 		tx.Exec(sq.Insert("tags").
 			Columns(
 				"name", "color_name",
+				"description",
 				"operation_id",
 			).
 			Select(sq.Select(
-				"name", "color_name",
+				"name", "color_name", "description",
 				fmt.Sprintf("%v AS operation_id", operationID),
 			).From("default_tags")),
 		)

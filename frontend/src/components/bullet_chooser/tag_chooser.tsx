@@ -7,6 +7,9 @@ import { randomTagColorName, TagColor, shiftColor } from 'src/helpers/tag_colors
 import BulletChooser, { BulletProps } from 'src/components/bullet_chooser'
 import { FilterModified } from 'src/helpers'
 import { isNotUndefined } from 'src/helpers/is_not_undefined'
+import classNames from 'classnames/bind'
+
+const cx = classNames.bind(require('./stylesheet.styl'))
 
 export const TagChooser = (props: {
   operationSlug: string,
@@ -35,6 +38,12 @@ export const TagChooser = (props: {
       onChange={props.onChange}
       valueRenderer={(b) => (
         <Tag name={b.bullet.name} color={b.bullet.colorName} {...b} />
+      )}
+      rowRenderer={(b) => (
+        <>
+          <Tag name={b.bullet.name} color={b.bullet.colorName} {...b} />
+          {b.bullet.description && <p className={cx('tag-description')}>{b.bullet.description}</p>}
+        </>
       )}
       noValueRenderer={(inputValue: string) => <CreateNewTagElem name={inputValue} />}
       onNoValueSelected={

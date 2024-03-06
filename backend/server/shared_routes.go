@@ -43,6 +43,7 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 			Name:          dr.FromBody("name").Required().AsString(),
 			ColorName:     dr.FromBody("colorName").AsString(),
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
+			Description:   dr.FromBody("description").AsStringPtr(),
 		}
 		if dr.Error != nil {
 			return nil, dr.Error

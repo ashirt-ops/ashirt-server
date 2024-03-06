@@ -21,6 +21,7 @@ export default function BulletChooser<T extends BulletProps>(props: {
   value: Array<T>
   onNoValueSelected?: (inputValue: string) => Promise<T | null>
   valueRenderer?: BulletRenderer<T>
+  rowRenderer?: BulletRenderer<T>
   noValueRenderer?: (inputValue: string) => React.ReactNode
   onChange: (tags: Array<T>) => void
   className?: string
@@ -49,7 +50,7 @@ export default function BulletChooser<T extends BulletProps>(props: {
     }
   }
 
-  const { valueRenderer, noValueRenderer } = props
+  const { valueRenderer, rowRenderer, noValueRenderer } = props
   const renderValFn = valueRenderer ?? StandardBulletRenderer
   const filteredValues = getOptions()
 
@@ -118,7 +119,7 @@ export default function BulletChooser<T extends BulletProps>(props: {
     if (bullet == null) {
       return noValueRenderer?.(inputValue) ?? <StandardNoValRenderer />
     }
-    return renderValFn({ bullet })
+    return rowRenderer ? rowRenderer({ bullet }) : renderValFn({ bullet })
   }
 
   // If there are no filtered tags we add a null option to render the "Create new tag" option
