@@ -86,7 +86,7 @@ export default (props: {
   if (activeEvidence == null) return null
 
   return (
-    <EvidencesContextProvider activeEvidence={activeEvidence}>
+    <EvidencesContextProvider>
       <div className={cx('root')} ref={rootRef}>
         {props.evidence.map((evi, idx) => {
           const active = activeChildIndex === idx
