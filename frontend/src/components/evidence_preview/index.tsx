@@ -10,6 +10,8 @@ import LazyLoadComponent from 'src/components/lazy_load_component'
 
 
 import TerminalPlayer from 'src/components/terminal_player'
+import { useEvidenceContext } from 'src/contexts/evidences_context'
+import { isAfter } from 'date-fns'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -41,8 +43,6 @@ export default (props: {
   fitToContainer?: boolean,
   useS3Url: boolean,
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
-  urlSetter?: (urlData: UrlData | null) => void,
-  preSavedS3UrlData?: UrlData,
 }) => {
   const Component = getComponent(props.contentType)
   if (Component == null) return null
@@ -68,8 +68,6 @@ type EvidenceProps = {
   viewHint?: EvidenceViewHint,
   interactionHint?: InteractionHint,
   useS3Url: boolean
-  urlSetter?: (urlData: UrlData) => void,
-  preSavedS3UrlData?: UrlData,
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
@@ -81,21 +79,31 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
   return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
 }
 
+const shouldUseCachedUrl = (imgData: UrlData | undefined, props: EvidenceProps) => (
+  imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date())
+)
+
 const EvidenceImage = (props: EvidenceProps) => {
+  const { imgDataSetter, cachedUrls } = useEvidenceContext()
   let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-  const now = new Date()
-  if (props.useS3Url && props.preSavedS3UrlData && new Date(props.preSavedS3UrlData.expirationTime) > now){
-    url = props.preSavedS3UrlData.url
+
+  const imgData = cachedUrls.get(props.evidenceUuid)
+
+  if (shouldUseCachedUrl(imgData, props)) {
+    url = imgData?.url as string
   } else if (props.useS3Url) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidenceUuid,
     }), [props.operationSlug, props.evidenceUuid]))
+
     wiredUrl.expose(s3url => {
-      props.urlSetter && props.urlSetter(s3url)
+      imgDataSetter(props.evidenceUuid, s3url)
       url = s3url.url
     })
   }
+
   return <img src={url} />
 }
 

@@ -6,12 +6,13 @@ import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
 import Help from 'src/components/help'
 import { ClickPopover } from 'src/components/popover'
-import { Tag, Evidence, UrlData } from 'src/global_types'
+import { Tag, Evidence } from 'src/global_types'
 import { addTagToQuery, addOperatorToQuery } from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CopyTextButton } from 'src/components/text_copiers'
 import { format } from 'date-fns'
 import { default as Menu, MenuItem } from 'src/components/menu'
+import EvidencesContextProvider from 'src/contexts/evidences_context'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -36,7 +37,7 @@ export default (props: {
 
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
-  const [currImageUrlData, setCurrImageUrlData] = React.useState<UrlData| null>(null)
+  // const [currImageData, setCurrImageData] = React.useState<UrlData| null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -84,43 +85,43 @@ export default (props: {
   const activeEvidence = props.evidence[activeChildIndex]
   if (activeEvidence == null) return null
 
-  return <>
-    <div className={cx('root')} ref={rootRef}>
-      {props.evidence.map((evi, idx) => {
-        const active = activeChildIndex === idx
-        return (
-          <TimelineRow
-            {...props}
-            focusUuid={props.scrollToUuid}
-            active={active}
-            urlSetter={active ? setCurrImageUrlData : undefined}
-            evidence={evi}
-            key={evi.uuid}
-            onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
-            onClick={() => setActiveChildIndex(idx)}
-          />
-        )
-      })}
-      <Help className={cx('help')}
-        preamble="Review and Edit the accumulated evidence for this operation"
-        shortcuts={KeyboardShortcuts}
-      />
-    </div>
-    <Lightbox canUseFitToggle={activeEvidence.contentType == "image"}
-      isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
-      <div ref={lightboxRef}>
-        <EvidencePreview
-          operationSlug={props.operationSlug}
-          evidenceUuid={activeEvidence.uuid}
-          contentType={activeEvidence.contentType}
-          useS3Url={activeEvidence.sendUrl}
-          preSavedS3UrlData={currImageUrlData ? currImageUrlData : undefined}
-          viewHint="large"
-          interactionHint="active"
+  return (
+    <EvidencesContextProvider>
+      <div className={cx('root')} ref={rootRef}>
+        {props.evidence.map((evi, idx) => {
+          const active = activeChildIndex === idx
+          return (
+              <TimelineRow
+                {...props}
+                focusUuid={props.scrollToUuid}
+                active={active}
+                evidence={evi}
+                key={evi.uuid}
+                onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
+                onClick={() => setActiveChildIndex(idx)}
+              />
+          )
+        })}
+        <Help className={cx('help')}
+          preamble="Review and Edit the accumulated evidence for this operation"
+          shortcuts={KeyboardShortcuts}
         />
       </div>
-    </Lightbox>
-  </>
+      <Lightbox canUseFitToggle={activeEvidence.contentType == "image"}
+        isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
+        <div ref={lightboxRef}>
+            <EvidencePreview
+              operationSlug={props.operationSlug}
+              evidenceUuid={activeEvidence.uuid}
+              contentType={activeEvidence.contentType}
+              useS3Url={activeEvidence.sendUrl}
+              viewHint="large"
+              interactionHint="active"
+            />
+        </div>
+      </Lightbox>
+    </EvidencesContextProvider>
+  )
 }
 
 const TimelineRow = (props: {
@@ -133,8 +134,7 @@ const TimelineRow = (props: {
   query: string,
   focusUuid?: string,
   onPreviewClick: () => void,
-  onClick: () => void,
-  urlSetter?: (urlData: UrlData | null) => void,
+  onClick: () => void
 }) => {
   const self = React.useRef<null | HTMLDivElement>(null)
 
@@ -167,7 +167,6 @@ const TimelineRow = (props: {
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
           useS3Url={props.evidence.sendUrl}
-          urlSetter={props.urlSetter}
           viewHint="medium"
           interactionHint="inactive"
         />
