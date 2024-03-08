@@ -198,7 +198,7 @@ func DeleteEvidence(ctx context.Context, db *database.Connection, contentStore c
 	return nil
 }
 
-func ListEvidenceForFinding(ctx context.Context, db *database.Connection, i ListEvidenceForFindingInput) ([]dtos.Evidence, error) {
+func ListEvidenceForFinding(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i ListEvidenceForFindingInput) ([]dtos.Evidence, error) {
 	operation, finding, err := lookupOperationFinding(db, i.OperationSlug, i.FindingUUID)
 	if err != nil {
 		return nil, backend.WrapError("Unable to list evidence for finding", backend.UnauthorizedReadErr(err))
@@ -234,19 +234,33 @@ func ListEvidenceForFinding(ctx context.Context, db *database.Connection, i List
 		return nil, backend.WrapError("Cannot get tags for evidnece", backend.UnauthorizedReadErr(err))
 	}
 
+	usingS3 := false
+	if _, ok := contentStore.(*contentstore.S3Store); ok {
+		usingS3 = true
+	}
+
 	var evidenceDTOs = make([]dtos.Evidence, len(evidenceForFinding))
 	for i, evi := range evidenceForFinding {
 		tags := tagsByEvidenceID[evi.Evidence.ID]
 		if tags == nil {
 			tags = []dtos.Tag{}
 		}
+
+		sendURL := false
+		if usingS3 && evi.ContentType == "image" {
+			sendURL = true
+		}
+
 		evidenceDTOs[i] = dtos.Evidence{
-			UUID:        evi.UUID,
-			ContentType: evi.ContentType,
-			Description: evi.Description,
-			OccurredAt:  evi.OccurredAt,
-			AdjustedAt:  evi.AdjustedAt,
-			Tags:        tags,
+			UUID:          evi.UUID,
+			ContentType:   evi.ContentType,
+			Description:   evi.Description,
+			OccurredAt:    evi.OccurredAt,
+			AdjustedAt:    evi.AdjustedAt,
+			Tags:          tags,
+			SendUrl:       sendURL,
+			FullImageKey:  evi.FullImageKey,
+			ThumbImageKey: evi.ThumbImageKey,
 			Operator: dtos.User{
 				Slug:      evi.Slug,
 				FirstName: evi.FirstName,
