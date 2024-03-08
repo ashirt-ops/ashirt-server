@@ -417,7 +417,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		return services.ListEvidenceForFinding(r.Context(), db, i)
+		return services.ListEvidenceForFinding(r.Context(), db, contentStore, i)
 	}))
 
 	route(r, "PUT", "/operations/{operation_slug}/findings/{finding_uuid}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {

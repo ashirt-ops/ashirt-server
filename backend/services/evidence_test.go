@@ -170,6 +170,7 @@ func getAssociatedFindings(t *testing.T, db *database.Connection, evidenceID int
 func TestListEvidenceForFinding(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		ctx := contextForUser(UserRon, db)
+		cs, _ := contentstore.NewMemStore()
 
 		masterOp := OpChamberOfSecrets
 		masterFinding := FindingBook2Magic
@@ -182,7 +183,7 @@ func TestListEvidenceForFinding(t *testing.T) {
 			FindingUUID:   FindingBook2Magic.UUID,
 		}
 
-		foundEvidence, err := services.ListEvidenceForFinding(ctx, db, input)
+		foundEvidence, err := services.ListEvidenceForFinding(ctx, db, cs, input)
 		require.NoError(t, err)
 		require.Equal(t, len(foundEvidence), len(allEvidence))
 		validateEvidenceSets(t, foundEvidence, allEvidence, validateEvidence)
