@@ -9,7 +9,7 @@ import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
 import Help from 'src/components/help'
 import { ClickPopover } from 'src/components/popover'
-import { Tag, Evidence } from 'src/global_types'
+import { Tag, Evidence, UrlData } from 'src/global_types'
 import { addTagToQuery, addOperatorToQuery } from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CopyTextButton } from 'src/components/text_copiers'
@@ -39,6 +39,7 @@ export default (props: {
 
   const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
   const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
+  const [currImageUrlData, setCurrImageUrlData] = React.useState<UrlData| null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -88,17 +89,21 @@ export default (props: {
 
   return <>
     <div className={cx('root')} ref={rootRef}>
-      {props.evidence.map((evi, idx) => (
-        <TimelineRow
-          {...props}
-          focusUuid={props.scrollToUuid}
-          active={activeChildIndex === idx}
-          evidence={evi}
-          key={evi.uuid}
-          onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
-          onClick={() => setActiveChildIndex(idx)}
-        />
-      ))}
+      {props.evidence.map((evi, idx) => {
+        const active = activeChildIndex === idx
+        return (
+          <TimelineRow
+            {...props}
+            focusUuid={props.scrollToUuid}
+            active={active}
+            urlSetter={active ? setCurrImageUrlData : undefined}
+            evidence={evi}
+            key={evi.uuid}
+            onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
+            onClick={() => setActiveChildIndex(idx)}
+          />
+        )
+      })}
       <Help className={cx('help')}
         preamble="Review and Edit the accumulated evidence for this operation"
         shortcuts={KeyboardShortcuts}
@@ -111,6 +116,8 @@ export default (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={activeEvidence.uuid}
           contentType={activeEvidence.contentType}
+          useS3Url={activeEvidence.sendUrl}
+          preSavedS3UrlData={currImageUrlData ? currImageUrlData : undefined}
           viewHint="large"
           interactionHint="active"
         />
@@ -130,6 +137,7 @@ const TimelineRow = (props: {
   focusUuid?: string,
   onPreviewClick: () => void,
   onClick: () => void,
+  urlSetter?: (urlData: UrlData | null) => void,
 }) => {
   const self = React.useRef<null | HTMLDivElement>(null)
 
@@ -158,6 +166,8 @@ const TimelineRow = (props: {
           operationSlug={props.operationSlug}
           evidenceUuid={props.evidence.uuid}
           contentType={props.evidence.contentType}
+          useS3Url={props.evidence.sendUrl}
+          urlSetter={props.urlSetter}
           viewHint="medium"
           interactionHint="inactive"
         />

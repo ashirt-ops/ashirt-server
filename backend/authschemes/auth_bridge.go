@@ -126,6 +126,10 @@ func (ah AShirtAuthBridge) GetUserFromID(userID int64) (models.User, error) {
 	return ah.db.RetrieveUserByID(userID)
 }
 
+func (ah AShirtAuthBridge) GetUserFromAuthnID(authnID string) (models.User, error) {
+	return ah.db.RetrieveUserIDByAuthnID(authnID)
+}
+
 // DeleteSession removes a user's session. Useful in situtations where authentication fails,
 // and we want to treat the user as not-logged-in
 func (ah AShirtAuthBridge) DeleteSession(w http.ResponseWriter, r *http.Request) error {

@@ -1,4 +1,4 @@
-import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata, C2Event } from 'src/global_types'
+import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata, UrlData, C2Event } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { evidenceFromDto } from './data_sources/converters'
@@ -37,6 +37,17 @@ export async function getEvidenceAsCodeblock(i: {
     language: evi.contentSubtype,
     code: evi.content,
     source: evi.metadata ? evi.metadata['source'] : null,
+  }
+}
+
+export async function getEvidenceAsUrlData(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<UrlData> {
+  const evi = JSON.parse(await ds.readEvidenceContent(i))
+  return {
+    url: evi.url,
+    expirationTime: evi.expirationTime,
   }
 }
 

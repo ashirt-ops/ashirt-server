@@ -38,6 +38,9 @@ type Seeder struct {
 	EviFindingsMap    []models.EvidenceFindingMap
 	Queries           []models.Query
 	ServiceWorkers    []models.ServiceWorker
+	GlobalVars        []models.GlobalVar
+	OperationVars     []models.OperationVar
+	VarOperationMap   []models.VarOperationMap
 }
 
 // AllInitialTagIds is a (convenience) method version of the function TagIDsFromTags
@@ -260,6 +263,33 @@ func (seed Seeder) ApplyTo(db *database.Connection) error {
 				"created_at": seed.ServiceWorkers[i].CreatedAt,
 				"updated_at": seed.ServiceWorkers[i].UpdatedAt,
 				"deleted_at": seed.ServiceWorkers[i].DeletedAt,
+			}
+		})
+		tx.BatchInsert("global_vars", len(seed.GlobalVars), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.GlobalVars[i].ID,
+				"name":       seed.GlobalVars[i].Name,
+				"value":      seed.GlobalVars[i].Value,
+				"created_at": seed.GlobalVars[i].CreatedAt,
+				"updated_at": seed.GlobalVars[i].UpdatedAt,
+			}
+		})
+		tx.BatchInsert("operation_vars", len(seed.OperationVars), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"id":         seed.OperationVars[i].ID,
+				"slug":       seed.OperationVars[i].Slug,
+				"name":       seed.OperationVars[i].Name,
+				"value":      seed.OperationVars[i].Value,
+				"created_at": seed.OperationVars[i].CreatedAt,
+				"updated_at": seed.OperationVars[i].UpdatedAt,
+			}
+		})
+		tx.BatchInsert("var_operation_map", len(seed.VarOperationMap), func(i int) map[string]interface{} {
+			return map[string]interface{}{
+				"var_id":       seed.VarOperationMap[i].VarID,
+				"operation_id": seed.VarOperationMap[i].OperationID,
+				"created_at":   seed.VarOperationMap[i].CreatedAt,
+				"updated_at":   seed.VarOperationMap[i].UpdatedAt,
 			}
 		})
 	})

@@ -259,7 +259,7 @@ func ListEvidenceForFinding(ctx context.Context, db *database.Connection, i List
 
 // ListEvidenceForOperation retrieves all evidence for a particular operation id matching a particular
 // set of filters (e.g. tag:some_tag)
-func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i ListEvidenceForOperationInput) ([]*dtos.Evidence, error) {
+func ListEvidenceForOperation(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i ListEvidenceForOperationInput) ([]*dtos.Evidence, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
 	if err != nil {
 		return nil, backend.WrapError("Unable to list evidence for an operation", backend.UnauthorizedReadErr(err))
@@ -318,11 +318,22 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 	}
 
 	evidenceDTO := make([]*dtos.Evidence, len(evidence))
+
+	usingS3 := false
+	if _, ok := contentStore.(*contentstore.S3Store); ok {
+		usingS3 = true
+	}
+
 	for idx, evi := range evidence {
 		tags, ok := tagsByEvidenceID[evi.ID]
 
 		if !ok {
 			tags = []dtos.Tag{}
+		}
+
+		sendURL := false
+		if usingS3 && evi.ContentType == "image" {
+			sendURL = true
 		}
 
 		evidenceDTO[idx] = &dtos.Evidence{
@@ -332,11 +343,28 @@ func ListEvidenceForOperation(ctx context.Context, db *database.Connection, i Li
 			OccurredAt:  evi.OccurredAt,
 			ContentType: evi.ContentType,
 			Tags:        tags,
+			SendUrl:     sendURL,
 		}
 	}
 	return evidenceDTO, nil
 }
 
+func SendURLData(ctx context.Context, db *database.Connection, contentStore *contentstore.S3Store, i ReadEvidenceInput) (*contentstore.URLData, error) {
+	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
+	if err != nil {
+		return nil, backend.WrapError("Unable to read evidence", backend.UnauthorizedReadErr(err))
+	}
+	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
+		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
+	}
+	urlData, err := contentStore.SendURLData(evidence.FullImageKey)
+	if err != nil {
+		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
+	}
+
+	return urlData, nil
+
+}
 func ReadEvidence(ctx context.Context, db *database.Connection, contentStore contentstore.Store, i ReadEvidenceInput) (*ReadEvidenceOutput, error) {
 	operation, evidence, err := lookupOperationEvidence(db, i.OperationSlug, i.EvidenceUUID)
 	if err != nil {

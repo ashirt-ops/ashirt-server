@@ -237,3 +237,30 @@ type ServiceWorker struct {
 	UpdatedAt *time.Time `db:"updated_at"`
 	DeletedAt *time.Time `db:"deleted_at"`
 }
+
+// GlobalVar reflects the structure of the database table 'global_vars'
+type GlobalVar struct {
+	ID        int64      `db:"id"`
+	Name      string     `db:"name"`
+	Value     string     `db:"value"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+// OperationVar reflects the structure of the database table 'operation_vars'
+type OperationVar struct {
+	ID        int64      `db:"id"`
+	Slug      string     `db:"slug"`
+	Name      string     `db:"name"`
+	Value     string     `db:"value"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+// VarOperationMap reflects the structure of the database table 'var_operation_map'
+type VarOperationMap struct {
+	VarID       int64      `db:"var_id"`
+	OperationID int64      `db:"operation_id"`
+	CreatedAt   time.Time  `db:"created_at"`
+	UpdatedAt   *time.Time `db:"updated_at"`
+}

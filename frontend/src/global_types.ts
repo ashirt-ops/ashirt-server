@@ -138,6 +138,7 @@ export type Evidence = {
   occurredAt: Date,
   tags: Array<Tag>,
   contentType: SupportedEvidenceType
+  sendUrl: boolean,
 }
 
 export type ExportedEvidence = Omit<Evidence, 'tags' | 'uuid'> & {
@@ -356,6 +357,32 @@ export interface Codeblock {
   metadata: {
     source: string,
   }
+}
+
+export type GlobalVar = {
+  name: string,
+  value: string,
+}
+
+export type OperationVar = {
+  name: string,
+  value: string,
+  varSlug: string,
+  operationSlug: string,
+}
+
+export type GlobalVariableData = {
+  variable: GlobalVar,
+}
+
+export type OperationVariableData = {
+  operationSlug: string,
+  variable: OperationVar,
+}
+
+export type UrlData = {
+  url: string,
+  expirationTime: Date,
 }
 
 export interface C2EventInterface {

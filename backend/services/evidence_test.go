@@ -195,6 +195,7 @@ func TestListEvidenceForFinding(t *testing.T) {
 func TestListEvidenceForOperation(t *testing.T) {
 	RunResettableDBTest(t, func(db *database.Connection, _ TestSeedData) {
 		ctx := contextForUser(UserRon, db)
+		cs, _ := contentstore.NewMemStore()
 
 		masterOp := OpChamberOfSecrets
 		allEvidence := getFullEvidenceByOperationID(t, db, masterOp.ID)
@@ -206,7 +207,7 @@ func TestListEvidenceForOperation(t *testing.T) {
 			Filters:       helpers.TimelineFilters{},
 		}
 
-		foundEvidence, err := services.ListEvidenceForOperation(ctx, db, input)
+		foundEvidence, err := services.ListEvidenceForOperation(ctx, db, cs, input)
 		require.NoError(t, err)
 		require.Equal(t, len(foundEvidence), len(allEvidence))
 		validateEvidenceSets(t, toRealEvidenceList(foundEvidence), allEvidence, validateEvidence)

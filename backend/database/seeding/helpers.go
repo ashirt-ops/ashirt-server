@@ -296,6 +296,39 @@ func newServiceWorkerGen(first int64) func(name, config string) models.ServiceWo
 	}
 }
 
+func newGlobalVarGen(first int64) func(name, value string) models.GlobalVar {
+	id := iotaLike(first)
+	return func(name, value string) models.GlobalVar {
+		return models.GlobalVar{
+			ID:        id(),
+			Value:     value,
+			Name:      name,
+			CreatedAt: time.Now(),
+		}
+	}
+}
+
+func newOperationVarGen(first int64) func(slug, name, value string) models.OperationVar {
+	id := iotaLike(first)
+	return func(slug, name, value string) models.OperationVar {
+		return models.OperationVar{
+			ID:        id(),
+			Slug:      slug,
+			Value:     value,
+			Name:      name,
+			CreatedAt: time.Now(),
+		}
+	}
+}
+
+func associateVarsToOperation(op models.Operation, vars ...models.OperationVar) []models.VarOperationMap {
+	mappings := make([]models.VarOperationMap, 0, len(vars))
+	for _, opVar := range vars {
+		mappings = append(mappings, models.VarOperationMap{OperationID: op.ID, VarID: opVar.ID, CreatedAt: time.Now()})
+	}
+	return mappings
+}
+
 // associateEvidenceToTag mirrors associateTagsToEvidence. Rather than associating multiple tags
 // with a single piece of evidence this will instead associate a single tag to multiple evidence.
 func associateEvidenceToTag(tag models.Tag, evis ...models.Evidence) []models.TagEvidenceMap {
@@ -358,6 +391,19 @@ func unionEviFindingMap(parts ...[]models.EvidenceFindingMap) []models.EvidenceF
 		totalLength += len(p)
 	}
 	result := make([]models.EvidenceFindingMap, totalLength)
+	copied := 0
+	for _, part := range parts {
+		copied += copy(result[copied:], part)
+	}
+	return result
+}
+
+func unionVarOperationMap(parts ...[]models.VarOperationMap) []models.VarOperationMap {
+	totalLength := 0
+	for _, p := range parts {
+		totalLength += len(p)
+	}
+	result := make([]models.VarOperationMap, totalLength)
 	copied := 0
 	for _, part := range parts {
 		copied += copy(result[copied:], part)

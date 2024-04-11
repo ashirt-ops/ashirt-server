@@ -23,6 +23,7 @@ type Evidence struct {
 	Operator    User      `json:"operator"`
 	Tags        []Tag     `json:"tags"`
 	ContentType string    `json:"contentType"`
+	SendUrl     bool      `json:"sendUrl"`
 }
 
 type EvidenceMetadata struct {
@@ -229,4 +230,16 @@ type ActiveServiceWorker struct {
 
 type Flags struct {
 	Flags []string `json:"flags"`
+}
+
+type GlobalVar struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type OperationVar struct {
+	OperationSlug string `json:"operationSlug"`
+	VarSlug       string `json:"varSlug"`
+	Name          string `json:"name"`
+	Value         string `json:"value"`
 }

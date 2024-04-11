@@ -13,6 +13,8 @@ type QueryId = { queryId: number }
 type TagId = { tagId: number }
 type FindingCategoryId = { findingCategoryId: number }
 type ServiceWorkerId = { serviceWorkerId: number }
+type Name = { name: string }
+type OpAndVarSlugs = { operationSlug: string, varSlug: string }
 
 type FindingPayload = {
   category: string,
@@ -137,6 +139,16 @@ export interface DataSource {
   adminInviteUser(i: { firstName: string, lastName?: string, email: string }): Promise<{ code: string }>,
   getTotpForUser(ids: UserSlug): Promise<boolean>
   deleteTotpForUser(ids: UserSlug): Promise<void>
+
+  listGlobalVars(): Promise<Array<dtos.GlobalVar>>
+  createGlobalVar(payload: { name: string, value: string | null }): Promise<dtos.GlobalVar>
+  updateGlobalVar(ids: Name, payload: { value: string | null, newName: string | null }): Promise<void>
+  deleteGlobalVar(ids: Name): Promise<void>
+
+  listOperationVars(ids: OpSlug): Promise<Array<dtos.OperationVar>>
+  createOperationVar(ids: OpSlug, payload: { varSlug: string, name: string, value: string | null }): Promise<dtos.OperationVar>
+  updateOperationVar(ids: OpAndVarSlugs, payload: {  value: string | null, name: string | null }): Promise<void>
+  deleteOperationVar(ids: OpAndVarSlugs): Promise<void>
 }
 
 // Since both dtos & this file only contains typescript types, webpack doesn't pick up the

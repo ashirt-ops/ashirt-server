@@ -41,7 +41,8 @@ export const BatchRunWorker = (props: {
           occurredAt: new Date(),
           tags: [],
           metadata: [],
-          contentType: 'image'
+          contentType: 'image',
+          sendUrl: false
         }))
       )}
       {...modalProps}

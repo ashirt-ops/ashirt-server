@@ -20,6 +20,7 @@ export type SharedProps = {
   placeholder?: string,
   readOnly?: boolean,
   value?: string,
+  adjustHeight?: boolean,
 }
 
 export default React.forwardRef((props: SharedProps & {
@@ -54,10 +55,22 @@ export default React.forwardRef((props: SharedProps & {
 ))
 
 export const TextArea = React.forwardRef((props: SharedProps & {
-}, ref: React.RefObject<HTMLTextAreaElement>) => (
+}, ref: React.RefObject<HTMLTextAreaElement>) => {
+  const adjustTextareaHeight = () => {
+    const element = document.getElementById("autoResizeTextarea");
+    element!.style.height = "auto";
+    element!.style.height = element!.scrollHeight < 400 ? element!.scrollHeight + "px": "400px";
+  };
+
+  props.adjustHeight && React.useEffect(() => {
+    adjustTextareaHeight();
+  }, []);
+
+  return (
   <WithLabel className={cx('root', props.className)} label={props.label}>
     <textarea
       ref={ref}
+      id="autoResizeTextarea"
       className={cx('input', 'textarea')}
       disabled={props.disabled}
       name={props.name}
@@ -70,4 +83,4 @@ export const TextArea = React.forwardRef((props: SharedProps & {
       value={props.value}
     />
   </WithLabel>
-))
+)})
