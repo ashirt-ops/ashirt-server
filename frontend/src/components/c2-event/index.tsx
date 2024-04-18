@@ -95,7 +95,7 @@ export const C2EventViewer = (props: {
       </div>
       <div className={cx('extIP')}>
         <Input
-                label="Exeternal IP"
+                label="External IP"
                 className={cx('c2-event-input')}
                 value={props.value.externalIP || ''}
                 disabled={props.disabled}
@@ -121,21 +121,20 @@ export const C2EventViewer = (props: {
         />
       </div>
       <div className={cx('command')}>
-        <Input
-                label="Command"
-                className={cx('c2-event-input')}
-                value={props.value.command || ''}
-                disabled={props.disabled}
-                readOnly
-            />
+      <C2EventTextArea
+          label="Command" className={cx('c2-event-input', 'resizeable')}
+          value={props.value.result || ''}
+          disabled={props.disabled}
+          readOnly
+      />
       </div>
       <div className={cx('result')}>
         <C2EventTextArea
-                  label="Result" className={cx('c2-event-input', 'resizeable')}
-                  value={props.value.result || ''}
-                  disabled={props.disabled}
-                  readOnly
-              />
+            label="Result" className={cx('c2-event-input', 'resizeable')}
+            value={props.value.result || ''}
+            disabled={props.disabled}
+            readOnly
+        />
         </div>
     </div>
   )
