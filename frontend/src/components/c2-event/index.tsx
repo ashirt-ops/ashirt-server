@@ -123,7 +123,7 @@ export const C2EventViewer = (props: {
       <div className={cx('command')}>
       <C2EventTextArea
           label="Command" className={cx('c2-event-input', 'resizeable')}
-          value={props.value.result || ''}
+          value={props.value.command || ''}
           disabled={props.disabled}
           readOnly
       />
