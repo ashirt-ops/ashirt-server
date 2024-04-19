@@ -1,4 +1,3 @@
-version: "3"
 services:
   ashirt-service:
     depends_on:
