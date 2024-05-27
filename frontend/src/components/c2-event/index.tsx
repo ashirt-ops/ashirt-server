@@ -1,6 +1,3 @@
-// Copyright 2020, Verizon Media
-// Licensed under the terms of the MIT. See LICENSE file in project root for terms.
-
 import * as React from 'react'
 import { default as Input, TextArea, SharedProps} from 'src/components/input'
 import { C2Event } from 'src/global_types'
@@ -10,27 +7,6 @@ import LoadingSpinner from 'src/components/loading_spinner'
 import WithLabel from 'src/components/with_label'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
-
-/*
-export const C2EventTextArea = React.forwardRef((props: SharedProps & {
-}, ref: React.RefObject<HTMLTextAreaElement>) => (
-  <WithLabel className={cx('root', props.className)} label={props.label}>
-    <textarea
-      ref={ref}
-      className={cx('c2-event-textarea')}
-      disabled={props.disabled}
-      name={props.name}
-      onBlur={props.onBlur}
-      onChange={e => { if (props.onChange) props.onChange(e.target.value) }}
-      onClick={props.onClick}
-      onFocus={props.onFocus}
-      onKeyDown={props.onKeyDown}
-      placeholder={props.placeholder}
-      value={props.value}
-    />
-  </WithLabel>
-))
-*/
 
 export const C2EventViewer = (props: {
   disabled?: boolean,
