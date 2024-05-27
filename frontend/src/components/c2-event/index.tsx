@@ -2,7 +2,7 @@
 // Licensed under the terms of the MIT. See LICENSE file in project root for terms.
 
 import * as React from 'react'
-import { default as Input, SharedProps} from 'src/components/input'
+import { default as Input, TextArea, SharedProps} from 'src/components/input'
 import { C2Event } from 'src/global_types'
 import ComboBox from 'src/components/combobox'
 import { useAsyncComponent } from 'src/helpers'
@@ -11,7 +11,7 @@ import WithLabel from 'src/components/with_label'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
-
+/*
 export const C2EventTextArea = React.forwardRef((props: SharedProps & {
 }, ref: React.RefObject<HTMLTextAreaElement>) => (
   <WithLabel className={cx('root', props.className)} label={props.label}>
@@ -30,11 +30,10 @@ export const C2EventTextArea = React.forwardRef((props: SharedProps & {
     />
   </WithLabel>
 ))
-
+*/
 
 export const C2EventViewer = (props: {
   disabled?: boolean,
-  //onChange: (newValue: C2Event) => void,
   value: C2Event,
 }) => {
   return (
@@ -121,7 +120,7 @@ export const C2EventViewer = (props: {
         />
       </div>
       <div className={cx('command')}>
-      <C2EventTextArea
+      <TextArea
           label="Command" className={cx('c2-event-input', 'resizeable')}
           value={props.value.command || ''}
           disabled={props.disabled}
@@ -129,7 +128,7 @@ export const C2EventViewer = (props: {
       />
       </div>
       <div className={cx('result')}>
-        <C2EventTextArea
+        <TextArea
             label="Result" className={cx('c2-event-input', 'resizeable')}
             value={props.value.result || ''}
             disabled={props.disabled}
@@ -140,7 +139,6 @@ export const C2EventViewer = (props: {
   )
 }
 
-// WIP..
 export const C2EventEditor = (props: {
   disabled?: boolean,
   onChange: (newValue: C2Event) => void,
@@ -233,7 +231,7 @@ export const C2EventEditor = (props: {
         />
       </div>
       <div className={cx('command')}>
-        <Input
+        <TextArea
                 label="Command"
                 className={cx('c2-event-input')}
                 value={props.value.command || ''}
@@ -242,7 +240,7 @@ export const C2EventEditor = (props: {
             />
       </div>
       <div className={cx('result')}>
-        <C2EventTextArea
+        <TextArea
                   label="Result" className={cx('c2-event-input', 'resizeable')}
                   value={props.value.result || ''}
                   disabled={props.disabled}
