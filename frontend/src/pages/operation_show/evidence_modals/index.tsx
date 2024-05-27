@@ -73,7 +73,7 @@ export const CreateEvidenceModal = (props: {
   const binaryBlobField = useFormField<File | null>(null)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
   const adjustedAtField = useFormField<Date | undefined>(undefined)
-  const c2EventField = useFormField<C2Event>({type: 'c2-event', c2: '', c2Operator: '', beacon: '', externalIP: '', internalIP: '', hostname: '', userContext: '', integrity: '', processName: '', processID: 0, command: '', result: ''})
+  const c2EventField = useFormField<C2Event>({type: 'c2-event', c2: '', c2Operator: '', beacon: '', externalIP: '', internalIP: '', hostname: '', userContext: '', integrity: '', processName: '', processID: '', command: '', result: ''})
 
   const isATerminalRecording = (file: File) => file.type == ''
   const isAnHttpRequestCycle = (file: File) => file.name.endsWith("har")
@@ -153,7 +153,7 @@ export const EditEvidenceModal = (props: {
   const tagsField = useFormField<Array<Tag>>(props.evidence.tags)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
   const adjustedAtField = useFormField<Date | undefined>(props.evidence.adjustedAt ?? undefined)
-  const c2EventField = useFormField<C2Event>({type: 'c2-event', c2: '', c2Operator: '', beacon: '', externalIP: '', internalIP: '', hostname: '', userContext: '', integrity: '', processName: '', processID: 0, command: '', result: ''})
+  const c2EventField = useFormField<C2Event>({type: 'c2-event', c2: '', c2Operator: '', beacon: '', externalIP: '', internalIP: '', hostname: '', userContext: '', integrity: '', processName: '', processID: '', command: '', result: ''})
   React.useEffect(() => {
       if (props.evidence.contentType !== 'codeblock' && props.evidence.contentType !== 'c2-event') {
       return

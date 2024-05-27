@@ -227,12 +227,7 @@ export const C2EventEditor = (props: {
             className={cx('c2-event-input')}
             value={props.value.processID !== undefined ? props.value.processID.toString() : ''}
             onChange={processID =>{
-              const pidNum = parseFloat(processID);
-              if (!isNaN(pidNum)) {
-                props.onChange({ ...props.value, processID: pidNum });
-              } else {
-                console.error('Invalid input. Please enter a number.'); // cowboy error handling... whats the ASHIRT way to do this?
-              }
+              props.onChange({ ...props.value, processID: processID });
             }}
             disabled={props.disabled}
         />

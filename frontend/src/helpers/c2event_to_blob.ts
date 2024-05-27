@@ -10,7 +10,7 @@ type JsonC2Evidence = {
     userContext: string,// The user context that the implant/beacon/agent is running under
     integrity: string,  // "Low", "Medium", "High", "System"
     processName: string,// process image file shortname
-    processID: number,  // is 'number' acceptable here? Its a float :/
+    processID: string,
     command: string,    // The actual command that an operator entered to task a beacon
     result: string,     // The result, if any, that a beacon responded to a tasking with
     metadata?: { [key: string]: string }
