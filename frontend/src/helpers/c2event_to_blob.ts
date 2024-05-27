@@ -30,9 +30,8 @@ export const c2eventToBlob = (c2e: C2Event): Blob => {
     processID: c2e.processID,
     command: c2e.command,
     result: c2e.result,
+    metadata: {},
   }
-
-    evidence.metadata = {}
 
   return new Blob([JSON.stringify(evidence)])
 }
