@@ -154,87 +154,65 @@ export const EditEvidenceModal = (props: {
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
   const adjustedAtField = useFormField<Date | undefined>(props.evidence.adjustedAt ?? undefined)
   const c2EventField = useFormField<C2Event>({type: 'c2-event', c2: '', c2Operator: '', beacon: '', externalIP: '', internalIP: '', hostname: '', userContext: '', integrity: '', processName: '', processID: 0, command: '', result: ''})
-  if (props.evidence.contentType === 'codeblock') {
-    React.useEffect(() => {
+  React.useEffect(() => {
+      if (props.evidence.contentType !== 'codeblock' && props.evidence.contentType !== 'c2-event') {
+      return
+    }
+    else if (props.evidence.contentType === 'codeblock') {
       getEvidenceAsCodeblock({
         operationSlug: props.operationSlug,
         evidenceUuid: props.evidence.uuid,
       }).then(codeblockField.onChange)
-    }, [props.evidence.contentType, codeblockField.onChange, props.operationSlug, props.evidence.uuid])
-    if (props.evidence.contentType !== 'codeblock') {
-      return
     }
-    const formComponentProps = useForm({
-      fields: [descriptionField, tagsField, codeblockField],
-      onSuccess: () => { props.onEdited(); props.onRequestClose() },
-      handleSubmit: () => updateEvidence({
-        operationSlug: props.operationSlug,
-        evidenceUuid: props.evidence.uuid,
-        adjustedAt: adjustedAtField.value,
-        description: descriptionField.value,
-        oldTags: props.evidence.tags,
-        newTags: tagsField.value,
-        updatedContent: props.evidence.contentType === 'codeblock' ? codeblockToBlob(codeblockField.value) : null,
-      }),
-    })
-    return (
-      <ModalForm title="Edit Evidence" submitText="Save" onRequestClose={props.onRequestClose} {...formComponentProps}>
-        <TextArea label="Description" {...descriptionField} />
-        {props.evidence.contentType === 'codeblock' && (
-          <CodeBlockEditor {...codeblockField} />
-        )}
-        <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
-        <WithLabel label='Occurred At'>
-        <Input
-          readOnly
-          value={isValid(props.evidence.occurredAt) ? format(props.evidence.occurredAt, "yyyy-dd-MM hh:mm") : ''}
-        />
-      </WithLabel>
-      <SplitInputRow
-        label="Adjusted Timestamp"
-        inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''}
-      >
-        <DateTimePicker
-          onSelectedDate={(date) => adjustedAtField.onChange(isValid(date) ? date : undefined)}
-          selected={adjustedAtField.value}
-        />
-      </SplitInputRow>
-      </ModalForm>
-    )
-  }
-  else if (props.evidence.contentType === 'c2-event') {
-    React.useEffect(() => {
+    else if (props.evidence.contentType === 'c2-event') {
       getEvidenceAsC2Event({
         operationSlug: props.operationSlug,
         evidenceUuid: props.evidence.uuid,
       }).then(c2EventField.onChange)
-    }, [props.evidence.contentType, c2EventField.onChange, props.operationSlug, props.evidence.uuid])
-    if (props.evidence.contentType !== 'c2-event') {
-      return
     }
-  }
+  }, [props.evidence.contentType, codeblockField.onChange, c2EventField.onChange, props.operationSlug, props.evidence.uuid])
+      
+      
   const formComponentProps = useForm({
-    fields: [descriptionField, tagsField, c2EventField],
+    fields: [descriptionField, tagsField, codeblockField, c2EventField],
     onSuccess: () => { props.onEdited(); props.onRequestClose() },
     handleSubmit: () => updateEvidence({
       operationSlug: props.operationSlug,
       evidenceUuid: props.evidence.uuid,
+      adjustedAt: adjustedAtField.value,
       description: descriptionField.value,
       oldTags: props.evidence.tags,
       newTags: tagsField.value,
-      updatedContent: props.evidence.contentType === 'c2-event' ? c2eventToBlob(c2EventField.value) : null,
+      updatedContent: props.evidence.contentType === 'codeblock' ? codeblockToBlob(codeblockField.value) : (props.evidence.contentType === 'c2-event' ? c2eventToBlob(c2EventField.value) : null),
     }),
   })
   return (
     <ModalForm title="Edit Evidence" submitText="Save" onRequestClose={props.onRequestClose} {...formComponentProps}>
       <TextArea label="Description" {...descriptionField} />
+      {props.evidence.contentType === 'codeblock' && (
+        <CodeBlockEditor {...codeblockField} />
+      )}
       {props.evidence.contentType === 'c2-event' && (
         <C2EventEditor {...c2EventField} />
       )}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
+      <WithLabel label='Occurred At'>
+      <Input
+        readOnly
+        value={isValid(props.evidence.occurredAt) ? format(props.evidence.occurredAt, "yyyy-dd-MM hh:mm") : ''}
+      />
+    </WithLabel>
+    <SplitInputRow
+      label="Adjusted Timestamp"
+      inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''}
+    >
+      <DateTimePicker
+        onSelectedDate={(date) => adjustedAtField.onChange(isValid(date) ? date : undefined)}
+        selected={adjustedAtField.value}
+      />
+    </SplitInputRow>
     </ModalForm>
   )
-  
 }
 
 export const ChangeFindingsOfEvidenceModal = (props: {
