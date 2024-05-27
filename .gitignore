@@ -19,3 +19,6 @@ cmd/client/client
 cmd/client/dropdown
 cmd/dropdown/dropdown
 cmd/web/web
+
+# Index
+index.html
