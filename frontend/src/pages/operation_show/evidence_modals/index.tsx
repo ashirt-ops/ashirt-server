@@ -90,6 +90,18 @@ export const CreateEvidenceModal = (props: {
   const [selectedCBValue, setSelectedCBValue] = React.useState<string>(evidenceTypeOptions[0].value)
   const getSelectedOption = () => evidenceTypeOptions.filter(opt => opt.value === selectedCBValue)[0]
 
+  // Validation logic for description and content fields
+  const validateForm = () => {
+    const errors = []
+    if (descriptionField.value.trim() === "") {
+      errors.push("Description cannot be empty.")
+    }
+    if (getSelectedOption().value !== 'event' && binaryBlobField.value === null && codeblockField.value.code.trim() === "") {
+      errors.push("Evidence content cannot be empty.")
+    }
+    return errors
+  }
+
   const formComponentProps = useForm({
     fields: [descriptionField, binaryBlobField, adjustedAtField],
     onSuccess: () => { props.onCreated(); props.onRequestClose() },
@@ -104,6 +116,11 @@ export const CreateEvidenceModal = (props: {
         data = { type: selectedOption.value, file: binaryBlobField.value }
       } else if (selectedOption.value === 'event') {
         data = { type: 'event' }
+      }
+
+      const formErrors = validateForm()
+      if (formErrors.length > 0) {
+        return Promise.reject(new Error(formErrors.join("\n")))
       }
 
       return createEvidence({
