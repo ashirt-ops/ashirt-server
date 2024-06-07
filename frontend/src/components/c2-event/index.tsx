@@ -179,7 +179,7 @@ export const C2EventEditor = (props: {
       </div>
       <div className={cx('extIP')}>
         <Input
-                label="Exeternal IP"
+                label="External IP"
                 className={cx('c2-event-input')}
                 value={props.value.externalIP || ''}
                 disabled={props.disabled}
