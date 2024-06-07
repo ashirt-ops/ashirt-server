@@ -93,6 +93,7 @@ export const C2EventViewer = (props: {
             className={cx('c2-event-input')}
             value={props.value.processID !== undefined ? props.value.processID.toString() : ''}
             disabled={props.disabled}
+            readOnly
         />
       </div>
       <div className={cx('command')}>
