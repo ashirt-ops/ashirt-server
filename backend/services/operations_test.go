@@ -217,6 +217,7 @@ func TestReadOperation(t *testing.T) {
 
 		masterOp := OpChamberOfSecrets
 		originalEvidence := getEvidenceForOperation(t, db, masterOp.ID)
+		harEvidence := helpers.Filter(originalEvidence, func(evi models.Evidence) bool {return evi.ContentType == "http-request-cycle"})
 
 		retrievedOp, err := services.ReadOperation(ctx, db, masterOp.Slug)
 		require.NoError(t, err)
@@ -233,7 +234,7 @@ func TestReadOperation(t *testing.T) {
 		require.Equal(t, int64(6), retrievedOp.EvidenceCount.ImageCount)
 		require.Equal(t, int64(0), retrievedOp.EvidenceCount.RecordingCount)
 		require.Equal(t, int64(0), retrievedOp.EvidenceCount.EventCount)
-		require.Equal(t, int64(0), retrievedOp.EvidenceCount.HarCount)
+		require.Equal(t, int64(len(harEvidence)), retrievedOp.EvidenceCount.HarCount)
 
 		require.Equal(t, len(seed.UsersForOp(masterOp)), retrievedOp.NumUsers)
 	})
