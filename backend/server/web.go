@@ -495,7 +495,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			LoadPreview:   dr.FromURL("type").AsString() == "preview",
 			LoadMedia:     dr.FromURL("type").AsString() == "media",
 		}
-
+		// No error checking needed (all from URL, all strings)
 		evidence, err := services.ReadEvidence(r.Context(), db, contentStore, i)
 		if err != nil {
 			return nil, backend.WrapError("Unable to read evidence", err)
@@ -523,6 +523,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			OperationSlug: dr.FromURL("operation_slug").AsString(),
 			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
 		}
+		// No error checking needed (all from URL, all strings)
 		return services.ReadEvidenceMetadata(r.Context(), db, i)
 	}))
 
@@ -534,6 +535,9 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			Source:        dr.FromBody("source").Required().AsString(),
 			Body:          dr.FromBody("body").Required().AsString(),
 		}
+		if dr.Error != nil {
+			return nil, dr.Error
+		}
 		return nil, services.CreateEvidenceMetadata(r.Context(), db, i)
 	}))
 
@@ -544,6 +548,9 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 			EvidenceUUID:  dr.FromURL("evidence_uuid").AsString(),
 			Source:        dr.FromBody("source").Required().AsString(),
 			Body:          dr.FromBody("body").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
 		}
 		return nil, services.UpdateEvidenceMetadata(r.Context(), db, i)
 	}))
@@ -638,6 +645,9 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 				DestinationOperationSlug: dr.FromURL("operation_slug").Required().AsString(),
 			},
 			SourceEvidenceUUID: dr.FromURL("evidence_uuid").Required().AsString(),
+		}
+		if dr.Error != nil {
+			return nil, dr.Error
 		}
 		return services.ListTagDifferenceForEvidence(r.Context(), db, i)
 	}))
