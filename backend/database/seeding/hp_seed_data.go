@@ -127,7 +127,7 @@ var HarryPotterSeedData = Seeder{
 		associateTagsToEvidence(EviFlyingCar, TagEarth, TagSaturn),
 		associateTagsToEvidence(EviDobby, TagMars, TagJupiter, TagMercury),
 		associateTagsToEvidence(EviPetrifiedHermione, TagMars, CommonTagWhatCoS, CommonTagWhoCoS),
-		associateTagsToEvidence(EviLazyHar, TagFamily),
+		associateTagsToEvidence(EviLazyHar, CommonTagWhatCoS),
 
 		associateTagsToEvidence(EviTristateTrophy, CommonTagWhoGoF, CommonTagWhereGoF, CommonTagWhyGoF),
 		associateTagsToEvidence(EviEntryForm, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF),
