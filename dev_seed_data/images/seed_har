@@ -1,0 +1,1041 @@
+{
+  "log": {
+    "version": "1.2",
+    "creator": {
+      "name": "WebInspector",
+      "version": "537.36"
+    },
+    "pages": [],
+    "entries": [
+      {
+        "_initiator": {
+          "type": "script",
+          "stack": {
+            "callFrames": [
+              {
+                "functionName": "request",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41071,
+                "columnNumber": 20
+              },
+              {
+                "functionName": "xhr",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41060,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "listTags",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41012,
+                "columnNumber": 80
+              },
+              {
+                "functionName": "getTags",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41638,
+                "columnNumber": 86
+              },
+              {
+                "functionName": "reloadTags",
+                "scriptId": "32",
+                "url": "http://localhost:8080/assets/15e4bea1cd5c5dcb09df.js",
+                "lineNumber": 1940,
+                "columnNumber": 84
+              },
+              {
+                "functionName": "invokePassiveEffectCreate",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 31268,
+                "columnNumber": 19
+              },
+              {
+                "functionName": "callCallback",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11731,
+                "columnNumber": 13
+              },
+              {
+                "functionName": "invokeGuardedCallbackDev",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11780,
+                "columnNumber": 15
+              },
+              {
+                "functionName": "invokeGuardedCallback",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11842,
+                "columnNumber": 30
+              },
+              {
+                "functionName": "flushPassiveEffectsImpl",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 31355,
+                "columnNumber": 8
+              },
+              {
+                "functionName": "unstable_runWithPriority",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 39205,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "runWithPriority$1",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 19062,
+                "columnNumber": 9
+              },
+              {
+                "functionName": "flushPassiveEffects",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 31228,
+                "columnNumber": 13
+              },
+              {
+                "functionName": "flushDiscreteUpdates",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 30137,
+                "columnNumber": 2
+              },
+              {
+                "functionName": "flushDiscreteUpdatesIfNeeded",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11554,
+                "columnNumber": 6
+              },
+              {
+                "functionName": "dispatchDiscreteEvent",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 13672,
+                "columnNumber": 4
+              }
+            ]
+          }
+        },
+        "_priority": "High",
+        "_resourceType": "fetch",
+        "cache": {},
+        "connection": "1369427",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:8080/web/operations/HPCoS/tags",
+          "httpVersion": "HTTP/1.1",
+          "headers": [
+            {
+              "name": "Host",
+              "value": "localhost:8080"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Google Chrome\";v=\"95\", \"Chromium\";v=\"95\", \";Not A Brand\";v=\"99\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"Linux\""
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "same-origin"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "cors"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "empty"
+            },
+            {
+              "name": "Referer",
+              "value": "http://localhost:8080/operations/HPCoS/evidence"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip, deflate, br"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Cookie",
+              "value": "_gorilla_csrf=MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg; auth=MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg=="
+            }
+          ],
+          "queryString": [],
+          "cookies": [
+            {
+              "name": "_gorilla_csrf",
+              "value": "MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg",
+              "path": "/",
+              "domain": "localhost",
+              "expires": "2022-03-15T05:32:25.843Z",
+              "httpOnly": true,
+              "secure": false,
+              "sameSite": "Lax"
+            },
+            {
+              "name": "auth",
+              "value": "MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg==",
+              "path": "/",
+              "domain": "localhost",
+              "expires": "2022-04-13T20:50:40.327Z",
+              "httpOnly": true,
+              "secure": false
+            }
+          ],
+          "headersSize": 794,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "HTTP/1.1",
+          "headers": [
+            {
+              "name": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "name": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "name": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "name": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin"
+            },
+            {
+              "name": "Content-Security-Policy",
+              "value": "default-src 'none';base-uri 'none';form-action 'none';frame-ancestors 'none';sandbox allow-scripts allow-same-origin allow-forms allow-popups;connect-src 'self';font-src 'self';img-src 'self' data:;script-src 'self';style-src 'self' 'unsafe-inline'"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Vary",
+              "value": "Cookie, Accept-Encoding"
+            },
+            {
+              "name": "x-csrf-token",
+              "value": "TE/DzuVnlj8dBD33e2UrDZZdiuY9eQzlBp2CDEDJbuhrCFvct+IHjartgMRlvQCKJyKiJPLVxsTUJYnlLkadEg=="
+            },
+            {
+              "name": "date",
+              "value": "Mon, 14 Mar 2022 20:59:26 GMT"
+            },
+            {
+              "name": "content-length",
+              "value": "780"
+            },
+            {
+              "name": "connection",
+              "value": "close"
+            }
+          ],
+          "cookies": [],
+          "content": {
+            "size": 780,
+            "mimeType": "application/json",
+            "compression": 0,
+            "text": "[{\"id\":8,\"colorName\":\"violet\",\"name\":\"Mercury\",\"evidenceCount\":1},{\"id\":9,\"colorName\":\"red\",\"name\":\"Venus\",\"evidenceCount\":0},{\"id\":10,\"colorName\":\"orange\",\"name\":\"Earth\",\"evidenceCount\":1},{\"id\":11,\"colorName\":\"yellow\",\"name\":\"Mars\",\"evidenceCount\":2},{\"id\":12,\"colorName\":\"green\",\"name\":\"Jupiter\",\"evidenceCount\":1},{\"id\":13,\"colorName\":\"blue\",\"name\":\"Saturn\",\"evidenceCount\":1},{\"id\":14,\"colorName\":\"indigo\",\"name\":\"Neptune\",\"evidenceCount\":0},{\"id\":20,\"colorName\":\"lightRed\",\"name\":\"Who\",\"evidenceCount\":1},{\"id\":21,\"colorName\":\"lightBlue\",\"name\":\"What\",\"evidenceCount\":1},{\"id\":22,\"colorName\":\"lightGreen\",\"name\":\"Where\",\"evidenceCount\":0},{\"id\":23,\"colorName\":\"lightIndigo\",\"name\":\"When\",\"evidenceCount\":0},{\"id\":24,\"colorName\":\"lightYellow\",\"name\":\"Why\",\"evidenceCount\":0}]"
+          },
+          "redirectURL": "",
+          "headersSize": 667,
+          "bodySize": 780,
+          "_transferSize": 1447,
+          "_error": null
+        },
+        "serverIPAddress": "[::1]",
+        "startedDateTime": "2022-03-14T20:59:26.420Z",
+        "time": 10.203999932855368,
+        "timings": {
+          "blocked": 2.5769999510273336,
+          "dns": -1,
+          "ssl": -1,
+          "connect": -1,
+          "send": 0.10799999999999998,
+          "wait": 6.312999995559454,
+          "receive": 1.20599998626858,
+          "_blocked_queueing": 2.2409999510273337
+        }
+      },
+      {
+        "_initiator": {
+          "type": "script",
+          "stack": {
+            "callFrames": [
+              {
+                "functionName": "request",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41081,
+                "columnNumber": 20
+              },
+              {
+                "functionName": "xhr",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41060,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "createTag",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41014,
+                "columnNumber": 92
+              },
+              {
+                "functionName": "createTag",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41635,
+                "columnNumber": 86
+              },
+              {
+                "functionName": "toggleTag",
+                "scriptId": "32",
+                "url": "http://localhost:8080/assets/15e4bea1cd5c5dcb09df.js",
+                "lineNumber": 1945,
+                "columnNumber": 79
+              },
+              {
+                "functionName": "onClick",
+                "scriptId": "32",
+                "url": "http://localhost:8080/assets/15e4bea1cd5c5dcb09df.js",
+                "lineNumber": 1735,
+                "columnNumber": 293
+              },
+              {
+                "functionName": "callCallback",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11731,
+                "columnNumber": 13
+              },
+              {
+                "functionName": "invokeGuardedCallbackDev",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11780,
+                "columnNumber": 15
+              },
+              {
+                "functionName": "invokeGuardedCallback",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11842,
+                "columnNumber": 30
+              },
+              {
+                "functionName": "invokeGuardedCallbackAndCatchFirstError",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11856,
+                "columnNumber": 24
+              },
+              {
+                "functionName": "executeDispatch",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 16029,
+                "columnNumber": 2
+              },
+              {
+                "functionName": "processDispatchQueueItemsInOrder",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 16061,
+                "columnNumber": 6
+              },
+              {
+                "functionName": "processDispatchQueue",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 16074,
+                "columnNumber": 4
+              },
+              {
+                "functionName": "dispatchEventsForPlugins",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 16085,
+                "columnNumber": 2
+              },
+              {
+                "functionName": "",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 16294,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "batchedEventUpdates$1",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 30177,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "batchedEventUpdates",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11531,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "dispatchEventForPluginEventSystem",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 16293,
+                "columnNumber": 2
+              },
+              {
+                "functionName": "attemptToDispatchEvent",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 13791,
+                "columnNumber": 2
+              },
+              {
+                "functionName": "dispatchEvent",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 13710,
+                "columnNumber": 18
+              },
+              {
+                "functionName": "unstable_runWithPriority",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 39205,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "runWithPriority$1",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 19062,
+                "columnNumber": 9
+              },
+              {
+                "functionName": "discreteUpdates$1",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 30194,
+                "columnNumber": 13
+              },
+              {
+                "functionName": "discreteUpdates",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 11542,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "dispatchDiscreteEvent",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 13675,
+                "columnNumber": 2
+              }
+            ]
+          }
+        },
+        "_priority": "High",
+        "_resourceType": "fetch",
+        "cache": {},
+        "connection": "1369546",
+        "request": {
+          "method": "POST",
+          "url": "http://localhost:8080/web/operations/HPCoS/tags",
+          "httpVersion": "HTTP/1.1",
+          "headers": [
+            {
+              "name": "Host",
+              "value": "localhost:8080"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Content-Length",
+              "value": "42"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Google Chrome\";v=\"95\", \"Chromium\";v=\"95\", \";Not A Brand\";v=\"99\""
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-CSRF-Token",
+              "value": "TE/DzuVnlj8dBD33e2UrDZZdiuY9eQzlBp2CDEDJbuhrCFvct+IHjartgMRlvQCKJyKiJPLVxsTUJYnlLkadEg=="
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"Linux\""
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Origin",
+              "value": "http://localhost:8080"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "same-origin"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "cors"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "empty"
+            },
+            {
+              "name": "Referer",
+              "value": "http://localhost:8080/operations/HPCoS/evidence"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip, deflate, br"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Cookie",
+              "value": "_gorilla_csrf=MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg; auth=MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg=="
+            }
+          ],
+          "queryString": [],
+          "cookies": [
+            {
+              "name": "_gorilla_csrf",
+              "value": "MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg",
+              "path": "/",
+              "domain": "localhost",
+              "expires": "2022-03-15T05:32:25.843Z",
+              "httpOnly": true,
+              "secure": false,
+              "sameSite": "Lax"
+            },
+            {
+              "name": "auth",
+              "value": "MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg==",
+              "path": "/",
+              "domain": "localhost",
+              "expires": "2022-04-13T20:50:40.327Z",
+              "httpOnly": true,
+              "secure": false
+            }
+          ],
+          "headersSize": 982,
+          "bodySize": 42,
+          "postData": {
+            "mimeType": "application/json",
+            "text": "{\"name\":\"boston\",\"colorName\":\"lightGreen\"}"
+          }
+        },
+        "response": {
+          "status": 201,
+          "statusText": "Created",
+          "httpVersion": "HTTP/1.1",
+          "headers": [
+            {
+              "name": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "name": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "name": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "name": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin"
+            },
+            {
+              "name": "Content-Security-Policy",
+              "value": "default-src 'none';base-uri 'none';form-action 'none';frame-ancestors 'none';sandbox allow-scripts allow-same-origin allow-forms allow-popups;connect-src 'self';font-src 'self';img-src 'self' data:;script-src 'self';style-src 'self' 'unsafe-inline'"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Vary",
+              "value": "Cookie, Accept-Encoding"
+            },
+            {
+              "name": "x-csrf-token",
+              "value": "jlp2JVW4N06IPrYr6HENw/DHrhcE8QxW7g9Oo6HiHAapHe43Bz2m/D/XCxj2qSZEQbiG1ctdxnc8t0VKz23v/A=="
+            },
+            {
+              "name": "date",
+              "value": "Mon, 14 Mar 2022 20:59:34 GMT"
+            },
+            {
+              "name": "content-length",
+              "value": "50"
+            },
+            {
+              "name": "connection",
+              "value": "close"
+            }
+          ],
+          "cookies": [],
+          "content": {
+            "size": 50,
+            "mimeType": "application/json",
+            "compression": 0,
+            "text": "{\"id\":41,\"colorName\":\"lightGreen\",\"name\":\"boston\"}"
+          },
+          "redirectURL": "",
+          "headersSize": 671,
+          "bodySize": 50,
+          "_transferSize": 721,
+          "_error": null
+        },
+        "serverIPAddress": "[::1]",
+        "startedDateTime": "2022-03-14T20:59:34.060Z",
+        "time": 24.560000051148233,
+        "timings": {
+          "blocked": 4.58700000975281,
+          "dns": 0.015000000000000013,
+          "ssl": -1,
+          "connect": 0.30999999999999994,
+          "send": 0.383,
+          "wait": 17.3190000083372,
+          "receive": 1.946000033058226,
+          "_blocked_queueing": 3.74700000975281
+        }
+      },
+      {
+        "_initiator": {
+          "type": "script",
+          "stack": {
+            "callFrames": [
+              {
+                "functionName": "request",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41071,
+                "columnNumber": 20
+              },
+              {
+                "functionName": "xhr",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41060,
+                "columnNumber": 11
+              },
+              {
+                "functionName": "listTags",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41012,
+                "columnNumber": 80
+              },
+              {
+                "functionName": "getTags",
+                "scriptId": "23",
+                "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                "lineNumber": 41638,
+                "columnNumber": 86
+              },
+              {
+                "functionName": "reloadTags",
+                "scriptId": "32",
+                "url": "http://localhost:8080/assets/15e4bea1cd5c5dcb09df.js",
+                "lineNumber": 1940,
+                "columnNumber": 84
+              },
+              {
+                "functionName": "toggleTag",
+                "scriptId": "32",
+                "url": "http://localhost:8080/assets/15e4bea1cd5c5dcb09df.js",
+                "lineNumber": 1946,
+                "columnNumber": 12
+              }
+            ],
+            "parent": {
+              "description": "async function",
+              "callFrames": [
+                {
+                  "functionName": "toggleTag",
+                  "scriptId": "32",
+                  "url": "http://localhost:8080/assets/15e4bea1cd5c5dcb09df.js",
+                  "lineNumber": 1945,
+                  "columnNumber": 79
+                },
+                {
+                  "functionName": "onClick",
+                  "scriptId": "32",
+                  "url": "http://localhost:8080/assets/15e4bea1cd5c5dcb09df.js",
+                  "lineNumber": 1735,
+                  "columnNumber": 293
+                },
+                {
+                  "functionName": "callCallback",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 11731,
+                  "columnNumber": 13
+                },
+                {
+                  "functionName": "invokeGuardedCallbackDev",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 11780,
+                  "columnNumber": 15
+                },
+                {
+                  "functionName": "invokeGuardedCallback",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 11842,
+                  "columnNumber": 30
+                },
+                {
+                  "functionName": "invokeGuardedCallbackAndCatchFirstError",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 11856,
+                  "columnNumber": 24
+                },
+                {
+                  "functionName": "executeDispatch",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 16029,
+                  "columnNumber": 2
+                },
+                {
+                  "functionName": "processDispatchQueueItemsInOrder",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 16061,
+                  "columnNumber": 6
+                },
+                {
+                  "functionName": "processDispatchQueue",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 16074,
+                  "columnNumber": 4
+                },
+                {
+                  "functionName": "dispatchEventsForPlugins",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 16085,
+                  "columnNumber": 2
+                },
+                {
+                  "functionName": "",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 16294,
+                  "columnNumber": 11
+                },
+                {
+                  "functionName": "batchedEventUpdates$1",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 30177,
+                  "columnNumber": 11
+                },
+                {
+                  "functionName": "batchedEventUpdates",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 11531,
+                  "columnNumber": 11
+                },
+                {
+                  "functionName": "dispatchEventForPluginEventSystem",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 16293,
+                  "columnNumber": 2
+                },
+                {
+                  "functionName": "attemptToDispatchEvent",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 13791,
+                  "columnNumber": 2
+                },
+                {
+                  "functionName": "dispatchEvent",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 13710,
+                  "columnNumber": 18
+                },
+                {
+                  "functionName": "unstable_runWithPriority",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 39205,
+                  "columnNumber": 11
+                },
+                {
+                  "functionName": "runWithPriority$1",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 19062,
+                  "columnNumber": 9
+                },
+                {
+                  "functionName": "discreteUpdates$1",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 30194,
+                  "columnNumber": 13
+                },
+                {
+                  "functionName": "discreteUpdates",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 11542,
+                  "columnNumber": 11
+                },
+                {
+                  "functionName": "dispatchDiscreteEvent",
+                  "scriptId": "23",
+                  "url": "http://localhost:8080/assets/main-21884134f10e588a492d.js",
+                  "lineNumber": 13675,
+                  "columnNumber": 2
+                }
+              ]
+            }
+          }
+        },
+        "_priority": "High",
+        "_resourceType": "fetch",
+        "cache": {},
+        "connection": "1369554",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:8080/web/operations/HPCoS/tags",
+          "httpVersion": "HTTP/1.1",
+          "headers": [
+            {
+              "name": "Host",
+              "value": "localhost:8080"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Google Chrome\";v=\"95\", \"Chromium\";v=\"95\", \";Not A Brand\";v=\"99\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"Linux\""
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "Sec-Fetch-Site",
+              "value": "same-origin"
+            },
+            {
+              "name": "Sec-Fetch-Mode",
+              "value": "cors"
+            },
+            {
+              "name": "Sec-Fetch-Dest",
+              "value": "empty"
+            },
+            {
+              "name": "Referer",
+              "value": "http://localhost:8080/operations/HPCoS/evidence"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip, deflate, br"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Cookie",
+              "value": "_gorilla_csrf=MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg; auth=MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg=="
+            }
+          ],
+          "queryString": [],
+          "cookies": [
+            {
+              "name": "_gorilla_csrf",
+              "value": "MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg",
+              "path": "/",
+              "domain": "localhost",
+              "expires": "2022-03-15T05:32:25.843Z",
+              "httpOnly": true,
+              "secure": false,
+              "sameSite": "Lax"
+            },
+            {
+              "name": "auth",
+              "value": "MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg==",
+              "path": "/",
+              "domain": "localhost",
+              "expires": "2022-04-13T20:50:40.327Z",
+              "httpOnly": true,
+              "secure": false
+            }
+          ],
+          "headersSize": 794,
+          "bodySize": 0
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "httpVersion": "HTTP/1.1",
+          "headers": [
+            {
+              "name": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "name": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "name": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "name": "Referrer-Policy",
+              "value": "strict-origin-when-cross-origin"
+            },
+            {
+              "name": "Content-Security-Policy",
+              "value": "default-src 'none';base-uri 'none';form-action 'none';frame-ancestors 'none';sandbox allow-scripts allow-same-origin allow-forms allow-popups;connect-src 'self';font-src 'self';img-src 'self' data:;script-src 'self';style-src 'self' 'unsafe-inline'"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Vary",
+              "value": "Cookie, Accept-Encoding"
+            },
+            {
+              "name": "x-csrf-token",
+              "value": "uZ0VDTTP3Gsa4TaYP8MMgwqlch2pLMZunepxW3YSc3+e2o0fZkpN2a0Ii6shGycEu9pa32aADE9PUnqyGJ2AhQ=="
+            },
+            {
+              "name": "date",
+              "value": "Mon, 14 Mar 2022 20:59:34 GMT"
+            },
+            {
+              "name": "content-length",
+              "value": "849"
+            },
+            {
+              "name": "connection",
+              "value": "close"
+            }
+          ],
+          "cookies": [],
+          "content": {
+            "size": 849,
+            "mimeType": "application/json",
+            "compression": 0,
+            "text": "[{\"id\":8,\"colorName\":\"violet\",\"name\":\"Mercury\",\"evidenceCount\":1},{\"id\":9,\"colorName\":\"red\",\"name\":\"Venus\",\"evidenceCount\":0},{\"id\":10,\"colorName\":\"orange\",\"name\":\"Earth\",\"evidenceCount\":1},{\"id\":11,\"colorName\":\"yellow\",\"name\":\"Mars\",\"evidenceCount\":2},{\"id\":12,\"colorName\":\"green\",\"name\":\"Jupiter\",\"evidenceCount\":1},{\"id\":13,\"colorName\":\"blue\",\"name\":\"Saturn\",\"evidenceCount\":1},{\"id\":14,\"colorName\":\"indigo\",\"name\":\"Neptune\",\"evidenceCount\":0},{\"id\":20,\"colorName\":\"lightRed\",\"name\":\"Who\",\"evidenceCount\":1},{\"id\":21,\"colorName\":\"lightBlue\",\"name\":\"What\",\"evidenceCount\":1},{\"id\":22,\"colorName\":\"lightGreen\",\"name\":\"Where\",\"evidenceCount\":0},{\"id\":23,\"colorName\":\"lightIndigo\",\"name\":\"When\",\"evidenceCount\":0},{\"id\":24,\"colorName\":\"lightYellow\",\"name\":\"Why\",\"evidenceCount\":0},{\"id\":41,\"colorName\":\"lightGreen\",\"name\":\"boston\",\"evidenceCount\":0}]"
+          },
+          "redirectURL": "",
+          "headersSize": 667,
+          "bodySize": 849,
+          "_transferSize": 1516,
+          "_error": null
+        },
+        "serverIPAddress": "[::1]",
+        "startedDateTime": "2022-03-14T20:59:34.088Z",
+        "time": 12.322000042922795,
+        "timings": {
+          "blocked": 3.179000032827258,
+          "dns": 0.009000000000000008,
+          "ssl": -1,
+          "connect": 0.22600000000000003,
+          "send": 0.22099999999999997,
+          "wait": 7.957000039450824,
+          "receive": 0.7299999706447124,
+          "_blocked_queueing": 2.848000032827258
+        }
+      }
+    ]
+  }
+}
