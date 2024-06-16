@@ -217,7 +217,7 @@ func TestReadOperation(t *testing.T) {
 
 		masterOp := OpChamberOfSecrets
 		originalEvidence := getEvidenceForOperation(t, db, masterOp.ID)
-		harEvidence := helpers.Filter(originalEvidence, func(evi models.Evidence) bool {return evi.ContentType == "http-request-cycle"})
+		harEvidence := helpers.Filter(originalEvidence, func(evi models.Evidence) bool { return evi.ContentType == "http-request-cycle" })
 
 		retrievedOp, err := services.ReadOperation(ctx, db, masterOp.Slug)
 		require.NoError(t, err)
