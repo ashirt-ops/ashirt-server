@@ -27,7 +27,7 @@ export default (props: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} style={{height: '100%'}}>
       {isVisible ? props.children : null}
     </div>
   );
