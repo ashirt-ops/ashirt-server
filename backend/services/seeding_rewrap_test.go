@@ -175,6 +175,7 @@ var EviWhompingWillow = seeding.EviWhompingWillow
 var EviTomRiddlesDiary = seeding.EviTomRiddlesDiary
 
 var EviPetrifiedHermione = seeding.EviPetrifiedHermione
+var EviLazyHar = seeding.EviLazyHar
 
 var QuerySalazarsHier = seeding.QuerySalazarsHier
 var QueryWhereIsTheChamberOfSecrets = seeding.QueryWhereIsTheChamberOfSecrets

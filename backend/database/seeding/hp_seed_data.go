@@ -114,7 +114,7 @@ var HarryPotterSeedData = Seeder{
 	},
 	Evidences: []models.Evidence{
 		EviDursleys, EviMirrorOfErised, EviLevitateSpell, EviRulesForQuidditch,
-		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione, EviHeadlessHuntApplication,
+		EviFlyingCar, EviDobby, EviSpiderAragog, EviMoaningMyrtle, EviWhompingWillow, EviTomRiddlesDiary, EviPetrifiedHermione, EviLazyHar, EviHeadlessHuntApplication,
 		EviTristateTrophy, EviEntryForm, EviWizardDance, EviPolyjuice, EviWarewolf,
 	},
 	EvidenceMetadatas: []models.EvidenceMetadata{
@@ -127,6 +127,7 @@ var HarryPotterSeedData = Seeder{
 		associateTagsToEvidence(EviFlyingCar, TagEarth, TagSaturn),
 		associateTagsToEvidence(EviDobby, TagMars, TagJupiter, TagMercury),
 		associateTagsToEvidence(EviPetrifiedHermione, TagMars, CommonTagWhatCoS, CommonTagWhoCoS),
+		associateTagsToEvidence(EviLazyHar, CommonTagWhatCoS),
 
 		associateTagsToEvidence(EviTristateTrophy, CommonTagWhoGoF, CommonTagWhereGoF, CommonTagWhyGoF),
 		associateTagsToEvidence(EviEntryForm, CommonTagWhatGoF, CommonTagWhereGoF, CommonTagWhenGoF),
@@ -321,6 +322,7 @@ var EviWhompingWillow = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed
 var EviTomRiddlesDiary = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_go_aoc201614", "What's a Horcrux?", "codeblock", 0, &timeNow)
 var EviHeadlessHuntApplication = newHPEvidence(OpChamberOfSecrets.ID, UserRon.ID, "seed_py_aoc201717", "This group is very particular", "codeblock", 0, &timeNow)
 var EviPetrifiedHermione = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_statue", "Strangely real-looking statue", "image", 0, &timeNow)
+var EviLazyHar = newHPEvidence(OpChamberOfSecrets.ID, UserHarry.ID, "seed_har", "Joel couldn't be bothered to add a themed asset.", "http-request-cycle", 0, &timeNow)
 
 var EviMetaFlyingCar = newHPEviMetadata(EviFlyingCar.ID, "color-averager", "rgb(106, 109, 84)\n#6a6d54\nhsl(67, 13%, 38%)", evidencemetadata.StatusCompleted.Ptr(), helpers.PTrue(), 0)
 var EviMetaDobby = newHPEviMetadata(EviDobby.ID, "color-averager", "rgb(74, 51, 32)\n#4a3320\nhsl(27, 40%, 21%)", nil, helpers.PTrue(), 0)

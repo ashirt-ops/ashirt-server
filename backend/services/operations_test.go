@@ -216,6 +216,8 @@ func TestReadOperation(t *testing.T) {
 		ctx := contextForUser(UserRon, db)
 
 		masterOp := OpChamberOfSecrets
+		originalEvidence := getEvidenceForOperation(t, db, masterOp.ID)
+		harEvidence := helpers.Filter(originalEvidence, func(evi models.Evidence) bool { return evi.ContentType == "http-request-cycle" })
 
 		retrievedOp, err := services.ReadOperation(ctx, db, masterOp.Slug)
 		require.NoError(t, err)
@@ -224,7 +226,7 @@ func TestReadOperation(t *testing.T) {
 		require.Equal(t, masterOp.Name, retrievedOp.Name)
 		require.Equal(t, 6, retrievedOp.NumUsers)
 		require.Equal(t, true, retrievedOp.Favorite)
-		require.Equal(t, 8, retrievedOp.NumEvidence)
+		require.Equal(t, len(originalEvidence), retrievedOp.NumEvidence)
 		require.Equal(t, 12, retrievedOp.NumTags)
 		require.Equal(t, 1, len(retrievedOp.TopContribs))
 		require.Equal(t, "harry.potter", retrievedOp.TopContribs[0].Slug)
@@ -232,7 +234,7 @@ func TestReadOperation(t *testing.T) {
 		require.Equal(t, int64(6), retrievedOp.EvidenceCount.ImageCount)
 		require.Equal(t, int64(0), retrievedOp.EvidenceCount.RecordingCount)
 		require.Equal(t, int64(0), retrievedOp.EvidenceCount.EventCount)
-		require.Equal(t, int64(0), retrievedOp.EvidenceCount.HarCount)
+		require.Equal(t, int64(len(harEvidence)), retrievedOp.EvidenceCount.HarCount)
 
 		require.Equal(t, len(seed.UsersForOp(masterOp)), retrievedOp.NumUsers)
 	})
