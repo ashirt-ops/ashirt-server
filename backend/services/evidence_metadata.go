@@ -43,6 +43,10 @@ func CreateEvidenceMetadata(ctx context.Context, db *database.Connection, i Edit
 		return backend.WrapError("Unwilling to create evidence metadata", backend.UnauthorizedWriteErr(err))
 	}
 
+	if i.Source == "" || i.Body == "" {
+		return backend.WrapError("Source and Body cannot be empty.", backend.MissingValueErr("Source/Body"))
+	}
+
 	_, err = db.Insert("evidence_metadata", map[string]interface{}{
 		"evidence_id": evidence.ID,
 		"source":      i.Source,
@@ -93,6 +97,10 @@ func UpsertEvidenceMetadata(ctx context.Context, db *database.Connection, i Upse
 	}
 	if err := policy.Require(middleware.Policy(ctx), policy.CanModifyEvidenceOfOperation{OperationID: operation.ID}); err != nil {
 		return backend.WrapError("Unwilling to edit evidence metadata", backend.UnauthorizedWriteErr(err))
+	}
+
+	if i.Source == "" || i.Body == "" {
+		return backend.WrapError("Source and Body cannot be empty.", backend.MissingValueErr("Source/Body"))
 	}
 
 	err = db.WithTx(ctx, func(tx *database.Transactable) {
