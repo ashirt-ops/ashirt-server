@@ -53,3 +53,15 @@ func wrapCredential(cred auth.Credential, extra AShirtWebauthnExtension) AShirtW
 		AShirtWebauthnExtension: extra,
 	}
 }
+
+type CredentialFlags struct {
+	BackupEligible bool `json:"backupEligible"`
+	BackupState    bool `json:"backupState"`
+}
+
+func (cf *CredentialFlags) Validate() error {
+	if cf.BackupEligible && !cf.BackupState {
+		return errors.New("BackupState must be true if BackupEligible is true")
+	}
+	return nil
+}

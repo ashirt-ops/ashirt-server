@@ -47,17 +47,8 @@ func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (WebAuthn, 
 		RPID:          host,
 		// the below are all optional
 		Debug:                  cfg.WebauthnConfig.Debug,
-		Timeout:                cfg.WebauthnConfig.Timeout,
 		AttestationPreference:  cfg.WebauthnConfig.Conveyance(),
 		AuthenticatorSelection: cfg.BuildAuthenticatorSelection(),
-	}
-
-	// TODO: I don't understand how to correctly set the RPOrigin. the code works *specifically* for
-	// localhost, but may fail for proper deployments. We might need to make this an env var.
-	if cfg.WebauthnConfig.RPOrigin != "" {
-		config.RPOrigin = cfg.WebauthnConfig.RPOrigin
-	} else if host == "localhost" {
-		config.RPOrigin = "http://" + host + ":" + port
 	}
 
 	web, err := auth.New(&config)
@@ -108,18 +99,18 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 	remux.Route(r, "POST", "/register/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			// validate basic registration data
-			if !a.RegistrationEnabled {
+			if (!a.RegistrationEnabled) {
 				return nil, errors.New("registration is closed to users")
 			}
 
 			dr := remux.DissectJSONRequest(r)
 			info := WebAuthnRegistrationInfo{
-				Email:            dr.FromBody("email").Required().AsString(),
-				Username:         dr.FromBody("username").Required().AsString(),
-				FirstName:        dr.FromBody("firstName").Required().AsString(),
-				LastName:         dr.FromBody("lastName").Required().AsString(),
-				CredentialName:   dr.FromBody("credentialName").Required().AsString(),
-				RegistrationType: CreateCredential,
+					Email:            dr.FromBody("email").Required().AsString(),
+					Username:         dr.FromBody("username").Required().AsString(),
+					FirstName:        dr.FromBody("firstName").Required().AsString(),
+					LastName:         dr.FromBody("lastName").Required().AsString(),
+					CredentialName:   dr.FromBody("credentialName").Required().AsString(),
+					RegistrationType: CreateCredential,
 			}
 			if dr.Error != nil {
 				return nil, dr.Error

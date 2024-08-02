@@ -14,7 +14,6 @@ type webauthnUser struct {
 	UserID                []byte
 	AuthnID               []byte
 	UserName              string
-	IconURL               string
 	Credentials           []AShirtWebauthnCredential
 	FirstName             string
 	LastName              string
@@ -85,10 +84,6 @@ func (u *webauthnUser) WebAuthnName() string {
 
 func (u *webauthnUser) WebAuthnDisplayName() string {
 	return strings.Join([]string{u.FirstName, u.LastName}, " ")
-}
-
-func (u *webauthnUser) WebAuthnIcon() string {
-	return u.IconURL
 }
 
 func (u *webauthnUser) WebAuthnCredentials() []auth.Credential {
