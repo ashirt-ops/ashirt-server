@@ -21,7 +21,7 @@
     "@typescript-eslint/parser": "^6.14.0",
     "chai": "^4.3.10",
     "css-loader": "^7.1.2",
-    "eslint": "^8.52.0",
+    "eslint": "^9.8.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.2",
     "html-webpack-harddisk-plugin": "^2.0.0",
