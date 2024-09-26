@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS dtos
+FROM golang:1.23-alpine AS dtos
 
 RUN mkdir /build
 WORKDIR /build
