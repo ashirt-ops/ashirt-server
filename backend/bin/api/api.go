@@ -17,26 +17,26 @@ func main() {
 	err := config.LoadAPIConfig()
 	logger := logging.SetupStdoutLogging()
 	if err != nil {
-		logging.Fatal(logger, "error", err, "msg", "Unable to start due to configuration error", "action", "exiting")
+		logging.Fatal(logger, "Unable to start due to configuration error", "error", err, "action", "exiting")
 	}
 
 	db, err := database.NewConnection(config.DBUri(), "/migrations")
 	if err != nil {
-		logging.Fatal(logger, "error", err, "msg", "Unable to connect to database", "action", "exiting")
+		logging.Fatal(logger, "Unable to connect to database", "error", err, "action", "exiting")
 	}
 
-	logger.Log("msg", "checking database schema")
+	logger.Info("checking database schema")
 	if err := db.CheckSchema(); err != nil {
-		logging.Fatal(logger, "msg", "schema read error", "error", err)
+		logging.Fatal(logger, "schema read error", "error", err)
 	}
 
 	contentStore, err := confighelpers.ChooseContentStoreType(config.AllStoreConfig())
 	if errors.Is(err, backend.ErrorDeprecated) {
-		logger.Log("msg", "No content store provided")
+		logger.Warn("No content store provided")
 		contentStore, err = confighelpers.DefaultS3Store()
 	}
 	if err != nil {
-		logging.Fatal(logger, "msg", "store setup error", "error", err)
+		logging.Fatal(logger, "store setup error", "error", err)
 	}
 
 	s := chi.NewRouter()
@@ -47,7 +47,7 @@ func main() {
 		)
 	})
 
-	logger.Log("msg", "starting API server", "port", config.Port())
+	logger.Info("starting API server", "port", config.Port())
 	serveErr := http.ListenAndServe(":"+config.Port(), s)
-	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
+	logging.Fatal(logger, "server shutting down", "err", serveErr)
 }

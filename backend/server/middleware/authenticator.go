@@ -92,7 +92,7 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 			userData, err := authenticateAPI(db, r, body)
 			if err != nil {
 				logging.LogWithoutAuth(
-					"msg", "Unable to build user policy",
+					"Unable to build user policy",
 					"error", err.Error(),
 				)
 				respondWithError(w, r, backend.UnauthorizedWriteErr(err))
@@ -152,7 +152,7 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	})
 
 	if err != nil {
-		logging.Log(ctx, "msg", "Unable to build user policy", "error", err.Error())
+		logging.ReqLogger(ctx).Error("Unable to build user policy", "error", err.Error())
 		return &policy.Deny{}
 	}
 	roleMap := make(map[int64]policy.OperationRole)
@@ -224,7 +224,7 @@ func cloneBody(r *http.Request) (io.Reader, func(), error) {
 		err := os.Remove(bodyTmpFile.Name())
 		if err != nil {
 			logging.LogWithoutAuth(
-				"msg", "Unable to remove tmp file",
+				"Unable to remove tmp file",
 				"error", err,
 				"tmpFile", bodyTmpFile.Name(),
 			)

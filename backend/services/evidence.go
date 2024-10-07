@@ -158,7 +158,7 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 	err = enhancementservices.SendEvidenceCreatedEvent(db, logging.ReqLogger(ctx), operation.ID, []string{evidenceUUID}, enhancementservices.AllWorkers())
 
 	if err != nil {
-		logging.Log(ctx, "msg", "Unable to run workers", "error", err.Error())
+		logging.ReqLogger(ctx).Error("Unable to run workers", "error", err.Error())
 	}
 
 	return &dtos.Evidence{

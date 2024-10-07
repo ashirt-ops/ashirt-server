@@ -1,17 +1,19 @@
 package emailservices
 
-import "github.com/ashirt-ops/ashirt-server/backend/logging"
+import (
+	"log/slog"
+)
 
 // MemoryMailer is an EmailServicer that holds all of the emails it receives in memory. This mailer
 // is designed to be used with testing, where the caller can quickly check if the email details
 // were received correctly
 type MemoryMailer struct {
 	Outbox map[string][]EmailJob // emails stored as To address : [emails, ...]
-	logger logging.Logger
+	logger *slog.Logger
 }
 
 // MakeMemoryMailer constructs a MemoryMailer
-func MakeMemoryMailer(logger logging.Logger) MemoryMailer {
+func MakeMemoryMailer(logger *slog.Logger) MemoryMailer {
 	return MemoryMailer{
 		Outbox: make(map[string][]EmailJob),
 	}

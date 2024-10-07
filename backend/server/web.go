@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -34,7 +35,7 @@ type WebConfig struct {
 	CSRFAuthKey      []byte
 	SessionStoreKey  []byte
 	UseSecureCookies bool
-	Logger           logging.Logger
+	Logger           *slog.Logger
 }
 
 func (c *WebConfig) validate() error {
@@ -49,7 +50,7 @@ func (c *WebConfig) validate() error {
 		return errors.New("SessionStoreKey must be 32 bytes or longer")
 	}
 	if !c.UseSecureCookies {
-		c.Logger.Log("msg", "Config Warning: cookies not using secure flag")
+		c.Logger.Warn("Config Warning: cookies not using secure flag")
 	}
 	return nil
 }

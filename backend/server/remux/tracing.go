@@ -2,10 +2,9 @@ package remux
 
 import (
 	"fmt"
+	"log/slog"
 	"runtime"
 	"strings"
-
-	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // StackTraceEntry is a small structure for holding relevent data pertaining to a single line
@@ -19,12 +18,12 @@ type StackTraceEntry struct {
 // questionable code. If a panic occurs, this will catch that panic, log the response,
 // and execute the provided cleanup code. a boolean provided to the cleanup code
 // indicates if a panic occurred.
-func watcher(log logging.Logger, cleanup func(bool)) {
+func watcher(log *slog.Logger, cleanup func(bool)) {
 	paniced := false
 	if r := recover(); r != nil {
 		paniced = true
 		strTrace := formatStackTrace(retrace(25))
-		log.Log("msg", "unexpected panic", "recoveredData", r, "stacktrace", strTrace)
+		log.Error("unexpected panic", "recoveredData", r, "stacktrace", strTrace)
 	}
 	cleanup(paniced)
 }

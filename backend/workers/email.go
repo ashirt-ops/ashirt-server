@@ -2,6 +2,7 @@ package workers
 
 import (
 	"fmt"
+	"log/slog"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -9,7 +10,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/emailservices"
 	"github.com/ashirt-ops/ashirt-server/backend/emailtemplates"
-	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // EmailStatus reflects the possible statuses for emails in any state
@@ -32,14 +32,14 @@ type EmailWorker struct {
 	stopChan                 chan bool
 	running                  bool
 	servicer                 emailservices.EmailServicer
-	logger                   logging.Logger
+	logger                   *slog.Logger
 	SleepAfterWorkDuration   time.Duration
 	SleepAfterNoWorkDuration time.Duration
 	OnPassComplete           func()
 }
 
 // MakeEmailWorker constructs an EmailWorker
-func MakeEmailWorker(db *database.Connection, servicer emailservices.EmailServicer, logger logging.Logger) EmailWorker {
+func MakeEmailWorker(db *database.Connection, servicer emailservices.EmailServicer, logger *slog.Logger) EmailWorker {
 	emailCh := make(chan emailservices.EmailJob)
 	stopCh := make(chan bool)
 	return EmailWorker{
@@ -66,7 +66,7 @@ func (w *EmailWorker) Start() {
 		w.running = true
 		defer func() {
 			if r := recover(); r != nil {
-				w.logger.Log("msg", "recovered from worker panic", "error", r)
+				w.logger.Error("recovered from worker panic", "error", r)
 			}
 		}()
 		w.start()
@@ -75,7 +75,7 @@ func (w *EmailWorker) Start() {
 
 // start _actually_ starts the worker.
 func (w *EmailWorker) start() {
-	w.logger.Log("msg", "Starting worker")
+	w.logger.Info("Starting worker")
 	go w.run()
 	go func() {
 		<-w.stopChan
@@ -122,7 +122,7 @@ func (w *EmailWorker) run() {
 				}
 				err = w.queueEmail(email)
 				if err != nil {
-					w.logger.Log("msg", "Unable to queue email", "error", err.Error())
+					w.logger.Error("Unable to queue email", "error", err.Error())
 					continue
 				}
 			}
@@ -171,7 +171,7 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 					Set("email_status", EmailSent).
 					Where(sq.Eq{"id": email.EmailID}))
 				if err != nil {
-					w.logger.Log("msg", "Unable to set email completed status", "error", err.Error())
+					w.logger.Error("Unable to set email completed status", "error", err.Error())
 				}
 			}
 		},
@@ -179,8 +179,8 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 	return err
 }
 
-func setEmailFailed(db *database.Connection, emailID int64, logger logging.Logger, err error) {
-	logger.Log("msg", "Unable to send email", "err", err.Error())
+func setEmailFailed(db *database.Connection, emailID int64, logger *slog.Logger, err error) {
+	logger.Error("Unable to send email", "err", err.Error())
 	db.Update(sq.Update("email_queue").
 		Set("error_count", sq.Expr("error_count + 1")).
 		SetMap(map[string]interface{}{

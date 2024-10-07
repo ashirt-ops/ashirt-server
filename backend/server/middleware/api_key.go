@@ -64,7 +64,7 @@ func authenticateAPI(db *database.Connection, r *http.Request, requestBody io.Re
 
 	err = db.Update(sq.Update("api_keys").Set("last_auth", time.Now()).Where(sq.Eq{"access_key": accessKey}))
 	if err != nil {
-		logging.Log(r.Context(), "msg", "Failed to update last_auth", "access_key", accessKey, "error", err)
+		logging.ReqLogger(r.Context()).Error("Failed to update last_auth", "access_key", accessKey, "error", err)
 	}
 
 	return UserData{ID: apiKey.UserID, Headless: apiKey.Headless}, nil

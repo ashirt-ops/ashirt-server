@@ -75,7 +75,7 @@ func InitTestWithOptions(t *testing.T, options TestOptions) *database.Connection
 // Note: this should only be done in a testing environment.
 func ClearDB(db *database.Connection) error {
 	systemLogger := logging.GetSystemLogger()
-	systemLogger.Log("msg", "Clearing Database...")
+	systemLogger.Info("Clearing Database...")
 	logging.SetSystemLogger(logging.NewNopLogger())
 	defer logging.SetSystemLogger(systemLogger)
 

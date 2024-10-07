@@ -3,13 +3,13 @@ package emailservices
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"mime/multipart"
 	"net/smtp"
 	"net/textproto"
 	"strings"
 
 	"github.com/ashirt-ops/ashirt-server/backend/config"
-	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // SMTPEmailAuthType indicates how the system should authenticate with the STMP server
@@ -29,11 +29,11 @@ const (
 
 // SMTPMailer is the struct that holds an email servicer that sends emails over SMTP
 type SMTPMailer struct {
-	logger logging.Logger
+	logger *slog.Logger
 }
 
 // MakeSMTPMailer constructs an SMTPMailer with the given logger
-func MakeSMTPMailer(logger logging.Logger) SMTPMailer {
+func MakeSMTPMailer(logger *slog.Logger) SMTPMailer {
 	return SMTPMailer{
 		logger: logger,
 	}

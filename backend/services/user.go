@@ -133,7 +133,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 				}
 
 				logging.LogWithoutAuth(
-					"msg", "Unable to create user with slug; trying alternative",
+					"Unable to create user with slug; trying alternative",
 					"slug", attemptedSlug,
 					"attempt", attemptNumber,
 					"error", err.Error(),
@@ -152,7 +152,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 	if userID == 1 {
 		err := db.Update(sq.Update("users").Set("admin", true).Where(sq.Eq{"id": userID}))
 		if err != nil {
-			logging.LogWithoutAuth("msg", "Unable to make the first user an admin", "error", err.Error())
+			logging.LogWithoutAuth("Unable to make the first user an admin", "error", err.Error())
 		}
 	}
 	return &dtos.CreateUserOutput{
@@ -365,7 +365,7 @@ func prepListUsersForOperation(ctx context.Context, db *database.Connection, i L
 		LeftJoin("users ON user_operation_permissions.user_id = users.id").
 		Where(sq.Eq{"operation_id": operation.ID, "users.deleted_at": nil}).
 		OrderBy("user_operation_permissions.created_at ASC")
-		// OrderBy("first_name ASC", "last_name ASC", "user_operation_permissions.created_at ASC")
+	// OrderBy("first_name ASC", "last_name ASC", "user_operation_permissions.created_at ASC")
 
 	i.UserFilter.AddWhere(&query)
 

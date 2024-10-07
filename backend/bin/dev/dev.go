@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -36,30 +37,30 @@ func main() {
 	err := config.LoadWebConfig()
 	logger := logging.SetupStdoutLogging()
 	if err != nil {
-		logger.Log("error", err, "msg", "Unable to start due to configuration error")
+		logger.Error("Unable to start due to configuration error", "error", err)
 		return
 	}
 	for {
 		err := tryRunServer(logger)
-		logger.Log("error", err, "msg", "Restarting app")
+		logger.Error("Restarting app", "error", err)
 		time.Sleep(3 * time.Second)
 	}
 }
 
-func tryRunServer(logger logging.Logger) error {
+func tryRunServer(logger *slog.Logger) error {
 	db, err := database.NewConnection(config.DBUri(), "./migrations")
 	if err != nil {
 		return fmt.Errorf("Unable to connect to database (DB_URI=%s) : %w", config.DBUri(), err)
 	}
 
-	logger.Log("msg", "checking database schema")
+	logger.Info("checking database schema")
 	if err := db.CheckSchema(); err != nil {
 		return err
 	}
 
 	seedFiles := false
 	if seeded, err := seeding.IsSeeded(db); !seeded && err == nil {
-		logger.Log("msg", "applying db seeding")
+		logger.Info("applying db seeding")
 		err := seeding.HarryPotterSeedData.ApplyTo(db)
 		if err != nil {
 			return err
@@ -69,16 +70,16 @@ func tryRunServer(logger logging.Logger) error {
 
 	contentStore, err := confighelpers.ChooseContentStoreType(config.AllStoreConfig())
 	if errors.Is(err, backend.ErrorDeprecated) {
-		logger.Log("msg", "No content store provided")
+		logger.Info("No content store provided")
 		contentStore, err = confighelpers.DefaultDevStore()
 	}
 	if err != nil {
 		return err
 	}
-	logger.Log("msg", "Using Storage", "type", contentStore.Name())
+	logger.Info("Using Storage", "type", contentStore.Name())
 
 	if seedFiles {
-		logger.Log("msg", "Adding files to storage")
+		logger.Info("Adding files to storage")
 		if contentStore.Name() != "local" {
 			seedEvidenceFiles(db, contentStore, logger)
 		}
@@ -102,7 +103,7 @@ func tryRunServer(logger logging.Logger) error {
 
 	if len(schemeErrors) > 0 {
 		for _, schemeError := range schemeErrors {
-			logger.Log("msg", "Unable to load auth scheme. Disabling.",
+			logger.Error("Unable to load auth scheme. Disabling.",
 				"schemeName", schemeError.name,
 				"error", schemeError.err.Error())
 		}
@@ -112,7 +113,7 @@ func tryRunServer(logger logging.Logger) error {
 	if config.EmailType() != "" {
 		startEmailServices(db, logger)
 	} else {
-		logger.Log("msg", "No Emailer selected")
+		logger.Info("No Emailer selected")
 	}
 
 	r := chi.NewRouter()
@@ -135,7 +136,7 @@ func tryRunServer(logger logging.Logger) error {
 		)
 	})
 
-	logger.Log("port", config.Port(), "msg", "Now Serving")
+	logger.Info("Now Serving", "port", config.Port())
 	return http.ListenAndServe(":"+config.Port(), r)
 }
 
@@ -158,9 +159,9 @@ func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, erro
 	return nil, fmt.Errorf("unknown auth type: %v", cfg.Type)
 }
 
-func startEmailServices(db *database.Connection, logger logging.Logger) {
+func startEmailServices(db *database.Connection, logger *slog.Logger) {
 	var emailServicer emailservices.EmailServicer
-	emailLogger := logging.With(logger, "service", "email-sender", "type", config.EmailType)
+	emailLogger := logger.With("service", "email-sender", "type", config.EmailType)
 	switch config.EmailType() {
 	case string(emailservices.StdOutEmailer):
 		mailer := emailservices.MakeWriterMailer(os.Stdout, emailLogger)
@@ -174,15 +175,15 @@ func startEmailServices(db *database.Connection, logger logging.Logger) {
 	}
 
 	if emailServicer == nil {
-		logger.Log("msg", "unsupported emailer", "type", config.EmailType)
+		logger.Error("unsupported emailer", "type", config.EmailType)
 	} else {
-		emailLogger.Log("msg", "Staring emailer")
-		emailWorker := workers.MakeEmailWorker(db, emailServicer, logging.With(logger, "service", "email-worker"))
+		emailLogger.Info("Staring emailer")
+		emailWorker := workers.MakeEmailWorker(db, emailServicer, logger.With("service", "email-worker"))
 		emailWorker.Start()
 	}
 }
 
-func seedEvidenceFiles(db *database.Connection, dstStore contentstore.Store, logger logging.Logger) {
+func seedEvidenceFiles(db *database.Connection, dstStore contentstore.Store, logger *slog.Logger) {
 	readStore, err := confighelpers.DefaultDevStore()
 	if err != nil {
 		panic("Cannot create temporary devstore for copying evidence")
@@ -212,7 +213,7 @@ func seedEvidenceFiles(db *database.Connection, dstStore contentstore.Store, log
 	for k := range evidenceList {
 		_, foundErr := dstStore.Read(k)
 		if foundErr != nil {
-			logger.Log("msg", "Moving content", "key", k)
+			logger.Info("Moving content", "key", k)
 			data, _ := readStore.Read(k)
 			dstStore.UploadWithName(k, data)
 		}
