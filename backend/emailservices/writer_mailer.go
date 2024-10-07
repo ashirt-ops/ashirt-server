@@ -2,9 +2,8 @@ package emailservices
 
 import (
 	"io"
+	"log/slog"
 	"text/template"
-
-	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
 // WriterMailer acts as a no-email email server for monitoring when running locally. All emails are
@@ -12,11 +11,11 @@ import (
 // work
 type WriterMailer struct {
 	writer io.Writer
-	logger logging.Logger
+	logger *slog.Logger
 }
 
 // MakeWriterMailer constructs a WriterMailer
-func MakeWriterMailer(w io.Writer, logger logging.Logger) WriterMailer {
+func MakeWriterMailer(w io.Writer, logger *slog.Logger) WriterMailer {
 	return WriterMailer{
 		writer: w,
 		logger: logger,

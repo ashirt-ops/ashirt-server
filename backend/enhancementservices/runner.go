@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
-	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/models"
 	"github.com/ashirt-ops/ashirt-server/backend/servicetypes/evidencemetadata"
 
@@ -35,7 +35,7 @@ func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
 }
 
 type SendServiceWorkerEventInput struct {
-	Logger      logging.Logger
+	Logger      *slog.Logger
 	WorkerNames []string
 	Builder     func(db database.ConnectionProxy) ([]interface{}, error)
 	EventType   string
@@ -52,7 +52,7 @@ func SendServiceWorkerEvent(db *database.Connection, input SendServiceWorkerEven
 			payloads, _ = input.Builder(tx)
 		})
 		if err != nil {
-			input.Logger.Log("msg", "Unable to execute service workers", "error", err.Error())
+			input.Logger.Error("Unable to execute service workers", "error", err.Error())
 			return
 		}
 
@@ -66,15 +66,15 @@ func SendServiceWorkerEvent(db *database.Connection, input SendServiceWorkerEven
 				go func() {
 					defer wg.Done()
 					err := runProcessEvent(db, workerCopy, &payloadCopy)
-					logger := logging.With(input.Logger,
+					logger := input.Logger.With(
 						"worker", workerCopy.Name,
 						"eventType", input.EventType,
 					)
 
 					if err != nil {
-						logger.Log("msg", "Unable to run worker", "error", err)
+						logger.Error("Unable to run worker", "error", err)
 					} else {
-						logger.Log("msg", "Worker completed")
+						logger.Info("Worker completed")
 					}
 				}()
 			}
@@ -88,7 +88,7 @@ func SendServiceWorkerEvent(db *database.Connection, input SendServiceWorkerEven
 
 // SendEvidenceCreatedEvent starts a specified set of workers for a specified set of evidenceUUIDs
 // Note that this process kicks off a number of goroutines.
-func SendEvidenceCreatedEvent(db *database.Connection, reqLogger logging.Logger, operationID int64, evidenceUUIDs []string, workerNames []string) error {
+func SendEvidenceCreatedEvent(db *database.Connection, reqLogger *slog.Logger, operationID int64, evidenceUUIDs []string, workerNames []string) error {
 	var workersToRun []models.ServiceWorker
 	var expandedPayloads []ExpandedNewEvidencePayload
 	workerContext := context.Background()
@@ -103,7 +103,7 @@ func SendEvidenceCreatedEvent(db *database.Connection, reqLogger logging.Logger,
 				helpers.Map(workersToRun, getServiceWorkerName))
 		})
 		if err != nil {
-			reqLogger.Log("msg", "Unable to execute service workers", "error", err.Error())
+			reqLogger.Error("Unable to execute service workers", "error", err.Error())
 			return
 		}
 
@@ -118,15 +118,15 @@ func SendEvidenceCreatedEvent(db *database.Connection, reqLogger logging.Logger,
 				go func() {
 					defer wg.Done()
 					err := runProcessMetadata(db, workerCopy, evidenceID, &payload)
-					logger := logging.With(reqLogger,
+					logger := reqLogger.With(
 						"worker", workerCopy.Name,
 						"evidenceID", evidenceID,
 					)
 
 					if err != nil {
-						logger.Log("msg", "Unable to run worker", "error", err)
+						logger.Error("Unable to run worker", "error", err)
 					} else {
-						logger.Log("msg", "Worker completed")
+						logger.Info("Worker completed")
 					}
 				}()
 			}

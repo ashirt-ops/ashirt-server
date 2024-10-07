@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -31,28 +32,28 @@ func main() {
 	err := config.LoadWebConfig()
 	logger := logging.SetupStdoutLogging()
 	if err != nil {
-		logging.Fatal(logger, "error", err, "msg", "Unable to start due to configuration error", "action", "exiting")
+		logging.Fatal(logger, "Unable to start due to configuration error", "error", err, "action", "exiting")
 	}
 
 	db, err := database.NewConnection(config.DBUri(), "/migrations")
 	if err != nil {
-		logging.Fatal(logger, "error", err, "msg", "Unable to connect to database", "action", "exiting")
+		logging.Fatal(logger, "Unable to connect to database", "error", err, "action", "exiting")
 	}
 
-	logger.Log("msg", "checking database schema")
+	logger.Info("checking database schema")
 	if err := db.CheckSchema(); err != nil {
-		logging.Fatal(logger, "msg", "schema read error", "error", err)
+		logging.Fatal(logger, "schema read error", "error", err)
 	}
 
 	contentStore, err := confighelpers.ChooseContentStoreType(config.AllStoreConfig())
 	if errors.Is(err, backend.ErrorDeprecated) {
-		logger.Log("msg", "No content store provided")
+		logger.Warn("No content store provided")
 		contentStore, err = confighelpers.DefaultS3Store()
 	}
 	if err != nil {
-		logging.Fatal(logger, "msg", "store setup error", "error", err)
+		logging.Fatal(logger, "store setup error", "error", err)
 	}
-	logger.Log("msg", "Using Storage", "type", contentStore.Name())
+	logger.Info("Using Storage", "type", contentStore.Name())
 
 	schemes := []authschemes.AuthScheme{
 		recoveryauth.New(config.RecoveryExpiry()),
@@ -71,7 +72,7 @@ func main() {
 
 	if len(schemeErrors) > 0 {
 		for _, schemeError := range schemeErrors {
-			logger.Log("msg", "Unable to load auth scheme. Disabling.",
+			logger.Error("Unable to load auth scheme. Disabling.",
 				"schemeName", schemeError.name,
 				"error", schemeError.err.Error())
 		}
@@ -81,7 +82,7 @@ func main() {
 	if config.EmailType() != "" {
 		startEmailServices(db, logger)
 	} else {
-		logger.Log("msg", "No Emailer selected")
+		logger.Warn("No Emailer selected")
 	}
 
 	r := chi.NewRouter()
@@ -104,9 +105,9 @@ func main() {
 		)
 	})
 
-	logger.Log("msg", "starting Web server", "port", config.Port())
+	logger.Info("starting Web server", "port", config.Port())
 	serveErr := http.ListenAndServe(":"+config.Port(), r)
-	logging.Fatal(logger, "msg", "server shutting down", "err", serveErr)
+	logging.Fatal(logger, "server shutting down", "err", serveErr)
 }
 
 func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, error) {
@@ -128,9 +129,9 @@ func handleAuthType(cfg config.AuthInstanceConfig) (authschemes.AuthScheme, erro
 	return nil, fmt.Errorf("unknown auth type: %v", cfg.Type)
 }
 
-func startEmailServices(db *database.Connection, logger logging.Logger) {
+func startEmailServices(db *database.Connection, logger *slog.Logger) {
 	var emailServicer emailservices.EmailServicer
-	emailLogger := logging.With(logger, "service", "email-sender", "type", config.EmailType)
+	emailLogger := logger.With("service", "email-sender", "type", config.EmailType)
 	switch config.EmailType() {
 	case string(emailservices.StdOutEmailer):
 		mailer := emailservices.MakeWriterMailer(os.Stdout, emailLogger)
@@ -144,10 +145,10 @@ func startEmailServices(db *database.Connection, logger logging.Logger) {
 	}
 
 	if emailServicer == nil {
-		logger.Log("msg", "unsupported emailer", "type", config.EmailType)
+		logger.Error("unsupported emailer", "type", config.EmailType)
 	} else {
-		emailLogger.Log("msg", "Staring emailer")
-		emailWorker := workers.MakeEmailWorker(db, emailServicer, logging.With(logger, "service", "email-worker"))
+		emailLogger.Info("Staring emailer")
+		emailWorker := workers.MakeEmailWorker(db, emailServicer, logger.With("service", "email-worker"))
 		emailWorker.Start()
 	}
 }

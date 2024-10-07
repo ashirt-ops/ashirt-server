@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -10,14 +11,13 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/dtos"
-	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func API(r chi.Router, db *database.Connection, contentStore contentstore.Store, logger logging.Logger) {
+func API(r chi.Router, db *database.Connection, contentStore contentstore.Store, logger *slog.Logger) {
 	r.Handle("/metrics", promhttp.Handler())
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.AuthenticateAppAndInjectCtx(db))

@@ -78,11 +78,11 @@ func HandleError(w http.ResponseWriter, r *http.Request, rootErr error) {
 		status = http.StatusInternalServerError
 		publicReason = "An unknown error occurred"
 		loggedReason = err
-		logging.Log(r.Context(), "msg", "handling non-HTTPError", "stacktrace", formatStackTrace(retrace(20)))
+		logging.ReqLogger(r.Context()).Error("handling non-HTTPError", "stacktrace", formatStackTrace(retrace(20)))
 	}
 
-	logging.Log(r.Context(),
-		"msg", "Error handling request",
+	logging.ReqLogger(r.Context()).Error(
+		"Error handling request",
 		"error", loggedReason,
 		"rootError", rootErr,
 		"status", status,

@@ -126,7 +126,7 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 					g.Go(func() error {
 						err := deleteEvidenceContent(contentStore, copy)
 						if err != nil {
-							log.Log("task", "delete operation", "msg", "error deleting evidence content", "uniqueKey", "orphanedDelete",
+							log.Error("error deleting evidence content", "task", "delete operation", "uniqueKey", "orphanedDelete",
 								"keys", fmt.Sprintf(`["%v", "%v"]`, copy.FullImageKey, copy.ThumbImageKey), "error", err.Error())
 							return backend.DeleteErr(err)
 						}
@@ -168,8 +168,11 @@ func DeleteOperation(ctx context.Context, db *database.Connection, contentStore 
 			tx.Delete(sq.Delete("operations").Where(sq.Eq{"id": operation.ID}))
 		})
 		if err != nil {
-			log.Log("task", "delete operation", "msg", "Failed to fully delete operation data",
-				"error", err.Error())
+			log.Error(
+				"Failed to fully delete operation data",
+				"task", "delete operation",
+				"error", err.Error(),
+			)
 			return backend.WrapError("Cannot delete operation", backend.DatabaseErr(err))
 		}
 		return nil

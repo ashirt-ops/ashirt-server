@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -24,16 +25,16 @@ func (w *responseWriterWrapper) Write(b []byte) (int, error) {
 	return n, err
 }
 
-func LogRequests(baseLogger logging.Logger) MiddlewareFunc {
+func LogRequests(baseLogger *slog.Logger) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			ctx, logger := logging.AddRequestLogger(r.Context(), baseLogger)
-			logger.Log("msg", "Incoming request", "method", r.Method, "url", r.URL, "from", r.RemoteAddr)
+			logger.Info("Incoming request", "method", r.Method, "url", r.URL, "from", r.RemoteAddr)
 			ww := &responseWriterWrapper{w, 0, 200}
 
 			next.ServeHTTP(ww, r.WithContext(ctx))
-			logger.Log("msg", "Request Completed", "status", ww.status, "sizeInBytes", ww.size, "duration", time.Since(start))
+			logger.Info("Request Completed", "status", ww.status, "sizeInBytes", ww.size, "duration", time.Since(start))
 		})
 	}
 }

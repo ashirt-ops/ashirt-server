@@ -78,7 +78,7 @@ func (ah AShirtAuthBridge) LoginUser(w http.ResponseWriter, r *http.Request, use
 func (ah AShirtAuthBridge) updateLastLogin(r *http.Request, userID int64) {
 	err := ah.db.Update(sq.Update("auth_scheme_data").Set("last_login", time.Now()).Where(sq.Eq{"user_id": userID, "auth_scheme": ah.authSchemeName}))
 	if err != nil {
-		logging.Log(r.Context(), "msg", "Unable to update last_login", "userID", userID, "error", err)
+		logging.ReqLogger(r.Context()).Error("Unable to update last_login", "userID", userID, "error", err)
 	}
 }
 
@@ -98,7 +98,7 @@ func (ah AShirtAuthBridge) IsAccountEnabled(userID int64) (bool, error) {
 func (ah AShirtAuthBridge) isAccountEnabled(r *http.Request, userID int64) bool {
 	enabled, err := ah.IsAccountEnabled(userID)
 	if err != nil {
-		logging.Log(r.Context(), "msg", "Unable to check user's disabled flag", "userID", userID, "error", err)
+		logging.ReqLogger(r.Context()).Error("Unable to check user's disabled flag", "userID", userID, "error", err)
 		return false
 	}
 	return enabled
@@ -108,7 +108,7 @@ func (ah AShirtAuthBridge) isAdmin(r *http.Request, userID int64) bool {
 	var isAdmin bool
 	err := ah.db.Get(&isAdmin, sq.Select("admin").From("users").Where(sq.Eq{"id": userID}))
 	if err != nil {
-		logging.Log(r.Context(), "msg", "Unable to check user's admin flag", "userID", userID, "error", err)
+		logging.ReqLogger(r.Context()).Error("Unable to check user's admin flag", "userID", userID, "error", err)
 		return false
 	}
 	return isAdmin

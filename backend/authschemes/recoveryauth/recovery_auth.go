@@ -62,7 +62,7 @@ func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAu
 
 		err := generateRecoveryEmail(r.Context(), bridge, userEmail)
 		if err != nil {
-			logging.Log(r.Context(), "msg", "Unable to generate recovery email", "error", err.Error())
+			logging.ReqLogger(r.Context()).Error("Unable to generate recovery email", "error", err.Error())
 		}
 		return nil, nil
 	}))
