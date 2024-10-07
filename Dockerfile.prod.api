@@ -22,7 +22,7 @@ RUN apk add --no-cache ca-certificates && \
 USER ashirt
 WORKDIR /home/ashirt
 
-COPY --from=build /build/api /home/ashirt/private-api
+COPY --from=build /build/api /home/ashirt/api
 COPY backend/migrations /migrations
 
-CMD /home/ashirt/private-api
+CMD ["/home/ashirt/api"]
