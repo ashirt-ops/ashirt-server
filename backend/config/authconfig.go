@@ -42,9 +42,9 @@ type OIDCConfig struct {
 type WebauthnConfig struct {
 	DisplayName string `split_words:"true"`
 	// All of the below have innate defaults, and so are effectively optional
-	Timeout                         int
-	RPOrigin                        string `envconfig:"RP_ORIGIN"`
-	AttestationPreference           string `split_words:"true"`
+	RPID                            string   `split_words:"true"`
+	RPOrigins                       []string `split_words:"true"`
+	AttestationPreference           string   `split_words:"true"`
 	Debug                           bool
 	AuthenticatorAttachment         string `split_words:"true"`
 	AuthenticatorResidentKey        string `split_words:"true"`

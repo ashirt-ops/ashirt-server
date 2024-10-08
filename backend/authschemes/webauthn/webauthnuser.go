@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
-	auth "github.com/go-webauthn/webauthn/webauthn"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -91,7 +91,7 @@ func (u *webauthnUser) WebAuthnIcon() string {
 	return u.IconURL
 }
 
-func (u *webauthnUser) WebAuthnCredentials() []auth.Credential {
+func (u *webauthnUser) WebAuthnCredentials() []webauthn.Credential {
 	return helpers.Map(u.Credentials, unwrapCredential)
 }
 
