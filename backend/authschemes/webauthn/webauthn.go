@@ -21,46 +21,46 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/go-webauthn/webauthn/protocol"
-	auth "github.com/go-webauthn/webauthn/webauthn"
+	"github.com/go-webauthn/webauthn/webauthn"
 )
 
 type WebAuthn struct {
 	RegistrationEnabled bool
-	Web                 *auth.WebAuthn
+	Web                 *webauthn.WebAuthn
 }
 
 func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (WebAuthn, error) {
 	parsedUrl, err := url.Parse(webConfig.FrontendIndexURL)
-
-	var host string
-	var port string
 	if err != nil {
 		return WebAuthn{}, err
 	}
 
-	if host, port, err = net.SplitHostPort(parsedUrl.Host); err != nil {
-		host = parsedUrl.Host
+	host, _, err := net.SplitHostPort(parsedUrl.Host)
+	if err != nil {
+		return WebAuthn{}, err
 	}
 
-	config := auth.Config{
+	rpID := host
+	if cfg.WebauthnConfig.RPID != "" {
+		rpID = cfg.WebauthnConfig.RPID
+	}
+
+	rpOrigins := []string{webConfig.FrontendIndexURL}
+	if len(cfg.WebauthnConfig.RPOrigins) > 0 {
+		rpOrigins = append(rpOrigins, cfg.WebauthnConfig.RPOrigins...)
+	}
+
+	webauthnConfig := &webauthn.Config{
 		RPDisplayName: cfg.WebauthnConfig.DisplayName,
-		RPID:          host,
+		RPID:          rpID,
+		RPOrigins:     rpOrigins,
 		// the below are all optional
 		Debug:                  cfg.WebauthnConfig.Debug,
-		Timeout:                cfg.WebauthnConfig.Timeout,
 		AttestationPreference:  cfg.WebauthnConfig.Conveyance(),
 		AuthenticatorSelection: cfg.BuildAuthenticatorSelection(),
 	}
 
-	// TODO: I don't understand how to correctly set the RPOrigin. the code works *specifically* for
-	// localhost, but may fail for proper deployments. We might need to make this an env var.
-	if cfg.WebauthnConfig.RPOrigin != "" {
-		config.RPOrigin = cfg.WebauthnConfig.RPOrigin
-	} else if host == "localhost" {
-		config.RPOrigin = "http://" + host + ":" + port
-	}
-
-	web, err := auth.New(&config)
+	web, err := webauthn.New(webauthnConfig)
 	if err != nil {
 		return WebAuthn{}, err
 	}
@@ -181,7 +181,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 			}
 			discoverable := isDiscoverable(r)
 
-			var cred *auth.Credential
+			var cred *webauthn.Credential
 			var err error
 
 			if discoverable {
@@ -191,7 +191,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 				}
 
 				var webauthnUser webauthnUser
-				userHandler := func(_, userHandle []byte) (user auth.User, err error) {
+				userHandler := func(_, userHandle []byte) (user webauthn.User, err error) {
 					authnID := string(userHandle)
 					dbUser, err := bridge.GetUserFromAuthnID(authnID)
 					if err != nil {
@@ -488,7 +488,7 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		credCreationOpts.AuthenticatorSelection = selection
 	}
 
-	credOptions, sessionData, err := a.Web.BeginRegistration(&user, auth.WithAuthenticatorSelection(selection), registrationOptions)
+	credOptions, sessionData, err := a.Web.BeginRegistration(&user, webauthn.WithAuthenticatorSelection(selection), registrationOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -503,12 +503,12 @@ func (a WebAuthn) beginLogin(w http.ResponseWriter, r *http.Request, bridge auth
 
 	var data interface{}
 	var options *protocol.CredentialAssertion
-	var sessionData *auth.SessionData
+	var sessionData *webauthn.SessionData
 	var err error
 
 	if discoverable {
-		var opts = []auth.LoginOption{
-			auth.WithUserVerification(protocol.VerificationPreferred),
+		var opts = []webauthn.LoginOption{
+			webauthn.WithUserVerification(protocol.VerificationPreferred),
 		}
 		options, sessionData, err = a.Web.BeginDiscoverableLogin(opts...)
 
@@ -585,7 +585,7 @@ func (a WebAuthn) validateRegistrationComplete(r *http.Request, bridge authschem
 	return data, encodedCreds, nil
 }
 
-func updateSignCount(data *webAuthNSessionData, loginCred *auth.Credential, bridge authschemes.AShirtAuthBridge) error {
+func updateSignCount(data *webAuthNSessionData, loginCred *webauthn.Credential, bridge authschemes.AShirtAuthBridge) error {
 	userID := data.UserData.UserIDAsI64()
 
 	userAuth, err := bridge.FindUserAuthByUserID(userID)
