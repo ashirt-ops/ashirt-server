@@ -51,8 +51,10 @@ services:
       AUTH_SERVICES: ashirt
       # AUTH_SERVICES: ashirt,google
       AUTH_SERVICES_ALLOW_REGISTRATION: ashirt
+
       # AUTH_WEBAUTHN_NAME: webauthn
       # AUTH_WEBAUTHN_DISPLAY_NAME: ashirt
+      # AUTH_WEBAUTHN_TYPE: webauthn
 
       # Google oidc
       AUTH_GOOGLE_TYPE: oidc
