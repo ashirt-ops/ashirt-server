@@ -111,6 +111,8 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 			fallthrough
 		case "codeblock":
 			fallthrough
+		case "c2-event":
+			fallthrough
 		case "event":
 			content = contentstore.NewBlob(i.Content)
 
@@ -442,6 +444,8 @@ func UpdateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		case "http-request-cycle":
 			fallthrough
 		case "codeblock":
+			fallthrough
+		case "c2-event":
 			fallthrough
 		case "terminal-recording":
 			content := contentstore.NewBlob(i.Content)

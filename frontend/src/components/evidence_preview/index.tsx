@@ -1,9 +1,10 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
+import { C2EventViewer } from '../c2-event'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
-import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint, UrlData } from 'src/global_types'
-import { getEvidenceAsCodeblock, getEvidenceAsString, getEvidenceAsUrlData, updateEvidence } from 'src/services/evidence'
+import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint, UrlData, C2Event } from 'src/global_types'
+import { getEvidenceAsC2Event, getEvidenceAsCodeblock, getEvidenceAsString, getEvidenceAsUrlData, updateEvidence } from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
 import LazyLoadComponent from 'src/components/lazy_load_component'
@@ -25,6 +26,8 @@ function getComponent(evidenceType: SupportedEvidenceType) {
       return EvidenceTerminalRecording
     case 'http-request-cycle':
       return EvidenceHttpCycle
+    case 'c2-event':
+      return EvidenceC2Event
     case 'event':
       return EvidenceEvent
     case 'none':
@@ -82,6 +85,15 @@ const EvidenceCodeblock = (props: EvidenceProps) => {
 const shouldUseCachedUrl = (imgData: UrlData | undefined, props: EvidenceProps) => (
   imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date())
 )
+
+const EvidenceC2Event = (props: EvidenceProps) => {
+  const wiredEvidence = useWiredData<C2Event>(React.useCallback(() => getEvidenceAsC2Event({
+    operationSlug: props.operationSlug,
+    evidenceUuid: props.evidenceUuid,
+  }), [props.operationSlug, props.evidenceUuid]))
+
+  return wiredEvidence.render(evi => <C2EventViewer value={evi} />)  //
+}
 
 const EvidenceImage = (props: EvidenceProps) => {
   const { imgDataSetter, cachedUrls } = useEvidenceContext()
