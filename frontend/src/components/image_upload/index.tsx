@@ -9,9 +9,18 @@ export default (props: {
   label: string,
   onChange: (newValue: File|null) => void,
   value: File | null,
+  error: string,
 }) => {
   const [imageDataUriString, setImageDataUriString] = React.useState<string|null>(null)
   const [err, setErr] = React.useState<Error|null>(null)
+
+  React.useEffect(() => {
+    if (props.error) {
+        setErr(Error(props.error))
+    } else {
+        setErr(null)
+    }
+  }, [props.error])
 
   React.useEffect(() => {
     const file = props.value
@@ -51,13 +60,15 @@ const ImageUploadChildren = (props: {
   err: Error | null,
   image: string | null,
 }) => {
-  if (props.image == null) return (
-    <div className={cx('no-image')}>
-      <img src={require('./image.svg')} />
-      Drag an image here or <span>Browse for an image</span> to upload
-      {props.err && <div className={cx('error')}>{props.err.message}</div>}
-    </div>
-  )
+  if (props.image == null) {
+    return (
+      <div className={cx('no-image')}>
+        <img src={require('./image.svg')} />
+        Drag an image here or <span>Browse for an image</span> to upload
+        {props.err && <div className={cx('error')}>{props.err.message}</div>}
+      </div>
+    )
+  }
 
   return (
     <div className={cx('has-images')}>
