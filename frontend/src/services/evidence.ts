@@ -1,4 +1,4 @@
-import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata, UrlData } from 'src/global_types'
+import { Evidence, Finding, Tag, SubmittableEvidence, CodeBlock, TagDifference, EvidenceMetadata, UrlData, C2Event } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { evidenceFromDto } from './data_sources/converters'
@@ -48,6 +48,28 @@ export async function getEvidenceAsUrlData(i: {
   return {
     url: evi.url,
     expirationTime: evi.expirationTime,
+  }
+}
+
+export async function getEvidenceAsC2Event(i: {
+  operationSlug: string,
+  evidenceUuid: string,
+}): Promise<C2Event> {
+  const evi = JSON.parse(await ds.readEvidenceContent(i))
+  return {
+    type: 'c2-event',
+    c2: evi.c2,
+    c2Operator: evi.c2Operator,
+    beacon: evi.beacon,
+    externalIP: evi.externalIP,
+    internalIP: evi.internalIP,
+    hostname: evi.hostname,
+    userContext: evi.userContext,
+    integrity: evi.integrity,
+    processName: evi.processName,
+    processID: evi.processID,
+    command: evi.command,
+    result: evi.result,
   }
 }
 

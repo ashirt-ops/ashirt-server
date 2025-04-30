@@ -1,0 +1,122 @@
+@import '~src/vars'
+
+.code-viewer
+  position: relative
+  width: 100%
+  height: 100%
+  min-height: 100px
+  min-width: 100px
+
+  .source
+    position: absolute
+    top: 0
+    left: 0
+    max-width: 100%
+    height: 35px
+    line-height: 30px
+    padding: 0 10px
+    box-sizing: border-box
+    background: #0b1115
+    border-top-right-radius: 3px
+    border-top-left-radius: 3px
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
+
+  .ace
+    position: absolute
+    top: 30px
+    bottom: 0
+    left: 0
+    right: 0
+  
+.c2-event-input
+    text-align: left
+    overflow: auto; /* Allow content to be scrollable when it overflows */
+
+
+.c2-event-textarea
+  height: 150px
+  line-height: 1.2
+  height: 70px
+  width: 100%
+  box-sizing: border-box
+  padding: 0 10px
+  background: $darker-background
+  box-shadow: 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), 0 0 0 0 rgba(19,124,189,0), inset 0 0 0 1px rgba(16,22,26,.3), inset 0 1px 1px rgba(16,22,26,.4)
+  color: $foreground
+  border: none
+  outline: none
+  border-radius: 3px
+  focus-box-shadow()
+  resize: vertical
+
+.c2-event-grid
+  padding: 5px 10px
+  width: 100%
+  display: grid;
+  grid-template-columns: auto; //repeat(2, 1fr);
+  gap: 10px;
+  grid-template-rows: auto; //repeat(5, 1fr);
+  
+  .c2framework
+    grid-row: 1;      /* This item starts in row 1 and ends in row 2 */
+    grid-column: 1;
+
+  .operator
+    grid-row: 2;
+    grid-column: 1;
+  
+  .user-context
+    grid-row: 3;
+    grid-column: 1;
+
+  .beacon
+    grid-row: 2;
+    grid-column: 2;
+
+  .hostname
+    grid-row: 3;
+    grid-column: 2;
+  
+  .intIP
+    grid-row: 4;
+    grid-column: 1;
+  
+  .extIP
+    grid-row: 4;
+    grid-column: 2;
+  
+  .process
+    grid-row: 5;
+    grid-column: 1;
+  
+  .procID
+    grid-row: 5;
+    grid-column: 2;
+
+  .command
+    grid-row: 6;
+    grid-column: 1 / 3;
+
+  .result
+    grid-row: 7;
+    grid-column: 1 / 3;
+
+  .c1
+    grid-column: 1;
+  
+  .c2
+    grid-column: 2;
+
+  .r1
+    grid-row: 1;
+
+  .r2
+    grid-row: 2;
+
+  .r3
+    grid-row: 3;
+
+  .r4
+    grid-row: 4;

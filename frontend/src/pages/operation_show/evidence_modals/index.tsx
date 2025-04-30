@@ -6,6 +6,7 @@ import {
   Finding,
   Tag,
   CodeBlock,
+  C2Event,
   SubmittableEvidence,
   Operation,
   TagDifference,
@@ -13,6 +14,7 @@ import {
 } from 'src/global_types'
 import {
   codeblockToBlob,
+  c2eventToBlob,
   highlightSubstring,
   useForm,
   useFormField,
@@ -34,6 +36,7 @@ import {
   runServiceWorkerForEvidence,
   listActiveServiceWorkers,
   hasFlag,
+  getEvidenceAsC2Event,
 } from 'src/services'
 
 import BinaryUpload from 'src/components/binary_upload'
@@ -55,6 +58,7 @@ import DateTimePicker from 'src/components/date_time_picker'
 import SplitInputRow from 'src/components/split_input_row'
 import WithLabel from 'src/components/with_label'
 import { format, isValid } from 'date-fns'
+import { C2EventEditor } from 'src/components/c2-event'
 
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -69,6 +73,7 @@ export const CreateEvidenceModal = (props: {
   const binaryBlobField = useFormField<File | null>(null)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
   const adjustedAtField = useFormField<Date | undefined>(undefined)
+  const c2EventField = useFormField<C2Event>({type: 'c2-event', c2: '', c2Operator: '', beacon: '', externalIP: '', internalIP: '', hostname: '', userContext: '', integrity: '', processName: '', processID: '', command: '', result: ''})
 
   const isATerminalRecording = (file: File) => file.type == ''
   const isAnHttpRequestCycle = (file: File) => file.name.endsWith("har")
@@ -76,6 +81,7 @@ export const CreateEvidenceModal = (props: {
   const evidenceTypeOptions: Array<{ name: string, value: SupportedEvidenceType, content?: React.ReactNode }> = [
     { name: 'Screenshot', value: 'image', content: <ImageUpload label='Screenshot' {...binaryBlobField} /> },
     { name: 'Code Block', value: 'codeblock', content: <CodeBlockEditor {...codeblockField} /> },
+    { name: 'C2 Event', value: 'c2-event', content: <C2EventEditor {...c2EventField} /> },
     { name: 'Event', value: 'event', content: <div /> },
     {
       name: 'Terminal Recording', value: 'terminal-recording',
@@ -100,6 +106,8 @@ export const CreateEvidenceModal = (props: {
 
       if (selectedOption.value === 'codeblock' && codeblockField.value !== null) {
         data = { type: 'codeblock', file: codeblockToBlob(codeblockField.value) }
+      } else if (selectedOption.value === 'c2-event' && c2EventField.value !== null) {
+        data = { type: 'c2-event', file: c2eventToBlob(c2EventField.value) }
       } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null) {
         data = { type: selectedOption.value, file: binaryBlobField.value }
       } else if (selectedOption.value === 'event') {
@@ -145,18 +153,28 @@ export const EditEvidenceModal = (props: {
   const tagsField = useFormField<Array<Tag>>(props.evidence.tags)
   const codeblockField = useFormField<CodeBlock>({ type: 'codeblock', language: '', code: '', source: null })
   const adjustedAtField = useFormField<Date | undefined>(props.evidence.adjustedAt ?? undefined)
+  const c2EventField = useFormField<C2Event>({type: 'c2-event', c2: '', c2Operator: '', beacon: '', externalIP: '', internalIP: '', hostname: '', userContext: '', integrity: '', processName: '', processID: '', command: '', result: ''})
   React.useEffect(() => {
-    if (props.evidence.contentType !== 'codeblock') {
+      if (props.evidence.contentType !== 'codeblock' && props.evidence.contentType !== 'c2-event') {
       return
     }
-    getEvidenceAsCodeblock({
-      operationSlug: props.operationSlug,
-      evidenceUuid: props.evidence.uuid,
-    }).then(codeblockField.onChange)
-  }, [props.evidence.contentType, codeblockField.onChange, props.operationSlug, props.evidence.uuid])
-
+    else if (props.evidence.contentType === 'codeblock') {
+      getEvidenceAsCodeblock({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+      }).then(codeblockField.onChange)
+    }
+    else if (props.evidence.contentType === 'c2-event') {
+      getEvidenceAsC2Event({
+        operationSlug: props.operationSlug,
+        evidenceUuid: props.evidence.uuid,
+      }).then(c2EventField.onChange)
+    }
+  }, [props.evidence.contentType, codeblockField.onChange, c2EventField.onChange, props.operationSlug, props.evidence.uuid])
+      
+      
   const formComponentProps = useForm({
-    fields: [descriptionField, tagsField, codeblockField],
+    fields: [descriptionField, tagsField, codeblockField, c2EventField],
     onSuccess: () => { props.onEdited(); props.onRequestClose() },
     handleSubmit: () => updateEvidence({
       operationSlug: props.operationSlug,
@@ -165,7 +183,7 @@ export const EditEvidenceModal = (props: {
       description: descriptionField.value,
       oldTags: props.evidence.tags,
       newTags: tagsField.value,
-      updatedContent: props.evidence.contentType === 'codeblock' ? codeblockToBlob(codeblockField.value) : null,
+      updatedContent: props.evidence.contentType === 'codeblock' ? codeblockToBlob(codeblockField.value) : (props.evidence.contentType === 'c2-event' ? c2eventToBlob(c2EventField.value) : null),
     }),
   })
   return (
@@ -174,22 +192,25 @@ export const EditEvidenceModal = (props: {
       {props.evidence.contentType === 'codeblock' && (
         <CodeBlockEditor {...codeblockField} />
       )}
+      {props.evidence.contentType === 'c2-event' && (
+        <C2EventEditor {...c2EventField} />
+      )}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
       <WithLabel label='Occurred At'>
-        <Input
-          readOnly
-          value={isValid(props.evidence.occurredAt) ? format(props.evidence.occurredAt, "yyyy-dd-MM hh:mm") : ''}
-        />
-      </WithLabel>
-      <SplitInputRow
-        label="Adjusted Timestamp"
-        inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''}
-      >
-        <DateTimePicker
-          onSelectedDate={(date) => adjustedAtField.onChange(isValid(date) ? date : undefined)}
-          selected={adjustedAtField.value}
-        />
-      </SplitInputRow>
+      <Input
+        readOnly
+        value={isValid(props.evidence.occurredAt) ? format(props.evidence.occurredAt, "yyyy-dd-MM hh:mm") : ''}
+      />
+    </WithLabel>
+    <SplitInputRow
+      label="Adjusted Timestamp"
+      inputValue={isValid(adjustedAtField.value) ? format(adjustedAtField.value as Date, 'yyyy-dd-MM hh:mm') : ''}
+    >
+      <DateTimePicker
+        onSelectedDate={(date) => adjustedAtField.onChange(isValid(date) ? date : undefined)}
+        selected={adjustedAtField.value}
+      />
+    </SplitInputRow>
     </ModalForm>
   )
 }
