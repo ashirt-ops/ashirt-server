@@ -1,8 +1,7 @@
 module github.com/ashirt-ops/ashirt-server
 
 go 1.23
-
-toolchain go1.23.1
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go/storage v1.46.0
@@ -29,7 +28,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.28.0
 	golang.org/x/oauth2 v0.24.0
-	golang.org/x/sync v0.8.0
+	golang.org/x/sync v0.13.0
 )
 
 require (
