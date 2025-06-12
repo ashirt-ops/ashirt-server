@@ -2,8 +2,6 @@ module github.com/ashirt-ops/ashirt-server
 
 go 1.23
 
-toolchain go1.23.1
-
 require (
 	cloud.google.com/go/storage v1.46.0
 	github.com/Masterminds/squirrel v1.5.4
@@ -12,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.70.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.2
 	github.com/coreos/go-oidc/v3 v3.11.0
-	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/go-webauthn/webauthn v0.11.2
 	github.com/google/uuid v1.6.0
