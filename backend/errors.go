@@ -46,7 +46,7 @@ func WrapError(msg string, err error) error {
 	case error:
 		return fmt.Errorf("%v : %w", msg, err)
 	}
-	return fmt.Errorf(msg)
+	return fmt.Errorf("%s", msg)
 }
 
 func HTTPErr(statusCode int, reason string, wrappedError error) error {
