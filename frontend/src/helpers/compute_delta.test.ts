@@ -1,4 +1,4 @@
-import {computeDelta} from './compute_delta'
+import {computeDelta} from './compute_delta.ts'
 import {expect} from 'chai'
 
 describe('#computeDelta', function() {
