@@ -3,7 +3,7 @@ import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Routes, Navigate, useParams, Params } from 'react-router-dom'
+import { Route, Routes, Navigate, useParams, Params } from 'react-router'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))

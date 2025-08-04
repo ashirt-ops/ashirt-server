@@ -1,7 +1,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router'
 import { UserOwnView } from 'src/global_types'
 import { getUser } from 'src/services'
 import { useUserIsSuperAdmin, useWiredData } from 'src/helpers'

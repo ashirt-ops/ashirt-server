@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 
 import { default as ListMenu, NavListItem, ListItem } from 'src/components/list_menu'
 

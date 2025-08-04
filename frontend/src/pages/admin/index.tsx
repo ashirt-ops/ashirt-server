@@ -20,7 +20,7 @@ import GlobalVarsTable from './global_vars_table'
 import { BuildReloadBus, BusSupportedService } from 'src/helpers/reload_bus'
 import { DefaultTagEditor } from './default_tag_editor'
 import { TagPorter } from './tag_porter'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router'
 
 const cx = classnames.bind(require('./stylesheet'))
 

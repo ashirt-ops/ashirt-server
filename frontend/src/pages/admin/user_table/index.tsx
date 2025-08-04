@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { usePaginatedWiredData } from 'src/helpers'
 
 import { UserAdminView } from 'src/global_types'

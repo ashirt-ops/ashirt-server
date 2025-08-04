@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import Button from 'src/components/button'
 import OperationBadge from 'src/components/operation_badges'

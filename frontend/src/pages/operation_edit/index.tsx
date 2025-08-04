@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { useParams, useNavigate, Routes, Route } from 'react-router-dom'
+import { useParams, useNavigate, Routes, Route } from 'react-router'
 
 import Button from 'src/components/button'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'

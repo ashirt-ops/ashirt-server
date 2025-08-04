@@ -55,7 +55,7 @@ export function queryFromDto(query: dtos.Query): types.SavedQuery {
 export function tagEvidenceDateFromDto(tag: dtos.TagByEvidenceDate): types.TagByEvidenceDate {
   return {
     ...tag,
-    usages: tag.usages.map(strDate => new Date(strDate))
+    usages: tag.usages.map((strDate: string) => new Date(strDate))
   }
 }
 

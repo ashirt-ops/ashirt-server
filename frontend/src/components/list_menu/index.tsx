@@ -2,7 +2,7 @@ import * as React from 'react'
 import Button from 'src/components/button'
 import classnames from 'classnames/bind'
 import {ClickPopover} from 'src/components/popover'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router'
 const cx = classnames.bind(require('./stylesheet'))
 
 // Usage:
@@ -33,7 +33,7 @@ export const NavListItem = (props: {
 
   return (
     <li className={cx({ selected: (location.pathname.endsWith(`/${props.to}`)) })}>
-      <NavLink end={props.exact} to={props.to + query}>
+      <NavLink end={props.exact} to={"../" + props.to + query}>
         {props.name}
       </NavLink>
     </li>
