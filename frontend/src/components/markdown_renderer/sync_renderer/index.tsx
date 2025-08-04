@@ -8,5 +8,7 @@ const cx = classnames.bind(require('./stylesheet'))
 export default (props: {
   children: string
 }) => (
-  <ReactMarkdown className={cx('markdown')}>{props.children}</ReactMarkdown>
+  <div className={cx('markdown')}>
+    <ReactMarkdown>{props.children}</ReactMarkdown>
+  </div>
 )
