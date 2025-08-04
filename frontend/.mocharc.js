@@ -1,3 +1,3 @@
 module.exports = {
-  require: ['ts-node/register', './src/test_helpers/setup']
+  require: ['ts-node/register', './src/test_helpers/setup.js']
 }
