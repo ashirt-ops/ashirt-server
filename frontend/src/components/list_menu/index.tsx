@@ -33,7 +33,7 @@ export const NavListItem = (props: {
 
   return (
     <li className={cx({ selected: (location.pathname.endsWith(`/${props.to}`)) })}>
-      <NavLink end={props.exact} to={props.to + query}>
+      <NavLink end={props.exact} to={"../" + props.to + query}>
         {props.name}
       </NavLink>
     </li>
