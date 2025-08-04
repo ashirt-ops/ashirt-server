@@ -2,7 +2,7 @@ import * as React from 'react'
 import Button from 'src/components/button'
 import classnames from 'classnames/bind'
 import {ClickPopover} from 'src/components/popover'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router'
 const cx = classnames.bind(require('./stylesheet'))
 
 // Usage:

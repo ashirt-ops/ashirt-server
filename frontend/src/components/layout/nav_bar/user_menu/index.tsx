@@ -1,6 +1,6 @@
 import * as React from 'react'
 import AuthContext from 'src/auth_context'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate} from 'react-router'
 
 import classnames from 'classnames/bind'
 import {logout} from 'src/services'

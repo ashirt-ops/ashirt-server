@@ -1,7 +1,7 @@
 import * as React from 'react'
 import UserMenu from './user_menu'
 import classnames from 'classnames/bind'
-import {Link} from 'react-router-dom'
+import {Link} from 'react-router'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default () => (

@@ -9,7 +9,7 @@ import {
   EvidenceMetadataModal,
 } from '../evidence_modals'
 import { Codeblock, Evidence, ExportedEvidence, Media, Tag } from 'src/global_types'
-import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { mkNavTo } from 'src/helpers/navigate-to-query'

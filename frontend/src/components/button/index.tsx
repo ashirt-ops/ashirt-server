@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 
 import LoadingSpinner from 'src/components/loading_spinner'
 

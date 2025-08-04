@@ -1,7 +1,7 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
 import { chunk } from 'lodash'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { DefaultTag, Tag as TagType, TagWithUsage } from 'src/global_types'
 import { useModal, renderModals } from 'src/helpers'
 
