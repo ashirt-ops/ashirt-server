@@ -1,4 +1,4 @@
-import {DateRange, addDateToRange, stringifyRange} from './range_picker_helpers'
+import {DateRange, addDateToRange, stringifyRange} from './range_picker_helpers.ts'
 import {expect} from 'chai'
 import {getMonth, format} from 'date-fns'
 
