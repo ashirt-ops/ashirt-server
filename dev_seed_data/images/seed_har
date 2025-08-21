@@ -187,24 +187,10 @@
             {
               "name": "Accept-Language",
               "value": "en-US,en;q=0.9"
-            },
-            {
-              "name": "Cookie",
-              "value": "_gorilla_csrf=MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg; auth=MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg=="
             }
           ],
           "queryString": [],
           "cookies": [
-            {
-              "name": "_gorilla_csrf",
-              "value": "MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg",
-              "path": "/",
-              "domain": "localhost",
-              "expires": "2022-03-15T05:32:25.843Z",
-              "httpOnly": true,
-              "secure": false,
-              "sameSite": "Lax"
-            },
             {
               "name": "auth",
               "value": "MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg==",
@@ -250,10 +236,6 @@
             {
               "name": "Vary",
               "value": "Cookie, Accept-Encoding"
-            },
-            {
-              "name": "x-csrf-token",
-              "value": "TE/DzuVnlj8dBD33e2UrDZZdiuY9eQzlBp2CDEDJbuhrCFvct+IHjartgMRlvQCKJyKiJPLVxsTUJYnlLkadEg=="
             },
             {
               "name": "date",
@@ -554,24 +536,10 @@
             {
               "name": "Accept-Language",
               "value": "en-US,en;q=0.9"
-            },
-            {
-              "name": "Cookie",
-              "value": "_gorilla_csrf=MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg; auth=MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg=="
             }
           ],
           "queryString": [],
           "cookies": [
-            {
-              "name": "_gorilla_csrf",
-              "value": "MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg",
-              "path": "/",
-              "domain": "localhost",
-              "expires": "2022-03-15T05:32:25.843Z",
-              "httpOnly": true,
-              "secure": false,
-              "sameSite": "Lax"
-            },
             {
               "name": "auth",
               "value": "MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg==",
@@ -621,10 +589,6 @@
             {
               "name": "Vary",
               "value": "Cookie, Accept-Encoding"
-            },
-            {
-              "name": "x-csrf-token",
-              "value": "jlp2JVW4N06IPrYr6HENw/DHrhcE8QxW7g9Oo6HiHAapHe43Bz2m/D/XCxj2qSZEQbiG1ctdxnc8t0VKz23v/A=="
             },
             {
               "name": "date",
@@ -928,24 +892,10 @@
             {
               "name": "Accept-Language",
               "value": "en-US,en;q=0.9"
-            },
-            {
-              "name": "Cookie",
-              "value": "_gorilla_csrf=MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg; auth=MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg=="
             }
           ],
           "queryString": [],
           "cookies": [
-            {
-              "name": "_gorilla_csrf",
-              "value": "MTY0NzI3OTE0NXxJa293WlZsRmJFdEdhMkpMTXpaaU1IcElkR2R5YURkR0wwdE5URkJ5VFc5b01ISm5URFpYTmxBNEwyODlJZ289fCEi0GcMoYiGubSpzyuZ1tqTivZ0mumYWLBsPlclp_Sg",
-              "path": "/",
-              "domain": "localhost",
-              "expires": "2022-03-15T05:32:25.843Z",
-              "httpOnly": true,
-              "secure": false,
-              "sameSite": "Lax"
-            },
             {
               "name": "auth",
               "value": "MTY0NzI5MTA0MHxCQXdBQVRFPXwEAHahyVkl_YzNxEl_EYSzNpNodaGhgUlhwu37ljxmpg==",
@@ -991,10 +941,6 @@
             {
               "name": "Vary",
               "value": "Cookie, Accept-Encoding"
-            },
-            {
-              "name": "x-csrf-token",
-              "value": "uZ0VDTTP3Gsa4TaYP8MMgwqlch2pLMZunepxW3YSc3+e2o0fZkpN2a0Ii6shGycEu9pa32aADE9PUnqyGJ2AhQ=="
             },
             {
               "name": "date",

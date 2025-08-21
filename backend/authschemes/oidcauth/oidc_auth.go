@@ -2,8 +2,11 @@ package oidcauth
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
@@ -13,7 +16,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/csrf"
 	"golang.org/x/oauth2"
 )
 
@@ -113,14 +115,16 @@ func (o OIDCAuth) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 
 func (o OIDCAuth) redirectLogin(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge, mode string) {
 	nonce, _ := authschemes.GenerateNonce()
-	stateChallenge := csrf.Token(r)
+	stateRaw := make([]byte, 16)
+	io.ReadFull(rand.Reader, stateRaw)
+	state := base64.RawURLEncoding.EncodeToString(stateRaw)
 	bridge.SetAuthSchemeSession(w, r, &preLoginAuthSession{
 		Nonce:              nonce,
-		StateChallengeCSRF: stateChallenge,
+		StateChallengeCSRF: state,
 		LoginMode:          mode,
 		OIDCService:        o.Name(),
 	})
-	http.Redirect(w, r, o.oauthConfig.AuthCodeURL(stateChallenge), http.StatusFound)
+	http.Redirect(w, r, o.oauthConfig.AuthCodeURL(state), http.StatusFound)
 }
 
 func (o OIDCAuth) handleCallback(w http.ResponseWriter, r *http.Request, bridge authschemes.AShirtAuthBridge) (interface{}, error) {

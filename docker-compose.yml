@@ -21,7 +21,6 @@ services:
       # STORE_BUCKET: 
       # If using S3...
       # STORE_REGION: 
-      APP_CSRF_AUTH_KEY: ""
       APP_SESSION_STORE_KEY: ""
       APP_PORT: 3000
       APP_FRONTEND_INDEX_URL: "http://localhost:8080"
@@ -66,14 +65,14 @@ services:
       AUTH_GOOGLE_SCOPES: email
       AUTH_GOOGLE_DISABLE_REGISTRATION: "false"
 
-      # Deprecated okta login
-      # AUTH_OKTA_CLIENT_ID:
-      # AUTH_OKTA_CLIENT_SECRET:
-      # AUTH_OKTA_ISSUER: 
-      # AUTH_OKTA_BACKEND_URL: "http://localhost:8080/web"
-      # AUTH_OKTA_SUCCESS_REDIRECT_URL: "http://localhost:8080"
-      # AUTH_OKTA_FAILURE_REDIRECT_URL_PREFIX: "http://localhost:8080"
-      # AUTH_OKTA_PROFILE_TO_SHORTNAME_FIELD: preferred_username
+      AUTH_OKTA_TYPE: oidc
+      AUTH_OKTA_NAME: okta
+      AUTH_OKTA_FRIENDLY_NAME: Okta OIDC
+      AUTH_OKTA_PROVIDER_URL:
+      AUTH_OKTA_CLIENT_ID:
+      AUTH_OKTA_CLIENT_SECRET:
+      AUTH_OKTA_SCOPES: email
+      AUTH_OKTA_DISABLE_REGISTRATION: "false"
 
   frontend:
     depends_on:

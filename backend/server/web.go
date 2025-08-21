@@ -18,7 +18,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/dtos"
 	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/csrf"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
@@ -32,7 +31,6 @@ import (
 type WebConfig struct {
 	DBConnection     *database.Connection
 	AuthSchemes      []authschemes.AuthScheme
-	CSRFAuthKey      []byte
 	SessionStoreKey  []byte
 	UseSecureCookies bool
 	Logger           *slog.Logger
@@ -42,9 +40,6 @@ func (c *WebConfig) validate() error {
 	if c.Logger == nil {
 		fmt.Println(`error="Logger not set" action="Using NopLogger"`)
 		c.Logger = logging.NewNopLogger()
-	}
-	if len(c.CSRFAuthKey) < 32 {
-		return errors.New("CSRFAuthKey must be 32 bytes or longer")
 	}
 	if len(c.SessionStoreKey) < 32 {
 		return errors.New("SessionStoreKey must be 32 bytes or longer")
@@ -68,16 +63,12 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 		panic(err)
 	}
 
+	csrf := http.NewCrossOriginProtection()
+
 	r.Handle("/metrics", promhttp.Handler())
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.LogRequests(config.Logger))
-		r.Use(csrf.Protect(config.CSRFAuthKey,
-			csrf.Secure(config.UseSecureCookies),
-			csrf.Path("/"),
-			csrf.ErrorHandler(jsonHandler(func(r *http.Request) (interface{}, error) {
-				return nil, backend.CSRFErr(csrf.FailureReason(r))
-			}))))
-		r.Use(middleware.InjectCSRFTokenHeader())
+		r.Use(csrf.Handler)
 		r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionStore))
 
 		supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))

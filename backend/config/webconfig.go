@@ -11,7 +11,6 @@ import (
 type WebConfig struct {
 	ImgstoreBucketName       string        `split_words:"true"`
 	ImgstoreRegion           string        `split_words:"true"`
-	CsrfAuthKey              string        `split_words:"true"`
 	SessionStoreKey          string        `split_words:"true"`
 	RecoveryExpiry           time.Duration `split_words:"true" default:"24h"`
 	DisableLocalRegistration bool          `split_words:"true"`
@@ -118,11 +117,6 @@ func ImageStoreBucketName() string {
 // AWSRegion retrieves the APP_IMGSTORE_REGION value from the environment
 func AWSRegion() string {
 	return app.ImgstoreRegion
-}
-
-// CSRFAuthKey retrieves the APP_CSRF_AUTH_KEY value from the environment
-func CSRFAuthKey() string {
-	return app.CsrfAuthKey
 }
 
 // SessionStoreKey retrieves the SESSION_STORE_KEY value from the environment

@@ -121,7 +121,6 @@ func tryRunServer(logger *slog.Logger) error {
 	r.Route("/web", func(r chi.Router) {
 		server.Web(r,
 			db, contentStore, &server.WebConfig{
-				CSRFAuthKey:      []byte("DEVELOPMENT_CSRF_AUTH_KEY_SECRET"),
 				SessionStoreKey:  []byte("DEVELOPMENT_SESSION_STORE_KEY_SECRET"),
 				UseSecureCookies: false,
 				AuthSchemes:      schemes,
