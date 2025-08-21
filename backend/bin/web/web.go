@@ -90,7 +90,6 @@ func main() {
 	r.Route("/web", func(r chi.Router) {
 		server.Web(r,
 			db, contentStore, &server.WebConfig{
-				CSRFAuthKey:      []byte(config.CSRFAuthKey()),
 				SessionStoreKey:  []byte(config.SessionStoreKey()),
 				UseSecureCookies: true,
 				AuthSchemes:      schemes,

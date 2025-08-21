@@ -10,7 +10,6 @@ services:
       - 8000:8000
     restart: on-failure
     environment:
-      APP_CSRF_AUTH_KEY: "dummy-csrf-for-testing-prod-locally"
       APP_IMGSTORE_BUCKET_NAME: ""
       APP_IMGSTORE_REGION: ""
       APP_PORT: 8000

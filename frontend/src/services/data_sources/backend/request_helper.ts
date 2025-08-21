@@ -1,7 +1,5 @@
 import queryString from "query-string"
 
-var CSRF_TOKEN: string | null = null
-
 class HttpError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -27,16 +25,13 @@ async function request(decode: (res: Response) => Promise<any>, method: string, 
   if (method === 'GET') {
     res = await fetch(path, { method })
   } else {
-    if (CSRF_TOKEN == null) throw Error('Non-GET request initiated before CSRF Token populated')
     const body = JSON.stringify(data);
     const headers = {
       'Content-Type': 'application/json',
-      'X-CSRF-Token': CSRF_TOKEN,
     }
     res = await fetch(path, { method, body, headers })
   }
 
-  CSRF_TOKEN = res.headers.get('X-CSRF-TOKEN')
   const responseJson = await decode(res)
   if (res.status < 200 || res.status >= 300 || (responseJson && responseJson.error)) {
     throw new HttpError(res.status, responseJson.error)
@@ -45,10 +40,8 @@ async function request(decode: (res: Response) => Promise<any>, method: string, 
 }
 
 export async function reqMultipart(method: string, path: string, body: FormData) {
-  if (CSRF_TOKEN == null) throw Error('Non-GET request initiated before CSRF Token populated')
   path = '/web' + path
-  const headers = { 'X-CSRF-Token': CSRF_TOKEN }
-  const res = await fetch(path, { method, body, headers })
+  const res = await fetch(path, { method, body })
   const responseJson = await res.json()
   if (res.status < 200 || res.status >= 300 || (responseJson && responseJson.error)) {
     throw new HttpError(res.status, responseJson.error)

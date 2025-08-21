@@ -110,9 +110,6 @@ func UnauthorizedWriteErr(err error) error {
 	return HTTPErr(http.StatusUnauthorized, "Unauthorized", err)
 }
 
-// CSRFErr provides an error for when the CSRF validation fails
-func CSRFErr(err error) error { return HTTPErr(http.StatusForbidden, "CSRF Failure", err) }
-
 // BadAuthErr provides an error for sitatutions when a user authentication cannot be determined (mostly for alternative identity providers)
 func BadAuthErr(err error) error { return HTTPErr(http.StatusForbidden, "Forbidden", err) }
 

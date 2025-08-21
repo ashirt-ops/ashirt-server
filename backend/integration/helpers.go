@@ -48,7 +48,6 @@ func NewTester(t *testing.T) *Tester {
 	s.Route("/web", func(r chi.Router) {
 		server.Web(r,
 			db, contentStore, &server.WebConfig{
-				CSRFAuthKey:     []byte("csrf-auth-key-for-integration-tests"),
 				SessionStoreKey: []byte("session-store-key-for-integration-tests"),
 				AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
 					RegistrationEnabled: true,
@@ -87,9 +86,8 @@ func doMinimalSeed(db *database.Connection) {
 }
 
 type UserSession struct {
-	Client    *http.Client
-	CSRFToken string
-	UserSlug  string
+	Client   *http.Client
+	UserSlug string
 }
 
 type APIKey struct {
@@ -177,7 +175,6 @@ func (a *Tester) APIKeyForUser(u *UserSession) *APIKey {
 
 func (b *RequestBuilder) AsUser(u *UserSession) *RequestBuilder {
 	b.userSession = u
-	b.req.Header.Set("X-CSRF-Token", u.CSRFToken)
 	return b
 }
 
@@ -249,11 +246,6 @@ func (b *RequestBuilder) Do() *ResponseTester {
 
 	res, err := client.Do(b.req)
 	require.NoError(b.t, err)
-
-	returnedCSRFToken := res.Header.Get("X-CSRF-Token")
-	if b.userSession != nil && returnedCSRFToken != "" {
-		b.userSession.CSRFToken = returnedCSRFToken
-	}
 
 	return &ResponseTester{t: b.t, res: res}
 }

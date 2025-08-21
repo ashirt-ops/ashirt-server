@@ -67,11 +67,5 @@ func TestUserAuthorization(t *testing.T) {
 	a.Get("/web/operations/alice/evidence/1/preview").AsUser(alice).Do().ExpectNotFound()
 	a.Get("/web/operations/alice/evidence/1/media").AsUser(alice).Do().ExpectNotFound()
 
-	// Ensure CSRF is valid for requests
-	eve := &integration.UserSession{
-		Client:    alice.Client,
-		CSRFToken: "some-invalid-token",
-	}
-	a.Post("/web/operations").WithJSONBody(`{"name": "Alice's Operation"}`).AsUser(eve).Do().ExpectResponse(403, []byte(`{"error":"CSRF Failure"}`))
 	a.Get("/web/operations").AsUser(alice).Do().ExpectSubsetJSONArray([]string{`{"slug": "alice", "name": "Alice's Operation", "numUsers": 1}`})
 }
