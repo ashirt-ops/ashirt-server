@@ -1,4 +1,4 @@
-import {addTagToQuery, addOperatorToQuery, addOrUpdateDateRangeInQuery, getDateRangeFromQuery} from './query_parser'
+import {addTagToQuery, addOperatorToQuery, addOrUpdateDateRangeInQuery, getDateRangeFromQuery} from './query_parser.ts'
 import {expect} from 'chai'
 
 describe('Query Parser Helpers', function() {
