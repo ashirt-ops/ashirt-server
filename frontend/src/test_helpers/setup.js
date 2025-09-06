@@ -3,7 +3,7 @@
 // First set up sinon-chai
 const sinonChai = require('sinon-chai')
 const chai = require('chai')
-chai.use(sinonChai)
+chai.use(sinonChai.default)
 
 const Module = require('module')
 const path = require('path')
