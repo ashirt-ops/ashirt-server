@@ -43,7 +43,7 @@ export const FilterFieldsGrid = (props: {
   className?: string
   requestQueriesReload?: () => void
 }) => {
-  const [state, dispatch] = React.useReducer<SearchOptionsReducer>(searchOptionsReducer, props.value)
+  const [state, dispatch] = React.useReducer(searchOptionsReducer, props.value)
   const chooseEvidenceModal = useModal<{}>(modalProps => (
     <ChooseEvidenceModal
       initialEvidence={

@@ -17,7 +17,7 @@ export default function <T extends { uuid: string }>(props: {
   const [query, setQuery] = React.useState<string>('')
   const dataFetcher = props.fetch
   const wiredResults = useWiredData<Array<T>>(React.useCallback(() => dataFetcher(query), [query, dataFetcher]))
-  const fetchedData = React.useRef<Array<T>>()
+  const fetchedData = React.useRef<Array<T>>([])
   const [allSelected, setAllSelected] = React.useState(false)
 
   const resultsByUuid: { [uuid: string]: T } = {}

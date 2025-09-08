@@ -130,7 +130,7 @@ const ExpandedSearch = (props: {
 
 const SearchInput = (props: {
   queryString: string
-  inputRef: React.RefObject<HTMLInputElement>
+  inputRef: React.RefObject<HTMLInputElement | null>
   onSearch: (query: string) => void
   setQueryString: (query: string) => void
 }) => {

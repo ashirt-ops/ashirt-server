@@ -25,11 +25,22 @@ export default (props: {
 
 function getNameForValue(curValue: string, children: React.ReactNode): string {
   let name = curValue
-  React.Children.map(children, child => {
-    if (!React.isValidElement(child)) return
-    let {value, children} = child.props
-    if (value == null) value = children
-    if (value === curValue) name = children
-  })
-  return name
+  React.Children.forEach(children, (child) => {
+    if (!React.isValidElement(child)) {
+      return;
+    }
+
+    const {value, children: childChildren} = child.props as {
+      value?: string;
+      children?: string;
+    }
+ 
+    const effectiveValue = value ?? childChildren;
+
+    if (effectiveValue === curValue) {
+      name = typeof childChildren === 'string' ? childChildren : curValue;
+    }
+  });
+
+  return name;
 }

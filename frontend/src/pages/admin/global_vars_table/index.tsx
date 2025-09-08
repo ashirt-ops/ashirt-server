@@ -61,10 +61,10 @@ const TableRow = (props: {
 
 type Rowdata = {
   "Name": string,
-  "Actions": JSX.Element,
+  "Actions": React.JSX.Element,
 }
 
-const rowBuilder = (u: GlobalVar | null, actions: JSX.Element): Rowdata => ({
+const rowBuilder = (u: GlobalVar | null, actions: React.JSX.Element): Rowdata => ({
   "Name": u ? u.name : "",
   "Actions": actions,
 })

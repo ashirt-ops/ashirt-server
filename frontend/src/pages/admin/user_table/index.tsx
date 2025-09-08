@@ -104,11 +104,11 @@ type Rowdata = {
   "First Name": string,
   "Last Name": string,
   "Contact Email": string,
-  "Flags": JSX.Element,
-  "Actions": JSX.Element,
+  "Flags": React.JSX.Element,
+  "Actions": React.JSX.Element,
 }
 
-const rowBuilder = (u: UserAdminView | null, actions: JSX.Element): Rowdata => ({
+const rowBuilder = (u: UserAdminView | null, actions: React.JSX.Element): Rowdata => ({
   "First Name": u ? u.firstName : "",
   "Last Name": u ? u.lastName : "",
   "Contact Email": u ? u.email : "",

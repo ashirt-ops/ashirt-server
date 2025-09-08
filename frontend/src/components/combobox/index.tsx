@@ -42,7 +42,7 @@ export default function SmartComboBox<T>(props: {
   disabled?: boolean,
 }) {
 
-  const [cbState, dispatch] = React.useReducer<ComboBoxReducer<T>>(
+  const [cbState, dispatch] = React.useReducer(
     standardComboboxStateReducer,
     initialComboBoxState(props.value, props.options, props.nonValueDefault),
   )

@@ -13,7 +13,7 @@ import {
   EventTypeFrameAdvance, EventTypeRateChange, EventTypeDesiredRateChange,
 } from './player'
 
-import "xterm/css/xterm.css"
+import "@xterm/xterm/css/xterm.css"
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {

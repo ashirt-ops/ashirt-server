@@ -97,12 +97,12 @@ const TableRow = (props: { data: Rowdata }) => (
 
 type Rowdata = {
   "Name": string,
-  "Users": JSX.Element,
-  "Flags": JSX.Element,
-  "Actions": JSX.Element,
+  "Users": React.JSX.Element,
+  "Flags": React.JSX.Element,
+  "Actions": React.JSX.Element,
 }
 
-const rowBuilder = (u: UserGroupAdminView | null, users: JSX.Element, actions: JSX.Element): Rowdata => ({
+const rowBuilder = (u: UserGroupAdminView | null, users: React.JSX.Element, actions: React.JSX.Element): Rowdata => ({
   "Name": u ? u.name : "",
   "Users": users,
   "Flags": (u && u.deleted) ? <span className={cx('deleted-user')}>Deleted</span> : <span />,
