@@ -20,25 +20,18 @@ import (
 )
 
 type OIDCAuth struct {
-	name                  string
-	friendlyName          string
-	provider              *oidc.Provider
-	oauthConfig           oauth2.Config
-	verifier              *oidc.IDTokenVerifier
-	profileSlugField      string
-	profileFirstNameField string
-	profileLastNameField  string
-	profileEmailField     string
-	registrationEnabled   bool
-
-	// do we need this?
-
-	redirectUrl string
-
-	absoluteBackendPath           string
+	name                          string
+	friendlyName                  string
+	provider                      *oidc.Provider
+	oauthConfig                   oauth2.Config
+	verifier                      *oidc.IDTokenVerifier
+	profileSlugField              string
+	profileFirstNameField         string
+	profileLastNameField          string
+	profileEmailField             string
+	registrationEnabled           bool
 	authSuccessRedirectPath       string
 	authFailureRedirectPathPrefix string
-	canAccessService              func(map[string]string) bool
 }
 
 type loginMode = string
@@ -49,20 +42,35 @@ const (
 )
 
 func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (OIDCAuth, error) {
-
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, cfg.ProviderURL)
 	if err != nil {
 		return OIDCAuth{}, err
 	}
 
+	backendURL := webConfig.BackendURL
+	if cfg.BackendURL != "" {
+		backendURL = cfg.BackendURL
+	}
+
+	successRedirectURL := webConfig.SuccessRedirectURL
+	if cfg.SuccessRedirectURL != "" {
+		successRedirectURL = cfg.SuccessRedirectURL
+	}
+
+	failureRedirectURLPrefix := cfg.FailureRedirectURLPrefix
+	if cfg.FailureRedirectURLPrefix != "" {
+		failureRedirectURLPrefix = cfg.FailureRedirectURLPrefix
+	}
+
 	oauth2Config := oauth2.Config{
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
-		RedirectURL:  callbackURI(webConfig.BackendURL, cfg.Name),
+		RedirectURL:  callbackURI(backendURL, cfg.Name),
 		Scopes:       append([]string{oidc.ScopeOpenID, "profile"}, cfg.Scopes),
 		Endpoint:     provider.Endpoint(), // Discovery returns the OAuth2 endpoints.
 	}
+
 	return OIDCAuth{
 		name:                          cfg.Name,
 		friendlyName:                  cfg.FriendlyName,
@@ -74,9 +82,8 @@ func New(cfg config.AuthInstanceConfig, webConfig *config.WebConfig) (OIDCAuth, 
 		profileLastNameField:          cfg.ProfileLastNameField,
 		profileEmailField:             cfg.ProfileEmailField,
 		registrationEnabled:           cfg.RegistrationEnabled,
-		absoluteBackendPath:           webConfig.BackendURL,
-		authSuccessRedirectPath:       webConfig.SuccessRedirectURL,
-		authFailureRedirectPathPrefix: webConfig.FailureRedirectURLPrefix,
+		authSuccessRedirectPath:       successRedirectURL,
+		authFailureRedirectPathPrefix: failureRedirectURLPrefix,
 	}, nil
 }
 
