@@ -28,15 +28,18 @@ type AuthInstanceConfig struct {
 }
 
 type OIDCConfig struct {
-	FriendlyName          string `split_words:"true"`
-	ProviderURL           string `split_words:"true"`
-	ClientID              string `split_words:"true"`
-	ClientSecret          string `split_words:"true"`
-	Scopes                string
-	ProfileFirstNameField string `split_words:"true"`
-	ProfileLastNameField  string `split_words:"true"`
-	ProfileEmailField     string `split_words:"true"`
-	ProfileSlugField      string `split_words:"true"`
+	FriendlyName             string `split_words:"true"`
+	ProviderURL              string `split_words:"true"`
+	ClientID                 string `split_words:"true"`
+	ClientSecret             string `split_words:"true"`
+	Scopes                   string
+	ProfileFirstNameField    string `split_words:"true"`
+	ProfileLastNameField     string `split_words:"true"`
+	ProfileEmailField        string `split_words:"true"`
+	ProfileSlugField         string `split_words:"true"`
+	BackendURL               string `split_words:"true"`
+	SuccessRedirectURL       string `split_words:"true"`
+	FailureRedirectURLPrefix string `split_words:"true"`
 }
 
 type WebauthnConfig struct {
