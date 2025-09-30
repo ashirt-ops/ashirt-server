@@ -104,6 +104,15 @@ func main() {
 		)
 	})
 
+	static := config.Static()
+	if static == "" {
+		logging.Fatal(logger, "no static directory provided")
+	} else {
+		logger.Info("serving static directory", "path", static)
+	}
+
+	r.Mount("/", http.FileServer(http.Dir(static)))
+
 	logger.Info("starting Web server", "port", config.Port())
 	serveErr := http.ListenAndServe(":"+config.Port(), r)
 	logging.Fatal(logger, "server shutting down", "err", serveErr)

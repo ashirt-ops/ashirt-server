@@ -22,6 +22,7 @@ type WebConfig struct {
 	EnableEvidenceExport     bool          `split_words:"true"`
 	Flags                    string
 	Port                     int
+	Static                   string `split_words:"true"`
 }
 
 // DBConfig provides configuration details on connecting to the backend database
@@ -66,16 +67,6 @@ func LoadWebConfig() error {
 		loadDBConfig,
 		loadAuthConfig,
 		loadEmailConfig,
-		loadStoreConfig,
-	})
-}
-
-// LoadAPIConfig loads all of the environment configuration from environment variables. This version
-// exists primarily to load data for the "API" / tools server
-func LoadAPIConfig() error {
-	return loadConfig([]func() error{
-		loadAppConfig,
-		loadDBConfig,
 		loadStoreConfig,
 	})
 }
@@ -165,4 +156,8 @@ func UseLambdaRIE() bool {
 
 func EnableEvidenceExport() bool {
 	return app.EnableEvidenceExport
+}
+
+func Static() string {
+	return app.Static
 }

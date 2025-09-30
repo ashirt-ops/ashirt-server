@@ -1,3 +1,23 @@
+FROM golang:1.25-alpine AS dtos
+
+RUN mkdir /build
+WORKDIR /build
+COPY go.mod go.sum ./
+COPY backend backend
+RUN go run ./backend/dtos/gentypes > dtos.ts
+
+
+FROM node:24-alpine AS build_node
+
+RUN mkdir /build
+WORKDIR /build
+
+COPY frontend frontend
+WORKDIR /build/frontend
+RUN npm install
+COPY --from=dtos /build/dtos.ts src/services/data_sources/dtos/dtos.ts
+RUN npm run build
+
 FROM golang:1.25-alpine AS build
 
 RUN apk add --no-cache git && \
@@ -13,7 +33,6 @@ COPY backend backend
 COPY signer signer
 RUN go build ./backend/bin/web/
 
-
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates && \
@@ -24,5 +43,8 @@ WORKDIR /home/ashirt
 
 COPY --from=build /build/web /home/ashirt/web
 COPY backend/migrations /migrations
+
+COPY --from=build_node /build/frontend/dist/ static
+COPY --from=build_node /build/frontend/dist/assets/index.html static/index.html
 
 CMD ["/home/ashirt/web"]
