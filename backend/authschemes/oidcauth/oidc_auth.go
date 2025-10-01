@@ -157,11 +157,11 @@ func (o OIDCAuth) handleCallback(w http.ResponseWriter, r *http.Request, bridge 
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
-		return o.authFailure(w, r, backend.BadAuthErr(errors.New(authName+" authentication token verification failed")), "/autherror/noverify")
+		return o.authFailure(w, r, backend.BadAuthErr(errors.New(authName+" no id_token field in oauth2 token")), "/autherror/noverify")
 	}
 	idToken, err := o.verifier.Verify(r.Context(), rawIDToken)
 	if err != nil {
-		return o.authFailure(w, r, backend.BadAuthErr(errors.New(authName+" authentication token verification failed")), "/autherror/noverify")
+		return o.authFailure(w, r, backend.BadAuthErr(fmt.Errorf("%s authentication token verification failed: %w", authName, err)), "/autherror/noverify")
 	}
 
 	tokenSource := o.oauthConfig.TokenSource(r.Context(), oauth2Token)
