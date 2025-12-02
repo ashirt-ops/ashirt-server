@@ -12,7 +12,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.16.0
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/go-webauthn/webauthn v0.14.0
+	github.com/go-webauthn/webauthn v0.15.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
@@ -71,17 +71,17 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-webauthn/x v0.1.25 // indirect
+	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
+	github.com/go-webauthn/x v0.1.26 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/google/go-tpm v0.9.5 // indirect
+	github.com/google/go-tpm v0.9.6 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
