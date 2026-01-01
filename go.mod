@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	cloud.google.com/go/storage v1.46.0
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/aws/aws-sdk-go-v2 v1.40.0
+	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.2
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.84.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.3
@@ -56,7 +56,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.30.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.10 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.2 // indirect
-	github.com/aws/smithy-go v1.23.2 // indirect
+	github.com/aws/smithy-go v1.24.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
