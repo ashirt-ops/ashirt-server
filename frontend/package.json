@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@types/har-format": "^1.2.16",
-    "ace-builds": "^1.43.4",
+    "ace-builds": "^1.43.5",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
