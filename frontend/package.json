@@ -24,7 +24,7 @@
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "7.0.1",
     "html-webpack-harddisk-plugin": "^2.0.0",
-    "html-webpack-plugin": "^5.6.3",
+    "html-webpack-plugin": "^5.6.5",
     "mini-css-extract-plugin": "^2.8.1",
     "mocha": "^11.7.2",
     "sinon-chai": "^4.0.0",
