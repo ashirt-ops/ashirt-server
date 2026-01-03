@@ -6,6 +6,7 @@ import supportedLanguages from './supported_languages'
 import { CodeBlock } from 'src/global_types'
 import ComboBox from 'src/components/combobox'
 import { useAsyncComponent } from 'src/helpers'
+
 const cx = classnames.bind(require('./stylesheet'))
 const importAceEditorAsync = () => import('./ace_editor').then(module => module.default)
 
@@ -13,6 +14,7 @@ export const CodeBlockEditor = (props: {
   disabled?: boolean,
   onChange: (newValue: CodeBlock) => void,
   value: CodeBlock,
+  error: string
 }) => {
   const AceEditor = useAsyncComponent(importAceEditorAsync)
 
@@ -44,6 +46,7 @@ export const CodeBlockEditor = (props: {
           readOnly={props.disabled}
         />
       </div>
+      {props.error && <div className={cx('error')}>{props.error}</div>}
     </div>
   )
 }
