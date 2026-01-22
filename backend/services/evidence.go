@@ -161,6 +161,14 @@ func CreateEvidence(ctx context.Context, db *database.Connection, contentStore c
 		logging.ReqLogger(ctx).Error("Unable to run workers", "error", err.Error())
 	}
 
+	// Validation logic for description and content fields
+	if i.Description == "" {
+		return nil, backend.WrapError("Description cannot be empty.", backend.BadInputErr(nil, "Description cannot be empty."))
+	}
+	if i.ContentType != "event" && i.Content == nil {
+		return nil, backend.WrapError("Evidence content cannot be empty.", backend.BadInputErr(nil, "Evidence content cannot be empty."))
+	}
+
 	return &dtos.Evidence{
 		UUID:        evidenceUUID,
 		Description: i.Description,
