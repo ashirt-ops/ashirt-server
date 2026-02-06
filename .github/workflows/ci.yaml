@@ -83,7 +83,7 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           platforms: linux/amd64
-          push: true # Push with pr-### and sha-xxxxxxx tags
+          push: false # Push with pr-### and sha-xxxxxxx tags
 
       - name: Build and Push Latest
         if: github.ref == 'refs/heads/main'
