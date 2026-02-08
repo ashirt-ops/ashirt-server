@@ -121,8 +121,10 @@ func NewMySQLStoreFromConnection(db *sql.DB, path string, maxAge int, keyPairs .
 		stmtSelect: stmtSelect,
 		Codecs:     codecs,
 		Options: &sessions.Options{
-			Path:   path,
-			MaxAge: maxAge,
+			Path:     path,
+			MaxAge:   maxAge,
+			Secure:   true,
+			HttpOnly: true,
 		},
 		table: tableName,
 	}, nil
