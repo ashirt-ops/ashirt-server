@@ -205,6 +205,9 @@ func (p LocalAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthB
 			}
 
 			authData, err := bridge.FindUserAuth(sess.Username)
+			if err != nil {
+				return nil, backend.WrapError("Could not validate passcode", err)
+			}
 
 			if authData.TOTPSecret == nil {
 				return nil, backend.HTTPErr(http.StatusUnauthorized,
