@@ -39,6 +39,19 @@ jobs:
     - name: go vet
       run: go vet ./...
 
+    - name: errcheck
+      run: |
+        go install github.com/kisielk/errcheck@latest
+        # Check critical files for unchecked errors that could cause bugs
+        # These files have been cleaned up to properly handle all errors
+        # from functions that return data used in subsequent operations
+        errcheck -ignoretests \
+          ./backend/authschemes/localauth/local_auth.go \
+          ./backend/authschemes/localauth/services.go \
+          ./backend/services/operation_vars.go \
+          ./backend/services/user_groups.go \
+          ./backend/workers/email.go
+
     - name: Test
       run: |
         docker run --rm -d -v $(pwd)/backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql -e MYSQL_DATABASE=dev-db -e MYSQL_ROOT_PASSWORD=dev-root-password -e MYSQL_USER=dev-user -e MYSQL_PASSWORD=dev-user-password -p3306:3306 mysql
