@@ -18,8 +18,14 @@ import (
 )
 
 func API(r chi.Router, db *database.Connection, contentStore contentstore.Store, logger *slog.Logger) {
+	// Create rate limiter for API endpoints
+	// Allows 100 requests per second with a burst of 200 (more lenient than auth)
+	apiRateLimiter := middleware.NewRateLimiter(100.0, 200)
+	apiRateLimiter.StartCleanup()
+
 	r.Handle("/metrics", promhttp.Handler())
 	r.Group(func(r chi.Router) {
+		r.Use(apiRateLimiter.Limit)
 		r.Use(middleware.AuthenticateAppAndInjectCtx(db))
 		r.Use(middleware.LogRequests(logger))
 		bindSharedRoutes(r, db, contentStore)
