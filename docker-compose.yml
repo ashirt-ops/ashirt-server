@@ -107,16 +107,12 @@ services:
       retries: 10
 
   demo:
-    image: ashirt/tesseract-lambda-python:latest
-    ports:
-      - 3001:3001
+    image: ashirt/ocr-worker:latest
     restart: on-failure
     environment:
-      PORT: 3001
-      ENABLE_DEV: "true"
-      ASHIRT_BACKEND_URL: http://backend:3000
-      ASHIRT_ACCESS_KEY: gR6nVtaQmp2SvzIqLUWdedDk
-      ASHIRT_SECRET_KEY: WvtvxFaJS0mPs82nCzqamI+bOGXpq7EIQhg4UD8nxS5448XG9N0gNAceJGBLPdCA3kAzC4MdUSHnKCJ/lZD++A==
+      API_BASE: http://backend:3000
+      ACCESS_KEY: gR6nVtaQmp2SvzIqLUWdedDk
+      SECRET_KEY: WvtvxFaJS0mPs82nCzqamI+bOGXpq7EIQhg4UD8nxS5448XG9N0gNAceJGBLPdCA3kAzC4MdUSHnKCJ/lZD++A==
 
 volumes:
   typescript-dtos:
