@@ -463,7 +463,7 @@ func TestListUserGroups(t *testing.T) {
 func testListUserGroupsCase(t *testing.T, db *database.Connection, query string, includeDeleted bool, expectedUserGroups []models.UserGroup) {
 	ctx := contextForUser(UserDumbledore, db)
 
-	userGroups, err := services.ListUserGroups(ctx, db, services.ListUserGroupsInput{Query: query, IncludeDeleted: includeDeleted})
+	userGroups, err := services.ListUserGroups(ctx, db, services.ListUserGroupsInput{Query: query, IncludeDeleted: includeDeleted, OperationSlug: OpSorcerersStone.Slug})
 	require.NoError(t, err)
 
 	require.Equal(t, len(expectedUserGroups), len(userGroups), "Expected %d users for query '%s' but got %d", len(expectedUserGroups), query, len(userGroups))

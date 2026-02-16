@@ -51,6 +51,9 @@ func deleteUserTotp(ctx context.Context, bridge authschemes.AShirtAuthBridge, us
 		return backend.WrapError("Non-Admin tried to delete totp status for another user", backend.UnauthorizedWriteErr(err))
 	}
 	authData, err := bridge.FindUserAuthByUserID(userID)
+	if err != nil {
+		return backend.WrapError("Unable to find user authentication data", err)
+	}
 
 	if authData.TOTPSecret == nil {
 		return backend.BadInputErr(

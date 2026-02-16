@@ -35,6 +35,9 @@ type DeleteOperationVarInput struct {
 
 func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOperationVarInput) (*dtos.OperationVar, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to create operation variable", err)
+	}
 	if err := policy.Require(middleware.Policy(ctx), policy.CanCreateOpVars{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unable to create operation variable", backend.UnauthorizedWriteErr(err))
 	}
@@ -53,6 +56,9 @@ func CreateOperationVar(ctx context.Context, db *database.Connection, i CreateOp
 	var varID int64
 
 	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to list existing operation variables", err)
+	}
 	for _, varInOperation := range listOfVarsInOperation {
 		if varInOperation.Name == formattedName {
 			return nil, backend.BadInputErr(errors.New("Unable to create operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
@@ -159,6 +165,9 @@ func UpdateOperationVar(ctx context.Context, db *database.Connection, i UpdateOp
 	formattedName := helpers.StrToUpperCaseUnderscore(i.Name)
 
 	listOfVarsInOperation, err := ListOperationVars(ctx, db, i.OperationSlug)
+	if err != nil {
+		return backend.WrapError("Unable to list existing operation variables", err)
+	}
 	for _, varInOperation := range listOfVarsInOperation {
 		if varInOperation.Name == formattedName {
 			return backend.BadInputErr(errors.New("Unable to update operation variable. Invalid operation variable name"), "A variable with this name already exists in the operation")
