@@ -16,7 +16,7 @@ func MediaHandler(handler func(*http.Request) (io.Reader, error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var data io.Reader
 		var err error
-		defer watcher(logging.ReqLogger(r.Context()), func(paniced bool) {
+		defer watcher(r.Context(), logging.ReqLogger(r.Context()), func(paniced bool) {
 			if paniced {
 				err = backend.PanicedError()
 			}
@@ -39,7 +39,7 @@ func JSONHandler(handler func(*http.Request) (interface{}, error)) http.HandlerF
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var data interface{}
 		var err error
-		defer watcher(logging.ReqLogger(r.Context()), func(paniced bool) {
+		defer watcher(r.Context(), logging.ReqLogger(r.Context()), func(paniced bool) {
 			if paniced {
 				err = backend.PanicedError()
 			}
@@ -78,10 +78,10 @@ func HandleError(w http.ResponseWriter, r *http.Request, rootErr error) {
 		status = http.StatusInternalServerError
 		publicReason = "An unknown error occurred"
 		loggedReason = err
-		logging.ReqLogger(r.Context()).Error("handling non-HTTPError", "stacktrace", formatStackTrace(retrace(20)))
+		logging.ReqLogger(r.Context()).ErrorContext(r.Context(), "handling non-HTTPError", "stacktrace", formatStackTrace(retrace(20)))
 	}
 
-	logging.ReqLogger(r.Context()).Error(
+	logging.ReqLogger(r.Context()).ErrorContext(r.Context(),
 		"Error handling request",
 		"error", loggedReason,
 		"rootError", rootErr,

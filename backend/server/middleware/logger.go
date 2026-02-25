@@ -30,11 +30,11 @@ func LogRequests(baseLogger *slog.Logger) MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			ctx, logger := logging.AddRequestLogger(r.Context(), baseLogger)
-			logger.Info("Incoming request", "method", r.Method, "url", r.URL, "from", r.RemoteAddr)
+			logger.InfoContext(ctx, "Incoming request", "method", r.Method, "url", r.URL, "from", r.RemoteAddr)
 			ww := &responseWriterWrapper{w, 0, 200}
 
 			next.ServeHTTP(ww, r.WithContext(ctx))
-			logger.Info("Request Completed", "status", ww.status, "sizeInBytes", ww.size, "duration", time.Since(start))
+			logger.InfoContext(ctx, "Request Completed", "status", ww.status, "sizeInBytes", ww.size, "duration", time.Since(start))
 		})
 	}
 }

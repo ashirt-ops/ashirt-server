@@ -41,8 +41,8 @@ func MakeAuthBridge(db *database.Connection, sessionStore *session.Store, authSc
 
 // CreateNewUser allows new users to be registered into the system, if they do not already exist.
 // Note that slug must be unique
-func (ah AShirtAuthBridge) CreateNewUser(profile UserProfile) (*dtos.CreateUserOutput, error) {
-	return services.CreateUser(ah.db, profile.ToCreateUserInput())
+func (ah AShirtAuthBridge) CreateNewUser(ctx context.Context, profile UserProfile) (*dtos.CreateUserOutput, error) {
+	return services.CreateUser(ctx, ah.db, profile.ToCreateUserInput())
 }
 
 // SetAuthSchemeSession sets authscheme specific session data to the current user session. Session data should

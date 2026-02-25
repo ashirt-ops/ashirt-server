@@ -69,7 +69,7 @@ func registerNewUser(ctx context.Context, bridge authschemes.AShirtAuthBridge, i
 		return backend.WrapError("Unable to generate encrypted password", err)
 	}
 
-	userResult, err := bridge.CreateNewUser(authschemes.UserProfile{
+	userResult, err := bridge.CreateNewUser(ctx, authschemes.UserProfile{
 		FirstName: info.FirstName,
 		LastName:  info.LastName,
 		Slug:      strings.ToLower(info.FirstName + "." + info.LastName),
