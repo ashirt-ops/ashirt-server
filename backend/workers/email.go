@@ -114,6 +114,11 @@ func (w *EmailWorker) run() {
 			Where(sq.Expr("error_count < ?", 3)).
 			OrderBy("updated_at ASC"). // grab the oldest emails first, prefer jobs that have not errored out
 			Limit(50))
+		if err != nil {
+			w.logger.Error("Failed to fetch emails from queue", "error", err)
+			time.Sleep(sleepDuration * time.Second)
+			continue
+		}
 
 		if len(emails) > 0 {
 			for _, email := range emails {

@@ -319,6 +319,9 @@ func SortUsersInToGroups(slugMap SlugMap) ([]dtos.UserGroupAdminView, error) {
 // Lists all user groups for an operation; op admins and sys admins can view
 func ListUserGroupsForOperation(ctx context.Context, db *database.Connection, i ListUserGroupsForOperationInput) ([]*dtos.UserGroupOperationRole, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to list usergroups", err)
+	}
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to list usergroups", backend.UnauthorizedReadErr(err))
 	}
@@ -357,6 +360,9 @@ func wrapListUserGroupsForOperationResponse(userGroups []userGroupAndRole) []*dt
 // lists all user groups that can be added to an operation
 func ListUserGroups(ctx context.Context, db *database.Connection, i ListUserGroupsInput) ([]*dtos.UserGroupAdminView, error) {
 	operation, err := lookupOperation(db, i.OperationSlug)
+	if err != nil {
+		return nil, backend.WrapError("Unable to list usergroups", err)
+	}
 	if err := policyRequireWithAdminBypass(ctx, policy.CanListUserGroupsOfOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to list usergroups", backend.UnauthorizedReadErr(err))
 	}
