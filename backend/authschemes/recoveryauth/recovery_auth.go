@@ -12,7 +12,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
-	"github.com/go-chi/chi/v5"
 )
 
 type RecoveryAuthScheme struct {
@@ -42,7 +41,7 @@ func (RecoveryAuthScheme) Type() string {
 	return constants.Code
 }
 
-func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
+func (p RecoveryAuthScheme) BindRoutes(r *http.ServeMux, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/generate", remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 		dr := remux.DissectJSONRequest(r)
 		userSlug := dr.FromBody("userSlug").Required().AsString()
