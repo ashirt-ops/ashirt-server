@@ -2,7 +2,7 @@ package contentstore
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -12,12 +12,13 @@ import (
 
 type Presigner struct {
 	PresignClient *s3.PresignClient
+	Logger        *slog.Logger
 }
 
 func (presigner Presigner) GetObject(
-	bucketName string, objectKey string, minutes time.Duration) (*v4.PresignedHTTPRequest, error) {
+	ctx context.Context, bucketName string, objectKey string, minutes time.Duration) (*v4.PresignedHTTPRequest, error) {
 	contentType := "image/jpeg"
-	request, err := presigner.PresignClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+	request, err := presigner.PresignClient.PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket:              aws.String(bucketName),
 		Key:                 aws.String(objectKey),
 		ResponseContentType: aws.String(contentType),
@@ -25,8 +26,7 @@ func (presigner Presigner) GetObject(
 		opts.Expires = minutes
 	})
 	if err != nil {
-		log.Printf("Couldn't get a presigned request to get %v:%v. Here's why: %v\n",
-			bucketName, objectKey, err)
+		presigner.Logger.ErrorContext(ctx, "Couldn't get a presigned request", "bucket", bucketName, "key", objectKey, "error", err)
 	}
 	return request, err
 }

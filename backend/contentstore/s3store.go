@@ -3,6 +3,7 @@ package contentstore
 import (
 	"context"
 	"io"
+	"log/slog"
 	"time"
 
 	"github.com/ashirt-ops/ashirt-server/backend"
@@ -82,11 +83,11 @@ type URLData struct {
 	ExpirationTime time.Time `json:"expirationTime"`
 }
 
-func (s *S3Store) SendURLData(key string) (*URLData, error) {
+func (s *S3Store) SendURLData(ctx context.Context, key string) (*URLData, error) {
 	minutes := time.Minute * time.Duration(30)
 	presignClient := s3.NewPresignClient(s.s3Client)
-	presigner := Presigner{PresignClient: presignClient}
-	presignedGetRequest, err := presigner.GetObject(s.bucketName, key, minutes)
+	presigner := Presigner{PresignClient: presignClient, Logger: slog.Default()}
+	presignedGetRequest, err := presigner.GetObject(ctx, s.bucketName, key, minutes)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get presigned URL", err)
 	}

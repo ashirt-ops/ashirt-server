@@ -1,6 +1,7 @@
 package remux
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"runtime"
@@ -18,12 +19,12 @@ type StackTraceEntry struct {
 // questionable code. If a panic occurs, this will catch that panic, log the response,
 // and execute the provided cleanup code. a boolean provided to the cleanup code
 // indicates if a panic occurred.
-func watcher(log *slog.Logger, cleanup func(bool)) {
+func watcher(ctx context.Context, log *slog.Logger, cleanup func(bool)) {
 	paniced := false
 	if r := recover(); r != nil {
 		paniced = true
 		strTrace := formatStackTrace(retrace(25))
-		log.Error("unexpected panic", "recoveredData", r, "stacktrace", strTrace)
+		log.ErrorContext(ctx, "unexpected panic", "recoveredData", r, "stacktrace", strTrace)
 	}
 	cleanup(paniced)
 }

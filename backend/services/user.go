@@ -91,7 +91,7 @@ func CreateHeadlessUser(ctx context.Context, db *database.Connection, i CreateUs
 		return nil, backend.WrapError("Unable to create new headless user", backend.UnauthorizedWriteErr(err))
 	}
 	i.Headless = true
-	return CreateUser(db, i)
+	return CreateUser(ctx, db, i)
 }
 
 // CreateUser generates an entry in the users table in the database. No more is done here, but it is expected
@@ -102,7 +102,7 @@ func CreateHeadlessUser(ctx context.Context, db *database.Connection, i CreateUs
 //
 // Returns a structure containing both the true slug (i.e. what it was mangled to, if it was infact mangled), plus
 // the associated user_id value
-func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOutput, error) {
+func CreateUser(ctx context.Context, db *database.Connection, i CreateUserInput) (*dtos.CreateUserOutput, error) {
 	validationErr := i.validate()
 	if validationErr != nil {
 		return nil, backend.WrapError("Unable to create new user", validationErr)
@@ -132,7 +132,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 					return nil, backend.WrapError("Unable to create new user after many attempts", backend.DatabaseErr(err))
 				}
 
-				logging.LogWithoutAuth(
+				logging.LogWithoutAuth(ctx,
 					"Unable to create user with slug; trying alternative",
 					"slug", attemptedSlug,
 					"attempt", attemptNumber,
@@ -152,7 +152,7 @@ func CreateUser(db *database.Connection, i CreateUserInput) (*dtos.CreateUserOut
 	if userID == 1 {
 		err := db.Update(sq.Update("users").Set("admin", true).Where(sq.Eq{"id": userID}))
 		if err != nil {
-			logging.LogWithoutAuth("Unable to make the first user an admin", "error", err.Error())
+			logging.LogWithoutAuth(ctx, "Unable to make the first user an admin", "error", err.Error())
 		}
 	}
 	return &dtos.CreateUserOutput{

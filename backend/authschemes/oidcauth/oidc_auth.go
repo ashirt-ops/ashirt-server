@@ -190,7 +190,7 @@ func (o OIDCAuth) handleCallback(w http.ResponseWriter, r *http.Request, bridge 
 				return o.authFailure(w, r, backend.WrapError("Registration is disabled", err), "/autherror/registrationdisabled")
 			}
 
-			userResult, err := bridge.CreateNewUser(*userProfile)
+			userResult, err := bridge.CreateNewUser(r.Context(), *userProfile)
 			if err != nil {
 				return o.authFailure(w, r, backend.WrapError("Create new "+authName+" user failed ["+userProfile.Slug+"]", err), "/autherror/incomplete")
 			}

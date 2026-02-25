@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"time"
@@ -66,7 +67,7 @@ func (w *EmailWorker) Start() {
 		w.running = true
 		defer func() {
 			if r := recover(); r != nil {
-				w.logger.Error("recovered from worker panic", "error", r)
+				w.logger.ErrorContext(context.Background(), "recovered from worker panic", "error", r)
 			}
 		}()
 		w.start()
@@ -75,7 +76,7 @@ func (w *EmailWorker) Start() {
 
 // start _actually_ starts the worker.
 func (w *EmailWorker) start() {
-	w.logger.Info("Starting worker")
+	w.logger.InfoContext(context.Background(), "Starting worker")
 	go w.run()
 	go func() {
 		<-w.stopChan
@@ -122,7 +123,7 @@ func (w *EmailWorker) run() {
 				}
 				err = w.queueEmail(email)
 				if err != nil {
-					w.logger.Error("Unable to queue email", "error", err.Error())
+					w.logger.ErrorContext(context.Background(), "Unable to queue email", "error", err.Error())
 					continue
 				}
 			}
@@ -171,7 +172,7 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 					Set("email_status", EmailSent).
 					Where(sq.Eq{"id": email.EmailID}))
 				if err != nil {
-					w.logger.Error("Unable to set email completed status", "error", err.Error())
+					w.logger.ErrorContext(context.Background(), "Unable to set email completed status", "error", err.Error())
 				}
 			}
 		},
@@ -180,7 +181,7 @@ func (w *EmailWorker) queueEmail(email emailRequest) error {
 }
 
 func setEmailFailed(db *database.Connection, emailID int64, logger *slog.Logger, err error) {
-	logger.Error("Unable to send email", "err", err.Error())
+	logger.ErrorContext(context.Background(), "Unable to send email", "err", err.Error())
 	db.Update(sq.Update("email_queue").
 		Set("error_count", sq.Expr("error_count + 1")).
 		SetMap(map[string]interface{}{

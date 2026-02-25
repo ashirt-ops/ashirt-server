@@ -57,22 +57,22 @@ func AddRequestLogger(ctx context.Context, baseLogger *slog.Logger) (context.Con
 
 // Fatal is an effective copy of go's log.Fatal, but using the logger provided, rather than
 // using go's native logging. After writing the message, the code will exit with code 1
-func Fatal(logger *slog.Logger, msg string, keyvals ...interface{}) {
-	logger.Error(msg, keyvals...)
+func Fatal(ctx context.Context, logger *slog.Logger, msg string, keyvals ...interface{}) {
+	logger.ErrorContext(ctx, msg, keyvals...)
 	os.Exit(1)
 }
 
-func LogWithoutAuth(msg string, keyvals ...interface{}) {
+func LogWithoutAuth(ctx context.Context, msg string, keyvals ...interface{}) {
 	if systemLogger != nil {
-		systemLogger.Info(msg, keyvals...)
+		systemLogger.InfoContext(ctx, msg, keyvals...)
 	}
 }
 
 // SystemLog provides a system-level logger, which is not tied to any request.
 // this should be used in situations where either a context is not handy, but logging is important
 // or for events that are not tied to a request (e.g. losing database connection)
-func SystemLog(msg string, keyvals ...interface{}) {
+func SystemLog(ctx context.Context, msg string, keyvals ...interface{}) {
 	if systemLogger != nil {
-		systemLogger.Info(msg, keyvals...)
+		systemLogger.InfoContext(ctx, msg, keyvals...)
 	}
 }
