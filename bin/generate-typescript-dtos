@@ -1,3 +1,3 @@
 #! /usr/bin/env bash
 
-go run ./backend/dtos/gentypes > frontend/src/services/data_sources/dtos.ts
+go run ./internal/dtos/gentypes > frontend/src/services/data_sources/dtos.ts

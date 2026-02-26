@@ -17,7 +17,7 @@ fi
 # sanitize description (spaces -> dashes)
 desc=${desc// /-}
 
-migrationsPath="./backend/migrations"
+migrationsPath="./migrations"
 
 filename=$migrationsPath/$now-$desc.sql
 
