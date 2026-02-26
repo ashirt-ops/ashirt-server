@@ -5,7 +5,7 @@ services:
         condition: service_healthy
     build:
       context: .
-      dockerfile: Dockerfile.prod.web
+      dockerfile: deployments/Dockerfile.prod
     ports:
       - 8000:8000
     restart: on-failure
@@ -29,7 +29,7 @@ services:
       - ashirt-service
     build:
       context: .
-      dockerfile: Dockerfile.prod.frontend
+      dockerfile: deployments/Dockerfile.prod.frontend
     ports:
       - 8080:8080
     environment:
@@ -41,7 +41,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
       - ./dev_seed_data/z01_seed_data.sql:/docker-entrypoint-initdb.d/z01_seed_data.sql
     environment:
       - MYSQL_DATABASE=dev-db

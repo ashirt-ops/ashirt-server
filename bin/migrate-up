@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 # Execute migrations on dev db
 echo '== Migrating development database =='
 docker-compose exec backend sh -c \
-  'sql-migrate up -config=backend/dbconfig.yml'
+  'sql-migrate up -config=dbconfig.yml'
 
 # Create a new database to generate the schema from migrations
 # (dev db has autoincrement values and other runtime-generated tables that we don't want in schema.sql)
@@ -17,17 +17,17 @@ MIGRATE_DB_URI="root:$(docker-compose exec db sh -c 'echo -n $MYSQL_ROOT_PASSWOR
 # Execute migrations on temp migrate db
 echo '== Generating schema.sql =='
 docker-compose exec -e "DB_URI=${MIGRATE_DB_URI}" backend sh -c \
-  'sql-migrate up -config=backend/dbconfig.yml'
+  'sql-migrate up -config=dbconfig.yml'
 
 # Dump db structure to schema.sql
 docker-compose exec db sh -c \
   'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump --no-data migrate_db' \
-  > backend/schema.sql
+  > schema.sql
 
 # Dump schema_migrations table data to schema.sql
 docker-compose exec db sh -c \
   'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump --no-create-info migrate_db gorp_migrations' \
-  >> backend/schema.sql
+  >> schema.sql
 
 # Drop temporary migrate_db
 docker-compose exec db sh -c \

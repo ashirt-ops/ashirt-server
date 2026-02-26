@@ -1,0 +1,29 @@
+FROM golang:1.25-alpine AS build
+
+RUN apk add --no-cache git && \
+    rm -rf /var/cache/apk/*
+
+RUN mkdir /build
+WORKDIR /build
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY internal internal
+COPY signer signer
+COPY cmd cmd
+RUN go build ./cmd/ashirt-server/
+
+
+FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates && \
+    adduser -h /home/ashirt -S -D ashirt
+
+USER ashirt
+WORKDIR /home/ashirt
+
+COPY --from=build /build/ashirt-server /home/ashirt/ashirt-server
+COPY migrations /migrations
+
+CMD ["/home/ashirt/ashirt-server"]

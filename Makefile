@@ -28,7 +28,7 @@ test-all: test-backend test-frontend
 
 .PHONY: test-backend
 test-backend:
-	cd backend && go vet ./... && go test ./...
+	go vet ./... && go test ./...
 
 .PHONY: test-frontend
 test-frontend:
@@ -42,7 +42,7 @@ tidy-all:  format-backend lint-frontend
 
 .PHONY: format-backend
 format-backend:
-	gofmt -w backend
+	gofmt -w internal
 
 .PHONY: lint-frontend
 lint-frontend:
@@ -105,8 +105,8 @@ prep: tidy-all test-all
 .PHONY: gentypes
 gentypes:
 	mkdir -p frontend/src/services/data_sources/dtos
-	go run backend/dtos/gentypes/generate_typescript_types.go > frontend/src/services/data_sources/dtos/dtos.ts
+	go run internal/dtos/gentypes/generate_typescript_types.go > frontend/src/services/data_sources/dtos/dtos.ts
 
 .PHONY: build-test
 build-test:
-	go build -o /dev/null backend/bin/dev/dev.go
+	go build -o /dev/null ./cmd/ashirt-server/
