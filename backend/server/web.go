@@ -65,6 +65,11 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 
 	csrf := http.NewCrossOriginProtection()
 
+	// Create rate limiter for authentication endpoints
+	// Allows 5 requests per second with a burst of 10 (prevents brute force attacks)
+	authRateLimiter := middleware.NewRateLimiter(5.0, 10)
+	authRateLimiter.StartCleanup()
+
 	r.Handle("/metrics", promhttp.Handler())
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.LogRequests(config.Logger))
@@ -74,6 +79,8 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 		supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))
 		for i, scheme := range config.AuthSchemes {
 			r.Route("/auth/"+scheme.Name(), func(r chi.Router) {
+				// Apply rate limiting to all auth routes (login, register, etc.)
+				r.Use(authRateLimiter.Limit)
 				scheme.BindRoutes(r.(chi.Router), authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
 			})
 			supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
