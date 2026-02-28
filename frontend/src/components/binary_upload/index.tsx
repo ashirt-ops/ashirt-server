@@ -10,19 +10,28 @@ const BinaryUpload = (props: {
   onChange: (newValue: File | null) => void,
   isSupportedFile: (file: File ) => boolean,
   value: File | null,
+  error: string,
 }) =>  {
   const [err, setErr] = React.useState<Error | null>(null)
 
   const {value, isSupportedFile, label} = {...props}
 
   React.useEffect(() => {
+    if (!props.error) {
+        setErr(null)
+    } else {
+        setErr(Error(props.error))
+    }
+  }, [props.error])
+
+  React.useEffect(() => {
     const file = value
     if (file == null || isSupportedFile(file)) {
-      setErr(null)
+      if (!props.error) setErr(null)
     } else {
       setErr(Error(`Expected a ${label.toLowerCase()}, but got ${file.type}.`))
     }
-  }, [value, isSupportedFile, label])
+  }, [value, isSupportedFile, label, props.error])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     multiple: false,
@@ -51,18 +60,20 @@ const BinaryUploadChildren = (props: {
   err: Error | null,
   file: File | null,
 }) => {
-  const content = (props.file != null  && props.err == null)
-    ? <div className={cx('has-content')}>
-        <div>Will Upload: {props.file.name}</div>
-      </div>
-    : <div className={cx('no-content')}>
-      Drag {props.friendlyFileType} here or <span>Browse for one</span> to upload
-        {props.err &&
-          <div className={cx('error')}>{props.err.message}</div>
-        }
-      </div>
+  if (props.file !== null && props.err === null) {
+      return (
+        <div className={cx('has-content')}>
+          <div>Will Upload: {props.file.name}</div>
+        </div>
+      )
+  }
 
-  return content
+  return (
+    <div className={cx('no-content')}>
+      Drag {props.friendlyFileType} here or <span>Browse for one</span> to upload
+        {props.err && <div className={cx('error')}>{props.err.message}</div>}
+    </div>
+  )
 }
 
 export default BinaryUpload

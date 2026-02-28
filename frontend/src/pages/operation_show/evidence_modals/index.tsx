@@ -9,7 +9,6 @@ import {
   SubmittableEvidence,
   Operation,
   TagDifference,
-  SupportedEvidenceType,
 } from 'src/global_types'
 import {
   codeblockToBlob,
@@ -56,8 +55,15 @@ import SplitInputRow from 'src/components/split_input_row'
 import WithLabel from 'src/components/with_label'
 import { format, isValid } from 'date-fns'
 
-
 const cx = classnames.bind(require('./stylesheet'))
+
+type EvidenceType = 'codeblock' | 'image' | 'event' | 'terminal-recording' | 'http-request-cycle' | 'none'
+
+interface EvidenceOption {
+    name: string;
+    value: EvidenceType;
+    content?: React.ReactNode;
+}
 
 export const CreateEvidenceModal = (props: {
   onCreated: () => void,
@@ -73,7 +79,7 @@ export const CreateEvidenceModal = (props: {
   const isATerminalRecording = (file: File) => file.type == ''
   const isAnHttpRequestCycle = (file: File) => file.name.endsWith("har")
 
-  const evidenceTypeOptions: Array<{ name: string, value: SupportedEvidenceType, content?: React.ReactNode }> = [
+  const evidenceTypeOptions: Array<EvidenceOption> = [
     { name: 'Screenshot', value: 'image', content: <ImageUpload label='Screenshot' {...binaryBlobField} /> },
     { name: 'Code Block', value: 'codeblock', content: <CodeBlockEditor {...codeblockField} /> },
     { name: 'Event', value: 'event', content: <div /> },
@@ -88,9 +94,17 @@ export const CreateEvidenceModal = (props: {
   ]
 
   const [selectedCBValue, setSelectedCBValue] = React.useState<string>(evidenceTypeOptions[0].value)
-  const getSelectedOption = () => evidenceTypeOptions.filter(opt => opt.value === selectedCBValue)[0]
+  const getSelectedOption = () => evidenceTypeOptions.find(opt => opt.value === selectedCBValue) as EvidenceOption
 
-  const formComponentProps = useForm({
+  const handleError = (field: ReturnType<typeof useFormField>, errorMessage: string) => {
+    const error = new Error(errorMessage)
+
+    field.setError(error.message)
+
+    return Promise.reject(error)
+  }
+
+  const { clear: clearForm, ...formComponentProps} = useForm({
     fields: [descriptionField, binaryBlobField, adjustedAtField],
     onSuccess: () => { props.onCreated(); props.onRequestClose() },
     handleSubmit: () => {
@@ -98,11 +112,29 @@ export const CreateEvidenceModal = (props: {
       const selectedOption = getSelectedOption()
       const fileBasedKeys = ['image', 'terminal-recording', 'http-request-cycle']
 
-      if (selectedOption.value === 'codeblock' && codeblockField.value !== null) {
+      if (selectedOption.value === 'codeblock') {
+        if (!codeblockField.value?.code) {
+            return handleError(codeblockField, "A codeblock must have a code written on it")
+        } else {
+            codeblockField.setError("")
+        }
+
         data = { type: 'codeblock', file: codeblockToBlob(codeblockField.value) }
-      } else if (fileBasedKeys.includes(selectedOption.value) && binaryBlobField.value != null) {
+      } else if (fileBasedKeys.includes(selectedOption.value)) {
+        if (!binaryBlobField.value) {
+            return handleError(binaryBlobField, `A file is required for evidence of type ${selectedOption.name}`)
+        } else {
+            binaryBlobField.setError("")
+        }
+
         data = { type: selectedOption.value, file: binaryBlobField.value }
       } else if (selectedOption.value === 'event') {
+        if (!descriptionField.value) {
+            return handleError(descriptionField, "Description is required for event evidence")
+        } else {
+            descriptionField.setError("")
+        }
+
         data = { type: 'event' }
       }
 
@@ -119,12 +151,16 @@ export const CreateEvidenceModal = (props: {
   return (
     <ModalForm title="New Evidence" submitText="Create Evidence" onRequestClose={props.onRequestClose} {...formComponentProps}>
       <TextArea label="Description" {...descriptionField} />
+      {descriptionField.error && <div className={cx('error')}>{descriptionField.error}</div>}
       <ComboBox
         label="Evidence Type"
         className={cx('dropdown')}
         options={evidenceTypeOptions}
         value={selectedCBValue}
-        onChange={setSelectedCBValue}
+        onChange={(value) => {
+            clearForm()
+            setSelectedCBValue(value)
+        }}
       />
       {getSelectedOption().content}
       <TagChooser operationSlug={props.operationSlug} label="Tags" {...tagsField} />
