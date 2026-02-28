@@ -8,6 +8,18 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/logging"
 )
 
+// InjectLogger is a thin middleware that injects a request-scoped logger into the context
+// via logging.AddRequestLogger. Use this alongside an external HTTP logging middleware (e.g.
+// weby's Logger) so that handlers and services can retrieve the logger via logging.ReqLogger(ctx).
+func InjectLogger(baseLogger *slog.Logger) MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx, _ := logging.AddRequestLogger(r.Context(), baseLogger)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
 type responseWriterWrapper struct {
 	http.ResponseWriter
 	size   int

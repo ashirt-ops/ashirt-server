@@ -10,11 +10,10 @@ import (
 
 	"github.com/ashirt-ops/ashirt-server/backend/server/dissectors"
 	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
-	"github.com/go-chi/chi/v5"
 )
 
-func route(r chi.Router, method string, path string, handler http.Handler) {
-	remux.Route(r, method, path, handler)
+func route(mux *http.ServeMux, method string, path string, handler http.Handler) {
+	remux.Route(mux, method, path, handler)
 }
 
 func dissectJSONRequest(r *http.Request) dissectors.DissectedRequest {

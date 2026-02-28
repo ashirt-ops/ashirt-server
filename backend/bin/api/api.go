@@ -10,7 +10,8 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/server"
-	"github.com/go-chi/chi/v5"
+	"github.com/jrozner/weby"
+	webyMiddleware "github.com/jrozner/weby/middleware"
 )
 
 func main() {
@@ -39,15 +40,16 @@ func main() {
 		logging.Fatal(logger, "store setup error", "error", err)
 	}
 
-	s := chi.NewRouter()
+	mux := weby.NewServeMux()
+	mux.Use(webyMiddleware.RequestID)
+	mux.Use(webyMiddleware.WrapResponse)
+	mux.Use(webyMiddleware.Logger(logger))
 
-	s.Route("/api", func(r chi.Router) {
-		server.API(r,
-			db, contentStore, logger,
-		)
-	})
+	apiMux := http.NewServeMux()
+	server.API(apiMux, db, contentStore, logger)
+	mux.Handle("/api/", http.StripPrefix("/api", apiMux))
 
 	logger.Info("starting API server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), s)
+	serveErr := http.ListenAndServe(":"+config.Port(), mux)
 	logging.Fatal(logger, "server shutting down", "err", serveErr)
 }

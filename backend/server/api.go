@@ -13,26 +13,28 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/dtos"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
-	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func API(r chi.Router, db *database.Connection, contentStore contentstore.Store, logger *slog.Logger) {
-	r.Handle("/metrics", promhttp.Handler())
-	r.Group(func(r chi.Router) {
-		r.Use(middleware.AuthenticateAppAndInjectCtx(db))
-		r.Use(middleware.LogRequests(logger))
-		bindSharedRoutes(r, db, contentStore)
-		bindAPIRoutes(r, db, contentStore)
-	})
+func API(mux *http.ServeMux, db *database.Connection, contentStore contentstore.Store, logger *slog.Logger) {
+	mux.Handle("GET /metrics", promhttp.Handler())
+
+	apiMux := http.NewServeMux()
+	bindSharedRoutes(apiMux, db, contentStore)
+	bindAPIRoutes(apiMux, db, contentStore)
+
+	var h http.Handler = apiMux
+	h = middleware.AuthenticateAppAndInjectCtx(db)(h)
+	h = middleware.InjectLogger(logger)(h)
+	mux.Handle("/", h)
 }
 
-func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
-	route(r, "GET", "/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
+func bindAPIRoutes(mux *http.ServeMux, db *database.Connection, contentStore contentstore.Store) {
+	route(mux, "GET", "/checkconnection", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return dtos.CheckConnection{Ok: true}, nil
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
+	route(mux, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type}", mediaHandler(func(r *http.Request) (io.Reader, error) {
 		dr := dissectNoBodyRequest(r)
 		i := services.ReadEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -52,7 +54,7 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return evidence.Media, nil
 	}))
 
-	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
 		i := services.CreateEvidenceInput{
 			Description:   dr.FromBody("notes").Required().AsString(),
@@ -72,7 +74,7 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
 		i := services.UpdateEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -95,7 +97,7 @@ func bindAPIRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpsertEvidenceMetadataInput{
 			EditEvidenceMetadataInput: services.EditEvidenceMetadataInput{
