@@ -41,7 +41,7 @@ jobs:
 
     - name: Test
       run: |
-        docker run --rm -d -v $(pwd)/backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql -e MYSQL_DATABASE=dev-db -e MYSQL_ROOT_PASSWORD=dev-root-password -e MYSQL_USER=dev-user -e MYSQL_PASSWORD=dev-user-password -p3306:3306 mysql
+        docker run --rm -d -v $(pwd)/schema.sql:/docker-entrypoint-initdb.d/schema.sql -e MYSQL_DATABASE=dev-db -e MYSQL_ROOT_PASSWORD=dev-root-password -e MYSQL_USER=dev-user -e MYSQL_PASSWORD=dev-user-password -p3306:3306 mysql
         while ! mysqladmin ping -h"127.0.0.1" --silent; do
           sleep 1
         done
@@ -52,7 +52,13 @@ jobs:
     needs: [gotest]
     strategy:
       matrix:
-        service: [frontend,web,api,init]
+        include:
+          - service: frontend
+            dockerfile: deployments/Dockerfile.prod.frontend
+          - service: ashirt-server
+            dockerfile: deployments/Dockerfile.prod
+          - service: init
+            dockerfile: deployments/Dockerfile.prod.init
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -82,7 +88,7 @@ jobs:
         uses: docker/build-push-action@v6.19.2
         with:
           context: .
-          file: Dockerfile.prod.${{ matrix.service }}
+          file: ${{ matrix.dockerfile }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           platforms: linux/amd64
@@ -93,7 +99,7 @@ jobs:
         uses: docker/build-push-action@v6.19.2
         with:
           context: .
-          file: Dockerfile.prod.${{ matrix.service }}
+          file: ${{ matrix.dockerfile }}
           tags: ${{ steps.docker_meta.outputs.tags }}, ashirt/${{ matrix.service }}:latest #Add latest tag for main
           labels: ${{ steps.docker_meta.outputs.labels }}
           platforms: linux/amd64
