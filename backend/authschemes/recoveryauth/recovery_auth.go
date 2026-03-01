@@ -85,7 +85,7 @@ func (p RecoveryAuthScheme) BindRoutes(r chi.Router, bridge authschemes.AShirtAu
 		if dr.Error != nil {
 			return nil, dr.Error
 		}
-		userResult, err := bridge.CreateNewUser(profile)
+		userResult, err := bridge.CreateNewUser(r.Context(), profile)
 		if err != nil {
 			return nil, backend.WrapError("Unable to create new user", err)
 		}

@@ -91,7 +91,7 @@ func AuthenticateAppAndInjectCtx(db *database.Connection) MiddlewareFunc {
 
 			userData, err := authenticateAPI(db, r, body)
 			if err != nil {
-				logging.LogWithoutAuth(
+				logging.LogWithoutAuth(r.Context(),
 					"Unable to build user policy",
 					"error", err.Error(),
 				)
@@ -136,7 +136,7 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 
 	var groupRoles []models.UserGroupOperationPermission
 
-	err := db.WithTx(context.Background(), func(tx *database.Transactable) {
+	err := db.WithTx(ctx, func(tx *database.Transactable) {
 		tx.Select(&roles, sq.Select("operation_id", "role").
 			From("user_operation_permissions").
 			Where(sq.Eq{"user_id": userID}))
@@ -152,7 +152,7 @@ func buildPolicyForUser(ctx context.Context, db *database.Connection, userID int
 	})
 
 	if err != nil {
-		logging.ReqLogger(ctx).Error("Unable to build user policy", "error", err.Error())
+		logging.ReqLogger(ctx).ErrorContext(ctx, "Unable to build user policy", "error", err.Error())
 		return &policy.Deny{}
 	}
 	roleMap := make(map[int64]policy.OperationRole)
@@ -223,7 +223,7 @@ func cloneBody(r *http.Request) (io.Reader, func(), error) {
 		r.Body.Close()
 		err := os.Remove(bodyTmpFile.Name())
 		if err != nil {
-			logging.LogWithoutAuth(
+			logging.LogWithoutAuth(r.Context(),
 				"Unable to remove tmp file",
 				"error", err,
 				"tmpFile", bodyTmpFile.Name(),

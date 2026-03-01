@@ -1,6 +1,7 @@
 package authschemes_test
 
 import (
+	"context"
 	"encoding/gob"
 	"net/http"
 	"net/http/httptest"
@@ -21,7 +22,7 @@ import (
 func TestCreateNewUser(t *testing.T) {
 	db, _, bridge := initBridgeTest(t)
 
-	newUser, err := bridge.CreateNewUser(authschemes.UserProfile{
+	newUser, err := bridge.CreateNewUser(context.Background(), authschemes.UserProfile{
 		FirstName: "Alice",
 		LastName:  "Defaultuser",
 		Email:     "alice@example.com",
@@ -39,7 +40,7 @@ func TestCreateNewUser(t *testing.T) {
 	require.Equal(t, "slug", user.Slug)
 
 	// Creating a user with a slug that already exists appends a random number to the slug
-	newUser, err = bridge.CreateNewUser(authschemes.UserProfile{
+	newUser, err = bridge.CreateNewUser(context.Background(), authschemes.UserProfile{
 		FirstName: "Bob",
 		LastName:  "Snooper",
 		Email:     "bob@example.com",
@@ -260,7 +261,7 @@ func initBridgeTest(t *testing.T) (*database.Connection, *session.Store, authsch
 }
 
 func createDummyUser(t *testing.T, bridge authschemes.AShirtAuthBridge, extra string) int64 {
-	newUser, err := bridge.CreateNewUser(authschemes.UserProfile{
+	newUser, err := bridge.CreateNewUser(context.Background(), authschemes.UserProfile{
 		FirstName: "Dummy",
 		LastName:  "User",
 		Email:     "email+" + extra + "@example.com",

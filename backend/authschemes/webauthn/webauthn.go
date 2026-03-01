@@ -145,7 +145,7 @@ func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) 
 			Slug:      strings.ToLower(data.UserData.FirstName + "." + data.UserData.LastName),
 			Email:     data.UserData.Email,
 		}
-		userResult, err := bridge.CreateNewUser(userProfile)
+		userResult, err := bridge.CreateNewUser(r.Context(), userProfile)
 		if err != nil {
 			return nil, backend.WrapError("Unable to create user", err)
 		}

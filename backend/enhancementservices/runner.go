@@ -52,7 +52,7 @@ func SendServiceWorkerEvent(db *database.Connection, input SendServiceWorkerEven
 			payloads, _ = input.Builder(tx)
 		})
 		if err != nil {
-			input.Logger.Error("Unable to execute service workers", "error", err.Error())
+			input.Logger.ErrorContext(workerContext, "Unable to execute service workers", "error", err.Error())
 			return
 		}
 
@@ -72,9 +72,9 @@ func SendServiceWorkerEvent(db *database.Connection, input SendServiceWorkerEven
 					)
 
 					if err != nil {
-						logger.Error("Unable to run worker", "error", err)
+						logger.ErrorContext(workerContext, "Unable to run worker", "error", err)
 					} else {
-						logger.Info("Worker completed")
+						logger.InfoContext(workerContext, "Worker completed")
 					}
 				}()
 			}
@@ -103,7 +103,7 @@ func SendEvidenceCreatedEvent(db *database.Connection, reqLogger *slog.Logger, o
 				helpers.Map(workersToRun, getServiceWorkerName))
 		})
 		if err != nil {
-			reqLogger.Error("Unable to execute service workers", "error", err.Error())
+			reqLogger.ErrorContext(workerContext, "Unable to execute service workers", "error", err.Error())
 			return
 		}
 
@@ -124,9 +124,9 @@ func SendEvidenceCreatedEvent(db *database.Connection, reqLogger *slog.Logger, o
 					)
 
 					if err != nil {
-						logger.Error("Unable to run worker", "error", err)
+						logger.ErrorContext(workerContext, "Unable to run worker", "error", err)
 					} else {
-						logger.Info("Worker completed")
+						logger.InfoContext(workerContext, "Worker completed")
 					}
 				}()
 			}

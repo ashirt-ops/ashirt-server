@@ -378,7 +378,7 @@ func SendURLData(ctx context.Context, db *database.Connection, contentStore *con
 	if err := policy.Require(middleware.Policy(ctx), policy.CanReadOperation{OperationID: operation.ID}); err != nil {
 		return nil, backend.WrapError("Unwilling to read evidence", backend.UnauthorizedReadErr(err))
 	}
-	urlData, err := contentStore.SendURLData(evidence.FullImageKey)
+	urlData, err := contentStore.SendURLData(ctx, evidence.FullImageKey)
 	if err != nil {
 		return nil, backend.WrapError("Unable to get image URL", backend.ServerErr(err))
 	}

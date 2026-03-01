@@ -25,7 +25,7 @@ func TestCreateUser(t *testing.T) {
 			Email:     "luna.lovegood@hogwarts.edu",
 		}
 
-		createUserOutput, err := services.CreateUser(db, i)
+		createUserOutput, err := services.CreateUser(context.Background(), db, i)
 		require.NoError(t, err)
 		require.Equal(t, createUserOutput.RealSlug, i.Slug)
 		luna := getUserProfile(t, db, createUserOutput.UserID)
@@ -36,12 +36,12 @@ func TestCreateUser(t *testing.T) {
 		require.Equal(t, luna.LastName, i.LastName)
 
 		// Verify re-register will fail (due to unique email constraint)
-		_, err = services.CreateUser(db, i)
+		_, err = services.CreateUser(context.Background(), db, i)
 		require.Error(t, err)
 
 		// Verify 2nd user (non-admin, no matching slug)
 		i.Email = "luna.lovegood+extra@hogwarts.edu" // change the password to something that won't exist
-		createUserOutput, err = services.CreateUser(db, i)
+		createUserOutput, err = services.CreateUser(context.Background(), db, i)
 		require.NoError(t, err)
 		// Since Luna's already exists, a new slug should be created
 		require.NotEqual(t, i.Slug, createUserOutput.RealSlug)

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -142,7 +143,7 @@ func (c *Connection) execSquirrel(sQuery squirrel.Sqlizer) (sql.Result, error) {
 }
 
 func logQuery(query string, values []interface{}) {
-	logging.SystemLog("executing query", "query", query, "values", fmt.Sprintf("%v", values))
+	logging.SystemLog(context.Background(), "executing query", "query", query, "values", fmt.Sprintf("%v", values))
 }
 
 // IsEmptyResultSetError returns true if the passed error is a database error resulting
