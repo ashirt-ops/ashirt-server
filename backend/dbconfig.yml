@@ -1,4 +1,0 @@
-development:
-  dialect: mysql
-  datasource: ${DB_URI}?parseTime=true
-  dir: backend/migrations

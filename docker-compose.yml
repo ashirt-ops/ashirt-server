@@ -5,11 +5,15 @@ services:
         condition: service_healthy
     build:
       context: .
-      dockerfile: Dockerfile.dev.backend
+      dockerfile: deployments/Dockerfile.dev.backend
     volumes:
-      - ./backend:/app/backend
+      - ./internal:/app/internal
+      - ./cmd:/app/cmd
       - ./dev_seed_data:/app/dev_seed_data
       - ./signer:/app/signer
+      - ./run-dev.sh:/app/run-dev.sh
+      - ./dbconfig.yml:/app/dbconfig.yml
+      - ./migrations:/app/migrations
       - /tmp/contentstore
       - typescript-dtos:/typescript-dtos
     ports:
@@ -21,7 +25,10 @@ services:
       # STORE_BUCKET: 
       # If using S3...
       # STORE_REGION: 
-      APP_SESSION_STORE_KEY: ""
+      APP_SESSION_STORE_KEY: "DEVELOPMENT_SESSION_STORE_KEY_SECRET"
+      APP_USE_SECURE_COOKIES: "false"
+      APP_SEED_DATABASE: "true"
+      APP_MIGRATIONS_PATH: "./migrations"
       APP_PORT: 3000
       APP_FRONTEND_INDEX_URL: "http://localhost:8080"
       APP_BACKEND_URL: "http://localhost:8080/web"
@@ -79,7 +86,7 @@ services:
       - backend
     build:
       context: .
-      dockerfile: Dockerfile.dev.frontend
+      dockerfile: deployments/Dockerfile.dev.frontend
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
@@ -95,7 +102,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     environment:
       - MYSQL_DATABASE=dev-db
       - MYSQL_ROOT_PASSWORD=dev-root-password

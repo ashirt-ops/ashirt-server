@@ -1,0 +1,6 @@
+FROM golang:1.25-alpine
+RUN go install github.com/rubenv/sql-migrate/sql-migrate@latest
+COPY dbconfig.yml /app/dbconfig.yml
+COPY migrations /app/migrations
+WORKDIR /app
+ENTRYPOINT ["sql-migrate", "up", "-config=dbconfig.yml"]
