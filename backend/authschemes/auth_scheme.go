@@ -1,7 +1,7 @@
 package authschemes
 
 import (
-	"github.com/go-chi/chi/v5"
+	"net/http"
 )
 
 // AuthScheme provides a small interface into interacting with the AShirt backend authentication.
@@ -16,11 +16,11 @@ import (
 // from any other scheme. Likewise, it should be a "friendlier" version of Name(), though it need
 // not be.
 //
-// BindRoutes(router, authBridge): BindRoutes exposes a _namespaced_ router that the authentication
-// system can use to register custom endpoints. Each router is prefixed with /auth/{name} (as
+// BindRoutes(mux, authBridge): BindRoutes exposes a _namespaced_ mux that the authentication
+// system can use to register custom endpoints. Each mux is prefixed with /auth/{name} (as
 // determined by the Name() method)
 type AuthScheme interface {
-	BindRoutes(chi.Router, AShirtAuthBridge)
+	BindRoutes(*http.ServeMux, AShirtAuthBridge)
 	Name() string
 	FriendlyName() string
 	Flags() []string

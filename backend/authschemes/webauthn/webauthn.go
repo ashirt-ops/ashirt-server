@@ -18,7 +18,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
-	"github.com/go-chi/chi/v5"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -104,7 +103,7 @@ func isDiscoverable(r *http.Request) bool {
 	return parsedURL.Query().Get("discoverable") == "true"
 }
 
-func (a WebAuthn) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
+func (a WebAuthn) BindRoutes(r *http.ServeMux, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "POST", "/register/begin", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		remux.JSONHandler(func(r *http.Request) (interface{}, error) {
 			// validate basic registration data

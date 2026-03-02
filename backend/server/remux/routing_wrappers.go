@@ -2,11 +2,10 @@ package remux
 
 import (
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 )
 
-// Route rewraps chi's Handle/Methods to provide a better at-a-glance reading of route definitions
-func Route(r chi.Router, method string, path string, handler http.Handler) {
-	r.Method(method, path, handler)
+// Route registers an HTTP handler for the given method and path on mux.
+// It combines method and path into the stdlib pattern format "METHOD /path".
+func Route(mux *http.ServeMux, method string, path string, handler http.Handler) {
+	mux.Handle(method+" "+path, handler)
 }

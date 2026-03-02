@@ -24,7 +24,8 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/server"
 	"github.com/ashirt-ops/ashirt-server/signer"
-	"github.com/go-chi/chi/v5"
+	"github.com/jrozner/weby"
+	webyMiddleware "github.com/jrozner/weby/middleware"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,29 +44,28 @@ func NewTester(t *testing.T) *Tester {
 	require.NoError(t, err)
 	commonLogger := logging.SetupStdoutLogging()
 
-	s := chi.NewRouter()
+	mux := weby.NewServeMux()
+	mux.Use(webyMiddleware.RequestID)
+	mux.Use(webyMiddleware.WrapResponse)
+	mux.Use(webyMiddleware.Logger(commonLogger))
 
-	s.Route("/web", func(r chi.Router) {
-		server.Web(r,
-			db, contentStore, &server.WebConfig{
-				SessionStoreKey: []byte("session-store-key-for-integration-tests"),
-				AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
-					RegistrationEnabled: true,
-				}},
-				Logger: commonLogger,
-			},
-		)
+	webMux := http.NewServeMux()
+	server.Web(webMux, db, contentStore, &server.WebConfig{
+		SessionStoreKey: []byte("session-store-key-for-integration-tests"),
+		AuthSchemes: []authschemes.AuthScheme{localauth.LocalAuthScheme{
+			RegistrationEnabled: true,
+		}},
+		Logger: commonLogger,
 	})
+	mux.Handle("/web/", http.StripPrefix("/web", webMux))
 
-	s.Route("/api", func(r chi.Router) {
-		server.API(r,
-			db, contentStore, commonLogger,
-		)
-	})
+	apiMux := http.NewServeMux()
+	server.API(apiMux, db, contentStore, commonLogger)
+	mux.Handle("/api/", http.StripPrefix("/api", apiMux))
 
 	return &Tester{
 		t: t,
-		s: httptest.NewServer(s),
+		s: httptest.NewServer(mux),
 	}
 }
 

@@ -17,7 +17,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/contentstore"
 	"github.com/ashirt-ops/ashirt-server/backend/database"
 	"github.com/ashirt-ops/ashirt-server/backend/dtos"
-	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
@@ -50,7 +49,7 @@ func (c *WebConfig) validate() error {
 	return nil
 }
 
-func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store, config *WebConfig) {
+func Web(mux *http.ServeMux, db *database.Connection, contentStore contentstore.Store, config *WebConfig) {
 	if err := config.validate(); err != nil {
 		panic(err)
 	}
@@ -65,41 +64,45 @@ func Web(r chi.Router, db *database.Connection, contentStore contentstore.Store,
 
 	csrf := http.NewCrossOriginProtection()
 
-	r.Handle("/metrics", promhttp.Handler())
-	r.Group(func(r chi.Router) {
-		r.Use(middleware.LogRequests(config.Logger))
-		r.Use(csrf.Handler)
-		r.Use(middleware.AuthenticateUserAndInjectCtx(db, sessionStore))
+	mux.Handle("GET /metrics", promhttp.Handler())
 
-		supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))
-		for i, scheme := range config.AuthSchemes {
-			r.Route("/auth/"+scheme.Name(), func(r chi.Router) {
-				scheme.BindRoutes(r.(chi.Router), authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
-			})
-			supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
-				SchemeName:  scheme.FriendlyName(),
-				SchemeCode:  scheme.Name(),
-				SchemeFlags: scheme.Flags(),
-				SchemeType:  scheme.Type(),
-			}
+	authMux := http.NewServeMux()
+
+	supportedAuthSchemes := make([]dtos.SupportedAuthScheme, len(config.AuthSchemes))
+	for i, scheme := range config.AuthSchemes {
+		prefix := "/auth/" + scheme.Name()
+		schemeMux := http.NewServeMux()
+		scheme.BindRoutes(schemeMux, authschemes.MakeAuthBridge(db, sessionStore, scheme.Name(), scheme.Type()))
+		authMux.Handle(prefix+"/", http.StripPrefix(prefix, schemeMux))
+		supportedAuthSchemes[i] = dtos.SupportedAuthScheme{
+			SchemeName:  scheme.FriendlyName(),
+			SchemeCode:  scheme.Name(),
+			SchemeFlags: scheme.Flags(),
+			SchemeType:  scheme.Type(),
 		}
-		authsWithOutRecovery := make([]dtos.SupportedAuthScheme, 0, len(supportedAuthSchemes)-1)
+	}
+	authsWithOutRecovery := make([]dtos.SupportedAuthScheme, 0, len(supportedAuthSchemes)-1)
 
-		// recovery is a special authentication that we kind of want to hide/separate from the other auth schemes
-		// so, we filter it out here
-		for _, auth := range supportedAuthSchemes {
-			if auth.SchemeCode != recoveryConsts.Code {
-				authsWithOutRecovery = append(authsWithOutRecovery, auth)
-			}
+	// recovery is a special authentication that we kind of want to hide/separate from the other auth schemes
+	// so, we filter it out here
+	for _, auth := range supportedAuthSchemes {
+		if auth.SchemeCode != recoveryConsts.Code {
+			authsWithOutRecovery = append(authsWithOutRecovery, auth)
 		}
+	}
 
-		bindSharedRoutes(r, db, contentStore)
-		bindWebRoutes(r, db, contentStore, sessionStore, &authsWithOutRecovery)
-	})
+	bindSharedRoutes(authMux, db, contentStore)
+	bindWebRoutes(authMux, db, contentStore, sessionStore, &authsWithOutRecovery)
+
+	var h http.Handler = authMux
+	h = middleware.AuthenticateUserAndInjectCtx(db, sessionStore)(h)
+	h = csrf.Handler(h)
+	h = middleware.InjectLogger(config.Logger)(h)
+	mux.Handle("/", h)
 }
 
-func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store, sessionStore *session.Store, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
-	route(r, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func bindWebRoutes(mux *http.ServeMux, db *database.Connection, contentStore contentstore.Store, sessionStore *session.Store, supportedAuthSchemes *[]dtos.SupportedAuthScheme) {
+	route(mux, "POST", "/logout", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jsonHandler(func(r *http.Request) (interface{}, error) {
 			err := sessionStore.Delete(w, r)
 			if err != nil {
@@ -109,7 +112,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		}).ServeHTTP(w, r)
 	}))
 
-	route(r, "GET", "/user", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/user", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		slug := dr.FromQuery("userSlug").AsString()
 
@@ -119,7 +122,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadUser(r.Context(), db, slug, supportedAuthSchemes)
 	}))
 
-	route(r, "GET", "/users", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/users", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUsersInput{
 			Query:          dr.FromQuery("query").Required().AsString(),
@@ -131,7 +134,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListUsers(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUserGroupsInput{
 			Query:          dr.FromQuery("query").Required().AsString(),
@@ -144,7 +147,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListUserGroups(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/admin/users", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/admin/users", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUsersForAdminInput{
 			UserFilter:     services.ParseRequestQueryUserFilter(dr),
@@ -157,7 +160,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListUsersForAdmin(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/admin/user/{userSlug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/admin/user/{userSlug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := dr.FromURL("userSlug").AsString()
 
@@ -167,7 +170,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteUser(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/admin/user/headless", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/admin/user/headless", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 
 		i := services.CreateUserInput{
@@ -183,7 +186,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateHeadlessUser(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/admin/{userSlug}/flags", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/admin/{userSlug}/flags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetUserFlagsInput{
 			Slug:     dr.FromURL("userSlug").AsString(),
@@ -197,7 +200,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.SetUserFlags(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUserGroupsForAdminInput{
 			UserGroupFilter: services.ParseRequestQueryUserGroupFilter(dr),
@@ -209,7 +212,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListUserGroupsForAdmin(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/admin/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateUserGroupInput{
 			Slug:      dr.FromBody("slug").Required().AsString(),
@@ -223,7 +226,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateUserGroup(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ModifyUserGroupInput{
 			Name:          dr.FromBody("newName").AsString(),
@@ -238,7 +241,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ModifyUserGroup(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/admin/usergroups/{group_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		groupSlug := dr.FromURL("group_slug").AsString()
 
@@ -248,19 +251,19 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteUserGroup(r.Context(), db, groupSlug)
 	}))
 
-	route(r, "GET", "/auths", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/auths", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return supportedAuthSchemes, nil
 	}))
 
-	route(r, "GET", "/flags", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/flags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return dtos.Flags{Flags: config.Flags()}, nil
 	}))
 
-	route(r, "GET", "/auths/breakdown", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/auths/breakdown", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListAuthDetails(r.Context(), db, supportedAuthSchemes)
 	}))
 
-	route(r, "DELETE", "/auths/{schemeCode}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/auths/{schemeCode}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		schemeCode := dr.FromURL("schemeCode").AsString()
 		if dr.Error != nil {
@@ -269,11 +272,11 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteAuthSchemeUsers(r.Context(), db, schemeCode)
 	}))
 
-	route(r, "GET", "/admin/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/admin/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListOperationsForAdmin(r.Context(), db)
 	}))
 
-	route(r, "DELETE", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		operationSlug := dr.FromURL("operation_slug").Required().AsString()
 		if dr.Error != nil {
@@ -283,7 +286,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteOperation(r.Context(), db, contentStore, operationSlug)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		operationSlug := dr.FromURL("operation_slug").Required().AsString()
 		if dr.Error != nil {
@@ -293,7 +296,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadOperation(r.Context(), db, operationSlug)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateOperationInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -305,7 +308,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/users", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/users", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUsersForOperationInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -318,7 +321,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListUsersForOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListUserGroupsForOperationInput{
 			OperationSlug:   dr.FromURL("operation_slug").Required().AsString(),
@@ -331,7 +334,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListUserGroupsForOperation(r.Context(), db, i)
 	}))
 
-	route(r, "PATCH", "/operations/{operation_slug}/users", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PATCH", "/operations/{operation_slug}/users", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetUserOperationRoleInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -344,7 +347,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.SetUserOperationRole(r.Context(), db, i)
 	}))
 
-	route(r, "PATCH", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PATCH", "/operations/{operation_slug}/usergroups", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetUserGroupOperationRoleInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -357,7 +360,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.SetUserGroupOperationRole(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/findings", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/findings", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		timelineFilters, err := helpers.ParseTimelineQuery(dr.FromQuery("query").AsString())
 		if err != nil {
@@ -374,7 +377,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListFindingsForOperation(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/operations/{operation_slug}/findings", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations/{operation_slug}/findings", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateFindingInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -388,7 +391,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateFinding(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/findings/{finding_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/findings/{finding_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ReadFindingInput{
 			FindingUUID:   dr.FromURL("finding_uuid").Required().AsString(),
@@ -400,7 +403,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadFinding(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/findings/{finding_uuid}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/findings/{finding_uuid}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListEvidenceForFindingInput{
 			FindingUUID:   dr.FromURL("finding_uuid").Required().AsString(),
@@ -412,7 +415,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListEvidenceForFinding(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/findings/{finding_uuid}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/findings/{finding_uuid}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.AddEvidenceToFindingInput{
 			OperationSlug:    dr.FromURL("operation_slug").Required().AsString(),
@@ -426,7 +429,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.AddEvidenceToFinding(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/findings/{finding_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/findings/{finding_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateFindingInput{
 			FindingUUID:   dr.FromURL("finding_uuid").Required().AsString(),
@@ -443,7 +446,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateFinding(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/operations/{operation_slug}/findings/{finding_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/operations/{operation_slug}/findings/{finding_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteFindingInput{
 			FindingUUID:   dr.FromURL("finding_uuid").Required().AsString(),
@@ -455,7 +458,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteFinding(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/creators", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/evidence/creators", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 
 		i := services.ListEvidenceCreatorsForOperationInput{
@@ -467,7 +470,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListEvidenceCreatorsForOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ReadEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -479,7 +482,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type:media|preview}", mediaHandler(func(r *http.Request) (io.Reader, error) {
+	route(mux, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/{type}", mediaHandler(func(r *http.Request) (io.Reader, error) {
 		dr := dissectNoBodyRequest(r)
 		i := services.ReadEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -509,7 +512,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return evidence.Media, nil
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ReadEvidenceMetadataInput{
 			OperationSlug: dr.FromURL("operation_slug").AsString(),
@@ -519,7 +522,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ReadEvidenceMetadata(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.EditEvidenceMetadataInput{
 			OperationSlug: dr.FromURL("operation_slug").AsString(),
@@ -533,7 +536,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.CreateEvidenceMetadata(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.EditEvidenceMetadataInput{
 			OperationSlug: dr.FromURL("operation_slug").AsString(),
@@ -547,7 +550,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateEvidenceMetadata(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/{service_name}/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/{service_name}/run", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.RunServiceWorkerInput{
 			OperationSlug: dr.FromURL("operation_slug").AsString(),
@@ -560,7 +563,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.RunServiceWorker(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.RunServiceWorkerInput{
 			OperationSlug: dr.FromURL("operation_slug").AsString(),
@@ -572,7 +575,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.RunServiceWorker(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
 		i := services.CreateEvidenceInput{
 			Description:   dr.FromBody("description").Required().AsString(),
@@ -592,7 +595,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectFormRequest(r)
 		i := services.UpdateEvidenceInput{
 			EvidenceUUID:  dr.FromURL("evidence_uuid").Required().AsString(),
@@ -615,7 +618,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "PUT", "/move/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/move/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.MoveEvidenceInput{
 			EvidenceUUID:        dr.FromURL("evidence_uuid").Required().AsString(),
@@ -629,7 +632,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.MoveEvidence(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/move/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/move/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListTagDifferenceForEvidenceInput{
 			ListTagsDifferenceInput: services.ListTagsDifferenceInput{
@@ -644,7 +647,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListTagDifferenceForEvidence(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/operations/{operation_slug}/evidence/{evidence_uuid}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteEvidenceInput{
 			EvidenceUUID:             dr.FromURL("evidence_uuid").Required().AsString(),
@@ -657,7 +660,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteEvidence(r.Context(), db, contentStore, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		operationID := dr.FromURL("operation_slug").Required().AsString()
 		if dr.Error != nil {
@@ -666,7 +669,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListQueriesForOperation(r.Context(), db, operationID)
 	}))
 
-	route(r, "POST", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateQueryInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -680,7 +683,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateQuery(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/queries", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpsertQueryInput{
 			CreateQueryInput: services.CreateQueryInput{
@@ -697,7 +700,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.UpsertQuery(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/queries/{query_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/queries/{query_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateQueryInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -711,7 +714,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateQuery(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/operations/{operation_slug}/queries/{query_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/operations/{operation_slug}/queries/{query_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteQueryInput{
 			ID:            dr.FromURL("query_id").Required().AsInt64(),
@@ -723,7 +726,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteQuery(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateTagInput{
 			ID:            dr.FromURL("tag_id").Required().AsInt64(),
@@ -738,7 +741,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateTag(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/operations/{operation_slug}/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/operations/{operation_slug}/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteTagInput{
 			ID:            dr.FromURL("tag_id").Required().AsInt64(),
@@ -750,11 +753,11 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteTag(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListDefaultTags(r.Context(), db)
 	}))
 
-	route(r, "POST", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/admin/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateDefaultTagInput{
 			Name:        dr.FromBody("name").Required().AsString(),
@@ -767,7 +770,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateDefaultTag(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/admin/merge/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/admin/merge/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		var tags []services.CreateDefaultTagInput
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -779,7 +782,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.MergeDefaultTags(r.Context(), db, tags)
 	}))
 
-	route(r, "PUT", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateDefaultTagInput{
 			ID:          dr.FromURL("tag_id").Required().AsInt64(),
@@ -793,7 +796,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateDefaultTag(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/admin/tags/{tag_id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteDefaultTagInput{
 			ID: dr.FromURL("tag_id").Required().AsInt64(),
@@ -804,7 +807,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteDefaultTag(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/user/apikeys", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/user/apikeys", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		userSlug := dr.FromQuery("userSlug").AsString()
 		if dr.Error != nil {
@@ -813,7 +816,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListAPIKeys(r.Context(), db, userSlug)
 	}))
 
-	route(r, "POST", "/user/{userSlug}/apikeys", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/user/{userSlug}/apikeys", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		userSlug := dr.FromURL("userSlug").AsString()
 		if dr.Error != nil {
@@ -822,7 +825,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateAPIKey(r.Context(), db, userSlug)
 	}))
 
-	route(r, "DELETE", "/user/{userSlug}/apikeys/{access_key}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/user/{userSlug}/apikeys/{access_key}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteAPIKeyInput{
 			UserSlug:  dr.FromURL("userSlug").Required().AsString(),
@@ -834,7 +837,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteAPIKey(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/user/profile/{userSlug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/user/profile/{userSlug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateUserProfileInput{
 			UserSlug:  dr.FromURL("userSlug").AsString(),
@@ -848,7 +851,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateUserProfile(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/user/{userSlug}/scheme/{authSchemeName}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/user/{userSlug}/scheme/{authSchemeName}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteAuthSchemeInput{
 			UserSlug:   dr.FromURL("userSlug").AsString(),
@@ -860,7 +863,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteAuthScheme(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/findings/categories", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/findings/categories", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		includeDeleted := dr.FromQuery("includeDeleted").OrDefault(false).AsBool()
 
@@ -870,7 +873,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.ListFindingCategories(r.Context(), db, includeDeleted)
 	}))
 
-	route(r, "POST", "/findings/category", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/findings/category", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		category := dr.FromBody("category").Required().AsString()
 		if dr.Error != nil {
@@ -879,7 +882,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return services.CreateFindingCategory(r.Context(), db, category)
 	}))
 
-	route(r, "DELETE", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteFindingCategoryInput{
 			FindingCategoryID: dr.FromURL("id").AsInt64(),
@@ -891,7 +894,7 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.DeleteFindingCategory(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/findings/category/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateFindingCategoryInput{
 			Category: dr.FromBody("category").Required().AsString(),
@@ -903,19 +906,19 @@ func bindWebRoutes(r chi.Router, db *database.Connection, contentStore contentst
 		return nil, services.UpdateFindingCategory(r.Context(), db, i)
 	}))
 
-	bindServiceWorkerRoutes(r, db)
+	bindServiceWorkerRoutes(mux, db)
 }
 
-func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
-	route(r, "GET", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
+func bindServiceWorkerRoutes(mux *http.ServeMux, db *database.Connection) {
+	route(mux, "GET", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListServiceWorker(r.Context(), db)
 	}))
 
-	route(r, "GET", "/services", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListActiveServices(r.Context(), db)
 	}))
 
-	route(r, "POST", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/admin/services", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateServiceWorkerInput{
 			Name:   dr.FromBody("name").Required().AsString(),
@@ -927,7 +930,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.CreateServiceWorker(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/admin/services/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/admin/services/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateServiceWorkerInput{
 			ID:     dr.FromURL("id").AsInt64(),
@@ -940,7 +943,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.UpdateServiceWorker(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/admin/services/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/admin/services/{id}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.DeleteServiceWorkerInput{
 			ID:       dr.FromURL("id").AsInt64(),
@@ -952,7 +955,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.DeleteServiceWorker(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/admin/services/{id}/test", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/admin/services/{id}/test", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		workerID := dr.FromURL("id").AsInt64()
 		if dr.Error != nil {
@@ -961,7 +964,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return services.TestServiceWorker(r.Context(), db, workerID)
 	}))
 
-	route(r, "PUT", "/operations/{operation_slug}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operations/{operation_slug}/metadata/run", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.BatchRunServiceWorkerInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -974,7 +977,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.BatchRunServiceWorker(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/operations/{operation_slug}/favorite", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations/{operation_slug}/favorite", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.SetFavoriteInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -986,11 +989,11 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.SetFavoriteOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/global-vars", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/global-vars", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListGlobalVars(r.Context(), db)
 	}))
 
-	route(r, "POST", "/global-vars", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/global-vars", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateGlobalVarInput{
 			Name:  dr.FromBody("name").Required().AsString(),
@@ -1002,7 +1005,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return services.CreateGlobalVar(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/global-vars/{name}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/global-vars/{name}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateGlobalVarInput{
 			Name:    dr.FromURL("name").Required().AsString(),
@@ -1015,7 +1018,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.UpdateGlobalVar(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/global-vars/{name}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/global-vars/{name}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		name := dr.FromURL("name").Required().AsString()
 		if dr.Error != nil {
@@ -1024,7 +1027,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.DeleteGlobalVar(r.Context(), db, name)
 	}))
 
-	route(r, "GET", "/operation-vars/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operation-vars/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		operationSlug := dr.FromURL("operation_slug").Required().AsString()
 		if dr.Error != nil {
@@ -1033,7 +1036,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return services.ListOperationVars(r.Context(), db, operationSlug)
 	}))
 
-	route(r, "POST", "/operation-vars/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operation-vars/{operation_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateOperationVarInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -1047,7 +1050,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return services.CreateOperationVar(r.Context(), db, i)
 	}))
 
-	route(r, "PUT", "/operation-vars/{operation_slug}/{var_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "PUT", "/operation-vars/{operation_slug}/{var_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.UpdateOperationVarInput{
 			VarSlug:       dr.FromURL("var_slug").Required().AsString(),
@@ -1061,7 +1064,7 @@ func bindServiceWorkerRoutes(r chi.Router, db *database.Connection) {
 		return nil, services.UpdateOperationVar(r.Context(), db, i)
 	}))
 
-	route(r, "DELETE", "/operation-vars/{operation_slug}/{var_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "DELETE", "/operation-vars/{operation_slug}/{var_slug}", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		varSlug := dr.FromURL("var_slug").Required().AsString()
 		operationSlug := dr.FromURL("operation_slug").Required().AsString()

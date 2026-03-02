@@ -20,7 +20,8 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/logging"
 	"github.com/ashirt-ops/ashirt-server/backend/server"
 	"github.com/ashirt-ops/ashirt-server/backend/workers"
-	"github.com/go-chi/chi/v5"
+	"github.com/jrozner/weby"
+	webyMiddleware "github.com/jrozner/weby/middleware"
 )
 
 type SchemeError struct {
@@ -85,27 +86,26 @@ func main() {
 		logger.Warn("No Emailer selected")
 	}
 
-	r := chi.NewRouter()
+	mux := weby.NewServeMux()
+	mux.Use(webyMiddleware.RequestID)
+	mux.Use(webyMiddleware.WrapResponse)
+	mux.Use(webyMiddleware.Logger(logger))
 
-	r.Route("/web", func(r chi.Router) {
-		server.Web(r,
-			db, contentStore, &server.WebConfig{
-				SessionStoreKey:  []byte(config.SessionStoreKey()),
-				UseSecureCookies: true,
-				AuthSchemes:      schemes,
-				Logger:           logger,
-			},
-		)
+	webMux := http.NewServeMux()
+	server.Web(webMux, db, contentStore, &server.WebConfig{
+		SessionStoreKey:  []byte(config.SessionStoreKey()),
+		UseSecureCookies: true,
+		AuthSchemes:      schemes,
+		Logger:           logger,
 	})
+	mux.Handle("/web/", http.StripPrefix("/web", webMux))
 
-	r.Route("/api", func(r chi.Router) {
-		server.API(r,
-			db, contentStore, logger,
-		)
-	})
+	apiMux := http.NewServeMux()
+	server.API(apiMux, db, contentStore, logger)
+	mux.Handle("/api/", http.StripPrefix("/api", apiMux))
 
 	logger.Info("starting Web server", "port", config.Port())
-	serveErr := http.ListenAndServe(":"+config.Port(), r)
+	serveErr := http.ListenAndServe(":"+config.Port(), mux)
 	logging.Fatal(logger, "server shutting down", "err", serveErr)
 }
 

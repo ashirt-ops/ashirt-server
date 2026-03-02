@@ -15,7 +15,6 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/server/remux"
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/go-chi/chi/v5"
 	"golang.org/x/oauth2"
 )
 
@@ -104,7 +103,7 @@ func (OIDCAuth) Flags() []string {
 	return []string{}
 }
 
-func (o OIDCAuth) BindRoutes(r chi.Router, bridge authschemes.AShirtAuthBridge) {
+func (o OIDCAuth) BindRoutes(r *http.ServeMux, bridge authschemes.AShirtAuthBridge) {
 	remux.Route(r, "GET", "/login", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		o.redirectLogin(w, r, bridge, modeLogin)
 	}))

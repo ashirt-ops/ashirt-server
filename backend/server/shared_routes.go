@@ -8,15 +8,14 @@ import (
 	"github.com/ashirt-ops/ashirt-server/backend/helpers"
 	"github.com/ashirt-ops/ashirt-server/backend/server/middleware"
 	"github.com/ashirt-ops/ashirt-server/backend/services"
-	"github.com/go-chi/chi/v5"
 )
 
-func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore contentstore.Store) {
-	route(r, "GET", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
+func bindSharedRoutes(mux *http.ServeMux, db *database.Connection, contentStore contentstore.Store) {
+	route(mux, "GET", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
 		return services.ListOperations(r.Context(), db)
 	}))
 
-	route(r, "POST", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateOperationInput{
 			Slug:    dr.FromBody("slug").Required().AsString(),
@@ -29,7 +28,7 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 		return services.CreateOperation(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.ListTagsForOperationInput{
 			OperationSlug: dr.FromURL("operation_slug").Required().AsString(),
@@ -37,7 +36,7 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 		return services.ListTagsForOperation(r.Context(), db, i)
 	}))
 
-	route(r, "POST", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "POST", "/operations/{operation_slug}/tags", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		i := services.CreateTagInput{
 			Name:          dr.FromBody("name").Required().AsString(),
@@ -51,7 +50,7 @@ func bindSharedRoutes(r chi.Router, db *database.Connection, contentStore conten
 		return services.CreateTag(r.Context(), db, i)
 	}))
 
-	route(r, "GET", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
+	route(mux, "GET", "/operations/{operation_slug}/evidence", jsonHandler(func(r *http.Request) (interface{}, error) {
 		dr := dissectJSONRequest(r)
 		timelineFilters, err := helpers.ParseTimelineQuery(dr.FromQuery("query").AsString())
 		if err != nil {
