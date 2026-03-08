@@ -33,8 +33,8 @@ import {Result} from 'src/global_types'
 // )
 
 export function useForm<T>(i: {
-  handleSubmit: () => Promise<T>,
-  fields?: Array<{setDisabled: (v: boolean) => void}>,
+  handleSubmit: () => T | Promise<T>,
+  fields?: Array<{setDisabled: (v: boolean) => void, setError: (error: string) => void}>,
   onSuccessText?: string,
   onSuccess?: () => void,
 }) {
@@ -63,12 +63,19 @@ export function useForm<T>(i: {
     }
   }
 
-  return {onSubmit, loading, result}
+  const clear = () => {
+    if (i.fields) i.fields.map(field => field.setError(""))
+
+    setResult(null)
+  }
+
+  return {onSubmit, clear, loading, result}
 }
 
 export function useFormField<T>(initialValue: T) {
   const [value, onChange] = React.useState<T>(initialValue)
   const [disabled, setDisabled] = React.useState(false)
+  const [error, setError] = React.useState<string>('')
 
-  return {value, onChange, disabled, setDisabled}
+  return {value, onChange, disabled, setDisabled, error, setError}
 }
