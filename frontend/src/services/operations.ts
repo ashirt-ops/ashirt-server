@@ -13,7 +13,7 @@ export async function createOperation(name: string): Promise<Operation> {
   try {
     return await ds.createOperation({ slug, name })
   } catch (err) {
-    if (err.message.match(/slug already exists/g)) {
+    if (err instanceof Error && err.message.match(/slug already exists/g)) {
       slug += '-' + Date.now()
       return await ds.createOperation({ slug, name })
     }

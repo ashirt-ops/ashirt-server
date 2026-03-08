@@ -13,11 +13,12 @@ async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
     await promise
     window.location.href = '/'
   } catch (err) {
-    if (err.message === 'PASSWORD_RESET_REQUIRED') {
+    const message = err instanceof Error ? err.message : ''
+    if (message === 'PASSWORD_RESET_REQUIRED') {
       window.location.href = '/login/local?step=reset'
       return
     }
-    else if (err.message === 'TOTP_REQUIRED') {
+    else if (message === 'TOTP_REQUIRED') {
       window.location.href = '/login/local?step=totp'
       return
     }

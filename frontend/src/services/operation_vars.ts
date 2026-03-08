@@ -12,7 +12,7 @@ export async function createOperationVar(operationSlug: string, name: string, va
   try {
     return await ds.createOperationVar({ operationSlug }, {name, value, varSlug: slug })
   } catch (err) {
-    if (err.message.match(/An operation variable with this name already exists/g)) {
+    if (err instanceof Error && err.message.match(/An operation variable with this name already exists/g)) {
       slug += '-' + Date.now()
       return await ds.createOperationVar({ operationSlug }, {varSlug: slug, name, value })
     }

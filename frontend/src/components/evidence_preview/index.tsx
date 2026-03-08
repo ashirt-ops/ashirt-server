@@ -142,7 +142,7 @@ const EvidenceHttpCycle = (props: EvidenceProps) => {
       return <ErrorDisplay title="Corrupted HAR file" err={new Error("unsupported format")} />
     }
     catch (err) {
-      return <ErrorDisplay title="Corrupted HAR file" err={err}/>
+      return <ErrorDisplay title="Corrupted HAR file" err={err instanceof Error ? err : new Error(String(err))}/>
     }
   })
 }

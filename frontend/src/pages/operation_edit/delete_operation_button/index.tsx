@@ -26,7 +26,7 @@ export default (props: {
 
 export const DeleteOperationModal = (props: {
   operationSlug: string,
-  onRequestClose: (success: boolean) => void,
+  onRequestClose: (success?: boolean) => void,
 }) => <ChallengeModalForm
     modalTitle="Delete Operation"
     warningText="This will permanently remove the operation from the system, along with associated evidence and findings. Please do not initiate a re-deployment while this process is on-going."

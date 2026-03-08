@@ -89,8 +89,8 @@ const PlaybackControlLogic = (props: {
 
   const termPlayer = props.player
 
-  const handlerPairs: Array<[string, (a: PositionChangeEventBody | RateChangeEventBody) => void]> =
-  React.useMemo(() => [
+  const handlerPairs =
+  React.useMemo((): Array<[string, (...args: any[]) => void]> => [
       [EventTypeFrameAdvance, (evt: PositionChangeEventBody) => { setPlaybackTime(evt.elapsedTime); setCompleted(evt.playbackPosition) }],
       [EventTypeRateChange, (evt: RateChangeEventBody) => setPlaying(evt.newRate != 0)],
       [EventTypeDesiredRateChange, (evt: RateChangeEventBody) => setDesiredRate(evt.newRate)]
