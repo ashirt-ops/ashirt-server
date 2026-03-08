@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {Result} from 'src/global_types'
+import { Result } from 'src/global_types'
 
 // Use form react hook helper to make form loading/error handling easier
 // Similar to useWiredData except for submitting data
@@ -33,17 +33,17 @@ import {Result} from 'src/global_types'
 // )
 
 export function useForm<T>(i: {
-  handleSubmit: () => Promise<T>,
-  fields?: Array<{setDisabled: (v: boolean) => void}>,
-  onSuccessText?: string,
-  onSuccess?: () => void,
+  handleSubmit: () => Promise<T>
+  fields?: Array<{ setDisabled: (v: boolean) => void }>
+  onSuccessText?: string
+  onSuccess?: () => void
 }) {
   const [loading, setLoading] = React.useState(false)
-  const [result, setResult] = React.useState<Result<string>|null>(null)
+  const [result, setResult] = React.useState<Result<string> | null>(null)
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (i.fields) i.fields.forEach(f => f.setDisabled(true))
+    if (i.fields) i.fields.forEach((f) => f.setDisabled(true))
     setLoading(true)
     let submitSuccessful
     try {
@@ -55,20 +55,20 @@ export function useForm<T>(i: {
       console.error(err)
       submitSuccessful = false
     }
-    if (i.fields) i.fields.forEach(f => f.setDisabled(false))
+    if (i.fields) i.fields.forEach((f) => f.setDisabled(false))
     setLoading(false)
     if (submitSuccessful) {
-      if (i.onSuccessText) setResult({success: i.onSuccessText})
+      if (i.onSuccessText) setResult({ success: i.onSuccessText })
       if (i.onSuccess) i.onSuccess()
     }
   }
 
-  return {onSubmit, loading, result}
+  return { onSubmit, loading, result }
 }
 
 export function useFormField<T>(initialValue: T) {
   const [value, onChange] = React.useState<T>(initialValue)
   const [disabled, setDisabled] = React.useState(false)
 
-  return {value, onChange, disabled, setDisabled}
+  return { value, onChange, disabled, setDisabled }
 }

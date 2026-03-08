@@ -12,7 +12,6 @@ import Table from 'src/components/table'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-
 export * from './is_valid_har'
 
 type ExpandedState = { [tabId: string]: boolean }
@@ -30,65 +29,82 @@ export const HarViewer = (props: {
   const [selectedRow, setSelectedRow] = React.useState<number>(-1)
   const [entryState, setEntryState] = React.useState<EntryState>({
     activeTab: -1,
-    expandedAreas: {}
+    expandedAreas: {},
   })
 
   return (
-    <div className={cx('root')} onClick={e => {
-      if (!props.disableKeyHandler) {
-        e.stopPropagation() // prevent lightbox from showing
-      }
-    }}>
+    <div
+      className={cx('root')}
+      onClick={(e) => {
+        if (!props.disableKeyHandler) {
+          e.stopPropagation() // prevent lightbox from showing
+        }
+      }}
+    >
       {/* <EvidenceHeader creator={log.creator.name} version={log.creator.version} /> */}
       <div className={cx('columns')}>
-        <RequestTable log={log} selectedRow={selectedRow} setSelectedRow={props.disableKeyHandler ? (_) => { } : setSelectedRow} />
-        {selectedRow > -1 &&
+        <RequestTable
+          log={log}
+          selectedRow={selectedRow}
+          setSelectedRow={props.disableKeyHandler ? (_) => {} : setSelectedRow}
+        />
+        {selectedRow > -1 && (
           <EntryData entry={log.entries[selectedRow]} state={entryState} setState={setEntryState} />
-        }
+        )}
       </div>
     </div>
   )
 }
 
 const EntryData = (props: {
-  entry: Entry,
-  state: EntryState,
+  entry: Entry
+  state: EntryState
   setState: (newState: EntryState) => void
 }) => {
   const onTabChanged = (_: Tab, idx: number) => props.setState({ ...props.state, activeTab: idx })
 
-  return <div className={cx('entry-root', 'column')}>
-    <TabMenu className={cx('tab-menu-group')} initialActiveTab={props.state.activeTab} onTabChanged={onTabChanged}
-      tabs={[
-        {
-          id: 'entry-headers', label: 'Headers',
-          content: (
-            <EntryHeadersData entry={props.entry}
-              expandedAreas={props.state.expandedAreas}
-              setExpandedAreas={(s) => props.setState({ ...props.state, expandedAreas: s })}
-            />
-          )
-        },
-        {
-          id: 'entry-request', label: 'Request',
-          content: <RequestContent data={props.entry.request.postData} />
-        },
-        {
-          id: 'entry-response', label: 'Response',
-          content: <ResponseContent response={props.entry.response} />
-        },
-        {
-          id: 'entry-request', label: 'Full Request',
-          content: <FullRequest data={props.entry.request} />
-        },
-        {
-          id: 'entry-response', label: 'Full Response',
-          content: <FullResponse response={props.entry.response} />
-        },
-
-      ]}
-    />
-  </div>
+  return (
+    <div className={cx('entry-root', 'column')}>
+      <TabMenu
+        className={cx('tab-menu-group')}
+        initialActiveTab={props.state.activeTab}
+        onTabChanged={onTabChanged}
+        tabs={[
+          {
+            id: 'entry-headers',
+            label: 'Headers',
+            content: (
+              <EntryHeadersData
+                entry={props.entry}
+                expandedAreas={props.state.expandedAreas}
+                setExpandedAreas={(s) => props.setState({ ...props.state, expandedAreas: s })}
+              />
+            ),
+          },
+          {
+            id: 'entry-request',
+            label: 'Request',
+            content: <RequestContent data={props.entry.request.postData} />,
+          },
+          {
+            id: 'entry-response',
+            label: 'Response',
+            content: <ResponseContent response={props.entry.response} />,
+          },
+          {
+            id: 'entry-request',
+            label: 'Full Request',
+            content: <FullRequest data={props.entry.request} />,
+          },
+          {
+            id: 'entry-response',
+            label: 'Full Response',
+            content: <FullResponse response={props.entry.response} />,
+          },
+        ]}
+      />
+    </div>
+  )
 }
 
 const EntryHeadersData = (props: {
@@ -97,8 +113,9 @@ const EntryHeadersData = (props: {
   setExpandedAreas: (newState: ExpandedState) => void
 }) => {
   const expandedAreaProps = (id: string) => ({
-    onExpanded: (include: boolean) => props.setExpandedAreas({ ...props.expandedAreas, [id]: include }),
-    initiallyExpanded: props.expandedAreas[id] || false
+    onExpanded: (include: boolean) =>
+      props.setExpandedAreas({ ...props.expandedAreas, [id]: include }),
+    initiallyExpanded: props.expandedAreas[id] || false,
   })
 
   return (
@@ -118,26 +135,15 @@ const EntryHeadersData = (props: {
 
 const formatHeaders = (headers: Array<Header>, withSort?: boolean): Array<[string, string]> => {
   const mapFn: (h: Header) => [string, string] = (header: Header) => [header.name, header.value]
-  const sortFn = (a: Header, b: Header) => (
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-  )
+  const sortFn = (a: Header, b: Header) => a.name.toLowerCase().localeCompare(b.name.toLowerCase())
 
   if (withSort) {
-    return (
-      headers
-        .sort(sortFn)
-        .map(mapFn)
-    )
+    return headers.sort(sortFn).map(mapFn)
   }
-  return (
-    headers
-      .map(mapFn)
-  )
+  return headers.map(mapFn)
 }
 
-const RequestInfo = (props: {
-  entry: Entry
-}) => {
+const RequestInfo = (props: { entry: Entry }) => {
   const requestUrl = new URL(props.entry.request.url)
   return (
     <SectionDefintions
@@ -152,13 +158,14 @@ const RequestInfo = (props: {
   )
 }
 
-const SectionDefintions = (props: {
-  definitions: Array<[key: string, value: string]>
-}) => (
+const SectionDefintions = (props: { definitions: Array<[key: string, value: string]> }) => (
   <section className={cx('section-container')}>
     {props.definitions.map(([key, value]) => (
       <div className={cx('section-entry')}>
-        <em className={cx('section-key')}>{key}{value && ':'}</em>
+        <em className={cx('section-key')}>
+          {key}
+          {value && ':'}
+        </em>
         <div className={cx('section-value')}>{value}</div>
       </div>
     ))}
@@ -170,7 +177,6 @@ const RequestTable = (props: {
   selectedRow: number
   setSelectedRow: (rowNumber: number) => void
 }) => {
-
   const tableRef = React.useRef<HTMLTableElement | null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -178,32 +184,43 @@ const RequestTable = (props: {
       e.stopPropagation()
       e.preventDefault()
 
-      const direction = (e.key == 'ArrowDown' ? 1 : -1)
+      const direction = e.key == 'ArrowDown' ? 1 : -1
       const newIndex = clamp(props.selectedRow + direction, 0, props.log.entries.length - 1)
       if (tableRef.current != null) {
-
         if (props.selectedRow == 0 && newIndex == 0) {
           tableRef.current.tHead?.scrollIntoView({ block: 'nearest' })
-        }
-        else {
-          tableRef.current.tBodies.item(0)?.rows.item(newIndex)?.scrollIntoView({ block: 'nearest' })
+        } else {
+          tableRef.current.tBodies
+            .item(0)
+            ?.rows.item(newIndex)
+            ?.scrollIntoView({ block: 'nearest' })
         }
       }
       props.setSelectedRow(newIndex)
     }
   }
 
-  const onRowSelected = (index: number) => (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-    props.setSelectedRow(props.selectedRow == index ? -1 : index)
-  }
+  const onRowSelected =
+    (index: number) => (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+      props.setSelectedRow(props.selectedRow == index ? -1 : index)
+    }
 
   return (
-    <div className={cx('table-container', 'column', props.selectedRow > -1 ? '' : 'full-width-column')}>
-      <Table className={cx('table')} columns={['#', 'Status', 'Method', 'Path']}
-        onKeyDown={onKeyDown} tableRef={tableRef}>
+    <div
+      className={cx('table-container', 'column', props.selectedRow > -1 ? '' : 'full-width-column')}
+    >
+      <Table
+        className={cx('table')}
+        columns={['#', 'Status', 'Method', 'Path']}
+        onKeyDown={onKeyDown}
+        tableRef={tableRef}
+      >
         {props.log.entries.map((entry, index) => (
-          <tr key={index} className={cx(index == props.selectedRow ? ['selected-row', 'render'] : '')}
-            onClick={(e) => onRowSelected(index)(e)} >
+          <tr
+            key={index}
+            className={cx(index == props.selectedRow ? ['selected-row', 'render'] : '')}
+            onClick={(e) => onRowSelected(index)(e)}
+          >
             <td>{index + 1}</td>
             <td>{entry.response.status}</td>
             <td>{entry.request.method}</td>
@@ -215,14 +232,12 @@ const RequestTable = (props: {
   )
 }
 
-const RequestContent = (props: {
-  data?: PostData
-}) => {
+const RequestContent = (props: { data?: PostData }) => {
   if (props.data == null) {
     return <RawContent content="No Post Data captured" />
   }
 
-  const mimetype = (props.data?.mimeType) || ''
+  const mimetype = props.data?.mimeType || ''
 
   // Per the draft HAR v1.2 standard, text and params are mutually exclusive.
   // However, in practice they are not (see chrome form data har export). Opting to prefer text
@@ -231,20 +246,17 @@ const RequestContent = (props: {
 
   if (props.data.text != null) {
     body = props.data.text
-  }
-  else {
+  } else {
     body = 'Parameters:\n'
     for (let p of props.data.params) {
-      body += `  ${p.name}${(p.value ? ': ' + p.value : '')}\n`
+      body += `  ${p.name}${p.value ? ': ' + p.value : ''}\n`
     }
   }
 
   return <RawContent content={body} language={mimetypeToAceLang(mimetype)} />
 }
 
-const FullRequest = (props: {
-  data: Request
-}) => {
+const FullRequest = (props: { data: Request }) => {
   const req = props.data
   const requestUrl = new URL(req.url)
 
@@ -258,7 +270,7 @@ const FullRequest = (props: {
 
   const body = [
     `${req.method} ${requestUrl.pathname} ${req.httpVersion}`,
-    ...(formatHeaders(req.headers, false).map(h => `${h[0]}: ${h[1]}`)),
+    ...formatHeaders(req.headers, false).map((h) => `${h[0]}: ${h[1]}`),
     '',
     content,
   ]
@@ -266,35 +278,35 @@ const FullRequest = (props: {
   return <RawContent content={body.join('\n')} language={''} />
 }
 
-const ResponseContent = (props: {
-  response: Response
-}) => {
+const ResponseContent = (props: { response: Response }) => {
   const length = props.response.content.size
   const rawText = props.response.content.text || ''
 
-  const content = (rawText == '' && length > 0)
-    ? `Content is ${length} bytes long, but no data/text was captured`
-    : rawText
+  const content =
+    rawText == '' && length > 0
+      ? `Content is ${length} bytes long, but no data/text was captured`
+      : rawText
 
-  return <RawContent content={content} language={mimetypeToAceLang(props.response.content.mimeType)} />
+  return (
+    <RawContent content={content} language={mimetypeToAceLang(props.response.content.mimeType)} />
+  )
 }
 
-const FullResponse = (props: {
-  response: Response
-}) => {
+const FullResponse = (props: { response: Response }) => {
   const res = props.response
   const length = res.content.size
   const rawText = res.content.text || ''
 
-  const content = (rawText == '' && length > 0)
-    ? `Content is ${length} bytes long, but no data/text was captured`
-    : rawText
+  const content =
+    rawText == '' && length > 0
+      ? `Content is ${length} bytes long, but no data/text was captured`
+      : rawText
 
   const body = [
     `${res.httpVersion} ${res.status} ${res.statusText}`,
-    ...(formatHeaders(res.headers, false).map(h => `${h[0]}: ${h[1]}`)),
+    ...formatHeaders(res.headers, false).map((h) => `${h[0]}: ${h[1]}`),
     '',
-    content
+    content,
   ]
 
   return <RawContent content={body.join('\n')} language={mimetypeToAceLang('')} />

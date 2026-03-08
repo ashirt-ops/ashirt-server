@@ -6,11 +6,7 @@ import { UserAdminView } from 'src/global_types'
 import { listUsersAdminView } from 'src/services'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
-import {
-  default as Table,
-  ErrorRow,
-  LoadingRow,
-} from 'src/components/table'
+import { default as Table, ErrorRow, LoadingRow } from 'src/components/table'
 import ComplexCheckbox from 'src/components/checkbox_complex'
 import Checkbox from 'src/components/checkbox'
 import { StandardPager } from 'src/components/paging'
@@ -32,27 +28,35 @@ export default (props: {
     const isUserIncluded = e.target.checked
     if (isUserIncluded) {
       const newSet = new Set(props.includedUsers).add(userSlug)
-      props.setIncludedUsers(newSet);
+      props.setIncludedUsers(newSet)
     } else {
-      const newSet = new Set(props.includedUsers);
-      newSet.delete(userSlug);
-      props.setIncludedUsers(newSet);
+      const newSet = new Set(props.includedUsers)
+      newSet.delete(userSlug)
+      props.setIncludedUsers(newSet)
     }
   }
 
   const columns = Object.keys({})
 
   const wiredUsers = usePaginatedWiredData<UserAdminView>(
-    React.useCallback(page => listUsersAdminView({ page, pageSize: 5, deleted: withDeleted, name: usernameFilterValue }), [usernameFilterValue, withDeleted]),
+    React.useCallback(
+      (page) =>
+        listUsersAdminView({ page, pageSize: 5, deleted: withDeleted, name: usernameFilterValue }),
+      [usernameFilterValue, withDeleted],
+    ),
     (err) => <ErrorRow span={columns.length} error={err} />,
-    () => <LoadingRow span={columns.length} />
+    () => <LoadingRow span={columns.length} />,
   )
 
   React.useEffect(() => {
     props.onReload(wiredUsers.reload)
-    return () => { props.offReload(wiredUsers.reload) }
+    return () => {
+      props.offReload(wiredUsers.reload)
+    }
   })
-  React.useEffect(() => { setIncludeDeletedUsers(withDeleted) }, [withDeleted])
+  React.useEffect(() => {
+    setIncludeDeletedUsers(withDeleted)
+  }, [withDeleted])
 
   return (
     <SettingsSection title="" width="wide">
@@ -60,30 +64,36 @@ export default (props: {
         <Input
           label="User Filter"
           value={usernameFilterValue}
-          onChange={v => { setUsernameFilterValue(v); wiredUsers.pagerProps.onPageChange(1) }}
+          onChange={(v) => {
+            setUsernameFilterValue(v)
+            wiredUsers.pagerProps.onPageChange(1)
+          }}
           loading={usernameFilterValue.length > 0 && wiredUsers.loading}
         />
         <Checkbox
           label="Include Deleted Users"
           className={cx('checkbox')}
           value={withDeleted}
-          onChange={setWithDeleted} />
+          onChange={setWithDeleted}
+        />
       </div>
       <Table className={cx('table')} columns={columns}>
-        {wiredUsers.render(data => <>
-          {data.map(user =>
-            (<tr key={user.slug}>
-              <td>{`${user.firstName} ${user.lastName}`}</td>
-              <td>
-                <ComplexCheckbox
-                  className={cx('checkbox')}
-                  value={props.includedUsers.has(user.slug)}
-                  onChange={(e) => toggleItem(e, user.slug)}
+        {wiredUsers.render((data) => (
+          <>
+            {data.map((user) => (
+              <tr key={user.slug}>
+                <td>{`${user.firstName} ${user.lastName}`}</td>
+                <td>
+                  <ComplexCheckbox
+                    className={cx('checkbox')}
+                    value={props.includedUsers.has(user.slug)}
+                    onChange={(e) => toggleItem(e, user.slug)}
                   />
-              </td>
-            </tr>)
-          )}
-        </>)}
+                </td>
+              </tr>
+            ))}
+          </>
+        ))}
       </Table>
       <StandardPager className={cx('user-table-pager')} {...wiredUsers.pagerProps} />
     </SettingsSection>

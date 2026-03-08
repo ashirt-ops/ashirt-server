@@ -1,7 +1,7 @@
 import * as React from 'react'
 import Button from 'src/components/button'
 import classnames from 'classnames/bind'
-import {ClickPopover} from 'src/components/popover'
+import { ClickPopover } from 'src/components/popover'
 import { NavLink, useLocation } from 'react-router'
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -11,14 +11,9 @@ const cx = classnames.bind(require('./stylesheet'))
 //   <ListItem name="Two" onSelect={...} />
 //   <ListItem name="Three" onSelect={...} />
 // </ListMenu>
-export default (props: {
-  className?: string,
-  children: React.ReactNode,
-}) => (
-    <ul className={cx('root', props.className)}>
-      {props.children}
-    </ul>
-  )
+export default (props: { className?: string; children: React.ReactNode }) => (
+  <ul className={cx('root', props.className)}>{props.children}</ul>
+)
 
 // NavListItem is a version of ListItem that sets and relies on the react-router location.pathname
 // to determine selectedness
@@ -29,69 +24,71 @@ export const NavListItem = (props: {
   query?: Record<string, string>
 }) => {
   const location = useLocation()
-  const query = props.query === undefined ? "" : `?${new URLSearchParams(props.query).toString()}`
+  const query = props.query === undefined ? '' : `?${new URLSearchParams(props.query).toString()}`
 
   return (
-    <li className={cx({ selected: (location.pathname.endsWith(`/${props.to}`)) })}>
-      <NavLink end={props.exact} to={"../" + props.to + query}>
+    <li className={cx({ selected: location.pathname.endsWith(`/${props.to}`) })}>
+      <NavLink end={props.exact} to={'../' + props.to + query}>
         {props.name}
       </NavLink>
     </li>
   )
 }
 
-export const ListItem = (props: {
-  name: string,
-  onSelect: () => void,
-  selected: boolean,
-}) => (
-    <BaseListItem {...props} />
-  )
+export const ListItem = (props: { name: string; onSelect: () => void; selected: boolean }) => (
+  <BaseListItem {...props} />
+)
 
 export const ListItemWithSaveButton = (props: {
-  name: string,
-  onSave: () => void,
-  onSelect: () => void,
-  selected: boolean,
+  name: string
+  onSave: () => void
+  onSelect: () => void
+  selected: boolean
 }) => (
-    <BaseListItem {...props} className="withSaveButton">
-      <Button
-        small
-        className={cx('saveButton')}
-        children="Save"
-        onClick={e => {e.stopPropagation(); props.onSave()}}
-      />
-    </BaseListItem>
-  )
+  <BaseListItem {...props} className="withSaveButton">
+    <Button
+      small
+      className={cx('saveButton')}
+      children="Save"
+      onClick={(e) => {
+        e.stopPropagation()
+        props.onSave()
+      }}
+    />
+  </BaseListItem>
+)
 
 export const ListItemWithMenu = (props: {
-  menu: React.ReactElement,
-  name: string,
-  onSelect: () => void,
-  selected: boolean,
+  menu: React.ReactElement
+  name: string
+  onSelect: () => void
+  selected: boolean
 }) => (
-    <BaseListItem {...props} className="withMenu">
-      <div onClick={e => e.stopPropagation()}>
-        <ClickPopover content={props.menu} closeOnContentClick>
-          <button className={cx('menuButton')}>⋮</button>
-        </ClickPopover>
-      </div>
-    </BaseListItem>
-  )
+  <BaseListItem {...props} className="withMenu">
+    <div onClick={(e) => e.stopPropagation()}>
+      <ClickPopover content={props.menu} closeOnContentClick>
+        <button className={cx('menuButton')}>⋮</button>
+      </ClickPopover>
+    </div>
+  </BaseListItem>
+)
 
 const BaseListItem = (props: {
-  className?: string,
-  name: string,
-  onSelect: () => void,
-  selected: boolean,
-  children?: React.ReactNode,
+  className?: string
+  name: string
+  onSelect: () => void
+  selected: boolean
+  children?: React.ReactNode
 }) => (
-    <li className={cx({selected: props.selected}, props.className)}>
-      <a
-        href="#"
-        onClick={e => {e.preventDefault(); props.onSelect()}}
-        children={props.name}
-      />
-      {props.children}
-    </li>
-  )
+  <li className={cx({ selected: props.selected }, props.className)}>
+    <a
+      href="#"
+      onClick={(e) => {
+        e.preventDefault()
+        props.onSelect()
+      }}
+      children={props.name}
+    />
+    {props.children}
+  </li>
+)

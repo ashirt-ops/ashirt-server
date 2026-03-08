@@ -10,48 +10,50 @@ import { useModal, useWiredData, renderModals } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-import {
-  DeleteFindingCategoryModal,
-  EditFindingCategoryModal,
-} from './modals'
+import { DeleteFindingCategoryModal, EditFindingCategoryModal } from './modals'
 
-const columns = [
-  'Name',
-  '# of Findings',
-  'Status',
-  'Actions',
-]
+const columns = ['Name', '# of Findings', 'Status', 'Actions']
 
-const TableRow = (props: {
-  category: FindingCategory,
-  onUpdate: () => void
-}) => {
-
-  const editModal = useModal<{}>(modalProps => (
+const TableRow = (props: { category: FindingCategory; onUpdate: () => void }) => {
+  const editModal = useModal<{}>((modalProps) => (
     <EditFindingCategoryModal {...modalProps} onEdited={props.onUpdate} category={props.category} />
   ))
-  const deleteModal = useModal<{}>(modalProps => (
-    <DeleteFindingCategoryModal {...modalProps} onDeleted={props.onUpdate} category={props.category} />
+  const deleteModal = useModal<{}>((modalProps) => (
+    <DeleteFindingCategoryModal
+      {...modalProps}
+      onDeleted={props.onUpdate}
+      category={props.category}
+    />
   ))
   const isDeleted = props.category.deleted
 
   return (
     <tr>
       <td>{props.category.category}</td>
-      <td>{props.category.usageCount == 0 ? "None" : props.category.usageCount}</td>
+      <td>{props.category.usageCount == 0 ? 'None' : props.category.usageCount}</td>
       <td>{isDeleted ? 'deleted' : 'active'}</td>
       <td>
         <ButtonGroup>
-          <Button small onClick={() => editModal.show({})}>Edit</Button>
-          {
-            isDeleted
-              ? <Button small onClick={() => deleteFindingCategory({
-                id: props.category.id,
-                delete: false
-              }).then(props.onUpdate)}>Restore</Button>
-              : <Button small danger onClick={() => deleteModal.show({})}>Delete</Button>
-          }
-
+          <Button small onClick={() => editModal.show({})}>
+            Edit
+          </Button>
+          {isDeleted ? (
+            <Button
+              small
+              onClick={() =>
+                deleteFindingCategory({
+                  id: props.category.id,
+                  delete: false,
+                }).then(props.onUpdate)
+              }
+            >
+              Restore
+            </Button>
+          ) : (
+            <Button small danger onClick={() => deleteModal.show({})}>
+              Delete
+            </Button>
+          )}
         </ButtonGroup>
         {renderModals(editModal, deleteModal)}
       </td>
@@ -59,15 +61,14 @@ const TableRow = (props: {
   )
 }
 
-export default (props: {
-}) => {
+export default (props: {}) => {
   const [withDeleted, setWithDeleted] = React.useState(false)
 
   const wiredCategories = useWiredData<Array<FindingCategory>>(
-    React.useCallback(() => getFindingCategories(true), [])
+    React.useCallback(() => getFindingCategories(true), []),
   )
 
-  const createModal = useModal<{}>(modalProps => (
+  const createModal = useModal<{}>((modalProps) => (
     <EditFindingCategoryModal {...modalProps} onEdited={wiredCategories.reload} />
   ))
 
@@ -78,19 +79,22 @@ export default (props: {
 
   return (
     <SettingsSection title="Finding Categories" className={cx('finding-table-section')}>
-      {wiredCategories.render(data => (
+      {wiredCategories.render((data) => (
         <>
           <Checkbox
             label="Include Deleted Categories"
             className={cx('checkbox')}
             value={withDeleted}
-            onChange={setWithDeleted} />
+            onChange={setWithDeleted}
+          />
           <Table columns={columns}>
-            {data.filter(filterMethod).map(category => (
+            {data.filter(filterMethod).map((category) => (
               <TableRow key={category.id} category={category} onUpdate={wiredCategories.reload} />
             ))}
           </Table>
-          <Button className={cx('create-button')} primary onClick={() => createModal.show({})}>Add New Category</Button>
+          <Button className={cx('create-button')} primary onClick={() => createModal.show({})}>
+            Add New Category
+          </Button>
         </>
       ))}
       {renderModals(createModal)}

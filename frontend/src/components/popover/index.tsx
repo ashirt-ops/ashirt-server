@@ -5,9 +5,17 @@ import { useWindowSize, useElementRect } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-function useEventListenerUnlessRef(ref: React.MutableRefObject<HTMLElement|null>, eventName: string, fn: () => void) {
+function useEventListenerUnlessRef(
+  ref: React.MutableRefObject<HTMLElement | null>,
+  eventName: string,
+  fn: () => void,
+) {
   const callUnlessThisEl = (e: Event) => {
-    for (let target = e.target; target !== ref.current; target = (target as HTMLElement).parentElement) {
+    for (
+      let target = e.target;
+      target !== ref.current;
+      target = (target as HTMLElement).parentElement
+    ) {
       if (target == null) return fn()
     }
   }
@@ -24,22 +32,24 @@ function useEventListenerUnlessRef(ref: React.MutableRefObject<HTMLElement|null>
 //
 // This component is used to easily build dropdowns & menus
 const Popover = (props: {
-  children: React.ReactElement,
-  closeOnContentClick?: boolean,
-  content: React.ReactNode,
-  isOpen: boolean,
-  className?: string,
-  onClick?: () => void,
-  onRequestClose?: () => void,
+  children: React.ReactElement
+  closeOnContentClick?: boolean
+  content: React.ReactNode
+  isOpen: boolean
+  className?: string
+  onClick?: () => void
+  onRequestClose?: () => void
 }) => {
-  const targetRef = React.useRef<HTMLDivElement|null>(null)
-  const contentRef = React.useRef<HTMLDivElement|null>(null)
+  const targetRef = React.useRef<HTMLDivElement | null>(null)
+  const contentRef = React.useRef<HTMLDivElement | null>(null)
 
   const windowSize = useWindowSize()
   const targetRect = useElementRect(props.isOpen ? targetRef : null)
   const contentRect = useElementRect(props.isOpen ? contentRef : null)
 
-  useEventListenerUnlessRef(contentRef, 'mousedown', () => { if (props.onRequestClose) props.onRequestClose() })
+  useEventListenerUnlessRef(contentRef, 'mousedown', () => {
+    if (props.onRequestClose) props.onRequestClose()
+  })
 
   const onContentClick = () => {
     if (props.closeOnContentClick && props.onRequestClose) {
@@ -48,14 +58,20 @@ const Popover = (props: {
   }
 
   // Compute proper x/y location if it were to go over page boundaries
-  const contentStyle: React.CSSProperties = {position: 'fixed'}
+  const contentStyle: React.CSSProperties = { position: 'fixed' }
   if (props.isOpen && targetRect && contentRect) {
-    if (targetRect.bottom + contentRect.height > windowSize.height && targetRect.top - contentRect.height > 0) {
+    if (
+      targetRect.bottom + contentRect.height > windowSize.height &&
+      targetRect.top - contentRect.height > 0
+    ) {
       contentStyle.bottom = windowSize.height - targetRect.top
     } else {
       contentStyle.top = targetRect.bottom
     }
-    if (targetRect.left + contentRect.width > windowSize.width && targetRect.right - contentRect.width > 0) {
+    if (
+      targetRect.left + contentRect.width > windowSize.width &&
+      targetRect.right - contentRect.width > 0
+    ) {
       contentStyle.right = windowSize.width - targetRect.right
     } else {
       contentStyle.left = targetRect.left
@@ -64,20 +80,26 @@ const Popover = (props: {
 
   return (
     <>
-      <div className={cx(props.className)} ref={targetRef} onClick={props.onClick}>{props.children}</div>
-      {props.isOpen && createPortal((
-        <div style={contentStyle} ref={contentRef} onClick={onContentClick}>{props.content}</div>
-      ), document.body)}
+      <div className={cx(props.className)} ref={targetRef} onClick={props.onClick}>
+        {props.children}
+      </div>
+      {props.isOpen &&
+        createPortal(
+          <div style={contentStyle} ref={contentRef} onClick={onContentClick}>
+            {props.content}
+          </div>,
+          document.body,
+        )}
     </>
   )
 }
 
 // A version of popover that opens automatically when `children` receives a click event
 export const ClickPopover = (props: {
-  content: React.ReactNode,
-  children: React.ReactElement,
-  closeOnContentClick?: boolean,
-  className?: string,
+  content: React.ReactNode
+  children: React.ReactElement
+  closeOnContentClick?: boolean
+  className?: string
 }) => {
   const [isOpen, setIsOpen] = React.useState(false)
 

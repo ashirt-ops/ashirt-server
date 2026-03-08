@@ -10,21 +10,19 @@ import { Operation } from 'src/global_types'
 import { getOperationsForAdmin } from 'src/services'
 import { renderModals, useModal, useWiredData } from 'src/helpers'
 
-const columns = [
-  'Slug',
-  'Name',
-  'Status',
-  'Settings Link',
-]
+const columns = ['Slug', 'Name', 'Status', 'Settings Link']
 
-const TableRow = (props: {
-  op: Operation,
-}) => {
+const TableRow = (props: { op: Operation }) => {
   const navigate = useNavigate()
   const { op } = props
 
-  const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={op.topContribs} evidenceCount={op.evidenceCount} numTags={op.numTags} />
+  const moreDetailsModal = useModal<{}>((modalProps) => (
+    <OperationBadgesModal
+      {...modalProps}
+      topContribs={op.topContribs}
+      evidenceCount={op.evidenceCount}
+      numTags={op.numTags}
+    />
   ))
 
   const handleDetailsModal = () => moreDetailsModal?.show({})
@@ -33,24 +31,31 @@ const TableRow = (props: {
     <tr>
       <td>{op.slug}</td>
       <td>{op.name}</td>
-      <td><OperationBadge numUsers={op.numUsers} showDetailsModal={handleDetailsModal} /></td>
-      <td><Button small onClick={() => navigate(`/operations/${op.slug}/edit/settings`)} >Settings</Button></td>
+      <td>
+        <OperationBadge numUsers={op.numUsers} showDetailsModal={handleDetailsModal} />
+      </td>
+      <td>
+        <Button small onClick={() => navigate(`/operations/${op.slug}/edit/settings`)}>
+          Settings
+        </Button>
+      </td>
       {renderModals(moreDetailsModal)}
     </tr>
   )
 }
 
-export default (props: {
-}) => {
+export default (props: {}) => {
   const wiredOps = useWiredData<Array<Operation>>(getOperationsForAdmin)
 
   return (
     <SettingsSection title="Operation List">
-      {wiredOps.render(data =>
+      {wiredOps.render((data) => (
         <Table columns={columns}>
-          {data.map(op => <TableRow key={op.slug} op={op} />)}
+          {data.map((op) => (
+            <TableRow key={op.slug} op={op} />
+          ))}
         </Table>
-      )}
+      ))}
     </SettingsSection>
   )
 }

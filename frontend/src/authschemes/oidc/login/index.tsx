@@ -16,11 +16,11 @@ const makeLoginFn = (code: string) => {
 export const makeLogin = (config: OIDCInstanceConfig) => {
   const loginFn = makeLoginFn(config.code)
 
-  return (_props: {
-    authFlags?: Array<string>
-  }) => (
+  return (_props: { authFlags?: Array<string> }) => (
     <div>
-      <Button className={cx('full-width-button')} primary onClick={loginFn}>Login With {config.name}</Button>
+      <Button className={cx('full-width-button')} primary onClick={loginFn}>
+        Login With {config.name}
+      </Button>
     </div>
   )
 }

@@ -5,21 +5,30 @@ import { deleteSavedQuery } from 'src/services'
 import { useForm } from 'src/helpers'
 
 export const DeleteQueryModal = (props: {
-  onDeleted: (before: SavedQuery) => void,
-  onRequestClose: () => void,
-  operationSlug: string,
-  savedQuery: SavedQuery,
+  onDeleted: (before: SavedQuery) => void
+  onRequestClose: () => void
+  operationSlug: string
+  savedQuery: SavedQuery
 }) => {
   const deleteQueryForm = useForm({
-    onSuccess: () => {props.onRequestClose(); props.onDeleted(props.savedQuery)},
-    handleSubmit: () => deleteSavedQuery({
-      operationSlug: props.operationSlug,
-      queryId: props.savedQuery.id,
-    }),
+    onSuccess: () => {
+      props.onRequestClose()
+      props.onDeleted(props.savedQuery)
+    },
+    handleSubmit: () =>
+      deleteSavedQuery({
+        operationSlug: props.operationSlug,
+        queryId: props.savedQuery.id,
+      }),
   })
 
   return (
-    <ModalForm title="Delete Saved Query" submitText="Delete Query" onRequestClose={props.onRequestClose} {...deleteQueryForm}>
+    <ModalForm
+      title="Delete Saved Query"
+      submitText="Delete Query"
+      onRequestClose={props.onRequestClose}
+      {...deleteQueryForm}
+    >
       <p>Are you sure you want to delete the saved query "{props.savedQuery.name}"?</p>
     </ModalForm>
   )

@@ -3,14 +3,18 @@ import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  className?: string,
-  value?: boolean,
-  label?: string,
-  title?: string,
-  disabled?: boolean,
-  onChange?: (...args: any[]) => void,
+  className?: string
+  value?: boolean
+  label?: string
+  title?: string
+  disabled?: boolean
+  onChange?: React.ChangeEventHandler<HTMLInputElement>
 }) => (
-  <label title={props.title} className={cx('root', props.className)} onClick={e => e.stopPropagation()}>
+  <label
+    title={props.title}
+    className={cx('root', props.className)}
+    onClick={(e) => e.stopPropagation()}
+  >
     <input
       type="checkbox"
       checked={props.value}

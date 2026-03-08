@@ -15,22 +15,35 @@ import { NewApiKeyModal, DeleteApiKeyModal } from './modals'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
-  profile: UserWithAuth
-}) => {
+export default (props: { profile: UserWithAuth }) => {
   const [deleteKey, setDeleteKey] = React.useState<null | ApiKey>(null)
-  const wiredApiKeys = useWiredData<Array<ApiKey>>(React.useCallback(() => getApiKeys({ userSlug: props.profile.slug }), [props.profile.slug]))
+  const wiredApiKeys = useWiredData<Array<ApiKey>>(
+    React.useCallback(() => getApiKeys({ userSlug: props.profile.slug }), [props.profile.slug]),
+  )
 
   return (
     <SettingsSection title="API Key Management" width="wide">
-      {wiredApiKeys.render(apiKeys => (
-        <Table columns={['Access Key', 'Secret Key', 'Last Used', 'Actions']} className={cx('table')}>
-          {apiKeys.map(apiKey => (
+      {wiredApiKeys.render((apiKeys) => (
+        <Table
+          columns={['Access Key', 'Secret Key', 'Last Used', 'Actions']}
+          className={cx('table')}
+        >
+          {apiKeys.map((apiKey) => (
             <tr key={apiKey.accessKey}>
-              <td><span className={cx('monospace')}>{apiKey.accessKey}</span></td>
-              <td><span className={cx('monospace')}>{apiKey.secretKey || '**************'}</span></td>
-              <td>{apiKey.lastAuth ? format(apiKey.lastAuth, "MMMM do, yyyy 'at' HH:mm:ss") : 'Never'}</td>
-              <td><Button small onClick={() => setDeleteKey(apiKey)}>Delete</Button></td>
+              <td>
+                <span className={cx('monospace')}>{apiKey.accessKey}</span>
+              </td>
+              <td>
+                <span className={cx('monospace')}>{apiKey.secretKey || '**************'}</span>
+              </td>
+              <td>
+                {apiKey.lastAuth ? format(apiKey.lastAuth, "MMMM do, yyyy 'at' HH:mm:ss") : 'Never'}
+              </td>
+              <td>
+                <Button small onClick={() => setDeleteKey(apiKey)}>
+                  Delete
+                </Button>
+              </td>
             </tr>
           ))}
         </Table>
@@ -49,20 +62,17 @@ export default (props: {
   )
 }
 
-const GenerateKeyButton = (props: {
-  userSlug: string,
-  onKeyCreated: () => void,
-}) => {
+const GenerateKeyButton = (props: { userSlug: string; onKeyCreated: () => void }) => {
   const [apiKey, setApiKey] = React.useState<null | ApiKey>(null)
   const generateKeyForm = useForm({
     onSuccess: props.onKeyCreated,
     handleSubmit: () => createApiKey({ userSlug: props.userSlug }).then(setApiKey),
   })
 
-  return <>
-    <Form submitText="Generate New API Key" {...generateKeyForm} />
-    {apiKey && (
-      <NewApiKeyModal apiKey={apiKey} onRequestClose={ () => setApiKey(null)} />
-    )}
-  </>
+  return (
+    <>
+      <Form submitText="Generate New API Key" {...generateKeyForm} />
+      {apiKey && <NewApiKeyModal apiKey={apiKey} onRequestClose={() => setApiKey(null)} />}
+    </>
+  )
 }

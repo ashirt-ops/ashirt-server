@@ -12,16 +12,15 @@ export const DefaultTagEditor = (props: {
 
   React.useEffect(() => {
     props.onReload(wiredTags.reload)
-    return () => { props.offReload(wiredTags.reload) }
+    return () => {
+      props.offReload(wiredTags.reload)
+    }
   })
 
   return (
     <SettingsSection title="Initial Operation Tags">
-      {wiredTags.render(tags => (
-        <DefaultTagTable
-          tags={tags}
-          onUpdate={wiredTags.reload}
-        />
+      {wiredTags.render((tags) => (
+        <DefaultTagTable tags={tags} onUpdate={wiredTags.reload} />
       ))}
     </SettingsSection>
   )

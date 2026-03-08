@@ -5,9 +5,7 @@ import ReactMarkdown from 'react-markdown'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
-  children: string
-}) => (
+export default (props: { children: string }) => (
   <div className={cx('markdown')}>
     <ReactMarkdown>{props.children}</ReactMarkdown>
   </div>

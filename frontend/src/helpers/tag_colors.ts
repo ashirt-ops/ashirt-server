@@ -1,55 +1,55 @@
 export type TagColor =
-  | "blue"
-  | "yellow"
-  | "green"
-  | "indigo"
-  | "orange"
-  | "pink"
-  | "red"
-  | "teal"
-  | "vermilion"
-  | "violet"
-  | "lightBlue"
-  | "lightYellow"
-  | "lightGreen"
-  | "lightIndigo"
-  | "lightOrange"
-  | "lightPink"
-  | "lightRed"
-  | "lightTeal"
-  | "lightVermilion"
-  | "lightViolet"
-  | "disabledGray"
+  | 'blue'
+  | 'yellow'
+  | 'green'
+  | 'indigo'
+  | 'orange'
+  | 'pink'
+  | 'red'
+  | 'teal'
+  | 'vermilion'
+  | 'violet'
+  | 'lightBlue'
+  | 'lightYellow'
+  | 'lightGreen'
+  | 'lightIndigo'
+  | 'lightOrange'
+  | 'lightPink'
+  | 'lightRed'
+  | 'lightTeal'
+  | 'lightVermilion'
+  | 'lightViolet'
+  | 'disabledGray'
 
 // We store color names instead of hex codes in the
 // database to allow color scheme changes in the future
 const TAG_COLORS: Record<TagColor, number> = {
-  blue           : 0x0E5A8A,
-  yellow         : 0xA67908,
-  green          : 0x0A6640,
-  indigo         : 0x5642A6,
-  orange         : 0xA66321,
-  pink           : 0xA82255,
-  red            : 0xA82A2A,
-  teal           : 0x008075,
-  vermilion      : 0x9E2B0E,
-  violet         : 0x5C255C,
+  blue: 0x0e5a8a,
+  yellow: 0xa67908,
+  green: 0x0a6640,
+  indigo: 0x5642a6,
+  orange: 0xa66321,
+  pink: 0xa82255,
+  red: 0xa82a2a,
+  teal: 0x008075,
+  vermilion: 0x9e2b0e,
+  violet: 0x5c255c,
 
-  lightBlue      : 0x48AFF0,
-  lightYellow    : 0xFFC940,
-  lightGreen     : 0x3DCC91,
-  lightIndigo    : 0xAD99FF,
-  lightOrange    : 0xFFB366,
-  lightPink      : 0xFF66A1,
-  lightRed       : 0xFF7373,
-  lightTeal      : 0x2EE6D6,
-  lightVermilion : 0xFF6E4A,
-  lightViolet    : 0xC274C2,
+  lightBlue: 0x48aff0,
+  lightYellow: 0xffc940,
+  lightGreen: 0x3dcc91,
+  lightIndigo: 0xad99ff,
+  lightOrange: 0xffb366,
+  lightPink: 0xff66a1,
+  lightRed: 0xff7373,
+  lightTeal: 0x2ee6d6,
+  lightVermilion: 0xff6e4a,
+  lightViolet: 0xc274c2,
 
-  disabledGray   : 0x606060,
+  disabledGray: 0x606060,
 }
 
-export const disabledGray = "disabledGray"
+export const disabledGray = 'disabledGray'
 
 export const tagColorNames = Object.keys(TAG_COLORS)
 

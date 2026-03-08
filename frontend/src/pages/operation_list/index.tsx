@@ -13,12 +13,11 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default () => {
   const { user } = React.useContext(AuthContext) // user should never be null
-  const wiredData = useWiredData(React.useCallback(() => Promise.all([
-    getOperations(),
-    hasFlag("welcome-message")
-  ]), []))
+  const wiredData = useWiredData(
+    React.useCallback(() => Promise.all([getOperations(), hasFlag('welcome-message')]), []),
+  )
 
-  const newOperationModal = useModal<{}>(modalProps => (
+  const newOperationModal = useModal<{}>((modalProps) => (
     <NewOperationModal {...modalProps} onCreated={wiredData.reload} />
   ))
   const filterText = useFormField<string>('')
@@ -27,7 +26,7 @@ export default () => {
   const [welcomeFlag, setWelcomeFlag] = React.useState<boolean>(false)
 
   React.useEffect(() => {
-    wiredData.expose(data => {
+    wiredData.expose((data) => {
       if (data) {
         const [ops, welcomeFlag] = data
         setOps(ops)
@@ -38,48 +37,54 @@ export default () => {
 
   return (
     <div className={cx('root')}>
-      {wiredData.render(() => <>
-        {welcomeFlag && (
-          <h1 className={cx('welcomeMessage')}>
-            Welcome Back, {user ? `${user.firstName} ${user.lastName}` : "Kotter"}!
-          </h1>
-        )}
-        <Input
-          placeholder="Filter Operations"
-          className={cx('filterInput')}
-          icon={require('./search.svg')}
-          {...filterText}
-        />
-        <List
-          ops={ops}
-          newOperationModal={newOperationModal}
-          filterText={filterText}
-          onFavoriteToggled={async (slug, isFav) => {
-            await setFavorite(slug, isFav)
-            wiredData.reload()
-          }}
-        />
-        {renderModals(newOperationModal)}
-      </>)}
+      {wiredData.render(() => (
+        <>
+          {welcomeFlag && (
+            <h1 className={cx('welcomeMessage')}>
+              Welcome Back, {user ? `${user.firstName} ${user.lastName}` : 'Kotter'}!
+            </h1>
+          )}
+          <Input
+            placeholder="Filter Operations"
+            className={cx('filterInput')}
+            icon={require('./search.svg')}
+            {...filterText}
+          />
+          <List
+            ops={ops}
+            newOperationModal={newOperationModal}
+            filterText={filterText}
+            onFavoriteToggled={async (slug, isFav) => {
+              await setFavorite(slug, isFav)
+              wiredData.reload()
+            }}
+          />
+          {renderModals(newOperationModal)}
+        </>
+      ))}
     </div>
   )
 }
 
-
-const NewOperationModal = (props: {
-  onRequestClose: () => void,
-  onCreated: () => void,
-}) => {
+const NewOperationModal = (props: { onRequestClose: () => void; onCreated: () => void }) => {
   const nameField = useFormField('')
   const formComponentProps = useForm({
     fields: [nameField],
     handleSubmit: () => createOperation(nameField.value),
-    onSuccess: () => { props.onCreated(); props.onRequestClose() },
+    onSuccess: () => {
+      props.onCreated()
+      props.onRequestClose()
+    },
   })
 
   return (
     <Modal title="New Operation" onRequestClose={props.onRequestClose}>
-      <Form submitText="Create Operation" cancelText="Close" onCancel={props.onRequestClose} {...formComponentProps}>
+      <Form
+        submitText="Create Operation"
+        cancelText="Close"
+        onCancel={props.onRequestClose}
+        {...formComponentProps}
+      >
         <Input label="Operation Name" {...nameField} />
       </Form>
     </Modal>

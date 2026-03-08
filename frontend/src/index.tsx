@@ -11,7 +11,7 @@ import { useWiredData } from 'src/helpers'
 const RootComponent = () => {
   const wiredUser = useWiredData(getCurrentUser)
 
-  return wiredUser.render(user => (
+  return wiredUser.render((user) => (
     <AuthContext.Provider value={{ user }}>
       <BrowserRouter>
         <Layout>

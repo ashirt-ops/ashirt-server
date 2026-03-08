@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 import Button from 'src/components/button'
-import { OIDCInstanceConfig } from '..';
+import { OIDCInstanceConfig } from '..'
 
 // export default (props: {
 //   onSuccess: () => void,
@@ -16,12 +16,9 @@ export const makeLinker = (config: OIDCInstanceConfig) => {
     window.location.href = `/web/auth/${config.code}/link`
   }
 
-  return (_props: {
-    onSuccess: () => void,
-    authFlags?: Array<string>
-  }) => (
+  return (_props: { onSuccess: () => void; authFlags?: Array<string> }) => (
     <Button primary onClick={onClick}>
       Login with {config.name}
-    </Button >
+    </Button>
   )
 }

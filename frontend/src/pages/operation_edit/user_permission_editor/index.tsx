@@ -6,45 +6,95 @@ import LoadingSpinner from 'src/components/loading_spinner'
 import Form from 'src/components/form'
 import Modal from 'src/components/modal'
 import Input from 'src/components/input'
+import PopoverMenu from 'src/components/popover_menu'
 import RadioGroup from 'src/components/radio_group'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import UserChooser from 'src/components/user_chooser'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import { User, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
-import { getUserPermissions, setUserPermission } from 'src/services'
+import { getUserPermissions, listUsers, setUserPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
 import { StandardPager } from 'src/components/paging'
 const cx = classnames.bind(require('./stylesheet'))
 
-const RoleSelect = (props: {
-  disabled?: boolean,
-  onChange: (r: UserRole) => void,
-  label?: string,
-  value: UserRole,
-}) => (
-    <RadioGroup
-      disabled={props.disabled}
-      groupLabel={props.label || ""}
-      getLabel={(r: UserRole) => userRoleToLabel[r]}
-      options={[UserRole.READ, UserRole.WRITE, UserRole.ADMIN]}
-      value={props.value}
-      onChange={props.onChange}
-    />
-  )
+const userToName = (u: User) => `${u.firstName} ${u.lastName}`
 
-const NewUserForm = (props: {
-  operationSlug: string,
-  requestReload: () => void
-}) => {
+const UserChooser = (props: { value: User | null; onChange: (user: User | null) => void }) => {
+  const [inputValue, setInputValue] = React.useState('')
+  const [dropdownVisible, setDropdownVisible] = React.useState(false)
+  const [searchResults, setSearchResults] = React.useState<Array<User>>([])
+  const [loading, setLoading] = React.useState(false)
+
+  React.useEffect(() => {
+    setInputValue(props.value ? userToName(props.value) : '')
+  }, [props.value])
+
+  React.useEffect(() => {
+    if (inputValue === '') return
+    const reload = () => {
+      listUsers({ query: inputValue })
+        .then(setSearchResults)
+        .then(() => setLoading(false))
+    }
+    const timeout = setTimeout(reload, 250)
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [inputValue])
+
+  return (
+    <PopoverMenu
+      onRequestClose={() => setDropdownVisible(false)}
+      isOpen={dropdownVisible && !loading && inputValue !== ''}
+      options={searchResults}
+      renderer={userToName}
+      onSelect={(u: User) => {
+        props.onChange(u)
+        setDropdownVisible(false)
+      }}
+      noOptionsMessage="No users found"
+    >
+      <Input
+        label="User Search"
+        value={inputValue}
+        onChange={(v) => {
+          setLoading(v !== '')
+          setInputValue(v)
+          if (props.value != null) props.onChange(null)
+        }}
+        onFocus={() => setDropdownVisible(true)}
+        onClick={() => setDropdownVisible(true)}
+        loading={loading}
+      />
+    </PopoverMenu>
+  )
+}
+
+const RoleSelect = (props: {
+  disabled?: boolean
+  onChange: (r: UserRole) => void
+  label?: string
+  value: UserRole
+}) => (
+  <RadioGroup
+    disabled={props.disabled}
+    groupLabel={props.label || ''}
+    getLabel={(r: UserRole) => userRoleToLabel[r]}
+    options={[UserRole.READ, UserRole.WRITE, UserRole.ADMIN]}
+    value={props.value}
+    onChange={props.onChange}
+  />
+)
+
+const NewUserForm = (props: { operationSlug: string; requestReload: () => void }) => {
   const userField = useFormField<User | null>(null)
   const roleField = useFormField(UserRole.READ)
   const formProps = useForm({
     fields: [userField, roleField],
     handleSubmit: async () => {
-      if (userField.value == null) throw Error("A user must be selected")
+      if (userField.value == null) throw Error('A user must be selected')
       await setUserPermission({
         operationSlug: props.operationSlug,
         userSlug: userField.value.slug,
@@ -52,24 +102,26 @@ const NewUserForm = (props: {
       })
       userField.onChange(null)
       props.requestReload()
-    }
+    },
   })
   return (
     <Form {...formProps}>
       <div className={cx('inline-form')}>
         <UserChooser {...userField} />
         <RoleSelect label="Role" {...roleField} />
-        <Button primary loading={formProps.loading}>Add</Button>
+        <Button primary loading={formProps.loading}>
+          Add
+        </Button>
       </div>
     </Form>
   )
 }
 
 const PermissionTableRow = (props: {
-  disabled?: boolean,
-  role: UserRole,
-  user: User,
-  currentUser?: UserOwnView,
+  disabled?: boolean
+  role: UserRole
+  user: User
+  currentUser?: UserOwnView
   requestReload: () => void
   updatePermissions: (role: UserRole) => Promise<void>
 }) => {
@@ -77,11 +129,14 @@ const PermissionTableRow = (props: {
   const isCurrentUser = currentUser ? currentUser.slug === props.user.slug : false
   const isAdmin = currentUser ? currentUser?.admin : false
 
-  const removeWarningModal = useModal<{}>(modalProps => (
-    <RemoveWarningModal {...modalProps} removeUser={async () => {
-      await props.updatePermissions(UserRole.NO_ACCESS)
-      props.requestReload()
-    }} />
+  const removeWarningModal = useModal<{}>((modalProps) => (
+    <RemoveWarningModal
+      {...modalProps}
+      removeUser={async () => {
+        await props.updatePermissions(UserRole.NO_ACCESS)
+        props.requestReload()
+      }}
+    />
   ))
 
   const disabled = props.disabled || (isCurrentUser && !isAdmin)
@@ -92,11 +147,21 @@ const PermissionTableRow = (props: {
         <td style={{ fontWeight: isCurrentUser ? 800 : 400 }}>
           {props.user.firstName} {props.user.lastName}
         </td>
-        <td><RoleSelect disabled={disabled} value={props.role} onChange={async (r) => {
-          await props.updatePermissions(r)
-          props.requestReload()
-        }} /></td>
-        <td><Button danger small disabled={disabled} onClick={() => removeWarningModal.show({})}>Remove</Button></td>
+        <td>
+          <RoleSelect
+            disabled={disabled}
+            value={props.role}
+            onChange={async (r) => {
+              await props.updatePermissions(r)
+              props.requestReload()
+            }}
+          />
+        </td>
+        <td>
+          <Button danger small disabled={disabled} onClick={() => removeWarningModal.show({})}>
+            Remove
+          </Button>
+        </td>
       </tr>
       {renderModals(removeWarningModal)}
     </>
@@ -104,28 +169,36 @@ const PermissionTableRow = (props: {
 }
 
 const RemoveWarningModal = (props: {
-  onRequestClose: () => void,
+  onRequestClose: () => void
   removeUser: () => Promise<void>
 }) => {
   const warningForm = useForm({
     fields: [],
     handleSubmit: async () => {
       props.removeUser()
-    }
+    },
   })
   return (
     <Modal title="Remove User?" onRequestClose={props.onRequestClose}>
-      <Form {...warningForm} submitText={"Remove User"} cancelText={"Go Back"} onCancel={props.onRequestClose}>
-        <em>Removing this user will remove all read/write access to this user from this operation. Do you wish to continue?</em>
+      <Form
+        {...warningForm}
+        submitText={'Remove User'}
+        cancelText={'Go Back'}
+        onCancel={props.onRequestClose}
+      >
+        <em>
+          Removing this user will remove all read/write access to this user from this operation. Do
+          you wish to continue?
+        </em>
       </Form>
     </Modal>
   )
 }
 
 const PermissionTable = (props: {
-  currentUser?: UserOwnView,
-  isAdmin: boolean,
-  operationSlug: string,
+  currentUser?: UserOwnView
+  isAdmin: boolean
+  operationSlug: string
   requestReload: () => void
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
@@ -133,28 +206,37 @@ const PermissionTable = (props: {
   const columns = ['Name', 'Role', 'Remove']
   const itemsPerPage = 10
 
-  const filterField = useFormField("")
+  const filterField = useFormField('')
   const [currentPage, setCurrentPage] = React.useState(1)
 
   const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
   const normalizedSearchTerm = filterField.value.toLowerCase()
 
   const wiredPermissions = useWiredData(
-    React.useCallback(() => getUserPermissions({ slug: props.operationSlug, name: "" }), [props.operationSlug]),
+    React.useCallback(
+      () => getUserPermissions({ slug: props.operationSlug, name: '' }),
+      [props.operationSlug],
+    ),
     (err) => <ErrorDisplay err={err} />,
-    () => <LoadingSpinner />
+    () => <LoadingSpinner />,
   )
 
   React.useEffect(() => {
     props.onReload(wiredPermissions.reload)
-    return () => { props.offReload(wiredPermissions.reload) }
+    return () => {
+      props.offReload(wiredPermissions.reload)
+    }
   })
 
   return (
     <>
-      {wiredPermissions.render(data => {
-        const matchingUsers = data.filter(({ user }) => normalizeName(user).includes(normalizedSearchTerm))
-        const renderableData = matchingUsers.filter((_, i) => i >= ((currentPage - 1) * itemsPerPage) && i < (itemsPerPage * currentPage))
+      {wiredPermissions.render((data) => {
+        const matchingUsers = data.filter(({ user }) =>
+          normalizeName(user).includes(normalizedSearchTerm),
+        )
+        const renderableData = matchingUsers.filter(
+          (_, i) => i >= (currentPage - 1) * itemsPerPage && i < itemsPerPage * currentPage,
+        )
 
         const notAdmin = !props.isAdmin
 
@@ -169,7 +251,13 @@ const PermissionTable = (props: {
                   disabled={notAdmin}
                   key={user.slug}
                   requestReload={props.requestReload}
-                  updatePermissions={(r: UserRole) => setUserPermission({ operationSlug: props.operationSlug, userSlug: user.slug, role: r })}
+                  updatePermissions={(r: UserRole) =>
+                    setUserPermission({
+                      operationSlug: props.operationSlug,
+                      userSlug: user.slug,
+                      role: r,
+                    })
+                  }
                   user={user}
                   role={role}
                 />
@@ -188,19 +276,13 @@ const PermissionTable = (props: {
   )
 }
 
-export default (props: {
-  operationSlug: string,
-  isAdmin: boolean
-}) => {
+export default (props: { operationSlug: string; isAdmin: boolean }) => {
   const bus = BuildReloadBus()
 
   const currentUser = React.useContext(AuthContext)?.user
   return (
     <SettingsSection title="Operation Users" width="wide">
-      {props.isAdmin && (<NewUserForm
-        {...bus}
-        operationSlug={props.operationSlug}
-      />)}
+      {props.isAdmin && <NewUserForm {...bus} operationSlug={props.operationSlug} />}
       <PermissionTable
         currentUser={currentUser || undefined}
         isAdmin={props.isAdmin}

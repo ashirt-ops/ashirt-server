@@ -16,14 +16,19 @@ export const findInitialIndex = (allTabs: Array<Tab>, tabIndexOrName?: number | 
   switch (typeof tabIndexOrName) {
     case 'undefined':
       const undefMatches = allTabs
-        .map((t, i) => { return { 'tab': t, 'idx': i } })
-        .filter(t => t.tab.active)
+        .map((t, i) => {
+          return { tab: t, idx: i }
+        })
+        .filter((t) => t.tab.active)
       return undefMatches.length > 0 ? undefMatches[0].idx : 0
     case 'number':
       return tabIndexOrName >= 0 && tabIndexOrName < allTabs.length ? tabIndexOrName : 0
     case 'string':
-      const matches = allTabs.map((t, i) => { return { 'tab': t, 'idx': i } })
-        .filter(t => t.tab.label === tabIndexOrName)
+      const matches = allTabs
+        .map((t, i) => {
+          return { tab: t, idx: i }
+        })
+        .filter((t) => t.tab.label === tabIndexOrName)
       return matches.length > 0 ? matches[0].idx : 0
     default:
       return 0
@@ -32,10 +37,10 @@ export const findInitialIndex = (allTabs: Array<Tab>, tabIndexOrName?: number | 
 
 const TabMenu = (props: {
   tabs: Array<Tab>
-  initialActiveTab?: number | string,
-  className?: string,
-  tabClassName?: string,
-  onTabChanged?: (tab: Tab, tabIndex: number) => void,
+  initialActiveTab?: number | string
+  className?: string
+  tabClassName?: string
+  onTabChanged?: (tab: Tab, tabIndex: number) => void
 }) => {
   const defaultActiveTab = findInitialIndex(props.tabs, props.initialActiveTab)
   const [activeTabIndex, setActiveTabIndex] = React.useState<number>(defaultActiveTab)
@@ -48,7 +53,7 @@ const TabMenu = (props: {
 
   return (
     <>
-      <ButtonGroup className={cx(props.className)} >
+      <ButtonGroup className={cx(props.className)}>
         {props.tabs.map((t, idx) => {
           return (
             <Button
@@ -63,13 +68,14 @@ const TabMenu = (props: {
                 }
               }}
               disabled={t.disabled}
-              active={idx == activeTabIndex}>{t.label}</Button>
+              active={idx == activeTabIndex}
+            >
+              {t.label}
+            </Button>
           )
         })}
       </ButtonGroup>
-      <div>
-        {activeTab.content}
-      </div>
+      <div>{activeTab.content}</div>
     </>
   )
 }

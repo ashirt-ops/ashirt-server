@@ -11,44 +11,60 @@ import { BuildReloadBus } from 'src/helpers/reload_bus'
 import { getSavedQueries, getOperation } from 'src/services'
 const cx = classnames.bind(require('./stylesheet'))
 
-const noOp = () => { }
+const noOp = () => {}
 
-export type CreateButtonPosition = "sidebar-inline" | "sidebar-above" | "filter" | "none"
+export type CreateButtonPosition = 'sidebar-inline' | 'sidebar-above' | 'filter' | 'none'
 
 export default (props: {
-  children: React.ReactNode,
-  onEvidenceCreated?: () => void,
-  onFindingCreated?: () => void,
-  onNavigate: NavToFunction,
-  operationSlug: string,
-  query: string,
-  view: ViewName,
-  exportEvidence?: () => Promise<void>,
+  children: React.ReactNode
+  onEvidenceCreated?: () => void
+  onFindingCreated?: () => void
+  onNavigate: NavToFunction
+  operationSlug: string
+  query: string
+  view: ViewName
+  exportEvidence?: () => Promise<void>
 }) => {
   const reloadBus = BuildReloadBus()
 
   const [expanded, setExpanded] = React.useState(false)
-  const createEvidenceModal = useModal<{}>(modalProps => (
-    <CreateEvidenceModal {...modalProps} onCreated={props.onEvidenceCreated || noOp} operationSlug={props.operationSlug} />
+  const createEvidenceModal = useModal<{}>((modalProps) => (
+    <CreateEvidenceModal
+      {...modalProps}
+      onCreated={props.onEvidenceCreated || noOp}
+      operationSlug={props.operationSlug}
+    />
   ))
-  const createFindingModal = useModal<{}>(modalProps => (
-    <CreateFindingModal {...modalProps} onCreated={props.onFindingCreated || noOp} operationSlug={props.operationSlug} />
+  const createFindingModal = useModal<{}>((modalProps) => (
+    <CreateFindingModal
+      {...modalProps}
+      onCreated={props.onFindingCreated || noOp}
+      operationSlug={props.operationSlug}
+    />
   ))
 
-  const wiredData = useWiredData(React.useCallback(() => Promise.all([
-    getSavedQueries({ operationSlug: props.operationSlug }),
-    getOperation(props.operationSlug),
-  ]), [props.operationSlug]))
+  const wiredData = useWiredData(
+    React.useCallback(
+      () =>
+        Promise.all([
+          getSavedQueries({ operationSlug: props.operationSlug }),
+          getOperation(props.operationSlug),
+        ]),
+      [props.operationSlug],
+    ),
+  )
 
   React.useEffect(() => {
     reloadBus.onReload(wiredData.reload)
-    return () => { reloadBus.offReload(wiredData.reload) }
+    return () => {
+      reloadBus.offReload(wiredData.reload)
+    }
   })
 
   const showCreateButtons: CreateButtonPosition = 'filter'
 
   return wiredData.render(([queries, operation]) => {
-    const currentQuery = queries.find(q => q.type == props.view && q.query == props.query)
+    const currentQuery = queries.find((q) => q.type == props.view && q.query == props.query)
     return (
       <div className={cx('root')}>
         <div className={cx(expanded ? 'expanded-toolbar' : 'toolbar')}>
@@ -56,7 +72,7 @@ export default (props: {
             operationSlug={props.operationSlug}
             userCanExportData={operation?.userCanExportData}
             query={props.query}
-            onSearch={query => props.onNavigate(props.view, query)}
+            onSearch={(query) => props.onNavigate(props.view, query)}
             expandedView={expanded}
             setExpandedView={setExpanded}
             viewName={props.view}
@@ -81,13 +97,10 @@ export default (props: {
             queries={queries}
           />
         </div>
-        <div className={cx('children')}>
-          {props.children}
-        </div>
+        <div className={cx('children')}>{props.children}</div>
 
         {renderModals(createEvidenceModal, createFindingModal)}
       </div>
     )
-  }
-  )
+  })
 }

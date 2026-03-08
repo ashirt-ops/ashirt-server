@@ -1,4 +1,9 @@
-import { UserOwnView, SupportedAuthenticationScheme, AuthSchemeDetails, RecoveryMetrics } from 'src/global_types'
+import {
+  UserOwnView,
+  SupportedAuthenticationScheme,
+  AuthSchemeDetails,
+  RecoveryMetrics,
+} from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { userOwnViewFromDto } from './data_sources/converters'
 
@@ -7,7 +12,7 @@ export async function getCurrentUser(): Promise<UserOwnView | null> {
     return userOwnViewFromDto(await ds.readCurrentUser())
   } catch (err) {
     // Not found indicates a non logged in user
-    if ((err as any).status === 404) return null
+    if ((err as { status?: number }).status === 404) return null
 
     // Bubble any other error types up
     throw err
@@ -15,31 +20,24 @@ export async function getCurrentUser(): Promise<UserOwnView | null> {
 }
 
 // TODO this should be encapsulated in an admin settings component under src/authschemes/local
-export async function adminChangePassword(i: {
-  userSlug: string,
-  newPassword: string,
-}) {
+export async function adminChangePassword(i: { userSlug: string; newPassword: string }) {
   if (i.newPassword.length < 3) {
-    throw Error("User password must be at least 3 characters long")
+    throw Error('User password must be at least 3 characters long')
   }
   await ds.adminChangePassword(i)
 }
 
 // TODO this should be encapsulated in an admin settings component under src/authschemes/local
 export async function adminCreateLocalUser(i: {
-  firstName: string,
-  lastName?: string,
-  email: string,
-  username: string,
+  firstName: string
+  lastName?: string
+  email: string
+  username: string
 }) {
   return await ds.adminCreateLocalUser(i)
 }
 
-export async function adminInviteUser(i: {
-  firstName: string,
-  lastName?: string,
-  email: string,
-}) {
+export async function adminInviteUser(i: { firstName: string; lastName?: string; email: string }) {
   return await ds.adminInviteUser(i)
 }
 
@@ -53,14 +51,11 @@ export async function getUser(i?: { userSlug: string }): Promise<UserOwnView> {
 }
 
 export async function adminSetUserFlags(i: {
-  userSlug: string,
-  disabled: boolean,
-  admin: boolean,
+  userSlug: string
+  disabled: boolean
+  admin: boolean
 }) {
-  await ds.adminSetUserFlags(
-    { userSlug: i.userSlug },
-    { disabled: i.disabled, admin: i.admin },
-  )
+  await ds.adminSetUserFlags({ userSlug: i.userSlug }, { disabled: i.disabled, admin: i.admin })
 }
 
 export async function getSupportedAuthentications(): Promise<Array<SupportedAuthenticationScheme>> {
@@ -69,7 +64,7 @@ export async function getSupportedAuthentications(): Promise<Array<SupportedAuth
 
 export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSchemeDetails>> {
   const schemes = await ds.listAuthDetails()
-  return schemes.map(details => ({
+  return schemes.map((details) => ({
     schemeName: details.schemeName,
     schemeCode: details.schemeCode,
     schemeType: details.schemeType,
@@ -81,15 +76,11 @@ export async function getSupportedAuthenticationDetails(): Promise<Array<AuthSch
   }))
 }
 
-export async function adminDeleteUser(i: {
-  userSlug: string,
-}) {
+export async function adminDeleteUser(i: { userSlug: string }) {
   await ds.adminDeleteUser(i)
 }
 
-export async function deleteGlobalAuthScheme(i: {
-  schemeName: string,
-}) {
+export async function deleteGlobalAuthScheme(i: { schemeName: string }) {
   await ds.deleteGlobalAuthScheme(i)
 }
 

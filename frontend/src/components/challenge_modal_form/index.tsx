@@ -8,36 +8,44 @@ import Input from 'src/components/input'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default <T extends unknown>(props: {
-  warningText: string,
-  challengeText?: string,
-  modalTitle: string,
-  submitText: string,
-  onRequestClose: (success?:boolean) => void,
+  warningText: string
+  challengeText?: string
+  modalTitle: string
+  submitText: string
+  onRequestClose: (success?: boolean) => void
   handleSubmit: () => Promise<T>
 }) => {
-
-  const challenge = useFormField<string>("")
+  const challenge = useFormField<string>('')
 
   const formComponentProps = useForm({
     fields: [challenge],
     onSuccess: () => props.onRequestClose(true),
     handleSubmit: () => {
       if (challenge.value !== props.challengeText && props.challengeText !== undefined) {
-        return Promise.reject(Error("Challenge text does not match"))
+        return Promise.reject(Error('Challenge text does not match'))
       }
       return props.handleSubmit()
-    }
+    },
   })
 
-  return <ModalForm submitDanger title={props.modalTitle} submitText={props.submitText} onRequestClose={props.onRequestClose} {...formComponentProps}>
-    <em className={cx('warning')}>{props.warningText}</em>
-    {
-      props.challengeText
-        && (<>
-          <p className={cx('challenge-prompt')}>Please enter the following text into the textbox below to continue: </p>
+  return (
+    <ModalForm
+      submitDanger
+      title={props.modalTitle}
+      submitText={props.submitText}
+      onRequestClose={props.onRequestClose}
+      {...formComponentProps}
+    >
+      <em className={cx('warning')}>{props.warningText}</em>
+      {props.challengeText && (
+        <>
+          <p className={cx('challenge-prompt')}>
+            Please enter the following text into the textbox below to continue:{' '}
+          </p>
           <em className={cx('challenge')}>{props.challengeText}</em>
           <Input label="Challenge" {...challenge} />
-        </>)
-    }
-  </ModalForm>
+        </>
+      )}
+    </ModalForm>
+  )
 }

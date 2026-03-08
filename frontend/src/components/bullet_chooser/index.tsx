@@ -29,24 +29,19 @@ export default function BulletChooser<T extends BulletProps>(props: {
   enableNot?: boolean
   hideDropDown?: boolean
 }) {
-  const [inputValue, setInputValue] = React.useState("")
+  const [inputValue, setInputValue] = React.useState('')
   const [dropdownVisible, setDropdownVisible] = React.useState(false)
   const [selectedTag, setSelectedTag] = React.useState<number>(-1)
   const [modifierHeld, setHeld] = React.useState(false)
 
   const getOptions = (): Array<T> => {
-    return (
-      typeof props.options == 'function'
-        ? props.options(inputValue)
-        : filterBullets(props.options, inputValue)
-    )
+    return typeof props.options == 'function'
+      ? props.options(inputValue)
+      : filterBullets(props.options, inputValue)
   }
   const setModifierHeld = (e: KeyboardModifiers | boolean) => {
     if (props.enableNot) {
-      setHeld(typeof e === 'boolean'
-        ? e
-        : e.ctrlKey || e.altKey
-      )
+      setHeld(typeof e === 'boolean' ? e : e.ctrlKey || e.altKey)
     }
   }
 
@@ -58,54 +53,47 @@ export default function BulletChooser<T extends BulletProps>(props: {
   const selectedTagsAsSet = getBulletIdAsSet(props.value)
 
   const toggleValue = async (selectedValue: T | null) => {
-    const val = selectedValue
-      ?? await props.onNoValueSelected?.(inputValue)
-      ?? null
+    const val = selectedValue ?? (await props.onNoValueSelected?.(inputValue)) ?? null
 
     if (val) {
-      const modifiedVal = modifierHeld
-        ? { ...val, modifier: "not" }
-        : val
+      const modifiedVal = modifierHeld ? { ...val, modifier: 'not' } : val
 
       let newValues: Array<T>
 
       const foundItem = selectedTagsAsSet[val.id]
       if (foundItem) {
-        const setLessValue = props.value.filter(v => v.id !== val.id)
-        newValues = (foundItem.modifier == modifiedVal.modifier)
-          ? setLessValue
-          : [...setLessValue, modifiedVal]
-      }
-      else {
+        const setLessValue = props.value.filter((v) => v.id !== val.id)
+        newValues =
+          foundItem.modifier == modifiedVal.modifier ? setLessValue : [...setLessValue, modifiedVal]
+      } else {
         newValues = [...props.value, modifiedVal]
       }
 
       props.onChange(newValues)
-      setInputValue("")
+      setInputValue('')
     }
   }
 
   const onInputKeyDown = (e: React.KeyboardEvent) => {
     setModifierHeld(e)
 
-    if (inputValue === "") {
+    if (inputValue === '') {
       if (['Backspace', 'Delete'].includes(e.key)) {
         if (selectedTag != -1) {
-          props.onChange([...props.value.slice(0, selectedTag), ...props.value.slice(selectedTag + 1)])
+          props.onChange([
+            ...props.value.slice(0, selectedTag),
+            ...props.value.slice(selectedTag + 1),
+          ])
           setSelectedTag(selectedTag - 1)
-        }
-        else if (e.key != 'Delete') {
+        } else if (e.key != 'Delete') {
           props.onChange(dropRight(props.value))
         }
-      }
-      else if (e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowLeft') {
         let index = selectedTag - 1
         setSelectedTag(index > -1 ? index : props.value.length - 1)
-      }
-      else if (e.key === 'ArrowRight') {
+      } else if (e.key === 'ArrowRight') {
         setSelectedTag((selectedTag + 1) % props.value.length)
-      }
-      else {
+      } else {
         setSelectedTag(-1)
       }
     }
@@ -130,21 +118,22 @@ export default function BulletChooser<T extends BulletProps>(props: {
       <PopoverMenu
         onRequestClose={() => setDropdownVisible(false)}
         isOpen={dropdownVisible}
-        options={modifierHeld
-          ? options.map(o => o == null ? null : ({ ...o, modifier: "not" }))
-          : options
+        options={
+          modifierHeld
+            ? options.map((o) => (o == null ? null : { ...o, modifier: 'not' }))
+            : options
         }
         renderer={renderer}
-        iconRenderer={t => t && selectedTagsAsSet[t.id] && require('./check.svg')}
+        iconRenderer={(t) => t && selectedTagsAsSet[t.id] && require('./check.svg')}
         onSelect={toggleValue}
         onKeyModifierChanged={setModifierHeld}
       >
         <div className={cx('input', props.className, { focus: dropdownVisible })}>
-          {props.value.map(
-            (val, idx) => renderValFn({ bullet: val, key: idx, selected: (idx == selectedTag) })
+          {props.value.map((val, idx) =>
+            renderValFn({ bullet: val, key: idx, selected: idx == selectedTag }),
           )}
           <input
-            onChange={e => setInputValue(e.target.value)}
+            onChange={(e) => setInputValue(e.target.value)}
             value={inputValue}
             onKeyDown={onInputKeyDown}
             onKeyUp={setModifierHeld}
@@ -163,14 +152,14 @@ export default function BulletChooser<T extends BulletProps>(props: {
 export type BulletProps = {
   id: string | number
   name: string
-  modifier?: "not"
+  modifier?: 'not'
   color?: TagColor
 }
 
 type BulletIdSet = Record<BulletProps['id'], BulletProps>
 const getBulletIdAsSet = (bullets: Array<BulletProps>): BulletIdSet => {
   const tagIdSet: BulletIdSet = {}
-  bullets.forEach(b => tagIdSet[b.id] = b)
+  bullets.forEach((b) => (tagIdSet[b.id] = b))
   return tagIdSet
 }
 
@@ -180,13 +169,15 @@ export type BulletRendererProps<T extends BulletProps> = {
   selected?: boolean
 }
 
-export type BulletRenderer<T extends BulletProps> = (props: BulletRendererProps<T>) => React.ReactNode
+export type BulletRenderer<T extends BulletProps> = (
+  props: BulletRendererProps<T>,
+) => React.ReactNode
 
 function StandardBulletRenderer<T extends BulletProps>(props: BulletRendererProps<T>) {
   return (
     <Tag
-      name={`${props.bullet.modifier == "not" ? "NOT " : ""}${props.bullet.name}`}
-      color={props.bullet.color ?? "blue"}
+      name={`${props.bullet.modifier == 'not' ? 'NOT ' : ''}${props.bullet.name}`}
+      color={props.bullet.color ?? 'blue'}
       key={props.key}
       selected={props.selected}
     />
@@ -196,11 +187,9 @@ function StandardBulletRenderer<T extends BulletProps>(props: BulletRendererProp
 const StandardNoValRenderer = () => <em>No Matches</em>
 
 function filterBullets<T extends BulletProps>(values: Array<T>, filter: string): Array<T> {
-  if (filter === "") {
+  if (filter === '') {
     return values
   }
   filter = filter.toUpperCase()
-  return values.filter(val =>
-    val.name.toUpperCase().indexOf(filter) > -1
-  )
+  return values.filter((val) => val.name.toUpperCase().indexOf(filter) > -1)
 }

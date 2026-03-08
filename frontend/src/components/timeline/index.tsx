@@ -19,18 +19,18 @@ const cx = classnames.bind(require('./stylesheet'))
 type Action = {
   label: string
   act: (evi: Evidence) => void
-  canAct?: (evi: Evidence) => { disabled: boolean, title?: string }
+  canAct?: (evi: Evidence) => { disabled: boolean; title?: string }
 }
 type Actions = Array<Action>
 
 export default (props: {
-  actions: Actions,
-  extraActions?: Actions,
-  evidence: Array<Evidence>,
-  onQueryUpdate: (q: string) => void,
-  operationSlug: string,
-  query: string,
-  scrollToUuid?: string,
+  actions: Actions
+  extraActions?: Actions
+  evidence: Array<Evidence>
+  onQueryUpdate: (q: string) => void
+  operationSlug: string
+  query: string
+  scrollToUuid?: string
 }) => {
   const rootRef = React.useRef<HTMLDivElement | null>(null)
   const lightboxRef = React.useRef<HTMLDivElement | null>(null)
@@ -42,15 +42,23 @@ export default (props: {
     // Only handle keystrokes if nothing is focused (target is body)
     // or if the focused element belongs to this component (child of root or lightbox)
     if (e.target == null) return
-    if (e.target !== document.body && !elementInRef(e.target as HTMLElement, [rootRef, lightboxRef])) return
+    if (
+      e.target !== document.body &&
+      !elementInRef(e.target as HTMLElement, [rootRef, lightboxRef])
+    )
+      return
 
     const children = refDivChildren(rootRef)
     let newActiveChildIndex = activeChildIndex
     switch (e.key) {
-      case 'ArrowDown': case 'ArrowRight': case 'j':
+      case 'ArrowDown':
+      case 'ArrowRight':
+      case 'j':
         newActiveChildIndex = Math.min(activeChildIndex + 1, children.length - 1)
         break
-      case 'ArrowUp': case 'ArrowLeft': case 'k':
+      case 'ArrowUp':
+      case 'ArrowLeft':
+      case 'k':
         newActiveChildIndex = Math.max(activeChildIndex - 1, 0)
         break
       case 'g':
@@ -90,33 +98,40 @@ export default (props: {
         {props.evidence.map((evi, idx) => {
           const active = activeChildIndex === idx
           return (
-              <TimelineRow
-                {...props}
-                focusUuid={props.scrollToUuid}
-                active={active}
-                evidence={evi}
-                key={evi.uuid}
-                onPreviewClick={() => { setActiveChildIndex(idx); setQuicklookVisible(true) }}
-                onClick={() => setActiveChildIndex(idx)}
-              />
+            <TimelineRow
+              {...props}
+              focusUuid={props.scrollToUuid}
+              active={active}
+              evidence={evi}
+              key={evi.uuid}
+              onPreviewClick={() => {
+                setActiveChildIndex(idx)
+                setQuicklookVisible(true)
+              }}
+              onClick={() => setActiveChildIndex(idx)}
+            />
           )
         })}
-        <Help className={cx('help')}
+        <Help
+          className={cx('help')}
           preamble="Review and Edit the accumulated evidence for this operation"
           shortcuts={KeyboardShortcuts}
         />
       </div>
-      <Lightbox canUseFitToggle={activeEvidence.contentType == "image"}
-        isOpen={quicklookVisible} onRequestClose={() => setQuicklookVisible(false)}>
+      <Lightbox
+        canUseFitToggle={activeEvidence.contentType == 'image'}
+        isOpen={quicklookVisible}
+        onRequestClose={() => setQuicklookVisible(false)}
+      >
         <div ref={lightboxRef}>
-            <EvidencePreview
-              operationSlug={props.operationSlug}
-              evidenceUuid={activeEvidence.uuid}
-              contentType={activeEvidence.contentType}
-              useS3Url={activeEvidence.sendUrl}
-              viewHint="large"
-              interactionHint="active"
-            />
+          <EvidencePreview
+            operationSlug={props.operationSlug}
+            evidenceUuid={activeEvidence.uuid}
+            contentType={activeEvidence.contentType}
+            useS3Url={activeEvidence.sendUrl}
+            viewHint="large"
+            interactionHint="active"
+          />
         </div>
       </Lightbox>
     </EvidencesContextProvider>
@@ -124,15 +139,15 @@ export default (props: {
 }
 
 const TimelineRow = (props: {
-  active: boolean,
-  actions: Actions,
-  extraActions?: Actions,
-  evidence: Evidence,
-  onQueryUpdate: (q: string) => void,
-  operationSlug: string,
-  query: string,
-  focusUuid?: string,
-  onPreviewClick: () => void,
+  active: boolean
+  actions: Actions
+  extraActions?: Actions
+  evidence: Evidence
+  onQueryUpdate: (q: string) => void
+  operationSlug: string
+  query: string
+  focusUuid?: string
+  onPreviewClick: () => void
   onClick: () => void
 }) => {
   const self = React.useRef<null | HTMLDivElement>(null)
@@ -157,7 +172,11 @@ const TimelineRow = (props: {
   const permalink = `${window.location.origin}/operations/${props.operationSlug}/evidence/${props.evidence.uuid}`
 
   return (
-    <div ref={self} className={cx('timeline-row', { active: props.active })} onClick={props.onClick}>
+    <div
+      ref={self}
+      className={cx('timeline-row', { active: props.active })}
+      onClick={props.onClick}
+    >
       <div className={cx('left')}>
         <EvidencePreview
           fitToContainer
@@ -171,38 +190,42 @@ const TimelineRow = (props: {
         />
       </div>
       <div className={cx('right')}>
-        <div>{format(props.evidence.adjustedAt ?? props.evidence.occurredAt, "MMMM do, yyyy 'at' HH:mm:ss")}</div>
+        <div>
+          {format(
+            props.evidence.adjustedAt ?? props.evidence.occurredAt,
+            "MMMM do, yyyy 'at' HH:mm:ss",
+          )}
+        </div>
         <a href="#" onClick={onOperatorClick}>
           {props.evidence.operator.firstName} {props.evidence.operator.lastName}
         </a>
         <TagList
           tags={
             props.evidence.adjustedAt
-            ? [
-                ...props.evidence.tags,
-                { id: 0, name: 'Adjusted Timestamp', colorName: 'yellow' }
-              ]
-            : props.evidence.tags
+              ? [...props.evidence.tags, { id: 0, name: 'Adjusted Timestamp', colorName: 'yellow' }]
+              : props.evidence.tags
           }
           onTagClick={onTagClick}
         />
         <ButtonGroup>
-          {
-            props.actions.map(action => (
-              <Button
-                small
-                key={action.label}
-                onClick={() => action.act(props.evidence)}
-                {...action.canAct?.(props.evidence)}
-              >
-                {action.label}
-              </Button>
-            ))
-          }
-          <CopyTextButton small textToCopy={permalink}>Copy Permalink</CopyTextButton>
+          {props.actions.map((action) => (
+            <Button
+              small
+              key={action.label}
+              onClick={() => action.act(props.evidence)}
+              {...action.canAct?.(props.evidence)}
+            >
+              {action.label}
+            </Button>
+          ))}
+          <CopyTextButton small textToCopy={permalink}>
+            Copy Permalink
+          </CopyTextButton>
           {renderExtraActions(props.evidence, props.extraActions)}
         </ButtonGroup>
-        <MarkdownRenderer className={cx('description')}>{props.evidence.description}</MarkdownRenderer>
+        <MarkdownRenderer className={cx('description')}>
+          {props.evidence.description}
+        </MarkdownRenderer>
       </div>
     </div>
   )
@@ -213,7 +236,7 @@ const renderExtraActions = (evidence: Evidence, extraActions?: Actions) => {
     return null
   }
 
-  const menuItems = extraActions.map(action => (
+  const menuItems = extraActions.map((action) => (
     <MenuItem
       key={action.label}
       onClick={() => action.act(evidence)}
@@ -231,8 +254,11 @@ const renderExtraActions = (evidence: Evidence, extraActions?: Actions) => {
 }
 
 // Returns true if the element el is a child of any of the supplied react refs
-function elementInRef(el: HTMLElement, refs: Array<React.MutableRefObject<HTMLElement | null>>): boolean {
-  const targetEls = refs.map(el => el.current)
+function elementInRef(
+  el: HTMLElement,
+  refs: Array<React.MutableRefObject<HTMLElement | null>>,
+): boolean {
+  const targetEls = refs.map((el) => el.current)
   while (!targetEls.includes(el)) {
     if (el === document.body) return false
     if (el.parentElement == null) return false
@@ -245,7 +271,7 @@ function elementInRef(el: HTMLElement, refs: Array<React.MutableRefObject<HTMLEl
 function refDivChildren(ref: React.MutableRefObject<HTMLDivElement | null>): Array<HTMLDivElement> {
   if (ref.current == null) return []
   // @ts-ignore - typescript is unable to determine that children is an array of HTMLDivElements
-  return Array.from(ref.current.children).filter(el => el instanceof HTMLDivElement)
+  return Array.from(ref.current.children).filter((el) => el instanceof HTMLDivElement)
 }
 
 // Scroll a react ref to the given position in pixels
@@ -255,12 +281,12 @@ function scrollRef(ref: React.MutableRefObject<HTMLDivElement | null>, scrollTop
 }
 
 export const KeyboardShortcuts = [
-  { keys: ["ArrowDown", "ArrowRight", "j"], description: "Move to the next evidence" },
-  { keys: ["ArrowUp", "ArrowLeft", "k"], description: "Move to the previous evidence" },
-  { keys: ["g"], description: "Move to the top of the evidence list" },
-  { keys: ["G"], description: "Move to the bottom of the evidence list" },
-  { keys: ["Enter"], description: "Open evidence large view" },
-  { keys: ["Escape"], description: "Close evidence large view" },
-  { keys: [" "], description: "Toggle evidence large view" },
-  { keys: ["z", "Z"], description: "Toggle Best Fit vs Standard views" },
+  { keys: ['ArrowDown', 'ArrowRight', 'j'], description: 'Move to the next evidence' },
+  { keys: ['ArrowUp', 'ArrowLeft', 'k'], description: 'Move to the previous evidence' },
+  { keys: ['g'], description: 'Move to the top of the evidence list' },
+  { keys: ['G'], description: 'Move to the bottom of the evidence list' },
+  { keys: ['Enter'], description: 'Open evidence large view' },
+  { keys: ['Escape'], description: 'Close evidence large view' },
+  { keys: [' '], description: 'Toggle evidence large view' },
+  { keys: ['z', 'Z'], description: 'Toggle Best Fit vs Standard views' },
 ]

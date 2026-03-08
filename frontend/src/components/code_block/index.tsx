@@ -7,12 +7,12 @@ import { CodeBlock } from 'src/global_types'
 import ComboBox from 'src/components/combobox'
 import { useAsyncComponent } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
-const importAceEditorAsync = () => import('./ace_editor').then(module => module.default)
+const importAceEditorAsync = () => import('./ace_editor').then((module) => module.default)
 
 export const CodeBlockEditor = (props: {
-  disabled?: boolean,
-  onChange: (newValue: CodeBlock) => void,
-  value: CodeBlock,
+  disabled?: boolean
+  onChange: (newValue: CodeBlock) => void
+  value: CodeBlock
 }) => {
   const AceEditor = useAsyncComponent(importAceEditorAsync)
 
@@ -24,7 +24,7 @@ export const CodeBlockEditor = (props: {
           className={cx('language')}
           options={supportedLanguages}
           value={props.value.language}
-          onChange={language => props.onChange({...props.value, language})}
+          onChange={(language) => props.onChange({ ...props.value, language })}
           disabled={props.disabled}
           nonValueDefault=""
         />
@@ -32,7 +32,7 @@ export const CodeBlockEditor = (props: {
           label="Source"
           className={cx('source')}
           value={props.value.source || ''}
-          onChange={source => props.onChange({...props.value, source})}
+          onChange={(source) => props.onChange({ ...props.value, source })}
           disabled={props.disabled}
         />
       </div>
@@ -40,7 +40,7 @@ export const CodeBlockEditor = (props: {
         <AceEditor
           mode={props.value.language}
           value={props.value.code}
-          onChange={code => props.onChange({...props.value, code})}
+          onChange={(code) => props.onChange({ ...props.value, code })}
           readOnly={props.disabled}
         />
       </div>
@@ -48,9 +48,7 @@ export const CodeBlockEditor = (props: {
   )
 }
 
-export const CodeBlockViewer = (props: {
-  value: CodeBlock,
-}) => {
+export const CodeBlockViewer = (props: { value: CodeBlock }) => {
   const AceEditor = useAsyncComponent(importAceEditorAsync)
 
   return (
@@ -59,22 +57,18 @@ export const CodeBlockViewer = (props: {
         <SourceDisplay value={props.value} />
       </div>
       <div className={cx('ace')}>
-        <AceEditor
-          readOnly
-          mode={props.value.language}
-          value={props.value.code}
-        />
+        <AceEditor readOnly mode={props.value.language} value={props.value.code} />
       </div>
     </div>
   )
 }
 
 export const SourcelessCodeblock = (props: {
-  code: string,
+  code: string
   language: string | null
   className?: string
   editable?: boolean
-  onChange?: (newValue: string) => void,
+  onChange?: (newValue: string) => void
 }) => {
   const AceEditor = useAsyncComponent(importAceEditorAsync)
 

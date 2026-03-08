@@ -26,11 +26,13 @@ const cx = classnames.bind(require('./stylesheet'))
 //      }
 //  />
 export default (props: {
-  preamble?: string,
-  shortcuts?: Array<KeyboardShortcut>,
-  className?: string,
+  preamble?: string
+  shortcuts?: Array<KeyboardShortcut>
+  className?: string
 }) => {
-  const helpModal = useModal<{}>(modalProps => <HelpModal preamble={props.preamble} shortcuts={props.shortcuts} {...modalProps} />)
+  const helpModal = useModal<{}>((modalProps) => (
+    <HelpModal preamble={props.preamble} shortcuts={props.shortcuts} {...modalProps} />
+  ))
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.target == null || e.target !== document.body) return
@@ -60,14 +62,14 @@ export type KeyboardShortcut = {
 }
 
 const commonKeyboardShortcuts = [
-  { keys: ["?"], description: "Open this help menu", uniqueKey: "stdhelp-?" },
-  { keys: ["Escape"], description: "Close this window", uniqueKey: "stdhelp-Escape"},
+  { keys: ['?'], description: 'Open this help menu', uniqueKey: 'stdhelp-?' },
+  { keys: ['Escape'], description: 'Close this window', uniqueKey: 'stdhelp-Escape' },
 ]
 
 export const HelpModal = (props: {
-  preamble?: string,
-  shortcuts?: Array<KeyboardShortcut>,
-  onRequestClose: () => void,
+  preamble?: string
+  shortcuts?: Array<KeyboardShortcut>
+  onRequestClose: () => void
 }) => {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') props.onRequestClose()
@@ -81,38 +83,44 @@ export const HelpModal = (props: {
   return (
     <Modal title="Help" onRequestClose={props.onRequestClose}>
       <div className={cx('preamble')}>{props.preamble}</div>
-      {!props.shortcuts ? null :
+      {!props.shortcuts ? null : (
         <div className={cx('shortcuts')}>
           <h1>Keyboard Shortcuts</h1>
-          {props.shortcuts
-            .concat(commonKeyboardShortcuts)
-            .map(shortcut => <KeyboardShortcutKey key={shortcut.uniqueKey ? shortcut.uniqueKey : shortcut.keys[0]} shortcut={shortcut} />)
-          }
+          {props.shortcuts.concat(commonKeyboardShortcuts).map((shortcut) => (
+            <KeyboardShortcutKey
+              key={shortcut.uniqueKey ? shortcut.uniqueKey : shortcut.keys[0]}
+              shortcut={shortcut}
+            />
+          ))}
         </div>
-      }
-      <Button primary onClick={props.onRequestClose}>Close</Button>
+      )}
+      <Button primary onClick={props.onRequestClose}>
+        Close
+      </Button>
     </Modal>
   )
 }
 
-const KeyboardShortcutKey = (props: {
-  shortcut: KeyboardShortcut
-}) => {
+const KeyboardShortcutKey = (props: { shortcut: KeyboardShortcut }) => {
   return (
     <div>
       <em className={cx('shortcut-description')}>{props.shortcut.description}: </em>
       {props.shortcut.keys
-        .filter(key => key.length > 0)
+        .filter((key) => key.length > 0)
         .map<React.ReactNode>((key, i) => {
           const singleLetter = key.length == 1
           const firstKeyCode = key.charCodeAt(0)
-          const isUppercaseLetter = (65 <= firstKeyCode) && (firstKeyCode <= 90) // A - Z
-          const isLowercaseLetter = (97 <= firstKeyCode) && (firstKeyCode <= 122) // a - z
+          const isUppercaseLetter = 65 <= firstKeyCode && firstKeyCode <= 90 // A - Z
+          const isLowercaseLetter = 97 <= firstKeyCode && firstKeyCode <= 122 // a - z
 
           let content
           switch (true) {
             case singleLetter && isUppercaseLetter:
-              content = <span><Key>Shift</Key>+<Key>{key}</Key></span>
+              content = (
+                <span>
+                  <Key>Shift</Key>+<Key>{key}</Key>
+                </span>
+              )
               break
             case singleLetter && isLowercaseLetter:
               content = <Key>{key.toUpperCase()}</Key>
@@ -123,12 +131,17 @@ const KeyboardShortcutKey = (props: {
             default:
               content = <Key>{key}</Key>
           }
-          return <div key={i} className={cx('keygroup')}>{content}</div>
+          return (
+            <div key={i} className={cx('keygroup')}>
+              {content}
+            </div>
+          )
         })
-        .reduce((prev, curr) => [prev, ', ', curr])
-      }
+        .reduce((prev, curr) => [prev, ', ', curr])}
     </div>
   )
 }
 
-const Key = (props: { children: React.ReactNode }) => <div className={cx('key')}>{props.children}</div>
+const Key = (props: { children: React.ReactNode }) => (
+  <div className={cx('key')}>{props.children}</div>
+)

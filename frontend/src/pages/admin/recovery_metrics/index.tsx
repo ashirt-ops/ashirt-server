@@ -15,17 +15,23 @@ export default (props: {}) => {
   return (
     <>
       <h1>Recovery Code Metrics</h1>
-      {wiredRecoveryMetrics.render(metrics => <dl className={cx('metric-list')}>
-        <dt>Expired Codes</dt>
-        <dd>{numFormatter.format(metrics.expiredCount)}</dd>
-        <dt>Active Codes</dt>
-        <dd>{numFormatter.format(metrics.activeCount)}</dd>
-      </dl>
-      )}
-      <Button primary onClick={() => {
-        deleteExpiredRecoveryCodes()
-        wiredRecoveryMetrics.reload()
-      }}>Remove Expired Codes</Button>
+      {wiredRecoveryMetrics.render((metrics) => (
+        <dl className={cx('metric-list')}>
+          <dt>Expired Codes</dt>
+          <dd>{numFormatter.format(metrics.expiredCount)}</dd>
+          <dt>Active Codes</dt>
+          <dd>{numFormatter.format(metrics.activeCount)}</dd>
+        </dl>
+      ))}
+      <Button
+        primary
+        onClick={() => {
+          deleteExpiredRecoveryCodes()
+          wiredRecoveryMetrics.reload()
+        }}
+      >
+        Remove Expired Codes
+      </Button>
     </>
   )
 }

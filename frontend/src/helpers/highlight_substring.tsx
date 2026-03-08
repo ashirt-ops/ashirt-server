@@ -22,18 +22,23 @@ import { escapeRegExp } from 'lodash'
  * @param className What class name to apply to the highlighted word
  * @returns An array of spans. Spans will either be plain, or with the given classname.
  */
-export const highlightSubstring = (s: string, regexAsStr: string, className: any,
+export const highlightSubstring = (
+  s: string,
+  regexAsStr: string,
+  className: string,
   options?: {
     regexFlags?: string
     minLength?: number
-  }
+  },
 ): Array<React.ReactNode> => {
   const rtn: Array<React.ReactNode> = []
-  if (s === "" || regexAsStr.length < (options?.minLength ?? 1)) {
+  if (s === '' || regexAsStr.length < (options?.minLength ?? 1)) {
     return [<span>{s}</span>]
   }
 
-  const matches = [...s.matchAll(new RegExp(escapeRegExp(regexAsStr), "g" + (options?.regexFlags ?? "")))]
+  const matches = [
+    ...s.matchAll(new RegExp(escapeRegExp(regexAsStr), 'g' + (options?.regexFlags ?? ''))),
+  ]
 
   const endOfWord = (match: RegExpMatchArray) => (match.index ?? 0) + match[0].length
   const highlight = (v: string) => <span className={className}>{v}</span>
@@ -56,10 +61,9 @@ export const highlightSubstring = (s: string, regexAsStr: string, className: any
         }
       }
     }
-    const lastEntry = (matches[matches.length - 1])
+    const lastEntry = matches[matches.length - 1]
     rtn.push(<span>{s.substring(endOfWord(lastEntry))}</span>)
-  }
-  else {
+  } else {
     rtn.push(<span>{s}</span>)
   }
 

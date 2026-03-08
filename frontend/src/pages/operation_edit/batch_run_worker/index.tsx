@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classnames from 'classnames/bind'
-import { Evidence } from "src/global_types"
+import { Evidence } from 'src/global_types'
 
 import { useFormField, useModal, renderModals } from 'src/helpers'
 import { runServiceWorkerMatrix } from 'src/services'
@@ -13,50 +13,49 @@ import Modal from 'src/components/modal'
 import SettingsSection from 'src/components/settings_section'
 import WithLabel from 'src/components/with_label'
 
-
 const cx = classnames.bind(require('./stylesheet'))
 
-export const BatchRunWorker = (props: {
-  operationSlug: string
-}) => {
+export const BatchRunWorker = (props: { operationSlug: string }) => {
   const [selectedWorkers, setSelectedWorkers] = React.useState<Array<BulletProps>>([])
   const [selectedEvidence, setSelectedEvidence] = React.useState<Array<Evidence>>([])
 
-  const chooseEvidenceModal = useModal<{}>(modalProps => (
+  const chooseEvidenceModal = useModal<{}>((modalProps) => (
     <ChooseEvidenceModal
       initialEvidence={selectedEvidence}
       operationSlug={props.operationSlug}
-      onChanged={(list) => setSelectedEvidence(
-        list.map(uuid => ({
-          uuid,
-          description: '',
-          operator: {
-            firstName: '',
-            lastName: '',
-            slug: ''
-          },
-          occurredAt: new Date(),
-          adjustedAt: null,
-          tags: [],
-          metadata: [],
-          contentType: 'image',
-          sendUrl: false
-        }))
-      )}
+      onChanged={(list) =>
+        setSelectedEvidence(
+          list.map((uuid) => ({
+            uuid,
+            description: '',
+            operator: {
+              firstName: '',
+              lastName: '',
+              slug: '',
+            },
+            occurredAt: new Date(),
+            adjustedAt: null,
+            tags: [],
+            metadata: [],
+            contentType: 'image',
+            sendUrl: false,
+          })),
+        )
+      }
       {...modalProps}
     />
   ))
 
-  const startWOrkersModal = useModal<{}>(modalProps => (
+  const startWOrkersModal = useModal<{}>((modalProps) => (
     <StartWorkerModal
-      onSubmit={ async() => {
+      onSubmit={async () => {
         if (selectedEvidence.length == 0) {
-          throw new Error("Some services must be selected")
+          throw new Error('Some services must be selected')
         }
         runServiceWorkerMatrix({
           operationSlug: props.operationSlug,
-          workers: selectedWorkers.map(bp => bp.name),
-          evidenceUuids: selectedEvidence.map(bp => bp.uuid),
+          workers: selectedWorkers.map((bp) => bp.name),
+          evidenceUuids: selectedEvidence.map((bp) => bp.uuid),
         })
       }}
       workers={selectedWorkers}
@@ -65,25 +64,24 @@ export const BatchRunWorker = (props: {
     />
   ))
 
-  const startButtonEnabled = (
-    selectedWorkers.length > 0 // some workers selected
-    && (selectedEvidence.length > 0) // some evidence selected
-  )
+  const startButtonEnabled =
+    selectedWorkers.length > 0 && // some workers selected
+    selectedEvidence.length > 0 // some evidence selected
 
   const selectedItemsText = `${selectedEvidence.length} items selected`
 
   return (
     <SettingsSection title="Run Workers">
       <em className={cx('preamble')}>
-        You can re-run workers on all, or a certain subset, of evidence for this operation.
-        Note that this process may take awhile to complete and may not necessarily produce
-        better data than before.
+        You can re-run workers on all, or a certain subset, of evidence for this operation. Note
+        that this process may take awhile to complete and may not necessarily produce better data
+        than before.
       </em>
 
       <div className={cx('control-container')}>
         <Area className={cx('worker-control')}>
           <ManagedServiceWorkerChooser
-            label='Choose workers'
+            label="Choose workers"
             operationSlug={props.operationSlug}
             value={selectedWorkers}
             onChange={setSelectedWorkers}
@@ -91,12 +89,9 @@ export const BatchRunWorker = (props: {
         </Area>
 
         <Area>
-          <WithLabel label='Select Evidence'>
+          <WithLabel label="Select Evidence">
             <div className={cx('multi-item-row')}>
-              <Button
-                className={cx('choose-button')}
-                onClick={() => chooseEvidenceModal.show({})}
-              >
+              <Button className={cx('choose-button')} onClick={() => chooseEvidenceModal.show({})}>
                 Browse
               </Button>
               <div className={cx('selected-label')}>{selectedItemsText}</div>
@@ -107,7 +102,9 @@ export const BatchRunWorker = (props: {
           <Button
             primary
             disabled={!startButtonEnabled}
-            title={startButtonEnabled ? "Start the workers" : "Choose some workers and evidence to start"}
+            title={
+              startButtonEnabled ? 'Start the workers' : 'Choose some workers and evidence to start'
+            }
             onClick={() => startWOrkersModal.show({})}
           >
             Start
@@ -121,39 +118,41 @@ export const BatchRunWorker = (props: {
 }
 export default BatchRunWorker
 
-
 const ChooseEvidenceModal = (props: {
-  initialEvidence: Array<Evidence>,
-  onRequestClose: () => void,
-  onChanged: (uuid: Array<string>) => void,
-  operationSlug: string,
+  initialEvidence: Array<Evidence>
+  onRequestClose: () => void
+  onChanged: (uuid: Array<string>) => void
+  operationSlug: string
 }) => {
   const evidenceField = useFormField<Array<Evidence>>(props.initialEvidence)
 
   return (
     <Modal title="Search for evidence" onRequestClose={props.onRequestClose}>
-      <EvidenceChooser operationSlug={props.operationSlug} {...evidenceField} includeSelectAll/>
-      <Button primary className={cx('submit-button')} onClick={() => {
-        props.onChanged(evidenceField.value.map(evi => evi.uuid))
-        props.onRequestClose()
-      }}>Select</Button>
+      <EvidenceChooser operationSlug={props.operationSlug} {...evidenceField} includeSelectAll />
+      <Button
+        primary
+        className={cx('submit-button')}
+        onClick={() => {
+          props.onChanged(evidenceField.value.map((evi) => evi.uuid))
+          props.onRequestClose()
+        }}
+      >
+        Select
+      </Button>
     </Modal>
   )
 }
 
 export const StartWorkerModal = (props: {
-  workers: Array<BulletProps>,
+  workers: Array<BulletProps>
   evidence: Array<Evidence>
-  onRequestClose: () => void,
+  onRequestClose: () => void
   onSubmit: () => Promise<void>
 }) => {
-  const quantityText = props.evidence.length == 1
-    ? "1 piece"
-    : `${props.evidence.length} pieces`
-  const warningText = (
+  const quantityText = props.evidence.length == 1 ? '1 piece' : `${props.evidence.length} pieces`
+  const warningText =
     `This will start workers for ${quantityText} of evidence. ` +
     `Are you sure you want to continue?`
-  )
 
   return (
     <ChallengeModalForm
@@ -174,11 +173,13 @@ const Area = (props: {
 }) => {
   const colspan = props.colspan ?? 1
   return (
-    <div className={cx(
-      props.startOfRow ? 'grid-col-1' : null,
-      colspan == 2 ? 'grid-span-2' : null,
-      props.className
-    )}>
+    <div
+      className={cx(
+        props.startOfRow ? 'grid-col-1' : null,
+        colspan == 2 ? 'grid-span-2' : null,
+        props.className,
+      )}
+    >
       {props.children}
     </div>
   )

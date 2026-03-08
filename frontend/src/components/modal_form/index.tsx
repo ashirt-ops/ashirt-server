@@ -1,25 +1,25 @@
 import * as React from 'react'
 import Form from 'src/components/form'
 import Modal from 'src/components/modal'
-import {Result} from 'src/global_types'
+import { Result } from 'src/global_types'
 
 // A convenience wrapper around <Modal><Form>{...}</Form></Modal> since it's such a common UI piece
 export default (props: {
-  children: React.ReactNode,
-  result: Result<string>|null,
-  loading: boolean,
-  onRequestClose: () => void,
-  onSubmit: (e: React.FormEvent) => void,
-  submitText?: string,
-  title: string,
-  submitDanger?:boolean,
-  cancelText?: string,
-  disableSubmit?: boolean,
-  disableCancel?: boolean,
+  children: React.ReactNode
+  result: Result<string> | null
+  loading: boolean
+  onRequestClose: () => void
+  onSubmit: (e: React.FormEvent) => void
+  submitText?: string
+  title: string
+  submitDanger?: boolean
+  cancelText?: string
+  disableSubmit?: boolean
+  disableCancel?: boolean
 }) => (
   <Modal title={props.title} onRequestClose={props.onRequestClose}>
     <Form
-      cancelText={props.cancelText || "Cancel"}
+      cancelText={props.cancelText || 'Cancel'}
       children={props.children}
       result={props.result}
       loading={props.loading}

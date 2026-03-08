@@ -1,34 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react'
 
 export default (props: { children: React.ReactNode }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
+          setIsVisible(true)
+          observer.disconnect()
         }
       },
-      { root: null, rootMargin: '0px', threshold: 0.1 }
-    );
+      { root: null, rootMargin: '0px', threshold: 0.1 },
+    )
 
     if (containerRef.current) {
-      observer.observe(containerRef.current);
+      observer.observe(containerRef.current)
     }
 
+    const el = containerRef.current
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
+      if (el) {
+        observer.unobserve(el)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   return (
-    <div ref={containerRef} style={{height: '100%'}}>
+    <div ref={containerRef} style={{ height: '100%' }}>
       {isVisible ? props.children : null}
     </div>
-  );
+  )
 }

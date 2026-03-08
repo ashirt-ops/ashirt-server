@@ -11,9 +11,6 @@ export async function getApiKeys(i?: { userSlug: string }): Promise<Array<ApiKey
   return keys.map(apiKeyFromDto)
 }
 
-export async function deleteApiKey(i: {
-  userSlug: string,
-  accessKey: string,
-}): Promise<void> {
+export async function deleteApiKey(i: { userSlug: string; accessKey: string }): Promise<void> {
   return await ds.deleteApiKey(i)
 }

@@ -15,12 +15,19 @@ const Pager = (props: {
   onPageUp: () => void
   onPageDown: () => void
 }) => (
-    <div className={cx('root', props.className)}>
-      <Button disabled={props.pageNumber == 1} onClick={props.onPageDown}>{props.prevButtonText || 'previous'}</Button>
-      {props.children}
-      <Button disabled={props.maxPageNumber == undefined ? false : props.maxPageNumber <= props.pageNumber} onClick={props.onPageUp}>{props.nextButtonText || 'next'}</Button>
-    </div>
-  )
+  <div className={cx('root', props.className)}>
+    <Button disabled={props.pageNumber == 1} onClick={props.onPageDown}>
+      {props.prevButtonText || 'previous'}
+    </Button>
+    {props.children}
+    <Button
+      disabled={props.maxPageNumber == undefined ? false : props.maxPageNumber <= props.pageNumber}
+      onClick={props.onPageUp}
+    >
+      {props.nextButtonText || 'next'}
+    </Button>
+  </div>
+)
 
 export const StandardPager = (props: {
   page: number
@@ -35,14 +42,14 @@ export const StandardPager = (props: {
   const incPage = () => setRelativePage(1)
   const decPage = () => setRelativePage(-1)
 
-
   return (
     <Pager
       maxPageNumber={props.maxPages}
       className={props.className}
       pageNumber={props.page}
       onPageUp={incPage}
-      onPageDown={decPage}>
+      onPageDown={decPage}
+    >
       <div className={cx('pageNumber')}>{props.page}</div>
     </Pager>
   )

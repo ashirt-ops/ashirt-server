@@ -6,8 +6,8 @@ import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
 export type ComboBoxItem<T> = {
-  name: string,
-  value: T,
+  name: string
+  value: T
 }
 
 function valueToName<T>(value: T, options: Array<ComboBoxItem<T>>, nonValueDefault?: T): string {
@@ -20,10 +20,13 @@ function valueToName<T>(value: T, options: Array<ComboBoxItem<T>>, nonValueDefau
   throw Error(`Bad value: ${value}`)
 }
 
-function filterOptions<T>(allOptions: Array<ComboBoxItem<T>>, filterValue: string): Array<ComboBoxItem<T>> {
+function filterOptions<T>(
+  allOptions: Array<ComboBoxItem<T>>,
+  filterValue: string,
+): Array<ComboBoxItem<T>> {
   filterValue = (filterValue ?? '').trim().toLowerCase()
   if (filterValue === '') return allOptions
-  return allOptions.filter(v => v.name.toLowerCase().indexOf(filterValue) > -1)
+  return allOptions.filter((v) => v.name.toLowerCase().indexOf(filterValue) > -1)
 }
 
 /**
@@ -33,15 +36,14 @@ function filterOptions<T>(allOptions: Array<ComboBoxItem<T>>, filterValue: strin
  * may suit your needs better.
  */
 export default function SmartComboBox<T>(props: {
-  options: Array<ComboBoxItem<T>>,
-  onChange: (newValue: T) => void,
-  label: string,
-  value: T,
-  nonValueDefault?: T,
-  className?: string,
-  disabled?: boolean,
+  options: Array<ComboBoxItem<T>>
+  onChange: (newValue: T) => void
+  label: string
+  value: T
+  nonValueDefault?: T
+  className?: string
+  disabled?: boolean
 }) {
-
   const [cbState, dispatch] = React.useReducer(
     standardComboboxStateReducer,
     initialComboBoxState(props.value, props.options, props.nonValueDefault),
@@ -58,7 +60,7 @@ export default function SmartComboBox<T>(props: {
       className={props.className}
       onChange={(v) => {
         dispatch(v)
-        if( v.type == 'popover-selected') {
+        if (v.type == 'popover-selected') {
           props.onChange(v.item.value)
         }
       }}
@@ -76,17 +78,17 @@ export default function SmartComboBox<T>(props: {
  */
 export function DumbComboBox<T>(props: {
   // display
-  options: Array<ComboBoxItem<T>>,
-  label: string,
+  options: Array<ComboBoxItem<T>>
+  label: string
   // state
-  value: T,
-  popoverOpen: boolean,
-  inputValue: string,
-  onChange: (newState: ComboBoxAction<T>) => void,
+  value: T
+  popoverOpen: boolean
+  inputValue: string
+  onChange: (newState: ComboBoxAction<T>) => void
 
   // optional values
-  className?: string,
-  disabled?: boolean,
+  className?: string
+  disabled?: boolean
   dontFilterOptions?: boolean
 }) {
   const { onChange } = props
@@ -104,13 +106,13 @@ export function DumbComboBox<T>(props: {
       disabled={props.disabled}
       className={props.className}
       onRequestPopoverClose={() => onChange({ type: 'popover-closed' })}
-
-      onPopoverSelect={(item: ComboBoxItem<T>) => { onChange({ type: 'popover-selected', item }) }}
-
+      onPopoverSelect={(item: ComboBoxItem<T>) => {
+        onChange({ type: 'popover-selected', item })
+      }}
       onInputChange={(newVal) => {
         onChange({
           type: 'input-changed',
-          inputValue: newVal
+          inputValue: newVal,
         })
       }}
       onInputClick={() => onChange({ type: 'input-click' })}
@@ -121,19 +123,19 @@ export function DumbComboBox<T>(props: {
 }
 
 function StatelessComboBox<T>(props: {
-  options: Array<ComboBoxItem<T>>,
-  label: string,
-  value: T,
-  inputValue: string,
-  popoverOpen: boolean,
-  onPopoverSelect: (item: ComboBoxItem<T>) => void,
-  onRequestPopoverClose: () => void,
+  options: Array<ComboBoxItem<T>>
+  label: string
+  value: T
+  inputValue: string
+  popoverOpen: boolean
+  onPopoverSelect: (item: ComboBoxItem<T>) => void
+  onRequestPopoverClose: () => void
   onInputKeyDown?: () => void
   onInputFocus?: () => void
   onInputChange?: (newVal: string) => void
-  onInputClick?: () => void,
-  className?: string,
-  disabled?: boolean,
+  onInputClick?: () => void
+  className?: string
+  disabled?: boolean
 }) {
   return (
     <PopoverMenu
@@ -141,7 +143,7 @@ function StatelessComboBox<T>(props: {
       onRequestClose={props.onRequestPopoverClose}
       onSelect={props.onPopoverSelect}
       options={props.options}
-      renderer={item => item.name}
+      renderer={(item) => item.name}
       noOptionsMessage="No Matches"
     >
       <Input
@@ -158,8 +160,16 @@ function StatelessComboBox<T>(props: {
   )
 }
 
-export function initialComboBoxState<T>(val: T, options: Array<ComboBoxItem<T>>, nonValueDefault?: T): ComboBoxState<T>
-export function initialComboBoxState<T>(val: ComboBoxItem<T>, options?: never, nonValueDefault?: never): ComboBoxState<T>
+export function initialComboBoxState<T>(
+  val: T,
+  options: Array<ComboBoxItem<T>>,
+  nonValueDefault?: T,
+): ComboBoxState<T>
+export function initialComboBoxState<T>(
+  val: ComboBoxItem<T>,
+  options?: never,
+  nonValueDefault?: never,
+): ComboBoxState<T>
 
 export function initialComboBoxState<T>(
   val: T | ComboBoxItem<T>,
@@ -168,16 +178,16 @@ export function initialComboBoxState<T>(
 ): ComboBoxState<T> {
   const cbItem: ComboBoxItem<T> = Array.isArray(options)
     ? { name: valueToName(val, options, nonValueDefault), value: val as T }
-    : val as ComboBoxItem<T>
+    : (val as ComboBoxItem<T>)
   return {
     popoverOpen: false,
     inputValue: cbItem.name,
     value: cbItem.value,
-    lastSelection: cbItem
+    lastSelection: cbItem,
   }
 }
 
-type ComboBoxReducer<T> = (state: ComboBoxState<T>, action: ComboBoxAction<T>) => ComboBoxState<T>
+type _ComboBoxReducer<T> = (state: ComboBoxState<T>, action: ComboBoxAction<T>) => ComboBoxState<T>
 
 /**
  * standardComboboxStateReducer is responsible for taking an existing combobox state, and
@@ -196,14 +206,13 @@ export function standardComboboxStateReducer<T>(
   state: ComboBoxState<T>,
   action: ComboBoxAction<T>,
 ): ComboBoxState<T> {
-
   if (action.type == 'popover-selected') {
     return {
       ...state,
       popoverOpen: false,
       inputValue: action.item.name,
       value: action.item.value,
-      lastSelection: action.item
+      lastSelection: action.item,
     }
   }
   if (action.type == 'input-changed') {
@@ -244,7 +253,7 @@ export type ComboBoxState<T> = {
   popoverOpen: boolean
   inputValue: string
   value: T
-  lastSelection: ComboBoxItem<T>,
+  lastSelection: ComboBoxItem<T>
 }
 
 export type ComboBoxAction<T> =
@@ -256,7 +265,7 @@ export type ComboBoxAction<T> =
   | ComboBoxStateInputClicked
 
 type ComboBoxStateFocused = {
-  type: "input-focused"
+  type: 'input-focused'
 }
 
 type ComboBoxStateInputChange = {

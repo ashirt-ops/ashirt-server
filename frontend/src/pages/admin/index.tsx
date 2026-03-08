@@ -4,12 +4,12 @@ import classnames from 'classnames/bind'
 import AuthTable from './auth_table'
 import HeadlessButton from './add_headless'
 import { NavVerticalTabMenu } from 'src/components/tab_vertical_menu'
-import CreateUserButton from "./add_user"
-import CreateUserGroupButton from "./add_user_group"
-import CreateVarButton from "../../components/add_variable"
-import InviteuserButton from "./invite_user"
+import CreateUserButton from './add_user'
+import CreateUserGroupButton from './add_user_group'
+import CreateVarButton from '../../components/add_variable'
+import InviteuserButton from './invite_user'
 import OperationsTable from './operations_table'
-import FindingCategoriesTable from "./finding_categories_table"
+import FindingCategoriesTable from './finding_categories_table'
 import RecoveryMetrics from './recovery_metrics'
 import UserTable from './user_table'
 import UserGroupTable from './user_group_table'
@@ -33,14 +33,14 @@ export const AdminTools = () => {
         <NavVerticalTabMenu
           title="Admin Tools"
           tabs={[
-            { id: "users", label: "User Management" },
-            { id: "groups", label: "Group Management" },
-            { id: "authdata", label: "Authentication Overview" },
-            { id: "operations", label: "Operation Management" },
-            { id: "tags", label: "Tag Management" },
-            { id: "findings", label: "Finding Categories" },
-            { id: "services", label: "Service Workers" },
-            { id: "globalvars", label: "Global Variables"}
+            { id: 'users', label: 'User Management' },
+            { id: 'groups', label: 'Group Management' },
+            { id: 'authdata', label: 'Authentication Overview' },
+            { id: 'operations', label: 'Operation Management' },
+            { id: 'tags', label: 'Tag Management' },
+            { id: 'findings', label: 'Finding Categories' },
+            { id: 'services', label: 'Service Workers' },
+            { id: 'globalvars', label: 'Global Variables' },
           ]}
         >
           <Routes>
@@ -56,7 +56,6 @@ export const AdminTools = () => {
         </NavVerticalTabMenu>
       </div>
     </>
-
   )
 }
 

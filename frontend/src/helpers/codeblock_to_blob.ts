@@ -1,8 +1,8 @@
 import { CodeBlock } from 'src/global_types'
 
 type JsonEvidence = {
-  contentSubtype: string,
-  content: string,
+  contentSubtype: string
+  content: string
   metadata?: { [key: string]: string }
 }
 
@@ -12,7 +12,7 @@ export const codeblockToBlob = (cb: CodeBlock): Blob => {
     contentSubtype: cb.language,
   }
   if (cb.source != null) {
-    evidence.metadata = { 'source': cb.source }
+    evidence.metadata = { source: cb.source }
   }
   return new Blob([JSON.stringify(evidence)])
 }

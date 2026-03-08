@@ -2,6 +2,7 @@ const tsPlugin = require('@typescript-eslint/eslint-plugin')
 const tsParser = require('@typescript-eslint/parser')
 const react = require('eslint-plugin-react')
 const reactHooks = require('eslint-plugin-react-hooks')
+const prettierConfig = require('eslint-config-prettier')
 
 module.exports = [
   {
@@ -14,7 +15,7 @@ module.exports = [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 2018,
+        ecmaVersion: 2022,
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
       },
@@ -25,13 +26,16 @@ module.exports = [
         varsIgnorePattern: '^_',
         ignoreRestSiblings: true,
       }],
-      'eol-last': ['error', 'always'],
-      'no-multiple-empty-lines': ['error', { max: Infinity, maxEOF: 0 }],
-      'no-trailing-spaces': ['error'],
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/consistent-type-imports': ['warn', {
+        prefer: 'type-imports',
+        fixStyle: 'inline-type-imports',
+      }],
       'react/jsx-uses-react': ['error'],
       'react/jsx-uses-vars': ['error'],
       'react-hooks/rules-of-hooks': ['error'],
-      'react-hooks/exhaustive-deps': ['warn'],
+      'react-hooks/exhaustive-deps': ['error'],
     },
   },
+  prettierConfig,
 ]

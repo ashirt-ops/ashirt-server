@@ -16,32 +16,33 @@ export * from './trim_url'
 export * from './highlight_substring'
 export * from './codeblock_to_blob'
 
-export function useFocusFirstFocusableChild(ref: React.MutableRefObject<HTMLDivElement|null>) {
+export function useFocusFirstFocusableChild(ref: React.MutableRefObject<HTMLDivElement | null>) {
   React.useLayoutEffect(() => {
     if (!ref.current) return
-    const el = ref
-      .current
-      .querySelector('button, [href], input, select, textarea, [tabindex]')
-    // @ts-ignore - Typescript is unable to know that el is a focusable element
-    if (el != null) el.focus()
+    const el = ref.current.querySelector('button, [href], input, select, textarea, [tabindex]')
+    if (el != null) (el as HTMLElement).focus()
   }, [ref])
 }
 
-export function useWindowSize(): {width: number, height: number} {
-  const [size, setSize] = React.useState({width: window.innerWidth, height: window.innerHeight})
+export function useWindowSize(): { width: number; height: number } {
+  const [size, setSize] = React.useState({ width: window.innerWidth, height: window.innerHeight })
 
   const onResize = () => {
-    setSize({width: window.innerWidth, height: window.innerHeight})
+    setSize({ width: window.innerWidth, height: window.innerHeight })
   }
 
   React.useEffect(() => {
     window.addEventListener('resize', onResize)
-    return () => { window.removeEventListener('resize', onResize) }
+    return () => {
+      window.removeEventListener('resize', onResize)
+    }
   })
 
   return size
 }
 
-export function isOperationVariable(variable: GlobalVariableData | OperationVariableData): variable is OperationVariableData {
-  return (variable as OperationVariableData).operationSlug !== undefined;
+export function isOperationVariable(
+  variable: GlobalVariableData | OperationVariableData,
+): variable is OperationVariableData {
+  return (variable as OperationVariableData).operationSlug !== undefined
 }

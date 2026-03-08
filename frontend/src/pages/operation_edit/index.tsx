@@ -23,24 +23,26 @@ export const OperationEdit = () => {
   const [canViewGroups, setCanViewGroups] = React.useState(false)
   const [operationName, setOperationName] = React.useState('')
 
-  const wiredOperation = useWiredData(React.useCallback(() => getOperation(operationSlug), [operationSlug]))
+  const wiredOperation = useWiredData(
+    React.useCallback(() => getOperation(operationSlug), [operationSlug]),
+  )
 
   React.useEffect(() => {
-    wiredOperation.expose(operation => {
+    wiredOperation.expose((operation) => {
       setCanViewGroups(!!operation?.userCanViewGroups)
       setOperationName(operation?.name)
     })
   }, [wiredOperation])
 
-  const tabs =[
-    { id: "settings", label: "Settings" },
-    { id: "users", label: "Users" },
-    { id: "tags", label: "Tags" },
-    { id: "tasks", label: "Tasks" },
+  const tabs = [
+    { id: 'settings', label: 'Settings' },
+    { id: 'users', label: 'Users' },
+    { id: 'tags', label: 'Tags' },
+    { id: 'tasks', label: 'Tasks' },
   ]
 
   if (canViewGroups) {
-    tabs.push({ id: "groups", label: "Groups" }, { id: "variables", label: "Variables"})
+    tabs.push({ id: 'groups', label: 'Groups' }, { id: 'variables', label: 'Variables' })
   }
 
   return (
@@ -48,19 +50,38 @@ export const OperationEdit = () => {
       <Button
         className={cx('back-button')}
         icon={require('./back.svg')}
-        onClick={() => navigate(-1)}>
+        onClick={() => navigate(-1)}
+      >
         Back
       </Button>
-      <NavVerticalTabMenu
-        title="Edit Operation"
-        tabs={tabs} >
+      <NavVerticalTabMenu title="Edit Operation" tabs={tabs}>
         <Routes>
-          <Route path="settings" element={<SettingManagement operationName={operationName} setCanViewGroups={setCanViewGroups} operationSlug={operationSlug} />} />
-          <Route path="users" element={<UserPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />} />
+          <Route
+            path="settings"
+            element={
+              <SettingManagement
+                operationName={operationName}
+                setCanViewGroups={setCanViewGroups}
+                operationSlug={operationSlug}
+              />
+            }
+          />
+          <Route
+            path="users"
+            element={<UserPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />}
+          />
           <Route path="tags" element={<TagEditor operationSlug={operationSlug} />} />
           <Route path="tasks" element={<BatchRunWorker operationSlug={operationSlug} />} />
-          <Route path="groups" element={<UserGroupPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />} />
-          <Route path="variables" element={<OperationVarsTable isAdmin={canViewGroups} operationSlug={operationSlug} />} />
+          <Route
+            path="groups"
+            element={
+              <UserGroupPermissionEditor isAdmin={canViewGroups} operationSlug={operationSlug} />
+            }
+          />
+          <Route
+            path="variables"
+            element={<OperationVarsTable isAdmin={canViewGroups} operationSlug={operationSlug} />}
+          />
         </Routes>
       </NavVerticalTabMenu>
     </>
@@ -69,12 +90,14 @@ export const OperationEdit = () => {
 export default OperationEdit
 
 const SettingManagement = (props: {
-  operationSlug: string,
-  setCanViewGroups: (canViewGroups: boolean) => void,
-  operationName: string,
+  operationSlug: string
+  setCanViewGroups: (canViewGroups: boolean) => void
+  operationName: string
 }) => {
-  return (<>
-    <OperationEditor {...props} />
-    <DeleteOperationButton {...props} />
-  </>)
+  return (
+    <>
+      <OperationEditor {...props} />
+      <DeleteOperationButton {...props} />
+    </>
+  )
 }

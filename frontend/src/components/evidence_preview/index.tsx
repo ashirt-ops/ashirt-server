@@ -2,12 +2,22 @@ import * as React from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
-import { SupportedEvidenceType, CodeBlock, EvidenceViewHint, InteractionHint, UrlData } from 'src/global_types'
-import { getEvidenceAsCodeblock, getEvidenceAsString, getEvidenceAsUrlData, updateEvidence } from 'src/services/evidence'
+import {
+  SupportedEvidenceType,
+  CodeBlock,
+  EvidenceViewHint,
+  InteractionHint,
+  UrlData,
+} from 'src/global_types'
+import {
+  getEvidenceAsCodeblock,
+  getEvidenceAsString,
+  getEvidenceAsUrlData,
+  updateEvidence,
+} from 'src/services/evidence'
 import { useWiredData } from 'src/helpers'
 import ErrorDisplay from 'src/components/error_display'
 import LazyLoadComponent from 'src/components/lazy_load_component'
-
 
 import TerminalPlayer from 'src/components/terminal_player'
 import { useEvidenceContext } from 'src/contexts/evidences_context'
@@ -34,15 +44,15 @@ function getComponent(evidenceType: SupportedEvidenceType) {
 }
 
 export default (props: {
-  operationSlug: string,
-  evidenceUuid: string,
-  contentType: SupportedEvidenceType,
-  viewHint?: EvidenceViewHint,
-  interactionHint?: InteractionHint,
-  className?: string,
-  fitToContainer?: boolean,
-  useS3Url: boolean,
-  onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void,
+  operationSlug: string
+  evidenceUuid: string
+  contentType: SupportedEvidenceType
+  viewHint?: EvidenceViewHint
+  interactionHint?: InteractionHint
+  className?: string
+  fitToContainer?: boolean
+  useS3Url: boolean
+  onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 }) => {
   const Component = getComponent(props.contentType)
   if (Component == null) return null
@@ -57,52 +67,73 @@ export default (props: {
 
   return (
     <div className={className} onClick={props.onClick}>
-      <LazyLoadComponent><Component {...props} /></LazyLoadComponent>
+      <LazyLoadComponent>
+        <Component {...props} />
+      </LazyLoadComponent>
     </div>
   )
 }
 
 type EvidenceProps = {
-  operationSlug: string,
-  evidenceUuid: string,
-  viewHint?: EvidenceViewHint,
-  interactionHint?: InteractionHint,
+  operationSlug: string
+  evidenceUuid: string
+  viewHint?: EvidenceViewHint
+  interactionHint?: InteractionHint
   useS3Url: boolean
 }
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
-  const wiredEvidence = useWiredData<CodeBlock>(React.useCallback(() => getEvidenceAsCodeblock({
-    operationSlug: props.operationSlug,
-    evidenceUuid: props.evidenceUuid,
-  }), [props.operationSlug, props.evidenceUuid]))
+  const wiredEvidence = useWiredData<CodeBlock>(
+    React.useCallback(
+      () =>
+        getEvidenceAsCodeblock({
+          operationSlug: props.operationSlug,
+          evidenceUuid: props.evidenceUuid,
+        }),
+      [props.operationSlug, props.evidenceUuid],
+    ),
+  )
 
-  return wiredEvidence.render(evi => <CodeBlockViewer value={evi} />)
+  return wiredEvidence.render((evi) => <CodeBlockViewer value={evi} />)
 }
 
-const shouldUseCachedUrl = (imgData: UrlData | undefined, props: EvidenceProps) => (
+const shouldUseCachedUrl = (imgData: UrlData | undefined, props: EvidenceProps) =>
   imgData && props.useS3Url && isAfter(new Date(imgData.expirationTime), new Date())
-)
 
 const EvidenceImage = (props: EvidenceProps) => {
-  const { imgDataSetter, cachedUrls } = useEvidenceContext()
-  let url = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
-
+  const { cachedUrls } = useEvidenceContext()
+  const defaultUrl = `/web/operations/${props.operationSlug}/evidence/${props.evidenceUuid}/media`
   const imgData = cachedUrls.get(props.evidenceUuid)
 
   if (shouldUseCachedUrl(imgData, props)) {
-    url = imgData?.url as string
-  } else if (props.useS3Url) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const wiredUrl = useWiredData<UrlData>(React.useCallback(() => getEvidenceAsUrlData({
-      operationSlug: props.operationSlug,
-      evidenceUuid: props.evidenceUuid,
-    }), [props.operationSlug, props.evidenceUuid]))
-
-    wiredUrl.expose(s3url => {
-      imgDataSetter(props.evidenceUuid, s3url)
-      url = s3url.url
-    })
+    return <img src={imgData!.url} />
   }
+
+  if (props.useS3Url) {
+    return <EvidenceImageS3 {...props} defaultUrl={defaultUrl} />
+  }
+
+  return <img src={defaultUrl} />
+}
+
+const EvidenceImageS3 = (props: EvidenceProps & { defaultUrl: string }) => {
+  const { imgDataSetter } = useEvidenceContext()
+  const wiredUrl = useWiredData<UrlData>(
+    React.useCallback(
+      () =>
+        getEvidenceAsUrlData({
+          operationSlug: props.operationSlug,
+          evidenceUuid: props.evidenceUuid,
+        }),
+      [props.operationSlug, props.evidenceUuid],
+    ),
+  )
+
+  let url = props.defaultUrl
+  wiredUrl.expose((s3url) => {
+    imgDataSetter(props.evidenceUuid, s3url)
+    url = s3url.url
+  })
 
   return <img src={url} />
 }
@@ -112,37 +143,60 @@ const EvidenceEvent = (_props: EvidenceProps) => {
 }
 
 const EvidenceTerminalRecording = (props: EvidenceProps) => {
-  const wiredEvidence = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
-    operationSlug: props.operationSlug,
-    evidenceUuid: props.evidenceUuid,
-  }), [props.operationSlug, props.evidenceUuid]))
+  const wiredEvidence = useWiredData<string>(
+    React.useCallback(
+      () =>
+        getEvidenceAsString({
+          operationSlug: props.operationSlug,
+          evidenceUuid: props.evidenceUuid,
+        }),
+      [props.operationSlug, props.evidenceUuid],
+    ),
+  )
 
-  const updateContent = (content: Blob): Promise<void> => updateEvidence({
-    operationSlug: props.operationSlug,
-    evidenceUuid: props.evidenceUuid,
-    updatedContent: content,
-  })
+  const updateContent = (content: Blob): Promise<void> =>
+    updateEvidence({
+      operationSlug: props.operationSlug,
+      evidenceUuid: props.evidenceUuid,
+      updatedContent: content,
+    })
 
-  return wiredEvidence.render(evi => <TerminalPlayer content={evi} playerUUID={props.evidenceUuid} onTerminalScriptUpdated={updateContent} />)
+  return wiredEvidence.render((evi) => (
+    <TerminalPlayer
+      content={evi}
+      playerUUID={props.evidenceUuid}
+      onTerminalScriptUpdated={updateContent}
+    />
+  ))
 }
 
 const EvidenceHttpCycle = (props: EvidenceProps) => {
-  const wiredEvidence = useWiredData<string>(React.useCallback(() => getEvidenceAsString({
-    operationSlug: props.operationSlug,
-    evidenceUuid: props.evidenceUuid,
-  }), [props.operationSlug, props.evidenceUuid]))
+  const wiredEvidence = useWiredData<string>(
+    React.useCallback(
+      () =>
+        getEvidenceAsString({
+          operationSlug: props.operationSlug,
+          evidenceUuid: props.evidenceUuid,
+        }),
+      [props.operationSlug, props.evidenceUuid],
+    ),
+  )
 
-  return wiredEvidence.render(evi => {
+  return wiredEvidence.render((evi) => {
     try {
       const log = JSON.parse(evi)
       if (isAHar(log)) {
-        const isActive = props.interactionHint == 'inactive' ? {disableKeyHandler : true} : {}
+        const isActive = props.interactionHint == 'inactive' ? { disableKeyHandler: true } : {}
         return <HarViewer log={log} viewHint={props.viewHint} {...isActive} />
       }
-      return <ErrorDisplay title="Corrupted HAR file" err={new Error("unsupported format")} />
-    }
-    catch (err) {
-      return <ErrorDisplay title="Corrupted HAR file" err={err instanceof Error ? err : new Error(String(err))}/>
+      return <ErrorDisplay title="Corrupted HAR file" err={new Error('unsupported format')} />
+    } catch (err) {
+      return (
+        <ErrorDisplay
+          title="Corrupted HAR file"
+          err={err instanceof Error ? err : new Error(String(err))}
+        />
+      )
     }
   })
 }

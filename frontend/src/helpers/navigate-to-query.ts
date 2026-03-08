@@ -40,11 +40,12 @@ export const navigate = (props: NavigateProps) => {
  * @param props.navTo the function to use to trigger the navigation
  * @returns a function that will navigate to another page based on the provided data
  */
-export const mkNavTo = (props: {
-  slug: string
-  navTo: (path: string) => void
-}): NavToFunction => {
-  return (view: ViewName, query: string, searchName?: string) => navigate({
-    ...props, view, query, searchName
-  })
+export const mkNavTo = (props: { slug: string; navTo: (path: string) => void }): NavToFunction => {
+  return (view: ViewName, query: string, searchName?: string) =>
+    navigate({
+      ...props,
+      view,
+      query,
+      searchName,
+    })
 }

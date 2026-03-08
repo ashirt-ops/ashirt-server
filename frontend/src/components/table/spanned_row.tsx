@@ -5,8 +5,6 @@ export const SpannedRow = (props: {
   children?: React.ReactNode
 }): React.ReactElement => (
   <tr>
-    <td colSpan={props.span}>
-      {props.children}
-    </td>
-  </tr >
+    <td colSpan={props.span}>{props.children}</td>
+  </tr>
 )

@@ -1,4 +1,3 @@
-
 /**
  * ProvidedCredentialCreationOptions tries to be a mirror of CredentialCreationOptions, but
  * with all base64 encoded fields marked as string
@@ -7,27 +6,31 @@
  * supports. The definition amounts to "copy this defintion, but exclude this bit", then
  * "tack on this new bit", which ultimately replaces the type from the original type
  */
-export type ProvidedCredentialCreationOptions =
-  Omit<CredentialCreationOptions, "publicKey">
-  & {
-    publicKey: Omit<PublicKeyCredentialCreationOptions, "challenge" | "excludeCredentials" | "user"> &
-    {
-      challenge: string // base64 encoded string (url encoded)
-      excludeCredentials?: Array<Omit<PublicKeyCredentialDescriptor, "id"> & {
-        id: string // base64 encoded string (url encoded)
-      }>
-      user: Omit<PublicKeyCredentialUserEntity, "id"> & {
+export type ProvidedCredentialCreationOptions = Omit<CredentialCreationOptions, 'publicKey'> & {
+  publicKey: Omit<
+    PublicKeyCredentialCreationOptions,
+    'challenge' | 'excludeCredentials' | 'user'
+  > & {
+    challenge: string // base64 encoded string (url encoded)
+    excludeCredentials?: Array<
+      Omit<PublicKeyCredentialDescriptor, 'id'> & {
         id: string // base64 encoded string (url encoded)
       }
+    >
+    user: Omit<PublicKeyCredentialUserEntity, 'id'> & {
+      id: string // base64 encoded string (url encoded)
     }
   }
+}
 
 export type ProvidedCredentialRequestOptions = {
-  publicKey: Omit<PublicKeyCredentialRequestOptions, "challenge" | "allowCredentials"> & {
+  publicKey: Omit<PublicKeyCredentialRequestOptions, 'challenge' | 'allowCredentials'> & {
     challenge: string
-    allowCredentials: Array<Omit<PublicKeyCredentialDescriptor, "id"> & {
-      id: string
-    }>
+    allowCredentials: Array<
+      Omit<PublicKeyCredentialDescriptor, 'id'> & {
+        id: string
+      }
+    >
   }
 }
 
