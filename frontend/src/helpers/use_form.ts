@@ -51,7 +51,7 @@ export function useForm<T>(i: {
       setResult(null)
       submitSuccessful = true
     } catch (err) {
-      setResult({ err })
+      setResult({ err: err instanceof Error ? err : new Error(String(err)) })
       console.error(err)
       submitSuccessful = false
     }

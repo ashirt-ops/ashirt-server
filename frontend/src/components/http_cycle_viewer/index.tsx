@@ -6,7 +6,7 @@ import { trimURL, clamp } from 'src/helpers'
 import { mimetypeToAceLang } from './helpers'
 import { RawContent } from './components'
 import { ExpandableSection } from '../expandable_area'
-import { Tab } from '../tab_vertical_menu'
+import { Tab } from '../tabs'
 import { default as TabMenu } from '../tabs'
 import Table from 'src/components/table'
 

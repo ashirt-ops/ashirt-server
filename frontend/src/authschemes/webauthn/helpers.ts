@@ -5,7 +5,7 @@ export const encodeAsB64 = (ab: ArrayBuffer) => {
 }
 
 export const arrayBufferToString = (a: ArrayBuffer) => {
-  return String.fromCharCode.apply(null, new Uint8Array(a))
+  return String.fromCharCode(...Array.from(new Uint8Array(a)))
 }
 
 export const base64UrlEncode = (value: string) => {

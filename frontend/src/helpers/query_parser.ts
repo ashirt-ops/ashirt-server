@@ -84,7 +84,9 @@ export function addTagToQuery(query: string, tagToAdd: string): string {
 }
 
 export function addOperatorToQuery(query: string, userSlugToAdd: string): string {
-  return addFieldToQuery(query, "operator", userSlugToAdd)
+  const tokenized = parseQuery(query)
+  tokenized['operator'] = [{ value: userSlugToAdd }]
+  return stringifyQuery(tokenized)
 }
 
 function addFieldToQuery(query: string, field: string, value: string, negate?: boolean): string {

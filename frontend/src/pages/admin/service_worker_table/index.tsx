@@ -91,7 +91,7 @@ export default (props: {
                             type: 'finish',
                             worker: worker.name,
                             passedTest: false,
-                            message: err,
+                            message: err instanceof Error ? err.message : String(err),
                           })
                         }
                       }

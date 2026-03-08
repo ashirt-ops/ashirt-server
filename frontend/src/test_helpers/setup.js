@@ -1,10 +1,5 @@
 // This file is included by mocha to help set up testing
 
-// First set up sinon-chai
-const sinonChai = require('sinon-chai')
-const chai = require('chai')
-chai.use(sinonChai)
-
 const Module = require('module')
 const path = require('path')
 

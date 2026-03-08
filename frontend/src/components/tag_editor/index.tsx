@@ -203,9 +203,9 @@ const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTable
 
 type compareableFunc = (l: unknown, r: unknown) => number
 
-const sortNone: compareableFunc = (a: unknown, b: unknown) => 0
-const sortNums: compareableFunc = (a: TagWithUsage, b: TagWithUsage) => a.evidenceCount - b.evidenceCount
-const sortTags: compareableFunc = (a: TagWithUsage, b: TagWithUsage) => a.name.localeCompare(b.name)
+const sortNone: compareableFunc = (_a: unknown, _b: unknown) => 0
+const sortNums: compareableFunc = (a, b) => (a as TagWithUsage).evidenceCount - (b as TagWithUsage).evidenceCount
+const sortTags: compareableFunc = (a, b) => (a as TagWithUsage).name.localeCompare((b as TagWithUsage).name)
 
 type tagTableColumn<T> = {
   title: string,

@@ -26,7 +26,7 @@ export default React.forwardRef((props: SharedProps & {
   type?: string,
   inputClassName?: string,
   autoFocus?: true
-}, ref: React.RefObject<HTMLInputElement>) => (
+}, ref: React.ForwardedRef<HTMLInputElement>) => (
   <WithLabel className={cx('root', props.className)} label={props.label}>
     {props.loading && (
       <LoadingSpinner className={cx('spinner')} small />
@@ -52,7 +52,7 @@ export default React.forwardRef((props: SharedProps & {
 ))
 
 export const TextArea = React.forwardRef((props: SharedProps & {
-}, ref: React.RefObject<HTMLTextAreaElement>) => {
+}, ref: React.ForwardedRef<HTMLTextAreaElement>) => {
   const adjustTextareaHeight = () => {
     const element = document.getElementById("autoResizeTextarea");
     element!.style.height = "auto";

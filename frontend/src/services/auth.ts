@@ -7,7 +7,7 @@ export async function getCurrentUser(): Promise<UserOwnView | null> {
     return userOwnViewFromDto(await ds.readCurrentUser())
   } catch (err) {
     // Not found indicates a non logged in user
-    if (err.status === 404) return null
+    if ((err as any).status === 404) return null
 
     // Bubble any other error types up
     throw err

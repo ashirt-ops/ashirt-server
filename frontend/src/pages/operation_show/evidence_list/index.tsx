@@ -16,9 +16,9 @@ import { mkNavTo } from 'src/helpers/navigate-to-query'
 
 import { saveAs } from 'file-saver';
 import _ from 'lodash'
+import JSZip from 'jszip'
 import Modal from 'src/components/modal'
 import { languageToFileExtension } from 'src/helpers/languages'
-const JSZip = require("jszip");
 
 export default () => {
   const { slug } = useParams<{ slug: string }>()
@@ -121,8 +121,8 @@ export default () => {
   }
 
   const exportEvidence = async () => {
-    var zip = new JSZip();
-    var evidenceFolder = zip.folder("evidence");
+    const zip = new JSZip();
+    const evidenceFolder = zip.folder("evidence")!;
     const evidenceCopy = _.cloneDeep(evidence)
     const [media, modEvidenceCopy] = await getMedia(evidenceCopy)
 

@@ -52,7 +52,7 @@ export function useModal<ModalProps>(
   }
 }
 
-export function renderModals(...modals: Array<UseModalOutput<unknown>>): React.ReactNode {
+export function renderModals(...modals: Array<UseModalOutput<any>>): React.ReactNode {
   for (let modal of modals) {
     if (modal.node != null) return modal.node
   }

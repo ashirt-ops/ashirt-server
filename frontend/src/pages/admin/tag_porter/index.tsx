@@ -110,7 +110,7 @@ const ImportModal = (props: {
                 parsedData = JSON.parse(value)
               }
               catch (err) {
-                setErr(err)
+                setErr(err instanceof Error ? err : new Error(String(err)))
                 return
               }
               isTagArray(parsedData)
@@ -118,7 +118,7 @@ const ImportModal = (props: {
                 : setErr(new Error("Unsupported Format"))
             })
             .catch(err => {
-              setErr(err)
+              setErr(err instanceof Error ? err : new Error(String(err)))
             })
         }
         else {

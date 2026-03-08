@@ -1,14 +1,8 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const HtmlWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 const path = require('path')
 
-const miniCssExtraPluginConfig = {
-  loader: MiniCssExtractPlugin.loader,
-  options: {
-    esModule: false,
-  },
-};
+const miniCssExtraPluginConfig = MiniCssExtractPlugin.loader;
 
 module.exports = (env, argv) => ({
   entry: './src/index.tsx',
@@ -25,8 +19,6 @@ module.exports = (env, argv) => ({
       test: /\.tsx?$/,
       loader: 'ts-loader',
       exclude: /node_modules/,
-      // This option cannot be set in tsconfig because it breaks frontend unit tests
-      options: {compilerOptions: {module: 'esnext'}},
     }, {
       test: /\.css$/,
       use: [miniCssExtraPluginConfig, 'css-loader'],
@@ -51,14 +43,12 @@ module.exports = (env, argv) => ({
   plugins: [
     new HtmlWebpackPlugin({
       title: "ASHIRT",
-      alwaysWriteToDisk: true,
-    }),
-    new HtmlWebpackHarddiskPlugin({
-      outputPath: path.resolve(__dirname, 'public')
+      filename: path.resolve(__dirname, 'public/index.html'),
     }),
     new MiniCssExtractPlugin({
       filename: 'main-[contenthash].css',
       chunkFilename: '[chunkhash].css',
+      ignoreOrder: true,
     }),
   ],
 
@@ -84,7 +74,8 @@ module.exports = (env, argv) => ({
       },
     ],
     devMiddleware: {
-      publicPath: "/assets/"
+      publicPath: "/assets/",
+      writeToDisk: (filePath) => filePath.endsWith('index.html'),
     },
     static: {
       directory: "public"

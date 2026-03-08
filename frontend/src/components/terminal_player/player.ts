@@ -15,13 +15,13 @@ export const EventTypeDesiredRateChange = 'desired rate change'
 
 export default class extends EventEmitter {
   terminal: Terminal
-  running: boolean
-  activeTimeout: NodeJS.Timeout
+  running: boolean = false
+  activeTimeout!: NodeJS.Timeout
   currentIndex: number
   content: TerminalRecordingData
   playbackRate: number
 
-  desiredPlaybackRate: number
+  desiredPlaybackRate: number = 0
   currentPlaybackRate: number
 
   duration: number
@@ -348,7 +348,7 @@ const parseTerminalRecording = (content: string, maxDelay = 1600): TerminalRecor
     }
   }
   catch (e) {
-    response.error = e
+    response.error = e instanceof Error ? e.message : String(e)
   }
 
   return response
