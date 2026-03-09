@@ -1,4 +1,4 @@
-import { GlobalVar } from 'src/global_types'
+import { type GlobalVar } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function createGlobalVar(name: string, value: string | null): Promise<GlobalVar> {

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import classnames from 'classnames/bind'
 import SettingsSection from 'src/components/settings_section'
 import { getDefaultTags, mergeDefaultTags } from 'src/services'
@@ -7,7 +7,7 @@ import Modal from 'src/components/modal'
 import Button from 'src/components/button'
 import Form from 'src/components/form'
 import { isError } from 'src/helpers/is_error'
-import { isPlainObject } from 'lodash'
+
 import { makeInvisibleDownloadAnchor } from 'src/helpers/invisible_download_anchor'
 import { useDropzone } from 'react-dropzone'
 import TagList from 'src/components/tag_list'
@@ -25,7 +25,7 @@ export const TagPorter = (props: {
     <ImportModal {...modalProps} requestReload={props.requestReload} />
   ))
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredTags.reload)
     return () => {
       props.offReload(wiredTags.reload)
@@ -77,9 +77,9 @@ export const TagPorter = (props: {
 }
 
 const ImportModal = (props: { onRequestClose: () => void; requestReload: () => void }) => {
-  const [err, setErr] = React.useState<Error | null>(null)
-  const [content, setContent] = React.useState<Array<UpsertTag> | null>(null)
-  const [contentFilename, setContentFilename] = React.useState<string | null>(null)
+  const [err, setErr] = useState<Error | null>(null)
+  const [content, setContent] = useState<Array<UpsertTag> | null>(null)
+  const [contentFilename, setContentFilename] = useState<string | null>(null)
 
   const formComponentProps = useForm({
     onSuccess: () => {
@@ -191,7 +191,7 @@ type UpsertTag = {
 }
 
 const isTag = (t: unknown): t is UpsertTag => {
-  if (isPlainObject(t)) {
+  if (t !== null && typeof t === 'object' && Object.getPrototypeOf(t) === Object.prototype) {
     const maybeTag = t as Record<string, string>
     return typeof maybeTag['name'] === 'string' && typeof maybeTag['colorName'] === 'string'
   }

@@ -1,8 +1,7 @@
-import * as React from 'react'
 import EvidenceChooser from 'src/components/evidence_chooser'
 import ModalForm from 'src/components/modal_form'
 import Select from 'src/components/select'
-import { Evidence, Finding } from 'src/global_types'
+import { type Evidence, type Finding } from 'src/global_types'
 import {
   createFinding,
   removeEvidenceFromFinding,

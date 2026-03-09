@@ -1,6 +1,6 @@
-import * as React from 'react'
+import { useState } from 'react'
 import classnames from 'classnames/bind'
-import { UserOwnView, SupportedAuthenticationScheme } from 'src/global_types'
+import { type UserOwnView, type SupportedAuthenticationScheme } from 'src/global_types'
 import { useWiredData } from 'src/helpers'
 import { getSupportedAuthentications } from 'src/services'
 import { format } from 'date-fns'
@@ -14,12 +14,12 @@ import { useAuthFrontendComponent } from 'src/authschemes'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function AuthMethods(props: {
   profile: UserOwnView
   allowLinking: boolean
   requestReload?: () => void
-}) => {
-  const [removeAuth, setRemovingAuth] = React.useState<null | string>(null)
+}) {
+  const [removeAuth, setRemovingAuth] = useState<null | string>(null)
   const wiredSchemes = useWiredData<Array<SupportedAuthenticationScheme>>(
     getSupportedAuthentications,
   )
@@ -64,7 +64,7 @@ const TableRow = (props: {
   allowLinking: boolean
   requestReload?: () => void
 }) => {
-  const [linking, setLinking] = React.useState<boolean>(false)
+  const [linking, setLinking] = useState<boolean>(false)
   const Linker = useAuthFrontendComponent(
     props.supportedScheme.schemeType,
     'Linker',

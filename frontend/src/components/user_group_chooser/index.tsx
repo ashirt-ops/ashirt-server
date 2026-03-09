@@ -1,26 +1,26 @@
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 import Input from 'src/components/input'
 import PopoverMenu from 'src/components/popover_menu'
-import { UserGroup } from 'src/global_types'
+import { type UserGroup } from 'src/global_types'
 import { listUserGroups } from 'src/services'
 
 const userGroupToName = (u: UserGroup) => `${u.name}`
 
-export default (props: {
+export default function UserGroupChooser(props: {
   value: UserGroup | null
   onChange: (userGroup: UserGroup | null) => void
   operationSlug: string
-}) => {
-  const [inputValue, setInputValue] = React.useState('')
-  const [dropdownVisible, setDropdownVisible] = React.useState(false)
-  const [searchResults, setSearchResults] = React.useState<Array<UserGroup>>([])
-  const [loading, setLoading] = React.useState(false)
+}) {
+  const [inputValue, setInputValue] = useState('')
+  const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [searchResults, setSearchResults] = useState<Array<UserGroup>>([])
+  const [loading, setLoading] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInputValue(props.value ? userGroupToName(props.value) : '')
   }, [props.value])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (inputValue === '') return
     const reload = () => {
       listUserGroups({ query: inputValue, operationSlug: props.operationSlug })

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import LoadingSpinner from 'src/components/loading_spinner'
 import { SpannedRow } from './spanned_row'
 

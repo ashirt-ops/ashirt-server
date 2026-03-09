@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type CSSProperties, type ReactNode, type MutableRefObject, useEffect } from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -16,29 +16,29 @@ export type ColumnData = {
   title: string
   sortDirection?: SortDirection
   clickable?: boolean
-  style?: React.CSSProperties
+  style?: CSSProperties
 }
 
-export const StartAlignedColumn: React.CSSProperties = {
+export const StartAlignedColumn: CSSProperties = {
   display: 'flex',
   justifyContent: 'flex-start',
 }
-export const EndAlignedColumn: React.CSSProperties = { display: 'flex', justifyContent: 'flex-end' }
-export const CenterAlignedColumn: React.CSSProperties = {
+export const EndAlignedColumn: CSSProperties = { display: 'flex', justifyContent: 'flex-end' }
+export const CenterAlignedColumn: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
 }
 
-export default (props: {
-  children: React.ReactNode
+export default function Table(props: {
+  children: ReactNode
   className?: string
   columns: Array<string | ColumnData>
   onColumnClicked?: (colIndex: number) => void
   onKeyDown?: (e: KeyboardEvent) => void
-  tableRef?: React.MutableRefObject<HTMLTableElement | null>
-}) => {
+  tableRef?: MutableRefObject<HTMLTableElement | null>
+}) {
   const noop = () => {}
-  React.useEffect(() => {
+  useEffect(() => {
     const curRootRef = props.tableRef?.current
     if (!curRootRef) {
       return

@@ -1,11 +1,10 @@
-import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import classnames from 'classnames/bind'
 import { login, register, userResetPassword, totpLogin } from '../services'
 import { useForm, useFormField } from 'src/helpers/use_form'
-import { useModal, renderModals, OnRequestClose } from 'src/helpers'
+import { useModal, renderModals, type OnRequestClose } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
@@ -32,18 +31,18 @@ function getValueAndClear(field: { value: string; onChange: (s: string) => void 
   return value
 }
 
-export default (props: { query: URLSearchParams; authFlags?: Array<string> }) => {
+export default function Login(props: { query: URLSearchParams; authFlags?: Array<string> }) {
   switch (props.query.get('step')) {
     case 'reset':
       return <ResetPassword />
     case 'totp':
       return <EnterTotp />
     default:
-      return <Login authFlags={props.authFlags} />
+      return <LoginForm authFlags={props.authFlags} />
   }
 }
 
-const Login = (props: { authFlags?: Array<string> }) => {
+const LoginForm = (props: { authFlags?: Array<string> }) => {
   const usernameField = useFormField('')
   const passwordField = useFormField('')
 

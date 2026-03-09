@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useNavigate } from 'react-router'
 
 import Button from 'src/components/button'
@@ -6,7 +5,7 @@ import OperationBadge from 'src/components/operation_badges'
 import OperationBadgesModal from 'src/components/operation_badges_modal'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import { Operation } from 'src/global_types'
+import { type Operation } from 'src/global_types'
 import { getOperationsForAdmin } from 'src/services'
 import { renderModals, useModal, useWiredData } from 'src/helpers'
 
@@ -44,7 +43,7 @@ const TableRow = (props: { op: Operation }) => {
   )
 }
 
-export default (props: {}) => {
+export default function OperationsTable(props: {}) {
   const wiredOps = useWiredData<Array<Operation>>(getOperationsForAdmin)
 
   return (

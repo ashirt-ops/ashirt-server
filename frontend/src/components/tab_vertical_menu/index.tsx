@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type ReactNode } from 'react'
 import classnames from 'classnames/bind'
 import { Outlet } from 'react-router'
 
@@ -10,7 +10,7 @@ export type Tab = {
   id: string
   disabled?: boolean
   label: string
-  content?: React.ReactNode
+  content?: ReactNode
 }
 
 export type NavTab = {
@@ -22,7 +22,7 @@ export type NavTab = {
 export const NavVerticalTabMenu = (props: {
   title: string
   tabs: Array<NavTab>
-  children: React.ReactNode
+  children: ReactNode
 }) => {
   return (
     <nav className={cx('root')}>

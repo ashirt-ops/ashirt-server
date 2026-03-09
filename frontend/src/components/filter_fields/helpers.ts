@@ -3,13 +3,13 @@ import * as dateFns from 'date-fns'
 import {
   parseQuery,
   parseDateRangeString,
-  ParsedQuery,
-  FilterModifier,
-  FilterModified,
+  type ParsedQuery,
+  type FilterModifier,
+  type FilterModified,
 } from 'src/helpers'
-import { Tag, User } from 'src/global_types'
+import { type Tag, type User } from 'src/global_types'
 import {
-  BulletProps,
+  type BulletProps,
   creatorToBulletProps,
   supportedEvidenceCount,
   tagToBulletProps,

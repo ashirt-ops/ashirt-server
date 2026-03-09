@@ -1,5 +1,5 @@
 import * as dtos from './dtos/dtos'
-import * as types from 'src/global_types'
+import type * as types from 'src/global_types'
 
 type EvidenceUuid = { evidenceUuid: string }
 type FindingUuid = { findingUuid: string }

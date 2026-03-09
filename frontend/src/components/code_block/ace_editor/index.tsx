@@ -1,6 +1,6 @@
-import * as React from 'react'
+import { useRef, useState, useEffect, type MutableRefObject } from 'react'
 import * as ace from 'ace-builds'
-import AceEditor from 'react-ace'
+import ReactAce from 'react-ace'
 import classnames from 'classnames/bind'
 import { useElementRect } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
@@ -9,20 +9,20 @@ const cx = classnames.bind(require('./stylesheet'))
 // and make it easier to work with. It handles automatic loading of modes
 // with webpack chunks and it matches the size of the editor to the size
 // of the parent container.
-export default (props: {
+export default function AceEditor(props: {
   mode: string
   onChange?: (code: string) => void
   readOnly?: boolean
   value: string
-}) => {
-  const rootRef = React.useRef<HTMLDivElement | null>(null)
+}) {
+  const rootRef = useRef<HTMLDivElement | null>(null)
   const editorSize = useSizeOfParentContainer(rootRef)
   const mode = useLoadAceModeWithWebpack(props.mode)
   useStopPropagationOfSearchKeydowns(rootRef)
 
   return (
     <div className={cx('root')} ref={rootRef}>
-      <AceEditor
+      <ReactAce
         {...props}
         {...editorSize}
         mode={mode}
@@ -38,16 +38,16 @@ export default (props: {
 // into webpack chunks and load them as requested. This function will return the mode
 // string only after it has loaded the mode via webpack chunk
 function useLoadAceModeWithWebpack(requestedMode: string): string {
-  const [loadedMode, setLoadedMode] = React.useState('plain_text')
+  const [loadedMode, setLoadedMode] = useState('plain_text')
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (requestedMode === '') {
       setLoadedMode('plain_text')
       return
     }
     import(`ace-builds/src-noconflict/mode-${requestedMode}`)
       .then(() => setLoadedMode(requestedMode))
-      .catch((err) => console.error(`Unable to load mode: ${requestedMode}`))
+      .catch(() => { /* mode load failed, editor will use plain_text fallback */ })
   }, [requestedMode])
 
   return loadedMode
@@ -61,14 +61,14 @@ function useLoadAceModeWithWebpack(requestedMode: string): string {
 // root container. Using values "100%" for both cause strange bugs where the editor
 // may not display if a min-height/min-width is specified in a parent rather than
 // an absolute height/width
-function useSizeOfParentContainer(parentRef: React.MutableRefObject<HTMLDivElement | null>): {
+function useSizeOfParentContainer(parentRef: MutableRefObject<HTMLDivElement | null>): {
   width: string
   height: string
 } {
-  const [size, setSize] = React.useState({ width: '100%', height: '100%' })
+  const [size, setSize] = useState({ width: '100%', height: '100%' })
 
   const parentRect = useElementRect(parentRef)
-  React.useEffect(() => {
+  useEffect(() => {
     if (parentRect == null) {
       return
     }
@@ -85,14 +85,14 @@ function useSizeOfParentContainer(parentRef: React.MutableRefObject<HTMLDivEleme
 // Since search field is self-contained within the ace-editor it seems reasonable that
 // a user typing in the search field shouldn't emit keydown events up the dom.
 function useStopPropagationOfSearchKeydowns(
-  parentRef: React.MutableRefObject<HTMLDivElement | null>,
+  parentRef: MutableRefObject<HTMLDivElement | null>,
 ) {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.target && (e.target as HTMLElement).className === 'ace_search_field') {
       e.stopPropagation()
     }
   }
-  React.useEffect(() => {
+  useEffect(() => {
     const curParentRef = parentRef.current
     if (!curParentRef) return
     curParentRef.addEventListener('keydown', onKeyDown)

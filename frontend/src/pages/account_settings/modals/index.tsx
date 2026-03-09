@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { deleteUserAuthenticationScheme } from 'src/services'
 
 import ChallengeModalForm from 'src/components/challenge_modal_form'

@@ -1,18 +1,18 @@
-import * as React from 'react'
+import { useState, useRef, useEffect, useCallback, type RefObject } from 'react'
 import classnames from 'classnames/bind'
-import { Tag, User, ViewName } from 'src/global_types'
+import { type Tag, type User, type ViewName } from 'src/global_types'
 
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { FilterFieldsGrid } from 'src/components/filter_fields/filter-field-grid'
 import Input from 'src/components/input'
 import {
   stringToSearch,
-  SearchOptions,
+  type SearchOptions,
   stringifySearch,
 } from 'src/components/filter_fields/helpers'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { getTags, listEvidenceCreators } from 'src/services'
-import { CreateButtonPosition } from '..'
+import { type CreateButtonPosition } from '..'
 import { SearchHelpModal } from './search_modal'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -32,15 +32,15 @@ export const Toolbar = (props: {
   exportEvidence?: () => Promise<void>
   userCanExportData?: boolean
 }) => {
-  const [queryString, setQueryString] = React.useState<string>(props.query)
-  const inputRef = React.useRef<HTMLInputElement>(null)
+  const [queryString, setQueryString] = useState<string>(props.query)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setQueryString(props.query)
   }, [props.query])
 
   const wiredData = useWiredData<[Array<Tag>, Array<User>]>(
-    React.useCallback(
+    useCallback(
       () =>
         Promise.all([
           getTags({ operationSlug: props.operationSlug }),
@@ -144,7 +144,7 @@ const ExpandedSearch = (props: {
 
 const SearchInput = (props: {
   queryString: string
-  inputRef: React.RefObject<HTMLInputElement | null>
+  inputRef: RefObject<HTMLInputElement | null>
   onSearch: (query: string) => void
   setQueryString: (query: string) => void
 }) => {

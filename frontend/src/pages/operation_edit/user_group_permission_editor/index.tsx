@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useCallback, useEffect, useContext } from 'react'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
 import ErrorDisplay from 'src/components/error_display'
@@ -12,7 +12,7 @@ import Table from 'src/components/table'
 import UserGroupChooser from 'src/components/user_group_chooser'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { UserGroup, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
+import { type UserGroup, type UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
 import { getUserGroupPermissions, setUserGroupPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
@@ -151,13 +151,13 @@ const PermissionTable = (props: {
   const itemsPerPage = 10
 
   const filterField = useFormField('')
-  const [page, setPage] = React.useState(1)
+  const [page, setPage] = useState(1)
 
   const normalizeName = (userGroup: UserGroup) => `${userGroup.name}`.toLowerCase()
   const normalizedSearchTerm = filterField.value.toLowerCase()
 
   const wiredPermissions = useWiredData(
-    React.useCallback(
+    useCallback(
       () => getUserGroupPermissions({ slug: props.operationSlug, name: '' }),
       [props.operationSlug],
     ),
@@ -165,7 +165,7 @@ const PermissionTable = (props: {
     () => <LoadingSpinner />,
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredPermissions.reload)
     return () => {
       props.offReload(wiredPermissions.reload)
@@ -222,9 +222,9 @@ const PermissionTable = (props: {
   )
 }
 
-export default (props: { operationSlug: string; isAdmin: boolean }) => {
+export default function UserGroupPermissionEditor(props: { operationSlug: string; isAdmin: boolean }) {
   const bus = BuildReloadBus()
-  const currentUser = React.useContext(AuthContext)?.user
+  const currentUser = useContext(AuthContext)?.user
 
   return (
     <SettingsSection title="Operation User Groups" width="wide">

@@ -1,10 +1,10 @@
-import * as React from 'react'
+import { type ReactNode, Children, isValidElement } from 'react'
 import classnames from 'classnames/bind'
 import WithLabel from 'src/components/with_label'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
-  children: React.ReactNode
+const Select = (props: {
+  children: ReactNode
   className?: string
   disabled?: boolean
   label?: string
@@ -26,11 +26,12 @@ export default (props: {
     </div>
   </WithLabel>
 )
+export default Select
 
-function getNameForValue(curValue: string, children: React.ReactNode): string {
+function getNameForValue(curValue: string, children: ReactNode): string {
   let name = curValue
-  React.Children.forEach(children, (child) => {
-    if (!React.isValidElement(child)) {
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) {
       return
     }
 

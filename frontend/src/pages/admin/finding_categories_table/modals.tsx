@@ -1,7 +1,6 @@
-import * as React from 'react'
 import Input from 'src/components/input'
 import ModalForm from 'src/components/modal_form'
-import { FindingCategory } from 'src/global_types'
+import { type FindingCategory } from 'src/global_types'
 import { createFindingCategory, deleteFindingCategory, updateFindingCategory } from 'src/services'
 import { useForm, useFormField } from 'src/helpers'
 

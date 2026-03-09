@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { useCallback, type ReactElement, useState, useRef, useEffect } from 'react'
 import ErrorDisplay from 'src/components/error_display'
 import LoadingSpinner from 'src/components/loading_spinner'
-import { PaginationResult } from 'src/global_types'
+import { type PaginationResult } from 'src/global_types'
 
 // useWiredData is a react hook helper to make it trivial to load data in a component.
 // It takes a `fetchDataFn` which returns a promise, and it returns a render method that will
@@ -22,13 +22,13 @@ import { PaginationResult } from 'src/global_types'
 // Handling dynamic fetchDataFns
 // useWiredData will refetch data any time the fetchDataFn changes. This means using an inline
 // function for useWiredData will result in constant fetching. To resolve this, you should use
-// `React.useCallback` which memoizes the callback to prevent this. This will have the added
+// `useCallback` which memoizes the callback to prevent this. This will have the added
 // benefit of automatically reloading data anytime any dependencies change and will be enforced
 // by the `react-hooks/exhaustive-deps`  lint rule
 //
 // Example:
 // const SomeComponent = (props: { userId: number }) => {
-//   const wiredUser = useWiredData(React.useCallback(() => fetchUser(props.userId), [props.userId]))
+//   const wiredUser = useWiredData(useCallback(() => fetchUser(props.userId), [props.userId]))
 //
 //   return wiredUser.render(user => <ProfilePicture avatar={user.avatar} />)
 // }
@@ -41,7 +41,7 @@ import { PaginationResult } from 'src/global_types'
 //
 // Example:
 //   const wiredUser = useWiredData(
-//     React.useCallback(() => fetchUser(props.userId), [props.userId]),
+//     useCallback(() => fetchUser(props.userId), [props.userId]),
 //     (err: Error) => <CustomErrorRenderer err={err} />,
 //     () => <CustomLoadingRenderer />,
 //   )
@@ -58,15 +58,15 @@ import { PaginationResult } from 'src/global_types'
 // calls to fetchDataFn:  1.......2....3............6.....7...
 //                                     time -->
 //
-// This allows you to pass in things like user input directly as a dependency to `React.useCallback`
+// This allows you to pass in things like user input directly as a dependency to `useCallback`
 // without sending many intermediate requests
 
-type Renderer<T> = (data: T) => React.ReactElement
+type Renderer<T> = (data: T) => ReactElement
 type Exposer<T> = (data: T) => void
 export type WiredData<T> = {
   loading: boolean
   reload: () => void
-  render: (renderer: Renderer<T>) => React.ReactElement
+  render: (renderer: Renderer<T>) => ReactElement
   expose: (exposer: Exposer<T>) => void
 }
 
@@ -85,14 +85,14 @@ export function useWiredData<T>(
   errorRenderer: Renderer<Error> = (err) => <ErrorDisplay err={err} />,
   loadingRenderer: Renderer<void> = () => <LoadingSpinner />,
 ): WiredData<T> {
-  const [err, setErr] = React.useState<Error | null>(null)
-  const [loading, setLoading] = React.useState(true)
-  const [data, setData] = React.useState<{ value: T } | null>(null)
-  const [isDirty, makeDirty] = React.useState(false)
-  const [debouncedFetchDataFn, setDebouncedFetchDataFn] = React.useState(() => fetchDataFn)
-  const isDebouncing = React.useRef(false)
+  const [err, setErr] = useState<Error | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<{ value: T } | null>(null)
+  const [isDirty, makeDirty] = useState(false)
+  const [debouncedFetchDataFn, setDebouncedFetchDataFn] = useState(() => fetchDataFn)
+  const isDebouncing = useRef(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     let timeoutFn: () => void
     if (isDebouncing.current) {
       timeoutFn = () => {
@@ -113,7 +113,7 @@ export function useWiredData<T>(
     }
   }, [fetchDataFn])
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true)
     debouncedFetchDataFn()
       .then((data: T) => {
@@ -149,10 +149,10 @@ export function usePaginatedWiredData<T>(
   errorRenderer: Renderer<Error> = (err) => <ErrorDisplay err={err} />,
   loadingRenderer: Renderer<void> = () => <LoadingSpinner />,
 ): PaginatedWiredData<T> {
-  const [pageNumber, setPageNumber] = React.useState(1)
-  const [totalPages, setTotalPages] = React.useState(1)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
-  const memoizedFetchDataFn = React.useCallback(async (): Promise<Array<T>> => {
+  const memoizedFetchDataFn = useCallback(async (): Promise<Array<T>> => {
     const data = await fetchDataFn(pageNumber)
     setTotalPages(data.totalPages)
     return data.content

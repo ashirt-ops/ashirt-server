@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { useModal, renderModals } from 'src/helpers'
 import classnames from 'classnames/bind'
 
@@ -25,11 +25,11 @@ const cx = classnames.bind(require('./stylesheet'))
 //        { keys: ["G"], description: "Move to the bottom of the evidence list" }, // G is represented as `Shift + G`
 //      }
 //  />
-export default (props: {
+export default function Help(props: {
   preamble?: string
   shortcuts?: Array<KeyboardShortcut>
   className?: string
-}) => {
+}) {
   const helpModal = useModal<{}>((modalProps) => (
     <HelpModal preamble={props.preamble} shortcuts={props.shortcuts} {...modalProps} />
   ))
@@ -40,7 +40,7 @@ export default (props: {
     if (e.key === '?') helpModal.show({})
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
@@ -75,7 +75,7 @@ export const HelpModal = (props: {
     if (e.key === 'Escape') props.onRequestClose()
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
@@ -107,7 +107,7 @@ const KeyboardShortcutKey = (props: { shortcut: KeyboardShortcut }) => {
       <em className={cx('shortcut-description')}>{props.shortcut.description}: </em>
       {props.shortcut.keys
         .filter((key) => key.length > 0)
-        .map<React.ReactNode>((key, i) => {
+        .map<ReactNode>((key, i) => {
           const singleLetter = key.length == 1
           const firstKeyCode = key.charCodeAt(0)
           const isUppercaseLetter = 65 <= firstKeyCode && firstKeyCode <= 90 // A - Z
@@ -142,6 +142,6 @@ const KeyboardShortcutKey = (props: { shortcut: KeyboardShortcut }) => {
   )
 }
 
-const Key = (props: { children: React.ReactNode }) => (
+const Key = (props: { children: ReactNode }) => (
   <div className={cx('key')}>{props.children}</div>
 )

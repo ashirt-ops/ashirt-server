@@ -27,10 +27,11 @@ module.exports = [
         ignoreRestSiblings: true,
       }],
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/consistent-type-imports': ['warn', {
+      '@typescript-eslint/consistent-type-imports': ['error', {
         prefer: 'type-imports',
         fixStyle: 'inline-type-imports',
       }],
+      'no-console': 'error',
       'react/jsx-uses-react': ['error'],
       'react/jsx-uses-vars': ['error'],
       'react-hooks/rules-of-hooks': ['error'],

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import classnames from 'classnames/bind'
 
 import AuthTable from './auth_table'
@@ -17,7 +16,7 @@ import ServiceWorkerTable from './service_worker_table'
 import AddServiceWorker from './service_worker_table/add_service_button'
 import GlobalVarsTable from './global_vars_table'
 
-import { BuildReloadBus, BusSupportedService } from 'src/helpers/reload_bus'
+import { BuildReloadBus, type BusSupportedService } from 'src/helpers/reload_bus'
 import { DefaultTagEditor } from './default_tag_editor'
 import { TagPorter } from './tag_porter'
 import { Route, Routes } from 'react-router'

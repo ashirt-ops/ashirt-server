@@ -1,12 +1,12 @@
-import * as React from 'react'
+import { type MouseEvent } from 'react'
 import Tag from 'src/components/tag'
 import classnames from 'classnames/bind'
-import { Tag as TagType } from 'src/global_types'
+import { type Tag as TagType } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+const TagList = (props: {
   tags: Array<TagType>
-  onTagClick?: (t: TagType, e: React.MouseEvent) => void
+  onTagClick?: (t: TagType, e: MouseEvent) => void
 }) => (
   <div className={cx('root')}>
     {props.tags.map((tag) => (
@@ -19,3 +19,4 @@ export default (props: {
     ))}
   </div>
 )
+export default TagList

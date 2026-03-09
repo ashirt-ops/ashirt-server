@@ -1,7 +1,6 @@
-import * as React from 'react'
 
-import BulletChooser, { BulletProps } from 'src/components/bullet_chooser'
-import { SupportedEvidenceType } from 'src/global_types'
+import BulletChooser, { type BulletProps } from 'src/components/bullet_chooser'
+import { type SupportedEvidenceType } from 'src/global_types'
 
 export type EvidenceTypeOption = BulletProps & {
   id: SupportedEvidenceType

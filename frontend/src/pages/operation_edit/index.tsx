@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import classnames from 'classnames/bind'
 import { useParams, useNavigate, Routes, Route } from 'react-router'
 
@@ -20,14 +20,14 @@ export const OperationEdit = () => {
   const { slug } = useParams<{ slug: string }>()
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const navigate = useNavigate()
-  const [canViewGroups, setCanViewGroups] = React.useState(false)
-  const [operationName, setOperationName] = React.useState('')
+  const [canViewGroups, setCanViewGroups] = useState(false)
+  const [operationName, setOperationName] = useState('')
 
   const wiredOperation = useWiredData(
-    React.useCallback(() => getOperation(operationSlug), [operationSlug]),
+    useCallback(() => getOperation(operationSlug), [operationSlug]),
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     wiredOperation.expose((operation) => {
       setCanViewGroups(!!operation?.userCanViewGroups)
       setOperationName(operation?.name)

@@ -1,4 +1,4 @@
-import { Request, Response } from 'har-format'
+import { type Request, type Response } from 'har-format'
 
 export const mimetypeToAceLang = (mimetype: string) => {
   if (mimetype.includes('text/javascript') || mimetype.includes('application/json')) {

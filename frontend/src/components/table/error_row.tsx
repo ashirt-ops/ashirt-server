@@ -1,4 +1,3 @@
-import * as React from 'react'
 import ErrorDisplay from 'src/components/error_display'
 import { SpannedRow } from './spanned_row'
 

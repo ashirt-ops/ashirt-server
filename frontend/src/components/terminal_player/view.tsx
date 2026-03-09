@@ -1,6 +1,6 @@
-import * as React from 'react'
+import { useRef, useState, type CSSProperties, useEffect, useMemo, type MouseEvent, type ReactNode } from 'react'
 import classnames from 'classnames/bind'
-import { PositionChangeEventBody, RateChangeEventBody, ExpandedTerminalEvent } from './types'
+import { type PositionChangeEventBody, type RateChangeEventBody, type ExpandedTerminalEvent } from './types'
 import { format } from 'date-fns'
 
 import { ClickPopover } from 'src/components/popover'
@@ -18,20 +18,20 @@ import {
 import '@xterm/xterm/css/xterm.css'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function View(props: {
   content: string
   playerUUID: string
   onTerminalScriptUpdated: (b: Blob) => Promise<void>
-}) => {
-  const rootRef = React.useRef<HTMLDivElement | null>(null)
-  const termRef = React.useRef<HTMLDivElement | null>(null)
-  const termPlayer = React.useRef<TerminalPlayer | null>(null)
+}) {
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const termRef = useRef<HTMLDivElement | null>(null)
+  const termPlayer = useRef<TerminalPlayer | null>(null)
 
-  const [termStyle, setTermStyle] = React.useState<React.CSSProperties>({})
-  const [wrapperStyle, setWrapperStyle] = React.useState<React.CSSProperties>({})
+  const [termStyle, setTermStyle] = useState<CSSProperties>({})
+  const [wrapperStyle, setWrapperStyle] = useState<CSSProperties>({})
 
   const rootRect = useElementRect(rootRef)
-  React.useEffect(() => {
+  useEffect(() => {
     if (rootRect == null || termRef.current == null) {
       return
     }
@@ -51,7 +51,7 @@ export default (props: {
     setWrapperStyle({ height: termRef.current.clientHeight * scale })
   }, [rootRect, termRef])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (termPlayer.current != null || termRef.current == null) {
       return
     }
@@ -87,16 +87,16 @@ const PlaybackControlLogic = (props: {
   player: TerminalPlayer
   onTerminalScriptUpdated: (b: Blob) => Promise<void>
 }) => {
-  const [model, setModel] = React.useState<Array<string> | null>(null)
-  const [bookmarkInsertIndex, setBookmarkInserIndex] = React.useState(0)
-  const [playing, setPlaying] = React.useState(false)
-  const [desiredRate, setDesiredRate] = React.useState(1)
-  const [playbackTime, setPlaybackTime] = React.useState(0)
-  const [completed, setCompleted] = React.useState(0)
+  const [model, setModel] = useState<Array<string> | null>(null)
+  const [bookmarkInsertIndex, setBookmarkInserIndex] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [desiredRate, setDesiredRate] = useState(1)
+  const [playbackTime, setPlaybackTime] = useState(0)
+  const [completed, setCompleted] = useState(0)
 
   const termPlayer = props.player
 
-  const handlerPairs = React.useMemo(
+  const handlerPairs = useMemo(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (): Array<[string, (...args: any[]) => void]> => [
       [
@@ -112,7 +112,7 @@ const PlaybackControlLogic = (props: {
     [],
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     handlerPairs.forEach((p) => termPlayer.on(...p))
     return () => {
       handlerPairs.forEach((p) => termPlayer.removeListener(...p))
@@ -181,10 +181,10 @@ const PlaybackControls = (props: {
   playbackTime: string
   supportedPlaybackRates: Array<number>
   setRate: (newRate: number) => void
-  playPauseToggle: (e: React.MouseEvent<Element, MouseEvent>) => void
-  resetStream: (e: React.MouseEvent<Element, MouseEvent>) => void
-  openBookmarkModal: (e: React.MouseEvent<Element, MouseEvent>) => void
-  children: React.ReactNode
+  playPauseToggle: (e: MouseEvent<Element>) => void
+  resetStream: (e: MouseEvent<Element>) => void
+  openBookmarkModal: (e: MouseEvent<Element>) => void
+  children: ReactNode
 }) => (
   <>
     <div className={cx('controls')}>
@@ -230,8 +230,8 @@ const ProgressBar = (props: {
   jumpToPosition: (pct: number) => void
   closestEventTime: (pct: number) => number
 }) => {
-  const progressRef = React.useRef<HTMLDivElement | null>(null)
-  const [hoverText, setHoverText] = React.useState('')
+  const progressRef = useRef<HTMLDivElement | null>(null)
+  const [hoverText, setHoverText] = useState('')
 
   const percentIntoProgressBar = (clientX: number): number => {
     if (progressRef.current) {
@@ -242,10 +242,10 @@ const ProgressBar = (props: {
   }
 
   const progressBarEvents = {
-    onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    onClick: (e: MouseEvent<HTMLDivElement>) => {
       props.jumpToPosition(percentIntoProgressBar(e.clientX))
     },
-    onMouseMove: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    onMouseMove: (e: MouseEvent<HTMLDivElement>) => {
       const percentComplete = percentIntoProgressBar(e.clientX)
       const eventTime = props.closestEventTime(percentComplete)
       setHoverText(`Jump To: ${format(eventTime * 1000, "MMM dd, yyyy '@' HH:mm")}`)

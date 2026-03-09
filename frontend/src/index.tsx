@@ -1,5 +1,4 @@
 require('./base_css')
-import * as React from 'react'
 import AuthContext from 'src/auth_context'
 import Layout from 'src/components/layout'
 import Routes from 'src/routes'

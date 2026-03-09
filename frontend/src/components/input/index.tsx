@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type KeyboardEvent, type ForwardedRef, useEffect, forwardRef } from 'react'
 import LoadingSpinner from 'src/components/loading_spinner'
 import WithLabel from 'src/components/with_label'
 import classnames from 'classnames/bind'
@@ -13,14 +13,14 @@ type SharedProps = {
   onChange?: (newValue: string) => void
   onClick?: () => void
   onFocus?: () => void
-  onKeyDown?: (e: React.KeyboardEvent) => void
+  onKeyDown?: (e: KeyboardEvent) => void
   placeholder?: string
   readOnly?: boolean
   value?: string
   adjustHeight?: boolean
 }
 
-export default React.forwardRef(
+export default forwardRef(
   (
     props: SharedProps & {
       icon?: string
@@ -29,7 +29,7 @@ export default React.forwardRef(
       inputClassName?: string
       autoFocus?: true
     },
-    ref: React.ForwardedRef<HTMLInputElement>,
+    ref: ForwardedRef<HTMLInputElement>,
   ) => (
     <WithLabel className={cx('root', props.className)} label={props.label}>
       {props.loading && <LoadingSpinner className={cx('spinner')} small />}
@@ -60,15 +60,15 @@ export default React.forwardRef(
   ),
 )
 
-export const TextArea = React.forwardRef(
-  (props: SharedProps & {}, ref: React.ForwardedRef<HTMLTextAreaElement>) => {
+export const TextArea = forwardRef(
+  (props: SharedProps & {}, ref: ForwardedRef<HTMLTextAreaElement>) => {
     const adjustTextareaHeight = () => {
       const element = document.getElementById('autoResizeTextarea')
       element!.style.height = 'auto'
       element!.style.height = element!.scrollHeight < 400 ? element!.scrollHeight + 'px' : '400px'
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
       if (props.adjustHeight) adjustTextareaHeight()
     }, [props.adjustHeight])
 

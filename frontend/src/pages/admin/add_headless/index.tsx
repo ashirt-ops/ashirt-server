@@ -1,10 +1,10 @@
-import * as React from 'react'
+import { useState } from 'react'
 import Button from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import { AddHeadlessUserModal } from 'src/pages/admin_modals'
 
-export default (props: { requestReload?: () => void }) => {
-  const [newHeadlessUser, setNewHeadlessUser] = React.useState<boolean>(false)
+export default function AddHeadless(props: { requestReload?: () => void }) {
+  const [newHeadlessUser, setNewHeadlessUser] = useState<boolean>(false)
 
   return (
     <SettingsSection title="Headless User Creation">

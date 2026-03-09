@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // This file uses `any` intentionally for runtime type guard validation functions.
 import {
-  Har,
-  Log,
-  Creator,
-  Entry,
-  Request,
-  Response,
-  Header,
-  Content,
-  PostData,
-  Param,
+  type Har,
+  type Log,
+  type Creator,
+  type Entry,
+  type Request,
+  type Response,
+  type Header,
+  type Content,
+  type PostData,
+  type Param,
   // Browser, Cache, CacheDetails, Cookie, Page, PageTiming, QueryString, Timings
 } from 'har-format'
 

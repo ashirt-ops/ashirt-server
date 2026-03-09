@@ -1,19 +1,19 @@
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 import WithLabel from 'src/components/with_label'
 import classnames from 'classnames/bind'
 import { useDropzone } from 'react-dropzone'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function ImageUpload(props: {
   disabled: boolean
   label: string
   onChange: (newValue: File | null) => void
   value: File | null
-}) => {
-  const [imageDataUriString, setImageDataUriString] = React.useState<string | null>(null)
-  const [err, setErr] = React.useState<Error | null>(null)
+}) {
+  const [imageDataUriString, setImageDataUriString] = useState<string | null>(null)
+  const [err, setErr] = useState<Error | null>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const file = props.value
     if (file == null) {
       setErr(null)

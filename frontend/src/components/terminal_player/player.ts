@@ -1,10 +1,10 @@
 import { Terminal } from '@xterm/xterm'
 import {
-  TerminalEvent,
-  TerminalRecordingHeader,
-  TerminalRecordingData,
-  ExpandedTerminalEvent,
-  PositionChangeEventBody,
+  type TerminalEvent,
+  type TerminalRecordingHeader,
+  type TerminalRecordingData,
+  type ExpandedTerminalEvent,
+  type PositionChangeEventBody,
 } from './types'
 import { clamp } from 'src/helpers'
 

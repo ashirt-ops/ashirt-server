@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { type ReactNode, type FormEvent, type MouseEvent } from 'react'
 import Button from 'src/components/button'
 import classnames from 'classnames/bind'
-import { Result } from 'src/global_types'
+import { type Result } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
 const DisplayResult = (props: { result: Result<string> }) => {
@@ -10,11 +10,11 @@ const DisplayResult = (props: { result: Result<string> }) => {
   return <div className={cx('result', 'success')}>{result.success}</div>
 }
 
-export default (props: {
-  children?: React.ReactNode
+export default function Form(props: {
+  children?: ReactNode
   result: Result<string> | null
   loading: boolean
-  onSubmit: (e: React.FormEvent) => void
+  onSubmit: (e: FormEvent) => void
   onCancel?: () => void
   submitText?: string
   cancelText?: string
@@ -22,8 +22,8 @@ export default (props: {
   disableSubmit?: boolean
   disableCancel?: boolean
   autoFocus?: boolean
-}) => {
-  const onCancel = (e: React.MouseEvent) => {
+}) {
+  const onCancel = (e: MouseEvent) => {
     e.preventDefault()
     if (props.onCancel) props.onCancel()
   }

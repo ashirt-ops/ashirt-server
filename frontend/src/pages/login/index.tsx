@@ -1,11 +1,11 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useLocation, useParams } from 'react-router'
 
 import { useAuthFrontendComponent } from 'src/authschemes'
 import Recovery from 'src/authschemes/recovery'
 import { RecoverySchemeName } from 'src/authschemes/recovery/constants'
 import Button from 'src/components/button'
-import { SupportedAuthenticationScheme } from 'src/global_types'
+import { type SupportedAuthenticationScheme } from 'src/global_types'
 import { useWiredData } from 'src/helpers'
 import { getSupportedAuthentications } from 'src/services/auth'
 
@@ -16,7 +16,7 @@ const cx = classnames.bind(require('./stylesheet'))
 // To add a new authentication method add a new authscheme frontend to
 // src/auth and ensure it is enabled on the backend
 // An optional schemeCode can be provided to only render that auth method
-export default () => {
+export default function Login() {
   const { schemeCode: renderOnlyScheme } = useParams<{ schemeCode?: string }>()
   const location = useLocation()
   const wiredAuthSchemes = useWiredData(getSupportedAuthentications)
@@ -66,7 +66,7 @@ const LoginMenu = (props: {
   authSchemes: Array<SupportedAuthenticationScheme>
   query: URLSearchParams
 }) => {
-  const [currentAuth, setCurrentAuth] = React.useState<SupportedAuthenticationScheme | null>(null)
+  const [currentAuth, setCurrentAuth] = useState<SupportedAuthenticationScheme | null>(null)
 
   return (
     <div className={cx('login-menu')}>

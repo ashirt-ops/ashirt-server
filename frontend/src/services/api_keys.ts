@@ -1,4 +1,4 @@
-import { ApiKey } from 'src/global_types'
+import { type ApiKey } from 'src/global_types'
 import { apiKeyFromDto } from './data_sources/converters'
 import { backendDataSource as ds } from './data_sources/backend'
 

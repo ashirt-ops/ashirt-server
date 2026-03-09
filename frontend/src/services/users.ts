@@ -1,10 +1,10 @@
 import { backendDataSource as ds } from './data_sources/backend'
 import {
-  PaginationResult,
-  User,
-  UserAdminView,
-  ListUsersForAdminQuery,
-  UserFilter,
+  type PaginationResult,
+  type User,
+  type UserAdminView,
+  type ListUsersForAdminQuery,
+  type UserFilter,
 } from 'src/global_types'
 
 export async function listUsers(i: {

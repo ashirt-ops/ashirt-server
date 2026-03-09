@@ -1,6 +1,6 @@
-import * as React from 'react'
+import { useState, useCallback, useEffect, type JSX } from 'react'
 
-import { OperationVar } from 'src/global_types'
+import { type OperationVar } from 'src/global_types'
 import { getOperationVars } from 'src/services'
 
 import { default as Table, ErrorRow, LoadingRow } from 'src/components/table'
@@ -11,23 +11,23 @@ import { useWiredData } from 'src/helpers'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import CreateVarButton from 'src/components/add_variable'
 
-export default (props: { operationSlug: string; isAdmin: boolean }) => {
+export default function OperationVarsTable(props: { operationSlug: string; isAdmin: boolean }) {
   const bus = BuildReloadBus()
 
-  const [deletingOperationVar, setDeletingOperationVar] = React.useState<null | OperationVar>(null)
-  const [modifyingOperationVar, setModifyingOperationVar] = React.useState<null | OperationVar>(
+  const [deletingOperationVar, setDeletingOperationVar] = useState<null | OperationVar>(null)
+  const [modifyingOperationVar, setModifyingOperationVar] = useState<null | OperationVar>(
     null,
   )
 
   const columns = Object.keys(rowBuilder(null, <span />))
 
   const wiredOperationVars = useWiredData<OperationVar[]>(
-    React.useCallback(() => getOperationVars(props.operationSlug), [props.operationSlug]),
+    useCallback(() => getOperationVars(props.operationSlug), [props.operationSlug]),
     (err: Error) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />,
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     bus.onReload(wiredOperationVars.reload)
     return () => {
       bus.offReload(wiredOperationVars.reload)
@@ -86,10 +86,10 @@ const TableRow = (props: { data: Rowdata; operationVar: OperationVar }) => (
 
 type Rowdata = {
   Name: string
-  Actions: React.JSX.Element
+  Actions: JSX.Element
 }
 
-const rowBuilder = (u: OperationVar | null, actions: React.JSX.Element): Rowdata => ({
+const rowBuilder = (u: OperationVar | null, actions: JSX.Element): Rowdata => ({
   Name: u ? u.name : '',
   Actions: actions,
 })

@@ -1,19 +1,19 @@
-import * as React from 'react'
+import { type ReactNode, useState, useEffect } from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
-  children: React.ReactNode
+export default function Lightbox(props: {
+  children: ReactNode
   isOpen: boolean
   canUseFitToggle?: boolean
   onRequestClose: () => void
-}) => {
-  const [exists, setExists] = React.useState<boolean>(false)
-  const [animating, setAnimating] = React.useState<boolean>(true)
-  const [full, setFull] = React.useState<boolean>(false)
+}) {
+  const [exists, setExists] = useState<boolean>(false)
+  const [animating, setAnimating] = useState<boolean>(true)
+  const [full, setFull] = useState<boolean>(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (props.isOpen) {
       setExists(true)
       setAnimating(true)
@@ -29,7 +29,7 @@ export default (props: {
     if (e.key === 'z' || e.key === 'Z') setFull(!full)
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })

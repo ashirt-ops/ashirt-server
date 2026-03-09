@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { type MouseEvent } from 'react'
 
 import Button from 'src/components/button'
-import { OIDCInstanceConfig } from '..'
+import { type OIDCInstanceConfig } from '..'
 
 // export default (props: {
 //   onSuccess: () => void,
@@ -11,7 +11,7 @@ import { OIDCInstanceConfig } from '..'
 // )
 
 export const makeLinker = (config: OIDCInstanceConfig) => {
-  const onClick = (e: React.MouseEvent<Element, MouseEvent>) => {
+  const onClick = (e: MouseEvent<Element>) => {
     e.preventDefault()
     window.location.href = `/web/auth/${config.code}/link`
   }

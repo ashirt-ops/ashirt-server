@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type ReactNode, type MouseEvent } from 'react'
 import classnames from 'classnames/bind'
 import { NavLink } from 'react-router'
 
@@ -26,13 +26,13 @@ function styleToClassname(style: ButtonStyle): string {
 
 const Button = (
   props: ButtonStyle & {
-    children?: React.ReactNode
+    children?: ReactNode
     className?: string
     disabled?: boolean
     icon?: string
     afterIcon?: string
     loading?: boolean
-    onClick?: (e: React.MouseEvent) => void
+    onClick?: (e: MouseEvent) => void
     title?: string
     doNotSubmit?: boolean
     autoFocus?: boolean
@@ -62,7 +62,7 @@ const Button = (
 
 export const NavLinkButton = (
   props: ButtonStyle & {
-    children: React.ReactNode
+    children: ReactNode
     className?: string
     exact?: boolean
     icon?: string
@@ -83,7 +83,7 @@ export const NavLinkButton = (
   </NavLink>
 )
 
-export const ButtonGroup = (props: { children: React.ReactNode; className?: string }) => (
+export const ButtonGroup = (props: { children: ReactNode; className?: string }) => (
   <div className={cx('button-group', props.className)}>{props.children}</div>
 )
 

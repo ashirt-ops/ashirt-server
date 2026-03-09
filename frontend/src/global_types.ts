@@ -1,3 +1,5 @@
+import type { Dispatch, SetStateAction } from 'react'
+
 export type SuccessfulResult<T> = { success: T }
 export type ErrorResult = { err: Error }
 
@@ -308,9 +310,9 @@ export type ServiceWorkerTestOutput = {
 
 export type FilterText = {
   value: string
-  onChange: React.Dispatch<React.SetStateAction<string>>
+  onChange: Dispatch<SetStateAction<string>>
   disabled: boolean
-  setDisabled: React.Dispatch<React.SetStateAction<boolean>>
+  setDisabled: Dispatch<SetStateAction<boolean>>
 }
 
 export type ContentType =

@@ -1,4 +1,4 @@
-import { NewUser } from 'src/global_types'
+import { type NewUser } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function updateUserProfile(i: {

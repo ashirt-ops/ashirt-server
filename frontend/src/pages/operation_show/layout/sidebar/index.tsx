@@ -1,11 +1,11 @@
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 import ActionMenu from './action_menu'
 import OperationBadges from 'src/components/operation_badges'
 import OperationBadgesModal from 'src/components/operation_badges_modal'
 import classnames from 'classnames/bind'
 import { Link } from 'react-router'
 import { DeleteQueryModal } from './query_modal'
-import { Operation, SavedQuery, SavedQueryType, ViewName } from 'src/global_types'
+import { type Operation, type SavedQuery, type SavedQueryType, type ViewName } from 'src/global_types'
 import {
   default as ListMenu,
   ListItem,
@@ -14,14 +14,14 @@ import {
 } from 'src/components/list_menu'
 import { useModal, renderModals } from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
-import { CreateButtonPosition } from '..'
-import { NavToFunction } from 'src/helpers/navigate-to-query'
+import { type CreateButtonPosition } from '..'
+import { type NavToFunction } from 'src/helpers/navigate-to-query'
 import { SaveQueryModal } from 'src/components/filter_fields/filter-field-grid'
 import { setFavorite } from 'src/services'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function Sidebar(props: {
   currentQuery: string
   currentView: ViewName
   onNavigate: NavToFunction
@@ -31,11 +31,11 @@ export default (props: {
   queries: Array<SavedQuery>
   operation: Operation
   requestQueriesReload?: () => void
-}) => {
+}) {
   const { operation, queries } = props
-  const [isFavorite, setIsFavorite] = React.useState(operation.favorite)
+  const [isFavorite, setIsFavorite] = useState(operation.favorite)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setFavorite(operation.slug, isFavorite)
   }, [operation.slug, isFavorite])
 

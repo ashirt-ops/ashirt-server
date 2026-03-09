@@ -1,5 +1,8 @@
-import * as React from 'react'
-import { escapeRegExp } from 'lodash'
+import { type ReactNode } from 'react'
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
 /**
  * highlightSubstring breaks a given string into words that match the given regex, joined with
@@ -30,8 +33,8 @@ export const highlightSubstring = (
     regexFlags?: string
     minLength?: number
   },
-): Array<React.ReactNode> => {
-  const rtn: Array<React.ReactNode> = []
+): Array<ReactNode> => {
+  const rtn: Array<ReactNode> = []
   if (s === '' || regexAsStr.length < (options?.minLength ?? 1)) {
     return [<span>{s}</span>]
   }

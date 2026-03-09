@@ -1,9 +1,9 @@
-import * as React from 'react'
+import { type ReactNode } from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
-  children: React.ReactNode
+const SettingsSection = (props: {
+  children: ReactNode
   className?: string
   title: string
   width?: 'full-width' | 'wide' | 'normal' | 'narrow'
@@ -13,3 +13,4 @@ export default (props: {
     {props.children}
   </section>
 )
+export default SettingsSection

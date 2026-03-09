@@ -1,8 +1,8 @@
 import {
-  UserOwnView,
-  SupportedAuthenticationScheme,
-  AuthSchemeDetails,
-  RecoveryMetrics,
+  type UserOwnView,
+  type SupportedAuthenticationScheme,
+  type AuthSchemeDetails,
+  type RecoveryMetrics,
 } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { userOwnViewFromDto } from './data_sources/converters'

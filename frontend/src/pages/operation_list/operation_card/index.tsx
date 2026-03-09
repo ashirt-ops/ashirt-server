@@ -1,15 +1,14 @@
-import * as React from 'react'
 import Card from 'src/components/card'
 import OperationBadges from 'src/components/operation_badges'
 import OperationBadgesModal from 'src/components/operation_badges_modal'
 import classnames from 'classnames/bind'
 import { Link } from 'react-router'
-import { EvidenceCount, TopContrib } from 'src/global_types'
+import { type EvidenceCount, type TopContrib } from 'src/global_types'
 import Button from 'src/components/button'
 import { renderModals, useModal } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function OperationCard(props: {
   className?: string
   slug: string
   name: string
@@ -20,7 +19,7 @@ export default (props: {
   onFavoriteClick: () => void
   topContribs: Array<TopContrib>
   evidenceCount: EvidenceCount
-}) => {
+}) {
   const { favorite } = props
   const moreDetailsModal = useModal<{}>((modalProps) => (
     <OperationBadgesModal

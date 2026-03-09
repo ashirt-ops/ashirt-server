@@ -1,10 +1,10 @@
-import * as React from 'react'
-import { ServiceWorker } from 'src/global_types'
+import { useState, useEffect } from 'react'
+import { type ServiceWorker } from 'src/global_types'
 import { listServiceWorkers } from 'src/services'
 import { isNotUndefined } from 'src/helpers/is_not_undefined'
-import { FilterModified } from 'src/helpers'
+import { type FilterModified } from 'src/helpers'
 
-import BulletChooser, { BulletProps } from 'src/components/bullet_chooser'
+import BulletChooser, { type BulletProps } from 'src/components/bullet_chooser'
 
 export const ServiceWorkerChooser = (props: {
   label: string
@@ -37,12 +37,12 @@ export const ManagedServiceWorkerChooser = (props: {
   value: Array<BulletProps>
   enableNot?: boolean
 }) => {
-  const [allWorkers, setAllWorkers] = React.useState<Array<ServiceWorker>>([])
+  const [allWorkers, setAllWorkers] = useState<Array<ServiceWorker>>([])
 
   const reloadWorkers = () => {
     listServiceWorkers().then((list) => setAllWorkers(list.filter((item) => !item.deleted)))
   }
-  React.useEffect(reloadWorkers, [props.operationSlug])
+  useEffect(reloadWorkers, [props.operationSlug])
 
   return (
     <ServiceWorkerChooser

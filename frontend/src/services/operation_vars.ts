@@ -1,4 +1,4 @@
-import { OperationVar } from 'src/global_types'
+import { type OperationVar } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function createOperationVar(

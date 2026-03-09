@@ -1,4 +1,4 @@
-import { Evidence, Finding, FindingCategory } from 'src/global_types'
+import { type Evidence, type Finding, type FindingCategory } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
 import { findingFromDto, evidenceFromDto } from './data_sources/converters'

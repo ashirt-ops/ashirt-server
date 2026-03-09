@@ -1,10 +1,10 @@
-import * as React from 'react'
+import { useState } from 'react'
 import Button from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import { AddUserModal } from 'src/pages/admin_modals'
 
-export default (props: { requestReload?: () => void }) => {
-  const [newUser, setNewUser] = React.useState<boolean>(false)
+export default function AddUser(props: { requestReload?: () => void }) {
+  const [newUser, setNewUser] = useState<boolean>(false)
 
   return (
     <SettingsSection title="New User Creation">

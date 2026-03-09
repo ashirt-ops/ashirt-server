@@ -1,4 +1,3 @@
-import * as React from 'react'
 import classnames from 'classnames/bind'
 
 import { NavLinkButton } from 'src/components/button'
@@ -24,7 +23,7 @@ const cx = classnames.bind(require('./stylesheet'))
  * Returns either the initial recovery component, or the recovery-sent page, depending on the url
  * query string.
  */
-export default (props: { query: URLSearchParams; authFlags?: Array<string> }) => {
+export default function Recovery(props: { query: URLSearchParams; authFlags?: Array<string> }) {
   if (props.query.get('step') === 'recovery-sent') {
     return <AccountRecoveryStarted />
   }

@@ -1,5 +1,5 @@
 import 'react-day-picker/dist/style.css'
-import * as React from 'react'
+import { useState } from 'react'
 import { DayPicker } from 'react-day-picker'
 import classnames from 'classnames/bind'
 import { subDays, startOfMonth, endOfMonth } from 'date-fns'
@@ -8,8 +8,8 @@ import Button from 'src/components/button'
 import Popover from 'src/components/popover'
 
 import {
-  DateRange,
-  MaybeDateRange,
+  type DateRange,
+  type MaybeDateRange,
   stringifyRange,
   addDateToRange,
   lengthenRangeToDayBoundaries,
@@ -55,8 +55,8 @@ const DropDown = (props: {
   </div>
 )
 
-export default (props: { range: MaybeDateRange; onSelectRange: (r: MaybeDateRange) => void }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+export default function DateRangePicker(props: { range: MaybeDateRange; onSelectRange: (r: MaybeDateRange) => void }) {
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <Popover

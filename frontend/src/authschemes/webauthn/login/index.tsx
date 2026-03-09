@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import Button, { ButtonGroup } from 'src/components/button'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
@@ -15,13 +15,13 @@ import { getResultState } from 'src/helpers/is_success_result'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: { query: URLSearchParams; authFlags?: Array<string> }) => {
-  return <Login authFlags={props.authFlags} />
+export default function Login(props: { query: URLSearchParams; authFlags?: Array<string> }) {
+  return <LoginForm authFlags={props.authFlags} />
 }
 
-const Login = (props: { authFlags?: Array<string> }) => {
+const LoginForm = (props: { authFlags?: Array<string> }) => {
   const usernameField = useFormField('')
-  const [isDiscoverable, setIsDiscoverable] = React.useState(true)
+  const [isDiscoverable, setIsDiscoverable] = useState(true)
 
   const loginForm = useForm({
     fields: [usernameField],

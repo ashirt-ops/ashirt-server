@@ -1,9 +1,9 @@
-import * as React from 'react'
+import { useState } from 'react'
 import Button from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import { AddVarModal } from 'src/pages/admin_modals'
-export default (props: { requestReload?: () => void; operationSlug?: string }) => {
-  const [newVar, setNewVar] = React.useState<boolean>(false)
+export default function AddVariable(props: { requestReload?: () => void; operationSlug?: string }) {
+  const [newVar, setNewVar] = useState<boolean>(false)
 
   return (
     <SettingsSection title="New Variable Creation">

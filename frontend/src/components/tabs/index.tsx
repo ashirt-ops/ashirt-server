@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type ReactNode, useState } from 'react'
 import { default as Button, ButtonGroup } from 'src/components/button'
 
 import classnames from 'classnames/bind'
@@ -8,7 +8,7 @@ export type Tab = {
   id: string
   disabled?: boolean
   label?: string
-  content?: React.ReactNode
+  content?: ReactNode
   active?: boolean
 }
 
@@ -43,7 +43,7 @@ const TabMenu = (props: {
   onTabChanged?: (tab: Tab, tabIndex: number) => void
 }) => {
   const defaultActiveTab = findInitialIndex(props.tabs, props.initialActiveTab)
-  const [activeTabIndex, setActiveTabIndex] = React.useState<number>(defaultActiveTab)
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(defaultActiveTab)
 
   const activeTab = props.tabs[activeTabIndex]
 

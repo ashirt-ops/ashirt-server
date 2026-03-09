@@ -1,4 +1,4 @@
-import { DataSource, cacheBust } from '../data_source'
+import { type DataSource, cacheBust } from '../data_source'
 import { default as req, xhrText as reqText, reqMultipart } from './request_helper'
 cacheBust()
 

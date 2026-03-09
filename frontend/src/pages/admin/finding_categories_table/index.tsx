@@ -1,10 +1,10 @@
-import * as React from 'react'
+import { useState, useCallback } from 'react'
 import classnames from 'classnames/bind'
 import Button, { ButtonGroup } from 'src/components/button'
 import Checkbox from 'src/components/checkbox'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import { FindingCategory } from 'src/global_types'
+import { type FindingCategory } from 'src/global_types'
 import { deleteFindingCategory, getFindingCategories } from 'src/services'
 import { useModal, useWiredData, renderModals } from 'src/helpers'
 
@@ -61,11 +61,11 @@ const TableRow = (props: { category: FindingCategory; onUpdate: () => void }) =>
   )
 }
 
-export default (props: {}) => {
-  const [withDeleted, setWithDeleted] = React.useState(false)
+export default function FindingCategoriesTable(props: {}) {
+  const [withDeleted, setWithDeleted] = useState(false)
 
   const wiredCategories = useWiredData<Array<FindingCategory>>(
-    React.useCallback(() => getFindingCategories(true), []),
+    useCallback(() => getFindingCategories(true), []),
   )
 
   const createModal = useModal<{}>((modalProps) => (

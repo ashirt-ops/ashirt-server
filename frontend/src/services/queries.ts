@@ -1,4 +1,4 @@
-import { SavedQuery } from 'src/global_types'
+import { type SavedQuery } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { queryFromDto } from './data_sources/converters'
 

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useContext } from 'react'
 import AuthContext from 'src/auth_context'
 import { useNavigate } from 'react-router'
 
@@ -45,8 +45,8 @@ const UserMenuDropdown = (props: { name: string; avatar: string }) => {
   )
 }
 
-export default (props: {}) => {
-  const { user } = React.useContext(AuthContext)
+export default function UserMenu() {
+  const { user } = useContext(AuthContext)
   if (user == null) return null
   const name = `${user.firstName} ${user.lastName}`
   const avatar = ''

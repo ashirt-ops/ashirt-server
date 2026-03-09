@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { useContext } from 'react'
 import AuthContext from 'src/auth_context'
 
 export function useUserIsSuperAdmin() {
-  const user = React.useContext(AuthContext).user
+  const user = useContext(AuthContext).user
   return user != null && user.admin
 }

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useReducer } from 'react'
 import Input from 'src/components/input'
 import PopoverMenu from 'src/components/popover_menu'
 
@@ -44,7 +44,7 @@ export default function SmartComboBox<T>(props: {
   className?: string
   disabled?: boolean
 }) {
-  const [cbState, dispatch] = React.useReducer(
+  const [cbState, dispatch] = useReducer(
     standardComboboxStateReducer,
     initialComboBoxState(props.value, props.options, props.nonValueDefault),
   )

@@ -1,5 +1,5 @@
-import * as React from 'react'
-import { Result } from 'src/global_types'
+import { useState, type FormEvent } from 'react'
+import { type Result } from 'src/global_types'
 
 // Use form react hook helper to make form loading/error handling easier
 // Similar to useWiredData except for submitting data
@@ -38,10 +38,10 @@ export function useForm<T>(i: {
   onSuccessText?: string
   onSuccess?: () => void
 }) {
-  const [loading, setLoading] = React.useState(false)
-  const [result, setResult] = React.useState<Result<string> | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<Result<string> | null>(null)
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (i.fields) i.fields.forEach((f) => f.setDisabled(true))
     setLoading(true)
@@ -52,7 +52,6 @@ export function useForm<T>(i: {
       submitSuccessful = true
     } catch (err) {
       setResult({ err: err instanceof Error ? err : new Error(String(err)) })
-      console.error(err)
       submitSuccessful = false
     }
     if (i.fields) i.fields.forEach((f) => f.setDisabled(false))
@@ -67,8 +66,8 @@ export function useForm<T>(i: {
 }
 
 export function useFormField<T>(initialValue: T) {
-  const [value, onChange] = React.useState<T>(initialValue)
-  const [disabled, setDisabled] = React.useState(false)
+  const [value, onChange] = useState<T>(initialValue)
+  const [disabled, setDisabled] = useState(false)
 
   return { value, onChange, disabled, setDisabled }
 }

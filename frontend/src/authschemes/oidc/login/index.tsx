@@ -1,7 +1,6 @@
-import * as React from 'react'
 import Button from 'src/components/button'
 import classnames from 'classnames/bind'
-import { OIDCInstanceConfig } from '..'
+import { type OIDCInstanceConfig } from '..'
 
 const cx = classnames.bind(require('./stylesheet'))
 

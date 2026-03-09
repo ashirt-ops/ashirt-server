@@ -1,13 +1,13 @@
-import * as React from 'react'
+import { type MouseEvent, useCallback } from 'react'
 import classnames from 'classnames/bind'
 import { CodeBlockViewer } from '../code_block'
 import { HarViewer, isAHar } from '../http_cycle_viewer'
 import {
-  SupportedEvidenceType,
-  CodeBlock,
-  EvidenceViewHint,
-  InteractionHint,
-  UrlData,
+  type SupportedEvidenceType,
+  type CodeBlock,
+  type EvidenceViewHint,
+  type InteractionHint,
+  type UrlData,
 } from 'src/global_types'
 import {
   getEvidenceAsCodeblock,
@@ -43,7 +43,7 @@ function getComponent(evidenceType: SupportedEvidenceType) {
   }
 }
 
-export default (props: {
+export default function EvidencePreview(props: {
   operationSlug: string
   evidenceUuid: string
   contentType: SupportedEvidenceType
@@ -52,8 +52,8 @@ export default (props: {
   className?: string
   fitToContainer?: boolean
   useS3Url: boolean
-  onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-}) => {
+  onClick?: (event: MouseEvent<HTMLDivElement>) => void
+}) {
   const Component = getComponent(props.contentType)
   if (Component == null) return null
 
@@ -84,7 +84,7 @@ type EvidenceProps = {
 
 const EvidenceCodeblock = (props: EvidenceProps) => {
   const wiredEvidence = useWiredData<CodeBlock>(
-    React.useCallback(
+    useCallback(
       () =>
         getEvidenceAsCodeblock({
           operationSlug: props.operationSlug,
@@ -119,7 +119,7 @@ const EvidenceImage = (props: EvidenceProps) => {
 const EvidenceImageS3 = (props: EvidenceProps & { defaultUrl: string }) => {
   const { imgDataSetter } = useEvidenceContext()
   const wiredUrl = useWiredData<UrlData>(
-    React.useCallback(
+    useCallback(
       () =>
         getEvidenceAsUrlData({
           operationSlug: props.operationSlug,
@@ -144,7 +144,7 @@ const EvidenceEvent = (_props: EvidenceProps) => {
 
 const EvidenceTerminalRecording = (props: EvidenceProps) => {
   const wiredEvidence = useWiredData<string>(
-    React.useCallback(
+    useCallback(
       () =>
         getEvidenceAsString({
           operationSlug: props.operationSlug,
@@ -172,7 +172,7 @@ const EvidenceTerminalRecording = (props: EvidenceProps) => {
 
 const EvidenceHttpCycle = (props: EvidenceProps) => {
   const wiredEvidence = useWiredData<string>(
-    React.useCallback(
+    useCallback(
       () =>
         getEvidenceAsString({
           operationSlug: props.operationSlug,

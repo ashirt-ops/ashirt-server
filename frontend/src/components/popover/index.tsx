@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type MutableRefObject, useEffect, type ReactElement, type ReactNode, useRef, type CSSProperties, useState } from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
 import { useWindowSize, useElementRect } from 'src/helpers'
@@ -6,7 +6,7 @@ import { useWindowSize, useElementRect } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 function useEventListenerUnlessRef(
-  ref: React.MutableRefObject<HTMLElement | null>,
+  ref: MutableRefObject<HTMLElement | null>,
   eventName: string,
   fn: () => void,
 ) {
@@ -19,7 +19,7 @@ function useEventListenerUnlessRef(
       if (target == null) return fn()
     }
   }
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener(eventName, callUnlessThisEl)
     return () => document.removeEventListener(eventName, callUnlessThisEl)
   })
@@ -32,16 +32,16 @@ function useEventListenerUnlessRef(
 //
 // This component is used to easily build dropdowns & menus
 const Popover = (props: {
-  children: React.ReactElement
+  children: ReactElement
   closeOnContentClick?: boolean
-  content: React.ReactNode
+  content: ReactNode
   isOpen: boolean
   className?: string
   onClick?: () => void
   onRequestClose?: () => void
 }) => {
-  const targetRef = React.useRef<HTMLDivElement | null>(null)
-  const contentRef = React.useRef<HTMLDivElement | null>(null)
+  const targetRef = useRef<HTMLDivElement | null>(null)
+  const contentRef = useRef<HTMLDivElement | null>(null)
 
   const windowSize = useWindowSize()
   const targetRect = useElementRect(props.isOpen ? targetRef : null)
@@ -58,7 +58,7 @@ const Popover = (props: {
   }
 
   // Compute proper x/y location if it were to go over page boundaries
-  const contentStyle: React.CSSProperties = { position: 'fixed' }
+  const contentStyle: CSSProperties = { position: 'fixed' }
   if (props.isOpen && targetRect && contentRect) {
     if (
       targetRect.bottom + contentRect.height > windowSize.height &&
@@ -96,12 +96,12 @@ const Popover = (props: {
 
 // A version of popover that opens automatically when `children` receives a click event
 export const ClickPopover = (props: {
-  content: React.ReactNode
-  children: React.ReactElement
+  content: ReactNode
+  children: ReactElement
   closeOnContentClick?: boolean
   className?: string
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <Popover

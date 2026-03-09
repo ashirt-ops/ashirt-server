@@ -1,12 +1,12 @@
 import {
-  Evidence,
-  Finding,
-  Tag,
-  SubmittableEvidence,
-  CodeBlock,
-  TagDifference,
-  EvidenceMetadata,
-  UrlData,
+  type Evidence,
+  type Finding,
+  type Tag,
+  type SubmittableEvidence,
+  type CodeBlock,
+  type TagDifference,
+  type EvidenceMetadata,
+  type UrlData,
 } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { computeDelta } from 'src/helpers'
@@ -160,7 +160,6 @@ export async function updateEvidence(i: {
   updatedContent: Blob | null
   adjustedAt?: Date
 }): Promise<void> {
-  console.log('updating')
   const formData = new FormData()
   if (i.description !== undefined) {
     formData.append('description', i.description)
@@ -174,7 +173,6 @@ export async function updateEvidence(i: {
     formData.append('tagsToRemove', JSON.stringify(subs))
   }
 
-  console.log(i.adjustedAt)
   if (i.adjustedAt) {
     formData.append('adjusted_at', i.adjustedAt.toISOString())
   }

@@ -1,8 +1,8 @@
-import * as React from 'react'
+import { useState, useCallback, useEffect, type JSX } from 'react'
 import classnames from 'classnames/bind'
-import { WiredData } from 'src/helpers'
+import { type WiredData } from 'src/helpers'
 
-import { UserGroupAdminView } from 'src/global_types'
+import { type UserGroupAdminView } from 'src/global_types'
 import { listUserGroupsAdminView } from 'src/services'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
@@ -19,39 +19,39 @@ import { useWiredData } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function UserGroupTable(props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
-}) => {
-  const [deletingUserGroup, setDeletingUserGroup] = React.useState<null | UserGroupAdminView>(null)
-  const [modifyingUserGroup, setModifyingUserGroup] = React.useState<null | UserGroupAdminView>(
+}) {
+  const [deletingUserGroup, setDeletingUserGroup] = useState<null | UserGroupAdminView>(null)
+  const [modifyingUserGroup, setModifyingUserGroup] = useState<null | UserGroupAdminView>(
     null,
   )
-  const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
+  const [withDeleted, setWithDeleted] = useState(getIncludeDeletedUsers())
   const itemsPerPage = 10
-  const [page, setPage] = React.useState(1)
-  const [pageLength, setPageLength] = React.useState(0)
+  const [page, setPage] = useState(1)
+  const [pageLength, setPageLength] = useState(0)
 
-  const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
+  const [usernameFilterValue, setUsernameFilterValue] = useState('')
 
   const columns = Object.keys(rowBuilder(null, <span />, <span />))
 
   const wiredUserGroups = useWiredData<UserGroupAdminView[]>(
-    React.useCallback(() => listUserGroupsAdminView({ deleted: withDeleted }), [withDeleted]),
+    useCallback(() => listUserGroupsAdminView({ deleted: withDeleted }), [withDeleted]),
     (err: Error) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />,
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredUserGroups.reload)
     return () => {
       props.offReload(wiredUserGroups.reload)
     }
   })
-  React.useEffect(() => {
+  useEffect(() => {
     setIncludeDeletedUsers(withDeleted)
   }, [withDeleted])
-  React.useEffect(() => {
+  useEffect(() => {
     wiredUserGroups.expose((data) => setPageLength(Math.ceil(data.length / itemsPerPage)))
   }, [wiredUserGroups])
 
@@ -136,15 +136,15 @@ const TableRow = (props: { data: Rowdata }) => (
 
 type Rowdata = {
   Name: string
-  Users: React.JSX.Element
-  Flags: React.JSX.Element
-  Actions: React.JSX.Element
+  Users: JSX.Element
+  Flags: JSX.Element
+  Actions: JSX.Element
 }
 
 const rowBuilder = (
   u: UserGroupAdminView | null,
-  users: React.JSX.Element,
-  actions: React.JSX.Element,
+  users: JSX.Element,
+  actions: JSX.Element,
 ): Rowdata => ({
   Name: u ? u.name : '',
   Users: users,

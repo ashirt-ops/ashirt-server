@@ -1,6 +1,5 @@
-import * as React from 'react'
 import ModalForm from 'src/components/modal_form'
-import { SavedQuery } from 'src/global_types'
+import { type SavedQuery } from 'src/global_types'
 import { deleteSavedQuery } from 'src/services'
 import { useForm } from 'src/helpers'
 

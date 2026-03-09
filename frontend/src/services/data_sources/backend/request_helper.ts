@@ -1,5 +1,3 @@
-import queryString from 'query-string'
-
 class HttpError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -42,7 +40,7 @@ async function request<T>(
   query?: QueryObj,
 ): Promise<T> {
   path = '/web' + path
-  if (query != null) path += `?${queryString.stringify(query)}`
+  if (query != null) path += `?${new URLSearchParams(query as Record<string, string>).toString()}`
   let res
   if (method === 'GET') {
     res = await fetch(path, { method })

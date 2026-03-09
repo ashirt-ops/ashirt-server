@@ -1,25 +1,25 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { linkLocalAccount } from '../services'
 import { useForm, useFormField } from 'src/helpers'
 
 import Form from 'src/components/form'
 import Input from 'src/components/input'
-import { UserOwnView } from 'src/global_types'
+import { type UserOwnView } from 'src/global_types'
 
 const alreadyExistsErrorText = 'An account for this user already exists'
 
-export default (props: {
+export default function Linker(props: {
   onSuccess: () => void
   userData: UserOwnView
   authFlags?: Array<string>
-}) => {
+}) {
   const initialUsername = props.userData.authSchemes.find(
     (s) => s.schemeType == 'webauthn',
   )?.username
   const username = useFormField<string>(initialUsername ?? '')
   const password = useFormField<string>('')
   const confirmPassword = useFormField<string>('')
-  const [allowUsernameOverride, setOverride] = React.useState(false)
+  const [allowUsernameOverride, setOverride] = useState(false)
 
   const formComponentProps = useForm({
     fields: [password, confirmPassword],

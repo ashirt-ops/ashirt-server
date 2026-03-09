@@ -1,15 +1,14 @@
-import * as React from 'react'
 import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
 import Table from 'src/components/table'
-import { Finding } from 'src/global_types'
+import { type Finding } from 'src/global_types'
 import { Link } from 'react-router'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import FindingStatus from '../finding_status'
 import { format } from 'date-fns'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+const FindingsTable = (props: {
   findings: Array<Finding>
   onDelete: (f: Finding) => void
   onEdit: (f: Finding) => void
@@ -54,3 +53,4 @@ export default (props: {
     ))}
   </Table>
 )
+export default FindingsTable
