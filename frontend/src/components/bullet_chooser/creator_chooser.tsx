@@ -1,9 +1,9 @@
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 
-import { User } from 'src/global_types'
+import { type User } from 'src/global_types'
 import { listEvidenceCreators } from 'src/services'
-import BulletChooser, { BulletProps } from 'src/components/bullet_chooser'
-import { FilterModified } from 'src/helpers'
+import BulletChooser, { type BulletProps } from 'src/components/bullet_chooser'
+import { type FilterModified } from 'src/helpers'
 import { isNotUndefined } from 'src/helpers/is_not_undefined'
 
 export const CreatorChooser = (props: {
@@ -36,12 +36,12 @@ export const ManagedCreatorChooser = (props: {
   value: Array<BulletProps>
   enableNot?: boolean
 }) => {
-  const [allCreators, setAllCreators] = React.useState<Array<User>>([])
+  const [allCreators, setAllCreators] = useState<Array<User>>([])
 
   const reloadCreators = () => {
     listEvidenceCreators({ operationSlug: props.operationSlug }).then(setAllCreators)
   }
-  React.useEffect(reloadCreators, [props.operationSlug])
+  useEffect(reloadCreators, [props.operationSlug])
 
   return (
     <CreatorChooser

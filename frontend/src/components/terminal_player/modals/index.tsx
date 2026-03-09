@@ -1,4 +1,3 @@
-import * as React from 'react'
 import Form from 'src/components/form'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { TextArea } from 'src/components/input'

@@ -1,11 +1,11 @@
-import * as React from 'react'
+import { type ReactNode, useCallback, type CSSProperties } from 'react'
 import { Link } from 'react-router'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import Modal from 'src/components/modal'
 import Tag from 'src/components/tag'
 import TagColorPicker from 'src/components/tag_color_picker'
-import { Tag as TagType } from 'src/global_types'
+import { type Tag as TagType } from 'src/global_types'
 import {
   deleteTag,
   updateTag,
@@ -104,7 +104,7 @@ const DeleteTagModal = (props: {
   onDeleted: () => void
   onRequestClose: () => void
   deleteFn: (id: number) => Promise<void>
-  children?: React.ReactNode
+  children?: ReactNode
 }) => {
   const formComponentProps = useForm({
     onSuccess: () => {
@@ -138,7 +138,7 @@ export const DeleteOperationTagModal = (props: {
   operationSlug: string
 }) => {
   const wiredEvidence = useWiredData(
-    React.useCallback(
+    useCallback(
       () =>
         getEvidenceList({
           operationSlug: props.operationSlug,
@@ -179,7 +179,7 @@ export const DeleteDefaultTagModal = (props: {
   return <DeleteTagModal {...props} deleteFn={(id) => deleteDefaultTag({ id })} />
 }
 
-const evidenceLinkStyle: React.CSSProperties = {
+const evidenceLinkStyle: CSSProperties = {
   display: 'block',
   fontWeight: 800,
   textDecoration: 'underline',

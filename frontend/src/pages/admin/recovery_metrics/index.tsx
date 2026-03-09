@@ -1,7 +1,6 @@
-import * as React from 'react'
 import classnames from 'classnames/bind'
 
-import { RecoveryMetrics } from 'src/global_types'
+import { type RecoveryMetrics } from 'src/global_types'
 import { useWiredData } from 'src/helpers'
 import { deleteExpiredRecoveryCodes, getRecoveryMetrics } from 'src/services'
 
@@ -9,7 +8,7 @@ import Button from 'src/components/button'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {}) => {
+export default function RecoveryMetrics(props: {}) {
   const wiredRecoveryMetrics = useWiredData<RecoveryMetrics>(getRecoveryMetrics)
   const numFormatter = new Intl.NumberFormat()
   return (

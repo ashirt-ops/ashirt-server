@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type CSSProperties, type MouseEvent } from 'react'
 import classnames from 'classnames/bind'
 import { tagColorNameToColor, disabledGray } from 'src/helpers/tag_colors'
 const cx = classnames.bind(require('./stylesheet'))
@@ -12,7 +12,7 @@ function getFgColorFromColor(color: number) {
   return yiq < 128 ? '#fff' : '#000'
 }
 
-export function tagColorStyle(colorName: string): React.CSSProperties {
+export function tagColorStyle(colorName: string): CSSProperties {
   const color = tagColorNameToColor(colorName)
   return {
     backgroundColor: '#' + ('000000' + color.toString(16)).substr(-6),
@@ -20,11 +20,11 @@ export function tagColorStyle(colorName: string): React.CSSProperties {
   }
 }
 
-export default (props: {
+const Tag = (props: {
   name: string
   color: string
   selected?: boolean
-  onClick?: (e: React.MouseEvent) => void
+  onClick?: (e: MouseEvent) => void
   className?: string
   disabled?: boolean
 }) => (
@@ -39,3 +39,4 @@ export default (props: {
     onClick={props.onClick}
   />
 )
+export default Tag

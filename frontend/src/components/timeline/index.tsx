@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useRef, useState, useEffect, type MutableRefObject } from 'react'
 import EvidencePreview from 'src/components/evidence_preview'
 import Lightbox from 'src/components/lightbox'
 import MarkdownRenderer from 'src/components/markdown_renderer'
@@ -6,7 +6,7 @@ import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
 import Help from 'src/components/help'
 import { ClickPopover } from 'src/components/popover'
-import { Tag, Evidence } from 'src/global_types'
+import { type Tag, type Evidence } from 'src/global_types'
 import { addTagToQuery, addOperatorToQuery } from 'src/helpers'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { CopyTextButton } from 'src/components/text_copiers'
@@ -23,7 +23,7 @@ type Action = {
 }
 type Actions = Array<Action>
 
-export default (props: {
+const Timeline = (props: {
   actions: Actions
   extraActions?: Actions
   evidence: Array<Evidence>
@@ -32,11 +32,11 @@ export default (props: {
   query: string
   scrollToUuid?: string
 }) => {
-  const rootRef = React.useRef<HTMLDivElement | null>(null)
-  const lightboxRef = React.useRef<HTMLDivElement | null>(null)
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const lightboxRef = useRef<HTMLDivElement | null>(null)
 
-  const [activeChildIndex, setActiveChildIndex] = React.useState<number>(0)
-  const [quicklookVisible, setQuicklookVisible] = React.useState<boolean>(false)
+  const [activeChildIndex, setActiveChildIndex] = useState<number>(0)
+  const [quicklookVisible, setQuicklookVisible] = useState<boolean>(false)
 
   const onKeyDown = (e: KeyboardEvent) => {
     // Only handle keystrokes if nothing is focused (target is body)
@@ -84,7 +84,7 @@ export default (props: {
     setActiveChildIndex(newActiveChildIndex)
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
@@ -150,9 +150,9 @@ const TimelineRow = (props: {
   onPreviewClick: () => void
   onClick: () => void
 }) => {
-  const self = React.useRef<null | HTMLDivElement>(null)
+  const self = useRef<null | HTMLDivElement>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (self.current != null && props.evidence.uuid == props.focusUuid) {
       self.current.scrollIntoView()
     }
@@ -256,7 +256,7 @@ const renderExtraActions = (evidence: Evidence, extraActions?: Actions) => {
 // Returns true if the element el is a child of any of the supplied react refs
 function elementInRef(
   el: HTMLElement,
-  refs: Array<React.MutableRefObject<HTMLElement | null>>,
+  refs: Array<MutableRefObject<HTMLElement | null>>,
 ): boolean {
   const targetEls = refs.map((el) => el.current)
   while (!targetEls.includes(el)) {
@@ -268,14 +268,14 @@ function elementInRef(
 }
 
 // Returns an array of direct children that are divs for the passed react ref
-function refDivChildren(ref: React.MutableRefObject<HTMLDivElement | null>): Array<HTMLDivElement> {
+function refDivChildren(ref: MutableRefObject<HTMLDivElement | null>): Array<HTMLDivElement> {
   if (ref.current == null) return []
   // @ts-ignore - typescript is unable to determine that children is an array of HTMLDivElements
   return Array.from(ref.current.children).filter((el) => el instanceof HTMLDivElement)
 }
 
 // Scroll a react ref to the given position in pixels
-function scrollRef(ref: React.MutableRefObject<HTMLDivElement | null>, scrollTop: number) {
+function scrollRef(ref: MutableRefObject<HTMLDivElement | null>, scrollTop: number) {
   if (ref.current == null) return
   ref.current.scrollTop = scrollTop
 }
@@ -290,3 +290,4 @@ export const KeyboardShortcuts = [
   { keys: [' '], description: 'Toggle evidence large view' },
   { keys: ['z', 'Z'], description: 'Toggle Best Fit vs Standard views' },
 ]
+export default Timeline

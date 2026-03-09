@@ -1,12 +1,12 @@
-import * as React from 'react'
+import { type ReactNode, useState, useCallback, useEffect } from 'react'
 import Sidebar from './sidebar'
 import { Toolbar } from './toolbar'
 import classnames from 'classnames/bind'
 import { CreateEvidenceModal } from '../evidence_modals'
 import { CreateFindingModal } from '../finding_modals'
-import { ViewName } from 'src/global_types'
+import { type ViewName } from 'src/global_types'
 import { useModal, useWiredData, renderModals } from 'src/helpers'
-import { NavToFunction } from 'src/helpers/navigate-to-query'
+import { type NavToFunction } from 'src/helpers/navigate-to-query'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import { getSavedQueries, getOperation } from 'src/services'
 const cx = classnames.bind(require('./stylesheet'))
@@ -15,8 +15,8 @@ const noOp = () => {}
 
 export type CreateButtonPosition = 'sidebar-inline' | 'sidebar-above' | 'filter' | 'none'
 
-export default (props: {
-  children: React.ReactNode
+export default function OperationLayout(props: {
+  children: ReactNode
   onEvidenceCreated?: () => void
   onFindingCreated?: () => void
   onNavigate: NavToFunction
@@ -24,10 +24,10 @@ export default (props: {
   query: string
   view: ViewName
   exportEvidence?: () => Promise<void>
-}) => {
+}) {
   const reloadBus = BuildReloadBus()
 
-  const [expanded, setExpanded] = React.useState(false)
+  const [expanded, setExpanded] = useState(false)
   const createEvidenceModal = useModal<{}>((modalProps) => (
     <CreateEvidenceModal
       {...modalProps}
@@ -44,7 +44,7 @@ export default (props: {
   ))
 
   const wiredData = useWiredData(
-    React.useCallback(
+    useCallback(
       () =>
         Promise.all([
           getSavedQueries({ operationSlug: props.operationSlug }),
@@ -54,7 +54,7 @@ export default (props: {
     ),
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     reloadBus.onReload(wiredData.reload)
     return () => {
       reloadBus.offReload(wiredData.reload)

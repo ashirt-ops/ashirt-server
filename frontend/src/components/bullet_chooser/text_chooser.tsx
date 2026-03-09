@@ -1,6 +1,5 @@
-import * as React from 'react'
 
-import BulletChooser, { BulletProps } from 'src/components/bullet_chooser'
+import BulletChooser, { type BulletProps } from 'src/components/bullet_chooser'
 import Tag from 'src/components/tag'
 
 export const TextChooser = (props: {

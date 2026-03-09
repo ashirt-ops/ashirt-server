@@ -1,8 +1,7 @@
-import * as React from 'react'
 import { useAuthFrontendComponent } from 'src/authschemes'
-import { SupportedAuthenticationScheme, UserOwnView } from 'src/global_types'
+import { type SupportedAuthenticationScheme, type UserOwnView } from 'src/global_types'
 
-export default (props: { user: UserOwnView | null }) => {
+export default function Security(props: { user: UserOwnView | null }) {
   const { user } = props
   if (user == null) return null
 

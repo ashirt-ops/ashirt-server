@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect, type ReactNode } from 'react'
 import classnames from 'classnames/bind'
 
 import Modal from 'src/components/modal'
@@ -12,7 +12,7 @@ export const SearchHelpModal = (props: { onRequestClose: () => void }) => {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
@@ -62,15 +62,15 @@ export const SearchHelpModal = (props: { onRequestClose: () => void }) => {
   )
 }
 
-const CodeSnippet = (props: { children: React.ReactNode; className?: string | Array<string> }) => (
+const CodeSnippet = (props: { children: ReactNode; className?: string | Array<string> }) => (
   <span className={cx('code', props.className)}>{props.children}</span>
 )
 
-const CodeExample = (props: { children: React.ReactNode; className?: string | Array<string> }) => (
+const CodeExample = (props: { children: ReactNode; className?: string | Array<string> }) => (
   <span className={cx('example', props.className)}>{props.children}</span>
 )
 
-type FilterDetail = { field: string; description: React.ReactNode }
+type FilterDetail = { field: string; description: ReactNode }
 const FilterDescriptionRow = (props: { filter: FilterDetail }) => (
   <tr className={cx('filter-row')}>
     <td className={cx('filter-field')}>{props.filter.field}</td>

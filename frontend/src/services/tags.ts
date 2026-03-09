@@ -1,4 +1,4 @@
-import { Tag, TagWithUsage, DefaultTag } from 'src/global_types'
+import { type Tag, type TagWithUsage, type DefaultTag } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function createTag(i: {

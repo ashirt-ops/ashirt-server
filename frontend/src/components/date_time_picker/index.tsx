@@ -1,7 +1,7 @@
 import 'react-day-picker/dist/style.css'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, type FC, type ChangeEventHandler } from 'react'
 
-import { DayPicker, SelectSingleEventHandler } from 'react-day-picker'
+import { DayPicker, type SelectSingleEventHandler } from 'react-day-picker'
 import classnames from 'classnames/bind'
 
 import Popover from 'src/components/popover'
@@ -19,7 +19,7 @@ interface PickerProps extends DateTimePickerProps {
   onButtonClick: () => void
 }
 
-const Picker: React.FC<PickerProps> = ({ onButtonClick, onSelectedDate, selected }) => {
+const Picker: FC<PickerProps> = ({ onButtonClick, onSelectedDate, selected }) => {
   const [date, setDate] = useState<Date>(selected ?? new Date())
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const Picker: React.FC<PickerProps> = ({ onButtonClick, onSelectedDate, selected
     setDate(new Date(newDate as Date))
   }
 
-  const onChangeHour: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+  const onChangeHour: ChangeEventHandler<HTMLInputElement> = (event) => {
     const [hours, minutes] = event.target.value.split(':').map(Number)
 
     setDate(setMinutes(setHours(date, hours), minutes))
@@ -62,8 +62,8 @@ const Picker: React.FC<PickerProps> = ({ onButtonClick, onSelectedDate, selected
   )
 }
 
-const DateTimePicker: React.FC<DateTimePickerProps> = ({ onSelectedDate, selected }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+const DateTimePicker: FC<DateTimePickerProps> = ({ onSelectedDate, selected }) => {
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <Popover

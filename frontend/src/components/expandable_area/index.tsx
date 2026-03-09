@@ -1,16 +1,16 @@
-import * as React from 'react'
+import { type ReactNode, useState } from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
 export const ExpandableSection = (props: {
-  children: React.ReactNode
-  label: React.ReactNode
+  children: ReactNode
+  label: ReactNode
   className?: string
   labelClassName?: string
   initiallyExpanded?: boolean
   onExpanded?: (expanded: boolean) => void
 }) => {
-  const [expanded, setExpanded] = React.useState<boolean>(props.initiallyExpanded || false)
+  const [expanded, setExpanded] = useState<boolean>(props.initiallyExpanded || false)
   const expandedState = expanded ? 'expanded' : 'condensed'
   return (
     <section className={cx('expandable-root')}>

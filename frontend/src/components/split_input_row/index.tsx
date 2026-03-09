@@ -1,5 +1,5 @@
 import classNames from 'classnames/bind'
-import React from 'react'
+import { type ReactNode } from 'react'
 
 import Input from 'src/components/input'
 import WithLabel from 'src/components/with_label'
@@ -10,7 +10,7 @@ const SplitInputRow = (props: {
   label: string
   inputValue: string
   className?: string
-  children: React.ReactNode
+  children: ReactNode
 }) => (
   <WithLabel label={props.label}>
     <div className={cx('multi-item-row')}>

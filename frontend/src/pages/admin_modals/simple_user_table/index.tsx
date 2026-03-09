@@ -1,8 +1,8 @@
-import * as React from 'react'
+import { useState, type ChangeEvent, useCallback, useEffect } from 'react'
 import classnames from 'classnames/bind'
 import { usePaginatedWiredData } from 'src/helpers'
 
-import { UserAdminView } from 'src/global_types'
+import { type UserAdminView } from 'src/global_types'
 import { listUsersAdminView } from 'src/services'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
 
@@ -15,16 +15,16 @@ import Input from 'src/components/input'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function SimpleUserTable(props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
   setIncludedUsers: (users: Set<string>) => void
   includedUsers: Set<string>
-}) => {
-  const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
-  const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
+}) {
+  const [withDeleted, setWithDeleted] = useState(getIncludeDeletedUsers())
+  const [usernameFilterValue, setUsernameFilterValue] = useState('')
 
-  const toggleItem = (e: React.ChangeEvent<HTMLInputElement>, userSlug: string): void => {
+  const toggleItem = (e: ChangeEvent<HTMLInputElement>, userSlug: string): void => {
     const isUserIncluded = e.target.checked
     if (isUserIncluded) {
       const newSet = new Set(props.includedUsers).add(userSlug)
@@ -39,7 +39,7 @@ export default (props: {
   const columns = Object.keys({})
 
   const wiredUsers = usePaginatedWiredData<UserAdminView>(
-    React.useCallback(
+    useCallback(
       (page) =>
         listUsersAdminView({ page, pageSize: 5, deleted: withDeleted, name: usernameFilterValue }),
       [usernameFilterValue, withDeleted],
@@ -48,13 +48,13 @@ export default (props: {
     () => <LoadingRow span={columns.length} />,
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredUsers.reload)
     return () => {
       props.offReload(wiredUsers.reload)
     }
   })
-  React.useEffect(() => {
+  useEffect(() => {
     setIncludeDeletedUsers(withDeleted)
   }, [withDeleted])
 

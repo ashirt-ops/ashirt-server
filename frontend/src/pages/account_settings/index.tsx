@@ -1,8 +1,8 @@
-import * as React from 'react'
+import { useCallback, useEffect } from 'react'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
 import { Route, Routes, useLocation } from 'react-router'
-import { UserOwnView } from 'src/global_types'
+import { type UserOwnView } from 'src/global_types'
 import { getUser } from 'src/services'
 import { useUserIsSuperAdmin, useWiredData } from 'src/helpers'
 
@@ -25,12 +25,12 @@ export const AccountSettings = () => {
   const userSlug = isSuperAdmin && user != null ? user : ''
 
   const wiredProfile = useWiredData<UserOwnView>(
-    React.useCallback(() => getUser({ userSlug }), [userSlug]),
+    useCallback(() => getUser({ userSlug }), [userSlug]),
   )
 
   const bus = BuildReloadBus()
 
-  React.useEffect(() => {
+  useEffect(() => {
     bus.onReload(wiredProfile.reload)
     return () => {
       bus.offReload(wiredProfile.reload)

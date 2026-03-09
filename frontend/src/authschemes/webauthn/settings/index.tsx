@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import * as dateFns from 'date-fns'
 
 import Input from 'src/components/input'
@@ -23,7 +23,7 @@ const cx = classnames.bind(require('./stylesheet'))
 
 const toEnUSDate = (d: Date) => dateFns.format(d, 'MMM dd, yyyy')
 
-export default (props: { username: string; authFlags?: Array<string> }) => {
+export default function Settings(props: { username: string; authFlags?: Array<string> }) {
   const bus = BuildReloadBus()
   return (
     <SettingsSection
@@ -43,7 +43,7 @@ const CredentialList = (props: {
 }) => {
   const wiredCredentials = useWiredData(listWebauthnCredentials)
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredCredentials.reload)
     return () => {
       props.offReload(wiredCredentials.reload)

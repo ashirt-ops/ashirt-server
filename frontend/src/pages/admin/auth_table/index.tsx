@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { useState } from 'react'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import { AuthSchemeDetails } from 'src/global_types'
+import { type AuthSchemeDetails } from 'src/global_types'
 import { DeleteGlobalAuthSchemeModal } from 'src/pages/admin_modals'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { formatDistanceToNow } from 'date-fns'
@@ -13,8 +13,8 @@ type PurgableScheme = {
   uniqueUsers: number
 }
 
-export default (props: {}) => {
-  const [purgeScheme, setPurgingScheme] = React.useState<PurgableScheme | null>(null)
+export default function AuthTable(props: {}) {
+  const [purgeScheme, setPurgingScheme] = useState<PurgableScheme | null>(null)
 
   const wiredSchemes = useWiredData<Array<AuthSchemeDetails>>(getSupportedAuthenticationDetails)
   const columns = [

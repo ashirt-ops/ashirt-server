@@ -1,6 +1,6 @@
-import * as React from 'react'
+import { useState, useCallback, useEffect, type JSX } from 'react'
 
-import { GlobalVar } from 'src/global_types'
+import { type GlobalVar } from 'src/global_types'
 import { getGlobalVars } from 'src/services'
 
 import { default as Table, ErrorRow, LoadingRow } from 'src/components/table'
@@ -9,22 +9,22 @@ import SettingsSection from 'src/components/settings_section'
 import { DeleteVarModal, ModifyVarModal } from 'src/pages/admin_modals'
 import { useWiredData } from 'src/helpers'
 
-export default (props: {
+export default function GlobalVarsTable(props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
-}) => {
-  const [deletingGlobalVar, setDeletingGlobalVar] = React.useState<null | GlobalVar>(null)
-  const [modifyingGlobalVar, setModifyingGlobalVar] = React.useState<null | GlobalVar>(null)
+}) {
+  const [deletingGlobalVar, setDeletingGlobalVar] = useState<null | GlobalVar>(null)
+  const [modifyingGlobalVar, setModifyingGlobalVar] = useState<null | GlobalVar>(null)
 
   const columns = Object.keys(rowBuilder(null, <span />))
 
   const wiredGlobalVars = useWiredData<GlobalVar[]>(
-    React.useCallback(() => getGlobalVars(), []),
+    useCallback(() => getGlobalVars(), []),
     (err: Error) => <ErrorRow span={columns.length} error={err} />,
     () => <LoadingRow span={columns.length} />,
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredGlobalVars.reload)
     return () => {
       props.offReload(wiredGlobalVars.reload)
@@ -81,10 +81,10 @@ const TableRow = (props: { data: Rowdata; globalVar: GlobalVar }) => (
 
 type Rowdata = {
   Name: string
-  Actions: React.JSX.Element
+  Actions: JSX.Element
 }
 
-const rowBuilder = (u: GlobalVar | null, actions: React.JSX.Element): Rowdata => ({
+const rowBuilder = (u: GlobalVar | null, actions: JSX.Element): Rowdata => ({
   Name: u ? u.name : '',
   Actions: actions,
 })

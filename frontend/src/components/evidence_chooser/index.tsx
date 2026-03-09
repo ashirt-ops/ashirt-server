@@ -1,22 +1,22 @@
-import * as React from 'react'
+import { useCallback, useState } from 'react'
 import Chooser from 'src/components/chooser'
 import EvidencePreview from 'src/components/evidence_preview'
 import Lightbox from 'src/components/lightbox'
 import classnames from 'classnames/bind'
-import { Evidence } from 'src/global_types'
+import { type Evidence } from 'src/global_types'
 
 import { getEvidenceList } from 'src/services'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function EvidenceChooser(props: {
   disabled?: boolean
   onChange: (e: Array<Evidence>) => void
   operationSlug: string
   value: Array<Evidence>
   includeSelectAll?: true
-}) => {
-  const fetchEvidence = React.useCallback(
+}) {
+  const fetchEvidence = useCallback(
     (query: string) => getEvidenceList({ operationSlug: props.operationSlug, query }),
     [props.operationSlug],
   )
@@ -31,7 +31,7 @@ export default (props: {
 }
 
 const EvidenceRow = (props: { evidence: Evidence; operationSlug: string }) => {
-  const [lightboxOpen, setLightboxOpen] = React.useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   return (
     <>

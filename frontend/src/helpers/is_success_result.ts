@@ -1,4 +1,4 @@
-import { ErrorResult, Result, SuccessfulResult } from 'src/global_types'
+import { type ErrorResult, type Result, type SuccessfulResult } from 'src/global_types'
 
 export const isSuccessfulResult = <T>(v: Result<T>): v is SuccessfulResult<T> => {
   return 'success' in v

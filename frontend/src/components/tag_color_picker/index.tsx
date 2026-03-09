@@ -1,4 +1,3 @@
-import * as React from 'react'
 import WithLabel from 'src/components/with_label'
 import classnames from 'classnames/bind'
 import { tagColorNames, tagColorNameToColor } from 'src/helpers'
@@ -8,7 +7,7 @@ const colorNameToStyle = (colorName: string) => ({
   background: '#' + ('000000' + tagColorNameToColor(colorName).toString(16)).substr(-6),
 })
 
-export default (props: {
+const TagColorPicker = (props: {
   disabled: boolean
   label: string
   onChange: (v: string) => void
@@ -28,3 +27,4 @@ export default (props: {
     </div>
   </WithLabel>
 )
+export default TagColorPicker

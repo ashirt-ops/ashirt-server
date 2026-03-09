@@ -1,12 +1,12 @@
-import * as React from 'react'
+import { useState, useRef, type MouseEvent } from 'react'
 import classnames from 'classnames/bind'
-import { Har, Entry, Log, Header, PostData, Response, Request } from 'har-format'
-import { EvidenceViewHint } from 'src/global_types'
+import { type Har, type Entry, type Log, type Header, type PostData, type Response, type Request } from 'har-format'
+import { type EvidenceViewHint } from 'src/global_types'
 import { trimURL, clamp } from 'src/helpers'
 import { mimetypeToAceLang } from './helpers'
 import { RawContent } from './components'
 import { ExpandableSection } from '../expandable_area'
-import { Tab } from '../tabs'
+import { type Tab } from '../tabs'
 import { default as TabMenu } from '../tabs'
 import Table from 'src/components/table'
 
@@ -26,8 +26,8 @@ export const HarViewer = (props: {
   disableKeyHandler?: boolean
 }) => {
   const log: Log = props.log.log
-  const [selectedRow, setSelectedRow] = React.useState<number>(-1)
-  const [entryState, setEntryState] = React.useState<EntryState>({
+  const [selectedRow, setSelectedRow] = useState<number>(-1)
+  const [entryState, setEntryState] = useState<EntryState>({
     activeTab: -1,
     expandedAreas: {},
   })
@@ -177,7 +177,7 @@ const RequestTable = (props: {
   selectedRow: number
   setSelectedRow: (rowNumber: number) => void
 }) => {
-  const tableRef = React.useRef<HTMLTableElement | null>(null)
+  const tableRef = useRef<HTMLTableElement | null>(null)
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
@@ -201,7 +201,7 @@ const RequestTable = (props: {
   }
 
   const onRowSelected =
-    (index: number) => (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+    (index: number) => (e: MouseEvent<HTMLTableRowElement>) => {
       props.setSelectedRow(props.selectedRow == index ? -1 : index)
     }
 

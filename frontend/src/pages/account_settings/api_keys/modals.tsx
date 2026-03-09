@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { type ReactNode } from 'react'
 import classnames from 'classnames/bind'
 
-import { ApiKey } from 'src/global_types'
+import { type ApiKey } from 'src/global_types'
 import Button from 'src/components/button'
 import Form from 'src/components/form'
 import Modal from 'src/components/modal'
@@ -24,7 +24,7 @@ export const NewApiKeyModal = (props: { apiKey: ApiKey; onRequestClose: () => vo
   )
 }
 
-export const NewApiKeyModalContents = (props: { apiKey: ApiKey; children?: React.ReactNode }) => (
+export const NewApiKeyModalContents = (props: { apiKey: ApiKey; children?: ReactNode }) => (
   <div className={cx('new-api-key-modal')}>
     <p>
       Below are your seceret and access keys. Once you close this modal, the seceret key will no

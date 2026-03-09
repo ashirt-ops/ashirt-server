@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type ReactNode } from 'react'
 import classnames from 'classnames/bind'
 
 import Button from 'src/components/button'
@@ -8,7 +8,7 @@ const cx = classnames.bind(require('./stylesheet'))
 const Pager = (props: {
   pageNumber: number
   maxPageNumber?: number
-  children: React.ReactNode
+  children: ReactNode
   className?: string
   nextButtonText?: string
   prevButtonText?: string

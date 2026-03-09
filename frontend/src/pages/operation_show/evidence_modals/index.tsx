@@ -1,15 +1,15 @@
-import * as React from 'react'
+import { type ReactNode, useState, useEffect, useCallback, type MouseEvent } from 'react'
 import classnames from 'classnames/bind'
 import {
-  Evidence,
-  EvidenceMetadata,
-  Finding,
-  Tag,
-  CodeBlock,
-  SubmittableEvidence,
-  Operation,
-  TagDifference,
-  SupportedEvidenceType,
+  type Evidence,
+  type EvidenceMetadata,
+  type Finding,
+  type Tag,
+  type CodeBlock,
+  type SubmittableEvidence,
+  type Operation,
+  type TagDifference,
+  type SupportedEvidenceType,
 } from 'src/global_types'
 import {
   codeblockToBlob,
@@ -80,7 +80,7 @@ export const CreateEvidenceModal = (props: {
   const evidenceTypeOptions: Array<{
     name: string
     value: SupportedEvidenceType
-    content?: React.ReactNode
+    content?: ReactNode
   }> = [
     {
       name: 'Screenshot',
@@ -113,7 +113,7 @@ export const CreateEvidenceModal = (props: {
     },
   ]
 
-  const [selectedCBValue, setSelectedCBValue] = React.useState<string>(evidenceTypeOptions[0].value)
+  const [selectedCBValue, setSelectedCBValue] = useState<string>(evidenceTypeOptions[0].value)
   const getSelectedOption = () =>
     evidenceTypeOptions.filter((opt) => opt.value === selectedCBValue)[0]
 
@@ -192,7 +192,7 @@ export const EditEvidenceModal = (props: {
     source: null,
   })
   const adjustedAtField = useFormField<Date | undefined>(props.evidence.adjustedAt ?? undefined)
-  React.useEffect(() => {
+  useEffect(() => {
     if (props.evidence.contentType !== 'codeblock') {
       return
     }
@@ -269,7 +269,7 @@ export const ChangeFindingsOfEvidenceModal = (props: {
   operationSlug: string
 }) => {
   const wiredFindings = useWiredData<Array<Finding>>(
-    React.useCallback(
+    useCallback(
       () =>
         getFindingsOfEvidence({
           operationSlug: props.operationSlug,
@@ -367,13 +367,13 @@ export const MoveEvidenceModal = (props: {
   onRequestClose: () => void
   onEvidenceMoved: () => void
 }) => {
-  const [selectedOperationSlug, setSelectedOperation] = React.useState(props.operationSlug)
+  const [selectedOperationSlug, setSelectedOperation] = useState(props.operationSlug)
 
   const wiredOps = useWiredData<Array<Operation>>(
-    React.useCallback(getOperations, [props.operationSlug, props.evidence.uuid]),
+    useCallback(getOperations, [props.operationSlug, props.evidence.uuid]),
   )
   const wiredDiff = useWiredData<TagDifference>(
-    React.useCallback(
+    useCallback(
       () =>
         getEvidenceMigrationDifference({
           fromOperationSlug: props.operationSlug,
@@ -465,7 +465,7 @@ export const EvidenceMetadataModal = (props: {
   onUpdated: () => void
 }) => {
   const wiredMetadata = useWiredData(
-    React.useCallback(
+    useCallback(
       () =>
         Promise.all([
           readEvidenceMetadata({
@@ -550,8 +550,8 @@ type ViewEditEvidenceMetadataContainerProps = {
 }
 
 const ViewEditEvidenceMetadataContainer = (props: ViewEditEvidenceMetadataContainerProps) => {
-  const [editedMetadata, setEditedMetadata] = React.useState<null | EvidenceMetadata>(null)
-  const [filterText, setFilterText] = React.useState<string>('')
+  const [editedMetadata, setEditedMetadata] = useState<null | EvidenceMetadata>(null)
+  const [filterText, setFilterText] = useState<string>('')
 
   return editedMetadata ? (
     <EditEvidenceMetadataForm
@@ -631,7 +631,7 @@ const ViewEvidenceMetadataForm = (props: {
 }) => {
   const wiredServices = useWiredData(listActiveServiceWorkers)
 
-  const [hide, setHide] = React.useState(true)
+  const [hide, setHide] = useState(true)
   const disabledTitleForStatus = (status?: string) =>
     status === 'Queued'
       ? 'Work has been queued'
@@ -786,7 +786,7 @@ const EvidenceMetadataItem = (props: {
 
 type ExpandableSectionLabelActionItem = {
   label: string
-  action: (e: React.MouseEvent<Element, MouseEvent>) => void
+  action: (e: MouseEvent<Element>) => void
   disabled?: boolean
   title?: string
 }

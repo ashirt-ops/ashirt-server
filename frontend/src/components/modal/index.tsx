@@ -1,19 +1,19 @@
-import * as React from 'react'
+import { type ReactNode, useRef, useEffect } from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
 import { useFocusFirstFocusableChild } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
-  children: React.ReactNode
+export default function Modal(props: {
+  children: ReactNode
   onRequestClose: () => void
   title: string
   smallerWidth?: boolean
-}) => {
-  const rootRef = React.useRef(null)
+}) {
+  const rootRef = useRef(null)
   useFocusFirstFocusableChild(rootRef)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const main = document.querySelector('main')
     if (main == null) return
     main.style.filter = 'blur(5px)'

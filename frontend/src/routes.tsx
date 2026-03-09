@@ -1,9 +1,9 @@
-import * as React from 'react'
+import { useContext, type FunctionComponent } from 'react'
 import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
 import { NavLinkButton } from './components/button'
-import { Route, Routes, Navigate, useParams, Params } from 'react-router'
+import { Route, Routes, Navigate, useParams, type Params } from 'react-router'
 import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -35,8 +35,8 @@ function Redirect(props: {
   return <Navigate to={`${props.to}${query ? `?${query}` : ''}`} replace />
 }
 
-export default () => {
-  const user = React.useContext(AuthContext).user
+export default function AppRoutes() {
+  const user = useContext(AuthContext).user
   const isSuperAdmin = useUserIsSuperAdmin()
 
   if (user == null)
@@ -109,7 +109,7 @@ export default () => {
 //
 // This is used to break up each page into its own bundle to prevent the main entry bundle from becoming too large and allows
 // page javascript to load on demand.
-function makeAsyncPage(page: () => Promise<{ default: React.FunctionComponent }>) {
+function makeAsyncPage(page: () => Promise<{ default: FunctionComponent }>) {
   const defaultPage = () => page().then((module) => module.default)
   return () => {
     const Page = useAsyncComponent(defaultPage)

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Layout from '../layout'
 import Timeline from 'src/components/timeline'
 import {
@@ -8,31 +8,31 @@ import {
   MoveEvidenceModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
-import { Codeblock, Evidence, ExportedEvidence, Media, Tag } from 'src/global_types'
+import { type Codeblock, type Evidence, type ExportedEvidence, type Media, type Tag } from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { mkNavTo } from 'src/helpers/navigate-to-query'
 
 import { saveAs } from 'file-saver'
-import _ from 'lodash'
+
 import JSZip from 'jszip'
 import Modal from 'src/components/modal'
 import { languageToFileExtension } from 'src/helpers/languages'
 
-export default () => {
+export default function EvidenceList() {
   const { slug } = useParams<{ slug: string }>()
   const operationSlug = slug! // useParams puts everything in a partial, so our type above doesn't matter.
   const location = useLocation()
   const navigate = useNavigate()
-  const [evidence, setEvidence] = React.useState<Evidence[]>([])
+  const [evidence, setEvidence] = useState<Evidence[]>([])
 
   const query: string = new URLSearchParams(location.search).get('q') || ''
-  const [lastEditedUuid, setLastEditedUuid] = React.useState('')
-  const [showModal, setShowModal] = React.useState(false)
+  const [lastEditedUuid, setLastEditedUuid] = useState('')
+  const [showModal, setShowModal] = useState(false)
 
   const wiredEvidence = useWiredData(
-    React.useCallback(
+    useCallback(
       () =>
         getEvidenceList({
           operationSlug,
@@ -42,7 +42,7 @@ export default () => {
     ),
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     wiredEvidence.expose((data) => data.length && setEvidence(data))
   }, [wiredEvidence])
 
@@ -150,7 +150,7 @@ export default () => {
   const exportEvidence = async () => {
     const zip = new JSZip()
     const evidenceFolder = zip.folder('evidence')!
-    const evidenceCopy = _.cloneDeep(evidence)
+    const evidenceCopy = structuredClone(evidence)
     const [media, modEvidenceCopy] = await getMedia(evidenceCopy)
 
     zip.file('evidence.json', JSON.stringify(modEvidenceCopy))

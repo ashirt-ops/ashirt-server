@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 import WithLabel from 'src/components/with_label'
 import classnames from 'classnames/bind'
 import { useDropzone } from 'react-dropzone'
@@ -11,11 +11,11 @@ const BinaryUpload = (props: {
   isSupportedFile: (file: File) => boolean
   value: File | null
 }) => {
-  const [err, setErr] = React.useState<Error | null>(null)
+  const [err, setErr] = useState<Error | null>(null)
 
   const { value, isSupportedFile, label } = { ...props }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const file = value
     if (file == null || isSupportedFile(file)) {
       setErr(null)

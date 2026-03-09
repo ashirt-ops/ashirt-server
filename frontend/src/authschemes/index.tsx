@@ -1,15 +1,15 @@
-import * as React from 'react'
+import { type FunctionComponent, useCallback } from 'react'
 import { useAsyncComponent } from 'src/helpers'
-import { SupportedAuthenticationScheme, UserOwnView } from 'src/global_types'
+import { type SupportedAuthenticationScheme, type UserOwnView } from 'src/global_types'
 
 export type AuthFrontend = {
-  Linker: React.FunctionComponent<{
+  Linker: FunctionComponent<{
     onSuccess: () => void
     authFlags?: Array<string>
     userData: UserOwnView
   }>
-  Login: React.FunctionComponent<{ query: URLSearchParams; authFlags?: Array<string> }>
-  Settings: React.FunctionComponent<{ username: string; authFlags?: Array<string> }>
+  Login: FunctionComponent<{ query: URLSearchParams; authFlags?: Array<string> }>
+  Settings: FunctionComponent<{ username: string; authFlags?: Array<string> }>
 }
 
 // @ts-ignore - this is a webpack compile-time include of src/authschemes/*/index.ts
@@ -57,7 +57,7 @@ export function useAuthFrontendComponent<Key extends keyof AuthFrontend>(
   schemeDetails?: SupportedAuthenticationScheme,
 ): AuthFrontend[Key] {
   return useAsyncComponent(
-    React.useCallback(
+    useCallback(
       () => getAuthFrontend(authSchemeType, schemeDetails).then((module) => module[key]),
       [authSchemeType, key, schemeDetails],
     ),

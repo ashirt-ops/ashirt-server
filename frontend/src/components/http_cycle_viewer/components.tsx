@@ -1,4 +1,3 @@
-import * as React from 'react'
 import classnames from 'classnames/bind'
 
 import { SourcelessCodeblock } from '../code_block'

@@ -1,26 +1,26 @@
-import * as React from 'react'
+import { type ReactNode, type MouseEvent, type KeyboardEvent, useRef, useEffect } from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: { maxHeight?: number; children: React.ReactNode }) => (
+const Menu = (props: { maxHeight?: number; children: ReactNode }) => (
   <div className={cx('root')} style={{ maxHeight: props.maxHeight }}>
     {props.children}
   </div>
 )
 
 export const MenuItem = (props: {
-  children: React.ReactNode
+  children: ReactNode
   icon?: string
-  onClick?: (e: React.MouseEvent<Element, MouseEvent>) => void
+  onClick?: (e: MouseEvent<Element>) => void
   selected?: boolean
   disabled?: boolean
   danger?: boolean
-  onKeyUp?: (e: React.KeyboardEvent) => void
-  onKeyDown?: (e: React.KeyboardEvent) => void
+  onKeyUp?: (e: KeyboardEvent) => void
+  onKeyDown?: (e: KeyboardEvent) => void
 }) => {
-  const ref = React.useRef<HTMLButtonElement | null>(null)
+  const ref = useRef<HTMLButtonElement | null>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (props.selected && ref.current != null) {
       ref.current.scrollIntoView({ block: 'nearest' })
     }
@@ -49,3 +49,4 @@ export const MenuItem = (props: {
 }
 
 export const MenuSeparator = () => <hr className={cx('separator')} />
+export default Menu

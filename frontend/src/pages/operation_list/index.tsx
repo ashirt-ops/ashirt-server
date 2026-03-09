@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useContext, useCallback, useState, useEffect } from 'react'
 import AuthContext from 'src/auth_context'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
@@ -8,13 +8,13 @@ import List from './list'
 import { getOperations, createOperation, hasFlag, setFavorite } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
-import { Operation } from 'src/global_types'
+import { type Operation } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default () => {
-  const { user } = React.useContext(AuthContext) // user should never be null
+export default function OperationList() {
+  const { user } = useContext(AuthContext) // user should never be null
   const wiredData = useWiredData(
-    React.useCallback(() => Promise.all([getOperations(), hasFlag('welcome-message')]), []),
+    useCallback(() => Promise.all([getOperations(), hasFlag('welcome-message')]), []),
   )
 
   const newOperationModal = useModal<{}>((modalProps) => (
@@ -22,10 +22,10 @@ export default () => {
   ))
   const filterText = useFormField<string>('')
 
-  const [ops, setOps] = React.useState<Operation[]>([])
-  const [welcomeFlag, setWelcomeFlag] = React.useState<boolean>(false)
+  const [ops, setOps] = useState<Operation[]>([])
+  const [welcomeFlag, setWelcomeFlag] = useState<boolean>(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     wiredData.expose((data) => {
       if (data) {
         const [ops, welcomeFlag] = data

@@ -1,11 +1,11 @@
-import * as React from 'react'
-import { dropRight } from 'lodash'
+import { type ReactNode, useState, type KeyboardEvent, type Key } from 'react'
+
 import classnames from 'classnames/bind'
 
 import WithLabel from 'src/components/with_label'
-import PopoverMenu, { KeyboardModifiers } from 'src/components/popover_menu'
+import PopoverMenu, { type KeyboardModifiers } from 'src/components/popover_menu'
 import Tag from 'src/components/tag'
-import { TagColor } from 'src/helpers'
+import { type TagColor } from 'src/helpers'
 
 export * from './creator_chooser'
 export * from './evidence_type_chooser'
@@ -22,17 +22,17 @@ export default function BulletChooser<T extends BulletProps>(props: {
   onNoValueSelected?: (inputValue: string) => Promise<T | null>
   valueRenderer?: BulletRenderer<T>
   rowRenderer?: BulletRenderer<T>
-  noValueRenderer?: (inputValue: string) => React.ReactNode
+  noValueRenderer?: (inputValue: string) => ReactNode
   onChange: (tags: Array<T>) => void
   className?: string
   disabled?: boolean
   enableNot?: boolean
   hideDropDown?: boolean
 }) {
-  const [inputValue, setInputValue] = React.useState('')
-  const [dropdownVisible, setDropdownVisible] = React.useState(false)
-  const [selectedTag, setSelectedTag] = React.useState<number>(-1)
-  const [modifierHeld, setHeld] = React.useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [selectedTag, setSelectedTag] = useState<number>(-1)
+  const [modifierHeld, setHeld] = useState(false)
 
   const getOptions = (): Array<T> => {
     return typeof props.options == 'function'
@@ -74,7 +74,7 @@ export default function BulletChooser<T extends BulletProps>(props: {
     }
   }
 
-  const onInputKeyDown = (e: React.KeyboardEvent) => {
+  const onInputKeyDown = (e: KeyboardEvent) => {
     setModifierHeld(e)
 
     if (inputValue === '') {
@@ -86,7 +86,7 @@ export default function BulletChooser<T extends BulletProps>(props: {
           ])
           setSelectedTag(selectedTag - 1)
         } else if (e.key != 'Delete') {
-          props.onChange(dropRight(props.value))
+          props.onChange(props.value.slice(0, -1))
         }
       } else if (e.key === 'ArrowLeft') {
         let index = selectedTag - 1
@@ -103,7 +103,7 @@ export default function BulletChooser<T extends BulletProps>(props: {
     }
   }
 
-  const renderer = (bullet: T | null): React.ReactNode => {
+  const renderer = (bullet: T | null): ReactNode => {
     if (bullet == null) {
       return noValueRenderer?.(inputValue) ?? <StandardNoValRenderer />
     }
@@ -165,13 +165,13 @@ const getBulletIdAsSet = (bullets: Array<BulletProps>): BulletIdSet => {
 
 export type BulletRendererProps<T extends BulletProps> = {
   bullet: T
-  key?: React.Key
+  key?: Key
   selected?: boolean
 }
 
 export type BulletRenderer<T extends BulletProps> = (
   props: BulletRendererProps<T>,
-) => React.ReactNode
+) => ReactNode
 
 function StandardBulletRenderer<T extends BulletProps>(props: BulletRendererProps<T>) {
   return (

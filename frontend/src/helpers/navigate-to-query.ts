@@ -1,4 +1,4 @@
-import { ViewName } from 'src/global_types'
+import { type ViewName } from 'src/global_types'
 
 export type NavigateProps = {
   slug: string

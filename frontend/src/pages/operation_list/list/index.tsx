@@ -1,21 +1,20 @@
-import * as React from 'react'
 import classnames from 'classnames/bind'
 import NewOperationButton from '../new_operation_button'
 import OperationCard from '../operation_card'
-import { FilterText, Operation } from 'src/global_types'
-import { UseModalOutput } from 'src/helpers'
+import { type FilterText, type Operation } from 'src/global_types'
+import { type UseModalOutput } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 const normalizedInclude = (baseString: string, term: string) => {
   return baseString.toLowerCase().includes(term.toLowerCase())
 }
 
-export default (props: {
+export default function List(props: {
   ops: Operation[]
   newOperationModal: UseModalOutput<{}>
   filterText: FilterText
   onFavoriteToggled: (slug: string, isFavorite: boolean) => void
-}) => {
+}) {
   const favoriteOps = props.ops?.filter((op) => op.favorite)
   const otherOps = props.ops?.filter((op) => !op.favorite)
 

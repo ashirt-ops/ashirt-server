@@ -1,20 +1,20 @@
-import * as React from 'react'
+import { useCallback, useState } from 'react'
 import Chooser from 'src/components/chooser'
 import Lightbox from 'src/components/lightbox'
 import MarkdownRenderer from 'src/components/markdown_renderer'
 import TagList from 'src/components/tag_list'
 import classnames from 'classnames/bind'
-import { Finding } from 'src/global_types'
+import { type Finding } from 'src/global_types'
 import { getFindings } from 'src/services'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function FindingChooser(props: {
   disabled?: boolean
   onChange: (e: Array<Finding>) => void
   operationSlug: string
   value: Array<Finding>
-}) => {
-  const fetchFindings = React.useCallback(
+}) {
+  const fetchFindings = useCallback(
     (query: string) => getFindings({ operationSlug: props.operationSlug, query }),
     [props.operationSlug],
   )
@@ -29,7 +29,7 @@ export default (props: {
 }
 
 const FindingRow = (props: { finding: Finding }) => {
-  const [lightboxOpen, setLightboxOpen] = React.useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   return (
     <div>

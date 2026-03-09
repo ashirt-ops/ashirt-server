@@ -1,13 +1,13 @@
-import * as React from 'react'
+import { useState, useContext } from 'react'
 import classnames from 'classnames/bind'
 
 import {
-  ApiKey,
-  User,
-  UserAdminView,
-  UserGroupAdminView,
-  GlobalVariableData,
-  OperationVariableData,
+  type ApiKey,
+  type User,
+  type UserAdminView,
+  type UserGroupAdminView,
+  type GlobalVariableData,
+  type OperationVariableData,
 } from 'src/global_types'
 import {
   adminChangePassword,
@@ -69,8 +69,8 @@ export const ResetPasswordModal = (props: { user: User; onRequestClose: () => vo
 }
 
 export const AddHeadlessUserModal = (props: { onRequestClose: () => void }) => {
-  const [apiKey, setApiKey] = React.useState<ApiKey | null>(null)
-  const [newUserSlug, setNewUserSlug] = React.useState<string | null>(null)
+  const [apiKey, setApiKey] = useState<ApiKey | null>(null)
+  const [newUserSlug, setNewUserSlug] = useState<string | null>(null)
 
   const headlessName = useFormField<string>('')
   const contactEmail = useFormField<string>('')
@@ -135,9 +135,9 @@ export const AddUserModal = (props: { onRequestClose: () => void }) => {
   const lastName = useFormField<string>('')
   const contactEmail = useFormField<string>('')
 
-  const [username, setUsername] = React.useState<string>('')
-  const [password, setPassword] = React.useState<string>('')
-  const [isDisabled, setDisabled] = React.useState<boolean>(false)
+  const [username, setUsername] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [isDisabled, setDisabled] = useState<boolean>(false)
 
   const formComponentProps = useForm({
     fields: [firstName, lastName, contactEmail],
@@ -194,8 +194,8 @@ export const AddUserModal = (props: { onRequestClose: () => void }) => {
 }
 
 export const AddUserGroupModal = (props: { onRequestClose: () => void }) => {
-  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
-  const [includedUsers, setIncludedUsers] = React.useState<Set<string>>(() => new Set())
+  const [isCompleted, setIsCompleted] = useState<boolean>(false)
+  const [includedUsers, setIncludedUsers] = useState<Set<string>>(() => new Set())
 
   const name = useFormField<string>('')
   const userSlugs = Array.from(includedUsers as Set<string>)
@@ -256,9 +256,9 @@ export const ModifyUserGroupModal = (props: {
   userGroup: UserGroupAdminView
   onRequestClose: () => void
 }) => {
-  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+  const [isCompleted, setIsCompleted] = useState<boolean>(false)
   const slugs = props.userGroup?.userSlugs ? props.userGroup.userSlugs : []
-  const [includedUsers, setIncludedUsers] = React.useState(() => new Set([...slugs]))
+  const [includedUsers, setIncludedUsers] = useState(() => new Set([...slugs]))
 
   const name = useFormField<string>(props.userGroup.name)
   const formComponentProps = useForm({
@@ -344,7 +344,7 @@ export const UpdateUserFlagsModal = (props: {
   user: UserAdminView
   onRequestClose: () => void
 }) => {
-  const fullContext = React.useContext(AuthContext)
+  const fullContext = useContext(AuthContext)
   const adminSlug = fullContext.user ? fullContext.user.slug : ''
 
   const isAdmin = useFormField(props.user.admin)
@@ -449,8 +449,8 @@ export const InviteUserModal = (props: { onRequestClose: () => void }) => {
   const lastName = useFormField<string>('')
   const contactEmail = useFormField<string>('')
 
-  const [url, setUrl] = React.useState<string>('')
-  const [isDisabled, setDisabled] = React.useState<boolean>(false)
+  const [url, setUrl] = useState<string>('')
+  const [isDisabled, setDisabled] = useState<boolean>(false)
 
   const formComponentProps = useForm({
     fields: [firstName, lastName, contactEmail],
@@ -531,7 +531,7 @@ export const RemoveTotpModal = (props: { user: UserAdminView; onRequestClose: ()
 }
 
 export const AddVarModal = (props: { onRequestClose: () => void; operationSlug?: string }) => {
-  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
+  const [isCompleted, setIsCompleted] = useState<boolean>(false)
 
   const name = useFormField<string>('')
   const value = useFormField<string>('')
@@ -606,8 +606,8 @@ export const ModifyVarModal = (props: {
   variableData: GlobalVariableData | OperationVariableData
   onRequestClose: () => void
 }) => {
-  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
-  const [copiedValue, setCopiedValue] = React.useState<boolean>(false)
+  const [isCompleted, setIsCompleted] = useState<boolean>(false)
+  const [copiedValue, setCopiedValue] = useState<boolean>(false)
 
   const name = useFormField<string>(props.variableData.variable.name)
   const value = useFormField<string>(props.variableData.variable.value)

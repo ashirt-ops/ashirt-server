@@ -1,8 +1,8 @@
-import * as React from 'react'
+import { useReducer, type ReactNode } from 'react'
 import classnames from 'classnames/bind'
-import { chunk } from 'lodash'
+
 import { useNavigate } from 'react-router'
-import { DefaultTag, Tag as TagType, TagWithUsage } from 'src/global_types'
+import { type DefaultTag, type Tag as TagType, type TagWithUsage } from 'src/global_types'
 import { useModal, renderModals } from 'src/helpers'
 
 import { StandardPager } from 'src/components/paging'
@@ -11,7 +11,7 @@ import {
   EndAlignedColumn,
   SortAsc,
   SortDesc,
-  SortDirection,
+  type SortDirection,
 } from 'src/components/table'
 import Input from 'src/components/input'
 import { default as Button, ButtonGroup } from 'src/components/button'
@@ -106,7 +106,7 @@ function BasicTagTable<T extends TagType>(props: {
   operationSlug?: string
 }) {
   const extraCols = props.extraColumns ?? []
-  const [tagTableState, dispatch] = React.useReducer(tagTableReducer, TagTableInitialState)
+  const [tagTableState, dispatch] = useReducer(tagTableReducer, TagTableInitialState)
 
   const columnRenders = extraCols.map((col) => col.renderer)
   const columnDefinitions = extraCols.map((col) => {
@@ -145,7 +145,9 @@ function BasicTagTable<T extends TagType>(props: {
   const sortedTags = props.tags
     .filter((tag) => tag.name.toLowerCase().includes(tagTableState.filterText))
     .sort(tagTableState.sortFunc)
-  const paginatedTags = chunk(sortedTags, 10)
+  const paginatedTags = Array.from({ length: Math.ceil(sortedTags.length / 10) }, (_, i) =>
+    sortedTags.slice(i * 10, i * 10 + 10),
+  )
 
   return (
     <>
@@ -245,7 +247,7 @@ type tagTableColumn<T> = {
   label: string
   clickable?: boolean
   compareVia: compareableFunc
-  renderer: (tag: T) => React.ReactNode
+  renderer: (tag: T) => ReactNode
 }
 
 type TagTableState = {

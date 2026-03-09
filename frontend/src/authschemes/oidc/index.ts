@@ -1,7 +1,7 @@
 import { makeLinker } from './linker'
 import { makeLogin } from './login'
-import { AuthFrontend } from 'src/authschemes'
-import { SupportedAuthenticationScheme } from 'src/global_types'
+import { type AuthFrontend } from 'src/authschemes'
+import { type SupportedAuthenticationScheme } from 'src/global_types'
 
 export type OIDCInstanceConfig = {
   code: string

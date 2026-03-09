@@ -1,4 +1,4 @@
-import { ProvidedCredentialCreationOptions, ProvidedCredentialRequestOptions } from './types'
+import { type ProvidedCredentialCreationOptions, type ProvidedCredentialRequestOptions } from './types'
 
 export const encodeAsB64 = (ab: ArrayBuffer) => {
   return base64UrlEncode(arrayBufferToString(ab))

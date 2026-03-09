@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import classnames from 'classnames/bind'
 import { totpIsEnabled, generateTotpSecret, setTotp, deleteTotp } from '../services'
 import { useWiredData, useForm, useFormField } from 'src/helpers'
@@ -12,7 +12,7 @@ import { InputWithCopyButton } from 'src/components/text_copiers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {}) => {
+export default function Totp(props: {}) {
   const wiredTotpIsEnabled = useWiredData(totpIsEnabled, (err: Error) => (
     <div className={cx('plain-error')}>
       Multifactor Authentication is not available for this account. Please ensure you have linked
@@ -52,7 +52,7 @@ const TotpEnabled = (props: { onSuccess: () => void }) => {
 // This component renders a button to open the totp setup modal. It is used for users
 // who don't currently have totp enabled
 const TotpDisabled = (props: { onSuccess: () => void }) => {
-  const [showTotpSetupModal, setShowTotpSetupModal] = React.useState(false)
+  const [showTotpSetupModal, setShowTotpSetupModal] = useState(false)
 
   return (
     <>

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import SettingsSection from 'src/components/settings_section'
 import { getDefaultTags } from 'src/services'
 import { useWiredData } from 'src/helpers'
@@ -10,7 +10,7 @@ export const DefaultTagEditor = (props: {
 }) => {
   const wiredTags = useWiredData(getDefaultTags)
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredTags.reload)
     return () => {
       props.offReload(wiredTags.reload)

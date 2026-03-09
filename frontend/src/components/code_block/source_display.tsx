@@ -1,10 +1,9 @@
-import * as React from 'react'
 import classnames from 'classnames/bind'
-import { CodeBlock } from 'src/global_types'
+import { type CodeBlock } from 'src/global_types'
 import { trimURL } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: { value: CodeBlock }) => {
+export default function SourceDisplay(props: { value: CodeBlock }) {
   const source = props.value ? props.value.source : null
   if (!source) {
     return <span className={cx('source-none')}>No source available</span>

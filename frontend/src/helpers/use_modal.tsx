@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type ReactNode, useState } from 'react'
 
 // useModal & renderModals are helpers to make it easy for a component to display one or many modals to the user
 //
@@ -24,7 +24,7 @@ import * as React from 'react'
 // </>
 
 export type UseModalOutput<ModalProps> = {
-  node: React.ReactNode
+  node: ReactNode
   show: (modalProps: ModalProps) => void
 }
 
@@ -33,10 +33,10 @@ export type OnRequestClose = {
 }
 
 export function useModal<ModalProps>(
-  modalRenderer: (modalProps: ModalProps & OnRequestClose) => React.ReactNode,
+  modalRenderer: (modalProps: ModalProps & OnRequestClose) => ReactNode,
   onClose?: () => void,
 ): UseModalOutput<ModalProps> {
-  const [modal, setModal] = React.useState<(ModalProps & OnRequestClose) | null>(null)
+  const [modal, setModal] = useState<(ModalProps & OnRequestClose) | null>(null)
   const hide = () => {
     setModal(null)
   }
@@ -55,7 +55,7 @@ export function useModal<ModalProps>(
   }
 }
 
-export function renderModals(...modals: Array<{ node: React.ReactNode }>): React.ReactNode {
+export function renderModals(...modals: Array<{ node: ReactNode }>): ReactNode {
   for (let modal of modals) {
     if (modal.node != null) return modal.node
   }

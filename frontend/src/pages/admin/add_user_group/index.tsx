@@ -1,10 +1,10 @@
-import * as React from 'react'
+import { useState } from 'react'
 import Button from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import { AddUserGroupModal } from 'src/pages/admin_modals'
 
-export default (props: { requestReload?: () => void }) => {
-  const [newUserGroup, setNewUserGroup] = React.useState<boolean>(false)
+export default function AddUserGroup(props: { requestReload?: () => void }) {
+  const [newUserGroup, setNewUserGroup] = useState<boolean>(false)
 
   return (
     <SettingsSection title="New Group Creation">

@@ -1,9 +1,9 @@
-import * as React from 'react'
+import { type ReactNode, type ReactElement } from 'react'
 
 export const SpannedRow = (props: {
   span: number
-  children?: React.ReactNode
-}): React.ReactElement => (
+  children?: ReactNode
+}): ReactElement => (
   <tr>
     <td colSpan={props.span}>{props.children}</td>
   </tr>

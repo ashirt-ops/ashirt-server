@@ -1,9 +1,9 @@
-import * as React from 'react'
+import { useState, useContext, useCallback, useEffect, type JSX } from 'react'
 import classnames from 'classnames/bind'
 import { useNavigate } from 'react-router'
 import { usePaginatedWiredData } from 'src/helpers'
 
-import { UserAdminView } from 'src/global_types'
+import { type UserAdminView } from 'src/global_types'
 import { listUsersAdminView, createRecoveryCode } from 'src/services'
 import AuthContext from 'src/auth_context'
 import { getIncludeDeletedUsers, setIncludeDeletedUsers } from 'src/helpers'
@@ -26,20 +26,20 @@ import Input from 'src/components/input'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+export default function UserTable(props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
-}) => {
-  const [resettingPassword, setResettingPassword] = React.useState<null | UserAdminView>(null)
-  const [editingUserFlags, setEditingUserFlags] = React.useState<null | UserAdminView>(null)
-  const [deletingUser, setDeletingUser] = React.useState<null | UserAdminView>(null)
-  const [deletingTotp, setDeletingTotp] = React.useState<null | UserAdminView>(null)
-  const [recoveryCode, setRecoveryCode] = React.useState<null | string>(null)
-  const [withDeleted, setWithDeleted] = React.useState(getIncludeDeletedUsers())
-  const self = React.useContext(AuthContext).user
+}) {
+  const [resettingPassword, setResettingPassword] = useState<null | UserAdminView>(null)
+  const [editingUserFlags, setEditingUserFlags] = useState<null | UserAdminView>(null)
+  const [deletingUser, setDeletingUser] = useState<null | UserAdminView>(null)
+  const [deletingTotp, setDeletingTotp] = useState<null | UserAdminView>(null)
+  const [recoveryCode, setRecoveryCode] = useState<null | string>(null)
+  const [withDeleted, setWithDeleted] = useState(getIncludeDeletedUsers())
+  const self = useContext(AuthContext).user
   const navigate = useNavigate()
 
-  const [usernameFilterValue, setUsernameFilterValue] = React.useState('')
+  const [usernameFilterValue, setUsernameFilterValue] = useState('')
 
   const editUserFn = (u: UserAdminView) => navigate(`/account/profile?user=${u.slug}`)
   const recoverFn = (u: UserAdminView) =>
@@ -56,7 +56,7 @@ export default (props: {
   const columns = Object.keys(rowBuilder(null, <span />))
 
   const wiredUsers = usePaginatedWiredData<UserAdminView>(
-    React.useCallback(
+    useCallback(
       (page) =>
         listUsersAdminView({ page, pageSize: 10, deleted: withDeleted, name: usernameFilterValue }),
       [usernameFilterValue, withDeleted],
@@ -65,13 +65,13 @@ export default (props: {
     () => <LoadingRow span={columns.length} />,
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredUsers.reload)
     return () => {
       props.offReload(wiredUsers.reload)
     }
   })
-  React.useEffect(() => {
+  useEffect(() => {
     setIncludeDeletedUsers(withDeleted)
   }, [withDeleted])
 
@@ -162,11 +162,11 @@ type Rowdata = {
   'First Name': string
   'Last Name': string
   'Contact Email': string
-  Flags: React.JSX.Element
-  Actions: React.JSX.Element
+  Flags: JSX.Element
+  Actions: JSX.Element
 }
 
-const rowBuilder = (u: UserAdminView | null, actions: React.JSX.Element): Rowdata => ({
+const rowBuilder = (u: UserAdminView | null, actions: JSX.Element): Rowdata => ({
   'First Name': u ? u.firstName : '',
   'Last Name': u ? u.lastName : '',
   'Contact Email': u ? u.email : '',

@@ -1,13 +1,13 @@
-import * as React from 'react'
+import { useCallback } from 'react'
 import { useWiredData } from 'src/helpers'
 import { getTags } from 'src/services'
 
 import SettingsSection from 'src/components/settings_section'
 import { OperationTagTable } from 'src/components/tag_editor'
 
-export default (props: { operationSlug: string }) => {
+export default function TagEditor(props: { operationSlug: string }) {
   const wiredTags = useWiredData(
-    React.useCallback(() => getTags({ operationSlug: props.operationSlug }), [props.operationSlug]),
+    useCallback(() => getTags({ operationSlug: props.operationSlug }), [props.operationSlug]),
   )
 
   return (

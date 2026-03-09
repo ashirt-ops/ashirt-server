@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type ReactNode, useState, useCallback, useRef } from 'react'
 import Checkbox from 'src/components/checkbox'
 import Input from 'src/components/input'
 import classnames from 'classnames/bind'
@@ -7,20 +7,20 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export default function <T extends { uuid: string }>(props: {
   fetch: (query: string) => Promise<Array<T>>
-  renderRow: (result: T) => React.ReactNode
+  renderRow: (result: T) => ReactNode
   disabled?: boolean
   onChange: (v: Array<T>) => void
   placeholder: string
   value: Array<T>
   includeSelectAll?: true
 }) {
-  const [query, setQuery] = React.useState<string>('')
+  const [query, setQuery] = useState<string>('')
   const dataFetcher = props.fetch
   const wiredResults = useWiredData<Array<T>>(
-    React.useCallback(() => dataFetcher(query), [query, dataFetcher]),
+    useCallback(() => dataFetcher(query), [query, dataFetcher]),
   )
-  const fetchedData = React.useRef<Array<T>>([])
-  const [allSelected, setAllSelected] = React.useState(false)
+  const fetchedData = useRef<Array<T>>([])
+  const [allSelected, setAllSelected] = useState(false)
 
   const resultsByUuid: { [uuid: string]: T } = {}
   props.value.forEach((result) => {
@@ -87,7 +87,7 @@ export default function <T extends { uuid: string }>(props: {
 const Row = (props: {
   selected: boolean
   onChange: (v: boolean) => void
-  children: React.ReactNode
+  children: ReactNode
 }) => (
   <div
     className={cx('row', { selected: props.selected })}

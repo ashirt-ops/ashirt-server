@@ -1,14 +1,14 @@
-import * as React from 'react'
+import { type ChangeEventHandler } from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+const CheckboxComplex = (props: {
   className?: string
   value?: boolean
   label?: string
   title?: string
   disabled?: boolean
-  onChange?: React.ChangeEventHandler<HTMLInputElement>
+  onChange?: ChangeEventHandler<HTMLInputElement>
 }) => (
   <label
     title={props.title}
@@ -26,3 +26,4 @@ export default (props: {
     {props.label}
   </label>
 )
+export default CheckboxComplex

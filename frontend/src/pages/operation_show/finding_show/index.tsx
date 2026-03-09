@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useCallback, useState } from 'react'
 import FindingInfo from './finding_info'
 import Timeline from 'src/components/timeline'
 import classnames from 'classnames/bind'
@@ -9,14 +9,14 @@ import {
   DeleteFindingModal,
 } from '../finding_modals'
 import { EditEvidenceModal } from '../evidence_modals'
-import { Evidence, Finding } from 'src/global_types'
+import { type Evidence, type Finding } from 'src/global_types'
 import { useNavigate, useParams } from 'react-router'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { getFinding } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default () => {
+export default function FindingShow() {
   const { slug, uuid } = useParams<{ slug: string; uuid: string }>()
   // useParams puts everything in a partial, so our type above doesn't matter.
   const operationSlug = slug!
@@ -24,7 +24,7 @@ export default () => {
 
   const navigate = useNavigate()
   const wiredFinding = useWiredData(
-    React.useCallback(
+    useCallback(
       () =>
         getFinding({
           operationSlug,
@@ -33,7 +33,7 @@ export default () => {
       [operationSlug, findingUuid],
     ),
   )
-  const [lastEditedUuid, setLastEditedUuid] = React.useState('')
+  const [lastEditedUuid, setLastEditedUuid] = useState('')
 
   const reloadToTop = () => {
     setLastEditedUuid('')

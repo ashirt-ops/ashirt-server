@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useEffect } from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import SettingsSection from 'src/components/settings_section'
@@ -8,7 +8,7 @@ import { useForm, useFormField } from 'src/helpers/use_form'
 const EditForm = (props: { name: string; onSave: (op: { name: string }) => Promise<void> }) => {
   const nameField = useFormField(props.name)
   const setName = nameField.onChange
-  React.useEffect(() => {
+  useEffect(() => {
     setName(props.name)
   }, [props.name, setName])
 
@@ -24,11 +24,11 @@ const EditForm = (props: { name: string; onSave: (op: { name: string }) => Promi
   )
 }
 
-export default (props: {
+export default function OperationEditor(props: {
   operationSlug: string
   setCanViewGroups: (canViewGroups: boolean) => void
   operationName: string
-}) => {
+}) {
   return (
     <SettingsSection title="Operation Settings">
       <EditForm

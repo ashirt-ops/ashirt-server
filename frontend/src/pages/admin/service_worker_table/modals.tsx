@@ -1,6 +1,5 @@
-import * as React from 'react'
 
-import { ServiceWorker } from 'src/global_types'
+import { type ServiceWorker } from 'src/global_types'
 import { useForm, useFormField } from 'src/helpers'
 
 import ChallengeModalForm from 'src/components/challenge_modal_form'

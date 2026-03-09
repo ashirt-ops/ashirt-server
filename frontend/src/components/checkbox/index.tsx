@@ -1,8 +1,7 @@
-import * as React from 'react'
 import classnames from 'classnames/bind'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: {
+const Checkbox = (props: {
   className?: string
   value?: boolean
   label?: string
@@ -26,3 +25,4 @@ export default (props: {
     {props.label}
   </label>
 )
+export default Checkbox

@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { type ReactElement, useRef, useState, useEffect } from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
-import { pick } from 'lodash'
+
 import { useElementRect } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -13,19 +13,19 @@ const RawTooltip = (props: { content: string; position: 'above' | 'below' | 'lef
 // set if the tooltip is open or not (useful for displaying a tip that goes away after a set
 // time rather than based on hover
 const Tooltip = (props: {
-  children: React.ReactElement
+  children: ReactElement
   content: string
   isOpen: boolean
   onMouseOut?: () => void
   onMouseOver?: () => void
   position?: 'above' | 'below' | 'left' | 'right'
 }) => {
-  const targetRef = React.useRef<HTMLDivElement | null>(null)
-  const [exists, setExists] = React.useState(false)
-  const [animating, setAnimating] = React.useState(false)
+  const targetRef = useRef<HTMLDivElement | null>(null)
+  const [exists, setExists] = useState(false)
+  const [animating, setAnimating] = useState(false)
   const rect = useElementRect(exists ? targetRef : null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     let timeout: number
     if (props.isOpen) {
       setExists(true)
@@ -58,7 +58,7 @@ const Tooltip = (props: {
         createPortal(
           <div
             className={cx('positioner', { animating })}
-            style={pick(rect, ['top', 'left', 'width', 'height'])}
+            style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }}
           >
             <RawTooltip content={props.content} position={props.position || 'above'} />
           </div>,
@@ -71,11 +71,11 @@ const Tooltip = (props: {
 // Hovertooltip is a tooltip that displays when the passed children emit an
 // onMouseOver event and hides when the children emit an onMouseOut event
 export const HoverTooltip = (props: {
-  children: React.ReactElement
+  children: ReactElement
   content: string
   position?: 'above' | 'below' | 'left' | 'right'
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <Tooltip

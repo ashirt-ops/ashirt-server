@@ -1,8 +1,8 @@
-import * as React from 'react'
+import { useReducer, useEffect, type ReactNode } from 'react'
 import classnames from 'classnames/bind'
 import * as dateFns from 'date-fns'
 
-import { Evidence, ViewName } from 'src/global_types'
+import { type Evidence, type ViewName } from 'src/global_types'
 import { useForm, useFormField, useModal, renderModals } from 'src/helpers'
 
 import {
@@ -12,15 +12,15 @@ import {
   TextChooser,
 } from 'src/components/bullet_chooser'
 import { ButtonGroup, default as Button } from 'src/components/button'
-import { ComboBoxItem, default as ComboBox } from 'src/components/combobox'
+import { type ComboBoxItem, default as ComboBox } from 'src/components/combobox'
 import DateRangePicker from 'src/components/date_range_picker'
-import { DateRange } from 'src/components/date_range_picker/range_picker_helpers'
+import { type DateRange } from 'src/components/date_range_picker/range_picker_helpers'
 import EvidenceChooser from 'src/components/evidence_chooser'
 import ModalForm from 'src/components/modal_form'
 import Input from 'src/components/input'
 import SplitInputRow from 'src/components/split_input_row'
 
-import { SearchOptions, stringifySearch } from './helpers'
+import { type SearchOptions, stringifySearch } from './helpers'
 
 import Modal from 'src/components/modal'
 import { upsertQuery } from 'src/services'
@@ -43,7 +43,7 @@ export const FilterFieldsGrid = (props: {
   className?: string
   requestQueriesReload?: () => void
 }) => {
-  const [state, dispatch] = React.useReducer(searchOptionsReducer, props.value)
+  const [state, dispatch] = useReducer(searchOptionsReducer, props.value)
   const chooseEvidenceModal = useModal<{}>((modalProps) => (
     <ChooseEvidenceModal
       initialEvidence={
@@ -74,7 +74,7 @@ export const FilterFieldsGrid = (props: {
     />
   ))
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch({
       type: 'set-full-state',
       value: props.value,
@@ -198,7 +198,7 @@ export const FilterFieldsGrid = (props: {
   )
 }
 
-const Cell = (props: { startOfRow?: true; span?: 2; children?: React.ReactNode }) => {
+const Cell = (props: { startOfRow?: true; span?: 2; children?: ReactNode }) => {
   const span = props.span ?? 1
   return (
     <div className={cx(props.startOfRow ? 'grid-col-1' : null, span == 2 ? 'grid-span-2' : null)}>

@@ -1,10 +1,9 @@
-import * as React from 'react'
-import { Finding } from 'src/global_types'
+import { type Finding } from 'src/global_types'
 import classnames from 'classnames/bind'
 import { trimURL } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: { finding: Finding; className?: string }) => {
+export default function FindingStatus(props: { finding: Finding; className?: string }) {
   let content
   if (!props.finding.readyToReport) {
     content = <em>Pending</em>

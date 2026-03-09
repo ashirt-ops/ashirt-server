@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useCallback } from 'react'
 import classnames from 'classnames/bind'
 import { format } from 'date-fns'
 
@@ -6,8 +6,8 @@ import Button from 'src/components/button'
 import Form from 'src/components/form'
 import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
-import { ApiKey } from 'src/global_types'
-import { UserWithAuth } from 'src/global_types'
+import { type ApiKey } from 'src/global_types'
+import { type UserWithAuth } from 'src/global_types'
 import { getApiKeys, createApiKey } from 'src/services'
 import { useWiredData, useForm } from 'src/helpers'
 
@@ -15,10 +15,10 @@ import { NewApiKeyModal, DeleteApiKeyModal } from './modals'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: { profile: UserWithAuth }) => {
-  const [deleteKey, setDeleteKey] = React.useState<null | ApiKey>(null)
+export default function ApiKeys(props: { profile: UserWithAuth }) {
+  const [deleteKey, setDeleteKey] = useState<null | ApiKey>(null)
   const wiredApiKeys = useWiredData<Array<ApiKey>>(
-    React.useCallback(() => getApiKeys({ userSlug: props.profile.slug }), [props.profile.slug]),
+    useCallback(() => getApiKeys({ userSlug: props.profile.slug }), [props.profile.slug]),
   )
 
   return (
@@ -63,7 +63,7 @@ export default (props: { profile: UserWithAuth }) => {
 }
 
 const GenerateKeyButton = (props: { userSlug: string; onKeyCreated: () => void }) => {
-  const [apiKey, setApiKey] = React.useState<null | ApiKey>(null)
+  const [apiKey, setApiKey] = useState<null | ApiKey>(null)
   const generateKeyForm = useForm({
     onSuccess: props.onKeyCreated,
     handleSubmit: () => createApiKey({ userSlug: props.userSlug }).then(setApiKey),

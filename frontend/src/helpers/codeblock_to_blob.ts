@@ -1,4 +1,4 @@
-import { CodeBlock } from 'src/global_types'
+import { type CodeBlock } from 'src/global_types'
 
 type JsonEvidence = {
   contentSubtype: string

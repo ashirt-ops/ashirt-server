@@ -1,11 +1,10 @@
-import * as React from 'react'
 import { renderModals, useModal } from 'src/helpers'
 
 import Button from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import { AddEditServiceWorkerModal } from './modals'
 
-export default (props: { requestReload?: () => void }) => {
+export default function AddServiceButton(props: { requestReload?: () => void }) {
   const editModal = useModal<{}>(
     (mProps) => <AddEditServiceWorkerModal {...mProps} />,
     props.requestReload,

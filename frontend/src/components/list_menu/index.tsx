@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { type ReactNode, type ReactElement } from 'react'
 import Button from 'src/components/button'
 import classnames from 'classnames/bind'
 import { ClickPopover } from 'src/components/popover'
@@ -11,7 +11,7 @@ const cx = classnames.bind(require('./stylesheet'))
 //   <ListItem name="Two" onSelect={...} />
 //   <ListItem name="Three" onSelect={...} />
 // </ListMenu>
-export default (props: { className?: string; children: React.ReactNode }) => (
+const ListMenu = (props: { className?: string; children: ReactNode }) => (
   <ul className={cx('root', props.className)}>{props.children}</ul>
 )
 
@@ -59,7 +59,7 @@ export const ListItemWithSaveButton = (props: {
 )
 
 export const ListItemWithMenu = (props: {
-  menu: React.ReactElement
+  menu: ReactElement
   name: string
   onSelect: () => void
   selected: boolean
@@ -78,7 +78,7 @@ const BaseListItem = (props: {
   name: string
   onSelect: () => void
   selected: boolean
-  children?: React.ReactNode
+  children?: ReactNode
 }) => (
   <li className={cx({ selected: props.selected }, props.className)}>
     <a
@@ -92,3 +92,4 @@ const BaseListItem = (props: {
     {props.children}
   </li>
 )
+export default ListMenu

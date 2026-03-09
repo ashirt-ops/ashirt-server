@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useEffect, useCallback, useContext } from 'react'
 import AuthContext from 'src/auth_context'
 import Button from 'src/components/button'
 import ErrorDisplay from 'src/components/error_display'
@@ -12,7 +12,7 @@ import SettingsSection from 'src/components/settings_section'
 import Table from 'src/components/table'
 import classnames from 'classnames/bind'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
-import { User, UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
+import { type User, type UserOwnView, UserRole, userRoleToLabel } from 'src/global_types'
 import { getUserPermissions, listUsers, setUserPermission } from 'src/services'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { useModal, renderModals, useWiredData } from 'src/helpers'
@@ -22,16 +22,16 @@ const cx = classnames.bind(require('./stylesheet'))
 const userToName = (u: User) => `${u.firstName} ${u.lastName}`
 
 const UserChooser = (props: { value: User | null; onChange: (user: User | null) => void }) => {
-  const [inputValue, setInputValue] = React.useState('')
-  const [dropdownVisible, setDropdownVisible] = React.useState(false)
-  const [searchResults, setSearchResults] = React.useState<Array<User>>([])
-  const [loading, setLoading] = React.useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [searchResults, setSearchResults] = useState<Array<User>>([])
+  const [loading, setLoading] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInputValue(props.value ? userToName(props.value) : '')
   }, [props.value])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (inputValue === '') return
     const reload = () => {
       listUsers({ query: inputValue })
@@ -207,13 +207,13 @@ const PermissionTable = (props: {
   const itemsPerPage = 10
 
   const filterField = useFormField('')
-  const [currentPage, setCurrentPage] = React.useState(1)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const normalizeName = (user: User) => `${user.firstName} ${user.lastName}`.toLowerCase()
   const normalizedSearchTerm = filterField.value.toLowerCase()
 
   const wiredPermissions = useWiredData(
-    React.useCallback(
+    useCallback(
       () => getUserPermissions({ slug: props.operationSlug, name: '' }),
       [props.operationSlug],
     ),
@@ -221,7 +221,7 @@ const PermissionTable = (props: {
     () => <LoadingSpinner />,
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredPermissions.reload)
     return () => {
       props.offReload(wiredPermissions.reload)
@@ -276,10 +276,10 @@ const PermissionTable = (props: {
   )
 }
 
-export default (props: { operationSlug: string; isAdmin: boolean }) => {
+export default function UserPermissionEditor(props: { operationSlug: string; isAdmin: boolean }) {
   const bus = BuildReloadBus()
 
-  const currentUser = React.useContext(AuthContext)?.user
+  const currentUser = useContext(AuthContext)?.user
   return (
     <SettingsSection title="Operation Users" width="wide">
       {props.isAdmin && <NewUserForm {...bus} operationSlug={props.operationSlug} />}

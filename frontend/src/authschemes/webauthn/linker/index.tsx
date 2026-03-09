@@ -1,23 +1,23 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useForm, useFormField } from 'src/helpers'
 
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import { beginLink, finishLinking } from '../services'
 import { convertToCredentialCreationOptions, encodeAsB64 } from '../helpers'
-import { UserOwnView } from 'src/global_types'
+import { type UserOwnView } from 'src/global_types'
 
 const alreadyExistsErrorText = 'An account for this user already exists'
 
-export default (props: {
+export default function Linker(props: {
   onSuccess: () => void
   userData: UserOwnView
   authFlags?: Array<string>
-}) => {
+}) {
   const initialUsername = props.userData.authSchemes.find((s) => s.schemeType == 'local')?.username
   const username = useFormField<string>(initialUsername ?? '')
   const credentialName = useFormField<string>('')
-  const [allowUsernameOverride, setOverride] = React.useState(false)
+  const [allowUsernameOverride, setOverride] = useState(false)
 
   const formComponentProps = useForm({
     fields: [username, credentialName],

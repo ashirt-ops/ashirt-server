@@ -1,4 +1,3 @@
-import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import SettingsSection from 'src/components/settings_section'
@@ -8,7 +7,7 @@ import { userChangePassword } from '../services'
 import Totp from '../totp'
 const cx = classnames.bind(require('./stylesheet'))
 
-export default (props: { username: string; authFlags?: Array<string> }) => (
+const Settings = (props: { username: string; authFlags?: Array<string> }) => (
   <>
     <h1 className={cx('header')}>
       Settings for local account <span className={cx('user-key')}>{props.username}</span>
@@ -47,3 +46,4 @@ const ResetPasswordForm = (props: { username: string }) => {
     </div>
   )
 }
+export default Settings

@@ -1,9 +1,9 @@
 import {
-  Operation,
-  UserRole,
-  UserOperationRole,
-  UserFilter,
-  UserGroupOperationRole,
+  type Operation,
+  type UserRole,
+  type UserOperationRole,
+  type UserFilter,
+  type UserGroupOperationRole,
 } from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 import { userGroupOperationRoleFromDto, userOperationRoleFromDto } from './data_sources/converters'

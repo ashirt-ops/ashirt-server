@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { useState, useReducer, useEffect, type ReactNode } from 'react'
 import classnames from 'classnames/bind'
 
-import { ServiceWorker } from 'src/global_types'
+import { type ServiceWorker } from 'src/global_types'
 import { renderModals, useModal, useWiredData } from 'src/helpers'
 import { listServiceWorkers, testServiceWorker } from 'src/services'
 
@@ -15,13 +15,13 @@ const cx = classnames.bind(require('./stylesheet'))
 
 type WorkerModal = { worker: ServiceWorker }
 
-export default (props: {
+export default function ServiceWorkerTable(props: {
   onReload: (listener: () => void) => void
   offReload: (listener: () => void) => void
-}) => {
+}) {
   const columns: Array<string> = cellOrder()
 
-  const [showDeleted, setShowDeleted] = React.useState(false)
+  const [showDeleted, setShowDeleted] = useState(false)
   const wiredServiceWorkers = useWiredData<Array<ServiceWorker>>(
     listServiceWorkers,
     (err) => <ErrorRow span={columns.length} error={err} />,
@@ -41,9 +41,9 @@ export default (props: {
     wiredServiceWorkers.reload,
   )
 
-  const [testDataState, dispatchTestData] = React.useReducer(testDataReducer, {})
+  const [testDataState, dispatchTestData] = useReducer(testDataReducer, {})
 
-  React.useEffect(() => {
+  useEffect(() => {
     props.onReload(wiredServiceWorkers.reload)
     return () => {
       props.offReload(wiredServiceWorkers.reload)
@@ -119,12 +119,12 @@ function cellOrder(
   worker: ServiceWorker,
   testData: TestData,
   actions: Actions,
-): Array<React.ReactNode>
+): Array<ReactNode>
 function cellOrder(
   worker?: ServiceWorker,
   testData?: TestData,
   actions?: Actions,
-): Array<string | React.ReactNode> {
+): Array<string | ReactNode> {
   const {
     showEditModal: showEdit,
     showDeleteModal: showDelete,

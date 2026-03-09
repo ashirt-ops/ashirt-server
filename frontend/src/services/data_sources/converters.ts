@@ -1,4 +1,4 @@
-import * as dtos from './dtos/dtos'
+import type * as dtos from './dtos/dtos'
 import * as types from 'src/global_types'
 
 export function apiKeyFromDto(apiKey: dtos.APIKey): types.ApiKey {

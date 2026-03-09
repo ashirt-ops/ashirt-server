@@ -1,6 +1,5 @@
-import _ from 'lodash'
-import React, { PropsWithChildren, createContext, useContext } from 'react'
-import { UrlData } from 'src/global_types'
+import { type PropsWithChildren, createContext, useContext, type FC, useState } from 'react'
+import { type UrlData } from 'src/global_types'
 
 interface IEvidencesContext {
   imgDataSetter: (key: string, urlData: UrlData) => void
@@ -18,10 +17,10 @@ export const useEvidenceContext = () => {
 
 interface EvidencesContextProviderProps {}
 
-const EvidencesContextProvider: React.FC<PropsWithChildren<EvidencesContextProviderProps>> = ({
+const EvidencesContextProvider: FC<PropsWithChildren<EvidencesContextProviderProps>> = ({
   children,
 }) => {
-  const [cachedUrls, setCachedUrls] = React.useState<Map<string, UrlData>>(new Map())
+  const [cachedUrls, setCachedUrls] = useState<Map<string, UrlData>>(new Map())
 
   return (
     <EvidencesContext.Provider

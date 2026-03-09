@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 
-export default (props: { children: React.ReactNode }) => {
+export default function LazyLoadComponent(props: { children: ReactNode }) {
   const [isVisible, setIsVisible] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
 

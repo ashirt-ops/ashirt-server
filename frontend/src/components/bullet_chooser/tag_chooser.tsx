@@ -1,11 +1,11 @@
-import * as React from 'react'
+import { useState, useEffect } from 'react'
 
 import Tag from 'src/components/tag'
-import { Tag as TagType } from 'src/global_types'
+import { type Tag as TagType } from 'src/global_types'
 import { getTags, createTag } from 'src/services'
-import { randomTagColorName, TagColor, shiftColor } from 'src/helpers/tag_colors'
-import BulletChooser, { BulletProps } from 'src/components/bullet_chooser'
-import { FilterModified } from 'src/helpers'
+import { randomTagColorName, type TagColor, shiftColor } from 'src/helpers/tag_colors'
+import BulletChooser, { type BulletProps } from 'src/components/bullet_chooser'
+import { type FilterModified } from 'src/helpers'
 import { isNotUndefined } from 'src/helpers/is_not_undefined'
 import classNames from 'classnames/bind'
 
@@ -19,12 +19,12 @@ export const TagChooser = (props: {
   onChange: (tags: Array<TagType>) => void
   value: Array<TagType>
 }) => {
-  const [allTags, setAllTags] = React.useState<Array<TagType>>([])
+  const [allTags, setAllTags] = useState<Array<TagType>>([])
 
   const reloadTags = () => {
     getTags({ operationSlug: props.operationSlug }).then(setAllTags)
   }
-  React.useEffect(reloadTags, [props.operationSlug])
+  useEffect(reloadTags, [props.operationSlug])
 
   const CreateNewTagElem = (props: { name: string }) => (
     <>
@@ -77,12 +77,12 @@ export const TagPicker = (props: {
   value: Array<BulletProps>
   enableNot?: boolean
 }) => {
-  const [allTags, setAllTags] = React.useState<Array<TagType>>([])
+  const [allTags, setAllTags] = useState<Array<TagType>>([])
 
   const reloadTags = () => {
     getTags({ operationSlug: props.operationSlug }).then(setAllTags)
   }
-  React.useEffect(reloadTags, [props.operationSlug])
+  useEffect(reloadTags, [props.operationSlug])
 
   return (
     <BulletChooser

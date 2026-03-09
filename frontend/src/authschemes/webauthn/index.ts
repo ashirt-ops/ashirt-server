@@ -1,8 +1,8 @@
 import Linker from './linker'
 import Login from './login'
 import Settings from './settings'
-import { AuthFrontend } from 'src/authschemes'
-import { SupportedAuthenticationScheme } from 'src/global_types'
+import { type AuthFrontend } from 'src/authschemes'
+import { type SupportedAuthenticationScheme } from 'src/global_types'
 
 const webAuthnFrontend: AuthFrontend = {
   Linker: Linker,

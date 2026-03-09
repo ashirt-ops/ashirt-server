@@ -1,11 +1,11 @@
-import * as React from 'react'
+import { useState, type ReactNode } from 'react'
 import classnames from 'classnames/bind'
-import { Evidence } from 'src/global_types'
+import { type Evidence } from 'src/global_types'
 
 import { useFormField, useModal, renderModals } from 'src/helpers'
 import { runServiceWorkerMatrix } from 'src/services'
 
-import { BulletProps, ManagedServiceWorkerChooser } from 'src/components/bullet_chooser'
+import { type BulletProps, ManagedServiceWorkerChooser } from 'src/components/bullet_chooser'
 import Button from 'src/components/button'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
 import EvidenceChooser from 'src/components/evidence_chooser'
@@ -16,8 +16,8 @@ import WithLabel from 'src/components/with_label'
 const cx = classnames.bind(require('./stylesheet'))
 
 export const BatchRunWorker = (props: { operationSlug: string }) => {
-  const [selectedWorkers, setSelectedWorkers] = React.useState<Array<BulletProps>>([])
-  const [selectedEvidence, setSelectedEvidence] = React.useState<Array<Evidence>>([])
+  const [selectedWorkers, setSelectedWorkers] = useState<Array<BulletProps>>([])
+  const [selectedEvidence, setSelectedEvidence] = useState<Array<Evidence>>([])
 
   const chooseEvidenceModal = useModal<{}>((modalProps) => (
     <ChooseEvidenceModal
@@ -168,7 +168,7 @@ export const StartWorkerModal = (props: {
 const Area = (props: {
   startOfRow?: true
   colspan?: 2
-  children?: React.ReactNode
+  children?: ReactNode
   className?: string
 }) => {
   const colspan = props.colspan ?? 1

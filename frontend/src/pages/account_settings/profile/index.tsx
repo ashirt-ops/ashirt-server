@@ -1,12 +1,11 @@
-import * as React from 'react'
 import Form from 'src/components/form'
 import Input from 'src/components/input'
 import SettingsSection from 'src/components/settings_section'
-import { UserWithAuth } from 'src/global_types'
+import { type UserWithAuth } from 'src/global_types'
 import { updateUserProfile } from 'src/services'
 import { useForm, useFormField } from 'src/helpers'
 
-export default (props: { profile: UserWithAuth; requestReload?: () => void }) => {
+export default function Profile(props: { profile: UserWithAuth; requestReload?: () => void }) {
   const firstNameField = useFormField(props.profile.firstName)
   const lastNameField = useFormField(props.profile.lastName)
   const emailField = useFormField(props.profile.email)

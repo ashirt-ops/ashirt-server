@@ -1,11 +1,11 @@
-import * as React from 'react'
+import { useState } from 'react'
 import Button from 'src/components/button'
 import SettingsSection from 'src/components/settings_section'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
 import { deleteOperation } from 'src/services'
 
-export default (props: { operationSlug: string }) => {
-  const [showDeleteOpModal, setShowDeleteOpModal] = React.useState<boolean>(false)
+export default function DeleteOperationButton(props: { operationSlug: string }) {
+  const [showDeleteOpModal, setShowDeleteOpModal] = useState<boolean>(false)
   return (
     <SettingsSection title="Delete Operation">
       <Button primary danger onClick={() => setShowDeleteOpModal(true)}>

@@ -1,12 +1,12 @@
 import req from 'src/services/data_sources/backend/request_helper'
 
 import {
-  CompletedLoginChallenge,
-  CredentialEntry,
-  CredentialList,
-  ProvidedCredentialCreationOptions,
-  ProvidedCredentialRequestOptions,
-  WebAuthNRegisterConfirmation,
+  type CompletedLoginChallenge,
+  type CredentialEntry,
+  type CredentialList,
+  type ProvidedCredentialCreationOptions,
+  type ProvidedCredentialRequestOptions,
+  type WebAuthNRegisterConfirmation,
 } from './types'
 
 export async function beginRegistration(

@@ -1,7 +1,7 @@
-import * as React from 'react'
+import { type ReactNode, useState } from 'react'
 import classnames from 'classnames/bind'
 
-import { default as Button, ButtonStyle } from 'src/components/button'
+import { default as Button, type ButtonStyle } from 'src/components/button'
 import Input from 'src/components/input'
 import Tooltip from 'src/components/tooltip'
 
@@ -12,10 +12,10 @@ export const CopyTextButton = (
     icon?: string
     title?: string
     textToCopy: string
-    children?: React.ReactNode
+    children?: ReactNode
   },
 ) => {
-  const [tooltipOpen, setTooltipOpen] = React.useState(false)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
 
   const onClick = async () => {
     try {
@@ -23,8 +23,7 @@ export const CopyTextButton = (
       setTooltipOpen(true)
       await new Promise((resolve) => setTimeout(resolve, 2000))
       setTooltipOpen(false)
-    } catch (err) {
-      console.error(err)
+    } catch {
       prompt('Failed to copy to clipboard. Please manually copy:', props.textToCopy)
     }
   }

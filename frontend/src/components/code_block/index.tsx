@@ -1,9 +1,8 @@
-import * as React from 'react'
 import Input from 'src/components/input'
 import SourceDisplay from './source_display'
 import classnames from 'classnames/bind'
 import supportedLanguages from './supported_languages'
-import { CodeBlock } from 'src/global_types'
+import { type CodeBlock } from 'src/global_types'
 import ComboBox from 'src/components/combobox'
 import { useAsyncComponent } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
