@@ -16,21 +16,35 @@ export default () => {
 
   const query: string = new URLSearchParams(location.search).get('q') || ''
 
-  const wiredFindings = useWiredData(React.useCallback(() => getFindings({
-    operationSlug,
-    query,
-  }), [operationSlug, query]))
+  const wiredFindings = useWiredData(
+    React.useCallback(
+      () =>
+        getFindings({
+          operationSlug,
+          query,
+        }),
+      [operationSlug, query],
+    ),
+  )
 
   const navTo = mkNavTo({
     navTo: navigate,
-    slug: operationSlug
+    slug: operationSlug,
   })
 
-  const editFindingModal = useModal<{ finding: Finding }>(modalProps => (
-    <EditFindingModal {...modalProps} onEdited={wiredFindings.reload} operationSlug={operationSlug} />
+  const editFindingModal = useModal<{ finding: Finding }>((modalProps) => (
+    <EditFindingModal
+      {...modalProps}
+      onEdited={wiredFindings.reload}
+      operationSlug={operationSlug}
+    />
   ))
-  const deleteFindingModal = useModal<{ finding: Finding }>(modalProps => (
-    <DeleteFindingModal {...modalProps} onDeleted={wiredFindings.reload} operationSlug={operationSlug} />
+  const deleteFindingModal = useModal<{ finding: Finding }>((modalProps) => (
+    <DeleteFindingModal
+      {...modalProps}
+      onDeleted={wiredFindings.reload}
+      operationSlug={operationSlug}
+    />
   ))
 
   return (
@@ -41,12 +55,12 @@ export default () => {
       query={query}
       view="findings"
     >
-      {wiredFindings.render(findings => (
+      {wiredFindings.render((findings) => (
         <div style={{ padding: 20 }}>
           <FindingsTable
             findings={findings}
-            onDelete={finding => deleteFindingModal.show({ finding })}
-            onEdit={finding => editFindingModal.show({ finding })}
+            onDelete={(finding) => deleteFindingModal.show({ finding })}
+            onEdit={(finding) => editFindingModal.show({ finding })}
             operationSlug={operationSlug}
           />
         </div>

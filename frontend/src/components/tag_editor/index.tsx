@@ -6,31 +6,52 @@ import { DefaultTag, Tag as TagType, TagWithUsage } from 'src/global_types'
 import { useModal, renderModals } from 'src/helpers'
 
 import { StandardPager } from 'src/components/paging'
-import { default as Table, EndAlignedColumn, SortAsc, SortDesc, SortDirection } from 'src/components/table'
+import {
+  default as Table,
+  EndAlignedColumn,
+  SortAsc,
+  SortDesc,
+  SortDirection,
+} from 'src/components/table'
 import Input from 'src/components/input'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import Tag from 'src/components/tag'
-import { DeleteDefaultTagModal, DeleteOperationTagModal, UpsertOperationTagModal, UpsertDefaultTagModal } from './modals'
-
+import {
+  DeleteDefaultTagModal,
+  DeleteOperationTagModal,
+  UpsertOperationTagModal,
+  UpsertDefaultTagModal,
+} from './modals'
 
 const cx = classnames.bind(require('./stylesheet'))
 
 export const OperationTagTable = (props: {
-  operationSlug: string,
-  tags: Array<TagWithUsage>,
-  onUpdate: () => void,
+  operationSlug: string
+  tags: Array<TagWithUsage>
+  onUpdate: () => void
 }) => {
   const navigate = useNavigate()
-  const editTagModal = useModal<{ tag?: TagWithUsage }>(modalProps => (
-    <UpsertOperationTagModal {...modalProps} operationSlug={props.operationSlug} onEdited={props.onUpdate} />
+  const editTagModal = useModal<{ tag?: TagWithUsage }>((modalProps) => (
+    <UpsertOperationTagModal
+      {...modalProps}
+      operationSlug={props.operationSlug}
+      onEdited={props.onUpdate}
+    />
   ))
-  const deleteTagModal = useModal<{ tag: TagWithUsage }>(modalProps => (
-    <DeleteOperationTagModal {...modalProps} operationSlug={props.operationSlug} onDeleted={props.onUpdate} />
+  const deleteTagModal = useModal<{ tag: TagWithUsage }>((modalProps) => (
+    <DeleteOperationTagModal
+      {...modalProps}
+      operationSlug={props.operationSlug}
+      onDeleted={props.onUpdate}
+    />
   ))
   const extraColumns: Array<tagTableColumn<TagWithUsage>> = [
     {
-      title: '', label: '# Evidence Attached To', clickable: true, compareVia: sortNums,
-      renderer: (tag: TagWithUsage) => tag.evidenceCount
+      title: '',
+      label: '# Evidence Attached To',
+      clickable: true,
+      compareVia: sortNums,
+      renderer: (tag: TagWithUsage) => tag.evidenceCount,
     },
   ]
 
@@ -40,9 +61,11 @@ export const OperationTagTable = (props: {
         tags={props.tags}
         extraColumns={extraColumns}
         onUpdate={props.onUpdate}
-        onDeleteClick={tag => deleteTagModal.show({ tag })}
-        onEditClick={tag => editTagModal.show({ tag })}
-        onTagClick={tag => navigate(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)}
+        onDeleteClick={(tag) => deleteTagModal.show({ tag })}
+        onEditClick={(tag) => editTagModal.show({ tag })}
+        onTagClick={(tag) =>
+          navigate(`/operations/${props.operationSlug}/evidence?q=tag:"${tag.name}"`)
+        }
         onCreateClick={() => editTagModal.show({})}
       />
       {renderModals(editTagModal, deleteTagModal)}
@@ -50,14 +73,11 @@ export const OperationTagTable = (props: {
   )
 }
 
-export const DefaultTagTable = (props: {
-  tags: Array<DefaultTag>,
-  onUpdate: () => void,
-}) => {
-  const editTagModal = useModal<{ tag?: TagType }>(modalProps => (
+export const DefaultTagTable = (props: { tags: Array<DefaultTag>; onUpdate: () => void }) => {
+  const editTagModal = useModal<{ tag?: TagType }>((modalProps) => (
     <UpsertDefaultTagModal {...modalProps} onEdited={props.onUpdate} />
   ))
-  const deleteTagModal = useModal<{ tag: TagType }>(modalProps => (
+  const deleteTagModal = useModal<{ tag: TagType }>((modalProps) => (
     <DeleteDefaultTagModal {...modalProps} onDeleted={props.onUpdate} />
   ))
 
@@ -66,8 +86,8 @@ export const DefaultTagTable = (props: {
       <BasicTagTable
         tags={props.tags}
         onUpdate={props.onUpdate}
-        onDeleteClick={tag => deleteTagModal.show({ tag })}
-        onEditClick={tag => editTagModal.show({ tag })}
+        onDeleteClick={(tag) => deleteTagModal.show({ tag })}
+        onEditClick={(tag) => editTagModal.show({ tag })}
         onCreateClick={() => editTagModal.show({})}
       />
       {renderModals(editTagModal, deleteTagModal)}
@@ -80,16 +100,16 @@ function BasicTagTable<T extends TagType>(props: {
   onEditClick: (tag: T) => void
   onCreateClick?: () => void
   extraColumns?: Array<tagTableColumn<T>>
-  tags: Array<T>,
-  onTagClick?: (tag: T) => void,
-  onUpdate: () => void,
-  operationSlug?: string,
+  tags: Array<T>
+  onTagClick?: (tag: T) => void
+  onUpdate: () => void
+  operationSlug?: string
 }) {
   const extraCols = props.extraColumns ?? []
   const [tagTableState, dispatch] = React.useReducer(tagTableReducer, TagTableInitialState)
 
-  const columnRenders = extraCols.map(col => col.renderer)
-  const columnDefinitions = extraCols.map(col => {
+  const columnRenders = extraCols.map((col) => col.renderer)
+  const columnDefinitions = extraCols.map((col) => {
     const { renderer, ...rest } = col
     return rest
   })
@@ -101,14 +121,16 @@ function BasicTagTable<T extends TagType>(props: {
   ]
 
   const updateColumnSorting = (index: number) => {
-    const sortDirections: Array<{ compare: compareableFunc, dir: SortDirection }> = [
+    const sortDirections: Array<{ compare: compareableFunc; dir: SortDirection }> = [
       { dir: SortAsc, compare: baseColumns[index].compareVia },
       { dir: SortDesc, compare: (a, b) => baseColumns[index].compareVia(b, a) },
-      { dir: undefined, compare: sortNone }
+      { dir: undefined, compare: sortNone },
     ]
-    const matchIndex = index != tagTableState.sortColIndex
-      ? 0
-      : (sortDirections.findIndex(x => x.dir == tagTableState.sortDir) + 1) % sortDirections.length
+    const matchIndex =
+      index != tagTableState.sortColIndex
+        ? 0
+        : (sortDirections.findIndex((x) => x.dir == tagTableState.sortDir) + 1) %
+          sortDirections.length
 
     const sortDirIndex = sortDirections[matchIndex]
 
@@ -116,34 +138,38 @@ function BasicTagTable<T extends TagType>(props: {
       type: 'sort-column',
       sortFunc: sortDirIndex.compare,
       sortColIndex: index,
-      sortDir: sortDirIndex.dir
+      sortDir: sortDirIndex.dir,
     })
   }
 
   const sortedTags = props.tags
-    .filter(tag => tag.name.toLowerCase().includes(tagTableState.filterText))
+    .filter((tag) => tag.name.toLowerCase().includes(tagTableState.filterText))
     .sort(tagTableState.sortFunc)
   const paginatedTags = chunk(sortedTags, 10)
 
-  return <>
-    <Input
-      placeholder={"Filter Tags..."}
-      value={tagTableState.filterText}
-      onChange={(val) => dispatch({ type: 'filter-text-change', filterText: val })}
-    />
-    <Table className={cx('table')} columns={baseColumns.map((col, idx) => ({
-      ...col,
-      sortDirection: (idx == tagTableState.sortColIndex ? tagTableState.sortDir : undefined)
-    }))} onColumnClicked={updateColumnSorting}>
-      {
-        paginatedTags.length == 0
-          ? (
-            <tr>
-              <td colSpan={3} style={{ textAlign: 'center' }}>
-                No Matching Tags
-              </td>
-            </tr>)
-          : (paginatedTags[tagTableState.page - 1] ?? []).map(tag => (
+  return (
+    <>
+      <Input
+        placeholder={'Filter Tags...'}
+        value={tagTableState.filterText}
+        onChange={(val) => dispatch({ type: 'filter-text-change', filterText: val })}
+      />
+      <Table
+        className={cx('table')}
+        columns={baseColumns.map((col, idx) => ({
+          ...col,
+          sortDirection: idx == tagTableState.sortColIndex ? tagTableState.sortDir : undefined,
+        }))}
+        onColumnClicked={updateColumnSorting}
+      >
+        {paginatedTags.length == 0 ? (
+          <tr>
+            <td colSpan={3} style={{ textAlign: 'center' }}>
+              No Matching Tags
+            </td>
+          </tr>
+        ) : (
+          (paginatedTags[tagTableState.page - 1] ?? []).map((tag) => (
             <tr key={tag.name}>
               <td>
                 <Tag
@@ -152,33 +178,38 @@ function BasicTagTable<T extends TagType>(props: {
                   onClick={() => props.onTagClick?.(tag)}
                 />
               </td>
-              {
-                columnRenders.map((col, idx) => <td key={idx}>{col(tag)}</td>)
-              }
+              {columnRenders.map((col, idx) => (
+                <td key={idx}>{col(tag)}</td>
+              ))}
               <td className={cx('button-cell')}>
                 <ButtonGroup className={cx('row-buttons')}>
-                  <Button small onClick={() => props.onEditClick(tag)}>Edit</Button>
-                  <Button small onClick={() => props.onDeleteClick(tag)}>Delete</Button>
+                  <Button small onClick={() => props.onEditClick(tag)}>
+                    Edit
+                  </Button>
+                  <Button small onClick={() => props.onDeleteClick(tag)}>
+                    Delete
+                  </Button>
                 </ButtonGroup>
               </td>
             </tr>
           ))
-      }
-    </Table>
-    <div className={cx('button-block')}>
-      {
-        props.onCreateClick &&
-        <Button className={cx('create-button')} onClick={() => props.onCreateClick?.()}>Create</Button>
-      }
+        )}
+      </Table>
+      <div className={cx('button-block')}>
+        {props.onCreateClick && (
+          <Button className={cx('create-button')} onClick={() => props.onCreateClick?.()}>
+            Create
+          </Button>
+        )}
 
-      <StandardPager
-        page={tagTableState.page}
-        onPageChange={pageNum => dispatch({ type: 'page-change', newPage: pageNum })}
-        maxPages={paginatedTags.length}
-      />
-    </div>
-
-  </>
+        <StandardPager
+          page={tagTableState.page}
+          onPageChange={(pageNum) => dispatch({ type: 'page-change', newPage: pageNum })}
+          maxPages={paginatedTags.length}
+        />
+      </div>
+    </>
+  )
 }
 
 const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTableState => {
@@ -195,7 +226,7 @@ const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTable
     return {
       ...state,
       ...action,
-      page: 1
+      page: 1,
     }
   }
   return state
@@ -204,11 +235,13 @@ const tagTableReducer = (state: TagTableState, action: TagTableAction): TagTable
 type compareableFunc = (l: unknown, r: unknown) => number
 
 const sortNone: compareableFunc = (_a: unknown, _b: unknown) => 0
-const sortNums: compareableFunc = (a, b) => (a as TagWithUsage).evidenceCount - (b as TagWithUsage).evidenceCount
-const sortTags: compareableFunc = (a, b) => (a as TagWithUsage).name.localeCompare((b as TagWithUsage).name)
+const sortNums: compareableFunc = (a, b) =>
+  (a as TagWithUsage).evidenceCount - (b as TagWithUsage).evidenceCount
+const sortTags: compareableFunc = (a, b) =>
+  (a as TagWithUsage).name.localeCompare((b as TagWithUsage).name)
 
 type tagTableColumn<T> = {
-  title: string,
+  title: string
   label: string
   clickable?: boolean
   compareVia: compareableFunc
@@ -228,7 +261,7 @@ const TagTableInitialState = {
   sortFunc: sortNone,
   sortDir: undefined,
   sortColIndex: 0,
-  filterText: ""
+  filterText: '',
 }
 
 type TagTableSortColumn = {
@@ -244,11 +277,8 @@ type TagTableUpdatePage = {
 }
 
 type TagTableFilterTextChange = {
-  type: 'filter-text-change',
+  type: 'filter-text-change'
   filterText: string
 }
 
-type TagTableAction =
-  | TagTableSortColumn
-  | TagTableUpdatePage
-  | TagTableFilterTextChange
+type TagTableAction = TagTableSortColumn | TagTableUpdatePage | TagTableFilterTextChange

@@ -16,13 +16,13 @@ export const configure = (config: SupportedAuthenticationScheme): AuthFrontend =
   return {
     Linker: makeLinker(oidcConfig),
     Login: makeLogin(oidcConfig),
-    Settings: () => null
+    Settings: () => null,
   }
 }
 
 const defaultConfig: OIDCInstanceConfig = {
-  code: "oidc",
-  name: "Unconfigured OIDC" // you should never see this
+  code: 'oidc',
+  name: 'Unconfigured OIDC', // you should never see this
 }
 
 const oidcAuthFrontend: AuthFrontend = {

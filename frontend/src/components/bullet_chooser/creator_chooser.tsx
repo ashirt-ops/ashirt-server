@@ -28,17 +28,19 @@ export const CreatorChooser = (props: {
 }
 
 export const ManagedCreatorChooser = (props: {
-  operationSlug: string,
-  className?: string,
-  disabled?: boolean,
-  label: string,
-  onChange: (creators: Array<BulletProps>) => void,
-  value: Array<BulletProps>,
+  operationSlug: string
+  className?: string
+  disabled?: boolean
+  label: string
+  onChange: (creators: Array<BulletProps>) => void
+  value: Array<BulletProps>
   enableNot?: boolean
 }) => {
   const [allCreators, setAllCreators] = React.useState<Array<User>>([])
 
-  const reloadCreators = () => { listEvidenceCreators({ operationSlug: props.operationSlug }).then(setAllCreators) }
+  const reloadCreators = () => {
+    listEvidenceCreators({ operationSlug: props.operationSlug }).then(setAllCreators)
+  }
   React.useEffect(reloadCreators, [props.operationSlug])
 
   return (
@@ -49,14 +51,16 @@ export const ManagedCreatorChooser = (props: {
   )
 }
 
-export const creatorToBulletProps = (creator: FilterModified<User> | undefined): BulletProps | undefined => {
+export const creatorToBulletProps = (
+  creator: FilterModified<User> | undefined,
+): BulletProps | undefined => {
   if (!creator) {
     return undefined
   }
   return {
     id: creator.slug,
     name: [creator.firstName, creator.lastName].join(' '),
-    modifier: creator.modifier == 'not' ? "not" : undefined
+    modifier: creator.modifier == 'not' ? 'not' : undefined,
   }
 }
 

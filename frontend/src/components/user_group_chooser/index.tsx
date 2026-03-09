@@ -1,15 +1,15 @@
 import * as React from 'react'
 import Input from 'src/components/input'
 import PopoverMenu from 'src/components/popover_menu'
-import {UserGroup} from 'src/global_types'
-import {listUserGroups} from 'src/services'
+import { UserGroup } from 'src/global_types'
+import { listUserGroups } from 'src/services'
 
 const userGroupToName = (u: UserGroup) => `${u.name}`
 
 export default (props: {
-  value: UserGroup|null,
-  onChange: (userGroup: UserGroup|null) => void,
-  operationSlug: string,
+  value: UserGroup | null
+  onChange: (userGroup: UserGroup | null) => void
+  operationSlug: string
 }) => {
   const [inputValue, setInputValue] = React.useState('')
   const [dropdownVisible, setDropdownVisible] = React.useState(false)
@@ -23,13 +23,15 @@ export default (props: {
   React.useEffect(() => {
     if (inputValue === '') return
     const reload = () => {
-      listUserGroups({query: inputValue, operationSlug: props.operationSlug})
+      listUserGroups({ query: inputValue, operationSlug: props.operationSlug })
         .then(setSearchResults)
         .then(() => setLoading(false))
     }
 
     const timeout = setTimeout(reload, 250)
-    return () => { clearTimeout(timeout) }
+    return () => {
+      clearTimeout(timeout)
+    }
   }, [inputValue, props.operationSlug])
 
   const onRequestClose = () => {

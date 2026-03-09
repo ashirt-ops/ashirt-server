@@ -24,10 +24,7 @@ const cx = classnames.bind(require('./stylesheet'))
  * Returns either the initial recovery component, or the recovery-sent page, depending on the url
  * query string.
  */
-export default (props: {
-  query: URLSearchParams,
-  authFlags?: Array<string>
-}) => {
+export default (props: { query: URLSearchParams; authFlags?: Array<string> }) => {
   if (props.query.get('step') === 'recovery-sent') {
     return <AccountRecoveryStarted />
   }
@@ -41,18 +38,22 @@ const RecoverUserAccount = (_: {}) => {
     fields: [emailField],
     handleSubmit: () => {
       if (emailField.value.trim() == '') {
-        return Promise.reject(Error("Please supply a valid email address"))
+        return Promise.reject(Error('Please supply a valid email address'))
       }
-      return requestRecovery(emailField.value).then(() => window.location.href = `/login/${RecoverySchemeName}?step=recovery-sent`)
-    }
+      return requestRecovery(emailField.value).then(
+        () => (window.location.href = `/login/${RecoverySchemeName}?step=recovery-sent`),
+      )
+    },
   })
 
-  return (<>
-    <h2 className={cx('title')}>Find Your Account</h2>
-    <Form submitText="Submit" {...emailForm}>
-      <Input label="Contact Email" {...emailField} />
-    </Form>
-  </>)
+  return (
+    <>
+      <h2 className={cx('title')}>Find Your Account</h2>
+      <Form submitText="Submit" {...emailForm}>
+        <Input label="Contact Email" {...emailField} />
+      </Form>
+    </>
+  )
 }
 
 const AccountRecoveryStarted = (_: {}) => (

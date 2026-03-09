@@ -10,12 +10,12 @@ const cx = classnames.bind(require('./stylesheet'))
 // with webpack chunks and it matches the size of the editor to the size
 // of the parent container.
 export default (props: {
-  mode: string,
-  onChange?: (code: string) => void,
-  readOnly?: boolean,
-  value: string,
+  mode: string
+  onChange?: (code: string) => void
+  readOnly?: boolean
+  value: string
 }) => {
-  const rootRef = React.useRef<HTMLDivElement|null>(null)
+  const rootRef = React.useRef<HTMLDivElement | null>(null)
   const editorSize = useSizeOfParentContainer(rootRef)
   const mode = useLoadAceModeWithWebpack(props.mode)
   useStopPropagationOfSearchKeydowns(rootRef)
@@ -47,7 +47,7 @@ function useLoadAceModeWithWebpack(requestedMode: string): string {
     }
     import(`ace-builds/src-noconflict/mode-${requestedMode}`)
       .then(() => setLoadedMode(requestedMode))
-      .catch(err => console.error(`Unable to load mode: ${requestedMode}`))
+      .catch((err) => console.error(`Unable to load mode: ${requestedMode}`))
   }, [requestedMode])
 
   return loadedMode
@@ -61,17 +61,20 @@ function useLoadAceModeWithWebpack(requestedMode: string): string {
 // root container. Using values "100%" for both cause strange bugs where the editor
 // may not display if a min-height/min-width is specified in a parent rather than
 // an absolute height/width
-function useSizeOfParentContainer(parentRef: React.MutableRefObject<HTMLDivElement|null>): {width: string, height: string} {
+function useSizeOfParentContainer(parentRef: React.MutableRefObject<HTMLDivElement | null>): {
+  width: string
+  height: string
+} {
   const [size, setSize] = React.useState({ width: '100%', height: '100%' })
 
   const parentRect = useElementRect(parentRef)
   React.useEffect(() => {
-    if(parentRect == null) {
+    if (parentRect == null) {
       return
     }
     setSize({
-      width: (`${parentRect.width}px`),
-      height: (`${parentRect.height}px`),
+      width: `${parentRect.width}px`,
+      height: `${parentRect.height}px`,
     })
   }, [parentRect])
   return size
@@ -81,7 +84,9 @@ function useSizeOfParentContainer(parentRef: React.MutableRefObject<HTMLDivEleme
 // are a few places where we listen to keydown events higher up in the dom e.g. timeline.
 // Since search field is self-contained within the ace-editor it seems reasonable that
 // a user typing in the search field shouldn't emit keydown events up the dom.
-function useStopPropagationOfSearchKeydowns(parentRef: React.MutableRefObject<HTMLDivElement|null>) {
+function useStopPropagationOfSearchKeydowns(
+  parentRef: React.MutableRefObject<HTMLDivElement | null>,
+) {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.target && (e.target as HTMLElement).className === 'ace_search_field') {
       e.stopPropagation()
@@ -91,7 +96,9 @@ function useStopPropagationOfSearchKeydowns(parentRef: React.MutableRefObject<HT
     const curParentRef = parentRef.current
     if (!curParentRef) return
     curParentRef.addEventListener('keydown', onKeyDown)
-    return () => { curParentRef.removeEventListener('keydown', onKeyDown) }
+    return () => {
+      curParentRef.removeEventListener('keydown', onKeyDown)
+    }
   })
 }
 
@@ -99,7 +106,7 @@ function useStopPropagationOfSearchKeydowns(parentRef: React.MutableRefObject<HT
 // trying to load a null theme which will be blocked by CSP
 //
 // @ts-ignore - typescript doesn't know about ace.define
-ace.define("ace/theme/ashirt", [], function(_, exports) {
+ace.define('ace/theme/ashirt', [], function (_, exports) {
   exports.isDark = true
   exports.cssClass = 'ace-ashirt-theme'
 })

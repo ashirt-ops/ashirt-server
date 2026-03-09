@@ -17,8 +17,7 @@ async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
     if (message === 'PASSWORD_RESET_REQUIRED') {
       window.location.href = '/login/local?step=reset'
       return
-    }
-    else if (message === 'TOTP_REQUIRED') {
+    } else if (message === 'TOTP_REQUIRED') {
       window.location.href = '/login/local?step=totp'
       return
     }
@@ -27,41 +26,40 @@ async function handleLoginStepPromise(promise: Promise<void>): Promise<void> {
 }
 
 // Used to pull a value out of a password field and clear the field value for security
-function getValueAndClear(field: { value: string, onChange: (s: string) => void }): string {
+function getValueAndClear(field: { value: string; onChange: (s: string) => void }): string {
   const { value } = field
   field.onChange('')
   return value
 }
 
-export default (props: {
-  query: URLSearchParams,
-  authFlags?: Array<string>
-}) => {
+export default (props: { query: URLSearchParams; authFlags?: Array<string> }) => {
   switch (props.query.get('step')) {
-    case 'reset': return <ResetPassword />
-    case 'totp': return <EnterTotp />
-    default: return <Login authFlags={props.authFlags} />
+    case 'reset':
+      return <ResetPassword />
+    case 'totp':
+      return <EnterTotp />
+    default:
+      return <Login authFlags={props.authFlags} />
   }
 }
 
-const Login = (props: {
-  authFlags?: Array<string>
-}) => {
+const Login = (props: { authFlags?: Array<string> }) => {
   const usernameField = useFormField('')
   const passwordField = useFormField('')
 
   const loginForm = useForm({
     fields: [usernameField, passwordField],
-    handleSubmit: () => (
-      handleLoginStepPromise(login(usernameField.value, getValueAndClear(passwordField)))
-    ),
+    handleSubmit: () =>
+      handleLoginStepPromise(login(usernameField.value, getValueAndClear(passwordField))),
   })
 
-  const registerModal = useModal<void>(modalProps => <RegisterModal {...(modalProps as OnRequestClose)} />)
+  const registerModal = useModal<void>((modalProps) => (
+    <RegisterModal {...(modalProps as OnRequestClose)} />
+  ))
 
-  const allowRegister = props.authFlags?.includes("open-registration")
+  const allowRegister = props.authFlags?.includes('open-registration')
   const registerProps = allowRegister
-    ? { cancelText: "Register", onCancel: () => registerModal.show() }
+    ? { cancelText: 'Register', onCancel: () => registerModal.show() }
     : {}
 
   return (
@@ -75,9 +73,7 @@ const Login = (props: {
   )
 }
 
-const RegisterModal = (props: {
-  onRequestClose: () => void,
-}) => {
+const RegisterModal = (props: { onRequestClose: () => void }) => {
   const firstNameField = useFormField('')
   const lastNameField = useFormField('')
   const usernameField = useFormField('')
@@ -121,30 +117,33 @@ const RegisterModal = (props: {
   )
 }
 
-const ResetPassword = (props: {
-}) => {
+const ResetPassword = (props: {}) => {
   const passwordField = useFormField('')
   const confirmPasswordField = useFormField('')
 
   const resetPasswordForm = useForm({
     fields: [passwordField, confirmPasswordField],
-    handleSubmit: () => (
-      handleLoginStepPromise(userResetPassword({
-        newPassword: getValueAndClear(passwordField),
-        confirmPassword: getValueAndClear(confirmPasswordField),
-      }))
-    ),
+    handleSubmit: () =>
+      handleLoginStepPromise(
+        userResetPassword({
+          newPassword: getValueAndClear(passwordField),
+          confirmPassword: getValueAndClear(confirmPasswordField),
+        }),
+      ),
   })
 
-  return <>
-    <div className={cx('messagebox')}>
-      You have been given a temporary password. You must change this password before you can continue using this application.
-    </div>
-    <Form submitText="Update Password" {...resetPasswordForm}>
-      <Input label="New Password" type="password" {...passwordField} />
-      <Input label="Confirm New Password" type="password" {...confirmPasswordField} />
-    </Form>
-  </>
+  return (
+    <>
+      <div className={cx('messagebox')}>
+        You have been given a temporary password. You must change this password before you can
+        continue using this application.
+      </div>
+      <Form submitText="Update Password" {...resetPasswordForm}>
+        <Input label="New Password" type="password" {...passwordField} />
+        <Input label="Confirm New Password" type="password" {...confirmPasswordField} />
+      </Form>
+    </>
+  )
 }
 
 const EnterTotp = (props: {}) => {
@@ -152,15 +151,15 @@ const EnterTotp = (props: {}) => {
 
   const totpForm = useForm({
     fields: [totpField],
-    handleSubmit: () => handleLoginStepPromise(
-      totpLogin(totpField.value)
-    ),
+    handleSubmit: () => handleLoginStepPromise(totpLogin(totpField.value)),
   })
 
-  return (<>
-    <h2 className={cx('title')}>Multi-factor Authentication</h2>
-    <Form submitText="Submit" {...totpForm}>
-      <Input label="Passcode" {...totpField} />
-    </Form>
-  </>)
+  return (
+    <>
+      <h2 className={cx('title')}>Multi-factor Authentication</h2>
+      <Form submitText="Submit" {...totpForm}>
+        <Input label="Passcode" {...totpField} />
+      </Form>
+    </>
+  )
 }

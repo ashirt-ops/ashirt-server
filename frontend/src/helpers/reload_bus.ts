@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 
-export const reloadEvent = "reload"
-export const reloadDoneEvent = "reload-done"
+export const reloadEvent = 'reload'
+export const reloadDoneEvent = 'reload-done'
 
 export const BuildReloadBus = () => {
   const bus = new EventEmitter()
@@ -29,7 +29,7 @@ export const BuildReloadBus = () => {
 
     clean: () => {
       bus.removeAllListeners()
-    }
+    },
   }
 }
 

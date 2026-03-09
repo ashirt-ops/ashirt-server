@@ -8,15 +8,18 @@ export function apiKeyFromDto(apiKey: dtos.APIKey): types.ApiKey {
   }
 }
 
-export function authenticationInfoFromDto(authInfo: dtos.AuthenticationInfo): types.AuthenticationInfo {
+export function authenticationInfoFromDto(
+  authInfo: dtos.AuthenticationInfo,
+): types.AuthenticationInfo {
   return {
     ...authInfo,
-    lastLogin: authInfo.lastLogin ? new Date(authInfo.lastLogin) : null
+    lastLogin: authInfo.lastLogin ? new Date(authInfo.lastLogin) : null,
   }
 }
 
 export function evidenceFromDto(evidence: dtos.Evidence): types.Evidence {
-  if (!isValidSupportedEvidenceType(evidence.contentType)) throw Error(`Unknown content type ${evidence.contentType}`)
+  if (!isValidSupportedEvidenceType(evidence.contentType))
+    throw Error(`Unknown content type ${evidence.contentType}`)
   return {
     ...evidence,
     adjustedAt: evidence.adjustedAt ? new Date(evidence.adjustedAt) : null,
@@ -33,12 +36,18 @@ export function findingFromDto(finding: dtos.Finding): types.Finding {
   }
 }
 
-export function userOperationRoleFromDto({ user, role }: dtos.UserOperationRole): types.UserOperationRole {
+export function userOperationRoleFromDto({
+  user,
+  role,
+}: dtos.UserOperationRole): types.UserOperationRole {
   if (!isValidUserRole(role)) throw Error(`Unknown userrole ${role}`)
   return { user, role }
 }
 
-export function userGroupOperationRoleFromDto({ userGroup, role }: dtos.UserGroupOperationRole): types.UserGroupOperationRole {
+export function userGroupOperationRoleFromDto({
+  userGroup,
+  role,
+}: dtos.UserGroupOperationRole): types.UserGroupOperationRole {
   if (!isValidUserRole(role)) throw Error(`Unknown userrole ${role}`)
   return { userGroup, role }
 }
@@ -55,7 +64,7 @@ export function queryFromDto(query: dtos.Query): types.SavedQuery {
 export function tagEvidenceDateFromDto(tag: dtos.TagByEvidenceDate): types.TagByEvidenceDate {
   return {
     ...tag,
-    usages: tag.usages.map((strDate: string) => new Date(strDate))
+    usages: tag.usages.map((strDate: string) => new Date(strDate)),
   }
 }
 
@@ -64,10 +73,14 @@ function isValidUserRole(maybeRole: string): maybeRole is types.UserRole {
   return Object.values(types.UserRole).indexOf(maybeRole) > -1
 }
 
-function isValidSupportedEvidenceType(maybeSupportedEvidence: string): maybeSupportedEvidence is types.SupportedEvidenceType {
-  return ['codeblock', 'image', 'terminal-recording',
-    'http-request-cycle', 'event',
-    'none'].indexOf(maybeSupportedEvidence) > -1
+function isValidSupportedEvidenceType(
+  maybeSupportedEvidence: string,
+): maybeSupportedEvidence is types.SupportedEvidenceType {
+  return (
+    ['codeblock', 'image', 'terminal-recording', 'http-request-cycle', 'event', 'none'].indexOf(
+      maybeSupportedEvidence,
+    ) > -1
+  )
 }
 
 function isValidQueryType(maybeQueryType: string): maybeQueryType is types.SavedQueryType {

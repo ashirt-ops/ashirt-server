@@ -12,8 +12,7 @@ export type ServiceWorkerWeb = {
   synchronous?: true
 }
 
-export type ServiceWorkerConfig =
-  | ServiceWorkerWeb
+export type ServiceWorkerConfig = ServiceWorkerWeb
 
 type JSONPrimitive = string | boolean | number | null
 
@@ -35,33 +34,22 @@ const isWebConfig = (json: Record<string, unknown>): json is ServiceWorkerWeb =>
   }
 
   return (
-    hasValue(json, "type", modelConfig.type)
-    && hasValue(json, "version", modelConfig.version)
-    && hasValueType(json, "url", typeof modelConfig.url)
-    && hasOptionalRecord(json, "headers")
+    hasValue(json, 'type', modelConfig.type) &&
+    hasValue(json, 'version', modelConfig.version) &&
+    hasValueType(json, 'url', typeof modelConfig.url) &&
+    hasOptionalRecord(json, 'headers')
   )
 }
 
-const hasValue = (
-  object: Record<string, unknown>,
-  field: string,
-  value: unknown
-) => {
+const hasValue = (object: Record<string, unknown>, field: string, value: unknown) => {
   return object[field] == value
 }
 
-const hasValueType = (
-  object: Record<string, unknown>,
-  field: string,
-  valueType: string
-) => {
-  return typeof (object[field]) == valueType
+const hasValueType = (object: Record<string, unknown>, field: string, valueType: string) => {
+  return typeof object[field] == valueType
 }
 
-const hasOptionalRecord = (
-  object: Record<string, unknown>,
-  field: string,
-) => {
+const hasOptionalRecord = (object: Record<string, unknown>, field: string) => {
   if (field in object) {
     return isRecord(object[field])
   }
@@ -69,5 +57,5 @@ const hasOptionalRecord = (
 }
 
 const isRecord = (o: unknown): o is Record<string, unknown> => {
-  return typeof o === "object" && o !== null && !Array.isArray(o)
+  return typeof o === 'object' && o !== null && !Array.isArray(o)
 }

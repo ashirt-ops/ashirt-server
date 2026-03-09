@@ -7,24 +7,20 @@ const isDown = (e: React.KeyboardEvent) => e.key === 'ArrowDown' || (e.ctrlKey &
 const isUp = (e: React.KeyboardEvent) => e.key === 'ArrowUp' || (e.ctrlKey && e.key === 'p') // up arrow or ctrl-p
 
 export default function PopoverMenu<T>(props: {
-  children: React.ReactNode,
-  isOpen: boolean,
-  onRequestClose: () => void,
-  onSelect: (item: T, e?: React.KeyboardEvent) => void,
-  options: Array<T> | (() => Array<T>),
-  renderer: (item: T) => React.ReactNode,
-  iconRenderer?: (item: T) => string,
-  noOptionsMessage?: React.ReactNode,
-  onKeyModifierChanged?: (modifiers: KeyboardModifiers) => void,
+  children: React.ReactNode
+  isOpen: boolean
+  onRequestClose: () => void
+  onSelect: (item: T, e?: React.KeyboardEvent) => void
+  options: Array<T> | (() => Array<T>)
+  renderer: (item: T) => React.ReactNode
+  iconRenderer?: (item: T) => string
+  noOptionsMessage?: React.ReactNode
+  onKeyModifierChanged?: (modifiers: KeyboardModifiers) => void
 }) {
   const [selectedIndex, setSelectedIndex] = React.useState(0)
 
   const getOptions = (): Array<T> => {
-    return (
-      typeof props.options == 'function'
-        ? props.options()
-        : props.options
-    )
+    return typeof props.options == 'function' ? props.options() : props.options
   }
 
   const selectItem = (e: React.KeyboardEvent) => {
@@ -51,8 +47,7 @@ export default function PopoverMenu<T>(props: {
     else if (e.key === 'Tab') {
       props.onRequestClose()
       return
-    }
-    else if (isDown(e)) changeSelectedIndex(1)
+    } else if (isDown(e)) changeSelectedIndex(1)
     else if (isUp(e)) changeSelectedIndex(-1)
     else if (!e.ctrlKey) return
     e.preventDefault()
@@ -60,7 +55,9 @@ export default function PopoverMenu<T>(props: {
 
   return (
     <Popover
-      content={<PopoverMenuContent selectedIndex={selectedIndex} {...props} options={getOptions()} />}
+      content={
+        <PopoverMenuContent selectedIndex={selectedIndex} {...props} options={getOptions()} />
+      }
       onRequestClose={props.onRequestClose}
       isOpen={props.isOpen}
     >
@@ -72,13 +69,13 @@ export default function PopoverMenu<T>(props: {
 }
 
 function PopoverMenuContent<T>(props: {
-  onSelect: (item: T) => void,
-  options: Array<T>,
-  renderer: (item: T) => React.ReactNode,
-  selectedIndex: number,
-  iconRenderer?: (item: T) => string,
-  noOptionsMessage?: React.ReactNode,
-  onKeyModifierChanged?: (modifiers: KeyboardModifiers) => void,
+  onSelect: (item: T) => void
+  options: Array<T>
+  renderer: (item: T) => React.ReactNode
+  selectedIndex: number
+  iconRenderer?: (item: T) => string
+  noOptionsMessage?: React.ReactNode
+  onKeyModifierChanged?: (modifiers: KeyboardModifiers) => void
 }) {
   const onKey = (e: React.KeyboardEvent) => {
     props.onKeyModifierChanged?.(reactKeyToModifiers(e))
@@ -100,19 +97,16 @@ function PopoverMenuContent<T>(props: {
           }}
         />
       ))}
-      {props.options.length === 0 && (
-        <MenuItem children={props.noOptionsMessage} />
-      )}
+      {props.options.length === 0 && <MenuItem children={props.noOptionsMessage} />}
     </Menu>
   )
 }
 
-
 export type KeyboardModifiers = {
-  altKey: boolean;
-  ctrlKey: boolean;
-  metaKey: boolean;
-  shiftKey: boolean;
+  altKey: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
 }
 
 const reactKeyToModifiers = (e: KeyboardModifiers) => {

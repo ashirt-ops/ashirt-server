@@ -8,10 +8,10 @@ const cx = classnames.bind(require('./stylesheet'))
 
 export type ButtonStyle = {
   active?: boolean
-  danger?: boolean,
-  primary?: boolean,
-  small?: boolean,
-  size?: "small" | "medium" | "normal",
+  danger?: boolean
+  primary?: boolean
+  small?: boolean
+  size?: 'small' | 'medium' | 'normal'
 }
 
 function styleToClassname(style: ButtonStyle): string {
@@ -20,22 +20,24 @@ function styleToClassname(style: ButtonStyle): string {
     danger: style.danger,
     primary: style.primary,
     small: style.small === true || style.size === 'small',
-    medium: style.size === 'medium'
-  });
+    medium: style.size === 'medium',
+  })
 }
 
-const Button = (props: ButtonStyle & {
-  children?: React.ReactNode,
-  className?: string,
-  disabled?: boolean,
-  icon?: string,
-  afterIcon?: string,
-  loading?: boolean,
-  onClick?: (e: React.MouseEvent) => void,
-  title?: string,
-  doNotSubmit?: boolean,
-  autoFocus?: boolean,
-}) => {
+const Button = (
+  props: ButtonStyle & {
+    children?: React.ReactNode
+    className?: string
+    disabled?: boolean
+    icon?: string
+    afterIcon?: string
+    loading?: boolean
+    onClick?: (e: React.MouseEvent) => void
+    title?: string
+    doNotSubmit?: boolean
+    autoFocus?: boolean
+  },
+) => {
   return (
     <button
       type={props.doNotSubmit ? 'button' : undefined}
@@ -58,16 +60,20 @@ const Button = (props: ButtonStyle & {
   )
 }
 
-export const NavLinkButton = (props: ButtonStyle & {
-  children: React.ReactNode,
-  className?: string,
-  exact?: boolean,
-  icon?: string,
-  to: string,
-}) => (
+export const NavLinkButton = (
+  props: ButtonStyle & {
+    children: React.ReactNode
+    className?: string
+    exact?: boolean
+    icon?: string
+    to: string
+  },
+) => (
   <NavLink
     end={props.exact}
-    className={({isActive}) => cx('root', props.className, styleToClassname(props), isActive ? "active" : null)}
+    className={({ isActive }) =>
+      cx('root', props.className, styleToClassname(props), isActive ? 'active' : null)
+    }
     to={props.to}
   >
     <div className={cx('children')}>
@@ -77,13 +83,8 @@ export const NavLinkButton = (props: ButtonStyle & {
   </NavLink>
 )
 
-export const ButtonGroup = (props: {
-  children: React.ReactNode,
-  className?: string,
-}) => (
-  <div className={cx('button-group', props.className)}>
-    {props.children}
-  </div>
+export const ButtonGroup = (props: { children: React.ReactNode; className?: string }) => (
+  <div className={cx('button-group', props.className)}>{props.children}</div>
 )
 
 export default Button

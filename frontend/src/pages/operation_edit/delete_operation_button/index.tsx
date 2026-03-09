@@ -4,30 +4,33 @@ import SettingsSection from 'src/components/settings_section'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
 import { deleteOperation } from 'src/services'
 
-export default (props: {
-  operationSlug: string
-}) => {
+export default (props: { operationSlug: string }) => {
   const [showDeleteOpModal, setShowDeleteOpModal] = React.useState<boolean>(false)
   return (
     <SettingsSection title="Delete Operation">
-      <Button primary danger onClick={() => setShowDeleteOpModal(true)}>Delete Operation</Button>
-      {showDeleteOpModal && <DeleteOperationModal
-        operationSlug={props.operationSlug}
-        onRequestClose={(success) => {
-          setShowDeleteOpModal(false)
-          if (success) {
-            window.location.href = "/operations"
-          }
-        }} />
-      }
+      <Button primary danger onClick={() => setShowDeleteOpModal(true)}>
+        Delete Operation
+      </Button>
+      {showDeleteOpModal && (
+        <DeleteOperationModal
+          operationSlug={props.operationSlug}
+          onRequestClose={(success) => {
+            setShowDeleteOpModal(false)
+            if (success) {
+              window.location.href = '/operations'
+            }
+          }}
+        />
+      )}
     </SettingsSection>
   )
 }
 
 export const DeleteOperationModal = (props: {
-  operationSlug: string,
-  onRequestClose: (success?: boolean) => void,
-}) => <ChallengeModalForm
+  operationSlug: string
+  onRequestClose: (success?: boolean) => void
+}) => (
+  <ChallengeModalForm
     modalTitle="Delete Operation"
     warningText="This will permanently remove the operation from the system, along with associated evidence and findings. Please do not initiate a re-deployment while this process is on-going."
     submitText="Delete"
@@ -35,3 +38,4 @@ export const DeleteOperationModal = (props: {
     handleSubmit={() => deleteOperation(props.operationSlug)}
     onRequestClose={props.onRequestClose}
   />
+)

@@ -5,15 +5,15 @@ import { Tag as TagType } from 'src/global_types'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  tags: Array<TagType>,
-  onTagClick?: (t: TagType, e: React.MouseEvent) => void,
+  tags: Array<TagType>
+  onTagClick?: (t: TagType, e: React.MouseEvent) => void
 }) => (
   <div className={cx('root')}>
-    {props.tags.map(tag => (
+    {props.tags.map((tag) => (
       <Tag
         key={tag.id}
         name={tag.name}
-        onClick={e => props.onTagClick?.(tag, e) ?? null}
+        onClick={(e) => props.onTagClick?.(tag, e) ?? null}
         color={tag.colorName}
       />
     ))}

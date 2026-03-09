@@ -29,19 +29,18 @@ export const ServiceWorkerChooser = (props: {
 }
 
 export const ManagedServiceWorkerChooser = (props: {
-  operationSlug: string,
-  className?: string,
-  disabled?: boolean,
-  label: string,
-  onChange: (workers: Array<BulletProps>) => void,
-  value: Array<BulletProps>,
+  operationSlug: string
+  className?: string
+  disabled?: boolean
+  label: string
+  onChange: (workers: Array<BulletProps>) => void
+  value: Array<BulletProps>
   enableNot?: boolean
 }) => {
   const [allWorkers, setAllWorkers] = React.useState<Array<ServiceWorker>>([])
 
   const reloadWorkers = () => {
-    listServiceWorkers()
-      .then(list => setAllWorkers(list.filter(item => !item.deleted)))
+    listServiceWorkers().then((list) => setAllWorkers(list.filter((item) => !item.deleted)))
   }
   React.useEffect(reloadWorkers, [props.operationSlug])
 
@@ -53,14 +52,16 @@ export const ManagedServiceWorkerChooser = (props: {
   )
 }
 
-export const workerToBulletProps = (worker: FilterModified<ServiceWorker> | undefined): BulletProps | undefined => {
+export const workerToBulletProps = (
+  worker: FilterModified<ServiceWorker> | undefined,
+): BulletProps | undefined => {
   if (!worker) {
     return undefined
   }
   return {
     id: worker.id,
     name: worker.name,
-    modifier: worker.modifier == 'not' ? "not" : undefined
+    modifier: worker.modifier == 'not' ? 'not' : undefined,
   }
 }
 

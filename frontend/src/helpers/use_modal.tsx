@@ -24,35 +24,38 @@ import * as React from 'react'
 // </>
 
 export type UseModalOutput<ModalProps> = {
-  node: React.ReactNode,
-  show: (modalProps: ModalProps) => void,
+  node: React.ReactNode
+  show: (modalProps: ModalProps) => void
 }
 
 export type OnRequestClose = {
-  onRequestClose: () => void,
+  onRequestClose: () => void
 }
 
 export function useModal<ModalProps>(
   modalRenderer: (modalProps: ModalProps & OnRequestClose) => React.ReactNode,
-  onClose?: () => void
+  onClose?: () => void,
 ): UseModalOutput<ModalProps> {
   const [modal, setModal] = React.useState<(ModalProps & OnRequestClose) | null>(null)
-  const hide = () => { setModal(null) }
+  const hide = () => {
+    setModal(null)
+  }
 
   return {
     node: modal == null ? null : modalRenderer(modal),
     show(modalProps: ModalProps) {
       setModal({
-        ...modalProps, onRequestClose: () => {
+        ...modalProps,
+        onRequestClose: () => {
           hide()
           onClose?.()
-        }
+        },
       })
     },
   }
 }
 
-export function renderModals(...modals: Array<UseModalOutput<any>>): React.ReactNode {
+export function renderModals(...modals: Array<{ node: React.ReactNode }>): React.ReactNode {
   for (let modal of modals) {
     if (modal.node != null) return modal.node
   }

@@ -1,12 +1,14 @@
-import { Terminal } from "@xterm/xterm"
+import { Terminal } from '@xterm/xterm'
 import {
-  TerminalEvent, TerminalRecordingHeader,
-  TerminalRecordingData, ExpandedTerminalEvent,
-  PositionChangeEventBody
+  TerminalEvent,
+  TerminalRecordingHeader,
+  TerminalRecordingData,
+  ExpandedTerminalEvent,
+  PositionChangeEventBody,
 } from './types'
-import { clamp } from  'src/helpers'
+import { clamp } from 'src/helpers'
 
-import {EventEmitter} from 'events'
+import { EventEmitter } from 'events'
 
 export const EventTypeFrameAdvance = 'frame advance'
 export const EventTypeHeadJump = 'head jump'
@@ -34,16 +36,14 @@ export default class extends EventEmitter {
   // This flag allows us to be associated with the frame we just played, instead of the frame we are just about to play
   advanceFrameOnPlay = false
 
-  constructor(
-    content: string
-  ) {
+  constructor(content: string) {
     super()
     this.content = parseTerminalRecording(content)
     this.terminal = new Terminal({
       cols: Math.max(this.content.header.width, 80),
       rows: Math.max(this.content.header.height, 30),
       disableStdin: true,
-      fontFamily: "monospace",
+      fontFamily: 'monospace',
       scrollback: 0, // scrollback presents some odd UI, so disabling it for now.
     })
     this.currentIndex = 0
@@ -54,7 +54,7 @@ export default class extends EventEmitter {
 
     const parseError = this.getError()
     if (parseError != null) {
-      this.terminal.writeln("Unable to play content. Error encountered:")
+      this.terminal.writeln('Unable to play content. Error encountered:')
       this.terminal.writeln(parseError)
     }
   }
@@ -71,7 +71,7 @@ export default class extends EventEmitter {
   }
 
   private eventsUntilIndex(i: number): string {
-    return this.content.events.slice(0, i).reduce((acc, cur) => acc + cur.eventContent , "")
+    return this.content.events.slice(0, i).reduce((acc, cur) => acc + cur.eventContent, '')
   }
 
   private makeFrameAdvanceEvent(eventIndex: number = this.currentIndex): PositionChangeEventBody {
@@ -80,7 +80,7 @@ export default class extends EventEmitter {
       elapsedTime: thisEvent.totalDelay,
       playbackPosition: thisEvent.totalDelay / this.getDuration(),
       index: eventIndex,
-      terminalTime: this.eventTimeToRealTime(eventIndex)
+      terminalTime: this.eventTimeToRealTime(eventIndex),
     }
   }
 
@@ -103,12 +103,13 @@ export default class extends EventEmitter {
   private writeToTerm = (msg: string) => {
     try {
       this.terminal.write(msg)
-    } catch { }
+    } catch {}
   }
 
   private waitForFrame() {
     const events = this.content.events
-    const delay = this.currentIndex == 0 ? 0 : events[this.currentIndex - 1].frameDuration / this.getRate()
+    const delay =
+      this.currentIndex == 0 ? 0 : events[this.currentIndex - 1].frameDuration / this.getRate()
     this.activeTimeout = setTimeout(() => {
       this.writeEvent(this.currentIndex)
       this.currentIndex++
@@ -121,7 +122,7 @@ export default class extends EventEmitter {
   private updatePlaybackRate(newRate: number) {
     const oldRate = this.currentPlaybackRate
     this.currentPlaybackRate = newRate
-    this.emit(EventTypeRateChange, {oldRate, newRate})
+    this.emit(EventTypeRateChange, { oldRate, newRate })
   }
 
   private getEvent(index: number): ExpandedTerminalEvent {
@@ -132,9 +133,13 @@ export default class extends EventEmitter {
   private findClosestEventViaPosition = (position: number) => {
     position = clamp(position, 0, 1)
     const desiredTimeOffset = this.getDuration() * position
-    return findClosestEvent(desiredTimeOffset, this.content.events, 0, this.content.events.length - 1)
+    return findClosestEvent(
+      desiredTimeOffset,
+      this.content.events,
+      0,
+      this.content.events.length - 1,
+    )
   }
-
 
   //public interface methods
 
@@ -170,7 +175,7 @@ export default class extends EventEmitter {
   }
 
   jumpToEventIndex = (evtIndex: number) => {
-    this.jumpToIndex(this.content.events.findIndex(evt => evt.eventIndex == evtIndex))
+    this.jumpToIndex(this.content.events.findIndex((evt) => evt.eventIndex == evtIndex))
   }
 
   jumpToIndex = (index: number) => {
@@ -181,19 +186,18 @@ export default class extends EventEmitter {
     if (this.isPlaying()) {
       this.currentIndex++
       this.waitForFrame()
-    }
-    else {
+    } else {
       this.advanceFrameOnPlay = true
     }
   }
 
-  elapsedTime = ():number => this.content.events[this.currentIndex].totalDelay
+  elapsedTime = (): number => this.content.events[this.currentIndex].totalDelay
 
   setRate = (newRate: number) => this.setDesiredRate(clamp(newRate, this.minRate, this.maxRate))
   setDesiredRate = (newRate: number) => {
     const oldRate = this.desiredPlaybackRate
     this.desiredPlaybackRate = newRate
-    this.emit(EventTypeDesiredRateChange, {oldRate, newRate})
+    this.emit(EventTypeDesiredRateChange, { oldRate, newRate })
     if (this.isPlaying()) {
       this.updatePlaybackRate(this.desiredPlaybackRate)
     }
@@ -212,11 +216,13 @@ export default class extends EventEmitter {
   getEventAtCursor = () => this.content.events[this.currentIndex]
   getCurrentIndex = () => this.currentIndex
 
-  nearestEventTime = (position: number): number => this.eventTimeToRealTime(this.findClosestEventViaPosition(position))
+  nearestEventTime = (position: number): number =>
+    this.eventTimeToRealTime(this.findClosestEventViaPosition(position))
 
   // Playback Script Controls
 
-  addBookmarkAtCursor = (description: string): void => this.addBookmark(this.currentIndex, description)
+  addBookmarkAtCursor = (description: string): void =>
+    this.addBookmark(this.currentIndex, description)
   removeBookmarkAtCursor = (): void => this.removeBookmark(this.currentIndex)
   removeBookmark = (index: number): void => {
     const evt = this.getEvent(index)
@@ -227,34 +233,42 @@ export default class extends EventEmitter {
   // whatever bookmark text was present, so acts both as an addBookmark and editBookmark function
   addBookmark = (index: number, description: string): void => {
     const evt = this.getEvent(index)
-    evt.bookmarks = description.split("\n")
+    evt.bookmarks = description.split('\n')
   }
 
   getBookmark = (index: number): Array<string> => this.getEvent(index).bookmarks
   getBookmarkAtCursor = (): Array<string> => this.getBookmark(this.currentIndex)
 
-  getBookmarks = () => { // TODO: should we maintain a cached version of this, and update that on bookmark change events?
+  getBookmarks = () => {
+    // TODO: should we maintain a cached version of this, and update that on bookmark change events?
     return this.content.events.filter((evt) => evt.bookmarks.length > 0)
   }
 
   export = (): string => {
     const json = [JSON.stringify(this.content.header)]
-    const jsonifyEvent = (evt: TerminalEvent) => JSON.stringify([evt.eventTime / 1000, 'o', evt.eventContent])
-    const jsonifyBookmark = (evt: ExpandedTerminalEvent) => evt.bookmarks.map(desc => JSON.stringify([evt.eventTime / 1000, 'b', desc]))
+    const jsonifyEvent = (evt: TerminalEvent) =>
+      JSON.stringify([evt.eventTime / 1000, 'o', evt.eventContent])
+    const jsonifyBookmark = (evt: ExpandedTerminalEvent) =>
+      evt.bookmarks.map((desc) => JSON.stringify([evt.eventTime / 1000, 'b', desc]))
 
     this.content.events.forEach((evt) => {
       json.push(jsonifyEvent(evt))
       json.push(...jsonifyBookmark(evt))
     })
 
-    return json.join("\n")
+    return json.join('\n')
   }
 }
 
 // Finds the closest event in a given list (via a binary search based on total delay).
-const findClosestEvent = (needle: number, list: Array<TerminalEvent>, lowerBound: number, upperBound: number): number => {
+const findClosestEvent = (
+  needle: number,
+  list: Array<TerminalEvent>,
+  lowerBound: number,
+  upperBound: number,
+): number => {
   if (upperBound < lowerBound) {
-    [upperBound, lowerBound] = [lowerBound, upperBound]
+    ;[upperBound, lowerBound] = [lowerBound, upperBound]
   }
 
   //  when very close, narrow in on technically closest event
@@ -264,8 +278,7 @@ const findClosestEvent = (needle: number, list: Array<TerminalEvent>, lowerBound
       const lowerDiff = needle - list[lowerBound].totalDelay
       if (lowerDiff < upperDiff) {
         upperBound--
-      }
-      else {
+      } else {
         lowerBound++
       }
     }
@@ -275,7 +288,8 @@ const findClosestEvent = (needle: number, list: Array<TerminalEvent>, lowerBound
   const effectiveLength = upperBound - lowerBound
   const guessIndex = lowerBound + Math.trunc(effectiveLength / 2)
   const guess = list[guessIndex]
-  if (guess.totalDelay == needle) { // extremely unlikely
+  if (guess.totalDelay == needle) {
+    // extremely unlikely
     return guessIndex
   }
 
@@ -283,8 +297,7 @@ const findClosestEvent = (needle: number, list: Array<TerminalEvent>, lowerBound
 
   if (guess.totalDelay < needle) {
     newLower = guessIndex + 1
-  }
-  else {
+  } else {
     newUpper = guessIndex - 1
   }
 
@@ -296,32 +309,32 @@ const emptyHeader: TerminalRecordingHeader = {
   width: 0,
   height: 0,
   timestamp: 0,
-  title: "",
+  title: '',
   env: {
-    shell: "",
-    term: ""
-  }
+    shell: '',
+    term: '',
+  },
 }
 
 const parseTerminalRecording = (content: string, maxDelay = 1600): TerminalRecordingData => {
   const response: TerminalRecordingData = {
     header: emptyHeader,
     events: [],
-    error: null
+    error: null,
   }
 
   try {
     const [header, ...rawEvents] = content
-      .split("\n")
-      .filter(line => line.trim() !== "")
-      .map(line => JSON.parse(line))
+      .split('\n')
+      .filter((line) => line.trim() !== '')
+      .map((line) => JSON.parse(line))
 
     response.header = header
     const basicEvents = rawEvents.map((evt, idx) => ({
       eventTime: evt[0] * 1000, // convert to milliseconds
       eventSource: evt[1],
       eventContent: evt[2],
-      eventIndex: idx
+      eventIndex: idx,
     }))
 
     for (const evt of basicEvents) {
@@ -330,7 +343,7 @@ const parseTerminalRecording = (content: string, maxDelay = 1600): TerminalRecor
           ...evt,
           frameDuration: 0,
           totalDelay: 0,
-          bookmarks: []
+          bookmarks: [],
         })
       }
       if (evt.eventSource == 'b') {
@@ -346,8 +359,7 @@ const parseTerminalRecording = (content: string, maxDelay = 1600): TerminalRecor
       lastEvent.frameDuration = Math.min(evt.eventTime - lastEvent.eventTime, maxDelay)
       evt.totalDelay = lastEvent.totalDelay + lastEvent.frameDuration
     }
-  }
-  catch (e) {
+  } catch (e) {
     response.error = e instanceof Error ? e.message : String(e)
   }
 

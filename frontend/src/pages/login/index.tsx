@@ -23,7 +23,7 @@ export default () => {
 
   const query = new URLSearchParams(location.search)
 
-  return wiredAuthSchemes.render(supportedAuthSchemes => {
+  return wiredAuthSchemes.render((supportedAuthSchemes) => {
     if (supportedAuthSchemes.length === 0) {
       return (
         <div className={cx('login')}>
@@ -32,28 +32,31 @@ export default () => {
       )
     }
 
-    const oneScheme = (supportedAuthSchemes.length === 1)
-      ? supportedAuthSchemes[0]
-      : (renderOnlyScheme !== undefined)
-        ? supportedAuthSchemes.find(s => s.schemeCode == renderOnlyScheme)
-        : null
+    const oneScheme =
+      supportedAuthSchemes.length === 1
+        ? supportedAuthSchemes[0]
+        : renderOnlyScheme !== undefined
+          ? supportedAuthSchemes.find((s) => s.schemeCode == renderOnlyScheme)
+          : null
 
     return (
       <div className={cx('login')}>
-        {(renderOnlyScheme === RecoverySchemeName)
-          ? <Recovery query={query} />
-          : (<>
-            {
-              oneScheme
-                ? <AuthSchemeLogin key={oneScheme.schemeCode} authScheme={oneScheme} query={query} />
-                : <LoginMenu authSchemes={supportedAuthSchemes} query={query} />
-            }
+        {renderOnlyScheme === RecoverySchemeName ? (
+          <Recovery query={query} />
+        ) : (
+          <>
+            {oneScheme ? (
+              <AuthSchemeLogin key={oneScheme.schemeCode} authScheme={oneScheme} query={query} />
+            ) : (
+              <LoginMenu authSchemes={supportedAuthSchemes} query={query} />
+            )}
             <div className={cx('recover-container')}>
-              <a className={cx('recover-link')} href="/login/recover" title="Account Recovery">Forgot how to log in?</a>
+              <a className={cx('recover-link')} href="/login/recover" title="Account Recovery">
+                Forgot how to log in?
+              </a>
             </div>
-          </>)
-        }
-
+          </>
+        )}
       </div>
     )
   })
@@ -67,22 +70,22 @@ const LoginMenu = (props: {
 
   return (
     <div className={cx('login-menu')}>
-      {currentAuth == null
-        ? <MenuHeader title="How do you want to authenticate?" />
-        : (
-          <MenuHeader
-            title={currentAuth.schemeName}
-            backButtonText="Choose a different method"
-            onBackPressed={() => setCurrentAuth(null)}
-          />
-        )
-      }
+      {currentAuth == null ? (
+        <MenuHeader title="How do you want to authenticate?" />
+      ) : (
+        <MenuHeader
+          title={currentAuth.schemeName}
+          backButtonText="Choose a different method"
+          onBackPressed={() => setCurrentAuth(null)}
+        />
+      )}
 
       <hr className={cx('menu-divider')} />
-      {currentAuth == null
-        ? <AuthButtons schemes={props.authSchemes} onSelected={setCurrentAuth} />
-        : <AuthSchemeLogin authScheme={currentAuth} query={props.query} />
-      }
+      {currentAuth == null ? (
+        <AuthButtons schemes={props.authSchemes} onSelected={setCurrentAuth} />
+      ) : (
+        <AuthSchemeLogin authScheme={currentAuth} query={props.query} />
+      )}
     </div>
   )
 }
@@ -107,7 +110,9 @@ const MenuHeader = (props: {
 )
 
 const NoAuthsWarning = (props: {}) => (
-  <div className={cx('no-auths-warning')}>This instance of AShirt has no way to authenticate users.</div>
+  <div className={cx('no-auths-warning')}>
+    This instance of AShirt has no way to authenticate users.
+  </div>
 )
 
 const AuthButtons = (props: {
@@ -115,28 +120,26 @@ const AuthButtons = (props: {
   onSelected: (scheme: SupportedAuthenticationScheme | null) => void
 }) => (
   <div className={cx('auth-buttons')}>
-    {
-      props.schemes.map(schemeDetails => {
-        const { schemeCode, schemeName } = schemeDetails
+    {props.schemes.map((schemeDetails) => {
+      const { schemeCode, schemeName } = schemeDetails
 
-        return (
-          <Button
-            className={cx('full-width-button')}
-            key={schemeCode}
-            afterIcon={require('./forward.svg')}
-            onClick={() => props.onSelected(schemeDetails)}
-          >
-            {schemeName}
-          </Button>
-        )
-      })
-    }
+      return (
+        <Button
+          className={cx('full-width-button')}
+          key={schemeCode}
+          afterIcon={require('./forward.svg')}
+          onClick={() => props.onSelected(schemeDetails)}
+        >
+          {schemeName}
+        </Button>
+      )
+    })}
   </div>
 )
 
 const AuthSchemeLogin = (props: {
-  authScheme: SupportedAuthenticationScheme,
-  query: URLSearchParams,
+  authScheme: SupportedAuthenticationScheme
+  query: URLSearchParams
 }) => {
   const Login = useAuthFrontendComponent(props.authScheme.schemeType, 'Login', props.authScheme)
   return (

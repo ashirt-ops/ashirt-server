@@ -12,16 +12,18 @@ import classNames from 'classnames/bind'
 const cx = classNames.bind(require('./stylesheet.styl'))
 
 export const TagChooser = (props: {
-  operationSlug: string,
-  className?: string,
-  disabled?: boolean,
-  label: string,
-  onChange: (tags: Array<TagType>) => void,
-  value: Array<TagType>,
+  operationSlug: string
+  className?: string
+  disabled?: boolean
+  label: string
+  onChange: (tags: Array<TagType>) => void
+  value: Array<TagType>
 }) => {
   const [allTags, setAllTags] = React.useState<Array<TagType>>([])
 
-  const reloadTags = () => { getTags({ operationSlug: props.operationSlug }).then(setAllTags) }
+  const reloadTags = () => {
+    getTags({ operationSlug: props.operationSlug }).then(setAllTags)
+  }
   React.useEffect(reloadTags, [props.operationSlug])
 
   const CreateNewTagElem = (props: { name: string }) => (
@@ -36,9 +38,7 @@ export const TagChooser = (props: {
       options={allTags}
       value={props.value}
       onChange={props.onChange}
-      valueRenderer={(b) => (
-        <Tag name={b.bullet.name} color={b.bullet.colorName} {...b} />
-      )}
+      valueRenderer={(b) => <Tag name={b.bullet.name} color={b.bullet.colorName} {...b} />}
       rowRenderer={(b) => (
         <>
           <Tag name={b.bullet.name} color={b.bullet.colorName} {...b} />
@@ -46,16 +46,15 @@ export const TagChooser = (props: {
         </>
       )}
       noValueRenderer={(inputValue: string) => <CreateNewTagElem name={inputValue} />}
-      onNoValueSelected={
-        async (inputValue: string) => {
-          const newVal = createTag({
-            operationSlug: props.operationSlug,
-            name: inputValue,
-            colorName: randomTagColorName()
-          })
-          reloadTags()
-          return newVal
-        }}
+      onNoValueSelected={async (inputValue: string) => {
+        const newVal = createTag({
+          operationSlug: props.operationSlug,
+          name: inputValue,
+          colorName: randomTagColorName(),
+        })
+        reloadTags()
+        return newVal
+      }}
     />
   )
 }
@@ -70,17 +69,19 @@ export const TagChooser = (props: {
  * @returns
  */
 export const TagPicker = (props: {
-  operationSlug: string,
-  className?: string,
-  disabled?: boolean,
-  label: string,
-  onChange: (tags: Array<BulletProps>) => void,
-  value: Array<BulletProps>,
+  operationSlug: string
+  className?: string
+  disabled?: boolean
+  label: string
+  onChange: (tags: Array<BulletProps>) => void
+  value: Array<BulletProps>
   enableNot?: boolean
 }) => {
   const [allTags, setAllTags] = React.useState<Array<TagType>>([])
 
-  const reloadTags = () => { getTags({ operationSlug: props.operationSlug }).then(setAllTags) }
+  const reloadTags = () => {
+    getTags({ operationSlug: props.operationSlug }).then(setAllTags)
+  }
   React.useEffect(reloadTags, [props.operationSlug])
 
   return (
@@ -91,21 +92,19 @@ export const TagPicker = (props: {
       options={allTags.map(tagToBulletProps).filter(isNotUndefined)}
       enableNot={props.enableNot}
       valueRenderer={(b) => {
-        const props = b.bullet.modifier == "not"
-          ? { name: `NOT ${b.bullet.name}`, color: shiftColor(b.bullet.color ?? "disabledGray") }
-          : { name: b.bullet.name, color: b.bullet.color ?? "disabledGray" }
-        return (
-          <Tag
-            {...props}
-            {...b}
-          />
-        )
+        const props =
+          b.bullet.modifier == 'not'
+            ? { name: `NOT ${b.bullet.name}`, color: shiftColor(b.bullet.color ?? 'disabledGray') }
+            : { name: b.bullet.name, color: b.bullet.color ?? 'disabledGray' }
+        return <Tag {...props} {...b} />
       }}
     />
   )
 }
 
-export const tagToBulletProps = (tag: FilterModified<TagType> | undefined): BulletProps | undefined => {
+export const tagToBulletProps = (
+  tag: FilterModified<TagType> | undefined,
+): BulletProps | undefined => {
   if (!tag) {
     return undefined
   }
@@ -113,7 +112,7 @@ export const tagToBulletProps = (tag: FilterModified<TagType> | undefined): Bull
     id: tag.id,
     name: tag.name,
     color: tag.colorName as TagColor,
-    modifier: tag.modifier == 'not' ? "not" : undefined
+    modifier: tag.modifier == 'not' ? 'not' : undefined,
   }
 }
 
@@ -121,7 +120,7 @@ export const bulletPropsToTag = (val: BulletProps): TagType => {
   return {
     id: parseInt(`${val.id}`),
     name: val.name,
-    colorName: val.color ?? "",
+    colorName: val.color ?? '',
   }
 }
 

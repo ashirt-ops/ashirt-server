@@ -38,7 +38,7 @@ test-frontend:
 ##### Linting/Tidy/Format Targets
 
 .PHONY: tidy-all
-tidy-all:  format-backend lint-frontend
+tidy-all: format-backend lint-frontend format-check-frontend
 
 .PHONY: format-backend
 format-backend:
@@ -47,6 +47,14 @@ format-backend:
 .PHONY: lint-frontend
 lint-frontend:
 	cd frontend && npm run lint
+
+.PHONY: format-frontend
+format-frontend:
+	cd frontend && npm run format
+
+.PHONY: format-check-frontend
+format-check-frontend:
+	cd frontend && npm run format:check
 
 # tidy-go removes unused/outdated go modules. This frequently causes conflicts so it is not included in tidy-all
 .PHONY: tidy-go

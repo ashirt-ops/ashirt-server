@@ -1,4 +1,3 @@
-
 // clamp constrains n to a number between min and max, inclusive
 // clamp(-1, 0, 4) == 0
 // clamp(5, 0, 4) == 4

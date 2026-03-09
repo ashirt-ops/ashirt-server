@@ -5,7 +5,11 @@ import { Tag, User, ViewName } from 'src/global_types'
 import { default as Button, ButtonGroup } from 'src/components/button'
 import { FilterFieldsGrid } from 'src/components/filter_fields/filter-field-grid'
 import Input from 'src/components/input'
-import { stringToSearch, SearchOptions, stringifySearch } from 'src/components/filter_fields/helpers'
+import {
+  stringToSearch,
+  SearchOptions,
+  stringifySearch,
+} from 'src/components/filter_fields/helpers'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
 import { getTags, listEvidenceCreators } from 'src/services'
 import { CreateButtonPosition } from '..'
@@ -13,14 +17,13 @@ import { SearchHelpModal } from './search_modal'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-
 export const Toolbar = (props: {
-  operationSlug: string,
-  expandedView: boolean,
-  query: string,
+  operationSlug: string
+  expandedView: boolean
+  query: string
   queryName?: string
-  setExpandedView: (expand: boolean) => void,
-  viewName: ViewName,
+  setExpandedView: (expand: boolean) => void
+  viewName: ViewName
   onSearch: (query: string) => void
   onRequestCreateFinding: () => void
   onRequestCreateEvidence: () => void
@@ -37,12 +40,15 @@ export const Toolbar = (props: {
   }, [props.query])
 
   const wiredData = useWiredData<[Array<Tag>, Array<User>]>(
-    React.useCallback(() =>
-      Promise.all([
-        getTags({ operationSlug: props.operationSlug }),
-        listEvidenceCreators({ operationSlug: props.operationSlug }),
-      ]), [props.operationSlug]
-    ))
+    React.useCallback(
+      () =>
+        Promise.all([
+          getTags({ operationSlug: props.operationSlug }),
+          listEvidenceCreators({ operationSlug: props.operationSlug }),
+        ]),
+      [props.operationSlug],
+    ),
+  )
 
   return (
     <div className={cx('toolbar-root')}>
@@ -71,7 +77,9 @@ export const Toolbar = (props: {
                 <ButtonGroup className={cx('tb-create-buttons')}>
                   <Button onClick={props.onRequestCreateEvidence}>Create Evidence</Button>
                   <Button onClick={props.onRequestCreateFinding}>Create Finding</Button>
-                  {props.userCanExportData && <Button onClick={props.exportEvidence}>Export Evidence</Button>}
+                  {props.userCanExportData && (
+                    <Button onClick={props.exportEvidence}>Export Evidence</Button>
+                  )}
                 </ButtonGroup>
               )}
             </div>
@@ -86,7 +94,6 @@ export const Toolbar = (props: {
                 />
               </div>
             )}
-
           </>
         )
       })}
@@ -104,8 +111,15 @@ const ExpandedSearch = (props: {
   setQueryString: (query: string) => void
   requestQueriesReload?: () => void
 }) => {
-  const { operationSlug, viewName, searchOptions,
-    setQueryString, onSearch, setExpandedView, requestQueriesReload, } = props
+  const {
+    operationSlug,
+    viewName,
+    searchOptions,
+    setQueryString,
+    onSearch,
+    setExpandedView,
+    requestQueriesReload,
+  } = props
 
   return (
     <FilterFieldsGrid
@@ -135,7 +149,7 @@ const SearchInput = (props: {
   setQueryString: (query: string) => void
 }) => {
   const { inputRef, queryString, setQueryString } = props
-  const helpModal = useModal<{}>(modalProps => <SearchHelpModal {...modalProps} />)
+  const helpModal = useModal<{}>((modalProps) => <SearchHelpModal {...modalProps} />)
   return (
     <>
       <div className={cx('tb-search-container')}>
@@ -147,14 +161,18 @@ const SearchInput = (props: {
           onChange={setQueryString}
           placeholder="Filter Timeline"
           icon={require('./search.svg')}
-          onKeyDown={e => {
+          onKeyDown={(e) => {
             if (e.key === 'Enter') {
               inputRef.current?.blur()
               props.onSearch(queryString)
             }
           }}
         />
-        <a className={cx('search-help-icon')} onClick={() => helpModal.show({})} title="Search Help"></a>
+        <a
+          className={cx('search-help-icon')}
+          onClick={() => helpModal.show({})}
+          title="Search Help"
+        ></a>
       </div>
       {renderModals(helpModal)}
     </>

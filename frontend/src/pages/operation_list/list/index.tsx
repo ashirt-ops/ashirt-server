@@ -11,38 +11,36 @@ const normalizedInclude = (baseString: string, term: string) => {
 }
 
 export default (props: {
-  ops: Operation[],
-  newOperationModal: UseModalOutput<{}>,
-  filterText: FilterText,
+  ops: Operation[]
+  newOperationModal: UseModalOutput<{}>
+  filterText: FilterText
   onFavoriteToggled: (slug: string, isFavorite: boolean) => void
 }) => {
-  const favoriteOps = props.ops?.filter(op => op.favorite)
-  const otherOps = props.ops?.filter(op => !op.favorite)
+  const favoriteOps = props.ops?.filter((op) => op.favorite)
+  const otherOps = props.ops?.filter((op) => !op.favorite)
 
   const returnOps = (ops: Operation[], displayButtonCriteria: boolean) => (
     <div className={cx('operationList')}>
-      {
-        ops
-          .filter(op => normalizedInclude(op.name, props.filterText.value))
-          .map(op =>
-            (
-              <OperationCard
-                slug={op.slug}
-                numUsers={op.numUsers}
-                key={op.slug}
-                name={op.name}
-                favorite={op.favorite}
-                numTags={op.numTags}
-                numEvidence={op.numEvidence}
-                onFavoriteClick={() => props.onFavoriteToggled(op.slug, !(op.favorite))}
-                topContribs={op.topContribs}
-                evidenceCount={op.evidenceCount}
-                className={cx('card')}
-              />
-            )
-          )
-      }
-      {displayButtonCriteria && <NewOperationButton onClick={() => props.newOperationModal.show({})} />}
+      {ops
+        .filter((op) => normalizedInclude(op.name, props.filterText.value))
+        .map((op) => (
+          <OperationCard
+            slug={op.slug}
+            numUsers={op.numUsers}
+            key={op.slug}
+            name={op.name}
+            favorite={op.favorite}
+            numTags={op.numTags}
+            numEvidence={op.numEvidence}
+            onFavoriteClick={() => props.onFavoriteToggled(op.slug, !op.favorite)}
+            topContribs={op.topContribs}
+            evidenceCount={op.evidenceCount}
+            className={cx('card')}
+          />
+        ))}
+      {displayButtonCriteria && (
+        <NewOperationButton onClick={() => props.newOperationModal.show({})} />
+      )}
     </div>
   )
 
@@ -50,8 +48,8 @@ export default (props: {
 
   return (
     <div>
-        {returnOps(favoriteOps, favOpsExists)}
-        {returnOps(otherOps, !favOpsExists)}
+      {returnOps(favoriteOps, favOpsExists)}
+      {returnOps(otherOps, !favOpsExists)}
     </div>
   )
 }

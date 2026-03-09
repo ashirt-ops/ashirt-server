@@ -7,15 +7,18 @@ import {
   ProvidedCredentialCreationOptions,
   ProvidedCredentialRequestOptions,
   WebAuthNRegisterConfirmation,
-} from "./types"
+} from './types'
 
-export async function beginRegistration(i: {
-  email: string,
-  username: string,
-  firstName: string,
-  lastName: string
-  credentialName: string
-}, discoverable: boolean): Promise<ProvidedCredentialCreationOptions> {
+export async function beginRegistration(
+  i: {
+    email: string
+    username: string
+    firstName: string
+    lastName: string
+    credentialName: string
+  },
+  discoverable: boolean,
+): Promise<ProvidedCredentialCreationOptions> {
   return await req('POST', '/auth/webauthn/register/begin', i, { discoverable })
 }
 
@@ -23,18 +26,24 @@ export async function finishRegistration(i: WebAuthNRegisterConfirmation) {
   return await req('POST', '/auth/webauthn/register/finish', i)
 }
 
-export async function beginLogin(i: {
-  username: string,
-}, discoverable: boolean): Promise<ProvidedCredentialRequestOptions> {
+export async function beginLogin(
+  i: {
+    username: string
+  },
+  discoverable: boolean,
+): Promise<ProvidedCredentialRequestOptions> {
   return await req('POST', '/auth/webauthn/login/begin', i, { discoverable })
 }
 
-export async function finishLogin(i: CompletedLoginChallenge, discoverable: boolean): Promise<void> {
+export async function finishLogin(
+  i: CompletedLoginChallenge,
+  discoverable: boolean,
+): Promise<void> {
   return await req('POST', '/auth/webauthn/login/finish', i, { discoverable })
 }
 
 export async function beginLink(i: {
-  username: string,
+  username: string
   credentialName: string
 }): Promise<ProvidedCredentialCreationOptions> {
   return await req('POST', '/auth/webauthn/link/begin', i)
@@ -60,16 +69,20 @@ export async function listWebauthnCredentials(): Promise<CredentialList> {
   return {
     credentials: data.credentials.map((credential: CredentialEntry) => ({
       ...credential,
-      dateCreated: new Date(credential.dateCreated)
-    }))
+      dateCreated: new Date(credential.dateCreated),
+    })),
   }
-
 }
 
-export async function deleteWebauthnCredential(i: { credentialId: string }): Promise<CredentialList> {
+export async function deleteWebauthnCredential(i: {
+  credentialId: string
+}): Promise<CredentialList> {
   return await req('DELETE', `/auth/webauthn/credential/${i.credentialId}`)
 }
 
-export async function modifyCredentialName(i: { credentialName: string, newCredentialName: string }): Promise<void> {
+export async function modifyCredentialName(i: {
+  credentialName: string
+  newCredentialName: string
+}): Promise<void> {
   return await req('PUT', `/auth/webauthn/credential`, i)
 }

@@ -15,25 +15,22 @@ import { useAuthFrontendComponent } from 'src/authschemes'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  profile: UserOwnView,
-  allowLinking: boolean,
-  requestReload?: () => void,
+  profile: UserOwnView
+  allowLinking: boolean
+  requestReload?: () => void
 }) => {
   const [removeAuth, setRemovingAuth] = React.useState<null | string>(null)
-  const wiredSchemes = useWiredData<Array<SupportedAuthenticationScheme>>(getSupportedAuthentications)
+  const wiredSchemes = useWiredData<Array<SupportedAuthenticationScheme>>(
+    getSupportedAuthentications,
+  )
 
-  const columns = [
-    "Method Name",
-    "Status",
-    "Last Login",
-    "Actions",
-  ]
+  const columns = ['Method Name', 'Status', 'Last Login', 'Actions']
 
   return (
     <SettingsSection title="Authentication Methods" width="wide">
-      {wiredSchemes.render(supportedSchemes => (
+      {wiredSchemes.render((supportedSchemes) => (
         <Table className={cx('table')} columns={columns}>
-          {supportedSchemes.map(scheme => (
+          {supportedSchemes.map((scheme) => (
             <TableRow
               allowLinking={props.allowLinking}
               key={scheme.schemeCode}
@@ -46,37 +43,50 @@ export default (props: {
         </Table>
       ))}
 
-      {removeAuth && <DeleteAuthModal
-        userSlug={props.profile.slug}
-        schemeCode={removeAuth}
-        onRequestClose={() => { setRemovingAuth(null); props.requestReload && props.requestReload() }}
-      />}
+      {removeAuth && (
+        <DeleteAuthModal
+          userSlug={props.profile.slug}
+          schemeCode={removeAuth}
+          onRequestClose={() => {
+            setRemovingAuth(null)
+            props.requestReload && props.requestReload()
+          }}
+        />
+      )}
     </SettingsSection>
   )
 }
 
 const TableRow = (props: {
-  supportedScheme: SupportedAuthenticationScheme,
-  profile: UserOwnView,
-  removeAuth: () => void,
-  allowLinking: boolean,
-  requestReload?: () => void,
+  supportedScheme: SupportedAuthenticationScheme
+  profile: UserOwnView
+  removeAuth: () => void
+  allowLinking: boolean
+  requestReload?: () => void
 }) => {
   const [linking, setLinking] = React.useState<boolean>(false)
-  const Linker = useAuthFrontendComponent(props.supportedScheme.schemeType, 'Linker', props.supportedScheme)
+  const Linker = useAuthFrontendComponent(
+    props.supportedScheme.schemeType,
+    'Linker',
+    props.supportedScheme,
+  )
 
-  const userScheme = props.profile.authSchemes.find(x => x.schemeCode === props.supportedScheme.schemeCode)
+  const userScheme = props.profile.authSchemes.find(
+    (x) => x.schemeCode === props.supportedScheme.schemeCode,
+  )
   const canDeleteAuth = () => {
     switch (true) {
-      case (!userScheme): return { disabled: true, title: "Auth scheme has not been linked" }
-      default: return {}
+      case !userScheme:
+        return { disabled: true, title: 'Auth scheme has not been linked' }
+      default:
+        return {}
     }
   }
   const canLink = () => {
     if (userScheme != undefined) {
-      let title = "Auth scheme has already been linked"
+      let title = 'Auth scheme has already been linked'
       if (props.supportedScheme.schemeCode == 'webauthn') {
-        title += ", add new keys in the security tab"
+        title += ', add new keys in the security tab'
       }
       return {
         disabled: true,
@@ -89,18 +99,26 @@ const TableRow = (props: {
   return (
     <tr>
       <td>{props.supportedScheme.schemeName}</td>
-      <td>{userScheme ? "Linked" : "Not Linked"}</td>
-      <td>{userScheme && userScheme.lastLogin
-        ? format(userScheme.lastLogin, "MMMM do, yyyy")
-        : "Never"} </td>
+      <td>{userScheme ? 'Linked' : 'Not Linked'}</td>
+      <td>
+        {userScheme && userScheme.lastLogin
+          ? format(userScheme.lastLogin, 'MMMM do, yyyy')
+          : 'Never'}{' '}
+      </td>
       <td>
         <ButtonGroup>
-          {props.allowLinking && <Button small {...canLink()} onClick={() => setLinking(true)}>Link</Button>}
-          <Button danger small {...canDeleteAuth()} onClick={() => props.removeAuth()}>Delete</Button>
+          {props.allowLinking && (
+            <Button small {...canLink()} onClick={() => setLinking(true)}>
+              Link
+            </Button>
+          )}
+          <Button danger small {...canDeleteAuth()} onClick={() => props.removeAuth()}>
+            Delete
+          </Button>
         </ButtonGroup>
       </td>
       {linking && (
-        <Modal onRequestClose={() => setLinking(false)} title={"Link Account"}>
+        <Modal onRequestClose={() => setLinking(false)} title={'Link Account'}>
           <Linker
             userData={props.profile}
             onSuccess={() => {

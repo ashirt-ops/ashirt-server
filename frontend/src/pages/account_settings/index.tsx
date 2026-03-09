@@ -22,52 +22,57 @@ export const AccountSettings = () => {
   // if a non-admin user tries to access someone's profile (not themselves), show the caller their
   // own profile. The backend prevents the user's data from displaying, but this provides a more
   // sane way of locking out a user
-  const userSlug = (isSuperAdmin && user != null)
-    ? user
-    : ""
+  const userSlug = isSuperAdmin && user != null ? user : ''
 
   const wiredProfile = useWiredData<UserOwnView>(
-    React.useCallback(() => getUser({ userSlug }), [userSlug])
+    React.useCallback(() => getUser({ userSlug }), [userSlug]),
   )
 
   const bus = BuildReloadBus()
 
   React.useEffect(() => {
     bus.onReload(wiredProfile.reload)
-    return () => { bus.offReload(wiredProfile.reload) }
+    return () => {
+      bus.offReload(wiredProfile.reload)
+    }
   })
 
-  return <>
-    <div className={cx('root')}>
-      {wiredProfile.render(p => {
-        const query = user !== null ? { user } : undefined
-        const tabs = [
-          { id: "profile", label: "Profile", query },
-          { id: "authmethods", label: "Authentication Methods", query },
-          ...(userSlug
-            ? []
-            : [{ id: "security", label: "Security" }]
-          ),
-          { id: "apikeys", label: "API Keys", query },
-        ]
+  return (
+    <>
+      <div className={cx('root')}>
+        {wiredProfile.render((p) => {
+          const query = user !== null ? { user } : undefined
+          const tabs = [
+            { id: 'profile', label: 'Profile', query },
+            { id: 'authmethods', label: 'Authentication Methods', query },
+            ...(userSlug ? [] : [{ id: 'security', label: 'Security' }]),
+            { id: 'apikeys', label: 'API Keys', query },
+          ]
 
-        return (<>
-          <NavVerticalTabMenu title="Account Settings" tabs={tabs}>
-            {userSlug &&
-              <em className={cx('notice')}>Editing the profile of: <em className={cx('editing-user-name')}>{`${p.firstName} ${p.lastName}`}</em></em>
-            }
-            <Routes>
-              <Route path="profile" element={<Profile {...bus} profile={p} />} />
-              <Route path="authmethods" element={<AuthMethods {...bus} profile={p} allowLinking={!userSlug} />} />
-              {
-                !userSlug && (<Route path="security" element={<Security user={p} />} />)
-              }
-              <Route path="apikeys" element={<ApiKeys profile={p} />} />
-            </Routes>
-          </NavVerticalTabMenu>
-        </>)
-      })}
-    </div>
-  </>
+          return (
+            <>
+              <NavVerticalTabMenu title="Account Settings" tabs={tabs}>
+                {userSlug && (
+                  <em className={cx('notice')}>
+                    Editing the profile of:{' '}
+                    <em className={cx('editing-user-name')}>{`${p.firstName} ${p.lastName}`}</em>
+                  </em>
+                )}
+                <Routes>
+                  <Route path="profile" element={<Profile {...bus} profile={p} />} />
+                  <Route
+                    path="authmethods"
+                    element={<AuthMethods {...bus} profile={p} allowLinking={!userSlug} />}
+                  />
+                  {!userSlug && <Route path="security" element={<Security user={p} />} />}
+                  <Route path="apikeys" element={<ApiKeys profile={p} />} />
+                </Routes>
+              </NavVerticalTabMenu>
+            </>
+          )
+        })}
+      </div>
+    </>
+  )
 }
 export default AccountSettings

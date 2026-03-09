@@ -10,31 +10,46 @@ import { renderModals, useModal } from 'src/helpers'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  className?: string,
-  slug: string,
-  name: string,
-  numEvidence: number,
-  numTags: number,
-  numUsers: number,
-  favorite: boolean,
-  onFavoriteClick: () => void,
-  topContribs: Array<TopContrib>,
-  evidenceCount: EvidenceCount,
+  className?: string
+  slug: string
+  name: string
+  numEvidence: number
+  numTags: number
+  numUsers: number
+  favorite: boolean
+  onFavoriteClick: () => void
+  topContribs: Array<TopContrib>
+  evidenceCount: EvidenceCount
 }) => {
   const { favorite } = props
-  const moreDetailsModal = useModal<{}>(modalProps => (
-    <OperationBadgesModal {...modalProps} topContribs={props.topContribs} evidenceCount={props.evidenceCount} numTags={props.numTags} />
+  const moreDetailsModal = useModal<{}>((modalProps) => (
+    <OperationBadgesModal
+      {...modalProps}
+      topContribs={props.topContribs}
+      evidenceCount={props.evidenceCount}
+      numTags={props.numTags}
+    />
   ))
   const handleDetailsModal = () => moreDetailsModal?.show({})
   return (
     <Card className={cx('root', props.className)}>
-      <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>{props.name}</Link>
-      <OperationBadges className={cx('badges')} numUsers={props.numUsers} showDetailsModal={handleDetailsModal} />
-      <Link className={cx('edit')} to={`/operations/${props.slug}/edit`} title="Edit this operation" />
+      <Link className={cx('name')} to={`/operations/${props.slug}/evidence`}>
+        {props.name}
+      </Link>
+      <OperationBadges
+        className={cx('badges')}
+        numUsers={props.numUsers}
+        showDetailsModal={handleDetailsModal}
+      />
+      <Link
+        className={cx('edit')}
+        to={`/operations/${props.slug}/edit`}
+        title="Edit this operation"
+      />
       <Button
         className={cx('favorite-button', favorite && 'filled')}
-        onClick={props.onFavoriteClick}>
-      </Button>
+        onClick={props.onFavoriteClick}
+      ></Button>
       {renderModals(moreDetailsModal)}
     </Card>
   )

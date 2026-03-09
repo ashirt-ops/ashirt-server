@@ -1,5 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// This file uses `any` intentionally for runtime type guard validation functions.
 import {
-  Har, Log, Creator, Entry, Request, Response, Header, Content, PostData, Param,
+  Har,
+  Log,
+  Creator,
+  Entry,
+  Request,
+  Response,
+  Header,
+  Content,
+  PostData,
+  Param,
   // Browser, Cache, CacheDetails, Cookie, Page, PageTiming, QueryString, Timings
 } from 'har-format'
 
@@ -7,12 +18,12 @@ import {
 // encodes them the same way. Everything below (mostly) conforms to the har types, but is ignored
 // since it gets in the way.
 
-export const isAHar = (o: any): o is Har => hasField("log", o, isHarLog)
+export const isAHar = (o: any): o is Har => hasField('log', o, isHarLog)
 
 const isHarLog = (o: any): o is Log => {
   return (
-    hasArray("entries", o, isHarEntry) // used by viewer
-    && hasField("creator", o, isHarCreator) // used by viewer
+    hasArray('entries', o, isHarEntry) && // used by viewer
+    hasField('creator', o, isHarCreator) // used by viewer
 
     // && hasString("version", o)
     // && hasMaybeField("browser", o, isHarBrowser)
@@ -23,8 +34,8 @@ const isHarLog = (o: any): o is Log => {
 
 const isHarCreator = (o: any): o is Creator => {
   return (
-    hasString("name", o) // used by viewer
-    && hasString("version", o) // used by viewer
+    hasString('name', o) && // used by viewer
+    hasString('version', o) // used by viewer
     // && hasMaybeString("comment", o)
   )
 }
@@ -57,10 +68,10 @@ const isHarCreator = (o: any): o is Creator => {
 
 const isHarEntry = (o: any): o is Entry => {
   return (
-    hasNumber("time", o) // used by viewer
-    && hasField("request", o, isHarRequest) // used by viewer
-    && hasField("response", o, isHarResponse) // used by viewer
-    && hasMaybeString("serverIPAddress", o) // used by viewer
+    hasNumber('time', o) && // used by viewer
+    hasField('request', o, isHarRequest) && // used by viewer
+    hasField('response', o, isHarResponse) && // used by viewer
+    hasMaybeString('serverIPAddress', o) // used by viewer
     // && hasMaybeString("pageref", o)
     // && hasString("startedDateTime", o)
     // && hasField("cache", o, isHarEntryCache)
@@ -72,11 +83,11 @@ const isHarEntry = (o: any): o is Entry => {
 
 const isHarRequest = (o: any): o is Request => {
   return (
-    hasString("method", o) // used by viewer
-    && hasString("url", o) // used by viewer
-    && hasArray("headers", o, isHarHeader) // used by viewer
-    && hasMaybeField("postData", o, isHarPostData) // used by viewer
-    && hasString("httpVersion", o) // used by viewer
+    hasString('method', o) && // used by viewer
+    hasString('url', o) && // used by viewer
+    hasArray('headers', o, isHarHeader) && // used by viewer
+    hasMaybeField('postData', o, isHarPostData) && // used by viewer
+    hasString('httpVersion', o) // used by viewer
     // && hasArray("cookies", o, isHarCookie)
     // && hasArray("queryString", o, isHarQueryString)
     // && hasNumber("headersSize", o)
@@ -87,9 +98,9 @@ const isHarRequest = (o: any): o is Request => {
 
 const isHarResponse = (o: any): o is Response => {
   return (
-    hasNumber("status", o) // used by viewer
-    && hasArray("headers", o, isHarHeader) // used by viewer
-    && hasField("content", o, isHarContent) // used by viewer
+    hasNumber('status', o) && // used by viewer
+    hasArray('headers', o, isHarHeader) && // used by viewer
+    hasField('content', o, isHarContent) // used by viewer
     // && hasString("statusText", o)
     // && hasString("httpVersion", o)
     // && hasArray("cookies", o, isHarCookie)
@@ -114,11 +125,7 @@ const isHarResponse = (o: any): o is Response => {
 // }
 
 const isHarHeader = (o: any): o is Header => {
-  return (
-    hasString("name", o)
-    && hasString("value", o)
-    && hasMaybeString("comment", o)
-  )
+  return hasString('name', o) && hasString('value', o) && hasMaybeString('comment', o)
 }
 
 // const isHarQueryString = (o: any): o is QueryString => {
@@ -131,17 +138,14 @@ const isHarHeader = (o: any): o is Header => {
 
 const isHarPostData = (o: any): o is PostData => {
   return (
-    hasString("mimeType", o)
-    && hasMaybeString("text", o)
-    && hasMaybeArray("param", o, isHarParam)
+    hasString('mimeType', o) && hasMaybeString('text', o) && hasMaybeArray('param', o, isHarParam)
     // && hasMaybeString("comment", o)
   )
 }
 
 const isHarParam = (o: any): o is Param => {
   return (
-    hasString("name", o)
-    && hasMaybeString("value", o)
+    hasString('name', o) && hasMaybeString('value', o)
     // && hasMaybeString("fileName", o)
     // && hasMaybeString("contentType", o)
     // && hasMaybeString("comment", o)
@@ -150,9 +154,9 @@ const isHarParam = (o: any): o is Param => {
 
 const isHarContent = (o: any): o is Content => {
   return (
-    hasNumber("size", o)  // used by viewer
-    && hasMaybeString("text", o)  // used by viewer
-    && hasString("mimeType", o)  // used by viewer
+    hasNumber('size', o) && // used by viewer
+    hasMaybeString('text', o) && // used by viewer
+    hasString('mimeType', o) // used by viewer
     // && hasMaybeNumber("compression", o)
     // && hasMaybeString("encoding", o)
     // && hasMaybeString("comment", o)
@@ -198,20 +202,27 @@ const hasNullField = (field: string, o: any) => {
   return field in o && o[field] == null
 }
 
-const hasMaybeField = (field: string, o: any, ofType: (b: any) => boolean, notNull: boolean = false): boolean => {
-  return (!(field in o) || hasField(field, o, ofType)) || (!notNull && hasNullField(field, o))
+const hasMaybeField = (
+  field: string,
+  o: any,
+  ofType: (b: any) => boolean,
+  notNull: boolean = false,
+): boolean => {
+  return !(field in o) || hasField(field, o, ofType) || (!notNull && hasNullField(field, o))
 }
 
 const hasArray = (field: string, o: any, isChildOfType: (b: any) => boolean): boolean => {
   return (
-    field in o
-    && Array.isArray(o[field])
-    && o[field].map((item: any) => isChildOfType(item)).reduce((acc: boolean, cur: boolean) => acc && cur, true)
+    field in o &&
+    Array.isArray(o[field]) &&
+    o[field]
+      .map((item: any) => isChildOfType(item))
+      .reduce((acc: boolean, cur: boolean) => acc && cur, true)
   )
 }
 
 const hasMaybeArray = (field: string, o: any, ofType: (b: any) => boolean): boolean => {
-  return (!(field in o) || hasArray(field, o, ofType))
+  return !(field in o) || hasArray(field, o, ofType)
 }
 
 const isAString = (o: any): o is string => typeof o === 'string'

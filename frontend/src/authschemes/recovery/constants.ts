@@ -1,1 +1,1 @@
-export const RecoverySchemeName = "recover"
+export const RecoverySchemeName = 'recover'

@@ -64,17 +64,17 @@ import { PaginationResult } from 'src/global_types'
 type Renderer<T> = (data: T) => React.ReactElement
 type Exposer<T> = (data: T) => void
 export type WiredData<T> = {
-  loading: boolean,
-  reload: () => void,
+  loading: boolean
+  reload: () => void
   render: (renderer: Renderer<T>) => React.ReactElement
   expose: (exposer: Exposer<T>) => void
 }
 
 export type PaginatedWiredData<T> = WiredData<Array<T>> & {
   pagerProps: {
-    page: number,
-    maxPages: number,
-    onPageChange: (pageNumber: number) => void,
+    page: number
+    maxPages: number
+    onPageChange: (pageNumber: number) => void
   }
 }
 
@@ -102,11 +102,15 @@ export function useWiredData<T>(
     } else {
       setDebouncedFetchDataFn(() => fetchDataFn)
       isDebouncing.current = true
-      timeoutFn = () => { isDebouncing.current = false }
+      timeoutFn = () => {
+        isDebouncing.current = false
+      }
     }
 
     const timeout = setTimeout(timeoutFn, DEBOUNCE_TIMEOUT)
-    return () => { clearTimeout(timeout) }
+    return () => {
+      clearTimeout(timeout)
+    }
   }, [fetchDataFn])
 
   React.useEffect(() => {
@@ -136,7 +140,7 @@ export function useWiredData<T>(
     expose(exposer: Exposer<T>) {
       if (data == null) return null
       return exposer(data.value)
-    }
+    },
   }
 }
 
@@ -161,6 +165,6 @@ export function usePaginatedWiredData<T>(
       page: pageNumber,
       maxPages: totalPages,
       onPageChange: setPageNumber,
-    }
+    },
   }
 }

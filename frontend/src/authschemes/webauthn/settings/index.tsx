@@ -6,7 +6,13 @@ import SettingsSection from 'src/components/settings_section'
 import classnames from 'classnames/bind'
 import { useForm, useFormField } from 'src/helpers/use_form'
 import { renderModals, useModal, useWiredData } from 'src/helpers'
-import { beginAddCredential, deleteWebauthnCredential, finishAddCredential, listWebauthnCredentials, modifyCredentialName } from '../services'
+import {
+  beginAddCredential,
+  deleteWebauthnCredential,
+  finishAddCredential,
+  listWebauthnCredentials,
+  modifyCredentialName,
+} from '../services'
 import Table from 'src/components/table'
 import Button, { ButtonGroup } from 'src/components/button'
 import { BuildReloadBus } from 'src/helpers/reload_bus'
@@ -15,15 +21,16 @@ import { convertToCredentialCreationOptions, encodeAsB64 } from '../helpers'
 import ChallengeModalForm from 'src/components/challenge_modal_form'
 const cx = classnames.bind(require('./stylesheet'))
 
-const toEnUSDate = (d: Date) => dateFns.format(d, "MMM dd, yyyy")
+const toEnUSDate = (d: Date) => dateFns.format(d, 'MMM dd, yyyy')
 
-export default (props: {
-  username: string,
-  authFlags?: Array<string>
-}) => {
+export default (props: { username: string; authFlags?: Array<string> }) => {
   const bus = BuildReloadBus()
   return (
-    <SettingsSection className={cx('security-credentials-section')} title="WebAuthn Security Credentials" width="narrow">
+    <SettingsSection
+      className={cx('security-credentials-section')}
+      title="WebAuthn Security Credentials"
+      width="narrow"
+    >
       <CredentialList {...bus} />
       <AddCredentialButton {...bus} />
     </SettingsSection>
@@ -38,69 +45,86 @@ const CredentialList = (props: {
 
   React.useEffect(() => {
     props.onReload(wiredCredentials.reload)
-    return () => { props.offReload(wiredCredentials.reload) }
+    return () => {
+      props.offReload(wiredCredentials.reload)
+    }
   })
 
-  const deleteModal = useModal<{ credentialId: string, credentialName: string }>(mProps => <DeleteCredentialModal {...mProps} />, wiredCredentials.reload)
-  const modifyModal = useModal<{ credentialName: string }>(mProps => <EditCredentialModal {...mProps} />, wiredCredentials.reload)
+  const deleteModal = useModal<{ credentialId: string; credentialName: string }>(
+    (mProps) => <DeleteCredentialModal {...mProps} />,
+    wiredCredentials.reload,
+  )
+  const modifyModal = useModal<{ credentialName: string }>(
+    (mProps) => <EditCredentialModal {...mProps} />,
+    wiredCredentials.reload,
+  )
 
-  return (<>
-    {wiredCredentials.render(data => {
-      return (
-        <div>
-          <Table columns={['Credential Name', 'Date Created', 'Actions']}>
-            {data.credentials.map(credentialEntry => {
-              const { credentialName, dateCreated, credentialId } = credentialEntry
-              return (
-                <tr key={credentialName}>
-                  <td>{credentialName}</td>
-                  <td>{toEnUSDate(dateCreated)}</td>
-                  <td className={cx('button-cell')}>
-                    <ButtonGroup className={cx('row-buttons')}>
-                      <Button small onClick={() => {
-                        modifyModal.show({ credentialName })
-                      }}>Edit</Button>
-                      <Button danger small onClick={() => {
-                        deleteModal.show({ credentialId, credentialName })
-                      }}>Delete</Button>
-                    </ButtonGroup>
-                  </td>
-                </tr>
-              )
-            })}
-          </Table>
-          {renderModals(deleteModal, modifyModal)}
-        </div>
-      )
-    })}
-  </>)
+  return (
+    <>
+      {wiredCredentials.render((data) => {
+        return (
+          <div>
+            <Table columns={['Credential Name', 'Date Created', 'Actions']}>
+              {data.credentials.map((credentialEntry) => {
+                const { credentialName, dateCreated, credentialId } = credentialEntry
+                return (
+                  <tr key={credentialName}>
+                    <td>{credentialName}</td>
+                    <td>{toEnUSDate(dateCreated)}</td>
+                    <td className={cx('button-cell')}>
+                      <ButtonGroup className={cx('row-buttons')}>
+                        <Button
+                          small
+                          onClick={() => {
+                            modifyModal.show({ credentialName })
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          danger
+                          small
+                          onClick={() => {
+                            deleteModal.show({ credentialId, credentialName })
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </ButtonGroup>
+                    </td>
+                  </tr>
+                )
+              })}
+            </Table>
+            {renderModals(deleteModal, modifyModal)}
+          </div>
+        )
+      })}
+    </>
+  )
 }
 
-const AddCredentialButton = (props: {
-  requestReload: () => void
-}) => {
-  const createModal = useModal(mProps => (
-    <AddCredentialModal {...mProps} />
-  ), props.requestReload)
+const AddCredentialButton = (props: { requestReload: () => void }) => {
+  const createModal = useModal((mProps) => <AddCredentialModal {...mProps} />, props.requestReload)
 
   return (
     <div>
-      <Button primary onClick={createModal.show}>Register new security credential</Button>
+      <Button primary onClick={createModal.show}>
+        Register new security credential
+      </Button>
       {renderModals(createModal)}
     </div>
   )
 }
 
-const AddCredentialModal = (props: {
-  onRequestClose: () => void,
-}) => {
-  const credentialName = useFormField("")
+const AddCredentialModal = (props: { onRequestClose: () => void }) => {
+  const credentialName = useFormField('')
 
   const formComponentProps = useForm({
     fields: [credentialName],
     handleSubmit: async () => {
       if (credentialName.value === '') {
-        return Promise.reject(new Error("Credential name must be populated"))
+        return Promise.reject(new Error('Credential name must be populated'))
       }
       const reg = await beginAddCredential({
         credentialName: credentialName.value,
@@ -110,7 +134,7 @@ const AddCredentialModal = (props: {
       const signed = await navigator.credentials.create(credOptions)
 
       if (signed == null || signed.type != 'public-key') {
-        throw new Error("WebAuthn is not supported")
+        throw new Error('WebAuthn is not supported')
       }
       const pubCredential = signed as PublicKeyCredential
       const pubCredentialResponse = pubCredential.response as AuthenticatorAttestationResponse
@@ -125,13 +149,13 @@ const AddCredentialModal = (props: {
         },
       })
     },
-    onSuccess: props.onRequestClose
+    onSuccess: props.onRequestClose,
   })
 
   return (
     <ModalForm
-      title={"Add Security Credential"}
-      submitText={"Create"}
+      title={'Add Security Credential'}
+      submitText={'Create'}
       cancelText="Cancel"
       onRequestClose={props.onRequestClose}
       {...formComponentProps}
@@ -142,9 +166,9 @@ const AddCredentialModal = (props: {
 }
 
 const DeleteCredentialModal = (props: {
-  credentialName: string,
-  credentialId: string,
-  onRequestClose: () => void,
+  credentialName: string
+  credentialId: string
+  onRequestClose: () => void
 }) => (
   <ChallengeModalForm
     modalTitle="Delete Credential"
@@ -156,30 +180,27 @@ const DeleteCredentialModal = (props: {
   />
 )
 
-const EditCredentialModal = (props: {
-  credentialName: string,
-  onRequestClose: () => void,
-}) => {
-  const credentialName = useFormField("")
+const EditCredentialModal = (props: { credentialName: string; onRequestClose: () => void }) => {
+  const credentialName = useFormField('')
 
   const formComponentProps = useForm({
     fields: [credentialName],
     handleSubmit: async () => {
       if (credentialName.value === '') {
-        return Promise.reject(new Error("Credential name must be populated"))
+        return Promise.reject(new Error('Credential name must be populated'))
       }
       await modifyCredentialName({
         newCredentialName: credentialName.value,
         credentialName: props.credentialName,
       })
     },
-    onSuccess: props.onRequestClose
+    onSuccess: props.onRequestClose,
   })
 
   return (
     <ModalForm
-      title={"Edit Credential Name"}
-      submitText={"Edit"}
+      title={'Edit Credential Name'}
+      submitText={'Edit'}
       cancelText="Cancel"
       onRequestClose={props.onRequestClose}
       {...formComponentProps}

@@ -7,15 +7,15 @@ import { beginLink, finishLinking } from '../services'
 import { convertToCredentialCreationOptions, encodeAsB64 } from '../helpers'
 import { UserOwnView } from 'src/global_types'
 
-const alreadyExistsErrorText = "An account for this user already exists"
+const alreadyExistsErrorText = 'An account for this user already exists'
 
 export default (props: {
-  onSuccess: () => void,
+  onSuccess: () => void
   userData: UserOwnView
-  authFlags?: Array<string>,
+  authFlags?: Array<string>
 }) => {
-  const initialUsername = props.userData.authSchemes.find(s => s.schemeType == 'local')?.username
-  const username = useFormField<string>(initialUsername ?? "")
+  const initialUsername = props.userData.authSchemes.find((s) => s.schemeType == 'local')?.username
+  const username = useFormField<string>(initialUsername ?? '')
   const credentialName = useFormField<string>('')
   const [allowUsernameOverride, setOverride] = React.useState(false)
 
@@ -24,10 +24,10 @@ export default (props: {
     onSuccess: () => props.onSuccess(),
     handleSubmit: async () => {
       if (username.value === '') {
-        return Promise.reject(new Error("Username must be populated"))
+        return Promise.reject(new Error('Username must be populated'))
       }
       if (credentialName.value === '') {
-        return Promise.reject(new Error("Credential name must be populated"))
+        return Promise.reject(new Error('Credential name must be populated'))
       }
 
       let reg = null
@@ -36,11 +36,10 @@ export default (props: {
           username: username.value,
           credentialName: credentialName.value,
         })
-      }
-      catch (err) {
+      } catch (err) {
         if ((err as Error)?.message === alreadyExistsErrorText) {
           setOverride(true)
-          throw new Error("This username is taken. Please try another one.")
+          throw new Error('This username is taken. Please try another one.')
         }
         throw err
       }
@@ -50,7 +49,7 @@ export default (props: {
       const signed = await navigator.credentials.create(credOptions)
 
       if (signed == null || signed.type != 'public-key') {
-        throw new Error("WebAuthn is not supported")
+        throw new Error('WebAuthn is not supported')
       }
       const pubKeyCred = signed as PublicKeyCredential
       const pubKeyResponse = pubKeyCred.response as AuthenticatorAttestationResponse
@@ -64,14 +63,12 @@ export default (props: {
           clientDataJSON: encodeAsB64(pubKeyResponse.clientDataJSON),
         },
       })
-    }
+    },
   })
 
   // yes, this could be rewritten as !allowUsernameOverride && (initialUsername !== undefined)
   // but the variable naming becomes weird, so using a different solution
-  const readonlyUsername = allowUsernameOverride ?
-    false :
-    (initialUsername !== undefined)
+  const readonlyUsername = allowUsernameOverride ? false : initialUsername !== undefined
 
   return (
     <Form submitText="Link Account" {...formComponentProps}>

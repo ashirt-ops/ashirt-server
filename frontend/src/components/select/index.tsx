@@ -4,19 +4,23 @@ import WithLabel from 'src/components/with_label'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default (props: {
-  children: React.ReactNode,
-  className?: string,
-  disabled?: boolean,
-  label?: string,
-  onChange: (v: string) => void,
-  value: string,
+  children: React.ReactNode
+  className?: string
+  disabled?: boolean
+  label?: string
+  onChange: (v: string) => void
+  value: string
 }) => (
   <WithLabel className={cx(props.className)} label={props.label}>
     <div className={cx('wrapper')}>
-      <select value={props.value} onChange={e => props.onChange(e.target.value)} disabled={props.disabled}>
+      <select
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        disabled={props.disabled}
+      >
         {props.children}
       </select>
-      <div className={cx('visual', {disabled: props.disabled})}>
+      <div className={cx('visual', { disabled: props.disabled })}>
         {getNameForValue(props.value, props.children)}
       </div>
     </div>
@@ -27,20 +31,20 @@ function getNameForValue(curValue: string, children: React.ReactNode): string {
   let name = curValue
   React.Children.forEach(children, (child) => {
     if (!React.isValidElement(child)) {
-      return;
+      return
     }
 
-    const {value, children: childChildren} = child.props as {
-      value?: string;
-      children?: string;
+    const { value, children: childChildren } = child.props as {
+      value?: string
+      children?: string
     }
- 
-    const effectiveValue = value ?? childChildren;
+
+    const effectiveValue = value ?? childChildren
 
     if (effectiveValue === curValue) {
-      name = typeof childChildren === 'string' ? childChildren : curValue;
+      name = typeof childChildren === 'string' ? childChildren : curValue
     }
-  });
+  })
 
-  return name;
+  return name
 }

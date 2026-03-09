@@ -12,58 +12,73 @@ export const SortDesc = 'desc'
 export type SortDirection = typeof SortAsc | typeof SortDesc | undefined
 
 export type ColumnData = {
-  label: string,
-  title: string,
-  sortDirection?: SortDirection,
+  label: string
+  title: string
+  sortDirection?: SortDirection
   clickable?: boolean
   style?: React.CSSProperties
 }
 
-export const StartAlignedColumn: React.CSSProperties = { display: 'flex', justifyContent: 'flex-start' }
+export const StartAlignedColumn: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'flex-start',
+}
 export const EndAlignedColumn: React.CSSProperties = { display: 'flex', justifyContent: 'flex-end' }
-export const CenterAlignedColumn: React.CSSProperties = { display: 'flex', justifyContent: 'center' }
+export const CenterAlignedColumn: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'center',
+}
 
 export default (props: {
-  children: React.ReactNode,
-  className?: string,
-  columns: Array<string | ColumnData>,
-  onColumnClicked?: (colIndex: number) => void,
-  onKeyDown?: (e: KeyboardEvent) => void,
+  children: React.ReactNode
+  className?: string
+  columns: Array<string | ColumnData>
+  onColumnClicked?: (colIndex: number) => void
+  onKeyDown?: (e: KeyboardEvent) => void
   tableRef?: React.MutableRefObject<HTMLTableElement | null>
 }) => {
-  const noop = () => { }
+  const noop = () => {}
   React.useEffect(() => {
     const curRootRef = props.tableRef?.current
     if (!curRootRef) {
       return
     }
     curRootRef.addEventListener('keydown', props.onKeyDown || noop)
-    return () => { curRootRef.removeEventListener('keydown', props.onKeyDown || noop) }
+    return () => {
+      curRootRef.removeEventListener('keydown', props.onKeyDown || noop)
+    }
   })
 
   return (
-    <table className={cx('root', props.className)} {...(props.onKeyDown ? { tabIndex: 0 } : {})}
+    <table
+      className={cx('root', props.className)}
+      {...(props.onKeyDown ? { tabIndex: 0 } : {})}
       {...(props.tableRef ? { ref: props.tableRef } : {})}
     >
       <thead>
         <tr>
           {props.columns.map((column, idx) => {
-            if (typeof (column) === 'object') {
+            if (typeof column === 'object') {
               const args = {
                 key: `${column.label}-${idx}`,
                 title: column.title,
                 style: {
-                  ...column.style, ...(
-                    column.clickable
-                      ? { cursor: "pointer" }
-                      : {})
+                  ...column.style,
+                  ...(column.clickable ? { cursor: 'pointer' } : {}),
                 },
-                onClick: () => (column.clickable && props.onColumnClicked) ? props.onColumnClicked(idx) : undefined
+                onClick: () =>
+                  column.clickable && props.onColumnClicked
+                    ? props.onColumnClicked(idx)
+                    : undefined,
               }
               return (
                 <th {...args}>
                   {column.label}
-                  {column.sortDirection ? <span className={cx('arrow', column.sortDirection == SortAsc ? 'asc' : 'desc')}></span> : null}
+                  {column.sortDirection ? (
+                    <span
+                      className={cx('arrow', column.sortDirection == SortAsc ? 'asc' : 'desc')}
+                    ></span>
+                  ) : null}
                 </th>
               )
             }
@@ -71,9 +86,7 @@ export default (props: {
           })}
         </tr>
       </thead>
-      <tbody>
-        {props.children}
-      </tbody>
+      <tbody>{props.children}</tbody>
     </table>
   )
 }

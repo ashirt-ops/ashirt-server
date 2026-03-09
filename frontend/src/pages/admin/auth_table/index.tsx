@@ -9,7 +9,7 @@ import { getSupportedAuthenticationDetails } from 'src/services'
 import { useWiredData } from 'src/helpers'
 
 type PurgableScheme = {
-  schemeCode: string,
+  schemeCode: string
   uniqueUsers: number
 }
 
@@ -19,8 +19,8 @@ export default (props: {}) => {
   const wiredSchemes = useWiredData<Array<AuthSchemeDetails>>(getSupportedAuthenticationDetails)
   const columns = [
     'Scheme Name',
-    { label: '# Users', title: "Number of users who can use this method" },
-    { label: '# Unique Users', title: "Number of users who only use this method" },
+    { label: '# Users', title: 'Number of users who can use this method' },
+    { label: '# Unique Users', title: 'Number of users who only use this method' },
     'Last Used',
     'Notes',
     'Actions',
@@ -28,34 +28,54 @@ export default (props: {}) => {
 
   return (
     <SettingsSection title="Authentication Methods" width="wide">
-      {wiredSchemes.render(supportedSchemes => {
-        const nonEmptySchemes = supportedSchemes.filter( s => s.userCount > 0).length
+      {wiredSchemes.render((supportedSchemes) => {
+        const nonEmptySchemes = supportedSchemes.filter((s) => s.userCount > 0).length
         return (
           <Table columns={columns}>
-            {supportedSchemes.map((item) => renderTableRow(item, nonEmptySchemes, setPurgingScheme))}
+            {supportedSchemes.map((item) =>
+              renderTableRow(item, nonEmptySchemes, setPurgingScheme),
+            )}
           </Table>
         )
       })}
 
-      {purgeScheme && <DeleteGlobalAuthSchemeModal {...purgeScheme} onRequestClose={() => { setPurgingScheme(null); wiredSchemes.reload() }} />}
+      {purgeScheme && (
+        <DeleteGlobalAuthSchemeModal
+          {...purgeScheme}
+          onRequestClose={() => {
+            setPurgingScheme(null)
+            wiredSchemes.reload()
+          }}
+        />
+      )}
     </SettingsSection>
   )
 }
 
-const renderTableRow = (data: AuthSchemeDetails, nonEmptySchemeQuantity: number, purgeScheme: (i: PurgableScheme) => void) => {
+const renderTableRow = (
+  data: AuthSchemeDetails,
+  nonEmptySchemeQuantity: number,
+  purgeScheme: (i: PurgableScheme) => void,
+) => {
   return (
     <tr key={data.schemeCode}>
       <td>{data.schemeName}</td>
       <td>{data.userCount}</td>
       <td>{data.uniqueUserCount}</td>
-      <td>{data.lastUsed ? formatDistanceToNow(data.lastUsed, { addSuffix: true }) : "Never"}</td>
-      <td>{data.labels.join(", ")}</td>
+      <td>{data.lastUsed ? formatDistanceToNow(data.lastUsed, { addSuffix: true }) : 'Never'}</td>
+      <td>{data.labels.join(', ')}</td>
       <td>
         <ButtonGroup>
-          <Button small danger
+          <Button
+            small
+            danger
             disabled={nonEmptySchemeQuantity == 1 || data.userCount == 0}
-            onClick={() => purgeScheme({ schemeCode: data.schemeCode, uniqueUsers: data.uniqueUserCount })}
-          >Remove All Users</Button>
+            onClick={() =>
+              purgeScheme({ schemeCode: data.schemeCode, uniqueUsers: data.uniqueUserCount })
+            }
+          >
+            Remove All Users
+          </Button>
         </ButtonGroup>
       </td>
     </tr>

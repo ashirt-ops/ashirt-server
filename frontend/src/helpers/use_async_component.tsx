@@ -39,15 +39,21 @@ import LoadingSpinner from 'src/components/loading_spinner'
 
 type ComponentOrLoadingOrError<T> = T | React.FunctionComponent<{}>
 
-export function useAsyncComponent<T>(getComponentFn: () => Promise<T>): ComponentOrLoadingOrError<T> {
+export function useAsyncComponent<T>(
+  getComponentFn: () => Promise<T>,
+): ComponentOrLoadingOrError<T> {
   // The extra function wrapper in useState and setComponent is required since useState will call the argument
   // if it is a function and in this case we always call setComponent with a React.FunctionComponent
-  const [component, setComponent] = React.useState<ComponentOrLoadingOrError<T>>(() => () => <LoadingSpinner />)
+  const [component, setComponent] = React.useState<ComponentOrLoadingOrError<T>>(() => () => (
+    <LoadingSpinner />
+  ))
 
   React.useEffect(() => {
     getComponentFn()
-      .then(component => setComponent(() => component))
-      .catch(err => setComponent(() => () => <ErrorDisplay title="Failed to load frontend module" err={err} />))
+      .then((component) => setComponent(() => component))
+      .catch((err) =>
+        setComponent(() => () => <ErrorDisplay title="Failed to load frontend module" err={err} />),
+      )
   }, [getComponentFn])
 
   return component

@@ -25,7 +25,11 @@ export const TextChooser = (props: {
         if (v.trim() == '') {
           return <>Type to add a term</>
         }
-        return <>Add Term: <Tag name={v} color='' /></>
+        return (
+          <>
+            Add Term: <Tag name={v} color="" />
+          </>
+        )
       }}
     />
   )
@@ -38,7 +42,7 @@ export const textToBulletProps = (text: string | undefined): BulletProps | undef
   return {
     id: text,
     name: text,
-    modifier: undefined
+    modifier: undefined,
   }
 }
 

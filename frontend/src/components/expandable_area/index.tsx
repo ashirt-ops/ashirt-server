@@ -8,22 +8,25 @@ export const ExpandableSection = (props: {
   className?: string
   labelClassName?: string
   initiallyExpanded?: boolean
-  onExpanded?: (expanded: boolean)=>void
+  onExpanded?: (expanded: boolean) => void
 }) => {
   const [expanded, setExpanded] = React.useState<boolean>(props.initiallyExpanded || false)
   const expandedState = expanded ? 'expanded' : 'condensed'
   return (
     <section className={cx('expandable-root')}>
-      <div className={cx(`expandable-arrow`, `${expandedState}`, props.className)} onClick={() => {
-        const newValue = !expanded
-        setExpanded(newValue)
-        props.onExpanded && props.onExpanded(newValue)
-      }}>
-        <section className={cx('expandable-section-label', props.labelClassName)}>{props.label}</section>
+      <div
+        className={cx(`expandable-arrow`, `${expandedState}`, props.className)}
+        onClick={() => {
+          const newValue = !expanded
+          setExpanded(newValue)
+          props.onExpanded && props.onExpanded(newValue)
+        }}
+      >
+        <section className={cx('expandable-section-label', props.labelClassName)}>
+          {props.label}
+        </section>
       </div>
-      <div className={cx('expandable-content')}>
-        {expanded && props.children}
-      </div>
+      <div className={cx('expandable-content')}>{expanded && props.children}</div>
     </section>
   )
 }
