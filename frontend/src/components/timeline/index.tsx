@@ -254,10 +254,7 @@ const renderExtraActions = (evidence: Evidence, extraActions?: Actions) => {
 }
 
 // Returns true if the element el is a child of any of the supplied react refs
-function elementInRef(
-  el: HTMLElement,
-  refs: Array<MutableRefObject<HTMLElement | null>>,
-): boolean {
+function elementInRef(el: HTMLElement, refs: Array<MutableRefObject<HTMLElement | null>>): boolean {
   const targetEls = refs.map((el) => el.current)
   while (!targetEls.includes(el)) {
     if (el === document.body) return false
