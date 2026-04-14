@@ -85,7 +85,7 @@ jobs:
 
       - name: Build and Push PR
         if: github.ref != 'refs/heads/main'
-        uses: docker/build-push-action@v7.0.0
+        uses: docker/build-push-action@v7.1.0
         with:
           context: .
           file: ${{ matrix.dockerfile }}
@@ -96,7 +96,7 @@ jobs:
 
       - name: Build and Push Latest
         if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v7.0.0
+        uses: docker/build-push-action@v7.1.0
         with:
           context: .
           file: ${{ matrix.dockerfile }}
