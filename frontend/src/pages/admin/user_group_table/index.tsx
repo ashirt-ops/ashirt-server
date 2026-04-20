@@ -24,9 +24,7 @@ export default function UserGroupTable(props: {
   offReload: (listener: () => void) => void
 }) {
   const [deletingUserGroup, setDeletingUserGroup] = useState<null | UserGroupAdminView>(null)
-  const [modifyingUserGroup, setModifyingUserGroup] = useState<null | UserGroupAdminView>(
-    null,
-  )
+  const [modifyingUserGroup, setModifyingUserGroup] = useState<null | UserGroupAdminView>(null)
   const [withDeleted, setWithDeleted] = useState(getIncludeDeletedUsers())
   const itemsPerPage = 10
   const [page, setPage] = useState(1)
