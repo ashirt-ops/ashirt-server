@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@types/har-format": "^1.2.16",
-    "@xterm/xterm": "^5.5.0",
+    "@xterm/xterm": "^6.0.0",
     "ace-builds": "^1.43.6",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
