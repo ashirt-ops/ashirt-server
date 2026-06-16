@@ -6,10 +6,8 @@
     "moduleResolution": "bundler",
     "module": "ESNext",
     "strict": true,
-    "baseUrl": "./",
     "paths": {
-      "~*": ["./*"],
-      "src/*": ["src/*"]
+      "src/*": ["./src/*"]
     },
     "isolatedModules": true,
     "skipLibCheck": true
