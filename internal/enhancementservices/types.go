@@ -1,13 +1,10 @@
 package enhancementservices
 
 import (
-	"context"
 	"io"
 	"net/http"
 
 	"github.com/ashirt-ops/ashirt-server/internal/helpers"
-	"github.com/ashirt-ops/ashirt-server/internal/models"
-	"github.com/aws/aws-sdk-go-v2/service/lambda"
 )
 
 var allWorkers []string = []string{}
@@ -20,13 +17,6 @@ func AllWorkers() []string {
 type BasicServiceWorkerConfig struct {
 	Type    string `json:"type"`
 	Version int64  `json:"version"`
-}
-
-type ServiceWorker interface {
-	Build(workerName string, config []byte) error
-	Test() ServiceTestResult
-	ProcessMetadata(evidenceID int64, payload *NewEvidencePayload) (*models.EvidenceMetadata, error)
-	ProcessEvent(payload interface{}) error
 }
 
 // ServiceTestResult provides a view of a Worker test
@@ -42,11 +32,6 @@ type ServiceTestResult struct {
 type TestResp struct {
 	Status  string  `json:"status"`
 	Message *string `json:"message"`
-}
-
-type LambdaResponse struct {
-	StatusCode int    `json:"statusCode"`
-	Body       string `json:"body"`
 }
 
 func errorTestResult(err error) ServiceTestResult {
@@ -67,11 +52,6 @@ func testResultSuccess(message string) ServiceTestResult {
 		Message: message,
 		Live:    true,
 	}
-}
-
-type LambdaInvokableClient interface {
-	// Invoke(input *lambda.InvokeInput) (*lambda.InvokeOutput, error)
-	Invoke(ctx context.Context, params *lambda.InvokeInput, optFns ...func(*lambda.Options)) (*lambda.InvokeOutput, error)
 }
 
 type ProcessResponse struct {

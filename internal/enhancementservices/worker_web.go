@@ -3,6 +3,7 @@ package enhancementservices
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -27,20 +28,34 @@ type WebConfigV1 struct {
 
 var workerRequestFnMap map[string]*RequestFn = map[string]*RequestFn{}
 
-func (w *webConfigV1Worker) Build(workerName string, workerConfig []byte) error {
-	var webConfig WebConfigV1
-	if err := json.Unmarshal([]byte(workerConfig), &webConfig); err != nil {
-		return errorwrap.WrapError("worker configuration is unparsable", err)
+// buildWorker parses a stored service worker config and returns a ready-to-use worker.
+// Only the HTTP ("web", version 1) transport is supported; any other type/version (e.g. a
+// legacy "aws" Lambda config) is rejected with a clear error.
+func buildWorker(workerName string, workerConfig []byte) (*webConfigV1Worker, error) {
+	var basicConfig BasicServiceWorkerConfig
+	if err := json.Unmarshal(workerConfig, &basicConfig); err != nil {
+		return nil, errorwrap.WrapError("worker configuration is unparsable", err)
 	}
-	w.WorkerName = workerName
-	w.Config = webConfig
+	if basicConfig.Type != "web" || basicConfig.Version != 1 {
+		return nil, fmt.Errorf("unsupported service worker type %q (version %d)", basicConfig.Type, basicConfig.Version)
+	}
+
+	var webConfig WebConfigV1
+	if err := json.Unmarshal(workerConfig, &webConfig); err != nil {
+		return nil, errorwrap.WrapError("worker configuration is unparsable", err)
+	}
+
+	w := &webConfigV1Worker{
+		WorkerName: workerName,
+		Config:     webConfig,
+	}
 
 	// allow for setting request fn based on test stuff
 	if fn, ok := workerRequestFnMap[workerName]; ok && fn != nil {
 		w.makeRequestFn = *fn
 	}
 
-	return nil
+	return w, nil
 }
 
 func (w *webConfigV1Worker) Test() ServiceTestResult {

@@ -37,7 +37,6 @@ services:
       # APP_FLAGS are comma separated strings
       APP_FLAGS: "welcome-message"
       DB_URI: dev-user:dev-user-password@tcp(db:3306)/dev-db
-      APP_USE_LAMBDA_RIE: "true"
 
       ENABLE_EVIDENCE_EXPORT: "false"
 

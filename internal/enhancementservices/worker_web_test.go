@@ -31,7 +31,7 @@ func TestWebTest(t *testing.T) {
 
 	// verify test success
 	setClient(func(w *httptest.ResponseRecorder) {
-		testSuccessResponse(t, w, noWrap)
+		testSuccessResponse(t, w)
 	})
 	result := worker.Test()
 	require.Equal(t, true, result.Live)
@@ -40,7 +40,7 @@ func TestWebTest(t *testing.T) {
 	// verify test failure
 	msg := "bummer"
 	setClient(func(w *httptest.ResponseRecorder) {
-		testErrorResponse(t, w, msg, noWrap)
+		testErrorResponse(t, w, msg)
 	})
 	result = worker.Test()
 	require.Equal(t, false, result.Live)
@@ -67,7 +67,7 @@ func TestWebProcessMetadata(t *testing.T) {
 				verifyProcessBody(t, req, payload)
 
 				w := httptest.NewRecorder()
-				fn(t, w, content, noWrap)
+				fn(t, w, content)
 
 				return w.Result(), nil
 			},
