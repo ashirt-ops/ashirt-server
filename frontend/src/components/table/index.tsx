@@ -47,7 +47,7 @@ export default function Table(props: {
     return () => {
       curRootRef.removeEventListener('keydown', props.onKeyDown || noop)
     }
-  })
+  }, [props.onKeyDown, props.tableRef])
 
   return (
     <table

@@ -142,6 +142,4 @@ const KeyboardShortcutKey = (props: { shortcut: KeyboardShortcut }) => {
   )
 }
 
-const Key = (props: { children: ReactNode }) => (
-  <div className={cx('key')}>{props.children}</div>
-)
+const Key = (props: { children: ReactNode }) => <div className={cx('key')}>{props.children}</div>

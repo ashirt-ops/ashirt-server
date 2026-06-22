@@ -1,4 +1,3 @@
-
 import SyncMarkdownRenderer from './sync_renderer'
 
 const MarkdownRenderer = (props: { className?: string; children: string }) => (

@@ -115,11 +115,7 @@ const emptyActions: Actions = {
 }
 
 function cellOrder(): Array<string>
-function cellOrder(
-  worker: ServiceWorker,
-  testData: TestData,
-  actions: Actions,
-): Array<ReactNode>
+function cellOrder(worker: ServiceWorker, testData: TestData, actions: Actions): Array<ReactNode>
 function cellOrder(
   worker?: ServiceWorker,
   testData?: TestData,
