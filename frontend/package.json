@@ -20,7 +20,7 @@
     "@types/file-saver": "^2.0.7",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
     "@typescript-eslint/parser": "^8.48.0",
     "@vitest/coverage-v8": "^4.1.9",
     "css-loader": "^7.1.2",
