@@ -1,4 +1,12 @@
-import { type MutableRefObject, useEffect, type ReactElement, type ReactNode, useRef, type CSSProperties, useState } from 'react'
+import {
+  type MutableRefObject,
+  useEffect,
+  type ReactElement,
+  type ReactNode,
+  useRef,
+  type CSSProperties,
+  useState,
+} from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
 import { useWindowSize, useElementRect } from 'src/helpers'
