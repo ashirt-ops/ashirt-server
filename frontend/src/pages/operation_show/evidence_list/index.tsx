@@ -8,7 +8,13 @@ import {
   MoveEvidenceModal,
   EvidenceMetadataModal,
 } from '../evidence_modals'
-import { type Codeblock, type Evidence, type ExportedEvidence, type Media, type Tag } from 'src/global_types'
+import {
+  type Codeblock,
+  type Evidence,
+  type ExportedEvidence,
+  type Media,
+  type Tag,
+} from 'src/global_types'
 import { useNavigate, useLocation, useParams } from 'react-router'
 import { getEvidenceList } from 'src/services'
 import { useWiredData, useModal, renderModals } from 'src/helpers'
