@@ -1,7 +1,7 @@
-import { type ReactNode, useId, useRef, useEffect } from 'react'
+import { type ReactNode, useId, useState, useLayoutEffect } from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
-import { useFocusFirstFocusableChild } from 'src/helpers'
+import { PopoverPortalContext } from 'src/components/popover/portal_context'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default function Modal(props: {
@@ -11,33 +11,44 @@ export default function Modal(props: {
   smallerWidth?: boolean
 }) {
   const titleId = useId()
-  const rootRef = useRef<HTMLDivElement | null>(null)
-  useFocusFirstFocusableChild(rootRef)
+  const [dialog, setDialog] = useState<HTMLDialogElement | null>(null)
 
-  useEffect(() => {
-    const main = document.querySelector('main')
-    if (main == null) return
-    main.style.filter = 'blur(5px)'
-    return () => {
-      main.style.removeProperty('filter')
-    }
-  }, [])
+  useLayoutEffect(() => {
+    if (!dialog) return
+    dialog.showModal()
+    return () => dialog.close()
+  }, [dialog])
 
   return createPortal(
-    <div className={cx('root')} onMouseDown={props.onRequestClose} ref={rootRef}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className={cx('modal', props.smallerWidth ? 'smaller-width' : '')}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <h1 id={titleId} className={cx('title')}>
-          {props.title}
-        </h1>
-        <div className={cx('content')}>{props.children}</div>
-      </div>
-    </div>,
+    <dialog
+      className={cx('root')}
+      aria-labelledby={titleId}
+      aria-modal="true"
+      ref={setDialog}
+      onCancel={(e) => {
+        e.preventDefault()
+        props.onRequestClose()
+      }}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          // Do not let the backdrop steal focus after close() restores the opener.
+          e.preventDefault()
+          props.onRequestClose()
+        }
+      }}
+    >
+      <PopoverPortalContext.Provider value={dialog}>
+        <div
+          className={cx('modal', props.smallerWidth ? 'smaller-width' : '')}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <h1 id={titleId} className={cx('title')}>
+            {props.title}
+          </h1>
+          <div className={cx('content')}>{props.children}</div>
+        </div>
+      </PopoverPortalContext.Provider>
+    </dialog>,
     document.body,
   )
 }
