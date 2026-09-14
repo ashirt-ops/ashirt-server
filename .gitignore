@@ -10,9 +10,18 @@
 ashirt.db
 conf.yaml
 app.config.yaml
+.env
+.env.*
+*.pem
+*.key
+*.crt
+credentials.json
 
 # Build stuff / Distributables
 dist/
+node_modules/
+__pycache__/
+.venv/
 
 # Others
 cmd/client/client
