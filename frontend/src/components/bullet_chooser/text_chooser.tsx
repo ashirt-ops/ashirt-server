@@ -1,4 +1,3 @@
-
 import BulletChooser, { type BulletProps } from 'src/components/bullet_chooser'
 import Tag from 'src/components/tag'
 

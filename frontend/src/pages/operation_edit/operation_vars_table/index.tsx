@@ -15,9 +15,7 @@ export default function OperationVarsTable(props: { operationSlug: string; isAdm
   const bus = BuildReloadBus()
 
   const [deletingOperationVar, setDeletingOperationVar] = useState<null | OperationVar>(null)
-  const [modifyingOperationVar, setModifyingOperationVar] = useState<null | OperationVar>(
-    null,
-  )
+  const [modifyingOperationVar, setModifyingOperationVar] = useState<null | OperationVar>(null)
 
   const columns = Object.keys(rowBuilder(null, <span />))
 

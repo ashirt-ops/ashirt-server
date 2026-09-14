@@ -1,22 +1,24 @@
-import { useContext, type FunctionComponent } from 'react'
+import { lazy, Suspense, useContext } from 'react'
 import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
+import ErrorBoundary from 'src/components/error_boundary'
+import LoadingSpinner from 'src/components/loading_spinner'
 import { NavLinkButton } from './components/button'
-import { Route, Routes, Navigate, useParams, type Params } from 'react-router'
-import { useAsyncComponent, useUserIsSuperAdmin } from 'src/helpers'
+import { Route, Routes, Navigate, useLocation, useParams, type Params } from 'react-router'
+import { useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
 
-const AsyncLogin = makeAsyncPage(() => import('src/pages/login'))
-const AsyncOperationList = makeAsyncPage(() => import('src/pages/operation_list'))
-const AsyncOperationEdit = makeAsyncPage(() => import('src/pages/operation_edit'))
-const AsyncFindingShow = makeAsyncPage(() => import('src/pages/operation_show/finding_show'))
-const AsyncEvidenceList = makeAsyncPage(() => import('src/pages/operation_show/evidence_list'))
-const AsyncFindingList = makeAsyncPage(() => import('src/pages/operation_show/finding_list'))
-const AsyncAdminSettings = makeAsyncPage(() => import('src/pages/admin'))
-const AsyncAccountSettings = makeAsyncPage(() => import('src/pages/account_settings'))
-const AsyncNotFound = makeAsyncPage(() => import('src/pages/not_found'))
+const AsyncLogin = lazy(() => import('src/pages/login'))
+const AsyncOperationList = lazy(() => import('src/pages/operation_list'))
+const AsyncOperationEdit = lazy(() => import('src/pages/operation_edit'))
+const AsyncFindingShow = lazy(() => import('src/pages/operation_show/finding_show'))
+const AsyncEvidenceList = lazy(() => import('src/pages/operation_show/evidence_list'))
+const AsyncFindingList = lazy(() => import('src/pages/operation_show/finding_list'))
+const AsyncAdminSettings = lazy(() => import('src/pages/admin'))
+const AsyncAccountSettings = lazy(() => import('src/pages/account_settings'))
+const AsyncNotFound = lazy(() => import('src/pages/not_found'))
 
 /**
  * Redirect provides a mechanism to redirect a user to the indicated URL
@@ -36,6 +38,18 @@ function Redirect(props: {
 }
 
 export default function AppRoutes() {
+  const location = useLocation()
+
+  return (
+    <ErrorBoundary resetKey={location.key}>
+      <Suspense fallback={<LoadingSpinner />}>
+        <PageRoutes />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+
+function PageRoutes() {
   const user = useContext(AuthContext).user
   const isSuperAdmin = useUserIsSuperAdmin()
 
@@ -102,19 +116,6 @@ export default function AppRoutes() {
       <Route path="*" element={<AsyncNotFound />} />
     </Routes>
   )
-}
-
-// makeAsyncPage turns a `() => import('path/to/page/component')` into a react component ready to be passed into <Route />
-// It uses useAsyncComponent to properly render a loading spinner or error as appropriate
-//
-// This is used to break up each page into its own bundle to prevent the main entry bundle from becoming too large and allows
-// page javascript to load on demand.
-function makeAsyncPage(page: () => Promise<{ default: FunctionComponent }>) {
-  const defaultPage = () => page().then((module) => module.default)
-  return () => {
-    const Page = useAsyncComponent(defaultPage)
-    return <Page />
-  }
 }
 
 const makeErrorDisplay =
