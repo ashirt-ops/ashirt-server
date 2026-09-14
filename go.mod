@@ -11,7 +11,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.19.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-sql-driver/mysql v1.10.0
-	github.com/go-webauthn/webauthn v0.17.4
+	github.com/go-webauthn/webauthn v0.18.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
@@ -62,13 +62,13 @@ require (
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fxamacker/cbor/v2 v2.9.2 // indirect
+	github.com/fxamacker/cbor/v2 v2.9.3 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
-	github.com/go-webauthn/x v0.2.6 // indirect
+	github.com/go-webauthn/x v0.3.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/google/go-tpm v0.9.8 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
