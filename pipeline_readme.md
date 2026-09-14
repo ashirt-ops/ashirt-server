@@ -43,7 +43,7 @@ Additional details may be necessary for the particular type of service you implm
 
 ### Web Service
 
-Web services are any service that can be contacted via an HTTP request, and respond in kind. The details on exactly how the request is sent and what the body is are below. Note that this can include AWS Lambda services, though there is a more specific tool available if you want to use AWS Lambda.
+Web services are any service that can be contacted via an HTTP request, and respond in kind. The details on exactly how the request is sent and what the body is are below. This includes AWS Lambda functions exposed over HTTP (e.g. via a Lambda Function URL or API Gateway).
 
 #### Web Configurations
 
@@ -269,5 +269,4 @@ export function nowInRFC1123(): string {
 As of July 2022, the full API is supported via:
 
 * [typescript](/enhancement_worker_templates/web/typescript_express/src/services/ashirt.ts)
-* [javascript](/enhancement_worker_templates/lambda/js-container/app/ashirt_service.js)
 * [python](/enhancement_worker_templates/web/python_flask/src/services/ashirt_base_class.py)

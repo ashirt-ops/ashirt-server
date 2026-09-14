@@ -2,7 +2,6 @@ package enhancementservices
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"sync"
@@ -19,16 +18,9 @@ import (
 
 // TestServiceWorker contacts the indicated worker to verify that it's running
 func TestServiceWorker(workerData models.ServiceWorker) ServiceTestResult {
-	var basicConfig BasicServiceWorkerConfig
-	if err := json.Unmarshal([]byte(workerData.Config), &basicConfig); err != nil {
-		return errorTestResultWithMessage(err, "Unable to parse worker configuration")
-	}
-	worker, err := findAppropriateWorker(basicConfig)
+	worker, err := buildWorker(workerData.Name, []byte(workerData.Config))
 	if err != nil {
-		return errorTestResultWithMessage(err, "Unable to find matching worker")
-	}
-	if err = worker.Build(workerData.Name, []byte(workerData.Config)); err != nil {
-		return errorTestResultWithMessage(err, "Unable to prep worker for test")
+		return errorTestResultWithMessage(err, "Unable to prepare worker for test")
 	}
 
 	return worker.Test()
@@ -141,18 +133,8 @@ func SendEvidenceCreatedEvent(db *database.Connection, reqLogger *slog.Logger, o
 }
 
 func runProcessEvent(db *database.Connection, worker models.ServiceWorker, payload interface{}) error {
-	var err error
-	var basicConfig BasicServiceWorkerConfig
-	if err = json.Unmarshal([]byte(worker.Config), &basicConfig); err != nil {
-		return err
-	}
-
-	var handler ServiceWorker
-	if handler, err = findAppropriateWorker(basicConfig); err != nil {
-		return err
-	}
-
-	if err = handler.Build(worker.Name, []byte(worker.Config)); err != nil {
+	handler, err := buildWorker(worker.Name, []byte(worker.Config))
+	if err != nil {
 		return err
 	}
 
@@ -160,18 +142,8 @@ func runProcessEvent(db *database.Connection, worker models.ServiceWorker, paylo
 }
 
 func runProcessMetadata(db *database.Connection, worker models.ServiceWorker, evidenceID int64, payload *NewEvidencePayload) error {
-	var err error
-	var basicConfig BasicServiceWorkerConfig
-	if err = json.Unmarshal([]byte(worker.Config), &basicConfig); err != nil {
-		return err
-	}
-
-	var handler ServiceWorker
-	if handler, err = findAppropriateWorker(basicConfig); err != nil {
-		return err
-	}
-
-	if err = handler.Build(worker.Name, []byte(worker.Config)); err != nil {
+	handler, err := buildWorker(worker.Name, []byte(worker.Config))
+	if err != nil {
 		return err
 	}
 
@@ -183,20 +155,6 @@ func runProcessMetadata(db *database.Connection, worker models.ServiceWorker, ev
 	}
 
 	return nil
-}
-
-func findAppropriateWorker(config BasicServiceWorkerConfig) (ServiceWorker, error) {
-	if config.Type == "web" {
-		if config.Version == 1 {
-			return &webConfigV1Worker{}, nil
-		}
-	}
-	if config.Type == "aws" {
-		if config.Version == 1 {
-			return &awsConfigV1Worker{}, nil
-		}
-	}
-	return nil, fmt.Errorf("no worker matches the provided configuration")
 }
 
 func getServiceWorkerList(db database.ConnectionProxy) ([]models.ServiceWorker, error) {

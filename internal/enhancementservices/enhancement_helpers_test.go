@@ -1,6 +1,7 @@
 package enhancementservices_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -10,82 +11,81 @@ import (
 	"github.com/stretchr/testify/require"
 	// aliasing as this to shorten lines / aid in reading
 	this "github.com/ashirt-ops/ashirt-server/internal/enhancementservices"
+	"github.com/ashirt-ops/ashirt-server/internal/helpers"
 )
 
-type transformFn = func(t *testing.T, data interface{}) []byte
-type responseFn = func(t *testing.T, w *httptest.ResponseRecorder, content string, tf transformFn)
+type responseFn = func(t *testing.T, w *httptest.ResponseRecorder, content string)
 
-func testSuccessResponse(t *testing.T, w *httptest.ResponseRecorder, tf transformFn) {
-	w.WriteHeader(http.StatusOK)
-	resp := this.TestResp{
-		Status: "ok",
-	}
-	w.Write(tf(t, resp))
+func writeJSON(t *testing.T, w *httptest.ResponseRecorder, data interface{}) {
+	body, err := json.Marshal(data)
+	require.NoError(t, err)
+	w.Write(body)
 }
 
-func testErrorResponse(t *testing.T, w *httptest.ResponseRecorder, message string, tf transformFn) {
+func testSuccessResponse(t *testing.T, w *httptest.ResponseRecorder) {
 	w.WriteHeader(http.StatusOK)
-	resp := this.TestResp{
+	writeJSON(t, w, this.TestResp{
+		Status: "ok",
+	})
+}
+
+func testErrorResponse(t *testing.T, w *httptest.ResponseRecorder, message string) {
+	w.WriteHeader(http.StatusOK)
+	writeJSON(t, w, this.TestResp{
 		Status:  "error",
 		Message: &message,
-	}
-	w.Write(tf(t, resp))
+	})
 }
 
-func processSuccessReponse(t *testing.T, w *httptest.ResponseRecorder, content string, tf transformFn) {
+func processSuccessReponse(t *testing.T, w *httptest.ResponseRecorder, content string) {
 	w.WriteHeader(http.StatusOK)
-	resp := awsProcessResp{
+	writeJSON(t, w, processResp{
 		Action:  "processed",
 		Content: &content,
-	}
-	w.Write(tf(t, resp))
+	})
 }
 
-func processErrorResponse_NoContent(t *testing.T, w *httptest.ResponseRecorder, _ string, tf transformFn) {
+func processErrorResponse_NoContent(t *testing.T, w *httptest.ResponseRecorder, _ string) {
 	w.WriteHeader(http.StatusOK)
-	resp := awsProcessResp{
+	writeJSON(t, w, processResp{
 		Action:  "processed",
 		Content: nil,
-	}
-	w.Write(tf(t, resp))
+	})
 }
 
-func processErrorResponse_WithMessage(t *testing.T, w *httptest.ResponseRecorder, content string, tf transformFn) {
+func processErrorResponse_WithMessage(t *testing.T, w *httptest.ResponseRecorder, content string) {
 	w.WriteHeader(http.StatusOK)
-	resp := awsProcessResp{
+	writeJSON(t, w, processResp{
 		Action:  "error",
 		Content: &content,
-	}
-	w.Write(tf(t, resp))
+	})
 }
 
-func processErrorResponse_StatusCode(t *testing.T, w *httptest.ResponseRecorder, _ string, _ transformFn) {
+func processErrorResponse_StatusCode(t *testing.T, w *httptest.ResponseRecorder, _ string) {
 	w.WriteHeader(http.StatusInternalServerError)
 }
 
-func processDeferalResponse_StatusCode(t *testing.T, w *httptest.ResponseRecorder, _ string, _ transformFn) {
+func processDeferalResponse_StatusCode(t *testing.T, w *httptest.ResponseRecorder, _ string) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func processDeferalReponse_Action(t *testing.T, w *httptest.ResponseRecorder, content string, tf transformFn) {
+func processDeferalReponse_Action(t *testing.T, w *httptest.ResponseRecorder, content string) {
 	w.WriteHeader(http.StatusOK)
-	resp := awsProcessResp{
+	writeJSON(t, w, processResp{
 		Action: "deferred",
-	}
-	w.Write(tf(t, resp))
+	})
 }
 
-func processRejectedResponse_StatusCode(t *testing.T, w *httptest.ResponseRecorder, _ string, _ transformFn) {
+func processRejectedResponse_StatusCode(t *testing.T, w *httptest.ResponseRecorder, _ string) {
 	w.WriteHeader(http.StatusNotAcceptable)
 }
 
-func processRejectedReponse_Action(t *testing.T, w *httptest.ResponseRecorder, content string, tf transformFn) {
+func processRejectedReponse_Action(t *testing.T, w *httptest.ResponseRecorder, content string) {
 	w.WriteHeader(http.StatusOK)
-	resp := awsProcessResp{
+	writeJSON(t, w, processResp{
 		Action:  "rejected",
 		Content: &content,
-	}
-	w.Write(tf(t, resp))
+	})
 }
 
 func verifyTestBody(t *testing.T, req *http.Request) {
@@ -107,27 +107,48 @@ func verifyProcessBody(t *testing.T, req *http.Request, expectedPayload this.New
 	require.Equal(t, expectedPayload, processBody)
 }
 
-func wrapInAwsResponse(t *testing.T, data interface{}) []byte {
-	body, err := json.Marshal(data)
-	require.NoError(t, err)
-	resp := this.LambdaResponse{
-		Body:       string(body),
-		StatusCode: 200,
+type processResp struct {
+	Action  string  `json:"action,omitempty"`  // Rejected | Deferred | Processed | Error
+	Content *string `json:"content,omitempty"` // Error => reason, Processed => Result
+}
+
+func makeMockRequestHandler(mock RequestMock) this.RequestFn {
+	return func(method, url string, body io.Reader, updateRequest helpers.ModifyReqFunc) (*http.Response, error) {
+		content, err := io.ReadAll(body)
+		clonedBody := bytes.NewReader(content)
+		req := httptest.NewRequest(method, url, clonedBody)
+
+		if mock.OnInvoked != nil {
+			mock.OnInvoked(RequestData{
+				Method:  method,
+				URL:     url,
+				Body:    content,
+				Request: req,
+				Error:   err,
+			})
+		}
+		err = updateRequest(req)
+		if mock.OnSendRequest != nil {
+			return mock.OnSendRequest(req, err)
+		}
+
+		// default in case someone doesn't provide a RespondWith function
+		w := httptest.NewRecorder()
+		w.WriteHeader(http.StatusNoContent)
+		return w.Result(), nil
 	}
-	respondWith, _ := json.Marshal(resp)
-	return respondWith
 }
 
-func noWrap(t *testing.T, data interface{}) []byte {
-	body, err := json.Marshal(data)
-	require.NoError(t, err)
-	return body
+// opting for a struct here so On* functions can be omitted
+type RequestMock struct {
+	OnInvoked     func(RequestData)
+	OnSendRequest func(*http.Request, error) (*http.Response, error)
 }
 
-func buildLambdaClientWithResponse(respFn func(req *http.Request, err error) (*http.Response, error)) this.LambdaInvokableClient {
-	return this.NewTestRIELambdaClient(
-		makeMockRequestHandler(
-			RequestMock{OnSendRequest: respFn},
-		),
-	)
+type RequestData struct {
+	Method  string
+	URL     string
+	Body    []byte
+	Request *http.Request
+	Error   error
 }

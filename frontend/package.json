@@ -1,7 +1,7 @@
 {
   "private": true,
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "scripts": {
     "start": "webpack serve --host=0.0.0.0",
@@ -14,47 +14,47 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.1",
     "@types/file-saver": "^2.0.7",
-    "@types/react": "^19.2.13",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.46.3",
-    "@typescript-eslint/parser": "^8.48.0",
-    "@vitest/coverage-v8": "^3.1.1",
-    "css-loader": "^7.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
+    "@typescript-eslint/parser": "^8.65.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "css-loader": "^7.1.5",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "7.0.1",
-    "html-webpack-plugin": "^5.6.5",
-    "jsdom": "^26.1.0",
-    "mini-css-extract-plugin": "^2.10.0",
+    "html-webpack-plugin": "^5.6.7",
+    "jsdom": "^30.0.1",
+    "mini-css-extract-plugin": "^2.10.2",
     "prettier": "^3.5.3",
     "stylus": "^0.64.0",
-    "stylus-loader": "^8.1.0",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.9.3",
-    "vitest": "^3.1.1",
+    "stylus-loader": "^9.0.0",
+    "ts-loader": "^9.6.2",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.0",
     "webpack": "5.105",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.2"
+    "webpack-cli": "^7.2.1",
+    "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {
     "@types/har-format": "^1.2.16",
-    "@xterm/xterm": "^5.5.0",
+    "@xterm/xterm": "^6.0.0",
     "ace-builds": "^1.43.6",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
-    "react": "^19.2.4",
+    "react": "^19.2.6",
     "react-ace": "^14.0.1",
     "react-day-picker": "^9.11.0",
-    "react-dom": "^19.2.4",
-    "react-dropzone": "^15.0.0",
+    "react-dom": "^19.2.6",
+    "react-dropzone": "^20.1.1",
     "react-markdown": "^10.1.0",
-    "react-router": "7.13.1"
+    "react-router": "8.3.0"
   }
 }

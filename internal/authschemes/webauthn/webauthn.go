@@ -483,9 +483,10 @@ func (a WebAuthn) beginRegistration(w http.ResponseWriter, r *http.Request, brid
 		}
 	}
 
-	registrationOptions := func(credCreationOpts *protocol.PublicKeyCredentialCreationOptions) {
+	registrationOptions := func(credCreationOpts *protocol.PublicKeyCredentialCreationOptions) error {
 		credCreationOpts.CredentialExcludeList = credExcludeList
 		credCreationOpts.AuthenticatorSelection = selection
+		return nil
 	}
 
 	credOptions, sessionData, err := a.Web.BeginRegistration(&user, webauthn.WithAuthenticatorSelection(selection), registrationOptions)

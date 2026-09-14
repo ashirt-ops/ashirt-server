@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 
 // JSDOM has no dialog top layer. Model only the open/close API here;
 // focus containment and background inertness need real-browser verification.
