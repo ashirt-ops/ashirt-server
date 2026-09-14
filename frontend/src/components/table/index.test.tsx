@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { useRef } from 'react'
+import { createRef, useRef } from 'react'
 import { renderHook } from '@testing-library/react'
 import Table, { SortAsc, SortDesc, type ColumnData } from './index'
 
@@ -139,5 +139,30 @@ describe('Table', () => {
       fireEvent.keyDown(tableRef.current, { key: 'ArrowDown' })
     }
     expect(onKeyDown).toHaveBeenCalled()
+  })
+
+  it('replaces changed keyboard handlers without duplicating listeners and cleans up on unmount', () => {
+    const tableRef = createRef<HTMLTableElement>()
+    const first = vi.fn()
+    const second = vi.fn()
+    const table = (handler: (event: KeyboardEvent) => void) => (
+      <Table columns={['Name']} tableRef={tableRef} onKeyDown={handler}>
+        <tr>
+          <td>Alice</td>
+        </tr>
+      </Table>
+    )
+    const view = render(table(first))
+    const element = screen.getByRole('table')
+    fireEvent.keyDown(element, { key: 'ArrowDown' })
+    expect(first).toHaveBeenCalledTimes(1)
+    view.rerender(table(second))
+    view.rerender(table(second))
+    fireEvent.keyDown(element, { key: 'ArrowDown' })
+    expect(first).toHaveBeenCalledTimes(1)
+    expect(second).toHaveBeenCalledTimes(1)
+    view.unmount()
+    fireEvent.keyDown(element, { key: 'ArrowDown' })
+    expect(second).toHaveBeenCalledTimes(1)
   })
 })
