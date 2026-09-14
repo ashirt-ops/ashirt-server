@@ -1,8 +1,6 @@
-import { Suspense } from 'react'
 import AuthContext from 'src/auth_context'
 import ErrorBoundary from 'src/components/error_boundary'
 import Layout from 'src/components/layout'
-import LoadingSpinner from 'src/components/loading_spinner'
 import Routes from 'src/routes'
 import { BrowserRouter } from 'react-router'
 import { getCurrentUser } from 'src/services'
@@ -17,9 +15,7 @@ const RootComponent = () => {
     <AuthContext.Provider value={{ user }}>
       <BrowserRouter>
         <Layout>
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes />
-          </Suspense>
+          <Routes />
         </Layout>
       </BrowserRouter>
     </AuthContext.Provider>

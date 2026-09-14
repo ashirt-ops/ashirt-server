@@ -2,9 +2,10 @@ import { lazy, Suspense, useContext } from 'react'
 import classnames from 'classnames/bind'
 import AuthContext from 'src/auth_context'
 import ErrorDisplay from 'src/components/error_display'
+import ErrorBoundary from 'src/components/error_boundary'
 import LoadingSpinner from 'src/components/loading_spinner'
 import { NavLinkButton } from './components/button'
-import { Route, Routes, Navigate, useParams, type Params } from 'react-router'
+import { Route, Routes, Navigate, useLocation, useParams, type Params } from 'react-router'
 import { useUserIsSuperAdmin } from 'src/helpers'
 
 const cx = classnames.bind(require('./stylesheet'))
@@ -37,75 +38,83 @@ function Redirect(props: {
 }
 
 export default function AppRoutes() {
+  const location = useLocation()
+
+  return (
+    <ErrorBoundary resetKey={location.key}>
+      <Suspense fallback={<LoadingSpinner />}>
+        <PageRoutes />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+
+function PageRoutes() {
   const user = useContext(AuthContext).user
   const isSuperAdmin = useUserIsSuperAdmin()
 
   if (user == null)
     return (
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          <Route path="/login" element={<AsyncLogin />} />
-          <Route path="/login/:schemeCode" element={<AsyncLogin />} />
-          <Route path="/autherror/*">
-            <Route index element={<Redirect to="/login" />} />
-            <Route path="recoveryfailed" element={<AuthRecoveryFailed />} />
-            <Route path="noaccess" element={<AuthNoAccess />} />
-            <Route path="noverify" element={<AuthNoVerify />} />
-            <Route path="incomplete" element={<AuthIncomplete />} />
-            <Route path="disabled" element={<AuthDisabled />} />
-            <Route path="registrationdisabled" element={<AuthNoRegistration />} />
-          </Route>
-          <Route path="*" element={<Redirect to="/login" />} />
-        </Routes>
-      </Suspense>
+      <Routes>
+        <Route path="/login" element={<AsyncLogin />} />
+        <Route path="/login/:schemeCode" element={<AsyncLogin />} />
+        <Route path="/autherror/*">
+          <Route index element={<Redirect to="/login" />} />
+          <Route path="recoveryfailed" element={<AuthRecoveryFailed />} />
+          <Route path="noaccess" element={<AuthNoAccess />} />
+          <Route path="noverify" element={<AuthNoVerify />} />
+          <Route path="incomplete" element={<AuthIncomplete />} />
+          <Route path="disabled" element={<AuthDisabled />} />
+          <Route path="registrationdisabled" element={<AuthNoRegistration />} />
+        </Route>
+        <Route path="*" element={<Redirect to="/login" />} />
+      </Routes>
     )
 
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Routes>
-        <Route path="/login" element={<Redirect to="/operations" />} />
-        <Route path="/" element={<Redirect to="/operations" />} />
+    <Routes>
+      <Route path="/login" element={<Redirect to="/operations" />} />
+      <Route path="/" element={<Redirect to="/operations" />} />
 
-        <Route path="/operations/*">
-          <Route index element={<AsyncOperationList />} />
-          <Route path=":slug/*">
-            <Route index element={<Redirect to={`evidence`} />} />
-            <Route path="evidence" element={<AsyncEvidenceList />} />
-            <Route
-              path="evidence/:uuid"
-              element={
-                <Redirect to={`../evidence`} queryBuilder={(params) => `q=uuid%3A${params.uuid}`} />
-              }
-            />
-            {/* ^^^ we need to do ../evidence because .. points to :slug, while . points to evidence/:uuid */}
-            <Route path="findings" element={<AsyncFindingList />} />
-            <Route path="findings/:uuid" element={<AsyncFindingShow />} />
-            <Route path="edit/*">
-              <Route index element={<Redirect to={`settings`} />} />
-              <Route path="*" element={<AsyncOperationEdit />} />
-            </Route>
+      <Route path="/operations/*">
+        <Route index element={<AsyncOperationList />} />
+        <Route path=":slug/*">
+          <Route index element={<Redirect to={`evidence`} />} />
+          <Route path="evidence" element={<AsyncEvidenceList />} />
+          <Route
+            path="evidence/:uuid"
+            element={
+              <Redirect to={`../evidence`} queryBuilder={(params) => `q=uuid%3A${params.uuid}`} />
+            }
+          />
+          {/* ^^^ we need to do ../evidence because .. points to :slug, while . points to evidence/:uuid */}
+          <Route path="findings" element={<AsyncFindingList />} />
+          <Route path="findings/:uuid" element={<AsyncFindingShow />} />
+          <Route path="edit/*">
+            <Route index element={<Redirect to={`settings`} />} />
+            <Route path="*" element={<AsyncOperationEdit />} />
           </Route>
         </Route>
+      </Route>
 
-        {/* Account Settings */}
-        <Route path="/account/*">
-          <Route index element={<Redirect to="profile" />} />
-          <Route path="*" element={<AsyncAccountSettings />} />
+      {/* Account Settings */}
+      <Route path="/account/*">
+        <Route index element={<Redirect to="profile" />} />
+        <Route path="*" element={<AsyncAccountSettings />} />
+      </Route>
+
+      {/* Admin Settings */}
+      {isSuperAdmin && (
+        <Route path="/admin/*">
+          <Route index element={<Redirect to="users" />} />
+          <Route path="*" element={<AsyncAdminSettings />} />
         </Route>
+      )}
 
-        {/* Admin Settings */}
-        {isSuperAdmin && (
-          <Route path="/admin/*">
-            <Route index element={<Redirect to="users" />} />
-            <Route path="*" element={<AsyncAdminSettings />} />
-          </Route>
-        )}
-
-        {/* AuthError routes that an admin might reach if testing */}
-        <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
-        <Route path="*" element={<AsyncNotFound />} />
-      </Routes>
-    </Suspense>
+      {/* AuthError routes that an admin might reach if testing */}
+      <Route path="/autherror/recoveryfailed" element={<NoAccess />} />
+      <Route path="*" element={<AsyncNotFound />} />
+    </Routes>
   )
 }
 

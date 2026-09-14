@@ -1,23 +1,34 @@
-import { Component, type ReactNode, type ErrorInfo } from 'react'
+import { Component, type ReactNode } from 'react'
+import Button from 'src/components/button'
 import ErrorDisplay from 'src/components/error_display'
 
-type Props = { children: ReactNode }
+type Props = { children: ReactNode; resetKey?: string }
 type State = { error: Error | null }
 
 export default class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { error }
+  static getDerivedStateFromError(error: unknown): State {
+    return { error: error instanceof Error ? error : new Error(String(error)) }
   }
 
-  componentDidCatch(_error: Error, _info: ErrorInfo) {
-    // Errors are surfaced via the render method
+  componentDidUpdate(previousProps: Props) {
+    if (this.state.error && previousProps.resetKey !== this.props.resetKey) {
+      this.setState({ error: null })
+    }
   }
 
   render() {
     if (this.state.error) {
-      return <ErrorDisplay err={this.state.error} />
+      return (
+        <ErrorDisplay err={this.state.error}>
+          <div>
+            <Button doNotSubmit onClick={() => window.location.reload()}>
+              Reload page
+            </Button>
+          </div>
+        </ErrorDisplay>
+      )
     }
     return this.props.children
   }
