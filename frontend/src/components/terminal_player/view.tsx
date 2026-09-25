@@ -1,6 +1,18 @@
-import { useRef, useState, type CSSProperties, useEffect, useMemo, type MouseEvent, type ReactNode } from 'react'
+import {
+  useRef,
+  useState,
+  type CSSProperties,
+  useEffect,
+  useMemo,
+  type MouseEvent,
+  type ReactNode,
+} from 'react'
 import classnames from 'classnames/bind'
-import { type PositionChangeEventBody, type RateChangeEventBody, type ExpandedTerminalEvent } from './types'
+import {
+  type PositionChangeEventBody,
+  type RateChangeEventBody,
+  type ExpandedTerminalEvent,
+} from './types'
 import { format } from 'date-fns'
 
 import { ClickPopover } from 'src/components/popover'

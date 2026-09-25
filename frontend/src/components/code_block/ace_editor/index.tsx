@@ -47,7 +47,9 @@ function useLoadAceModeWithWebpack(requestedMode: string): string {
     }
     import(`ace-builds/src-noconflict/mode-${requestedMode}`)
       .then(() => setLoadedMode(requestedMode))
-      .catch(() => { /* mode load failed, editor will use plain_text fallback */ })
+      .catch(() => {
+        /* mode load failed, editor will use plain_text fallback */
+      })
   }, [requestedMode])
 
   return loadedMode
@@ -84,9 +86,7 @@ function useSizeOfParentContainer(parentRef: MutableRefObject<HTMLDivElement | n
 // are a few places where we listen to keydown events higher up in the dom e.g. timeline.
 // Since search field is self-contained within the ace-editor it seems reasonable that
 // a user typing in the search field shouldn't emit keydown events up the dom.
-function useStopPropagationOfSearchKeydowns(
-  parentRef: MutableRefObject<HTMLDivElement | null>,
-) {
+function useStopPropagationOfSearchKeydowns(parentRef: MutableRefObject<HTMLDivElement | null>) {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.target && (e.target as HTMLElement).className === 'ace_search_field') {
       e.stopPropagation()

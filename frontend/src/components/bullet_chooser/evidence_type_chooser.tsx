@@ -1,4 +1,3 @@
-
 import BulletChooser, { type BulletProps } from 'src/components/bullet_chooser'
 import { type SupportedEvidenceType } from 'src/global_types'
 

@@ -1,6 +1,14 @@
 import { useState, useRef, type MouseEvent } from 'react'
 import classnames from 'classnames/bind'
-import { type Har, type Entry, type Log, type Header, type PostData, type Response, type Request } from 'har-format'
+import {
+  type Har,
+  type Entry,
+  type Log,
+  type Header,
+  type PostData,
+  type Response,
+  type Request,
+} from 'har-format'
 import { type EvidenceViewHint } from 'src/global_types'
 import { trimURL, clamp } from 'src/helpers'
 import { mimetypeToAceLang } from './helpers'
@@ -200,10 +208,9 @@ const RequestTable = (props: {
     }
   }
 
-  const onRowSelected =
-    (index: number) => (e: MouseEvent<HTMLTableRowElement>) => {
-      props.setSelectedRow(props.selectedRow == index ? -1 : index)
-    }
+  const onRowSelected = (index: number) => (e: MouseEvent<HTMLTableRowElement>) => {
+    props.setSelectedRow(props.selectedRow == index ? -1 : index)
+  }
 
   return (
     <div
