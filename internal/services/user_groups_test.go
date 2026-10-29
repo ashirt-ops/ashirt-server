@@ -37,7 +37,7 @@ func getUserIDsFromGroup(db *database.Connection, groupSlug string) ([]int64, er
 			"group_id": userGroupId,
 		}))
 	if err != nil {
-		s := fmt.Sprintf("Cannot get user group map for group %q", userGroupId)
+		s := fmt.Sprintf("Cannot get user group map for group %d", userGroupId)
 		return userGroupMap, errorwrap.WrapError(s, errorwrap.DatabaseErr(err))
 	}
 	return userGroupMap, nil
