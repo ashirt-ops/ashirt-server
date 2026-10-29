@@ -55,7 +55,10 @@ const DropDown = (props: {
   </div>
 )
 
-export default function DateRangePicker(props: { range: MaybeDateRange; onSelectRange: (r: MaybeDateRange) => void }) {
+export default function DateRangePicker(props: {
+  range: MaybeDateRange
+  onSelectRange: (r: MaybeDateRange) => void
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (

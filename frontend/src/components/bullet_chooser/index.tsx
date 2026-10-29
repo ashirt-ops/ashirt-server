@@ -169,9 +169,7 @@ export type BulletRendererProps<T extends BulletProps> = {
   selected?: boolean
 }
 
-export type BulletRenderer<T extends BulletProps> = (
-  props: BulletRendererProps<T>,
-) => ReactNode
+export type BulletRenderer<T extends BulletProps> = (props: BulletRendererProps<T>) => ReactNode
 
 function StandardBulletRenderer<T extends BulletProps>(props: BulletRendererProps<T>) {
   return (

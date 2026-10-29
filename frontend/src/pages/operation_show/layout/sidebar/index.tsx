@@ -5,7 +5,12 @@ import OperationBadgesModal from 'src/components/operation_badges_modal'
 import classnames from 'classnames/bind'
 import { Link } from 'react-router'
 import { DeleteQueryModal } from './query_modal'
-import { type Operation, type SavedQuery, type SavedQueryType, type ViewName } from 'src/global_types'
+import {
+  type Operation,
+  type SavedQuery,
+  type SavedQueryType,
+  type ViewName,
+} from 'src/global_types'
 import {
   default as ListMenu,
   ListItem,

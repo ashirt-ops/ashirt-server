@@ -84,11 +84,7 @@ export default function <T extends { uuid: string }>(props: {
   )
 }
 
-const Row = (props: {
-  selected: boolean
-  onChange: (v: boolean) => void
-  children: ReactNode
-}) => (
+const Row = (props: { selected: boolean; onChange: (v: boolean) => void; children: ReactNode }) => (
   <div
     className={cx('row', { selected: props.selected })}
     onClick={() => props.onChange(!props.selected)}
