@@ -222,7 +222,10 @@ const PermissionTable = (props: {
   )
 }
 
-export default function UserGroupPermissionEditor(props: { operationSlug: string; isAdmin: boolean }) {
+export default function UserGroupPermissionEditor(props: {
+  operationSlug: string
+  isAdmin: boolean
+}) {
   const bus = BuildReloadBus()
   const currentUser = useContext(AuthContext)?.user
 

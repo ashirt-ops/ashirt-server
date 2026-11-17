@@ -1,6 +1,7 @@
-import { type ReactNode, useState, useEffect } from 'react'
+import { type ReactNode, useState, useEffect, useContext } from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
+import { PopoverPortalContext } from 'src/components/popover/portal_context'
 const cx = classnames.bind(require('./stylesheet'))
 
 export default function Lightbox(props: {
@@ -9,6 +10,7 @@ export default function Lightbox(props: {
   canUseFitToggle?: boolean
   onRequestClose: () => void
 }) {
+  const portalTarget = useContext(PopoverPortalContext)
   const [exists, setExists] = useState<boolean>(false)
   const [animating, setAnimating] = useState<boolean>(true)
   const [full, setFull] = useState<boolean>(false)
@@ -25,7 +27,11 @@ export default function Lightbox(props: {
   }, [props.isOpen])
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') props.onRequestClose()
+    if (!props.isOpen) return
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      props.onRequestClose()
+    }
     if (e.key === 'z' || e.key === 'Z') setFull(!full)
   }
 
@@ -46,6 +52,6 @@ export default function Lightbox(props: {
         {props.children}
       </div>
     </div>,
-    document.body,
+    portalTarget ?? document.body,
   )
 }

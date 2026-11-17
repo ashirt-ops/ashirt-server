@@ -1,7 +1,17 @@
-import { type MutableRefObject, useEffect, type ReactElement, type ReactNode, useRef, type CSSProperties, useState } from 'react'
+import {
+  type MutableRefObject,
+  useEffect,
+  type ReactElement,
+  type ReactNode,
+  useRef,
+  type CSSProperties,
+  useState,
+  useContext,
+} from 'react'
 import classnames from 'classnames/bind'
 import { createPortal } from 'react-dom'
 import { useWindowSize, useElementRect } from 'src/helpers'
+import { PopoverPortalContext } from './portal_context'
 
 const cx = classnames.bind(require('./stylesheet'))
 
@@ -40,6 +50,7 @@ const Popover = (props: {
   onClick?: () => void
   onRequestClose?: () => void
 }) => {
+  const portalTarget = useContext(PopoverPortalContext)
   const targetRef = useRef<HTMLDivElement | null>(null)
   const contentRef = useRef<HTMLDivElement | null>(null)
 
@@ -88,7 +99,7 @@ const Popover = (props: {
           <div style={contentStyle} ref={contentRef} onClick={onContentClick}>
             {props.content}
           </div>,
-          document.body,
+          portalTarget ?? document.body,
         )}
     </>
   )

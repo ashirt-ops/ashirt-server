@@ -1,4 +1,8 @@
-import { type ActiveServiceWorker, type ServiceWorker, type ServiceWorkerTestOutput } from 'src/global_types'
+import {
+  type ActiveServiceWorker,
+  type ServiceWorker,
+  type ServiceWorkerTestOutput,
+} from 'src/global_types'
 import { backendDataSource as ds } from './data_sources/backend'
 
 export async function createServiceWorker(i: { name: string; config: string }): Promise<void> {
